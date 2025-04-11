@@ -14,6 +14,7 @@ export const metadata = {
 };
 
 export default function App() {
+  console.log("Test");
   return (
     <html lang="en" className="h-full">
       <body className="h-full">

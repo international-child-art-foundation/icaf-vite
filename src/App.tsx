@@ -17,7 +17,7 @@ export default function App() {
   return (
     <div className="flex min-h-screen flex-col max-w-screen-2xl w-full mx-auto px-0 box-border">
       <NavigationBar />
-      <main className="flex-1">
+      <main className="flex-1 mt-[98px]">
         <Routes>
           <Route path="/" element={<Home />} />
         </Routes>

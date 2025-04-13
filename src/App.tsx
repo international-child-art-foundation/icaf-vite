@@ -15,18 +15,14 @@ export const metadata = {
 
 export default function App() {
   return (
-    <html lang="en" className="h-full">
-      <body className="h-full">
-        <div className="flex min-h-screen flex-col">
-          <NavigationBar />
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<Home />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </body>
-    </html>
+    <div className="flex min-h-screen flex-col max-w-screen-2xl w-full mx-auto px-0 box-border">
+      <NavigationBar />
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
   );
 }

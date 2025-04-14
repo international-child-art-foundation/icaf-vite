@@ -5,7 +5,10 @@ import { YoutubeIcon } from "@/assets/shared/icons/YoutubeIcon";
 import { LinkedinIcon } from "@/assets/shared/icons/LinkedinIcon";
 import { PinterestIcon } from "@/assets/shared/icons/PinterestIcon";
 import { EmailIcon } from "@/assets/shared/icons/EmailIcon";
-import { CustomIcon } from "@/assets/shared/icons/CustomIcon";
+import { HeartIcon } from "@/assets/shared/icons/HeartIcon";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { HeartArrowIcon } from "@/assets/shared/icons/HeartArrowIcon";
 
 const icons = [
   {
@@ -42,32 +45,39 @@ const icons = [
 
 const Footer = () => {
   return (
-    <footer className="bg-[#134380] font-body relative w-full mx-auto z-20">
-      <div className="mx-5% sm:mx-auto sm:max-w-sm md:max-w-full lg:max-w-screen-2xl flex flex-wrap gap-y-10 pt-12 pb-10 px-8 md:px-12 lg:px-16 xl:px-20 justify-between">
-        <div className="space-y-3 w-full md:w-2/5 max-w-sm lg:w-30% text-sm text-white col-span-2 md:order-1 md:col-span-3">
-          <p>Get our Sketches newsletter</p>
-          <div className="flex flex-wrap gap-1 items-center text-stone-700 focus-within:text-stone-900">
-            <div className="flex flex-auto">
-              <input
+    <footer className="bg-primary font-sans relative w-full mx-auto z-20 min-h-[670px]  md:min-h-[1200px] lg:min-h-[480px] xl:min-h-[310px]">
+      <div className="mx-5% flex flex-wrap gap-y-10 pt-14 pb-10 px-6 md:px-11 md:pt-20 md:gap-y-20 lg:py-10 lg:pr-16 lg:pl-8 lg:gap-y-16  xl:px-20 justify-between xl:grid xl:grid-cols-5 xl:gap-x-8 xl:gap-y-16 xl:auto-rows-min">
+        {/* Newsletter */}
+        <div className="space-y-4 md:space-y-8 w-full tracking-wide text-base footer-inverse col-span-2  md:text-3xl md:col-span-3 lg:text-lg lg:order-1  lg:w-[42%] lg:space-y-6  xl:col-span-2 xl:w-full">
+          <p className="block lg:hidden">Get our quarterly newsletter</p>
+          <p className="hidden lg:block">Join our quarterly newsletter here</p>
+          <div className="flex flex-wrap lg:flex-nowrap  gap-1 lg:gap-2 items-center text-stone-700 focus-within:text-stone-900">
+            <div className="flex flex-auto w-full lg:basis-3/5 ">
+              <Input
                 type="text"
                 name="email"
                 placeholder="Your email address"
                 autoComplete="off"
-                className="h-10 min-w-min	flex-1 flex-grow w-full tracking-wide sm:w-auto pl-10 pr-3 border border-stone-700 rounded-md required"
-              ></input>
-              <EmailIcon />
+                className="h-11 md:h-20 pl-16 md:pl-28 lg:h-10 lg:pl-12  pr-3 rounded-full placeholder:text-neutral-600 placeholder:text-sans md:text-3xl md:placeholder:text-3xl lg:placeholder:text-sm lg:pb-5"
+              ></Input>
+              <EmailIcon
+                strokeWidth={2}
+                className="absolute pointer-events-none w-6 h-6 mt-2.5 md:w-11 md:h-11 ml-6 md:ml-8 md:mt-5 lg:w-5 lg:h-5 lg:mt-2.5 lg:ml-4 stroke-neutral-400"
+              />
             </div>
-            <a
-              href="#"
-              className="h-fit sm:flex-1 border-white whitespace-nowrap border rounded text-center py-2 px-3 text-sm cursor-pointer tracking-wide w-full sm:w-auto text-white"
-            >
-              Sign up
-            </a>
+            <div className="w-full lg:basis-2/5">
+              <Button
+                variant="default"
+                className=" h-11 md:h-20 lg:h-10 mt-2 md:mt-6 md:font-semibold lg:mt-0 w-full bg-secondary-yellow rounded-full text-black text-base md:text-3xl lg:text-sm text-sans font-normal hover:bg-secondary-yellow/90 "
+              >
+                Sign up
+              </Button>
+            </div>
           </div>
         </div>
-
-        <div className="w-full max-w-sm md:max-w-fit md:w-1/5 lg:w-1/5 md:order-3">
-          <ol className="grid md:place-items-center md:gap-3 md:gap-x-6 my-2 md:grid-cols-3 grid-flow-col md:grid-flow-row justify-between w-full">
+        {/* Social Icons */}
+        <div className="w-full lg:w-1/5 xl:w-full lg:order-3 lg:my-auto">
+          <ol className="grid lg:place-items-center lg:gap-6 my-2 lg:grid-cols-3 grid-flow-col lg:grid-flow-row justify-between w-full lg:my-0">
             {icons.map((icon, i) => (
               <div key={i}>
                 <a
@@ -77,7 +87,7 @@ const Footer = () => {
                   rel="noopener noreferrer"
                 >
                   <icon.SVGcomponent
-                    className="fill-white"
+                    className="fill-white md:h-[71px] md:w-[71px] lg:h-10 lg:w-10"
                     aria-hidden="true"
                   />
                 </a>
@@ -85,9 +95,9 @@ const Footer = () => {
             ))}
           </ol>
         </div>
-
-        <div className="text-sm w-full max-w-sm md:order-2 md:w-1/4 md:pl-11 lg:pl-0 lg:w-auto text-white">
-          <ol className="grid grid-cols-2 gap-y-5 md:gap-y-3 md:grid-cols-1">
+        {/* Links */}
+        <div className=" w-full footer-inverse text-base md:text-3xl lg:text-base lg:order-2 lg:w-auto ">
+          <ol className="grid grid-cols-2 gap-x-8 gap-y-5 md:justify-between md:pl-24 md:gap-x-16 md:gap-y-14 lg:grid-cols-1 lg:gap-y-4 lg:pl-0 lg:pr-14">
             <div className="break-words">
               <a href="/faq">FAQs</a>
             </div>
@@ -97,7 +107,7 @@ const Footer = () => {
                 target="blank"
                 rel="noopener noreferrer"
               >
-                Contact ICAF
+                Contact Us
               </a>
             </div>
             <div className="break-words">
@@ -110,7 +120,7 @@ const Footer = () => {
                 Privacy policy
               </a>
             </div>
-            <div className="break-words">
+            {/* <div className="break-words">
               <a href="https://icaf.org/resource/documents/ICAF.website.-.Privacy.Policy.pdf">
                 COPPA Notice
               </a>
@@ -119,7 +129,7 @@ const Footer = () => {
               <a href="https://icaf.org/resource/documents/ICAF.website.-.Privacy.Policy.pdf">
                 Cookie Settings
               </a>
-            </div>
+            </div> */}
           </ol>
         </div>
 
@@ -140,15 +150,56 @@ const Footer = () => {
           </div> 
         </div>  */}
 
-        <div className="w-full relative max-w-sm md:max-w-full md:justify-center md:gap-9 md:order-4 lg:w-auto lg:flex-col min-h-[100px]">
-          <div className="relative w-full flex justify-center">
-            <CustomIcon width={100} height={100} className="absolute top-0" />
+        {/* Donate/Contact Buttons*/}
+        <div className="w-full lg:order-4  min-h-[100px]">
+          <div className="grid grid-cols-1 xl:grid-cols-2">
+            {/* Donate Button */}
+            <div className="grid grid-cols-2 gap-4 w-full md:gap-8 md:max-w-[97%] lg:max-w-[45%] ml-auto lg:mx-auto xl:max-w-full xl:order-last xl:grid-cols-1">
+              <div className="flex justify-center">
+                <Button
+                  asChild
+                  variant="default"
+                  className="w-full h-14 md:h-24 lg:h-14 bg-secondary-yellow rounded-full text-black text-base md:text-3xl lg:text-base font-semibold hover:bg-secondary-yellow/90"
+                >
+                  <a
+                    href="https://icaf.org/donate"
+                    target="blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center"
+                  >
+                    <HeartIcon
+                      strokeWidth={2}
+                      className="stroke-black !w-6 !h-6 md:!w-10 md:!h-10 md:mr-2  lg:!w-6 lg:!h-6 lg:mr-0"
+                    />
+                    Donate
+                  </a>
+                </Button>
+              </div>
+
+              {/* Contact Us Button */}
+              <div className="flex justify-center">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="w-full bg-primary h-14 md:h-24 lg:h-14 text-white text-base md:text-3xl lg:text-base font-medium rounded-full border-2"
+                >
+                  <a
+                    href="https://icaf.org/about/contact-us"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Contact Us
+                  </a>
+                </Button>
+              </div>
+            </div>
+            <HeartArrowIcon className="overflow-visible w-16 h-8 mt-4 md:w-32 md:h-16 md:mt-8 lg:w-16 lg:h-9 lg:mt-0 lg:ml-48 xl:ml-auto xl:my-auto xl:order-first " />
           </div>
         </div>
-
-        <div className="bg-[#134380] order-5 lg:mx-80 max-w-sm md:max-w-full md:w-screen grid grid-cols-1 place-items-center font-light text-xs text-white">
-          © 1997-2025 International Child Art Foundation P O Box S8133 |
-          Washington, DC 20037, USA
+        {/* Copyright Notice */}
+        <div className="bg-primary w-full footer-inverse order-5  place-items-center text-center text-sm md:text-2xl md:tracking-wide md:leading-10 lg:text-sm xl:mx-auto xl:col-span-4">
+          © 2025 International Children Art Foundation | 2549 Virginia Avenue,
+          NW | Washington, DC 20037
         </div>
       </div>
     </footer>

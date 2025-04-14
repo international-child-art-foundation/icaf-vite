@@ -36,7 +36,7 @@ Tailwind is the primary styling solution. Icaf-specific colors will be defined i
 2. If so, import and style it according to our design system.
 3. If not, create it from scratch only as a last resort.
 
-Detailed styling guidelines are available in the Figma file. Hello!
+Detailed styling guidelines are available in the Figma file.
 
 ## Resources
 

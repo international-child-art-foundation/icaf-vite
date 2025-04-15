@@ -46,12 +46,12 @@ const icons = [
 const Footer = () => {
   return (
     <footer className="bg-primary font-sans relative w-full mx-auto z-20 min-h-[670px]  md:min-h-[1200px] lg:min-h-[480px] xl:min-h-[310px]">
-      <div className="mx-5% flex flex-wrap gap-y-10 pt-14 pb-10 px-6 md:px-11 md:pt-20 md:gap-y-20 lg:py-10 lg:pr-16 lg:pl-8 lg:gap-y-16  xl:px-20 justify-between xl:grid xl:grid-cols-5 xl:gap-x-8 xl:gap-y-16 xl:auto-rows-min">
+      <div className="mx-5% flex flex-wrap gap-y-10 pt-14 pb-10 px-6 md:px-11 md:pt-20 md:gap-y-20 lg:py-10 lg:pr-16 lg:pl-8 lg:gap-y-16  xl:px-20 justify-between xl:grid xl:grid-cols-12 xl:gap-x-8 xl:gap-y-16 xl:auto-rows-min">
         {/* Newsletter */}
-        <div className="space-y-4 md:space-y-8 w-full tracking-wide text-base footer-inverse col-span-2  md:text-3xl md:col-span-3 lg:text-lg lg:order-1  lg:w-[42%] lg:space-y-6  xl:col-span-2 xl:w-full">
+        <div className="space-y-4 md:space-y-8 w-full tracking-wide text-base footer-inverse col-span-2  md:text-3xl md:col-span-3 lg:text-lg lg:order-1  lg:w-[42%] lg:space-y-6  xl:col-span-5 xl:w-full 2xl:text-xl">
           <p className="block lg:hidden">Get our quarterly newsletter</p>
           <p className="hidden lg:block">Join our quarterly newsletter here</p>
-          <div className="flex flex-wrap lg:flex-nowrap  gap-1 lg:gap-2 items-center text-stone-700 focus-within:text-stone-900">
+          <div className="flex flex-wrap lg:flex-nowrap  gap-1 lg:gap-2 items-center text-stone-700 focus-within:text-stone-900 xl:max-w-[85%]">
             <div className="flex flex-auto w-full lg:basis-3/5 ">
               <Input
                 type="text"
@@ -76,7 +76,7 @@ const Footer = () => {
           </div>
         </div>
         {/* Social Icons */}
-        <div className="w-full lg:w-1/5 xl:w-full lg:order-3 lg:my-auto">
+        <div className="w-full lg:w-1/5 xl:w-full lg:order-3 lg:my-auto xl:my-0 xl:col-start-8 xl:col-span-2">
           <ol className="grid lg:place-items-center lg:gap-6 my-2 lg:grid-cols-3 grid-flow-col lg:grid-flow-row justify-between w-full lg:my-0">
             {icons.map((icon, i) => (
               <div key={i}>
@@ -96,7 +96,7 @@ const Footer = () => {
           </ol>
         </div>
         {/* Links */}
-        <div className=" w-full footer-inverse text-base md:text-3xl lg:text-base lg:order-2 lg:w-auto ">
+        <div className=" w-full footer-inverse text-base md:text-3xl lg:text-base lg:order-2 lg:w-auto xl:col-start-6 xl:col-span-2 ">
           <ol className="grid grid-cols-2 gap-x-8 gap-y-5 md:justify-between md:pl-24 md:gap-x-16 md:gap-y-14 lg:grid-cols-1 lg:gap-y-4 lg:pl-0 lg:pr-14">
             <div className="break-words">
               <a href="/faq">FAQs</a>
@@ -151,10 +151,10 @@ const Footer = () => {
         </div>  */}
 
         {/* Donate/Contact Buttons*/}
-        <div className="w-full lg:order-4  min-h-[100px]">
-          <div className="grid grid-cols-1 xl:grid-cols-2">
+        <div className="w-full lg:order-4  min-h-[100px] xl:col-start-10 xl:col-span-3">
+          <div className="grid grid-cols-1 xl:grid-cols-10">
             {/* Donate Button */}
-            <div className="grid grid-cols-2 gap-4 w-full md:gap-8 md:max-w-[97%] lg:max-w-[45%] ml-auto lg:mx-auto xl:max-w-full xl:order-last xl:grid-cols-1">
+            <div className="grid grid-cols-2  gap-4 w-full md:gap-8 md:max-w-[97%] lg:max-w-[45%] ml-auto lg:mx-auto xl:max-w-full xl:order-last xl:col-start-4 xl:col-span-7 2xl:col-start-6 2xl:col-span-5 xl:grid-cols-1">
               <div className="flex justify-center">
                 <Button
                   asChild
@@ -193,13 +193,14 @@ const Footer = () => {
                 </Button>
               </div>
             </div>
-            <HeartArrowIcon className="overflow-visible w-16 h-8 mt-4 md:w-32 md:h-16 md:mt-8 lg:w-16 lg:h-9 lg:mt-0 lg:ml-48 xl:ml-auto xl:my-auto xl:order-first " />
+            <HeartArrowIcon className="overflow-visible w-16 h-8 mt-4 md:w-32 md:h-16 md:mt-8 lg:w-16 lg:h-9 lg:mt-0 lg:pl-44 xl:h-8 xl:w-20  xl:pl-0 xl:my-auto 2xl:col-start-3 2xl:col-span-2 2xl:h-10 2xl:w-24" />
           </div>
         </div>
         {/* Copyright Notice */}
-        <div className="bg-primary w-full footer-inverse order-5  place-items-center text-center text-sm md:text-2xl md:tracking-wide md:leading-10 lg:text-sm xl:mx-auto xl:col-span-4">
-          © 2025 International Children Art Foundation | 2549 Virginia Avenue,
-          NW | Washington, DC 20037
+        <div className="bg-primary w-full footer-inverse order-5  place-items-center text-center text-sm md:text-2xl md:tracking-wide md:leading-10 lg:text-sm lg:flex lg:items-center lg:justify-center xl:mx-auto xl:col-span-12">
+          <span className="text-lg  md:text-3xl lg:pr-2 lg:text-2xl">©</span>{" "}
+          2025 International Children Art Foundation | 2549 Virginia Avenue, NW
+          | Washington, DC 20037
         </div>
       </div>
     </footer>

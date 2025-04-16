@@ -1,11 +1,18 @@
 import { ICAFlogo } from "@/assets/shared/logos/ICAFLogo";
+import { Button } from "../ui/button";
+import { Link } from "react-router-dom";
 
 const NavigationBar = () => {
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-50 min-h-[98px] h-[98px] bg-white w-full flex justify-center items-center shadow-md">
-        <div className="my-2">
-          <ICAFlogo />
+      <div className="px-6 gap-6 py-6 sm:px-8 lg:mx-auto md:px-12 lg:px-16 xl:px-20 max-w-screen-2xl w-full font-body z-20 shadow-md h-fit relative content-center">
+        <div className="px-4 mx-auto flex flex-row gap-4 items-center justify-between">
+          <Button size="lg">
+            <Link to="/gallery">Go to Gallery</Link>{" "}
+          </Button>
+          <Link to="/">
+            <ICAFlogo />
+          </Link>
         </div>
       </div>
     </>

@@ -171,7 +171,7 @@ const Footer = () => {
                 <Button
                   asChild
                   variant="secondary"
-                  className="w-full h-14 md:h-24 lg:h-14 rounded-full text-base md:text-3xl lg:text-base font-semibold"
+                  className="w-full h-14 md:h-24 lg:h-14 rounded-full text-base md:text-3xl lg:text-base font-semibold tracking-wide"
                 >
                   <a
                     href="https://icaf.org/donate"
@@ -193,7 +193,7 @@ const Footer = () => {
                 <Button
                   asChild
                   variant="outline"
-                  className="w-full bg-primary h-14 md:h-24 lg:h-14 text-white text-base md:text-3xl lg:text-base font-semibold rounded-full border-2"
+                  className="w-full bg-primary h-14 md:h-24 lg:h-14 text-white text-base md:text-3xl lg:text-base font-medium tracking-wide rounded-full border-2 hover:font-semibold"
                 >
                   <a
                     href="https://icaf.org/about/contact-us"

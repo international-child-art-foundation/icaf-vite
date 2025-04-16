@@ -45,14 +45,23 @@ const icons = [
 
 const Footer = () => {
   return (
-    <footer className="bg-primary font-sans relative w-full mx-auto z-20 min-h-[670px]  md:min-h-[1200px] lg:min-h-[480px] xl:min-h-[310px]">
-      <div className="mx-5% flex flex-wrap gap-y-10 pt-14 pb-10 px-6 md:px-11 md:pt-20 md:gap-y-20 lg:py-10 lg:pr-16 lg:pl-8 lg:gap-y-16  xl:px-20 justify-between xl:grid xl:grid-cols-12 xl:gap-x-8 xl:gap-y-16 xl:auto-rows-min">
+    <footer className="bg-primary font-sans relative w-full mx-auto z-20 min-h-[670px]  md:min-h-[1200px] lg:min-h-[480px] xl:min-h-[310px] 2xl:min:h-[310px]">
+      <div
+        className="mx-5% flex flex-wrap gap-y-10 pt-14 pb-10 px-6 
+      md:px-11 md:pt-20 md:gap-y-20 
+      lg:py-10 lg:pr-16 lg:pl-8 lg:gap-y-16  
+      xl:px-20 justify-between xl:grid xl:grid-cols-12 xl:gap-x-8 xl:gap-y-16 xl:auto-rows-min"
+      >
         {/* Newsletter */}
-        <div className="space-y-4 md:space-y-8 w-full tracking-wide text-base footer-inverse col-span-2  md:text-3xl md:col-span-3 lg:text-lg lg:order-1  lg:w-[42%] lg:space-y-6  xl:col-span-5 xl:w-full 2xl:text-xl">
+        <div
+          className="space-y-4 md:space-y-8 w-full tracking-wide text-base footer-inverse col-span-2  md:text-3xl md:col-span-3 
+        lg:text-lg lg:order-1  lg:w-[42%] lg:space-y-6  
+        xl:col-span-5 xl:w-full 2xl:text-xl"
+        >
           <p className="block lg:hidden">Get our quarterly newsletter</p>
           <p className="hidden lg:block">Join our quarterly newsletter here</p>
           <div className="flex flex-wrap lg:flex-nowrap  gap-1 lg:gap-2 items-center text-stone-700 focus-within:text-stone-900 xl:max-w-[85%]">
-            <div className="flex flex-auto w-full lg:basis-3/5 ">
+            <div className="flex flex-auto w-full ">
               <Input
                 type="text"
                 name="email"
@@ -65,10 +74,10 @@ const Footer = () => {
                 className="absolute pointer-events-none w-6 h-6 mt-2.5 md:w-11 md:h-11 ml-6 md:ml-8 md:mt-5 lg:w-5 lg:h-5 lg:mt-2.5 lg:ml-4 stroke-neutral-400"
               />
             </div>
-            <div className="w-full lg:basis-2/5">
+            <div className="w-full lg:max-w-[9.25rem] 2xl:max-w-[10.7rem]">
               <Button
-                variant="default"
-                className=" h-11 md:h-20 lg:h-10 mt-2 md:mt-6 md:font-semibold lg:mt-0 w-full bg-secondary-yellow rounded-full text-black text-base md:text-3xl lg:text-sm text-sans font-normal hover:bg-secondary-yellow/90 "
+                variant="secondary"
+                className="text-sans h-11 md:h-20 lg:h-10 w-full rounded-full text-black  font-normal mt-2 md:mt-6 lg:mt-0 md:font-semibold text-base md:text-3xl lg:text-sm"
               >
                 Sign up
               </Button>
@@ -154,12 +163,15 @@ const Footer = () => {
         <div className="w-full lg:order-4  min-h-[100px] xl:col-start-10 xl:col-span-3">
           <div className="grid grid-cols-1 xl:grid-cols-10">
             {/* Donate Button */}
-            <div className="grid grid-cols-2  gap-4 w-full md:gap-8 md:max-w-[97%] lg:max-w-[45%] ml-auto lg:mx-auto xl:max-w-full xl:order-last xl:col-start-4 xl:col-span-7 2xl:col-start-6 2xl:col-span-5 xl:grid-cols-1">
+            <div
+              className="grid grid-cols-2  gap-4 w-full ml-auto md:gap-8 md:max-w-[97%] lg:max-w-[45%]  lg:mx-auto 
+            xl:max-w-full xl:order-last xl:col-start-4 xl:col-span-7 xl:grid-cols-1 2xl:col-start-6 2xl:col-span-5 "
+            >
               <div className="flex justify-center">
                 <Button
                   asChild
-                  variant="default"
-                  className="w-full h-14 md:h-24 lg:h-14 bg-secondary-yellow rounded-full text-black text-base md:text-3xl lg:text-base font-semibold hover:bg-secondary-yellow/90"
+                  variant="secondary"
+                  className="w-full h-14 md:h-24 lg:h-14 rounded-full text-base md:text-3xl lg:text-base font-semibold"
                 >
                   <a
                     href="https://icaf.org/donate"
@@ -181,7 +193,7 @@ const Footer = () => {
                 <Button
                   asChild
                   variant="outline"
-                  className="w-full bg-primary h-14 md:h-24 lg:h-14 text-white text-base md:text-3xl lg:text-base font-medium rounded-full border-2"
+                  className="w-full bg-primary h-14 md:h-24 lg:h-14 text-white text-base md:text-3xl lg:text-base font-semibold rounded-full border-2"
                 >
                   <a
                     href="https://icaf.org/about/contact-us"
@@ -193,11 +205,22 @@ const Footer = () => {
                 </Button>
               </div>
             </div>
-            <HeartArrowIcon className="overflow-visible w-16 h-8 mt-4 md:w-32 md:h-16 md:mt-8 lg:w-16 lg:h-9 lg:mt-0 lg:pl-44 xl:h-8 xl:w-20  xl:pl-0 xl:my-auto 2xl:col-start-3 2xl:col-span-2 2xl:h-10 2xl:w-24" />
+            <HeartArrowIcon
+              className="overflow-visible w-16 h-8 mt-4 
+            md:w-32 md:h-16 md:mt-8 
+            lg:w-16 lg:h-9 lg:mt-0 lg:pl-44 xl:h-8 
+            xl:w-20  xl:pl-0 xl:my-auto 
+            2xl:col-start-3 2xl:col-span-2 2xl:h-10 2xl:w-24"
+            />
           </div>
         </div>
         {/* Copyright Notice */}
-        <div className="bg-primary w-full footer-inverse order-5  place-items-center text-center text-sm md:text-2xl md:tracking-wide md:leading-10 lg:text-sm lg:flex lg:items-center lg:justify-center xl:mx-auto xl:col-span-12">
+        <div
+          className="bg-primary w-full footer-inverse order-5  place-items-center text-center text-sm 
+        md:text-2xl md:tracking-wide md:leading-10 
+        lg:text-sm lg:flex lg:items-center lg:justify-center 
+        xl:mx-auto xl:col-span-12"
+        >
           <span className="text-lg  md:text-3xl lg:pr-2 lg:text-2xl">©</span>{" "}
           2025 International Children Art Foundation | 2549 Virginia Avenue, NW
           | Washington, DC 20037

@@ -92,3 +92,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+.footer-inverse {
+  color: hsl(var(--text-inverse));
+}

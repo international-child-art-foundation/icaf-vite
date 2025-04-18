@@ -29,11 +29,19 @@ export default function Home() {
             Empowering children through the arts to foster creativity and
             positive change since 1997.
           </p>
-          <Button>
-            {" "}
-            <HeartIcon />
-            Donate to our cause
-          </Button>
+          <div>
+            <Button variant={"festivalYellow"} size={"lg"}>
+              {" "}
+              <HeartIcon
+                width={24}
+                height={24}
+                strokeWidth={2}
+                className="stroke-black w-6 !h-6 md:!w-6 md:!h-6 md:mr-0"
+              />
+              Donate to our <span className="md:hidden">cause</span>{" "}
+              <span className="hidden md:inline">campaign</span>
+            </Button>
+          </div>
         </div>
       </div>
       <HomeHeader />

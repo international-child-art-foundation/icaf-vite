@@ -4,11 +4,11 @@ import { TwitterIcon } from "@/assets/shared/icons/TwitterIcon";
 import { YoutubeIcon } from "@/assets/shared/icons/YoutubeIcon";
 import { LinkedinIcon } from "@/assets/shared/icons/LinkedinIcon";
 import { PinterestIcon } from "@/assets/shared/icons/PinterestIcon";
-import { EmailIcon } from "@/assets/shared/icons/EmailIcon";
 import { HeartIcon } from "@/assets/shared/icons/HeartIcon";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { HeartArrowIcon } from "@/assets/shared/icons/HeartArrowIcon";
+import { InputIconWrapper } from "../ui/InputIconWrapper";
+import { Mail } from "lucide-react";
 
 const icons = [
   {
@@ -45,39 +45,32 @@ const icons = [
 
 const Footer = () => {
   return (
-    <footer className="bg-primary font-sans relative w-full mx-auto z-20 min-h-[670px]  md:min-h-[1200px] lg:min-h-[480px] xl:min-h-[310px] 2xl:min:h-[310px]">
+    <footer className="bg-primary font-sans relative w-full mx-auto z-20 min-h-[670px] lg:min-h-[480px] xl:min-h-[310px] 2xl:min:h-[310px]">
       <div
-        className="mx-5% flex flex-wrap gap-y-10 pt-14 pb-10 px-6 
-      md:px-11 md:pt-20 md:gap-y-20 
-      lg:py-10 lg:pr-16 lg:pl-8 lg:gap-y-16  
-      xl:px-20 justify-between xl:grid xl:grid-cols-12 xl:gap-x-8 xl:gap-y-16 xl:auto-rows-min"
+        className="mx-5% flex flex-wrap gap-y-10 pt-14 pb-10 mx-auto
+      lg:py-10 lg:gap-y-16  
+      justify-between xl:grid xl:grid-cols-12 xl:gap-x-8 xl:gap-y-16 xl:auto-rows-min 
+      px-8 md:px-12 lg:px-16 xl:px-20 md:max-w-[750px] lg:max-w-screen-2xl"
       >
         {/* Newsletter */}
         <div
-          className="space-y-4 md:space-y-8 w-full tracking-wide text-base footer-inverse col-span-2  md:text-3xl md:col-span-3 
+          className="space-y-4 w-full tracking-wide text-base footer-inverse col-span-2 
         lg:text-lg lg:order-1  lg:w-[42%] lg:space-y-6  
         xl:col-span-5 xl:w-full 2xl:text-xl"
         >
-          <p className="block lg:hidden">Get our quarterly newsletter</p>
-          <p className="hidden lg:block">Join our quarterly newsletter here</p>
+          <p className="block">Get our quarterly newsletter</p>
           <div className="flex flex-wrap lg:flex-nowrap  gap-1 lg:gap-2 items-center text-stone-700 focus-within:text-stone-900 xl:max-w-[85%]">
-            <div className="flex flex-auto w-full ">
-              <Input
-                type="text"
-                name="email"
+            <div className="flex flex-auto w-full h-11 lg:h-10 ">
+              <InputIconWrapper
+                icon={Mail}
                 placeholder="Your email address"
-                autoComplete="off"
-                className="h-11 md:h-20 pl-16 md:pl-28 lg:h-10 lg:pl-12  pr-3 rounded-full placeholder:text-neutral-600 placeholder:text-sans md:text-3xl md:placeholder:text-3xl lg:placeholder:text-sm lg:pb-5"
-              ></Input>
-              <EmailIcon
-                strokeWidth={2}
-                className="absolute pointer-events-none w-6 h-6 mt-2.5 md:w-11 md:h-11 ml-6 md:ml-8 md:mt-5 lg:w-5 lg:h-5 lg:mt-2.5 lg:ml-4 stroke-neutral-400"
+                className="flex bg-white rounded-full placeholder:text-neutral-600 placeholder:text-sans lg:placeholder:text-sm"
               />
             </div>
             <div className="w-full lg:max-w-[9.25rem] 2xl:max-w-[10.7rem]">
               <Button
                 variant="secondary"
-                className="text-sans h-11 md:h-20 lg:h-10 w-full rounded-full text-black  font-normal mt-2 md:mt-6 lg:mt-0 md:font-semibold text-base md:text-3xl lg:text-sm"
+                className="text-sans w-full rounded-full text-black  font-normal mt-2 lg:mt-0 text-base lg:text-sm"
               >
                 Sign up
               </Button>
@@ -96,7 +89,7 @@ const Footer = () => {
                   rel="noopener noreferrer"
                 >
                   <icon.SVGcomponent
-                    className="fill-white md:h-[71px] md:w-[71px] lg:h-10 lg:w-10"
+                    className="fill-white lg:h-10 lg:w-10"
                     aria-hidden="true"
                   />
                 </a>
@@ -105,8 +98,8 @@ const Footer = () => {
           </ol>
         </div>
         {/* Links */}
-        <div className=" w-full footer-inverse text-base md:text-3xl lg:text-base lg:order-2 lg:w-auto xl:col-start-6 xl:col-span-2 ">
-          <ol className="grid grid-cols-2 gap-x-8 gap-y-5 md:justify-between md:pl-24 md:gap-x-16 md:gap-y-14 lg:grid-cols-1 lg:gap-y-4 lg:pl-0 lg:pr-14">
+        <div className=" w-full footer-inverse text-base lg:text-base lg:order-2 lg:w-auto xl:col-start-6 xl:col-span-2 ">
+          <ol className="grid grid-cols-2 gap-x-8 gap-y-5 lg:grid-cols-1 lg:gap-y-4 lg:pl-0 lg:pr-14">
             <div className="break-words">
               <a href="/faq">FAQs</a>
             </div>
@@ -164,14 +157,14 @@ const Footer = () => {
           <div className="grid grid-cols-1 xl:grid-cols-10">
             {/* Donate Button */}
             <div
-              className="grid grid-cols-2  gap-4 w-full ml-auto md:gap-8 md:max-w-[97%] lg:max-w-[45%]  lg:mx-auto 
+              className="grid grid-cols-2  gap-4 w-full ml-auto lg:max-w-[45%] lg:mx-auto 
             xl:max-w-full xl:order-last xl:col-start-4 xl:col-span-7 xl:grid-cols-1 2xl:col-start-6 2xl:col-span-5 "
             >
               <div className="flex justify-center">
                 <Button
                   asChild
                   variant="secondary"
-                  className="w-full h-14 md:h-24 lg:h-14 rounded-full text-base md:text-3xl lg:text-base font-semibold tracking-wide"
+                  className="w-full h-14 lg:h-14 rounded-full text-base lg:text-base font-semibold tracking-wide"
                 >
                   <a
                     href="https://icaf.org/donate"
@@ -181,7 +174,7 @@ const Footer = () => {
                   >
                     <HeartIcon
                       strokeWidth={2}
-                      className="stroke-black !w-6 !h-6 md:!w-10 md:!h-10 md:mr-2  lg:!w-6 lg:!h-6 lg:mr-0"
+                      className="stroke-black !w-6 !h-6 lg:!w-6 lg:!h-6 lg:mr-0"
                     />
                     Donate
                   </a>
@@ -193,7 +186,7 @@ const Footer = () => {
                 <Button
                   asChild
                   variant="outline"
-                  className="w-full bg-primary h-14 md:h-24 lg:h-14 text-white text-base md:text-3xl lg:text-base font-medium tracking-wide rounded-full border-2 hover:font-semibold"
+                  className="w-full bg-primary h-14 lg:h-14 text-white text-base lg:text-base font-medium tracking-wide rounded-full border-2 hover:font-semibold"
                 >
                   <a
                     href="https://icaf.org/about/contact-us"
@@ -207,7 +200,6 @@ const Footer = () => {
             </div>
             <HeartArrowIcon
               className="overflow-visible w-16 h-8 mt-4 
-            md:w-32 md:h-16 md:mt-8 
             lg:w-16 lg:h-9 lg:mt-0 lg:pl-44 xl:h-8 
             xl:w-20  xl:pl-0 xl:my-auto 
             2xl:col-start-3 2xl:col-span-2 2xl:h-10 2xl:w-24"
@@ -217,13 +209,12 @@ const Footer = () => {
         {/* Copyright Notice */}
         <div
           className="bg-primary w-full footer-inverse order-5  place-items-center text-center text-sm 
-        md:text-2xl md:tracking-wide md:leading-10 
         lg:text-sm lg:flex lg:items-center lg:justify-center 
         xl:mx-auto xl:col-span-12"
         >
-          <span className="text-lg  md:text-3xl lg:pr-2 lg:text-2xl">©</span>{" "}
-          2025 International Children Art Foundation | 2549 Virginia Avenue, NW
-          | Washington, DC 20037
+          <span className="text-lg lg:pr-2 lg:text-2xl">©</span> 2025
+          International Children Art Foundation | 2549 Virginia Avenue, NW |
+          Washington, DC 20037
         </div>
       </div>
     </footer>

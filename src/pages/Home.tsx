@@ -30,7 +30,11 @@ export default function Home() {
             positive change since 1997.
           </p>
           <div>
-            <Button variant={"festivalYellow"} size={"lg"}>
+            <Button
+              variant={"secondary"}
+              size={"lg"}
+              className="font-semibold text-base rounded-full"
+            >
               {" "}
               <HeartIcon
                 width={24}
@@ -38,8 +42,7 @@ export default function Home() {
                 strokeWidth={2}
                 className="stroke-black w-6 !h-6 md:!w-6 md:!h-6 md:mr-0"
               />
-              Donate to our <span className="md:hidden">cause</span>{" "}
-              <span className="hidden md:inline">campaign</span>
+              Donate to our campaign
             </Button>
           </div>
         </div>

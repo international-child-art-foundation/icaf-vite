@@ -18,8 +18,6 @@ const buttonVariants = cva(
           "bg-secondary-yellow text-secondary-foreground hover:bg-secondary-yellow/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        festivalYellow:
-          "bg-secondary-festivalYellow text-black rounded-[100px] font-semibold text-base leading-normal ",
       },
       size: {
         default: "h-10 px-4 py-2",

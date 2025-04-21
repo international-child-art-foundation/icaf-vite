@@ -22,7 +22,7 @@ const MobileNav: any = () => {
       </Button>
 
       {open && (
-        <nav className="fixed inset-x-0 top-[98px] bottom-0 bg-primary p-6">
+        <nav className="fixed inset-x-0 top-[98px]  bg-primary p-6">
           {<MobileNavMenu />}
         </nav>
       )}

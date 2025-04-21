@@ -8,6 +8,7 @@ export interface NavChild {
 export interface NavItem {
   key: string;
   label: string;
+  navLabel: string;
   href?: string;
   colSpan: number;
   children?: NavChild[];
@@ -17,6 +18,7 @@ export const navItems: NavItem[] = [
   {
     key: "about",
     label: "ABOUT",
+    navLabel: "About",
     colSpan: 3,
     children: [
       {
@@ -48,6 +50,7 @@ export const navItems: NavItem[] = [
   {
     key: "programs",
     label: "PROGRAMS",
+    navLabel: "Programs",
     href: "/programs",
     colSpan: 4,
     children: [
@@ -86,6 +89,7 @@ export const navItems: NavItem[] = [
   {
     key: "get-involved",
     label: "GET INVOLVED",
+    navLabel: "Get Involved",
     href: "/get-involved",
     colSpan: 3,
     children: [
@@ -118,6 +122,7 @@ export const navItems: NavItem[] = [
   {
     key: "news-events",
     label: "NEWS & EVENTS",
+    navLabel: "News & Events",
     href: "/news-events",
     colSpan: 4,
     children: [
@@ -138,6 +143,7 @@ export const navItems: NavItem[] = [
   {
     key: "sponsorship",
     label: "SPONSORSHIP",
+    navLabel: "Sponsorship",
     href: "/sponsorship",
     colSpan: 6,
     children: [],
@@ -145,6 +151,7 @@ export const navItems: NavItem[] = [
   {
     key: "gallery",
     label: "GALLERY",
+    navLabel: "Gallery",
     href: "/gallery",
     colSpan: 4,
     children: [

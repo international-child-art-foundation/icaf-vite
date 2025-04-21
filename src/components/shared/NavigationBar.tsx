@@ -1,14 +1,18 @@
-import { ICAFlogo } from "@/assets/shared/logos/ICAFLogo";
+import DesktopNav from "./header/DesktopNav";
+import MobileNav from "./header/MobileNav";
 
 const NavigationBar = () => {
   return (
-    <>
-      <div className="fixed top-0 left-0 right-0 z-50 min-h-[98px] h-[98px] bg-white w-full flex justify-center items-center shadow-md">
-        <div className="my-2">
-          <ICAFlogo />
-        </div>
+    <header className="fixed top-0 left-0 right-0 z-50 h-[98px] bg-white shadow-md ">
+      <div className="mx-auto h-full max-w-screen-2xl px-6">
+        <nav className="flex h-full items-center justify-between xl:hidden">
+          <MobileNav />
+        </nav>
+        <nav className="hidden xl:block h-full items-center justify-center">
+          <DesktopNav />
+        </nav>
       </div>
-    </>
+    </header>
   );
 };
 

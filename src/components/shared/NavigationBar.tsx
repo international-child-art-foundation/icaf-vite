@@ -1,5 +1,5 @@
-import DesktopNav from "./header/DesktopNav";
-import MobileNav from "./header/MobileNav";
+import DesktopNav from "./navigation/DesktopNav";
+import MobileNav from "./navigation/MobileNav";
 
 const NavigationBar = () => {
   return (

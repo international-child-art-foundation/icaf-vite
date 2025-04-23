@@ -1,3 +1,22 @@
+import history from "../assets/shared/images/navigation/about/history.webp";
+import team from "../assets/shared/images/navigation/about/team.webp";
+import partner from "../assets/shared/images/navigation/about/partners.webp";
+import impact from "../assets/shared/images/navigation/about/impact.webp";
+import childArt from "../assets/shared/images/navigation/programs/childArtMagazine.webp";
+import climate from "../assets/shared/images/navigation/programs/climateChange.webp";
+import healing from "../assets/shared/images/navigation/programs/healingArtsProgram.webp";
+import peace from "../assets/shared/images/navigation/programs/peaceThroughArt.webp";
+import theArtOlypiad from "../assets/shared/images/navigation/programs/theArtOlympiad.webp";
+import world from "../assets/shared/images/navigation/programs/worldChildrensFestival.webp";
+import corporate from "../assets/shared/images/navigation/getInvolved/corporatePartnership.webp";
+import professional from "../assets/shared/images/navigation/getInvolved/professional.webp";
+import student from "../assets/shared/images/navigation/getInvolved/student.webp";
+import volunteer from "../assets/shared/images/navigation/getInvolved/volunteer.webp";
+import latest from "../assets/shared/images/navigation/news/latestNews.webp";
+import upcoming from "../assets/shared/images/navigation/news/upcomingEvents.webp";
+import annual from "../assets/shared/images/navigation/gallery/annualReports.webp";
+import gallery from "../assets/shared/images/navigation/gallery/gallery.webp";
+
 export interface NavChild {
   label: string;
   href: string;
@@ -10,7 +29,7 @@ export interface NavItem {
   label: string;
   navLabel: string;
   href?: string;
-  colSpan: number;
+  col: number;
   children?: NavChild[];
 }
 
@@ -19,30 +38,30 @@ export const navItems: NavItem[] = [
     key: "about",
     label: "ABOUT",
     navLabel: "About",
-    colSpan: 3,
+    col: 4,
     children: [
       {
         label: "History",
         href: "/about/history",
-        imageSrc: "https://placehold.co/300x300",
+        imageSrc: history,
         alt: "Our history",
       },
       {
         label: "Team",
         href: "/about/team",
-        imageSrc: "https://placehold.co/300x300",
+        imageSrc: team,
         alt: "Our team",
       },
       {
         label: "Partners",
         href: "/about/partners",
-        imageSrc: "https://placehold.co/300x300",
+        imageSrc: partner,
         alt: "Our partners",
       },
       {
         label: "Impact",
         href: "/about/impact",
-        imageSrc: "https://placehold.co/300x300",
+        imageSrc: impact,
         alt: "Our partners",
       },
     ],
@@ -52,36 +71,42 @@ export const navItems: NavItem[] = [
     label: "PROGRAMS",
     navLabel: "Programs",
     href: "/programs",
-    colSpan: 4,
+    col: 6,
     children: [
       {
         label: "The Art Olympiad",
         href: "/programs/theartolympiad",
-        imageSrc: "https://placehold.co/300x300",
+        imageSrc: childArt,
         alt: "The Art Olympiad gallery",
       },
       {
-        label: "ChilArt Magazine",
+        label: "Child Art Magazine",
         href: "/programs/outreach",
-        imageSrc: "https://placehold.co/300x300",
+        imageSrc: climate,
+        alt: "School outreach",
+      },
+      {
+        label: "World Children's Festival",
+        href: "/programs/outreach",
+        imageSrc: world,
         alt: "School outreach",
       },
       {
         label: "Peace Through Art",
         href: "/programs/outreach",
-        imageSrc: "https://placehold.co/300x300",
+        imageSrc: peace,
         alt: "School outreach",
       },
       {
         label: "Climate Change",
         href: "/programs/outreach",
-        imageSrc: "https://placehold.co/300x300",
+        imageSrc: theArtOlypiad,
         alt: "School outreach",
       },
       {
         label: "Healing Arts Program",
         href: "/programs/outreach",
-        imageSrc: "https://placehold.co/300x300",
+        imageSrc: healing,
         alt: "School outreach",
       },
     ],
@@ -91,30 +116,30 @@ export const navItems: NavItem[] = [
     label: "GET INVOLVED",
     navLabel: "Get Involved",
     href: "/get-involved",
-    colSpan: 3,
+    col: 4,
     children: [
       {
         label: "Volunteer",
         href: "/get-involved/volunteer",
-        imageSrc: "https://placehold.co/300x300",
+        imageSrc: volunteer,
         alt: "Volunteer with us",
       },
       {
         label: "Profesional",
         href: "/get-involved/donate",
-        imageSrc: "https://placehold.co/300x300",
+        imageSrc: professional,
         alt: "Make a donation",
       },
       {
         label: "Student",
         href: "/get-involved/donate",
-        imageSrc: "https://placehold.co/300x300",
+        imageSrc: student,
         alt: "Make a donation",
       },
       {
         label: "Corporate Partnerships",
         href: "/get-involved/donate",
-        imageSrc: "https://placehold.co/300x300",
+        imageSrc: corporate,
         alt: "Make a donation",
       },
     ],
@@ -124,18 +149,18 @@ export const navItems: NavItem[] = [
     label: "NEWS & EVENTS",
     navLabel: "News & Events",
     href: "/news-events",
-    colSpan: 4,
+    col: 2,
     children: [
       {
         label: "Latest News",
         href: "/news-events/news",
-        imageSrc: "https://placehold.co/300x300",
+        imageSrc: latest,
         alt: "Latest news",
       },
       {
         label: "Upcoming Events",
         href: "/news-events/events",
-        imageSrc: "https://placehold.co/300x300",
+        imageSrc: upcoming,
         alt: "Upcoming events",
       },
     ],
@@ -145,7 +170,7 @@ export const navItems: NavItem[] = [
     label: "SPONSORSHIP",
     navLabel: "Sponsorship",
     href: "/sponsorship",
-    colSpan: 6,
+    col: 0,
     children: [],
   },
   {
@@ -153,18 +178,18 @@ export const navItems: NavItem[] = [
     label: "GALLERY",
     navLabel: "Gallery",
     href: "/gallery",
-    colSpan: 4,
+    col: 2,
     children: [
       {
         label: "Gallery",
         href: "/gallery/recent",
-        imageSrc: "https://placehold.co/300x300",
+        imageSrc: gallery,
         alt: "Recent art",
       },
       {
         label: "Annual Reports",
         href: "/gallery/all",
-        imageSrc: "https://placehold.co/300x300",
+        imageSrc: annual,
         alt: "All submissions",
       },
     ],

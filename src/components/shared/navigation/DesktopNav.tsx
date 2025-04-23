@@ -51,7 +51,7 @@ const DesktopNav: any = () => {
 
       {/* Dropdown Section */}
       {activeItem !== "" ? (
-        <nav className="fixed inset-x-0 top-[98px]  bg-primary">
+        <nav className="fixed inset-x-0 top-[98px] bg-primary">
           <DesktopNavDropdown activeItem={activeItem} />
         </nav>
       ) : (

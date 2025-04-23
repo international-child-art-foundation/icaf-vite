@@ -2,7 +2,7 @@ import { ICAFlogo } from "@/assets/shared/logos/ICAFLogo";
 import { Menu, X } from "lucide-react";
 import { Button } from "../../ui/button";
 import { useState } from "react";
-import MobileNavMenu from "../header/MobileNavMenu";
+import MobileNavMenu from "./MobileNavMenu";
 
 const MobileNav: any = () => {
   const [open, setOpen] = useState(false);

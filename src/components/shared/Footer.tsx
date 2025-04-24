@@ -71,8 +71,8 @@ const Footer = () => {
         {/* Social Icons */}
         <div className="w-full lg:order-3 lg:my-auto lg:w-1/5 xl:col-span-2 xl:col-start-8 xl:my-0 xl:w-full">
           <ol className="my-2 grid w-full grid-flow-col justify-between lg:my-0 lg:grid-flow-row lg:grid-cols-3 lg:place-items-center lg:gap-6">
-            {icons.map((icon, i) => (
-              <div key={i}>
+            {icons.map((icon) => (
+              <div key={icon.href}>
                 <a
                   aria-label={icon.altText}
                   href={icon.href}

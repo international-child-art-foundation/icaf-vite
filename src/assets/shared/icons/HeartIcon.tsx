@@ -1,4 +1,4 @@
-import { SVGProps } from "react";
+import { SVGProps } from 'react';
 
 export const HeartIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
@@ -7,7 +7,7 @@ export const HeartIcon = (props: SVGProps<SVGSVGElement>) => (
     viewBox="0 0 24 24"
     strokeWidth="1.5"
     stroke="#134380"
-    className="w-5 h-5 inline-block group-hover:fill-main-red group-hover:stroke-main-red"
+    className="group-hover:fill-main-red group-hover:stroke-main-red inline-block h-5 w-5"
     {...props}
   >
     <path

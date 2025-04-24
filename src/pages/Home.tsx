@@ -1,4 +1,4 @@
-import HomeHeader from '@/components/home/HomeHeader';
+// import HomeHeader from '@/components/home/HomeHeader';
 import {
   childrenImage1536,
   childrenImage768,
@@ -9,6 +9,7 @@ import {
   girlWithFlag768,
   girlWithFlag428,
 } from '@/assets/shared/images/home/girl-with-flag';
+import { mapBg1024, mapBg428 } from '@/assets/shared/images/home/map-bg';
 import { Button } from '@/components/ui/button';
 import { HeartIcon } from '@/assets/shared/icons/HeartIcon';
 
@@ -52,7 +53,19 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <HomeHeader />
+      {/* <HomeHeader /> */}
+      <div className="relative">
+        <picture>
+          <source media="(min-width: 1024px)" srcSet={mapBg1024} />
+          <source media="(max-width: 1023px)" srcSet={mapBg428} />
+          <img
+            src={mapBg1024}
+            alt="Map Background"
+            className="m-auto h-[1060px] w-[438px] object-cover object-center lg:h-[785px] lg:w-[1024px]"
+            loading="lazy"
+          />
+        </picture>
+      </div>
       <picture>
         <source media="(min-width: 1024px)" srcSet={girlWithFlag1536} />
         <source media="(min-width: 768px)" srcSet={girlWithFlag768} />

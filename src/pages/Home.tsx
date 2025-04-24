@@ -4,6 +4,11 @@ import {
   childrenImage768,
   childrenImage428,
 } from '@/assets/shared/images/home/children';
+import {
+  girlWithFlag1536,
+  girlWithFlag768,
+  girlWithFlag428,
+} from '@/assets/shared/images/home/girl-with-flag';
 import { Button } from '@/components/ui/button';
 import { HeartIcon } from '@/assets/shared/icons/HeartIcon';
 
@@ -48,6 +53,17 @@ export default function Home() {
         </div>
       </div>
       <HomeHeader />
+      <picture>
+        <source media="(min-width: 1024px)" srcSet={girlWithFlag1536} />
+        <source media="(min-width: 768px)" srcSet={girlWithFlag768} />
+        <source media="(max-width: 767px)" srcSet={girlWithFlag428} />
+        <img
+          src={childrenImage1536}
+          alt="Girl holding flag"
+          className="h-[443px] w-full md:h-[495px] lg:h-[725px] 2xl:h-[824px]"
+          loading="lazy"
+        />
+      </picture>
     </div>
   );
 }

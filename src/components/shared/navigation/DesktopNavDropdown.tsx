@@ -1,11 +1,14 @@
 import { NavItem, navItems } from "@/lib/navItems";
+import { NavGraphic } from "@/assets/shared/images/navigation/navGraphic";
 
 interface DesktopNavDropdownProps {
   activeItem: string;
+  preloadedImages: string[];
 }
 
 const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
   activeItem,
+  preloadedImages,
 }) => {
   return (
     <>
@@ -26,9 +29,14 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
                     <div key={i} className="relative">
                       <div className="relative w-full">
                         <img
-                          src={child.imageSrc}
+                          src={
+                            preloadedImages.includes(child.imageSrc)
+                              ? child.imageSrc
+                              : ""
+                          }
                           alt={child.alt}
-                          className="w-full h-64 object-cover "
+                          className="w-full h-64 object-cover"
+                          loading="lazy"
                         />
                         <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black opacity-40"></div>
                       </div>
@@ -44,8 +52,9 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
                   ))}
               </div>
               {/* Bottom Label*/}
-              <div className="flex items-center h-16 font-sans text-lg text-text-inverse font-semibold pl-20 bg-primary">
-                {item.label}
+              <div className="flex items-center h-16 font-sans text-lg text-text-inverse font-semibold bg-primary gap-2">
+                <NavGraphic className="" />
+                <div className="">{item.label}</div>
               </div>
             </div>
           ))}

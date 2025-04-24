@@ -1,8 +1,8 @@
-import * as React from "react";
-import { cn } from "@/lib/utils";
-import type { LucideIcon } from "lucide-react";
+import * as React from 'react';
+import { cn } from '@/lib/utils';
+import type { LucideIcon } from 'lucide-react';
 
-interface InputIconWrapperProps extends React.ComponentProps<"input"> {
+interface InputIconWrapperProps extends React.ComponentProps<'input'> {
   icon: LucideIcon;
   className?: string;
 }
@@ -14,11 +14,11 @@ const InputIconWrapper = React.forwardRef<
   return (
     <div
       className={cn(
-        "flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        className
+        'flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+        className,
       )}
     >
-      <Icon className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
+      <Icon className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
       <input
         ref={ref}
         {...props}
@@ -27,6 +27,6 @@ const InputIconWrapper = React.forwardRef<
     </div>
   );
 });
-InputIconWrapper.displayName = "InputIconWrapper";
+InputIconWrapper.displayName = 'InputIconWrapper';
 
 export { InputIconWrapper };

@@ -1,23 +1,23 @@
-import { sharedOpenGraph } from "@/data/shared-metadata";
-import NavigationBar from "@/components/shared/NavigationBar";
-import Footer from "@/components/shared/Footer";
-import "./index.css";
-import Home from "./pages/Home";
-import { Route, Routes } from "react-router-dom";
+import { sharedOpenGraph } from '@/data/shared-metadata';
+import NavigationBar from '@/components/shared/NavigationBar';
+import Footer from '@/components/shared/Footer';
+import './index.css';
+import Home from './pages/Home';
+import { Route, Routes } from 'react-router-dom';
 
 export const metadata = {
-  title: "Home | ICAF",
+  title: 'Home | ICAF',
   openGraph: {
     ...sharedOpenGraph,
-    title: "Home | ICAF",
+    title: 'Home | ICAF',
   },
 };
 
 export default function App() {
   return (
-    <div className="flex min-h-screen flex-col max-w-screen-2xl w-full mx-auto px-0 box-border">
+    <div className="mx-auto box-border flex min-h-screen w-full max-w-screen-2xl flex-col px-0">
       <NavigationBar />
-      <main className="flex-1 mt-[98px]">
+      <main className="mt-[98px] flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
         </Routes>

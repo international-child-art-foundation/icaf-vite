@@ -1,4 +1,4 @@
-import { SVGProps } from "react";
+import { SVGProps } from 'react';
 
 export const EmailIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
@@ -7,7 +7,7 @@ export const EmailIcon = (props: SVGProps<SVGSVGElement>) => (
     viewBox="0 0 24 24"
     strokeWidth="1.5"
     stroke="currentColor"
-    className="absolute pointer-events-none w-5 h-5 ml-3 mt-2.5"
+    className="pointer-events-none absolute ml-3 mt-2.5 h-5 w-5"
     {...props}
   >
     <path

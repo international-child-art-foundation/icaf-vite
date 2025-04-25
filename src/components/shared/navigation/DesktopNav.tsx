@@ -7,7 +7,37 @@ import { useState, useEffect } from "react";
 
 const DesktopNav: any = () => {
   const [activeItem, setActiveItem] = useState<string>("");
+  const [prevItem, setPrevItem] = useState<string>("");
+  const [isLeaving, setIsLeaving] = useState(false);
   const [preloadedImages, setPreloadedImages] = useState<string[]>([]);
+
+  const handleMouseEnter = (label: string) => {
+    if (label !== activeItem) {
+      setActiveItem(label);
+      setPrevItem(activeItem);
+
+      //Specific sequence allowing the dropdown to exit when hovering sponsorhsip
+      if (label === "SPONSORSHIP") {
+        setIsLeaving(true);
+        setActiveItem("");
+
+        setTimeout(() => {
+          setPrevItem("");
+        }, 250);
+      } else {
+        setIsLeaving(false);
+      }
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsLeaving(true);
+    setTimeout(() => {
+      setIsLeaving(false);
+      setActiveItem("");
+      setPrevItem("");
+    }, 250);
+  };
 
   //Preload of images
   const preloadImage = (imageUrl: string) => {
@@ -33,16 +63,18 @@ const DesktopNav: any = () => {
         <ICAFlogo />
       </div>
 
-      <div className="flex space-x-6 items-center">
+      <div className="flex space-x-6 items-center ">
         {navItems.map((item: NavItem) => (
           <a
             key={item.key}
-            onClick={() => setActiveItem(item.label)}
-            className={`text-lg hover:text-primary hover:cursor-pointer ${
+            onMouseEnter={() => handleMouseEnter(item.label)}
+            className={`text-lg hover:text-primary hover:cursor-pointer relative group ${
               activeItem === item.label ? "text-primary" : "text-black"
             }`}
           >
             {item.navLabel}
+            {/*Nav Item Underline Animation*/}
+            <span className="absolute top-7 left-1/2 transform -translate-x-1/2 w-0 h-[1px] bg-primary transition-all duration-300 ease-in-out group-hover:w-full"></span>
           </a>
         ))}
 
@@ -70,12 +102,29 @@ const DesktopNav: any = () => {
       </div>
 
       {/* Dropdown Section */}
-      {activeItem !== "" ? (
-        <nav className="fixed top-[98px] left-1/2 transform -translate-x-1/2 bg-primary 2xl:max-w-screen-2xl w-full">
-          <DesktopNavDropdown
-            activeItem={activeItem}
-            preloadedImages={preloadedImages}
-          />
+      {activeItem || isLeaving ? (
+        <nav
+          onMouseLeave={() => handleMouseLeave()}
+          className="fixed top-[98px] left-1/2 transform -translate-x-1/2  2xl:max-w-screen-2xl w-full overflow-hidden min-h-80"
+        >
+          {prevItem !== "SPONSORSHIP" && (
+            <div className={`dropdown-inner static ${isLeaving ? "exit" : ""}`}>
+              <DesktopNavDropdown
+                activeItem={prevItem || ""}
+                preloadedImages={preloadedImages}
+              />
+            </div>
+          )}
+
+          <div
+            key={activeItem}
+            className={`dropdown-inner animated ${isLeaving ? "exit" : ""}`}
+          >
+            <DesktopNavDropdown
+              activeItem={activeItem}
+              preloadedImages={preloadedImages}
+            />
+          </div>
         </nav>
       ) : (
         ""

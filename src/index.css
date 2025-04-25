@@ -96,3 +96,54 @@
 .footer-inverse {
   color: hsl(var(--text-inverse));
 }
+
+@keyframes dropIn {
+  from {
+    transform: translate(0, -250px);
+    opacity: 1;
+  }
+  to {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes dropOut {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(0, -250px);
+    opacity: 1;
+  }
+}
+
+.dropdown-inner {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.dropdown-inner.static {
+  position: relative;
+  visibility: visible;
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+.dropdown-inner.animated {
+  visibility: visible;
+  opacity: 1;
+  transform: translate(20px, -250px);
+  animation: dropIn 0.25s ease-out forwards;
+}
+
+.dropdown-inner.exit.animated {
+  animation: dropOut 0.25s ease-in forwards;
+}
+
+.dropdown-inner.exit.static {
+  animation: dropOut 0.25s ease-in forwards;
+}

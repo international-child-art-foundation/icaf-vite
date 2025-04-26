@@ -1,8 +1,8 @@
-import { NavItem, navItems } from "@/lib/navItems";
-import { NavGraphic } from "@/assets/shared/images/navigation/navGraphic";
-import { CircleArrowRight } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { NavItem, navItems } from '@/lib/navItems';
+import { NavGraphic } from '@/assets/shared/images/navigation/navGraphic';
+import { CircleArrowRight } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface DesktopNavDropdownProps {
   activeItem: string;
@@ -28,10 +28,10 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
     setSelectedImage(index);
 
     setTimeout(() => {
-      navigate(href);
+      void navigate(href);
       setIsLeaving(true);
-      setActiveItem("");
-      setPrevItem("");
+      setActiveItem('');
+      setPrevItem('');
     }, 500);
   };
   return (
@@ -43,7 +43,7 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
             <div key={item.key}>
               {/* Image Section*/}
               <div
-                className={`grid h-64 `}
+                className="grid h-64"
                 style={{
                   gridTemplateColumns: `repeat(${item.col}, 1fr)`,
                 }}
@@ -52,66 +52,67 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
                   item.children.map((child, i) => (
                     <div
                       key={i}
-                      className={`relative group overflow-hidden transition-all duration-300 ${
+                      className={`group relative overflow-hidden transition-all duration-300 ${
                         hoverState === i
-                          ? "scale-x-105 origin-right"
-                          : "scale-x-100"
+                          ? item.col > 3
+                            ? 'origin-right scale-x-105'
+                            : 'origin-right scale-x-[102%]'
+                          : 'scale-x-100'
                       }`}
                       onClick={() => handleClick(i, child.href)}
                       onMouseEnter={() => setHoverState(i)}
                       onMouseLeave={() => setHoverState(null)}
                     >
-                      <div className="relative w-full ">
+                      <div className="relative w-full">
                         <img
                           src={
                             preloadedImages.includes(child.imageSrc)
                               ? child.imageSrc
-                              : ""
+                              : ''
                           }
                           alt={child.alt}
-                          className="w-full h-64 object-cover "
+                          className="h-64 w-full object-cover"
                           loading="lazy"
                         />
                         <div
                           className={`absolute inset-0 bg-gradient-to-b from-black via-black to-black ${
-                            selectedImage === i ? "opacity-70" : "opacity-40"
+                            selectedImage === i ? 'opacity-70' : 'opacity-40'
                           }`}
                         ></div>
                       </div>
                       {/*Image title and hover text*/}
                       <div
                         className={`absolute bottom-4 px-8 transition-all duration-300 group-hover:bottom-2 ${
-                          child.hoverDescription !== ""
-                            ? "group-hover:translate-y-[-120px]"
-                            : "group-hover:translate-y-[-50px]"
+                          child.hoverDescription !== ''
+                            ? 'group-hover:translate-y-[-120px]'
+                            : 'group-hover:translate-y-[-50px]'
                         } `}
                       >
                         <h3
-                          className={` text-2xl text-text-inverse font-bold  leading-loose tracking-wide ${
-                            item.col > 3 ? `xl:max-w-48` : ""
-                          } 
-                          `}
+                          className={`text-2xl font-bold leading-loose tracking-wide text-text-inverse ${
+                            item.col > 3 ? `xl:max-w-48` : ''
+                          } `}
                         >
                           {child.label}
                         </h3>
                       </div>
                       <div
-                        className={`absolute text-text-inverse px-8 transition-all duration-300 opacity-0 group-hover:opacity-100  ${
-                          child.hoverDescription !== ""
-                            ? "group-hover:translate-y-[-120px]"
-                            : "group-hover:translate-y-[-50px]"
+                        className={`absolute px-8 text-text-inverse opacity-0 transition-all duration-300 group-hover:opacity-100 ${
+                          child.hoverDescription !== ''
+                            ? 'group-hover:translate-y-[-120px]'
+                            : 'group-hover:translate-y-[-50px]'
                         } `}
                       >
                         <p
                           className={`${
-                            child.hoverDescription !== "" ? "mb-4" : "hidden"
+                            child.hoverDescription !== '' ? 'mb-4' : 'hidden'
                           }`}
                         >
                           {child.hoverDescription}
                         </p>
-                        <p className="flex ">
-                          Learn More{" "}
-                          <span className=" ml-4">
+                        <p className="flex">
+                          Learn More{' '}
+                          <span className="ml-4">
                             <CircleArrowRight />
                           </span>
                         </p>
@@ -120,7 +121,7 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
                   ))}
               </div>
               {/* Bottom Label*/}
-              <div className="flex items-center h-16 font-sans text-lg text-text-inverse font-semibold bg-primary gap-2 ">
+              <div className="flex h-16 items-center gap-2 bg-primary font-sans text-lg font-semibold text-text-inverse">
                 <NavGraphic />
                 <div>{item.label}</div>
               </div>

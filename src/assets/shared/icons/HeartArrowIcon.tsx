@@ -1,4 +1,4 @@
-import { SVGProps } from "react";
+import { SVGProps } from 'react';
 
 export const HeartArrowIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg

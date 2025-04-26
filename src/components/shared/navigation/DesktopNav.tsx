@@ -3,13 +3,16 @@ import { Button } from "@/components/ui/button";
 import { HeartIcon } from "lucide-react";
 import { NavItem, navItems } from "@/lib/navItems";
 import DesktopNavDropdown from "./DesktopNavDropdown";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
-const DesktopNav: any = () => {
+const DesktopNav: React.FC = () => {
   const [activeItem, setActiveItem] = useState<string>("");
   const [prevItem, setPrevItem] = useState<string>("");
   const [isLeaving, setIsLeaving] = useState(false);
   const [preloadedImages, setPreloadedImages] = useState<string[]>([]);
+  const navigate = useNavigate();
+  const navbarRef = useRef<HTMLDivElement | null>(null);
 
   const handleMouseEnter = (label: string) => {
     if (label !== activeItem) {
@@ -30,13 +33,22 @@ const DesktopNav: any = () => {
     }
   };
 
-  const handleMouseLeave = () => {
-    setIsLeaving(true);
-    setTimeout(() => {
-      setIsLeaving(false);
-      setActiveItem("");
-      setPrevItem("");
-    }, 250);
+  const handleMouseLeave = (event: React.MouseEvent) => {
+    //First check if mouse moved up to navbar menu items, if not close dropdown
+    if (!navbarRef.current?.contains(event.relatedTarget as Node)) {
+      setIsLeaving(true);
+      setTimeout(() => {
+        setIsLeaving(false);
+        setActiveItem("");
+        setPrevItem("");
+      }, 250);
+    }
+  };
+
+  const handleClick = (label: string, href: string) => {
+    if (label === "SPONSORSHIP") {
+      navigate(href);
+    }
   };
 
   //Preload of images
@@ -63,11 +75,12 @@ const DesktopNav: any = () => {
         <ICAFlogo />
       </div>
 
-      <div className="flex space-x-6 items-center ">
+      <div className="flex space-x-6 items-center h-full " ref={navbarRef}>
         {navItems.map((item: NavItem) => (
           <a
             key={item.key}
             onMouseEnter={() => handleMouseEnter(item.label)}
+            onClick={() => handleClick(item.label, item.href)}
             className={`text-lg hover:text-primary hover:cursor-pointer relative group ${
               activeItem === item.label ? "text-primary" : "text-black"
             }`}
@@ -104,14 +117,17 @@ const DesktopNav: any = () => {
       {/* Dropdown Section */}
       {activeItem || isLeaving ? (
         <nav
-          onMouseLeave={() => handleMouseLeave()}
           className="fixed top-[98px] left-1/2 transform -translate-x-1/2  2xl:max-w-screen-2xl w-full overflow-hidden min-h-80"
+          onMouseLeave={(event) => handleMouseLeave(event)}
         >
           {prevItem !== "SPONSORSHIP" && (
             <div className={`dropdown-inner static ${isLeaving ? "exit" : ""}`}>
               <DesktopNavDropdown
                 activeItem={prevItem || ""}
                 preloadedImages={preloadedImages}
+                setIsLeaving={setIsLeaving}
+                setActiveItem={setActiveItem}
+                setPrevItem={setPrevItem}
               />
             </div>
           )}
@@ -123,6 +139,9 @@ const DesktopNav: any = () => {
             <DesktopNavDropdown
               activeItem={activeItem}
               preloadedImages={preloadedImages}
+              setIsLeaving={setIsLeaving}
+              setActiveItem={setActiveItem}
+              setPrevItem={setPrevItem}
             />
           </div>
         </nav>

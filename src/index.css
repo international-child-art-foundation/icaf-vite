@@ -97,6 +97,8 @@
   color: hsl(var(--text-inverse));
 }
 
+/* Navigation Animations*/
+
 @keyframes dropIn {
   from {
     transform: translate(0, -250px);

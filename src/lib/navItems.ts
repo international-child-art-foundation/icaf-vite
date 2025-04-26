@@ -22,13 +22,14 @@ export interface NavChild {
   href: string;
   imageSrc: string;
   alt: string;
+  hoverDescription: string;
 }
 
 export interface NavItem {
   key: string;
   label: string;
   navLabel: string;
-  href?: string;
+  href: string;
   col: number;
   children?: NavChild[];
 }
@@ -38,6 +39,7 @@ export const navItems: NavItem[] = [
     key: "about",
     label: "ABOUT",
     navLabel: "About",
+    href: "/about",
     col: 4,
     children: [
       {
@@ -45,24 +47,30 @@ export const navItems: NavItem[] = [
         href: "/about/history",
         imageSrc: history,
         alt: "Our history",
+        hoverDescription: "Learn about ICAF's history, see where it all began.",
       },
       {
         label: "Team",
         href: "/about/team",
         imageSrc: team,
         alt: "Our team",
+        hoverDescription: "Learn about the people that work in ICAF.",
       },
       {
         label: "Partners",
         href: "/about/partners",
         imageSrc: partner,
         alt: "Our partners",
+        hoverDescription:
+          "List of organizations and companies ICAF works with.",
       },
       {
         label: "Impact",
         href: "/about/impact",
         imageSrc: impact,
         alt: "Our partners",
+        hoverDescription:
+          "List of organizations and companies ICAF works with.",
       },
     ],
   },
@@ -78,36 +86,42 @@ export const navItems: NavItem[] = [
         href: "/programs/theartolympiad",
         imageSrc: childArt,
         alt: "The Art Olympiad gallery",
+        hoverDescription: "",
       },
       {
         label: "Child Art Magazine",
         href: "/programs/outreach",
         imageSrc: climate,
         alt: "Child Art Magazine",
+        hoverDescription: "",
       },
       {
         label: "World Children's Festival",
         href: "/programs/outreach",
         imageSrc: world,
         alt: "World Children's Festival",
+        hoverDescription: "",
       },
       {
         label: "Peace Through Art",
         href: "/programs/outreach",
         imageSrc: peace,
         alt: "Peace",
+        hoverDescription: "",
       },
       {
         label: "Climate Change",
         href: "/programs/outreach",
         imageSrc: theArtOlypiad,
         alt: "Climate Change",
+        hoverDescription: "",
       },
       {
         label: "Healing Arts Program",
         href: "/programs/outreach",
         imageSrc: healing,
         alt: "healing",
+        hoverDescription: "",
       },
     ],
   },
@@ -123,24 +137,28 @@ export const navItems: NavItem[] = [
         href: "/get-involved/volunteer",
         imageSrc: volunteer,
         alt: "Volunteer with us",
+        hoverDescription: "",
       },
       {
         label: "Profesional",
         href: "/get-involved/donate",
         imageSrc: professional,
         alt: "Make a donation",
+        hoverDescription: "",
       },
       {
         label: "Student",
         href: "/get-involved/donate",
         imageSrc: student,
         alt: "Make a donation",
+        hoverDescription: "",
       },
       {
         label: "Corporate Partnerships",
         href: "/get-involved/donate",
         imageSrc: corporate,
         alt: "Make a donation",
+        hoverDescription: "",
       },
     ],
   },
@@ -156,12 +174,14 @@ export const navItems: NavItem[] = [
         href: "/news-events/news",
         imageSrc: latest,
         alt: "Latest news",
+        hoverDescription: "",
       },
       {
         label: "Upcoming Events",
         href: "/news-events/events",
         imageSrc: upcoming,
         alt: "Upcoming events",
+        hoverDescription: "",
       },
     ],
   },
@@ -185,12 +205,14 @@ export const navItems: NavItem[] = [
         href: "/gallery/recent",
         imageSrc: gallery,
         alt: "Recent art",
+        hoverDescription: "",
       },
       {
         label: "Annual Reports",
         href: "/gallery/all",
         imageSrc: annual,
         alt: "All submissions",
+        hoverDescription: "",
       },
     ],
   },

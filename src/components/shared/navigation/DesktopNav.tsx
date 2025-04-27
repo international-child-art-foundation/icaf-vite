@@ -12,27 +12,38 @@ const DesktopNav: React.FC = () => {
   const [preloadedImages, setPreloadedImages] = useState<string[]>([]);
   const navigate = useNavigate();
   const navbarRef = useRef<HTMLDivElement | null>(null);
+  const openTimer = useRef<number | undefined>(undefined);
 
-  const handleMouseEnter = (label: string) => {
-    if (label !== activeItem) {
-      setActiveItem(label);
-      setPrevItem(activeItem);
+  const handleMouseEnterNavItems = (label: string) => {
+    window.clearTimeout(openTimer.current);
 
-      //Specific sequence allowing the dropdown to exit when hovering sponsorhsip
-      if (label === 'SPONSORSHIP') {
-        setIsLeaving(true);
-        setActiveItem('');
+    //Setting delay in dropdown as user hovers nav items
+    openTimer.current = window.setTimeout(() => {
+      if (label !== activeItem) {
+        setActiveItem(label);
+        setPrevItem(activeItem);
 
-        setTimeout(() => {
-          setPrevItem('');
-        }, 250);
-      } else {
-        setIsLeaving(false);
+        //Specific sequence allowing the dropdown to exit when hovering sponsorhsip
+        if (label === 'SPONSORSHIP') {
+          setIsLeaving(true);
+          setActiveItem('');
+
+          setTimeout(() => {
+            setPrevItem('');
+          }, 250);
+        } else {
+          setIsLeaving(false);
+        }
       }
-    }
+    }, 350);
   };
 
-  const handleMouseLeave = (event: React.MouseEvent) => {
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => window.clearTimeout(openTimer.current);
+  }, []);
+
+  const handleMouseLeaveDropdown = (event: React.MouseEvent) => {
     //First check if mouse moved up to navbar menu items, if not close dropdown
     if (!navbarRef.current?.contains(event.relatedTarget as Node)) {
       setIsLeaving(true);
@@ -78,7 +89,7 @@ const DesktopNav: React.FC = () => {
         {navItems.map((item: NavItem) => (
           <a
             key={item.key}
-            onMouseEnter={() => handleMouseEnter(item.label)}
+            onMouseEnter={() => handleMouseEnterNavItems(item.label)}
             onClick={() => handleClick(item.label, item.href)}
             className={`group relative text-lg hover:cursor-pointer hover:text-primary ${
               activeItem === item.label ? 'text-primary' : 'text-black'
@@ -98,7 +109,7 @@ const DesktopNav: React.FC = () => {
       {activeItem || isLeaving ? (
         <nav
           className="fixed left-1/2 top-[98px] min-h-80 w-full -translate-x-1/2 transform overflow-hidden 2xl:max-w-screen-2xl"
-          onMouseLeave={(event) => handleMouseLeave(event)}
+          onMouseLeave={(event) => handleMouseLeaveDropdown(event)}
         >
           {prevItem !== 'SPONSORSHIP' && (
             <div className={`dropdown-inner static ${isLeaving ? 'exit' : ''}`}>

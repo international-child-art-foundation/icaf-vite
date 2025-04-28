@@ -1,4 +1,3 @@
-// import HomeHeader from '@/components/home/HomeHeader';
 import {
   childrenImage1536,
   childrenImage768,
@@ -9,13 +8,14 @@ import {
   girlWithFlag768,
   girlWithFlag428,
 } from '@/assets/shared/images/home/girl-with-flag';
-import { mapBg1024, mapBg428 } from '@/assets/shared/images/home/map-bg';
+
 import { Button } from '@/components/ui/button';
 import { HeartIcon } from '@/assets/shared/icons/HeartIcon';
+import MissionVision from '@/components/home/MissionVision';
 
 export default function Home() {
   return (
-    <div>
+    <div className="m-0 flex w-full flex-col items-center p-0">
       <div className="relative h-[565px] overflow-hidden p-0 md:h-[541px] lg:h-[676px]">
         <picture>
           <source media="(min-width: 1024px)" srcSet={childrenImage1536} />
@@ -24,7 +24,7 @@ export default function Home() {
           <img
             src={childrenImage1536}
             alt="Children holding art"
-            className="absolute inset-0 h-full w-full object-cover object-left transition-opacity duration-300 ease-in-out"
+            className="inset-0 h-full w-full object-cover object-left transition-opacity duration-300 ease-in-out"
           />
         </picture>
         <div className="absolute left-0 top-0 flex flex-col gap-10 px-6 pt-10 md:w-[486px] md:px-5 lg:w-[744px] lg:gap-8 lg:pl-20 lg:pt-[90px]">
@@ -53,30 +53,20 @@ export default function Home() {
           </div>
         </div>
       </div>
-      {/* <HomeHeader /> */}
-      <div className="relative">
+      <MissionVision />
+      <div className="w-full">
         <picture>
-          <source media="(min-width: 1024px)" srcSet={mapBg1024} />
-          <source media="(max-width: 1023px)" srcSet={mapBg428} />
+          <source media="(min-width: 1024px)" srcSet={girlWithFlag1536} />
+          <source media="(min-width: 768px)" srcSet={girlWithFlag768} />
+          <source media="(max-width: 767px)" srcSet={girlWithFlag428} />
           <img
-            src={mapBg1024}
-            alt="Map Background"
-            className="m-auto h-[1060px] w-[438px] object-cover object-center lg:h-[785px] lg:w-[1024px]"
+            src={girlWithFlag1536}
+            alt="Girl holding flag"
+            className="h-[443px] w-full md:h-[495px] lg:h-[725px] 2xl:h-[824px]"
             loading="lazy"
           />
         </picture>
       </div>
-      <picture>
-        <source media="(min-width: 1024px)" srcSet={girlWithFlag1536} />
-        <source media="(min-width: 768px)" srcSet={girlWithFlag768} />
-        <source media="(max-width: 767px)" srcSet={girlWithFlag428} />
-        <img
-          src={childrenImage1536}
-          alt="Girl holding flag"
-          className="h-[443px] w-full md:h-[495px] lg:h-[725px] 2xl:h-[824px]"
-          loading="lazy"
-        />
-      </picture>
     </div>
   );
 }

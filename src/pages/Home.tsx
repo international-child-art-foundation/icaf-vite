@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { HeartIcon } from '@/assets/shared/icons/HeartIcon';
 import MissionVision from '@/components/home/MissionVision';
+import WhatWeDo from '@/components/home/WhatWeDo';
 
 export default function Home() {
   return (
@@ -67,6 +68,7 @@ export default function Home() {
           />
         </picture>
       </div>
+      <WhatWeDo />
     </div>
   );
 }

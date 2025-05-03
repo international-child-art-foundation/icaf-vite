@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 
 interface DesktopNavDropdownProps {
   activeItem: string;
-  preloadedImages: string[];
   setIsLeaving: React.Dispatch<React.SetStateAction<boolean>>;
   setActiveItem: React.Dispatch<React.SetStateAction<string>>;
   setPrevItem: React.Dispatch<React.SetStateAction<string>>;
@@ -14,25 +13,27 @@ interface DesktopNavDropdownProps {
 
 const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
   activeItem,
-  preloadedImages,
   setIsLeaving,
   setActiveItem,
   setPrevItem,
 }) => {
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
-  const [hoverState, setHoverState] = useState<number | null>(null);
 
   const navigate = useNavigate();
 
   const handleClick = (index: number, href: string) => {
     setSelectedImage(index);
+    void navigate(href);
+    setIsLeaving(true);
+    setActiveItem('');
+    setPrevItem('');
 
-    setTimeout(() => {
-      void navigate(href);
-      setIsLeaving(true);
-      setActiveItem('');
-      setPrevItem('');
-    }, 500);
+    // setTimeout(() => {
+    //   void navigate(href);
+    //   setIsLeaving(true);
+    //   setActiveItem('');
+    //   setPrevItem('');
+    // }, 500);
   };
   return (
     <>
@@ -43,7 +44,7 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
             <div key={item.key}>
               {/* Image Section*/}
               <div
-                className="grid h-64"
+                className="grid h-64 overflow-hidden"
                 style={{
                   gridTemplateColumns: `repeat(${item.col}, 1fr)`,
                 }}
@@ -52,27 +53,14 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
                   item.children.map((child, i) => (
                     <div
                       key={i}
-                      className={`group relative overflow-hidden transition-all duration-300 ${
-                        hoverState === i
-                          ? item.col > 3
-                            ? 'origin-right scale-x-105'
-                            : 'origin-right scale-x-[102%]'
-                          : 'scale-x-100'
-                      }`}
+                      className={`group relative overflow-hidden transition-all duration-300 hover:scale-105`}
                       onClick={() => handleClick(i, child.href)}
-                      onMouseEnter={() => setHoverState(i)}
-                      onMouseLeave={() => setHoverState(null)}
                     >
                       <div className="relative w-full">
                         <img
-                          src={
-                            preloadedImages.includes(child.imageSrc)
-                              ? child.imageSrc
-                              : ''
-                          }
+                          src={child.imageSrc}
                           alt={child.alt}
                           className="h-64 w-full object-cover"
-                          loading="lazy"
                         />
                         <div
                           className={`absolute inset-0 bg-gradient-to-b from-black via-black to-black ${

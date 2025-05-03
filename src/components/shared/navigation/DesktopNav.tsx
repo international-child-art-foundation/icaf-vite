@@ -9,7 +9,6 @@ const DesktopNav: React.FC = () => {
   const [activeItem, setActiveItem] = useState<string>('');
   const [prevItem, setPrevItem] = useState<string>('');
   const [isLeaving, setIsLeaving] = useState(false);
-  const [preloadedImages, setPreloadedImages] = useState<string[]>([]);
   const navigate = useNavigate();
   const navbarRef = useRef<HTMLDivElement | null>(null);
   const openTimer = useRef<number | undefined>(undefined);
@@ -61,19 +60,12 @@ const DesktopNav: React.FC = () => {
     }
   };
 
-  //Preload of images
-  const preloadImage = (imageUrl: string) => {
-    if (!preloadedImages.includes(imageUrl)) {
-      const img = new Image();
-      img.src = imageUrl;
-      setPreloadedImages((prev) => [...prev, imageUrl]);
-    }
-  };
-
+  // //Preload of images
   useEffect(() => {
-    navItems.find((item) => {
+    navItems.forEach((item) => {
       item.children?.forEach((child) => {
-        preloadImage(child.imageSrc);
+        const img = new Image();
+        img.src = child.imageSrc;
       });
     });
   }, []);
@@ -115,7 +107,6 @@ const DesktopNav: React.FC = () => {
             <div className={`dropdown-inner static ${isLeaving ? 'exit' : ''}`}>
               <DesktopNavDropdown
                 activeItem={prevItem || ''}
-                preloadedImages={preloadedImages}
                 setIsLeaving={setIsLeaving}
                 setActiveItem={setActiveItem}
                 setPrevItem={setPrevItem}
@@ -129,7 +120,6 @@ const DesktopNav: React.FC = () => {
           >
             <DesktopNavDropdown
               activeItem={activeItem}
-              preloadedImages={preloadedImages}
               setIsLeaving={setIsLeaving}
               setActiveItem={setActiveItem}
               setPrevItem={setPrevItem}

@@ -44,7 +44,7 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
             <div key={item.key}>
               {/* Image Section*/}
               <div
-                className="grid h-64 overflow-hidden"
+                className="grid h-64 cursor-pointer overflow-hidden"
                 style={{
                   gridTemplateColumns: `repeat(${item.col}, 1fr)`,
                 }}

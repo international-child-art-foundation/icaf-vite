@@ -54,10 +54,11 @@ const DesktopNav: React.FC = () => {
     }
   };
 
-  const handleClick = (label: string, href: string) => {
-    if (label === 'SPONSORSHIP') {
-      void navigate(href);
-    }
+  const handleClick = (href: string) => {
+    setIsLeaving(true);
+    setActiveItem('');
+    setPrevItem('');
+    void navigate(href);
   };
 
   // //Preload of images
@@ -73,7 +74,12 @@ const DesktopNav: React.FC = () => {
   return (
     <>
       {/* Icon */}
-      <div className="my-2">
+      <div
+        className="my-2 cursor-pointer"
+        onClick={() => {
+          void navigate('/');
+        }}
+      >
         <ICAFlogo />
       </div>
       {/* Navigation Items*/}
@@ -82,7 +88,7 @@ const DesktopNav: React.FC = () => {
           <a
             key={item.key}
             onMouseEnter={() => handleMouseEnterNavItems(item.label)}
-            onClick={() => handleClick(item.label, item.href)}
+            onClick={() => handleClick(item.href)}
             className={`group relative text-lg hover:cursor-pointer hover:text-primary ${
               activeItem === item.label ? 'text-primary' : 'text-black'
             }`}

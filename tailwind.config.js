@@ -17,12 +17,10 @@ module.exports = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-
         popover: {
           DEFAULT: 'hsl(var(--popover))',
           foreground: 'hsl(var(--popover-foreground))',
         },
-
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           alt: 'hsl(var(--primary-alt))',
@@ -30,7 +28,6 @@ module.exports = {
           soft: 'hsl(var(--primary-soft))',
           foreground: 'hsl(var(--primary-foreground))',
         },
-
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
           foreground: 'hsl(var(--secondary-foreground))',
@@ -39,46 +36,39 @@ module.exports = {
           yellow: 'hsl(var(--secondary-yellow))',
           pink: 'hsl(var(--secondary-pink))',
         },
-
         muted: {
           DEFAULT: 'hsl(var(--muted))',
           foreground: 'hsl(var(--muted-foreground))',
         },
-
         accent: {
           DEFAULT: 'hsl(var(--accent))',
           foreground: 'hsl(var(--accent-foreground))',
         },
-
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
         },
-
         error: {
           DEFAULT: 'hsl(var(--error))',
         },
-
         success: {
           DEFAULT: 'hsl(var(--success))',
         },
-
         text: {
           accent: 'hsl(var(--text-accent))',
           inverse: 'hsl(var(--text-inverse))',
         },
-
         gray: {
           100: 'hsl(var(--gray-100))',
           600: 'hsl(var(--gray-600))',
           900: 'hsl(var(--gray-900))',
         },
 
-        black: 'hsl(var(--black))',
+        black: "hsl(var(--black))",
 
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
 
         chart: {
           1: 'hsl(var(--chart-1))',
@@ -93,6 +83,28 @@ module.exports = {
         montserrat: ['Montserrat', 'sans-serif'],
         inter: ['Inter', 'sans-serif'],
         nunito: ['Nunito', 'sans-serif'],
+      },
+      keyframes: {
+        "accordion-down": {
+          from: {
+            height: "0",
+          },
+          to: {
+            height: "var(--radix-accordion-content-height)",
+          },
+        },
+        "accordion-up": {
+          from: {
+            height: "var(--radix-accordion-content-height)",
+          },
+          to: {
+            height: "0",
+          },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
   },

@@ -4,11 +4,11 @@ import { TwitterIcon } from '@/assets/shared/icons/TwitterIcon';
 import { YoutubeIcon } from '@/assets/shared/icons/YoutubeIcon';
 import { LinkedinIcon } from '@/assets/shared/icons/LinkedinIcon';
 import { PinterestIcon } from '@/assets/shared/icons/PinterestIcon';
-import { HeartIcon } from '@/assets/shared/icons/HeartIcon';
 import { Button } from '@/components/ui/button';
 import { HeartArrowIcon } from '@/assets/shared/icons/HeartArrowIcon';
 import { InputIconWrapper } from '../ui/InputIconWrapper';
 import { Mail } from 'lucide-react';
+import DonateButton from '../ui/donateButton';
 
 const icons = [
   {
@@ -148,26 +148,7 @@ const Footer = () => {
           <div className="grid grid-cols-1 xl:grid-cols-10">
             {/* Donate Button */}
             <div className="ml-auto grid w-full grid-cols-2 gap-4 lg:mx-auto lg:max-w-[45%] xl:order-last xl:col-span-7 xl:col-start-4 xl:max-w-full xl:grid-cols-1 2xl:col-span-5 2xl:col-start-6">
-              <div className="flex justify-center">
-                <Button
-                  asChild
-                  variant="secondary"
-                  className="h-14 w-full rounded-full text-base font-semibold tracking-wide lg:h-14 lg:text-base"
-                >
-                  <a
-                    href="https://icaf.org/donate"
-                    target="blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center"
-                  >
-                    <HeartIcon
-                      strokeWidth={2}
-                      className="!h-6 !w-6 stroke-black lg:mr-0 lg:!h-6 lg:!w-6"
-                    />
-                    Donate
-                  </a>
-                </Button>
-              </div>
+              <DonateButton className="lg:h-14 lg:text-base" />
 
               {/* Contact Us Button */}
               <div className="flex justify-center">

@@ -129,7 +129,6 @@
 }
 
 .dropdown-inner.static {
-  position: relative;
   visibility: visible;
   opacity: 1;
   transform: translate(0, 0);

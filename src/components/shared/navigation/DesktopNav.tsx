@@ -1,9 +1,12 @@
 import { ICAFlogo } from '@/assets/shared/logos/ICAFLogo';
 import { NavItem, navItems } from '@/lib/navItems';
 import DesktopNavDropdown from './DesktopNavDropdown';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import DonateButton from '@/components/ui/donateButton';
+import { throttle } from 'lodash';
+
+const HEADERCOOLDOWN = 250; // ms cooldown for dropdown menu changes
 
 const DesktopNav: React.FC = () => {
   const [activeItem, setActiveItem] = useState<string>('');
@@ -12,42 +15,54 @@ const DesktopNav: React.FC = () => {
   const navigate = useNavigate();
   const navbarRef = useRef<HTMLDivElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const openTimer = useRef<number | undefined>(undefined);
 
-  const handleMouseEnterNavItems = (label: string) => {
-    window.clearTimeout(openTimer.current);
-
-    //Setting delay in dropdown as user hovers nav items
-    openTimer.current = window.setTimeout(() => {
-      if (label !== activeItem) {
-        setActiveItem(label);
-        setPrevItem(activeItem);
-
-        //Specific sequence allowing the dropdown to exit when hovering sponsorhsip
-        if (label === 'SPONSORSHIP') {
-          setIsLeaving(true);
-          setActiveItem('');
-
-          setTimeout(() => {
-            setPrevItem('');
-          }, 250);
-        } else {
-          setIsLeaving(false);
-        }
-      }
-    }, 350);
-  };
-
-  // Cleanup on unmount
+  const activeItemRef = useRef(activeItem);
   useEffect(() => {
-    return () => window.clearTimeout(openTimer.current);
+    activeItemRef.current = activeItem;
+  }, [activeItem]);
+
+  const runHover = useCallback((label: string): void => {
+    if (label === activeItemRef.current) return;
+    setPrevItem(activeItemRef.current);
+    if (label === 'SPONSORSHIP') {
+      setIsLeaving(true);
+      setActiveItem('');
+      setTimeout(() => setPrevItem(''), HEADERCOOLDOWN);
+      return;
+    }
+
+    setIsLeaving(false);
+    setActiveItem(label);
   }, []);
+
+  const throttledHover = useMemo(() => {
+    return throttle(runHover, HEADERCOOLDOWN, {
+      leading: true,
+      trailing: true,
+    });
+  }, []);
+
+  useEffect(() => {
+    return () => throttledHover.cancel();
+  }, [throttledHover]);
 
   const handleClick = (href: string) => {
     setIsLeaving(true);
     setActiveItem('');
     setPrevItem('');
     void navigate(href);
+  };
+
+  const handleMouseLeaveDropdown = (event: React.MouseEvent) => {
+    //First check if mouse moved up to navbar menu items, if not close dropdown
+    if (!navbarRef.current?.contains(event.relatedTarget as Node)) {
+      setIsLeaving(true);
+      setTimeout(() => {
+        setIsLeaving(false);
+        setActiveItem('');
+        setPrevItem('');
+      }, HEADERCOOLDOWN);
+    }
   };
 
   // //Preload of images
@@ -94,7 +109,7 @@ const DesktopNav: React.FC = () => {
         {navItems.map((item: NavItem) => (
           <a
             key={item.key}
-            onMouseEnter={() => handleMouseEnterNavItems(item.label)}
+            onMouseEnter={() => throttledHover(item.label)}
             onClick={() => handleClick(item.href)}
             className={`group relative text-lg hover:cursor-pointer hover:text-primary ${
               activeItem === item.label ? 'text-primary' : 'text-black'
@@ -115,6 +130,7 @@ const DesktopNav: React.FC = () => {
         <nav
           className="fixed left-1/2 top-[98px] min-h-80 w-full -translate-x-1/2 transform overflow-hidden 2xl:max-w-screen-2xl"
           ref={dropdownRef}
+          onMouseLeave={(event) => handleMouseLeaveDropdown(event)}
         >
           {prevItem !== 'SPONSORSHIP' && (
             <div className={`dropdown-inner static ${isLeaving ? 'exit' : ''}`}>

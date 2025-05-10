@@ -24,7 +24,7 @@ const DesktopNav: React.FC = () => {
   const runHover = useCallback((label: string): void => {
     if (label === activeItemRef.current) return;
     setPrevItem(activeItemRef.current);
-    if (label === 'SPONSORSHIP') {
+    if (!label || label === 'SPONSORSHIP') {
       setIsLeaving(true);
       setActiveItem('');
       setTimeout(() => setPrevItem(''), HEADERCOOLDOWN);
@@ -122,7 +122,9 @@ const DesktopNav: React.FC = () => {
         ))}
 
         {/* Donate Button */}
-        <DonateButton className="w-32" />
+        <div onMouseEnter={() => throttledHover('')}>
+          <DonateButton className="w-32" />
+        </div>
       </div>
 
       {/* Dropdown Section */}

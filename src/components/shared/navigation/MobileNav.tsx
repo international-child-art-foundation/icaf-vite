@@ -3,14 +3,15 @@ import { Menu, X } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { useState } from 'react';
 import MobileNavMenu from './MobileNavMenu';
+import { Link } from 'react-router-dom';
 
 const MobileNav: React.FC = () => {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <div className="">
+      <Link to={'/'} className="my-2 cursor-pointer">
         <ICAFlogo />
-      </div>
+      </Link>
       <Button
         variant="ghost"
         size="icon"

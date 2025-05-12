@@ -27,6 +27,8 @@
     --secondary-yellow: 40 96% 59%; /* #FBB22E */
     --secondary-pink: 350 83% 58%; /* #EE2F4D */
 
+    --tertiary-blue: 221 72% 46%; /* #2057CC */
+
     --gray-100: 0 0% 90%; /* #E6E6E6 */
     --gray-600: 0 0% 55%; /* #8C8C8C */
     --gray-900: 240 9% 27%; /* #403F4C */
@@ -147,4 +149,10 @@
 
 .dropdown-inner.exit.static {
   animation: dropOut 0.25s ease-in forwards;
+}
+.clipped-image-top {
+  clip-path: url(#wave-clip-top);
+}
+.clipped-image-bottom {
+  clip-path: url(#wave-clip-bottom);
 }

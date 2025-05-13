@@ -37,6 +37,9 @@ module.exports = {
           pink: 'hsl(var(--secondary-pink))',
           red: ` hsl(var(--secondary-red))`,
         },
+        tertiary: {
+          blue: 'hsl(var(--tertiary-blue))',
+        },
         muted: {
           DEFAULT: 'hsl(var(--muted))',
           foreground: 'hsl(var(--muted-foreground))',

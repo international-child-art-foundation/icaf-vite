@@ -35,6 +35,7 @@ module.exports = {
           green: 'hsl(var(--secondary-green))',
           yellow: 'hsl(var(--secondary-yellow))',
           pink: 'hsl(var(--secondary-pink))',
+          red: ` hsl(var(--secondary-red))`,
         },
         muted: {
           DEFAULT: 'hsl(var(--muted))',
@@ -64,11 +65,11 @@ module.exports = {
           900: 'hsl(var(--gray-900))',
         },
 
-        black: "hsl(var(--black))",
+        black: 'hsl(var(--black))',
 
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
 
         chart: {
           1: 'hsl(var(--chart-1))',
@@ -85,26 +86,26 @@ module.exports = {
         nunito: ['Nunito', 'sans-serif'],
       },
       keyframes: {
-        "accordion-down": {
+        'accordion-down': {
           from: {
-            height: "0",
+            height: '0',
           },
           to: {
-            height: "var(--radix-accordion-content-height)",
+            height: 'var(--radix-accordion-content-height)',
           },
         },
-        "accordion-up": {
+        'accordion-up': {
           from: {
-            height: "var(--radix-accordion-content-height)",
+            height: 'var(--radix-accordion-content-height)',
           },
           to: {
-            height: "0",
+            height: '0',
           },
         },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
       },
     },
   },

@@ -1,5 +1,7 @@
 import DonateButton from '@/components/ui/donateButton';
-import ICAFAboutImage from '@/assets/shared/images/about/ICAF1.png';
+import ICAFAboutImage from '@/assets/shared/images/about/ICAF1.webp';
+import ourProgramsImage from '@/assets/shared/images/about/ourPrograms.webp';
+import writingsResearchImage from '@/assets/shared/images/about/writingsResearch.webp';
 import { AboutGraphic1 } from '@/assets/shared/images/about/AboutGraphic1';
 
 export default function WhoWeAre() {
@@ -23,7 +25,7 @@ export default function WhoWeAre() {
           <h3 className="lg:text-x my-4 text-2xl font-semibold">
             International Child Art Foundation
           </h3>
-          <div className="border-secondary-red lg:text-x my-4 rounded-full border-4"></div>
+          <div className="lg:text-x my-4 rounded-full border-4 border-secondary-red"></div>
           <p className="my-4 font-sans lg:text-xl">
             Founded in the District of Columbia in 1997 as a 501(c)(3) nonprofit
             with federal tax# 52-2032649, the International Child Art Foundation
@@ -44,7 +46,7 @@ export default function WhoWeAre() {
             <img
               src={ICAFAboutImage}
               alt="children showing artwork"
-              className="border-secondary-red h-full w-full rounded-[42px] border-4 object-cover"
+              className="h-full w-full rounded-[42px] border-4 border-secondary-red object-cover"
             />
           </picture>
         </div>
@@ -95,7 +97,7 @@ export default function WhoWeAre() {
           </div>
           <picture className="h-full w-full">
             <img
-              src={ICAFAboutImage}
+              src={ourProgramsImage}
               alt="children showing artwork"
               className="h-full w-full rounded-[42px] border-4 border-secondary-blue object-cover"
             />
@@ -124,7 +126,7 @@ export default function WhoWeAre() {
               </div>
             </div>
             <img
-              src={ICAFAboutImage}
+              src={writingsResearchImage}
               alt="children showing artwork"
               className="h-full w-full rounded-[42px] border-4 border-secondary-yellow object-cover"
             />

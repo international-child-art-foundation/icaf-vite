@@ -1,4 +1,4 @@
-import heroImage from '../assets/shared/images/about/About Us Image.png';
+import heroImage from '@/assets/shared/images/about/aboutUs.webp';
 import WhoWeAre from '@/components/about/WhoWeAre';
 import { CurvedImage } from './CurvedImage';
 

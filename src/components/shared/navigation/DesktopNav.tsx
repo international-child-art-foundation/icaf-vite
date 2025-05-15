@@ -123,7 +123,7 @@ const DesktopNav: React.FC = () => {
 
         {/* Donate Button */}
         <div onMouseEnter={() => throttledHover('')}>
-          <DonateButton className="w-32" />
+          <DonateButton className="w-32" title="Donate" />
         </div>
       </div>
 

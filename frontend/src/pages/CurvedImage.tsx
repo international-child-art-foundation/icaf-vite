@@ -21,7 +21,7 @@ export const CurvedImage = ({
         </defs>
       </svg>
 
-      <div className="relative grid h-[600px] w-full grid-cols-1 grid-rows-1">
+      <div className="relative grid h-[550px] w-full grid-cols-1 grid-rows-1">
         <div className="clipped-image-bottom relative col-start-1 row-start-1 grid h-[570px] w-full overflow-hidden md:h-[580px]">
           <div
             className={`bg-tertiary-blue col-start-1 row-start-1 h-full w-full`}

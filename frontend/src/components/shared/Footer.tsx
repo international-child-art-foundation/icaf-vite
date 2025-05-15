@@ -148,7 +148,7 @@ const Footer = () => {
           <div className="grid grid-cols-1 xl:grid-cols-10">
             {/* Donate Button */}
             <div className="ml-auto grid w-full grid-cols-2 gap-4 lg:mx-auto lg:max-w-[45%] xl:order-last xl:col-span-7 xl:col-start-4 xl:max-w-full xl:grid-cols-1 2xl:col-span-5 2xl:col-start-6">
-              <DonateButton className="lg:h-14 lg:text-base" />
+              <DonateButton className="lg:h-14 lg:text-base" title="Donate" />
 
               {/* Contact Us Button */}
               <div className="flex justify-center">

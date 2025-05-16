@@ -10,10 +10,10 @@ When starting a new task, create a new branch (e.g. `sponsor-page`, `about-page-
 
 ## Commands
 
-`pnpm i` - Installs dependencies
-`pnpm run dev` - Runs the frontend development server.
-`pnpm run check` - Checks all frontend files for type and linter errors.
-`pnpm run build` - Builds the frontend (plus shared dependencies) for web hosting.
+- `pnpm i` - Installs dependencies
+- `pnpm run dev` - Runs the frontend development server.
+- `pnpm run check` - Checks all frontend files for type and linter errors.
+- `pnpm run build` - Builds the frontend (plus shared dependencies) for web hosting.
 
 ## Technology Stack
 

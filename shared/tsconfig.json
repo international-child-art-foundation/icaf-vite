@@ -1,11 +1,11 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "../tsconfig.strict.json",
   "compilerOptions": {
     "composite": true,
-    "rootDir": "src", 
-    "declaration": true, 
-    "emitDeclarationOnly": true, 
-    "outDir": "dist" 
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    "emitDeclarationOnly": true
   },
   "include": ["src"]
 }

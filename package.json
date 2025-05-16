@@ -9,10 +9,10 @@
   ],
   "scripts": {
     "dev": "pnpm --filter @icaf/frontend dev",
-    "build": "pnpm run build:shared && pnpm run build:backend && pnpm --filter @icaf/frontend build",
-    "build:shared": "pnpm --filter @icaf/shared ts-node --project tsconfig.json",
-    "build:backend": "pnpm --filter @icaf/backend tsc -b",
-    "typecheck": "tsc --build --clean && tsc --build -v"
+    "clean": "tsc -b --clean",
+    "check": "tsc -b && pnpm --filter @icaf/frontend lint",
+    "build": "pnpm run build:shared && pnpm --filter @icaf/frontend build",
+    "build:shared": "pnpm --filter @icaf/shared build"
   },
   "devDependencies": {
     "typescript": "~5.7.2"

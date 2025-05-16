@@ -1,4 +1,5 @@
 {
+  "extends": "../tsconfig.strict.json",
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },
@@ -10,8 +11,6 @@
       "@/*": ["./src/*"],
       "@icaf/shared": ["../shared/src"]
     },
-    "noEmit": true,
-  },
-  "extends": "../tsconfig.json",
-  "include": ["src"]
+    "noEmit": true
+  }
 }

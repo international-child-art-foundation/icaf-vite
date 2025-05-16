@@ -7,7 +7,7 @@ import reactDom from 'eslint-plugin-react-dom';
 import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  { ignores: ['dist', '**/.ts-build/**', '**/*.css'] },
   {
     extends: [
       js.configs.recommended,

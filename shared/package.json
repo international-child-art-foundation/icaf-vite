@@ -1,7 +1,7 @@
 {
   "name": "@icaf/shared",
   "version": "0.0.1",
-  "private": true,
-  "main": "src/index.ts",
-  "types": "./dist/index.d.ts" 
+  "scripts": {
+    "build": "tsc -b"
+  }
 }

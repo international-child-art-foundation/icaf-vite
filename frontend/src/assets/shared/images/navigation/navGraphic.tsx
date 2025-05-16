@@ -1,6 +1,4 @@
-import { SVGProps } from "react";
-
-export const NavGraphic = (props: SVGProps<SVGSVGElement>) => (
+export const NavGraphic = () => (
   <svg
     width="73"
     height="60"

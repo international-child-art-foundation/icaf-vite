@@ -1,6 +1,7 @@
 import heroImage from '@/assets/shared/images/about/aboutUs.webp';
 import WhoWeAre from '@/components/about/WhoWeAre';
 import { CurvedImage } from './CurvedImage';
+import WhatWeWant from '@/components/about/WhatWeWant';
 
 export default function About() {
   return (
@@ -19,9 +20,7 @@ export default function About() {
         {/* Who We Are */}
         <WhoWeAre />
         {/* What We Want */}
-        <section className="">
-          <h2>What We Want</h2>
-        </section>
+        <WhatWeWant />
         {/* How Do We Do It */}
         <section className="">
           <h2>How Do We Do It</h2>

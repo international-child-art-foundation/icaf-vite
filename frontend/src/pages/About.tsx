@@ -2,6 +2,7 @@ import heroImage from '@/assets/shared/images/about/aboutUs.webp';
 import WhoWeAre from '@/components/about/WhoWeAre';
 import { CurvedImage } from './CurvedImage';
 import WhatWeWant from '@/components/about/WhatWeWant';
+import YourDonations from '@/components/about/YourDonations';
 
 export default function About() {
   return (
@@ -17,9 +18,7 @@ export default function About() {
         </figure>
       </div>
       <div className="px-6 lg:px-10 xl:px-20">
-        {/* Who We Are */}
         <WhoWeAre />
-        {/* What We Want */}
         <WhatWeWant />
         {/* How Do We Do It */}
         <section className="">
@@ -37,6 +36,7 @@ export default function About() {
         <section className="">
           <h2>Testimonials</h2>
         </section>
+        <YourDonations />
       </div>
     </div>
   );

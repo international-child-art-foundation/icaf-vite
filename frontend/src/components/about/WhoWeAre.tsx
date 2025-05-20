@@ -45,6 +45,7 @@ export default function WhoWeAre() {
           <picture className="h-full w-full">
             <img
               src={ICAFAboutImage}
+              loading="lazy"
               alt="children showing artwork"
               className="border-secondary-red h-full w-full rounded-[42px] border-4 object-cover"
             />
@@ -98,6 +99,7 @@ export default function WhoWeAre() {
           <picture className="h-full w-full">
             <img
               src={ourProgramsImage}
+              loading="lazy"
               alt="children showing artwork"
               className="border-secondary-blue h-full w-full rounded-[42px] border-4 object-cover"
             />
@@ -127,6 +129,7 @@ export default function WhoWeAre() {
             </div>
             <img
               src={writingsResearchImage}
+              loading="lazy"
               alt="children showing artwork"
               className="border-secondary-yellow h-full w-full rounded-[42px] border-4 object-cover"
             />

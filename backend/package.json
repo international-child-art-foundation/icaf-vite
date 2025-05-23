@@ -3,5 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "main": "index.ts",
-  "types": "index.ts"
+  "types": "index.ts",
+  "devDependencies": {
+    "aws-cdk": "2",
+    "aws-cdk-lib": "^2.196.1",
+    "constructs": "^10.4.2"
+  }
 }

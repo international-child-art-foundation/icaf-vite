@@ -18,14 +18,16 @@ const PartnersCarousel: React.FC<PartnersCarouselProps> = ({ partners }) => {
   const [visibleLogos, setVisibleLogos] = useState<Partner[]>([]);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [translateX, setTranslateX] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   const currentPartner = partners[currentIndex];
   const descriptionRef = useRef<HTMLDivElement>(null);
 
-  // Determine visible logo count and sliding behavior based on screen width - Fixed logic
+  // Determine visible logo count and sliding behavior based on screen width
   const updateVisibleLogos = () => {
     let visibleCount = 1;
+    let startIndex = currentIndex;
 
     if (window.innerWidth >= 1536) { // Extra large screens
       visibleCount = 7;
@@ -39,18 +41,42 @@ const PartnersCarousel: React.FC<PartnersCarouselProps> = ({ partners }) => {
       visibleCount = 2;
     }
 
-    // Fix: Display from index 0 directly, not centered on currentIndex
-    const startIndex = 0;
-    const endIndex = Math.min(visibleCount, partners.length);
+    // Calculate start index to keep selected item visible and centered
+    const halfVisible = Math.floor(visibleCount / 2);
+    if (currentIndex >= partners.length - halfVisible) {
+      startIndex = partners.length - visibleCount;
+    } else if (currentIndex > halfVisible) {
+      startIndex = currentIndex - halfVisible;
+    } else {
+      startIndex = 0;
+    }
 
-    // Update visible logos
+    startIndex = Math.max(0, Math.min(startIndex, partners.length - visibleCount));
+    const endIndex = Math.min(startIndex + visibleCount, partners.length);
     setVisibleLogos(partners.slice(startIndex, endIndex));
+
+    // Calculate translateX to center the selected item
+    const itemWidth = 180; // Increased from 140 to add more space between items
+    const offset = currentIndex - startIndex;
+    const containerWidth = carouselRef.current?.clientWidth || 0;
+    const totalItemsWidth = visibleCount * itemWidth;
+    const availableSpace = containerWidth - totalItemsWidth;
+    const centerOffset = (containerWidth - itemWidth) / 2;
+
+    // Ensure the focused item is centered when possible
+    let newTranslateX = centerOffset - (offset * itemWidth);
+
+    // Prevent overscrolling
+    const minTranslate = containerWidth - totalItemsWidth - 60; // Increased padding
+    const maxTranslate = 60; // Increased padding
+    newTranslateX = Math.min(maxTranslate, Math.max(minTranslate, newTranslateX));
+
+    setTranslateX(newTranslateX);
   };
 
-  // Initialize and update on window resize
+  // Initialize and update on window resize or currentIndex change
   useEffect(() => {
     updateVisibleLogos();
-
     const handleResize = () => {
       updateVisibleLogos();
     };
@@ -59,7 +85,7 @@ const PartnersCarousel: React.FC<PartnersCarouselProps> = ({ partners }) => {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [partners.length]); // Remove currentIndex dependency to avoid unnecessary recalculations
+  }, [currentIndex, partners.length]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -103,49 +129,32 @@ const PartnersCarousel: React.FC<PartnersCarouselProps> = ({ partners }) => {
     setTouchEnd(null);
   };
 
-  // Previous partner
-  const handlePrevious = () => {
-    if (isAnimating) return;
-
-    setIsAnimating(true);
-    setCurrentIndex((prev) => (prev === 0 ? partners.length - 1 : prev - 1));
-
-    // Reset state after animation completes
-    setTimeout(() => {
-      setIsAnimating(false);
-    }, 300);
-  };
-
-  // Next partner
+  // Handle navigation
   const handleNext = () => {
-    if (isAnimating) return;
-
-    setIsAnimating(true);
-    setCurrentIndex((prev) => (prev === partners.length - 1 ? 0 : prev + 1));
-
-    // Reset state after animation completes
-    setTimeout(() => {
-      setIsAnimating(false);
-    }, 300);
+    if (currentIndex < partners.length - 1) {
+      setIsTransitioning(true);
+      setCurrentIndex(currentIndex + 1);
+      setTimeout(() => setIsTransitioning(false), 300);
+    }
   };
 
-  // Select specific partner
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setIsTransitioning(true);
+      setCurrentIndex(currentIndex - 1);
+      setTimeout(() => setIsTransitioning(false), 300);
+    }
+  };
+
   const handleSelectPartner = (index: number) => {
-    if (isAnimating || index === currentIndex) return;
-
-    setIsAnimating(true);
+    setIsTransitioning(true);
     setCurrentIndex(index);
-
-    // Reset state after animation completes
-    setTimeout(() => {
-      setIsAnimating(false);
-    }, 300);
+    setTimeout(() => setIsTransitioning(false), 300);
   };
 
   // Add animation effect to description when partner changes
   useEffect(() => {
     if (descriptionRef.current) {
-      // Add fade-in animation
       descriptionRef.current.classList.add('opacity-0');
       setTimeout(() => {
         if (descriptionRef.current) {
@@ -156,60 +165,53 @@ const PartnersCarousel: React.FC<PartnersCarouselProps> = ({ partners }) => {
   }, [currentIndex, currentPartner]);
 
   return (
-    <div className="w-full py-8">
-      {/* Partner carousel */}
-      <section
-        ref={carouselRef}
-        className="relative mb-10"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        aria-label="Partner logos carousel"
-      >
-        {/* Logo container - Fixed sizing issues */}
-        <div className="flex justify-center items-center px-16 md:px-20 py-8">
-          <div className="flex items-center justify-center space-x-8 md:space-x-10 lg:space-x-12 transition-all duration-300">
-            {visibleLogos.map((partner) => {
-              const partnerIndex = partners.indexOf(partner);
-              const isSelected = partnerIndex === currentIndex;
-
+    <div className="w-full">
+      <section className="relative">
+        <div className="relative overflow-hidden">
+          <div
+            ref={carouselRef}
+            className="flex items-center justify-center space-x-8 md:space-x-10 lg:space-x-12 transition-transform duration-300"
+            style={{
+              transform: `translateX(${translateX}px)`,
+            }}
+          >
+            {visibleLogos.map((partner, index) => {
+              const isSelected = partner === partners[currentIndex];
               return (
                 <button
                   key={partner.id}
-                  onClick={() => handleSelectPartner(partnerIndex)}
-                  className={`relative group flex items-center justify-center focus:outline-none transition-all duration-300 ${isSelected
+                  onClick={() => handleSelectPartner(partners.indexOf(partner))}
+                  className={`relative group flex items-center justify-center focus:outline-none transition-all duration-300 p-2 ${isSelected
                     ? 'scale-110' // Selected state: enlarged
                     : 'hover:scale-105' // Non-selected state: hover effect
                     }`}
                   aria-label={`Select ${partner.name}`}
                   aria-pressed={isSelected}
                 >
-                  {/* Container - Use relative positioning for border placement */}
-                  <div className="relative w-[120px] h-[120px]">
+                  {/* Container with padding to accommodate the border */}
+                  <div className="relative w-[140px] h-[140px]">
+                    {/* Border when selected - positioned behind the white circle */}
+                    {isSelected && (
+                      <div className="absolute inset-0 rounded-full border-4 border-[#2057CC] pointer-events-none transition-all duration-300"></div>
+                    )}
+
                     {/* Background container */}
-                    <div className={`w-full h-full rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-300 ${isSelected
-                      ? 'opacity-100'
-                      : 'opacity-40 hover:opacity-60'
-                      } ${partner.name === 'INSEA' ? 'p-6' : 'p-2'
-                      }`}>
-                      {/* Logo image - Adjust style based on logo characteristics */}
+                    <div
+                      className={`absolute inset-[4px] rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-300 ${isSelected
+                        ? 'opacity-100'
+                        : 'opacity-40 hover:opacity-60'
+                        }`}
+                    >
                       <img
                         src={partner.logo}
                         alt={`${partner.name} logo`}
                         className={`rounded-full ${partner.name === 'INSEA'
-                          ? 'w-[80px] h-[80px] object-contain' // INSEA logo uses object-contain to maintain integrity
-                          : 'w-[100px] h-[100px] object-cover' // Other logos use object-cover to fill container
-                          }`}
+                          ? 'w-[115px] h-[75px]'
+                          : 'w-[110px] h-[110px]'
+                          } object-cover`}
                       />
                     </div>
-
-                    {/* Border when selected - Use absolute positioning to not affect content */}
-                    {isSelected && (
-                      <div className="absolute inset-0 rounded-full border-4 border-[#2057CC] pointer-events-none transition-all duration-300"></div>
-                    )}
                   </div>
-
-
                 </button>
               );
             })}
@@ -217,7 +219,6 @@ const PartnersCarousel: React.FC<PartnersCarouselProps> = ({ partners }) => {
         </div>
       </section>
 
-      {/* Partner description - Dynamic text area */}
       <div
         ref={descriptionRef}
         className="text-center mb-8 transition-opacity duration-300 min-h-[120px]"
@@ -231,36 +232,36 @@ const PartnersCarousel: React.FC<PartnersCarouselProps> = ({ partners }) => {
         </p>
       </div>
 
-      {/* Dot navigation and arrows - Grouped together */}
       <div className="flex justify-center items-center space-x-2">
-        {/* Left arrow */}
         <button
           onClick={handlePrevious}
-          className="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+          className={`p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${currentIndex === 0 ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          disabled={currentIndex === 0}
           aria-label="Previous partner"
-          disabled={isAnimating}
         >
           <ChevronLeft className="h-5 w-5 text-gray-700" />
         </button>
 
-        {/* Dots */}
         {partners.map((partner) => (
           <button
             key={`dot-${partner.id}`}
             onClick={() => handleSelectPartner(partners.indexOf(partner))}
-            className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-colors duration-300 ${partners.indexOf(partner) === currentIndex ? 'bg-blue-500' : 'bg-gray-300 hover:bg-gray-400'
+            className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-colors duration-300 ${partners.indexOf(partner) === currentIndex
+              ? 'bg-blue-500'
+              : 'bg-gray-300 hover:bg-gray-400'
               }`}
             aria-label={`Go to partner ${partners.indexOf(partner) + 1}`}
             aria-current={partners.indexOf(partner) === currentIndex ? 'true' : 'false'}
           />
         ))}
 
-        {/* Right arrow */}
         <button
           onClick={handleNext}
-          className="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+          className={`p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${currentIndex === partners.length - 1 ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          disabled={currentIndex === partners.length - 1}
           aria-label="Next partner"
-          disabled={isAnimating}
         >
           <ChevronRight className="h-5 w-5 text-gray-700" />
         </button>

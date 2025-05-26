@@ -3,6 +3,7 @@ import NavigationBar from '@/components/shared/NavigationBar';
 import { Button } from '@/components/ui/button';
 import DonateButtonPure from '@/components/ui/donateButtonPure';
 import DonateButtonPartnersPage from '@/components/ui/donateButtonPartnersPage';
+import { CurvedImage } from '@/pages/CurvedImage';
 import {
     fireworkImage,
     partnersBackgroundImage,
@@ -77,47 +78,35 @@ export default function Partners() {
     return (
         <div className="mx-auto box-border flex min-h-screen w-full max-w-screen-2xl flex-col px-0">
             <NavigationBar />
-            <main className=" flex-1">
+            <main className="flex-1">
                 {/* First Section */}
-                <section className="relative h-[500px] md:h-[600px] bg-gray-50">
-                    <div className="absolute inset-0 bg-cover bg-center"
-                        style={{ backgroundImage: `url(${partnersBackgroundImage})` }}>
-                        <div className="absolute inset-0 bg-gradient-to-r from-black/100 via-transparent via-60% to-white/20"></div>
-                    </div>
-
-                    <div className="container mx-auto px-6 md:px-12 relative z-10 text-white h-full flex items-center">
-                        <div className="max-w-3xl">
-                            <h1 className="font-montserrat text-5xl md:text-6xl lg:text-7xl font-bold mb-6">Partners</h1>
-                            <h2 className="font-montserrat text-2xl md:text-3xl lg:text-4xl mb-6 font-light">Inspiring the Next Generation Through Art</h2>
-                            <p className="font-sans text-lg md:text-xl mb-10 leading-relaxed max-w-2xl">
-                                ICAF partners with organizations worldwide to nurture creativity and empathy in
-                                children. Our collaborations bring the power of art to young minds, making a
-                                global impact.
-                            </p>
-                            <div className="flex justify-start">
-                                <DonateButtonPartnersPage className=" text-gray-900 border-0 shadow-lg hover:shadow-xl !w-auto !px-8" />
+                <div className="relative w-full">
+                    <div className="grid grid-rows-1 grid-cols-1">
+                        <div className="col-start-1 row-start-1">
+                            <CurvedImage src={partnersBackgroundImage} darkened={true} />
+                        </div>
+                        <div className="col-start-1 row-start-1 relative z-10">
+                            <div className="container px-8 md:px-12 lg:px-16 xl:px-20 mx-auto h-full flex items-center">
+                                <div className="max-w-3xl">
+                                    <h1 className="font-montserrat text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-white">Partners</h1>
+                                    <h2 className="font-montserrat text-2xl md:text-3xl lg:text-4xl mb-6 font-light text-white">Inspiring the Next Generation Through Art</h2>
+                                    <p className="font-sans text-lg md:text-xl mb-10 leading-relaxed max-w-2xl text-white">
+                                        ICAF partners with organizations worldwide to nurture creativity and empathy in
+                                        children. Our collaborations bring the power of art to young minds, making a
+                                        global impact.
+                                    </p>
+                                    <div className="flex justify-start">
+                                        <DonateButtonPartnersPage className="text-gray-900 border-0 shadow-lg hover:shadow-xl !w-auto !px-8" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    {/* White curved mask to hide bottom part */}
-                    <div className="absolute bottom-0 left-0 w-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 140" className="block">
-                            <path fill="white" fillOpacity="1" d="M0,140 Q720,0 1440,140 Z"></path>
-                        </svg>
-                    </div>
-
-                    {/* Blue curved border */}
-                    <div className="absolute bottom-0 left-0 w-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 140" className="block">
-                            <path fill="#134380" fillOpacity="1" d="M0,140 Q720,20 1440,140 L1440,120 Q720,0 0,120 Z"></path>
-                        </svg>
-                    </div>
-                </section>
+                </div>
 
                 {/* Global Partnerships Section */}
                 <section className="py-16">
-                    <div className="container mx-auto px-4">
+                    <div className="px-8 md:px-12 lg:px-16 xl:px-20 max-w-screen-2xl mx-auto">
                         <h2 className="font-montserrat text-3xl md:text-4xl font-bold text-center mb-12">Our Global Partnerships</h2>
                         <p className="font-sans text-lg mb-12 leading-relaxed">
                             ICAF collaborates on occasion with a diverse range of partners across nearly 100 countries to inspire and empower children through art and creativity.
@@ -126,15 +115,13 @@ export default function Partners() {
                         </p>
 
                         {/* Partners Carousel Component */}
-
                         <PartnersCarousel partners={partners} />
-
                     </div>
                 </section>
 
                 {/* Donation CTA Section */}
                 <section className="py-16 relative">
-                    <div className="container mx-auto px-4">
+                    <div className="px-8 md:px-12 lg:px-16 xl:px-20 max-w-screen-2xl mx-auto">
                         <div className="relative bg-blue-50 rounded-2xl p-6 sm:p-8 md:p-12">
                             <div className="flex flex-col">
                                 <div className="max-w-2xl">

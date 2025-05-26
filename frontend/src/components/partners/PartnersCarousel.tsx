@@ -37,8 +37,8 @@ const PartnersCarousel: React.FC<PartnersCarouselProps> = ({ partners }) => {
       visibleCount = 5;
     } else if (window.innerWidth >= 768) { // Tablets
       visibleCount = 3;
-    } else if (window.innerWidth >= 428) { // Mobile devices
-      visibleCount = 2;
+    } else { // Mobile devices - show 3 (1 full + 2 partial)
+      visibleCount = 3;
     }
 
     // Calculate start index to keep selected item visible and centered
@@ -56,19 +56,26 @@ const PartnersCarousel: React.FC<PartnersCarouselProps> = ({ partners }) => {
     setVisibleLogos(partners.slice(startIndex, endIndex));
 
     // Calculate translateX to center the selected item
-    const itemWidth = 180; // Increased from 140 to add more space between items
+    const isMobile = window.innerWidth < 768;
+    const itemWidth = isMobile ? 140 : 180; // Smaller width for mobile
     const offset = currentIndex - startIndex;
     const containerWidth = carouselRef.current?.clientWidth || 0;
     const totalItemsWidth = visibleCount * itemWidth;
-    const availableSpace = containerWidth - totalItemsWidth;
-    const centerOffset = (containerWidth - itemWidth) / 2;
 
-    // Ensure the focused item is centered when possible
-    let newTranslateX = centerOffset - (offset * itemWidth);
+    let newTranslateX;
+    if (isMobile) {
+      // On mobile, show more of the side items
+      const centerOffset = (containerWidth - itemWidth) / 2;
+      newTranslateX = centerOffset - (offset * itemWidth) + 70; // Increased offset to show more of side items
+    } else {
+      // Desktop view remains the same
+      const centerOffset = (containerWidth - itemWidth) / 2;
+      newTranslateX = centerOffset - (offset * itemWidth);
+    }
 
-    // Prevent overscrolling
-    const minTranslate = containerWidth - totalItemsWidth - 60; // Increased padding
-    const maxTranslate = 60; // Increased padding
+    // Prevent overscrolling with adjusted boundaries for mobile
+    const minTranslate = containerWidth - totalItemsWidth - (isMobile ? 40 : 60);
+    const maxTranslate = isMobile ? 40 : 60;
     newTranslateX = Math.min(maxTranslate, Math.max(minTranslate, newTranslateX));
 
     setTranslateX(newTranslateX);
@@ -131,19 +138,17 @@ const PartnersCarousel: React.FC<PartnersCarouselProps> = ({ partners }) => {
 
   // Handle navigation
   const handleNext = () => {
-    if (currentIndex < partners.length - 1) {
-      setIsTransitioning(true);
-      setCurrentIndex(currentIndex + 1);
-      setTimeout(() => setIsTransitioning(false), 300);
-    }
+    setIsTransitioning(true);
+    const nextIndex = currentIndex === partners.length - 1 ? 0 : currentIndex + 1;
+    setCurrentIndex(nextIndex);
+    setTimeout(() => setIsTransitioning(false), 300);
   };
 
   const handlePrevious = () => {
-    if (currentIndex > 0) {
-      setIsTransitioning(true);
-      setCurrentIndex(currentIndex - 1);
-      setTimeout(() => setIsTransitioning(false), 300);
-    }
+    setIsTransitioning(true);
+    const prevIndex = currentIndex === 0 ? partners.length - 1 : currentIndex - 1;
+    setCurrentIndex(prevIndex);
+    setTimeout(() => setIsTransitioning(false), 300);
   };
 
   const handleSelectPartner = (index: number) => {
@@ -189,7 +194,7 @@ const PartnersCarousel: React.FC<PartnersCarouselProps> = ({ partners }) => {
                   aria-pressed={isSelected}
                 >
                   {/* Container with padding to accommodate the border */}
-                  <div className="relative w-[140px] h-[140px]">
+                  <div className="relative w-[100px] h-[100px] md:w-[140px] md:h-[140px]">
                     {/* Border when selected - positioned behind the white circle */}
                     {isSelected && (
                       <div className="absolute inset-0 rounded-full border-4 border-[#2057CC] pointer-events-none transition-all duration-300"></div>
@@ -206,8 +211,8 @@ const PartnersCarousel: React.FC<PartnersCarouselProps> = ({ partners }) => {
                         src={partner.logo}
                         alt={`${partner.name} logo`}
                         className={`rounded-full ${partner.name === 'INSEA'
-                          ? 'w-[115px] h-[75px]'
-                          : 'w-[110px] h-[110px]'
+                          ? 'w-[85px] h-[55px] md:w-[115px] md:h-[75px]'
+                          : 'w-[80px] h-[80px] md:w-[110px] md:h-[110px]'
                           } object-cover`}
                       />
                     </div>
@@ -235,9 +240,7 @@ const PartnersCarousel: React.FC<PartnersCarouselProps> = ({ partners }) => {
       <div className="flex justify-center items-center space-x-2">
         <button
           onClick={handlePrevious}
-          className={`p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${currentIndex === 0 ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-          disabled={currentIndex === 0}
+          className="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
           aria-label="Previous partner"
         >
           <ChevronLeft className="h-5 w-5 text-gray-700" />
@@ -258,9 +261,7 @@ const PartnersCarousel: React.FC<PartnersCarouselProps> = ({ partners }) => {
 
         <button
           onClick={handleNext}
-          className={`p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${currentIndex === partners.length - 1 ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-          disabled={currentIndex === partners.length - 1}
+          className="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
           aria-label="Next partner"
         >
           <ChevronRight className="h-5 w-5 text-gray-700" />

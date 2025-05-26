@@ -271,7 +271,7 @@ const PartnersCarousel: React.FC<PartnersCarouselProps> = ({ partners }) => {
 
       <div
         ref={descriptionRef}
-        className="text-center mb-8 transition-opacity duration-300 min-h-[120px]"
+        className="text-center mt-16 mb-8 transition-opacity duration-300 min-h-[120px]"
         aria-live="polite"
       >
         <h3 className="font-montserrat text-xl md:text-2xl lg:text-3xl font-bold mb-4 transition-all duration-300">

@@ -86,16 +86,16 @@ export default function Partners() {
                             <CurvedImage src={partnersBackgroundImage} darkened={true} />
                         </div>
                         <div className="col-start-1 row-start-1 relative z-10">
-                            <div className="container px-8 md:px-12 lg:px-16 xl:px-20 mx-auto h-full flex items-center">
+                            <div className="container px-8 md:px-12 lg:px-16 xl:px-20 mx-auto h-full flex items-start md:items-center pt-20 md:pt-0">
                                 <div className="max-w-3xl">
-                                    <h1 className="font-montserrat text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-white">Partners</h1>
-                                    <h2 className="font-montserrat text-2xl md:text-3xl lg:text-4xl mb-6 font-light text-white">Inspiring the Next Generation Through Art</h2>
-                                    <p className="font-sans text-lg md:text-xl mb-10 leading-relaxed max-w-2xl text-white">
+                                    <h1 className="font-montserrat text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-3 md:mb-4 lg:mb-6 text-white">Partners</h1>
+                                    <h2 className="font-montserrat text-xl md:text-2xl lg:text-3xl xl:text-4xl mb-3 md:mb-4 lg:mb-6 font-light text-white">Inspiring the Next Generation Through Art</h2>
+                                    <p className="font-sans text-base md:text-lg lg:text-xl mb-4 md:mb-6 lg:mb-10 leading-relaxed max-w-2xl text-white">
                                         ICAF partners with organizations worldwide to nurture creativity and empathy in
                                         children. Our collaborations bring the power of art to young minds, making a
                                         global impact.
                                     </p>
-                                    <div className="flex justify-start">
+                                    <div className="flex justify-start mb-6 sm:mb-8 md:mb-12 lg:mb-16">
                                         <DonateButtonPartnersPage className="text-gray-900 border-0 shadow-lg hover:shadow-xl !w-auto !px-8" />
                                     </div>
                                 </div>

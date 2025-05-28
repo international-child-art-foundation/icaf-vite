@@ -4,6 +4,7 @@ import Footer from '@/components/shared/Footer';
 import './index.css';
 import Home from './pages/Home';
 import { Route, Routes } from 'react-router-dom';
+import ChildArtPage from './pages/ChildArtPage';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -20,6 +21,7 @@ export default function App() {
       <main className="mt-[98px] flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/programs/outreach" element={<ChildArtPage />} />
         </Routes>
       </main>
       <Footer />

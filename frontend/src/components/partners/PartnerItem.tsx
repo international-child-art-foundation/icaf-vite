@@ -16,12 +16,18 @@ export const PartnerItem = ({
   scrollToPartner,
 }: IPartnerItem) => {
   const isActive = index === activeCarouselIndex % carouselLength;
+  
+  const getLogoClass = (name: string) => {
+    if (name === 'American Institute of Architects (AIA)' || name === 'Endangered Species Coalition') {
+      return 'h-full w-full object-contain scale-125';
+    }
+    return 'h-full w-full object-contain';
+  };
 
   return (
     <div
-      className={`relative m-auto my-4 flex h-[220px] w-[220px] cursor-pointer select-none rounded-full transition-opacity hover:opacity-100 ${
-        isActive ? 'opacity-100' : 'opacity-50'
-      }`}
+      className={`relative m-auto my-4 flex h-[220px] w-[220px] cursor-pointer select-none rounded-full transition-opacity hover:opacity-100 ${isActive ? 'opacity-100' : 'opacity-50'
+        }`}
       onClick={() => scrollToPartner(index)}
     >
       <div
@@ -32,7 +38,7 @@ export const PartnerItem = ({
             <img
               src={partner.logo}
               alt={partner.name}
-              className="h-full w-full object-contain"
+              className={getLogoClass(partner.name)}
             />
           </div>
         </div>

@@ -14,6 +14,13 @@ import {
   endangeredSpeciesLogo,
   artsMindLogo,
   INLogo,
+  NIHLogo,
+  NEALogo,
+  pentagonLogo,
+  qatarFoundationLogo,
+  UNESCOLogo,
+  WHOLogo,
+  XRSILogo,
 } from '../assets/shared/images/partners';
 import '../index.css';
 import {
@@ -42,21 +49,21 @@ const partners: IPartners = [
     name: 'World Bank',
     logo: worldBankLogo,
     description:
-      'ICAF partners with the World Bank to promote arts education in developing countries.',
+      'Collaborating on the "Destruction, Reconstruction, and Prevention" program, focusing on rebuilding communities through creativity after natural disasters.',
   },
   {
     id: 2,
-    name: 'UNICEF',
+    name: 'United Nations',
     logo: unicefLogo,
     description:
-      'Together with UNICEF, ICAF has brought art programs to children in crisis situations around the world.',
+      'Hosted children\'s art exhibition at UN headquarters and served as a judge for the selection of the design for the Permanent Memorial to Honour the Victims of Slavery and the Transatlantic Slave Trade.',
   },
   {
     id: 3,
-    name: 'American Institute of Architects',
+    name: 'American Institute of Architects (AIA)',
     logo: aiaLogo,
     description:
-      'The American Institute of Architects partners with ICAF to introduce children to architectural design and urban planning.',
+      'Collaborating on ChildArt magazine to inspire the next generation of architects.',
   },
   {
     id: 4,
@@ -67,25 +74,74 @@ const partners: IPartners = [
   },
   {
     id: 5,
-    name: 'INSEA',
-    logo: INLogo,
+    name: 'International Arts + Mind Lab',
+    logo: artsMindLogo,
     description:
-      'The International Society for Education through Art collaborates with ICAF on global art education initiatives.',
+      'Collaborated to inform young readers about neuroscientific findings and neuroaesthetics through a special issue of ChildArt magazine.',
   },
   {
     id: 6,
-    name: 'Arts + Mind Lab',
-    logo: artsMindLogo,
-    description:
-      'ICAF works with the Arts & Mind Lab to research the impact of arts on child development and empathy.',
-  },
-  {
-    id: 7,
     name: 'NASBE',
     logo: NASBELogo,
     description:
-      'The National Association of State Boards of Education partners with ICAF to advocate for arts in education policy.',
+      'Contributing to the State Education Standard to enhance art education policies.',
   },
+  {
+    id: 7,
+    name: 'NIH',
+    logo: NIHLogo,
+    description:
+      'Partnered to promote the groundbreaking findings from the ABCD Study through a special issue of ChildArt magazine.',
+  },
+  {
+    id: 8,
+    name: 'NEA',
+    logo: NEALogo,
+    description:
+      'Received financial support and partnered on the "Art for Health" initiative during COVID-19.',
+  },
+  {
+    id: 9,
+    name: 'Pentagon',
+    logo: pentagonLogo,
+    description:
+      'Invited to present on Peace through Art, contributed to the design of the "Hall of Heroes," and collaborated on DMV area military families\' participation in the World Children\'s Festival as host families for foreign delegates.',
+  },
+  {
+    id: 10,
+    name: 'Qatar Foundation',
+    logo: qatarFoundationLogo,
+    description:
+      'Cohosted Qatar Foundation\'s very first educational symposium on Innovations in Education—Regional Symposium on Arts Learning, Science and Educational Technology.',
+  },
+  {
+    id: 11,
+    name: 'UNESCO',
+    logo: UNESCOLogo,
+    description:
+      'Participated in the World Conference on Arts Education, contributed ICAF research to the UNESCO Observatory, and provided art for UNESCO\'s cards and calendars.',
+  },
+  {
+    id: 12,
+    name: 'WHO',
+    logo: WHOLogo,
+    description:
+      'Worked together to expand awareness of mental health in childhood and adolescence, using art as a powerful tool for expression and healing.',
+  },
+  {
+    id: 13,
+    name: 'XRSI',
+    logo: XRSILogo,
+    description:
+      'Collaborating on a youth panel\'s inclusion in conferences on Metaverse.',
+  },
+  {
+    id: 14,
+    name: 'InSEA',
+    logo: INLogo,
+    description:
+      'Delivered a keynote address at the World Congress and received an award for outstanding contributions to arts education.',
+  }
 ];
 
 export default function Partners() {

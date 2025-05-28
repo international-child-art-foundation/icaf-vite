@@ -25,9 +25,9 @@ export const CarouselSharedContent = ({
   const handleNext = () => scrollToPartner((activeIndex + 1) % partners.length);
 
   return (
-    <div key={activePartner.id} className="grid-col grid gap-4 text-center">
-      <p className="font-bold">{activePartner.name}</p>
-      <p>{activePartner.description}</p>
+    <div key={activePartner.id} className="grid-col grid gap-6 text-center mt-10">
+      <p className="font-montserrat text-xl font-bold">{activePartner.name}</p>
+      <p className="font-sans text-base leading-relaxed">{activePartner.description}</p>
 
       <div className="flex items-center justify-center gap-3">
         <button
@@ -44,11 +44,10 @@ export const CarouselSharedContent = ({
           return (
             <span
               key={partner.id}
-              className={`block rounded-full transition-all duration-300 ${
-                isActive
-                  ? 'bg-primary h-3 w-3'
-                  : 'h-2 w-2 bg-gray-400 hover:bg-gray-500'
-              }`}
+              className={`block rounded-full transition-all duration-300 ${isActive
+                ? 'bg-primary h-3 w-3'
+                : 'h-2 w-2 bg-gray-400 hover:bg-gray-500'
+                }`}
             />
           );
         })}

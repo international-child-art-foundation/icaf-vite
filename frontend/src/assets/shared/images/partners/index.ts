@@ -1,0 +1,16 @@
+export { default as fireworkImage } from './firework.webp';
+export { default as partnersBackgroundImage } from './partners_background.webp';
+export { default as worldBankLogo } from './f_worldBank.webp';
+export { default as unicefLogo } from './f_UN.webp';
+export { default as aiaLogo } from './f_AIA.webp';
+export { default as NASBELogo } from './f_NASBE.webp';
+export { default as endangeredSpeciesLogo } from './f_EndangeredSpeiciesCoalition.webp';
+export { default as artsMindLogo } from './f_Artsmind.webp';
+export { default as NIHLogo } from './f_NIH.webp';
+export { default as NEALogo } from './f_nationalEndowmentArts.webp';
+export { default as pentagonLogo } from './f_pentagon.webp';
+export { default as qatarFoundationLogo } from './f_QatarFoundation.webp';
+export { default as UNESCOLogo } from './f_UNESCO.webp';
+export { default as WHOLogo } from './f_WHO.webp';
+export { default as XRSILogo } from './f_XRSI.webp';
+export { default as INLogo } from './f_INSEA.webp';

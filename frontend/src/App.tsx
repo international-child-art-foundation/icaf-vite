@@ -22,11 +22,8 @@ export default function App() {
       <main className="mt-[98px] flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
-<!-- <<<<<<< child-art-carousel -->
           <Route path="/programs/outreach" element={<ChildArtPage />} />
-=======
-           <Route path="/about/partners" element={<Partners />} />
-<!-- >>>>>>> main -->
+          <Route path="/about/partners" element={<Partners />} />
         </Routes>
       </main>
       <Footer />

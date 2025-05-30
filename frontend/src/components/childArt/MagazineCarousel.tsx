@@ -7,7 +7,6 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel';
 import { useState, useEffect } from 'react';
-import { cn } from '@/lib/utils';
 
 import cover1 from '@/assets/shared/images/navigation/programs/childArtMagazine.webp';
 import cover2 from '@/assets/shared/images/navigation/programs/childArtMagazine_small.webp';
@@ -31,7 +30,7 @@ const covers = [
   cover2,
 ];
 
-const ITEMS_PER_PAGE = 3;
+// const ITEMS_PER_PAGE = 3;
 const TOTAL_PAGES = covers.length;
 
 export default function MagazineCarousel() {
@@ -49,12 +48,14 @@ export default function MagazineCarousel() {
     };
 
     api.on('select', onSelect);
-    return () => api.off('select', onSelect);
+    return () => {
+      api.off('select', onSelect);
+    };
   }, [api]);
 
-  const handleSlideChange = (newPage: number) => {
-    setPage(newPage);
-  };
+  // const handleSlideChange = (newPage: number) => {
+  //   setPage(newPage);
+  // };
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-10 px-4 sm:px-6 md:flex-row md:items-start md:gap-12 lg:gap-16 xl:gap-20">

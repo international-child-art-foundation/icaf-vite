@@ -8,7 +8,6 @@ import { testimonials } from '@/lib/testimonials';
 import { TestimonialCard } from './TestimonialsCard';
 import { useState, useEffect } from 'react';
 
-import { cn } from '@/lib/utils';
 import CarouselArrowsDots from './CarouselArrowsDots';
 
 export const TestimonialsCarousel = () => {
@@ -20,18 +19,11 @@ export const TestimonialsCarousel = () => {
       return;
     }
 
-    const onSelect = () => {
-      const inView = api.slidesInView();
-      const center = inView[Math.floor(inView.length / 2)];
-      setSelectedIndex(center);
-    };
+    setSelectedIndex(api.selectedScrollSnap());
 
-    onSelect();
-    api.on('select', onSelect);
-
-    return () => {
-      api.off('select', onSelect);
-    };
+    api.on('select', () => {
+      setSelectedIndex(api.selectedScrollSnap());
+    });
   }, [api]);
 
   const handlePrevious = () => api?.scrollPrev();
@@ -49,28 +41,20 @@ export const TestimonialsCarousel = () => {
         opts={{
           align: 'center',
           loop: true,
-          slidesToScroll: 1,
-          duration: 40,
         }}
         className="mx-auto"
       >
         <CarouselContent className="">
           {testimonials.map((testimonial, index) => {
-            const slidesInView = api?.slidesInView() ?? [];
-            const middleInView =
-              slidesInView[Math.floor(slidesInView.length / 2)];
-            const isActive = index === middleInView;
-            console.log('test', middleInView, 'active', isActive);
-
             return (
               <CarouselItem
                 key={testimonial.id}
-                className={cn(
-                  'basis-[75%] px-4 pl-8 transition-transform duration-300 sm:basis-[50%] lg:basis-1/3',
-                  index === selectedIndex ? 'scale-110' : 'scale-100',
-                )}
+                className="mx-0 px-0 sm:basis-1/2 lg:basis-1/3"
               >
-                <TestimonialCard testimonial={testimonial} />
+                <TestimonialCard
+                  testimonial={testimonial}
+                  active={selectedIndex === index}
+                />
               </CarouselItem>
             );
           })}

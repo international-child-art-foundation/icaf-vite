@@ -30,6 +30,8 @@ export const TestimonialsCarousel = () => {
   const handleNext = () => api?.scrollNext();
   const handleSelect = (index: number) => api?.scrollTo(index);
 
+  const n = testimonials.length;
+
   return (
     <section className="bg-white py-6 md:py-20 lg:px-10">
       <h2 className="mb-10 text-center font-sans text-3xl font-bold">
@@ -46,14 +48,25 @@ export const TestimonialsCarousel = () => {
       >
         <CarouselContent className="">
           {testimonials.map((testimonial, index) => {
+            // Tracking the location of the visible indexes to assign the correct blob color in TestimonialCard
+            const leftIndex = (selectedIndex - 1 + n) % n;
+            const rightIndex = (selectedIndex + 1) % n;
+
+            let blobColor: 'yellow' | 'blue' | 'red' | '' = '';
+
+            if (index === selectedIndex) blobColor = 'blue';
+            else if (index === leftIndex) blobColor = 'yellow';
+            else if (index === rightIndex) blobColor = 'red';
+
             return (
               <CarouselItem
                 key={testimonial.id}
-                className="mx-0 px-0 sm:basis-1/2 lg:basis-1/3"
+                className="mx-0 basis-[75%] pl-4 sm:basis-1/2 md:basis-[45%] lg:basis-1/3"
               >
                 <TestimonialCard
                   testimonial={testimonial}
                   active={selectedIndex === index}
+                  blobColor={blobColor}
                 />
               </CarouselItem>
             );

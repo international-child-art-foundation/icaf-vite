@@ -4,34 +4,14 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  type CarouselApi,
 } from '@/components/ui/carousel';
 import { useState, useEffect } from 'react';
 
-import cover1 from '@/assets/shared/images/navigation/programs/childArtMagazine.webp';
-import cover2 from '@/assets/shared/images/navigation/programs/childArtMagazine_small.webp';
-import cover3 from '@/assets/shared/images/navigation/programs/theArtOlympiad.webp';
-import cover4 from '@/assets/shared/images/navigation/programs/worldChildrensFestival_small.webp';
-import cover5 from '@/assets/shared/images/navigation/programs/peaceThroughArt_small.webp';
+import { magazineCovers } from '@/data/magazineCovers';
+
 import { Button } from '../ui/button';
 
-const covers = [
-  cover1,
-  cover2,
-  cover3,
-  cover4,
-  cover5,
-  cover1,
-  cover2,
-  cover3,
-  cover4,
-  cover5,
-  cover1,
-  cover2,
-];
-
-// const ITEMS_PER_PAGE = 3;
-const TOTAL_PAGES = covers.length;
+const TOTAL_PAGES = magazineCovers.length;
 
 export default function MagazineCarousel() {
   const [page, setPage] = useState(0);
@@ -58,9 +38,9 @@ export default function MagazineCarousel() {
   // };
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-10 px-4 sm:px-6 md:flex-row md:items-start md:gap-12 lg:gap-16 xl:gap-20">
+    <div className="lg:gap- w-full py-16 pl-8 pr-0 lg:flex lg:items-start">
       {/* left - description */}
-      <div className="order-2 mb-8 text-center md:order-1 md:mb-0 md:w-1/2 md:text-left lg:w-1/3">
+      <div className="mb-12 w-full lg:mb-0 lg:w-1/3">
         <h2 className="mb-4 text-2xl font-bold">Latest Issues</h2>
         <p className="mb-2 font-semibold text-blue-700">
           Subscription is $30 per year
@@ -73,16 +53,16 @@ export default function MagazineCarousel() {
         </p>
         <Button
           className="rounded-full px-6 py-3 font-medium"
-          variant={'default'}
-          size={'lg'}
+          variant="default"
+          size="lg"
         >
           Subscribe
         </Button>
       </div>
-      {/* right - title + Carousel  */}
-      <div className="order-1 w-full md:order-2 md:w-full lg:w-2/3">
-        {/* title */}
-        <h2 className="mb-4 text-center text-xl font-bold italic md:text-left lg:text-2xl xl:text-3xl">
+
+      {/* right - Carousel */}
+      <div className="w-full px-0 md:px-0 lg:w-2/3 lg:px-0 lg:pl-16">
+        <h2 className="mb-4 text-xl font-bold italic md:text-left lg:text-2xl xl:text-3xl">
           <span className="font-semibold italic">ChildArt</span> Magazine Art
         </h2>
 
@@ -96,26 +76,27 @@ export default function MagazineCarousel() {
           className="w-full"
         >
           <CarouselContent className="-ml-4 flex">
-            {covers.map((src, index) => (
-              <CarouselItem key={index} className="basis-1/3 pl-4">
+            {magazineCovers.map((cover) => (
+              <CarouselItem
+                key={cover.name}
+                className="basis-[42%] pl-4 md:basis-1/4 lg:basis-[40%]"
+              >
                 <img
-                  src={src}
-                  alt={`Magazine ${index + 1}`}
-                  className="h-64 w-full rounded object-cover shadow-md"
+                  src={cover.image}
+                  alt={cover.name}
+                  className="aspect-[3/4] w-full rounded object-cover shadow-md"
                 />
               </CarouselItem>
             ))}
           </CarouselContent>
 
           <div className="mt-5 flex w-full items-center justify-center gap-4">
-            {/* left */}
             <div className="mt-7 flex items-center gap-5">
               <CarouselPrevious
                 className="static h-10 w-10 rounded-full border border-[hsl(var(--primary))] text-[hsl(var(--primary))] transition hover:bg-[hsl(var(--primary-muted))]"
                 aria-label="Previous"
                 onClick={() => api?.scrollPrev()}
               />
-              {/* right  */}
               <CarouselNext
                 className="static h-10 w-10 rounded-full border border-[hsl(var(--primary))] text-[hsl(var(--primary))] transition hover:bg-[hsl(var(--primary-muted))]"
                 aria-label="Next"
@@ -123,7 +104,6 @@ export default function MagazineCarousel() {
               />
             </div>
 
-            {/* progress bar */}
             <div
               className="relative h-1 max-w-md flex-1 overflow-hidden rounded bg-[hsl(var(--gray-100))]"
               role="progressbar"
@@ -138,7 +118,6 @@ export default function MagazineCarousel() {
               />
             </div>
 
-            {/* page */}
             <span className="min-w-[3ch] text-right text-base font-bold text-[hsl(var(--primary))]">
               {String(page + 1).padStart(2, '0')}
             </span>

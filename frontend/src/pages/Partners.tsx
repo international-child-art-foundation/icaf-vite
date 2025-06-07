@@ -56,7 +56,7 @@ const partners: IPartners = [
     name: 'United Nations',
     logo: unicefLogo,
     description:
-      'Hosted children\'s art exhibition at UN headquarters and served as a judge for the selection of the design for the Permanent Memorial to Honour the Victims of Slavery and the Transatlantic Slave Trade.',
+      "Hosted children's art exhibition at UN headquarters and served as a judge for the selection of the design for the Permanent Memorial to Honour the Victims of Slavery and the Transatlantic Slave Trade.",
   },
   {
     id: 3,
@@ -112,14 +112,14 @@ const partners: IPartners = [
     name: 'Qatar Foundation',
     logo: qatarFoundationLogo,
     description:
-      'Cohosted Qatar Foundation\'s very first educational symposium on Innovations in Education—Regional Symposium on Arts Learning, Science and Educational Technology.',
+      "Cohosted Qatar Foundation's very first educational symposium on Innovations in Education—Regional Symposium on Arts Learning, Science and Educational Technology.",
   },
   {
     id: 11,
     name: 'UNESCO',
     logo: UNESCOLogo,
     description:
-      'Participated in the World Conference on Arts Education, contributed ICAF research to the UNESCO Observatory, and provided art for UNESCO\'s cards and calendars.',
+      "Participated in the World Conference on Arts Education, contributed ICAF research to the UNESCO Observatory, and provided art for UNESCO's cards and calendars.",
   },
   {
     id: 12,
@@ -133,7 +133,7 @@ const partners: IPartners = [
     name: 'XRSI',
     logo: XRSILogo,
     description:
-      'Collaborating on a youth panel\'s inclusion in conferences on Metaverse.',
+      "Collaborating on a youth panel's inclusion in conferences on Metaverse.",
   },
   {
     id: 14,
@@ -141,7 +141,7 @@ const partners: IPartners = [
     logo: INLogo,
     description:
       'Delivered a keynote address at the World Congress and received an award for outstanding contributions to arts education.',
-  }
+  },
 ];
 
 export default function Partners() {

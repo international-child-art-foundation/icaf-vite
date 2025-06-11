@@ -40,26 +40,27 @@ export default function MagazineCarousel() {
   return (
     <div className="lg:gap- w-full py-16 pl-8 pr-0 lg:flex lg:items-start">
       {/* left - description */}
-      <div className="mb-12 w-full lg:mb-0 lg:w-1/3">
-        <h2 className="mb-4 text-2xl font-bold">Latest Issues</h2>
-        <p className="mb-2 font-semibold text-blue-700">
-          Subscription is $30 per year
-        </p>
-        <p className="mb-6 text-sm leading-relaxed text-gray-700">
-          Please pay online to start receiving emails each quarter with a link
-          to the magazine. To order, pay $10 and email us the title of the
-          ChildArt issue you ordered, so we can email it to you. All 15 issues,
-          you can order for $110—a saving of $40.00!
-        </p>
-        <Button
-          className="rounded-full px-6 py-3 font-medium"
-          variant="default"
-          size="lg"
-        >
-          Subscribe
-        </Button>
+      <div className="w-full lg:w-1/3">
+        <div className="mx-auto max-w-screen-2xl px-8 md:px-12 lg:px-16 xl:px-20">
+          <h2 className="mb-4 text-2xl font-bold">Latest Issues</h2>
+          <p className="mb-2 font-semibold text-blue-700">
+            Subscription is $30 per year
+          </p>
+          <p className="mb-6 text-sm leading-relaxed text-gray-700">
+            Please pay online to start receiving emails each quarter with a link
+            to the magazine. To order, pay $10 and email us the title of the
+            ChildArt issue you ordered, so we can email it to you. All 15
+            issues, you can order for $110—a saving of $40.00!
+          </p>
+          <Button
+            className="rounded-full px-6 py-3 font-medium"
+            variant="default"
+            size="lg"
+          >
+            Subscribe
+          </Button>
+        </div>
       </div>
-
       {/* right - Carousel */}
       <div className="w-full px-0 md:px-0 lg:w-2/3 lg:px-0 lg:pl-16">
         <h2 className="mb-4 text-xl font-bold italic md:text-left lg:text-2xl xl:text-3xl">
@@ -125,5 +126,6 @@ export default function MagazineCarousel() {
         </Carousel>
       </div>
     </div>
+    // </div>
   );
 }

@@ -1,3 +1,5 @@
+import CousumanoImage from '../assets/shared/images/about/Cosumano.webp';
+
 export interface Testimonial {
   id: number;
   name: string;
@@ -6,7 +8,7 @@ export interface Testimonial {
   image?: string;
 }
 
-//Do we have additional testimonials or just the ones on figma?
+//Will need to update this with proper images
 export const testimonials: Testimonial[] = [
   {
     id: 1,
@@ -21,7 +23,7 @@ export const testimonials: Testimonial[] = [
     title: 'Commanding General, U.S. Army Space and Missile Defense Command',
     quote:
       'The positive message of peace and hope promoted by the International Child Art Foundation is commendable and worthy of great recognition.',
-    image: '/images/about/cosumano.jpg',
+    image: CousumanoImage,
   },
   {
     id: 3,
@@ -32,17 +34,16 @@ export const testimonials: Testimonial[] = [
   },
   {
     id: 4,
-    name: 'Stanishlav Nedzelskyi',
-    title: 'Artist and art studio owner',
+    name: 'Liston D. Bochette III Ph.D.',
+    title: 'Olympian, artist, and educator',
     quote:
-      'The event, sponsored and hosted by the International Child Art Foundation, was a successful attempt at growing fresh flowers in the minds of the next generation.',
+      'Olympians around the world could not be more proud of the young talent involved in the International Child Art Foundation events. ',
   },
   {
     id: 5,
-    name: 'Lt. Gen. Joseph Cosumano',
-    title: 'Commanding General, U.S. Army Space and Missile Defense Command',
+    name: 'Wook Choi',
+    title: 'Founder of Oogie Haus, Wook Choi Gallery, New York, NY',
     quote:
-      'The positive message of peace and hope promoted by the International Child Art Foundation is commendable and worthy of great recognition.',
-    image: '/images/about/cosumano.jpg',
+      "The World Children's Festival is one of those uplifting experiences my students and I will never forget.",
   },
 ];

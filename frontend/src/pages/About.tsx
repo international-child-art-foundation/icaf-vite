@@ -4,7 +4,8 @@ import { CurvedImage } from './CurvedImage';
 import WhatWeWant from '@/components/about/WhatWeWant';
 import YourDonations from '@/components/about/YourDonations';
 // import Testimonials from '@/components/about/Testimonials/Testimonials';
-import { TestimonialsCarousel } from '@/components/about/Testimonials/TestimonialsCarousel';
+import { TestimonialsCarousel } from '@/components/about/testimonials/TestimonialsCarousel';
+import { MoreCarousel } from '@/components/about/more/MoreCarousel';
 
 export default function About() {
   return (
@@ -23,11 +24,12 @@ export default function About() {
         <div className="px-6 lg:px-10 xl:px-20">
           <WhoWeAre />
           <WhatWeWant />
+          <MoreCarousel />
         </div>
       </div>
       {/* How Do We Do It */}
       {/* Explore Our Projects */}
-      {/* More on Our Projects */}
+
       <TestimonialsCarousel />
       <div className="px-6 lg:px-10 xl:px-20">
         <YourDonations />

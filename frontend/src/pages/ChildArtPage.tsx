@@ -47,7 +47,7 @@ export default function ChildArtPage() {
       </div>
 
       {/* === Carousel Section === */}
-      <div className="mt-12 w-full">
+      <div className="mt-0 w-full">
         <MagazineCarousel />
       </div>
     </div>

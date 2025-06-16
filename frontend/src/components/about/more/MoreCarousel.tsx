@@ -9,6 +9,7 @@ import { moreOnOurSiteData } from '@/lib/moreOnOurSite';
 
 import CarouselArrowsDots from '../testimonials/CarouselArrowsDots';
 import { MoreCard } from './MoreCard';
+import Graphic from '@/assets/shared/images/about/more/Group 514888.svg';
 
 /**
  * This component is built on top of Shadcn's carousel with custom CarouselArrowsDots navigation
@@ -37,7 +38,15 @@ export const MoreCarousel = () => {
   const handleSelect = (index: number) => api?.scrollTo(index);
 
   return (
-    <section className="bg-white py-6 md:py-20">
+    <section className="relative h-full overflow-visible bg-white py-6 md:py-20">
+      {/*Decoration */}
+      <div className="absolute bottom-0 left-[40%] w-[150%] -translate-x-1/2 sm:bottom-[-10%] sm:left-[50%] md:bottom-0 2xl:bottom-[-12%]">
+        <img
+          src={Graphic}
+          className="pointer-events-none h-auto w-full object-cover"
+        />
+      </div>
+
       <h2 className="mb-10 text-center font-sans text-3xl font-bold">
         More On Our Site
       </h2>

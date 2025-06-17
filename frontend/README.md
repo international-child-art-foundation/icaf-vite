@@ -8,13 +8,6 @@ When starting a new task, create a new branch (e.g. `sponsor-page`, `about-page-
 
 - Follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
-## Commands
-
-- `pnpm i` - Installs dependencies.
-- `pnpm run dev` - Runs the frontend development server.
-- `pnpm run check` - Checks all frontend files for type and linter errors.
-- `pnpm run build` - Builds the frontend (plus shared dependencies) for web hosting.
-
 ## Technology Stack
 
 _Note: Subject to change._
@@ -34,11 +27,6 @@ _Note: Subject to change._
 - **Database**: DynamoDB
 - **Image Storage**: S3
 - **Authentication**: Cognito, possibly OpenAuth
-
-## Repo structure
-
-The /shared folder is for types and other functions which are shared between frontend and backend code (mainly for API call and response objects).
-`tsconfig.strict.json` is extended by each subproject and contains settings for all three TypeScript environments.
 
 ## Style Guide
 

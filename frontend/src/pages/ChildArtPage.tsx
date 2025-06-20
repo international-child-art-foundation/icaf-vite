@@ -6,6 +6,7 @@ import magazineCoverSmall from '@/assets/shared/images/navigation/programs/child
 
 import DonateButtonPartnersPage from '@/components/ui/donateButtonPartnersPage';
 import DonationCTA from '@/components/shared/DonationCTA';
+import BackIssueGrid from '@/components/childArt/BackIssueGrid';
 
 export default function ChildArtPage() {
   return (
@@ -51,6 +52,8 @@ export default function ChildArtPage() {
       <div className="mt-0 w-full">
         <MagazineCarousel />
       </div>
+
+      <BackIssueGrid />
       {/* Donation CTA Section */}
       <DonationCTA />
     </div>

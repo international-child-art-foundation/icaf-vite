@@ -7,6 +7,7 @@ import magazineCoverSmall from '@/assets/shared/images/navigation/programs/child
 import DonateButtonPartnersPage from '@/components/ui/donateButtonPartnersPage';
 import DonationCTA from '@/components/shared/DonationCTA';
 import BackIssueGrid from '@/components/childArt/BackIssueGrid';
+import TestimonialBlock from '@/components/childArt/TestimonialBlock';
 
 export default function ChildArtPage() {
   return (
@@ -54,6 +55,9 @@ export default function ChildArtPage() {
       </div>
 
       <BackIssueGrid />
+
+      <TestimonialBlock />
+
       {/* Donation CTA Section */}
       <DonationCTA />
     </div>

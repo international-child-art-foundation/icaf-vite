@@ -4,11 +4,11 @@ import { magazineCovers } from '@/data/magazineCovers';
 
 export default function BackIssueGrid() {
   return (
-    <section className="mt-16 w-full max-w-screen-2xl px-8 md:px-12 lg:px-16 xl:px-20">
+    <section className="mx-auto mt-16 w-full max-w-screen-2xl px-5 md:px-20 lg:px-20 xl:px-28 2xl:px-36">
       <h2 className="mb-4 text-center text-2xl font-bold md:text-3xl">
         Back issues of <span className="italic">ChildArt</span>
       </h2>
-      <p className="mx-auto mb-8 max-w-3xl text-center text-gray-700">
+      <p className="text-lef mx-auto mb-8 text-gray-700">
         You can choose from a list of the quarterly magazine’s past issues. Each
         magazine covers a relevant and timely subject. The information is
         presented in an exciting, colorful way for young readers to cherish.
@@ -34,7 +34,7 @@ export default function BackIssueGrid() {
           variant="secondary"
           className="rounded-full px-6 py-3 text-base font-semibold shadow hover:shadow-md"
         >
-          <a href="https://icaf.org/donate">View more</a>
+          <a href="">View more</a>
         </Button>
       </div>
     </section>

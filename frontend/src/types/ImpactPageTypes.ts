@@ -11,6 +11,7 @@ export interface IContentCarouselItem {
   body: string;
   contentType: ContentType;
   content: string;
+  color: string;
 }
 type ContentType = 'img' | 'vid';
 

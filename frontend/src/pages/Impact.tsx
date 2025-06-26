@@ -5,6 +5,8 @@ import MissionDropdownData from '@/data/impact/impactMissionDropdownData';
 import DancingImg from '@/assets/impact/Dancing.png';
 import { Button } from '@/components/ui/button';
 import { HeartIcon } from 'lucide-react';
+import { ContentCarousel } from '@/components/impact/ContentCarousel';
+import { ImpactContentCarouselData } from '@/data/impact/impactContentCarouselData';
 
 const Impact = () => {
   return (
@@ -98,6 +100,7 @@ const Impact = () => {
           <p className="text-center text-5xl font-extrabold">
             Bringing Children's Voices to the World
           </p>
+          <ContentCarousel carouselData={ImpactContentCarouselData} />
         </div>
       </div>
     </div>

@@ -44,10 +44,7 @@ export const ContentCarousel = ({ carouselData }: ContentCarouselProps) => {
         <CarouselContent>
           {carouselData.map((item) => {
             return (
-              <CarouselItem
-                className="basis-1/3 md:basis-1/2 lg:basis-1/2"
-                key={item.title}
-              >
+              <CarouselItem className="basis-full" key={item.title}>
                 <CarouselItemDisplay item={item} scrollToItem={scrollToItem} />
               </CarouselItem>
             );
@@ -60,14 +57,6 @@ export const ContentCarousel = ({ carouselData }: ContentCarouselProps) => {
           getKey={(item) => item.title}
         />
       </Carousel>
-
-      {carouselData.map((item) => {
-        return (
-          <div key={item.title}>
-            <div></div>
-          </div>
-        );
-      })}
     </>
   );
 };

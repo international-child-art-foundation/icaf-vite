@@ -5,7 +5,7 @@ interface ICarouselItemDisplay {
   scrollToItem: (index: number) => void;
 }
 
-export const CarouselItemDisplay = ({ item }: ICarouselItemDisplay) => {
+export const BugMVR = ({ item }: ICarouselItemDisplay) => {
   const colorClassMap = {
     pink: 'bg-[#E7BDB9]',
     yellow: 'bg-[#FFECCB]',
@@ -23,15 +23,6 @@ export const CarouselItemDisplay = ({ item }: ICarouselItemDisplay) => {
           <p className="font-bold">{item.title}</p>
           <p>{item.body}</p>
         </div>
-      </div>
-      <div className="min-h-0 flex-initial">
-        {item.contentType == 'img' && (
-          <img
-            className="order-first min-h-0 w-full object-cover object-top sm:order-none sm:h-full"
-            src={item.content}
-          />
-        )}{' '}
-        {item.contentType == 'vid' && <video src={item.content} />}
       </div>
     </div>
   );

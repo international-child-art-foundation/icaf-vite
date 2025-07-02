@@ -4,11 +4,13 @@ import { Button } from '@/components/ui/button';
 interface DonateButtonProps {
   className?: string;
   text?: string;
+  icon: boolean;
 }
 
 const DonateButton: React.FC<DonateButtonProps> = ({
   className,
   text = 'Donate',
+  icon = true,
 }) => {
   return (
     <div className="flex justify-center">
@@ -23,10 +25,12 @@ const DonateButton: React.FC<DonateButtonProps> = ({
           rel="noopener noreferrer"
           className="flex items-center"
         >
-          <HeartIcon
-            strokeWidth={2}
-            className="!h-6 !w-6 stroke-black lg:mr-0 lg:!h-6 lg:!w-6"
-          />
+          {icon && (
+            <HeartIcon
+              strokeWidth={2}
+              className="!h-6 !w-6 stroke-black lg:mr-0 lg:!h-6 lg:!w-6"
+            />
+          )}
           {text}
         </a>
       </Button>

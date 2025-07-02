@@ -23,7 +23,10 @@ const MissionDropdown = ({ data }: MissionDropdownProps) => {
       onClick={() => setOpen((prev) => !prev)}
     >
       <div className="grid-col grid h-full flex-col gap-2">
-        <img src={data.image} className="mx-auto h-[80px] w-[80px]" />
+        <img
+          src={data.image}
+          className="pointer-events-none mx-auto h-[80px] w-[80px] select-none"
+        />
         <div className="min-h-[50px] content-center">
           <p className="text-center font-semibold">{data.title}</p>
         </div>

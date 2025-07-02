@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/button';
 import { HeartIcon } from 'lucide-react';
 import { ContentCarousel } from '@/components/impact/ContentCarousel';
 import { ImpactContentCarouselData } from '@/data/impact/impactContentCarouselData';
+import Firework from '@/assets/impact/Firework.png';
+import { BugMVR } from '@/components/impact/BugMVR';
 
 const Impact = () => {
   return (
-    <div className="w-full">
+    <div className="relative w-full">
       {/* Header */}
       <div className="grid h-[550px] grid-cols-1 grid-rows-1">
         <div className="col-start-1 row-start-1">
@@ -26,7 +28,7 @@ const Impact = () => {
         </p>
       </div>
       {/* Body */}
-      <div className="my-8 grid w-full max-w-screen-2xl gap-8 px-8 md:px-12 lg:px-16 xl:px-20">
+      <div className="relative my-8 grid w-full max-w-screen-2xl gap-8 px-8 md:px-12 lg:px-16 xl:px-20">
         {/* Better World with Creativity Section */}
         <div className="grid gap-4">
           <p className="text-center text-5xl font-extrabold">
@@ -96,11 +98,32 @@ const Impact = () => {
           </div>
         </div>
         {/* Children's voices section */}
-        <div>
+        <div className="flex flex-col gap-6">
           <p className="text-center text-5xl font-extrabold">
             Bringing Children's Voices to the World
           </p>
-          <ContentCarousel carouselData={ImpactContentCarouselData} />
+          <BugMVR carouselData={ImpactContentCarouselData} />
+        </div>
+        {/* Donation section */}
+        <div className="relative">
+          <div className="relative rounded-xl bg-[#2057CC23] p-10 py-4 sm:py-8 md:py-12 lg:py-16 xl:py-24">
+            <p className="mb-8 max-w-[60%] font-bold">
+              Your donation today will bring the arts to more children and help
+              them become creative and empathic.
+            </p>
+            <div className="inline-grid grid-cols-2 gap-2">
+              <Button
+                className="bg-secondary-yellow w-auto rounded-full font-bold text-black"
+                variant={'secondary'}
+              >
+                Donate
+              </Button>
+              <Button className="rounded-full" variant="default">
+                Contact Us
+              </Button>
+            </div>
+            <img src={Firework} className="absolute -right-6 top-0 w-[30%]" />
+          </div>
         </div>
       </div>
     </div>

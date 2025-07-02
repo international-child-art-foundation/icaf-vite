@@ -1,14 +1,14 @@
-@import '@fontsource/montserrat';
-@import '@fontsource/open-sans';
-@import '@fontsource/nunito';
-@import '@fontsource/inter';
+@import '@fontsource-variable/montserrat';
+@import '@fontsource-variable/open-sans';
+@import '@fontsource-variable/nunito';
+@import '@fontsource-variable/inter';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    font-family: 'inter', sans-serif;
+    font-family: 'Open Sans Variable', sans-serif;
 
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;

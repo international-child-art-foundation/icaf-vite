@@ -83,10 +83,10 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['Open Sans', 'sans-serif'],
-        montserrat: ['Montserrat', 'sans-serif'],
-        inter: ['Inter', 'sans-serif'],
-        nunito: ['Nunito', 'sans-serif'],
+        sans: ['Open Sans Variable', 'sans-serif'],
+        montserrat: ['Montserrat Variable', 'sans-serif'],
+        inter: ['Inter Variable', 'sans-serif'],
+        nunito: ['Nunito Variable', 'sans-serif'],
       },
       keyframes: {
         'accordion-down': {

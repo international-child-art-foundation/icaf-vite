@@ -8,7 +8,6 @@ import { HeartIcon } from 'lucide-react';
 import { ContentCarousel } from '@/components/impact/ContentCarousel';
 import { ImpactContentCarouselData } from '@/data/impact/impactContentCarouselData';
 import Firework from '@/assets/impact/Firework.png';
-import { BugMVR } from '@/components/impact/BugMVR';
 
 const Impact = () => {
   return (
@@ -23,7 +22,7 @@ const Impact = () => {
             gradientDefinition={'bg-gradient-to-b from-black/70 to-black/0'}
           />
         </div>
-        <p className="margin-auto z-20 col-start-1 row-start-1 -mt-14 content-center place-self-center text-5xl font-bold text-white">
+        <p className="margin-auto font-montserrat z-20 col-start-1 row-start-1 -mt-14 content-center place-self-center text-6xl font-extrabold text-white">
           Impact
         </p>
       </div>
@@ -31,10 +30,10 @@ const Impact = () => {
       <div className="relative my-8 grid w-full max-w-screen-2xl gap-8 px-8 md:px-12 lg:px-16 xl:px-20">
         {/* Better World with Creativity Section */}
         <div className="grid gap-4">
-          <p className="text-center text-5xl font-extrabold">
+          <p className="font-montserrat text-center text-3xl font-extrabold">
             Building a Better World with Creativity
           </p>
-          <p>
+          <p className="text-xl">
             At ICAF, we're working to make the world more peaceful, prosperous,
             and sustainable. We believe that helping kids grow creatively and
             empathetically can help achieve six important goals set by the
@@ -44,10 +43,10 @@ const Impact = () => {
         </div>
         {/* Making an Impact section */}
         <div className="grid-col grid gap-4">
-          <p className="text-center text-5xl font-extrabold">
+          <p className="font-montserrat text-center text-3xl font-extrabold">
             Making an Impact
           </p>
-          <p>
+          <p className="text-xl">
             Every day, thousands of kids learn about ICAF from their friends or
             online, helping them see themselves as creative individuals. They
             realize that their imagination can lead to new discoveries and
@@ -56,18 +55,22 @@ const Impact = () => {
           </p>
           <div className="grid gap-4 lg:grid-cols-2">
             <div className="order-2 flex flex-col justify-center gap-2 lg:order-1">
-              <p className="font-bold">5M Children</p>
-              <p className="">
+              <p className="font-montserrat text-2xl font-bold">5M Children</p>
+              <p className="text-xl">
                 ICAF has reached more than five million children, encouraging
                 them to create original artworks through our programs.{' '}
               </p>
-              <p className="font-bold">2.5M Participants</p>
-              <p className="">
+              <p className="font-montserrat text-2xl font-bold">
+                2.5M Participants
+              </p>
+              <p className="text-xl">
                 Our festivals and exhibitions have attracted about 2.5 million
                 participants and visitors in major cities worldwide
               </p>
-              <p className="font-bold">Making People Smile since 1998</p>
-              <p className="">
+              <p className="font-montserrat text-2xl font-bold">
+                Making People Smile since 1998
+              </p>
+              <p className="text-xl">
                 Over a million children, parents, teachers, and librarians have
                 enjoyed our quarterly ChildArt magazine since 1998.
               </p>
@@ -98,32 +101,35 @@ const Impact = () => {
           </div>
         </div>
         {/* Children's voices section */}
-        <div className="flex flex-col gap-6">
-          <p className="text-center text-5xl font-extrabold">
+        <div className="flex flex-col gap-6 overflow-hidden">
+          <p className="font-montserrat text-center text-3xl font-extrabold">
             Bringing Children's Voices to the World
           </p>
-          <BugMVR carouselData={ImpactContentCarouselData} />
+          <ContentCarousel carouselData={ImpactContentCarouselData} />
         </div>
-        {/* Donation section */}
-        <div className="relative">
-          <div className="relative rounded-xl bg-[#2057CC23] p-10 py-4 sm:py-8 md:py-12 lg:py-16 xl:py-24">
-            <p className="mb-8 max-w-[60%] font-bold">
-              Your donation today will bring the arts to more children and help
-              them become creative and empathic.
-            </p>
-            <div className="inline-grid grid-cols-2 gap-2">
-              <Button
-                className="bg-secondary-yellow w-auto rounded-full font-bold text-black"
-                variant={'secondary'}
-              >
-                Donate
-              </Button>
-              <Button className="rounded-full" variant="default">
-                Contact Us
-              </Button>
-            </div>
-            <img src={Firework} className="absolute -right-6 top-0 w-[30%]" />
+      </div>
+      {/* Donation section */}
+      <div className="relative max-w-screen-2xl gap-8 overflow-clip px-8 py-12 md:px-12 lg:px-16 xl:px-20">
+        <div className="relative rounded-xl bg-[#2057CC23] p-10 sm:py-8 md:py-12 lg:py-16 xl:py-24">
+          <p className="font-montserrat mb-8 text-2xl font-semibold sm:max-w-[75%]">
+            Your donation today will bring the arts to more children and help
+            them become creative and empathic.
+          </p>
+          <div className="inline-grid grid-cols-2 gap-2">
+            <Button
+              className="bg-secondary-yellow w-auto rounded-full font-semibold text-black"
+              variant={'secondary'}
+            >
+              Donate
+            </Button>
+            <Button className="rounded-full font-semibold" variant="default">
+              Contact Us
+            </Button>
           </div>
+          <img
+            src={Firework}
+            className="sm:bottom-unset pointer-events-none absolute -right-6 -top-12 w-[30%] max-w-24 select-none sm:-right-6 sm:top-0 sm:max-w-80"
+          />
         </div>
       </div>
     </div>

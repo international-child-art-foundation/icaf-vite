@@ -28,14 +28,14 @@ const MissionDropdown = ({ data }: MissionDropdownProps) => {
           className="pointer-events-none mx-auto h-[80px] w-[80px] select-none"
         />
         <div className="min-h-[50px] content-center">
-          <p className="text-center font-semibold">{data.title}</p>
+          <p className="text-center text-xl font-semibold">{data.title}</p>
         </div>
         <div
           className={`grid transition-all duration-500 ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
         >
           <div className="overflow-hidden">
             <p
-              className={`transition-all duration-500 ${open ? 'opacity-100' : 'opacity-0'}`}
+              className={`text-sm transition-all duration-500 ${open ? 'opacity-100' : 'opacity-0'}`}
             >
               {data.body}
             </p>

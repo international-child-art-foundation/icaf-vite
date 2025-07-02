@@ -20,8 +20,10 @@ export const CarouselItemDisplay = ({ item }: ICarouselItemDisplay) => {
       >
         <div className="flex select-none flex-col gap-6 p-10 sm:max-w-[600px] sm:pt-0">
           <img src={item.icon} className="h-10 w-10" />
-          <p className="font-bold">{item.title}</p>
-          <p>{item.body}</p>
+          <p className="font-montserrat text-2xl font-extrabold">
+            {item.title}
+          </p>
+          <p className="text-base">{item.body}</p>
         </div>
       </div>
       <div className="min-h-0 flex-initial">

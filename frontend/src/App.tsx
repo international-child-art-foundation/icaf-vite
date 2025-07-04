@@ -23,6 +23,7 @@ export default function App() {
       <main className="mt-[98px] flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
+
           <Route path="/programs/outreach" element={<ChildArtPage />} />
           <Route path="/about/partners" element={<Partners />} />
           <Route path="/about" element={<About />} />

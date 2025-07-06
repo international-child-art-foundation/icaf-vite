@@ -7,6 +7,7 @@ import YourDonations from '@/components/about/YourDonations';
 import { TestimonialsCarousel } from '@/components/about/testimonials/TestimonialsCarousel';
 import { MoreCarousel } from '@/components/about/more/MoreCarousel';
 import ExploreOurProjects from '@/components/about/ExploreOurProjects';
+import HowWeDoIt from '@/components/about/HowWeDoIt';
 
 export default function About() {
   return (
@@ -25,6 +26,7 @@ export default function About() {
         <div className="px-6 lg:px-10 xl:px-20">
           <WhoWeAre />
           <WhatWeWant />
+          <HowWeDoIt />
           <ExploreOurProjects />
           <MoreCarousel />
         </div>

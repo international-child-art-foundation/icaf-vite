@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 interface DonateButtonProps {
   className?: string;
   text?: string;
-  icon: boolean;
+  icon?: boolean;
 }
 
 const DonateButton: React.FC<DonateButtonProps> = ({

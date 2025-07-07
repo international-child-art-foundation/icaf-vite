@@ -14,7 +14,7 @@ export const CarouselItemDisplay = ({ item }: ICarouselItemDisplay) => {
   type ColorKey = keyof typeof colorClassMap;
 
   return (
-    <div className="flex h-[500px] max-w-full flex-col overflow-hidden rounded-[40px] sm:grid sm:h-[500px] sm:grid-cols-2">
+    <div className="flex h-[650px] max-w-full flex-col overflow-hidden rounded-[40px] sm:grid sm:h-[600px] sm:grid-cols-2">
       <div
         className={`${colorClassMap[item.color as ColorKey]} order-last content-center sm:order-none sm:place-items-center`}
       >
@@ -29,7 +29,7 @@ export const CarouselItemDisplay = ({ item }: ICarouselItemDisplay) => {
       <div className="min-h-0 flex-initial">
         {item.contentType == 'img' && (
           <img
-            className="order-first min-h-0 w-full object-cover object-top sm:order-none sm:h-full"
+            className="order-first w-full object-cover object-top sm:order-none sm:h-full"
             src={item.content}
           />
         )}{' '}

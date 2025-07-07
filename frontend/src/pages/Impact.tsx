@@ -27,9 +27,9 @@ const Impact = () => {
         </p>
       </div>
       {/* Body */}
-      <div className="relative my-8 grid w-full max-w-screen-2xl gap-8 px-8 md:px-12 lg:px-16 xl:px-20">
+      <div className="relative mt-16 grid w-full gap-20">
         {/* Better World with Creativity Section */}
-        <div className="grid gap-4">
+        <div className="grid max-w-screen-2xl gap-8 px-8 md:px-12 lg:px-16 xl:px-20">
           <p className="font-montserrat text-center text-3xl font-extrabold">
             Building a Better World with Creativity
           </p>
@@ -42,42 +42,52 @@ const Impact = () => {
           <MissionDropdowns data={MissionDropdownData} />
         </div>
         {/* Making an Impact section */}
-        <div className="grid-col grid gap-4">
-          <p className="font-montserrat text-center text-3xl font-extrabold">
-            Making an Impact
-          </p>
-          <p className="text-xl">
-            Every day, thousands of kids learn about ICAF from their friends or
-            online, helping them see themselves as creative individuals. They
-            realize that their imagination can lead to new discoveries and
-            innovations, and they know that their art is a true and honest form
-            of expression.
-          </p>
+        <div className="grid-col grid max-w-screen-2xl gap-20 px-8 md:px-12 lg:px-16 xl:px-20">
+          <div className="grid gap-8">
+            <p className="font-montserrat text-center text-3xl font-extrabold">
+              Making an Impact
+            </p>
+            <p className="text-xl">
+              Every day, thousands of kids learn about ICAF from their friends
+              or online, helping them see themselves as creative individuals.
+              They realize that their imagination can lead to new discoveries
+              and innovations, and they know that their art is a true and honest
+              form of expression.
+            </p>
+          </div>
           <div className="grid gap-4 lg:grid-cols-2">
-            <div className="order-2 flex flex-col justify-center gap-2 lg:order-1">
-              <p className="font-montserrat text-2xl font-bold">5M Children</p>
-              <p className="text-xl">
-                ICAF has reached more than five million children, encouraging
-                them to create original artworks through our programs.{' '}
-              </p>
-              <p className="font-montserrat text-2xl font-bold">
-                2.5M Participants
-              </p>
-              <p className="text-xl">
-                Our festivals and exhibitions have attracted about 2.5 million
-                participants and visitors in major cities worldwide
-              </p>
-              <p className="font-montserrat text-2xl font-bold">
-                Making People Smile since 1998
-              </p>
-              <p className="text-xl">
-                Over a million children, parents, teachers, and librarians have
-                enjoyed our quarterly ChildArt magazine since 1998.
-              </p>
+            <div className="order-2 flex flex-col justify-center gap-8 lg:order-1">
+              <div className="grid gap-3">
+                <p className="font-montserrat text-2xl font-bold">
+                  5M Children
+                </p>
+                <p className="text-xl">
+                  ICAF has reached more than five million children, encouraging
+                  them to create original artworks through our programs.{' '}
+                </p>
+              </div>
+              <div className="grid gap-3">
+                <p className="font-montserrat text-2xl font-bold">
+                  2.5M Participants
+                </p>
+                <p className="text-xl">
+                  Our festivals and exhibitions have attracted about 2.5 million
+                  participants and visitors in major cities worldwide
+                </p>
+              </div>
+              <div className="grid gap-3">
+                <p className="font-montserrat text-2xl font-bold">
+                  Making People Smile since 1998
+                </p>
+                <p className="text-xl">
+                  Over a million children, parents, teachers, and librarians
+                  have enjoyed our quarterly ChildArt magazine since 1998.
+                </p>
+              </div>
               <Button
                 asChild
                 variant="secondary"
-                className="mt-4 h-14 self-center rounded-full px-6 text-base tracking-wide"
+                className="mt-4 h-14 self-start rounded-full px-6 text-base tracking-wide"
               >
                 <a
                   href="https://icaf.org/donate"
@@ -93,15 +103,15 @@ const Impact = () => {
                 </a>
               </Button>
             </div>
-            <div className="order-1 content-center lg:order-2">
-              <div className="self-center overflow-hidden rounded-[30px]">
-                <img src={DancingImg} className="object-cover lg:h-[400px]" />
+            <div className="relative order-1 content-center lg:order-2">
+              <div className="relative h-full self-center overflow-hidden rounded-[30px]">
+                <img src={DancingImg} className="h-full w-auto object-cover" />
               </div>
             </div>
           </div>
         </div>
         {/* Children's voices section */}
-        <div className="flex flex-col gap-6 overflow-hidden">
+        <div className="flex max-w-screen-2xl flex-col gap-8 overflow-hidden px-8 md:px-12 lg:px-16 xl:px-20">
           <p className="font-montserrat text-center text-3xl font-extrabold">
             Bringing Children's Voices to the World
           </p>
@@ -109,7 +119,7 @@ const Impact = () => {
         </div>
       </div>
       {/* Donation section */}
-      <div className="relative max-w-screen-2xl gap-8 overflow-clip px-8 py-12 md:px-12 lg:px-16 xl:px-20">
+      <div className="relative max-w-screen-2xl gap-8 overflow-clip px-8 py-20 md:px-12 lg:px-16 xl:px-20">
         <div className="relative rounded-xl bg-[#2057CC23] p-10 sm:py-8 md:py-12 lg:py-16 xl:py-24">
           <p className="font-montserrat mb-8 text-2xl font-semibold sm:max-w-[75%]">
             Your donation today will bring the arts to more children and help
@@ -117,13 +127,30 @@ const Impact = () => {
           </p>
           <div className="inline-grid grid-cols-2 gap-2">
             <Button
+              asChild
               className="bg-secondary-yellow w-auto rounded-full font-semibold text-black"
               variant={'secondary'}
             >
-              Donate
+              <a
+                href="https://icaf.org/donate"
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                Donate
+              </a>
             </Button>
-            <Button className="rounded-full font-semibold" variant="default">
-              Contact Us
+            <Button
+              asChild
+              className="rounded-full font-semibold"
+              variant="default"
+            >
+              <a
+                href="https://icaf.org/donate"
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                Contact Us
+              </a>
             </Button>
           </div>
           <img

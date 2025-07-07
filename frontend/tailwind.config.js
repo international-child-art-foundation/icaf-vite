@@ -35,6 +35,7 @@ module.exports = {
           green: 'hsl(var(--secondary-green))',
           yellow: 'hsl(var(--secondary-yellow))',
           pink: 'hsl(var(--secondary-pink))',
+          purple: 'hsl(var(--secondary-purple))',
         },
         tertiary: {
           blue: 'hsl(var(--tertiary-blue))',
@@ -82,10 +83,10 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['Open Sans', 'sans-serif'],
-        montserrat: ['Montserrat', 'sans-serif'],
-        inter: ['Inter', 'sans-serif'],
-        nunito: ['Nunito', 'sans-serif'],
+        sans: ['Open Sans Variable', 'sans-serif'],
+        montserrat: ['Montserrat Variable', 'sans-serif'],
+        inter: ['Inter Variable', 'sans-serif'],
+        nunito: ['Nunito Variable', 'sans-serif'],
       },
       keyframes: {
         'accordion-down': {

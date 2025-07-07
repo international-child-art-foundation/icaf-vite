@@ -4,12 +4,14 @@ interface CurvedImageProps {
   src: string;
   curveStyle?: RibbonStyleTypes;
   darkened?: boolean;
+  gradientDefinition?: string;
 }
 
 export const CurvedImage = ({
   src,
   curveStyle = 'Ellipse',
   darkened = true,
+  gradientDefinition,
 }: CurvedImageProps) => {
   return (
     <>
@@ -36,7 +38,9 @@ export const CurvedImage = ({
           />
         </div>
         {darkened && (
-          <div className="clipped-image-bottom relative col-start-1 row-start-1 h-[550px] w-full overflow-hidden bg-gradient-to-r from-black/80 via-black/0 to-black/0" />
+          <div
+            className={`clipped-image-bottom relative col-start-1 row-start-1 h-[550px] w-full overflow-hidden ${gradientDefinition ? gradientDefinition : 'bg-gradient-to-r from-black/80 via-black/0 to-black/0'}`}
+          />
         )}
       </div>
     </>

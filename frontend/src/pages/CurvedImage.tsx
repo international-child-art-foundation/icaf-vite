@@ -4,6 +4,8 @@ interface CurvedImageProps {
   src: string;
   curveStyle?: RibbonStyleTypes;
   darkened?: boolean;
+  brightened?: boolean;
+  blur?: boolean;
   gradientDefinition?: string;
 }
 
@@ -11,6 +13,8 @@ export const CurvedImage = ({
   src,
   curveStyle = 'Ellipse',
   darkened = true,
+  brightened = false,
+  blur = false,
   gradientDefinition,
 }: CurvedImageProps) => {
   return (
@@ -33,7 +37,7 @@ export const CurvedImage = ({
         <div className="clipped-image-bottom relative col-start-1 row-start-1 h-[550px] w-full overflow-hidden">
           <img
             src={src}
-            className="col-start-1 row-start-1 min-h-[550px] w-full object-cover"
+            className={`col-start-1 row-start-1 min-h-[550px] w-full object-cover ${blur && 'blur-sm'}`}
             alt="Header image"
           />
         </div>
@@ -41,6 +45,9 @@ export const CurvedImage = ({
           <div
             className={`clipped-image-bottom relative col-start-1 row-start-1 h-[550px] w-full overflow-hidden ${gradientDefinition ? gradientDefinition : 'bg-gradient-to-r from-black/80 via-black/0 to-black/0'}`}
           />
+        )}
+        {brightened && (
+          <div className="clipped-image-bottom z-20 col-start-1 row-start-1 h-[550px] w-full bg-white/10" />
         )}
       </div>
     </>

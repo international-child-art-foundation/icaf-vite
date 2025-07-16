@@ -1,8 +1,13 @@
 import { CurvedImage } from './CurvedImage';
 import MalaysiaChildren from '@/assets/donate/MalaysiaChildren.png';
 import TransparencyLogo from '@/assets/donate/TransparencyLogo.png';
+import Award from '@/assets/donate/award-alt.svg';
+import TeachKidPainting from '@/assets/donate/TeachKidPainting.png';
+import Portrait1 from '@/assets/donate/Portrait1.png';
+import Portrait2 from '@/assets/donate/Portrait2.png';
 import { Button } from '@/components/ui/button';
 import { HeartIcon } from 'lucide-react';
+import { childArtExhibition } from '@/data/donate/childArtExhibition';
 
 export default function Donate() {
   return (
@@ -37,13 +42,13 @@ export default function Donate() {
               Your gift funds art programs for underserved schools, spotlights young artists at the World Children's Festival, and delivers creativity without ads through ChildArt Magazine. Empower children to create their future—donate today!
             </p>
             {/* Transparency Logo */}
-            
-              <img
-                src={TransparencyLogo}
-                alt="Transparent Logo"
-                className="h-8 w-auto md:h-10"
-              />
-            
+
+            <img
+              src={TransparencyLogo}
+              alt="Transparent Logo"
+              className="h-8 w-auto md:h-10"
+            />
+
           </div>
 
           {/* Right Side - Donation Form */}
@@ -117,6 +122,99 @@ export default function Donate() {
           </div>
         </div>
       </div>
+
+      {/* About ICAF */}
+      <div className="px-8 md:px-8 lg:px-20 py-12">
+        {/* Main Heading */}
+        <div className="mb-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-black mb-3">
+            About ICAF
+          </h2>
+
+          {/* Ranking Text with Award Icon */}
+          <div className="flex items-center gap-2">
+            <img src={Award} alt="Award" className="w-5 h-5" />
+            <p className="text-base text-black">
+              We have been consistently ranked among the{' '}
+              <a href="#" className="text-secondary-blue font-bold hover:underline">
+                Top 25 Children's Charities in the United States.
+              </a>
+            </p>
+          </div>
+        </div>
+
+        {/* Main Content Box */}
+        <div className="bg-blue-50 rounded-xl p-6 md:p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-center">
+            {/* Left Section - Text and Button */}
+            <div className="space-y-6">
+              <p className="text-base text-black leading-relaxed">
+                Established in 1997 as the national arts organization for American children and the global arts organization for children worldwide, ICAF cultivates their creativity and grows mutual empathy for a prosperous and peaceful future.
+              </p>
+              <Button className="bg-secondary-blue hover:bg-secondary-blue/90 text-white font-semibold py-2.5 px-5 rounded-lg text-sm">
+                More about us
+              </Button>
+            </div>
+
+            {/* Right Section - Image */}
+            <div className="flex justify-center lg:justify-end">
+              <div className="relative w-full max-w-sm">
+                <img
+                  src={TeachKidPainting}
+                  alt="Adult and child engaged in art activity"
+                  className="w-full h-64 object-cover rounded-lg"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Child Art Exhibitions */}
+        <div className="mt-16">
+          <div className="text-center mb-8">
+            <h3 className="text-3xl md:text-4xl font-bold text-black mb-4">
+              Art by the children we serve
+            </h3>
+            <p className="text-base text-black mb-6">
+              Every piece of art here tells a story of hope and resilience. Here's a glimpse of the talent you're supporting.
+            </p>
+            {/* Social Proof */}
+            <div className="flex items-center justify-center gap-2 mb-8">
+              <div className="flex -space-x-2">
+                <div className="w-8 h-8 bg-secondary-blue rounded-full border-2 border-white"></div>
+                <div className="w-8 h-8 bg-secondary-yellow rounded-full border-2 border-white"></div>
+              </div>
+              <p className="text-sm text-black">
+                Join 254 others who donated this month!
+              </p>
+            </div>
+          </div>
+
+          {/* Artwork Grid - 2 rows, 3 columns */}
+          <div className="flex flex-col gap-8 items-center">
+            {Array.from({ length: 2 }).map((_, rowIdx) => (
+              <div key={rowIdx} className="flex flex-row gap-8 w-full justify-center">
+                {childArtExhibition.slice(rowIdx * 3, rowIdx * 3 + 3).map((artwork) => (
+                  <div key={artwork.id} className="text-center">
+                    <div className="mb-4">
+                      <img
+                        src={artwork.image}
+                        alt={artwork.alt}
+                        className="rounded-lg shadow-md"
+                      />
+                    </div>
+                    <p className="text-sm text-black font-medium">
+                      {artwork.artistName}, {artwork.age}, {artwork.location}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+
     </div>
   );
 }

@@ -1,44 +1,40 @@
-export interface DonationUsageCard {
+import Money from '@/assets/donate/Money.svg';
+import Earth from '@/assets/donate/Earth.svg';
+import Donator from '@/assets/donate/Donator.svg';
+
+
+export interface DonationUsageItem {
     id: string;
     title: string;
     description: string;
-    icon: string;
-    actionIcon: string;
-    hoverColor: string;
-    redirectTo: string;
+    icon: string; // SVG file path
+    borderColor: string;
+    iconColor: string;
 }
 
-import artsOlympiadLogo from '@/assets/donate/DonationUsage-7thArtsOlympiadLogo.png';
-import childArtMagazine from '@/assets/donate/DonationUsage-ChildArtMagazine.png';
-import worldChildrensFestival from '@/assets/donate/DonationUsage-WCF.png';
-import arrowCircleUp from '@/assets/donate/DonationUsage-arrow_circle_up.svg';
-
-export const donationUsageData: DonationUsageCard[] = [
+export const DonationUsageData: DonationUsageItem[] = [
     {
-        id: 'arts-olympiad',
-        title: 'Arts Olympiad',
-        description: 'Free school art programs inspiring creativity and healthy living in +40 low-income schools worldwide.',
-        icon: artsOlympiadLogo,
-        actionIcon: arrowCircleUp,
-        hoverColor: '#F97316', // Orange
-        redirectTo: '/arts-olympiad'
+        id: 'direct-impact',
+        title: 'Direct Impact',
+        description: '9 of every 10 dollars we receive go directly to our free Art Programs and resources.',
+        icon: Money,
+        borderColor: '#22C55E', // Green
+        iconColor: '#22C55E'
     },
     {
-        id: 'childart-magazine',
-        title: 'ChildArt Magazine',
-        description: 'A quarterly magazine nurturing creativity, empathy, and global citizenship—ad-free since 1998.',
-        icon: childArtMagazine,
-        actionIcon: arrowCircleUp,
-        hoverColor: '#3B82F6', // Blue
-        redirectTo: '/childart-magazine'
+        id: 'program-outreach',
+        title: 'Program Outreach',
+        description: 'We support children in USA and in +80 countries through in-country partnerships.',
+        icon: Earth,
+        borderColor: '#3B82F6', // Blue
+        iconColor: '#3B82F6'
     },
     {
-        id: 'world-childrens-festival',
-        title: 'World Childrens Festival',
-        description: 'A global celebration of young talent, hosted every four years at the U.S. National Mall. Free and open to all.',
-        icon: worldChildrensFestival,
-        actionIcon: arrowCircleUp,
-        hoverColor: '#EF4444', // Red
-        redirectTo: '/world-childrens-festival'
+        id: 'theory-of-change',
+        title: 'Theory of Change',
+        description: 'We foster personal growth as artist-athletes and cultivate social impact through creative empathy.',
+        icon: Donator,
+        borderColor: '#EF4444', // Red
+        iconColor: '#EF4444'
     }
 ];

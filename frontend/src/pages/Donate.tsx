@@ -7,7 +7,8 @@ import Portrait1 from '@/assets/donate/Portrait1.png';
 import Portrait2 from '@/assets/donate/Portrait2.png';
 import { Button } from '@/components/ui/button';
 import { HeartIcon } from 'lucide-react';
-import { childArtExhibition } from '@/data/donate/childArtExhibition';
+import { childArtExhibition } from '@/data/donate/childArtExhibitionData';
+import DonationUsageCards from '@/components/donate/DonationUsageCards';
 
 export default function Donate() {
   return (
@@ -214,6 +215,12 @@ export default function Donate() {
         </div>
 
       </div>
+
+
+        {/*Donation Usages*/}
+        <div>
+          <DonationUsageCards />
+        </div>
 
 
     </div>

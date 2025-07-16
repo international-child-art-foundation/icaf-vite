@@ -5,6 +5,10 @@ interface CurvedImageProps {
   curveStyle?: RibbonStyleTypes;
   darkened?: boolean;
   gradientDefinition?: string;
+  objectFit?: 'cover' | 'contain' | 'fill' | 'scale-down' | 'none';
+  objectPosition?: string; //'center top', 'center bottom', '50% 30%'
+  scale?: number;
+  height?: string;
 }
 
 export const CurvedImage = ({
@@ -12,6 +16,10 @@ export const CurvedImage = ({
   curveStyle = 'Ellipse',
   darkened = true,
   gradientDefinition,
+  objectFit = 'cover',
+  objectPosition = 'center',
+  scale = 1,
+  height = '550px',
 }: CurvedImageProps) => {
   return (
     <>
@@ -23,8 +31,14 @@ export const CurvedImage = ({
         </defs>
       </svg>
 
-      <div className="relative grid h-[600px] w-full grid-cols-1 grid-rows-1">
-        <div className="clipped-image-bottom relative col-start-1 row-start-1 grid h-[570px] w-full overflow-hidden md:h-[580px]">
+      <div className={`relative grid w-full grid-cols-1 grid-rows-1`} style={{ height }}>
+        <div 
+          className="clipped-image-bottom relative col-start-1 row-start-1 grid w-full overflow-hidden"
+          style={{ height: `calc(${height} + 20px)` }} 
+        >
+         <div className={`bg-tertiary-blue col-start-1 row-start-1 h-full w-full`} />
+        </div>
+        <div className="clipped-image-bottom relative col-start-1 row-start-1 grid h-full w-full overflow-hidden">
           <div
             className={`bg-tertiary-blue col-start-1 row-start-1 h-full w-full`}
           />
@@ -33,7 +47,13 @@ export const CurvedImage = ({
         <div className="clipped-image-bottom relative col-start-1 row-start-1 h-[550px] w-full overflow-hidden">
           <img
             src={src}
-            className="col-start-1 row-start-1 min-h-[550px] w-full object-cover"
+            className="col-start-1 row-start-1 w-full h-full"
+            style={{
+              objectFit: objectFit,
+              objectPosition: objectPosition,
+              transform: `scale(${scale})`,
+              transformOrigin: 'center center'
+            }}
             alt="Header image"
           />
         </div>

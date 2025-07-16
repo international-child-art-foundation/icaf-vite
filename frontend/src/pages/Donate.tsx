@@ -212,6 +212,7 @@ export default function Donate() {
             ))}
           </div>
         </div>
+
       </div>
 
 

@@ -39,14 +39,13 @@ export const childArtExhibition: ChildArtwork[] = [
         location: 'Bulgaria',
         alt: 'A dynamic painting depicting three cyclists in red, yellow, and green jerseys, riding bicycles with large, brightly colored, overlapping circular wheels. The background is a dark blue sky with white speckles.'
     },
-
     {
-        id: 'jonathan-stearns',
-        image: ChildArtJonathan,
-        artistName: 'Jonathan Stearns',
-        age: 12,
-        location: 'California',
-        alt: 'A painting with a dramatic sky in shades of orange, red, and purple. In the foreground, there\'s a dark, stylized cityscape with a large, gnarled tree extending from the bottom right, intertwining with the buildings.'
+        id: 'aishling-kelly',
+        image: ChildArtAishling,
+        artistName: 'Aishling Kelly',
+        age: 11,
+        location: 'Arizona',
+        alt: 'An abstract or impressionistic painting with a sepia or golden-brown tone. It features several stylized human figures in various acrobatic or dance poses, surrounded by and interacting with large, overlapping circular shapes.'
     },
     {
         id: 'michael-lanfranco',
@@ -57,11 +56,11 @@ export const childArtExhibition: ChildArtwork[] = [
         alt: 'A watercolor painting depicting a tall, dark grey skyscraper on the right, with smaller buildings to its left. A grey flying saucer (UFO) is visible in the sky above the smaller buildings. A person\'s head and shoulders are visible in the lower-middle part of the image.'
     },
     {
-        id: 'aishling-kelly',
-        image: ChildArtAishling,
-        artistName: 'Aishling Kelly',
-        age: 11,
-        location: 'Arizona',
-        alt: 'An abstract or impressionistic painting with a sepia or golden-brown tone. It features several stylized human figures in various acrobatic or dance poses, surrounded by and interacting with large, overlapping circular shapes.'
+        id: 'jonathan-stearns',
+        image: ChildArtJonathan,
+        artistName: 'Jonathan Stearns',
+        age: 12,
+        location: 'California',
+        alt: 'A painting with a dramatic sky in shades of orange, red, and purple. In the foreground, there\'s a dark, stylized cityscape with a large, gnarled tree extending from the bottom right, intertwining with the buildings.'
     }
 ];

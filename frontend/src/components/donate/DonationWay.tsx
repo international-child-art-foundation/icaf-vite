@@ -37,7 +37,7 @@ export default function DonationWay() {
                     <button
                         key={way.id}
                         type="button"
-                        className={`bg-white rounded-2xl p-6 border-2 ${way.borderColor} hover:shadow-lg transition-all duration-700 ease-in-out cursor-pointer`}
+                        className={`${isExpanded(way.id) ? way.bgColor : 'bg-white'} rounded-2xl p-4 border-4 ${way.borderColor} hover:shadow-lg transition-all duration-700 ease-in-out cursor-pointer`}
                         onClick={() => toggleCard(way.id)}
                     >
                         {/* Icon */}

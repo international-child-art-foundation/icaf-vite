@@ -10,6 +10,7 @@ export interface DonationWay {
     icon: string;
     borderColor: string;
     iconColor: string;
+    bgColor: string;
 }
 
 export const donationWayData: DonationWay[] = [
@@ -20,7 +21,8 @@ export const donationWayData: DonationWay[] = [
         expandedDescription: 'Use any DAF giving platform, such as Fidelity Charitable, Private Bank of America or DAF Giving 360. International Child Art Foundation\'s EIN (Federal Tax ID) is 52-2032649.',
         icon: handshake,
         borderColor: 'border-red-500',
-        iconColor: 'text-red-500'
+        iconColor: 'text-red-500',
+        bgColor: 'bg-red-100'
     },
     {
         id: 'legacy-giving',
@@ -35,7 +37,8 @@ export const donationWayData: DonationWay[] = [
         ],
         icon: gift,
         borderColor: 'border-orange-500',
-        iconColor: 'text-orange-500'    
+        iconColor: 'text-orange-500',
+        bgColor: 'bg-orange-100'
     },
     {
         id: 'corporate-matching',
@@ -44,6 +47,7 @@ export const donationWayData: DonationWay[] = [
         expandedDescription: 'Many companies match employee donations as part of their social responsibility programs. Check with your employer, your gift to ICAF could be doubled or even tripled, at no extra cost to you.',
         icon: users,
         borderColor: 'border-blue-500',
-        iconColor: 'text-blue-500'
+        iconColor: 'text-blue-500',
+        bgColor: 'bg-blue-100'
     }
 ];

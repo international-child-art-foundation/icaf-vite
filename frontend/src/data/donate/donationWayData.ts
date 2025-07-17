@@ -35,7 +35,7 @@ export const donationWayData: DonationWay[] = [
         ],
         icon: gift,
         borderColor: 'border-orange-500',
-        iconColor: 'text-orange-500'
+        iconColor: 'text-orange-500'    
     },
     {
         id: 'corporate-matching',

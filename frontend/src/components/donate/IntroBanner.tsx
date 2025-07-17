@@ -4,7 +4,7 @@ import IntroBannerImg from '@/assets/donate/IntroBanner.png';
 
 const IntroBanner: React.FC = () => {
     return (
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="w-full py-12">
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                 <div className="flex flex-col lg:flex-row">
                     {/* Left Section - Text and Button */}

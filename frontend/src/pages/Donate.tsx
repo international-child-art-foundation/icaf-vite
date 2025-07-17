@@ -14,6 +14,7 @@ import IntroBanner from '@/components/donate/IntroBanner';
 import DonationUsageCards from '@/components/donate/DonationUsageCards';
 import DonationWay from '@/components/donate/DonationWay';
 import groupswCapitol from '@/assets/donate/groupswCapitol.png';
+import { CircleArrowUp } from 'lucide-react';
 
 export default function Donate() {
   return (
@@ -208,21 +209,49 @@ export default function Donate() {
       </div>
 
       {/*Quote Banner*/}
-      <div>
+      <div className="px-8 md:px-8 lg:px-20">
         <QuoteBanner />
       </div>
-      
-      {/*How We Make It Happen*/}
-      <div>
-        <DonationUsageCards />
-      </div>
 
+      {/*How We Make It Happen*/}
       <div className="px-8 md:px-8 lg:px-20">
+        <DonationUsageCards />
         <img src={groupswCapitol} alt="groupsqCapitol" className="w-full h-full rounded-2xl" />
       </div>
 
       {/*More Ways to Give*/}
-      <DonationWay />
+      <div className="px-8 md:px-8 lg:px-20">
+        <DonationWay />
+      </div>
+
+      {/* Final Call-to-Action Section */}
+      <div className="bg-white py-16">
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Main Message */}
+          <h2 className="text-3xl md:text-4xl font-bold text-black mb-8">
+            Create a <span className="font-bold">brighter future</span> with your donation <span className="font-bold">today!</span>
+          </h2>
+
+          {/* Donate Button */}
+          <button className="bg-secondary-yellow text-black font-bold py-4 px-8 rounded-lg mb-12 hover:bg-secondary-yellow/90 transition-colors flex items-center justify-center gap-2 mx-auto">
+            <HeartIcon className="w-5 h-5" />
+            DONATE IN 60 SECONDS
+          </button>
+
+          {/* Scroll to Top */}
+          <div className="flex flex-col items-center gap-2">
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className=""
+            >
+              <CircleArrowUp className="w-10 h-10 text-secondary-blue" />
+            </button>
+            <span className="text-sm text-gray-500">Scroll to top</span>
+          </div>
+        </div>
+      </div>
+
+
     </div>
   );
 }

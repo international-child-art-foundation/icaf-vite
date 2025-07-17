@@ -10,11 +10,11 @@ export default function HowWeMakeItHappen() {
                 </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {DonationUsageData.map((item) => (
                     <div
                         key={item.id}
-                        className="bg-white rounded-lg p-6 border-2 transition-all duration-300 hover:shadow-lg"
+                        className="bg-white rounded-2xl p-6 border-2 transition-all duration-300 hover:shadow-lg"
                         style={{ borderColor: item.borderColor }}
                     >
                         <div className="flex items-center gap-4">

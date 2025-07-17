@@ -12,6 +12,8 @@ import DonationUsageOrgCards from '@/components/donate/DonationUsageOrgCards';
 import QuoteBanner from '@/components/donate/QuoteBanner';
 import IntroBanner from '@/components/donate/IntroBanner';
 import DonationUsageCards from '@/components/donate/DonationUsageCards';
+import DonationWay from '@/components/donate/DonationWay';
+import groupswCapitol from '@/assets/donate/groupswCapitol.png';
 
 export default function Donate() {
   return (
@@ -203,18 +205,24 @@ export default function Donate() {
         <div>
           <DonationUsageOrgCards />
         </div>
-
-        {/*Quote Banner*/}
-        <div>
-          <QuoteBanner />
-        </div>
       </div>
 
+      {/*Quote Banner*/}
+      <div>
+        <QuoteBanner />
+      </div>
+      
+      {/*How We Make It Happen*/}
+      <div>
+        <DonationUsageCards />
+      </div>
 
-        {/*How We Make It Happen*/}
-        <div>
-          <DonationUsageCards/>
-        </div>
+      <div className="px-8 md:px-8 lg:px-20">
+        <img src={groupswCapitol} alt="groupsqCapitol" className="w-full h-full rounded-2xl" />
+      </div>
+
+      {/*More Ways to Give*/}
+      <DonationWay />
     </div>
   );
 }

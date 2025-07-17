@@ -32,7 +32,7 @@ export default function DonationWay() {
             </div>
 
             {/* Cards - Grid Layout */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {donationWayData.map((way) => (
                     <button
                         key={way.id}

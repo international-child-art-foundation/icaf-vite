@@ -15,6 +15,7 @@ import DonationUsageCards from '@/components/donate/DonationUsageCards';
 import DonationWay from '@/components/donate/DonationWay';
 import groupswCapitol from '@/assets/donate/groupswCapitol.png';
 import { CircleArrowUp } from 'lucide-react';
+import DonateForm from '@/components/donate/DonateForm';
 
 
 export default function Donate() {
@@ -60,74 +61,7 @@ export default function Donate() {
           </div>
 
           {/* Right Side - Donation Form */}
-          <div className="font-montserrat hidden md:block w-full md:w-1/2 md:pl-8 lg:pl-20 md:pr-8 lg:pr-20">
-            <div className="max-w-md">
-              {/* Donation Link */}
-              <div className="mb-6">
-                <a href="#" className="text-white text-sm hover:text-secondary-yellow flex items-center gap-2">
-                  <span>Donate via Every.org using card, Apple Pay & more</span>
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </a>
-              </div>
-
-              {/* Preset Amount Buttons */}
-              <div className="mb-6">
-                <div className="grid grid-cols-4 gap-2 mb-4">
-                  <button className="px-3 py-2 text-sm border border-white/30 rounded text-white hover:bg-white/10 transition-colors">
-                    $200
-                  </button>
-                  <button className="px-3 py-2 text-sm border border-white/30 rounded text-white hover:bg-white/10 transition-colors">
-                    $100
-                  </button>
-                  <button className="px-3 py-2 text-sm border border-secondary-blue rounded bg-secondary-blue/20 text-white">
-                    $50
-                  </button>
-                  <button className="px-3 py-2 text-sm border border-white/30 rounded text-white hover:bg-white/10 transition-colors">
-                    Other
-                  </button>
-                </div>
-
-                {/* Amount Input and Frequency */}
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value="$50"
-                    className="flex-1 px-3 py-2 bg-white/10 border border-white/30 rounded text-white placeholder-white/70"
-                    readOnly
-                  />
-                  <select className="px-3 py-2 bg-white/10 border border-white/30 rounded text-white">
-                    <option>One-time</option>
-                    <option>Monthly</option>
-                    <option>Yearly</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Donate Button */}
-              <button className="w-full bg-secondary-yellow text-black font-bold py-4 px-6 rounded-lg mb-4 hover:bg-secondary-yellow/90 transition-colors flex items-center justify-center gap-2">
-                <HeartIcon className="w-5 h-5" />
-                DONATE IN 60 SECONDS
-              </button>
-
-              {/* Tax ID */}
-              <p className="text-white text-xs text-center mb-6">
-                International Child Art Foundation's Tax ID (EIN) 52-2032649
-              </p>
-
-              {/* Other Donation Methods */}
-              <div className="text-center">
-                <div className="border-t border-white/30 mb-4"></div>
-                <h4 className="text-white text-sm font-semibold mb-4">Other Donation Methods</h4>
-                <div className="flex justify-center gap-6">
-                  <a href="#" className="text-white text-xs hover:text-secondary-yellow">Network for Good</a>
-                  <a href="#" className="text-white text-xs hover:text-secondary-yellow">JustGiving</a>
-                  <a href="#" className="text-white text-xs hover:text-secondary-yellow">Send a Check</a>
-                </div>
-              </div>
-            </div>
-          </div>
+          <DonateForm />
         </div>
       </div>
 

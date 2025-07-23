@@ -234,10 +234,24 @@ export default function Donate() {
           </h2>
 
           {/* Donate Button */}
-          <button className="bg-secondary-yellow text-black font-bold py-4 px-8 rounded-lg mb-12 hover:bg-secondary-yellow/90 transition-colors flex items-center justify-center gap-2 mx-auto">
-            <HeartIcon className="w-5 h-5" />
-            DONATE IN 60 SECONDS
-          </button>
+          <Button
+            asChild
+            variant="secondary"
+            className="mt-4 mb-12 h-14 self-start rounded-full px-6 text-base tracking-wide"
+          >
+            <a
+              href="https://icaf.org/donate"
+              target="blank"
+              rel="noopener noreferrer"
+              className="flex items-center"
+            >
+              <HeartIcon
+                strokeWidth={2}
+                className="!h-5 !w-5 stroke-black lg:mr-0 lg:!h-5 lg:!w-5"
+              />
+              DONATE IN 60 SECONDS
+            </a>
+          </Button>
 
           {/* Scroll to Top */}
           <div className="flex flex-col items-center gap-2">
@@ -245,7 +259,7 @@ export default function Donate() {
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className=""
             >
-              <CircleArrowUp className="w-10 h-10 text-secondary-blue" />
+              <CircleArrowUp className="w-10 h-10 text-secondary-black" />
             </button>
             <span className="text-sm text-gray-500">Scroll to top</span>
           </div>

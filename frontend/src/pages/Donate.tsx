@@ -16,9 +16,10 @@ import DonationWay from '@/components/donate/DonationWay';
 import groupswCapitol from '@/assets/donate/groupswCapitol.png';
 import { CircleArrowUp } from 'lucide-react';
 
+
 export default function Donate() {
   return (
-    <div className="relative w-full">
+    <div className="relative w-full font-montserrat">
       {/* Header */}
       <div className="grid h-[550px] grid-cols-1 grid-rows-1">
         <div className="col-start-1 row-start-1">
@@ -38,14 +39,14 @@ export default function Donate() {
           {/* Left Side - Text Content */}
           <div className="w-full md:w-1/2">
             <div className="mb-8">
-              <h1 className="mb-2 text-5xl font-bold text-white md:text-6xl lg:text-7xl text-left">
+              <h1 className="font-montserrat mb-2 text-5xl font-bold text-white md:text-6xl lg:text-7xl text-left">
                 Art Changes Lives,
               </h1>
-              <h2 className="text-4xl font-bold text-secondary-yellow md:text-5xl lg:text-6xl text-left">
+              <h2 className="font-montserrat text-4xl font-bold text-secondary-yellow md:text-5xl lg:text-6xl text-left">
                 You Can Too.
               </h2>
             </div>
-            <p className="text-base text-white md:text-lg lg:text-xl text-left mb-6">
+            <p className="font-montserrat text-base text-white md:text-lg lg:text-xl text-left mb-6">
               Your gift funds art programs for underserved schools, spotlights young artists at the World Children's Festival, and delivers creativity without ads through ChildArt Magazine. Empower children to create their future—donate today!
             </p>
             {/* Transparency Logo */}
@@ -59,7 +60,7 @@ export default function Donate() {
           </div>
 
           {/* Right Side - Donation Form */}
-          <div className="hidden md:block w-full md:w-1/2 md:pl-8 lg:pl-20 md:pr-8 lg:pr-20">
+          <div className="font-montserrat hidden md:block w-full md:w-1/2 md:pl-8 lg:pl-20 md:pr-8 lg:pr-20">
             <div className="max-w-md">
               {/* Donation Link */}
               <div className="mb-6">
@@ -131,7 +132,7 @@ export default function Donate() {
       </div>
 
       {/* About ICAF */}
-      <div className="px-8 md:px-8 lg:px-20 py-12">
+      <div className="px-8 md:px-8 lg:px-20 py-12 text-center">
         {/* Main Heading */}
         <div className="mb-6">
           <h2 className="text-3xl md:text-4xl font-bold text-black mb-3">
@@ -139,7 +140,7 @@ export default function Donate() {
           </h2>
 
           {/* Ranking Text with Award Icon */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2">
             <img src={Award} alt="Award" className="w-5 h-5" />
             <p className="text-base text-black">
               We have been consistently ranked among the{' '}

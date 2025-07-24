@@ -17,63 +17,132 @@ import groupswCapitol from '@/assets/donate/groupswCapitol.png';
 import { CircleArrowUp } from 'lucide-react';
 import DonateForm from '@/components/donate/DonateForm';
 
-
 export default function Donate() {
   return (
     <div className="relative w-full font-montserrat">
       {/* Header */}
-      <div className="grid h-[550px] grid-cols-1 grid-rows-1">
-        <div className="col-start-1 row-start-1">
-          <CurvedImage
-            src={MalaysiaChildren}
-            curveStyle={'Ellipse'}
-            darkened={true}
-            gradientDefinition={'bg-gradient-to-b from-black/70 to-black/0'}
-            objectFit="cover"
-            objectPosition="center center"
-            scale={1}
-          />
+      <div className="relative">
+        {/* Desktop Layout (1280px+) - Side by side */}
+        <div className="hidden xl:grid h-[550px] grid-cols-1 grid-rows-1">
+          <div className="col-start-1 row-start-1">
+            <CurvedImage
+              src={MalaysiaChildren}
+              curveStyle={'Ellipse'}
+              darkened={true}
+              gradientDefinition={'bg-gradient-to-b from-black/70 to-black/0'}
+              objectFit="cover"
+              objectPosition="center center"
+              scale={1}
+            />
+          </div>
+          <div className="z-20 col-start-1 row-start-1 flex justify-between items-center px-8 md:px-8 lg:px-20">
+            <div className="w-full md:w-1/2">
+              <div className="mb-8">
+                <h1 className="font-montserrat mb-2 text-5xl font-bold text-white md:text-6xl lg:text-7xl text-left">
+                  Art Changes Lives,
+                </h1>
+                <h2 className="font-montserrat text-4xl font-bold text-secondary-yellow md:text-5xl lg:text-6xl text-left">
+                  You Can Too.
+                </h2>
+              </div>
+              <p className="font-montserrat text-base text-white md:text-lg lg:text-xl text-left mb-6">
+                Your gift funds art programs for underserved schools, spotlights young artists at the World Children's Festival, and delivers creativity without ads through ChildArt Magazine. Empower children to create their future—donate today!
+              </p>
+              <img
+                src={TransparencyLogo}
+                alt="Transparent Logo"
+                className="h-8 w-auto md:h-10"
+              />
+            </div>
+            <DonateForm />
+          </div>
         </div>
 
-        {/* Text Overlay */}
-        <div className="z-20 col-start-1 row-start-1 flex justify-between items-center px-8 md:px-8 lg:px-20">
-          {/* Left Side - Text Content */}
-          <div className="w-full md:w-1/2">
-            <div className="mb-8">
-              <h1 className="font-montserrat mb-2 text-5xl font-bold text-white md:text-6xl lg:text-7xl text-left">
-                Art Changes Lives,
-              </h1>
-              <h2 className="font-montserrat text-4xl font-bold text-secondary-yellow md:text-5xl lg:text-6xl text-left">
-                You Can Too.
-              </h2>
-            </div>
-            <p className="font-montserrat text-base text-white md:text-lg lg:text-xl text-left mb-6">
-              Your gift funds art programs for underserved schools, spotlights young artists at the World Children's Festival, and delivers creativity without ads through ChildArt Magazine. Empower children to create their future—donate today!
-            </p>
-            {/* Transparency Logo */}
-
-            <img
-              src={TransparencyLogo}
-              alt="Transparent Logo"
-              className="h-8 w-auto md:h-10"
+        {/* Tablet Layout (1024px) - Stacked with form below image */}
+        <div className="hidden lg:block xl:hidden">
+          <div className="relative h-[400px]">
+            <CurvedImage
+              src={MalaysiaChildren}
+              curveStyle={'Ellipse'}
+              darkened={true}
+              gradientDefinition={'bg-gradient-to-b from-black/70 to-black/0'}
+              objectFit="cover"
+              objectPosition="center center"
+              scale={1}
             />
-
+            <div className="absolute inset-0 z-20 flex flex-col justify-center px-8 lg:px-20 text-center">
+              <div className="mb-6">
+                <h1 className="font-montserrat mb-2 text-4xl font-bold text-white lg:text-5xl">
+                  Art Changes Lives,
+                </h1>
+                <h2 className="font-montserrat text-3xl font-bold text-secondary-yellow lg:text-4xl">
+                  You Can Too.
+                </h2>
+              </div>
+              <p className="font-montserrat text-base text-white lg:text-lg mb-4 max-w-2xl mx-auto">
+                Your gift funds art programs for underserved schools, spotlights young artists at the World Children's Festival, and delivers creativity without ads through ChildArt Magazine. Empower children to create their future—donate today!
+              </p>
+              <div className="flex justify-center">
+                <img
+                  src={TransparencyLogo}
+                  alt="Transparent Logo"
+                  className="h-8 w-auto"
+                />
+              </div>
+            </div>
           </div>
+          <div className="bg-white px-8 lg:px-20 py-12">
+            <div className="max-w-2xl mx-auto">
+              <DonateForm isMobile={true} isTablet={true} />
+            </div>
+          </div>
+        </div>
 
-          {/* Right Side - Donation Form */}
-          <DonateForm />
+        {/* Mobile Layout (768px and below) - Compact stacked */}
+        <div className="lg:hidden">
+          <div className="relative h-[350px]">
+            <CurvedImage
+              src={MalaysiaChildren}
+              curveStyle={'Ellipse'}
+              darkened={true}
+              gradientDefinition={'bg-gradient-to-b from-black/70 to-black/0'}
+              objectFit="cover"
+              objectPosition="center center"
+              scale={1}
+            />
+            <div className="absolute inset-0 z-20 flex flex-col justify-center px-6 text-center">
+              <div className="mb-4">
+                <h1 className="font-montserrat mb-2 text-2xl font-bold text-white md:text-3xl">
+                  Art Changes Lives,
+                </h1>
+                <h2 className="font-montserrat text-xl font-bold text-secondary-yellow md:text-2xl">
+                  You Can Too.
+                </h2>
+              </div>
+              <p className="font-montserrat text-sm text-white md:text-base mb-4">
+                Your gift funds art programs for underserved schools, spotlights young artists at the World Children's Festival, and delivers creativity without ads through ChildArt Magazine. Empower children to create their future—donate today!
+              </p>
+              <div className="flex justify-center">
+                <img
+                  src={TransparencyLogo}
+                  alt="Transparent Logo"
+                  className="h-6 w-auto"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="bg-white px-6 py-8">
+            <DonateForm isMobile={true} />
+          </div>
         </div>
       </div>
 
       {/* About ICAF */}
       <div className="px-8 md:px-8 lg:px-20 py-12 text-center">
-        {/* Main Heading */}
         <div className="mb-6">
           <h2 className="text-3xl md:text-4xl font-bold text-black mb-3">
             About ICAF
           </h2>
-
-          {/* Ranking Text with Award Icon */}
           <div className="flex items-center justify-center gap-2">
             <img src={Award} alt="Award" className="w-5 h-5" />
             <p className="text-base text-black">
@@ -85,14 +154,11 @@ export default function Donate() {
           </div>
         </div>
 
-        {/*Intro Banner*/}
         <div>
           <IntroBanner />
         </div>
 
-
         <div className="mb-6">
-          {/* Child Art Exhibitions */}
           <div className="mt-16">
             <div className="text-center mb-8">
               <h3 className="text-3xl md:text-4xl font-bold text-black mb-4">
@@ -101,7 +167,6 @@ export default function Donate() {
               <p className="text-base text-black mb-6">
                 Every piece of art here tells a story of hope and resilience. Here's a glimpse of the talent you're supporting.
               </p>
-              {/* Social Proof */}
               <div className="flex items-center justify-center gap-2 mb-8">
                 <div className="flex -space-x-2">
                   <div className="w-8 h-8 bg-secondary-blue rounded-full border-2 border-white"></div>
@@ -113,7 +178,6 @@ export default function Donate() {
               </div>
             </div>
 
-            {/* Artwork Grid - 2 rows, 3 columns */}
             <div className="flex flex-col gap-8 items-center">
               {Array.from({ length: 2 }).map((_, rowIdx) => (
                 <div key={rowIdx} className="flex flex-row gap-8 w-full justify-center">
@@ -137,37 +201,30 @@ export default function Donate() {
           </div>
         </div>
 
-        {/*Donation Usages*/}
         <div>
           <DonationUsageOrgCards />
         </div>
       </div>
 
-      {/*Quote Banner*/}
       <div className="px-8 md:px-8 lg:px-20">
         <QuoteBanner />
       </div>
 
-      {/*How We Make It Happen*/}
       <div className="px-8 md:px-8 lg:px-20">
         <DonationUsageCards />
         <img src={groupswCapitol} alt="groupsqCapitol" className="w-full h-full rounded-2xl" />
       </div>
 
-      {/*More Ways to Give*/}
       <div className="px-8 md:px-8 lg:px-20">
         <DonationWay />
       </div>
 
-      {/* Final Call-to-Action Section */}
       <div className="bg-white py-16">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Main Message */}
           <h2 className="text-3xl md:text-4xl font-bold text-black mb-8">
             Create a <span className="font-bold">brighter future</span> with your donation <span className="font-bold">today!</span>
           </h2>
 
-          {/* Donate Button */}
           <Button
             asChild
             variant="secondary"
@@ -187,7 +244,6 @@ export default function Donate() {
             </a>
           </Button>
 
-          {/* Scroll to Top */}
           <div className="flex flex-col items-center gap-2">
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -199,8 +255,6 @@ export default function Donate() {
           </div>
         </div>
       </div>
-
-
     </div>
   );
 }

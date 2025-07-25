@@ -5,6 +5,7 @@
   "workspaces": [
     "frontend",
     "backend",
+    "backend/infra",
     "shared"
   ],
   "scripts": {

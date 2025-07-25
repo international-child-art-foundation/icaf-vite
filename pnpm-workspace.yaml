@@ -3,4 +3,5 @@ ignoredBuiltDependencies:
 packages:
   - "frontend"
   - "backend"
+  - "backend/infra"
   - "shared"

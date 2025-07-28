@@ -4,6 +4,9 @@ module.exports = {
   content: ['./index.html', './src/**/*.{html,js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      backgroundOpacity: {
+        8: '0.08',
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
@@ -31,11 +34,11 @@ module.exports = {
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
           foreground: 'hsl(var(--secondary-foreground))',
-          blue: 'hsl(var(--secondary-blue))',
-          green: 'hsl(var(--secondary-green))',
-          yellow: 'hsl(var(--secondary-yellow))',
-          pink: 'hsl(var(--secondary-pink))',
-          purple: 'hsl(var(--secondary-purple))',
+          pink: 'hsl(var(--secondary-pink) / <alpha-value>)',
+          blue: 'hsl(var(--secondary-blue) / <alpha-value>)',
+          green: 'hsl(var(--secondary-green) / <alpha-value>)',
+          yellow: 'hsl(var(--secondary-yellow) / <alpha-value>)',
+          purple: 'hsl(var(--secondary-purple) / <alpha-value>)',
         },
         tertiary: {
           blue: 'hsl(var(--tertiary-blue))',

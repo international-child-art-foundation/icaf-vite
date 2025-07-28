@@ -1,75 +1,68 @@
 import React from 'react';
 import { donationUsageData } from '../../data/donate/donationUsageOrgData';
+import { FlairColorMap } from '../shared/FlairColorMap';
 
 import { CircleArrowRight } from 'lucide-react';
 
 const DonationUsageCards: React.FC = () => {
-    const handleCardClick = (redirectTo: string) => {
-        console.log(`Redirecting to: ${redirectTo}`);
-    };
+  // TODO: Replace with href once pages are linkable
+  const handleCardClick = (redirectTo: string) => {
+    console.log(`Redirecting to: ${redirectTo}`);
+  };
 
-    return (
-        <div className="w-full py-12">
-            {/* Header Section */}
-            <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                    Where your support goes
-                </h2>
-                <p className="text-lg text-gray-600">
-                    90% of your donation directly funds:
-                </p>
+  return (
+    <div className="w-full py-12">
+      {/* Header Section */}
+      <div className="mb-12 text-center">
+        <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
+          Where your support goes
+        </h2>
+        <p className="text-lg text-gray-600">
+          90% of your donation directly funds:
+        </p>
+      </div>
+
+      {/* Cards Grid */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
+        {donationUsageData.map((card) => (
+          <button
+            type="button"
+            key={card.id}
+            className={`group w-full cursor-pointer rounded-2xl border-2 border-white ${FlairColorMap[card.color].borderHover} bg-opacity-8 p-6 text-left shadow-[2px_4px_4px_rgba(54,53,53,0.1)] transition-all duration-300 hover:shadow-xl lg:p-8`}
+            onClick={() => handleCardClick(card.redirectTo)}
+            aria-label={`Learn more about ${card.title}`}
+          >
+            {/* Icon Section */}
+            <div className="mb-6 flex justify-center">
+              <div className="flex h-20 w-20 items-center justify-center lg:h-24 lg:w-24">
+                <img
+                  src={card.icon}
+                  alt={card.title}
+                  className="h-full w-full object-contain"
+                />
+              </div>
             </div>
 
-            {/* Cards Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-                {donationUsageData.map((card) => (
-                    <button
-                        key={card.id}
-                        className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 lg:p-8 border border-gray-100 cursor-pointer group text-left w-full"
-                        style={{
-                            borderColor: 'transparent',
-                            '--hover-color': card.hoverColor
-                        } as React.CSSProperties}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = card.hoverColor;
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = 'transparent';
-                        }}
-                        onClick={() => handleCardClick(card.redirectTo)}
-                        aria-label={`Learn more about ${card.title}`}
-                    >
-                        {/* Icon Section */}
-                        <div className="flex justify-center mb-6">
-                            <div className="w-20 h-20 lg:w-24 lg:h-24 flex items-center justify-center">
-                                <img
-                                    src={card.icon}
-                                    alt={card.title}
-                                    className="w-full h-full object-contain"
-                                />
-                            </div>
-                        </div>
+            {/* Content Section */}
+            <div className="text-center">
+              <h3 className="mb-4 text-xl font-bold text-gray-900 lg:text-2xl">
+                {card.title}
+              </h3>
+              <p className="mb-6 text-sm leading-relaxed text-gray-600 lg:text-base">
+                {card.description}
+              </p>
 
-                        {/* Content Section */}
-                        <div className="text-center">
-                            <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-4">
-                                {card.title}
-                            </h3>
-                            <p className="text-gray-600 text-sm lg:text-base leading-relaxed mb-6">
-                                {card.description}
-                            </p>
-
-                            {/* Action Button */}
-                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white group-hover:scale-110 transition-transform duration-200">
-                                {/* <ArrowRightIcon className="w-6 h-6 group-hover:scale-110 transition-transform duration-200" /> */}
-                                <CircleArrowRight />
-                            </div>
-                        </div>
-                    </button>
-                ))}
+              {/* Action Button */}
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white transition-transform duration-200 group-hover:scale-110">
+                {/* <ArrowRightIcon className="w-6 h-6 group-hover:scale-110 transition-transform duration-200" /> */}
+                <CircleArrowRight />
+              </div>
             </div>
-        </div>
-    );
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 };
 
-export default DonationUsageCards; 
+export default DonationUsageCards;

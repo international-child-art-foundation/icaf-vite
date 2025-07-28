@@ -13,4 +13,4 @@ export { default as qatarFoundationLogo } from './f_QatarFoundation.webp';
 export { default as UNESCOLogo } from './f_UNESCO.webp';
 export { default as WHOLogo } from './f_WHO.webp';
 export { default as XRSILogo } from './f_XRSI.webp';
-export { default as INLogo } from './f_INSEA.webp';
+export { default as INLogo } from './f_Insea.webp';

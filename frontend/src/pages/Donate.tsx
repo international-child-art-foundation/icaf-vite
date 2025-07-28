@@ -3,10 +3,10 @@ import MalaysiaChildren from '@/assets/donate/MalaysiaChildren.png';
 import TransparencyLogo from '@/assets/donate/TransparencyLogo.png';
 import Award from '@/assets/donate/award-alt.svg';
 
-import Portrait1 from '@/assets/donate/Portrait1.png';
-import Portrait2 from '@/assets/donate/Portrait2.png';
+import Portrait1 from '@/assets/donate/Portrait1.svg';
+import Portrait2 from '@/assets/donate/Portrait2.svg';
 import { Button } from '@/components/ui/button';
-import { HeartIcon } from 'lucide-react';
+import { HeartIcon, X } from 'lucide-react';
 import { childArtExhibition } from '@/data/donate/childArtExhibitionData';
 import DonationUsageOrgCards from '@/components/donate/DonationUsageOrgCards';
 import QuoteBanner from '@/components/donate/QuoteBanner';
@@ -16,8 +16,22 @@ import DonationWay from '@/components/donate/DonationWay';
 import groupswCapitol from '@/assets/donate/groupswCapitol.png';
 import { CircleArrowUp } from 'lucide-react';
 import DonateForm from '@/components/donate/DonateForm';
+import Icaflogo from '@/assets/donate/icafLogo.svg';
+import { useState } from 'react';
 
 export default function Donate() {
+  const [showRedirectModal, setShowRedirectModal] = useState(false);
+
+  const handleDonateClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowRedirectModal(true);
+  };
+
+  const handleGotItClick = () => {
+    setShowRedirectModal(false);
+    window.open('https://www.every.org/icaf?search_meta=%7B%22query%22%3A%22international+art+foun%22%7D&donateTo=icaf#/donate/card', '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <div className="relative w-full font-montserrat">
       {/* Header */}
@@ -33,10 +47,11 @@ export default function Donate() {
               objectFit="cover"
               objectPosition="center center"
               scale={1}
+              height="650px"
             />
           </div>
           <div className="z-20 col-start-1 row-start-1 flex justify-between items-center px-8 md:px-8 lg:px-20">
-            <div className="w-full md:w-1/2">
+            <div className="w-full md:w-3/5">
               <div className="mb-8">
                 <h1 className="font-montserrat mb-2 text-5xl font-bold text-white md:text-6xl lg:text-7xl text-left">
                   Art Changes Lives,
@@ -48,11 +63,18 @@ export default function Donate() {
               <p className="font-montserrat text-base text-white md:text-lg lg:text-xl text-left mb-6">
                 Your gift funds art programs for underserved schools, spotlights young artists at the World Children's Festival, and delivers creativity without ads through ChildArt Magazine. Empower children to create their future—donate today!
               </p>
-              <img
-                src={TransparencyLogo}
-                alt="Transparent Logo"
-                className="h-8 w-auto md:h-10"
-              />
+              <a
+                href="https://www.guidestar.org/profile/52-2032649"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cursor-pointer hover:opacity-80 transition-opacity"
+              >
+                <img
+                  src={TransparencyLogo}
+                  alt="Transparent Logo"
+                  className="h-20 w-auto md:h-20"
+                />
+              </a>
             </div>
             <DonateForm />
           </div>
@@ -69,6 +91,7 @@ export default function Donate() {
               objectFit="cover"
               objectPosition="center center"
               scale={1}
+              height="500px"
             />
             <div className="absolute inset-0 z-20 flex flex-col justify-center px-8 lg:px-20 text-center">
               <div className="mb-6">
@@ -83,11 +106,18 @@ export default function Donate() {
                 Your gift funds art programs for underserved schools, spotlights young artists at the World Children's Festival, and delivers creativity without ads through ChildArt Magazine. Empower children to create their future—donate today!
               </p>
               <div className="flex justify-center">
-                <img
-                  src={TransparencyLogo}
-                  alt="Transparent Logo"
-                  className="h-8 w-auto"
-                />
+                <a
+                  href="https://www.guidestar.org/profile/52-2032649"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                >
+                  <img
+                    src={TransparencyLogo}
+                    alt="Transparent Logo"
+                    className="h-20 w-auto"
+                  />
+                </a>
               </div>
             </div>
           </div>
@@ -100,7 +130,7 @@ export default function Donate() {
 
         {/* Mobile Layout (768px and below) - Compact stacked */}
         <div className="lg:hidden">
-          <div className="relative h-[350px]">
+          <div className="relative h-[600px]">
             <CurvedImage
               src={MalaysiaChildren}
               curveStyle={'Ellipse'}
@@ -109,6 +139,7 @@ export default function Donate() {
               objectFit="cover"
               objectPosition="center center"
               scale={1}
+              height="700px"
             />
             <div className="absolute inset-0 z-20 flex flex-col justify-center px-6 text-center">
               <div className="mb-4">
@@ -119,26 +150,33 @@ export default function Donate() {
                   You Can Too.
                 </h2>
               </div>
-              <p className="font-montserrat text-sm text-white md:text-base mb-4">
+              <p className="font-montserrat text-sm text-white md:text-base mb-6">
                 Your gift funds art programs for underserved schools, spotlights young artists at the World Children's Festival, and delivers creativity without ads through ChildArt Magazine. Empower children to create their future—donate today!
               </p>
-              <div className="flex justify-center">
-                <img
-                  src={TransparencyLogo}
-                  alt="Transparent Logo"
-                  className="h-6 w-auto"
-                />
+              <div className="flex justify-center mb-6">
+                <a
+                  href="https://www.guidestar.org/profile/52-2032649"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                >
+                  <img
+                    src={TransparencyLogo}
+                    alt="Transparent Logo"
+                    className="h-10 w-auto"
+                  />
+                </a>
+              </div>
+              <div className="max-w-md mx-auto">
+                <DonateForm isMobile={true} />
               </div>
             </div>
-          </div>
-          <div className="bg-white px-6 py-8">
-            <DonateForm isMobile={true} />
           </div>
         </div>
       </div>
 
       {/* About ICAF */}
-      <div className="px-8 md:px-8 lg:px-20 py-12 text-center">
+      <div className="px-8 md:px-8 lg:px-20 pt-10 pb-12 text-center">
         <div className="mb-6">
           <h2 className="text-3xl md:text-4xl font-bold text-black mb-3">
             About ICAF
@@ -168,9 +206,10 @@ export default function Donate() {
                 Every piece of art here tells a story of hope and resilience. Here's a glimpse of the talent you're supporting.
               </p>
               <div className="flex items-center justify-center gap-2 mb-8">
-                <div className="flex -space-x-2">
-                  <div className="w-8 h-8 bg-secondary-blue rounded-full border-2 border-white"></div>
-                  <div className="w-8 h-8 bg-secondary-yellow rounded-full border-2 border-white"></div>
+                <div className="flex -space-x-2 relative">
+                  <img src={Portrait1} alt="Portrait 1" className="w-8 h-8 rounded-full border-2 border-white object-cover" />
+                  <img src={Portrait2} alt="Portrait 2" className="w-8 h-8 rounded-full border-2 border-white object-cover relative z-10" />
+                  <img src={Portrait1} alt="Portrait 1" className="w-8 h-8 rounded-full border-2 border-white object-cover" />
                 </div>
                 <p className="text-sm text-black">
                   Join 254 others who donated this month!
@@ -178,9 +217,9 @@ export default function Donate() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-8 items-center">
+            <div className="flex flex-row md:flex-col gap-8 items-start justify-center">
               {Array.from({ length: 2 }).map((_, rowIdx) => (
-                <div key={rowIdx} className="flex flex-row gap-8 w-full justify-center">
+                <div key={rowIdx} className="flex flex-col md:flex-row gap-8 w-full justify-center">
                   {childArtExhibition.slice(rowIdx * 3, rowIdx * 3 + 3).map((artwork) => (
                     <div key={artwork.id} className="text-center">
                       <div className="mb-4">
@@ -206,13 +245,24 @@ export default function Donate() {
         </div>
       </div>
 
-      <div className="px-8 md:px-8 lg:px-20">
+      <div className="px-8 md:px-8 lg:px-20 mb-12">
         <QuoteBanner />
       </div>
 
       <div className="px-8 md:px-8 lg:px-20">
-        <DonationUsageCards />
-        <img src={groupswCapitol} alt="groupsqCapitol" className="w-full h-full rounded-2xl" />
+        <div className="text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-black mb-12">
+            How we make it happen
+          </h2>
+        </div>
+        <div className="flex flex-col gap-8 lg:flex-row lg:gap-12 lg:items-stretch 2xl:flex-col 2xl:gap-8">
+          <div className="w-full lg:w-2/5 2xl:w-full">
+            <DonationUsageCards />
+          </div>
+          <div className="w-full lg:w-3/5 2xl:w-full">
+            <img src={groupswCapitol} alt="groupsqCapitol" className="w-full h-auto lg:h-full lg:object-cover 2xl:h-auto rounded-2xl" />
+          </div>
+        </div>
       </div>
 
       <div className="px-8 md:px-8 lg:px-20">
@@ -226,22 +276,15 @@ export default function Donate() {
           </h2>
 
           <Button
-            asChild
             variant="secondary"
             className="mt-4 mb-12 h-14 self-start rounded-full px-6 text-base tracking-wide"
+            onClick={handleDonateClick}
           >
-            <a
-              href="https://icaf.org/donate"
-              target="blank"
-              rel="noopener noreferrer"
-              className="flex items-center"
-            >
-              <HeartIcon
-                strokeWidth={2}
-                className="!h-5 !w-5 stroke-black lg:mr-0 lg:!h-5 lg:!w-5"
-              />
-              DONATE IN 60 SECONDS
-            </a>
+            <HeartIcon
+              strokeWidth={2}
+              className="!h-5 !w-5 stroke-black lg:mr-0 lg:!h-5 lg:!w-5"
+            />
+            DONATE IN 60 SECONDS
           </Button>
 
           <div className="flex flex-col items-center gap-2">
@@ -255,6 +298,43 @@ export default function Donate() {
           </div>
         </div>
       </div>
+
+      {showRedirectModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 relative">
+            <button
+              onClick={() => setShowRedirectModal(false)}
+              className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+
+            <div className="mb-6">
+              <img src={Icaflogo} alt="ICAF Logo" className="w-20 h-15" />
+            </div>
+
+            <h2 className="text-2xl font-bold text-center mb-4 text-gray-800">
+              Heads up!
+            </h2>
+
+            <div className="text-center mb-6">
+              <p className="text-gray-700 leading-relaxed mb-4">
+                You're about to be redirected to Every.org to complete your donation.
+              </p>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                An optional tip to Every.org may appear. You can set it to $0. 100% of your donation will go to ICAF.
+              </p>
+            </div>
+
+            <button
+              onClick={handleGotItClick}
+              className="w-full py-3 px-6 rounded-full font-semibold bg-primary hover:bg-primary/90 text-white transition-colors"
+            >
+              Got it!
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

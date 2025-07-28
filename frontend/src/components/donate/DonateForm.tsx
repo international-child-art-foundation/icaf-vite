@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { HeartIcon, X, Copy } from 'lucide-react';
+import { HeartIcon, X, Copy, Check } from 'lucide-react';
 import JustGiving from '@/assets/donate/DonateForm-JustGiving.svg';
 import NetworkForGood from '@/assets/donate/DonateForm-NetworkForGood.svg';
 import SendCheck from '@/assets/donate/DonateForm-SendACheck.svg';
+import Icaflogo from '@/assets/donate/icafLogo.svg';
 
 const DonationForm = ({ isMobile = false, isTablet = false }) => {
     const [selectedAmount, setSelectedAmount] = useState(50);
@@ -11,10 +12,12 @@ const DonationForm = ({ isMobile = false, isTablet = false }) => {
     const [isCustom, setIsCustom] = useState(false);
     const [frequency, setFrequency] = useState('One-time');
     const [showCheckModal, setShowCheckModal] = useState(false);
+    const [showRedirectModal, setShowRedirectModal] = useState(false);
+    const [isCopied, setIsCopied] = useState(false);
 
     const presetAmounts = [200, 100, 50];
 
-    const handlePresetClick = (amount) => {
+    const handlePresetClick = (amount: number) => {
         setSelectedAmount(amount);
         setIsCustom(false);
         setCustomAmount('');
@@ -26,7 +29,7 @@ const DonationForm = ({ isMobile = false, isTablet = false }) => {
         setCustomAmount('');
     };
 
-    const handleCustomAmountChange = (e) => {
+    const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value.replace(/[^0-9]/g, '');
         setCustomAmount(value);
         if (value) {
@@ -36,12 +39,29 @@ const DonationForm = ({ isMobile = false, isTablet = false }) => {
 
     const handleSendCheckClick = () => {
         setShowCheckModal(true);
+        setIsCopied(false);
     };
 
     const handleCopyAddress = () => {
         const address = `Post Office Box 58133,
 Washington, D.C. 20037`;
         navigator.clipboard.writeText(address);
+        setIsCopied(true);
+
+        // Reset the copied state after 2 seconds
+        setTimeout(() => {
+            setIsCopied(false);
+        }, 2000);
+    };
+
+    const handleDonateClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setShowRedirectModal(true);
+    };
+
+    const handleGotItClick = () => {
+        setShowRedirectModal(false);
+        window.open('https://www.every.org/icaf?search_meta=%7B%22query%22%3A%22international+art+foun%22%7D&donateTo=icaf#/donate/card', '_blank', 'noopener,noreferrer');
     };
 
     const displayAmount = isCustom ? (customAmount || 0) : selectedAmount;
@@ -59,88 +79,91 @@ Washington, D.C. 20037`;
                         </a>
                     </div>
 
-                    <div className="mb-6">
-                        <div className="grid grid-cols-4 gap-2 mb-4">
-                            {presetAmounts.map((amount) => (
+                    {isTablet ? (
+                        <div className="mb-6">
+                            <div className="grid grid-cols-4 gap-2 mb-4">
+                                {presetAmounts.map((amount) => (
+                                    <button
+                                        key={amount}
+                                        onClick={() => handlePresetClick(amount)}
+                                        className={`px-3 py-2 text-sm border rounded transition-all duration-200 ${selectedAmount === amount && !isCustom
+                                            ? 'border-secondary-yellow bg-primary text-secondary-yellow shadow-md'
+                                            : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
+                                            }`}
+                                    >
+                                        ${amount}
+                                    </button>
+                                ))}
                                 <button
-                                    key={amount}
-                                    onClick={() => handlePresetClick(amount)}
-                                    className={`px-3 py-2 text-sm border rounded transition-all duration-200 ${selectedAmount === amount && !isCustom
+                                    onClick={handleOtherClick}
+                                    className={`px-3 py-2 text-sm border rounded transition-all duration-200 ${isCustom
                                         ? 'border-secondary-yellow bg-primary text-secondary-yellow shadow-md'
-                                        : isTablet
-                                            ? 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
-                                            : 'border-white/30 text-white hover:bg-white/10 hover:border-white/50'
+                                        : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
                                         }`}
                                 >
-                                    ${amount}
+                                    Other
                                 </button>
-                            ))}
-                            <button
-                                onClick={handleOtherClick}
-                                className={`px-3 py-2 text-sm border rounded transition-all duration-200 ${isCustom
-                                    ? 'border-secondary-yellow bg-primary text-secondary-yellow shadow-md'
-                                    : isTablet
-                                        ? 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
-                                        : 'border-white/30 text-white hover:bg-white/10 hover:border-white/50'
-                                    }`}
-                            >
-                                Other
-                            </button>
-                        </div>
+                            </div>
 
-                        <div className="flex gap-2">
-                            {isCustom ? (
-                                <div className="flex-1 relative">
-                                    <span className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-sm ${isTablet ? 'text-gray-500' : 'text-white/70'}`}>$</span>
-                                    <input
-                                        type="text"
-                                        value={customAmount}
-                                        onChange={handleCustomAmountChange}
-                                        placeholder="Enter amount"
-                                        className={`w-full pl-8 pr-3 py-2 border rounded transition-all focus:outline-none ${isTablet
-                                            ? 'bg-white border-gray-300 text-gray-700 placeholder-gray-400 focus:border-secondary-yellow'
-                                            : 'bg-white/10 border-white/30 text-white placeholder-white/50 focus:border-secondary-yellow focus:bg-white/15'
-                                            }`}
-                                    />
-                                </div>
-                            ) : (
-                                <input
-                                    type="text"
-                                    value={`$${selectedAmount}`}
-                                    className={`flex-1 px-3 py-2 border rounded ${isTablet
-                                        ? 'bg-gray-50 border-gray-300 text-gray-700'
-                                        : 'bg-white/10 border-white/30 text-white'
-                                        }`}
-                                    readOnly
-                                />
-                            )}
-                            <select
-                                value={frequency}
-                                onChange={(e) => setFrequency(e.target.value)}
-                                className={`px-3 py-2 border rounded transition-all focus:outline-none ${isTablet
-                                    ? 'bg-white border-gray-300 text-gray-700 focus:border-secondary-yellow [&>option]:bg-white [&>option]:text-gray-700'
-                                    : 'bg-white/10 border-white/30 text-white focus:border-secondary-yellow [&>option]:bg-white [&>option]:text-black'
-                                    }`}
-                            >
-                                <option>One-time</option>
-                                <option>Monthly</option>
-                                <option>Yearly</option>
-                            </select>
+                            <div className="relative">
+                                {isCustom ? (
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 z-10">$</span>
+                                        <input
+                                            type="text"
+                                            value={customAmount}
+                                            onChange={handleCustomAmountChange}
+                                            placeholder="Enter amount"
+                                            className="w-full pl-8 pr-24 py-2 border rounded transition-all focus:outline-none bg-white border-gray-300 text-gray-700 placeholder-gray-400 focus:border-secondary-yellow"
+                                        />
+                                        <div className="absolute right-0 top-0 bottom-0 flex items-center">
+                                            <div className="w-px h-4 bg-gray-300"></div>
+                                            <select
+                                                value={frequency}
+                                                onChange={(e) => setFrequency(e.target.value)}
+                                                className="px-3 py-2 bg-transparent border-none text-gray-700 focus:outline-none focus:ring-0 text-sm [&>option]:bg-white [&>option]:text-gray-700"
+                                            >
+                                                <option>One-time</option>
+                                                <option>Monthly</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={`$${selectedAmount}`}
+                                            className="w-full pl-3 pr-24 py-2 border rounded bg-gray-50 border-gray-300 text-gray-700"
+                                            readOnly
+                                        />
+                                        <div className="absolute right-0 top-0 bottom-0 flex items-center">
+                                            <div className="w-px h-4 bg-gray-300"></div>
+                                            <select
+                                                value={frequency}
+                                                onChange={(e) => setFrequency(e.target.value)}
+                                                className="px-3 py-2 bg-transparent border-none text-gray-700 focus:outline-none focus:ring-0 text-sm [&>option]:bg-white [&>option]:text-gray-700"
+                                            >
+                                                <option>One-time</option>
+                                                <option>Monthly</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    ) : null}
 
                     <Button
                         asChild
                         variant="secondary"
                         className="mt-4 h-14 self-start font-bold mb-4 rounded-full px-6 text-base tracking-wide flex items-center justify-center w-full"
+                        onClick={handleDonateClick}
                     >
                         <a
-                            href="https://icaf.org/donate"
-                            target="blank"
-                            rel="noopener noreferrer"
+                            href="#"
                             className="flex items-center gap-2"
                         >
-                            DONATE ${displayAmount} {frequency !== 'One-time' ? frequency.toUpperCase() : 'NOW'}
+                            DONATE IN 60 SECONDS
                             <HeartIcon
                                 strokeWidth={2}
                                 className="!h-5 !w-5 stroke-black lg:!h-5 lg:!w-5"
@@ -202,8 +225,8 @@ Washington, D.C. 20037`;
                                 <X className="w-5 h-5 text-gray-500" />
                             </button>
 
-                            <div className="text-center mb-6">
-                                <div className="text-2xl font-bold text-gray-800">CHILD ART</div>
+                            <div className="mb-6">
+                                <img src={Icaflogo} alt="ICAF Logo" className="w-20 h-15" />
                             </div>
 
                             <h2 className="text-xl font-bold text-center mb-6 text-gray-800">
@@ -219,10 +242,59 @@ Washington, D.C. 20037`;
 
                             <button
                                 onClick={handleCopyAddress}
-                                className="w-full bg-primary hover:bg-primary/90 text-white py-3 px-6 rounded-full font-semibold transition-colors flex items-center justify-center gap-2"
+                                className={`w-full py-3 px-6 rounded-full font-semibold transition-colors flex items-center justify-center gap-2 ${isCopied
+                                    ? 'bg-white text-primary border-2 border-primary'
+                                    : 'bg-primary hover:bg-primary/90 text-white'
+                                    }`}
                             >
-                                <Copy className="w-4 h-4" />
-                                Copy to clipboard
+                                {isCopied ? (
+                                    <>
+                                        <Check className="w-4 h-4" />
+                                        Copied!
+                                    </>
+                                ) : (
+                                    <>
+                                        <Copy className="w-4 h-4" />
+                                        Copy to clipboard
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {showRedirectModal && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 relative">
+                            <button
+                                onClick={() => setShowRedirectModal(false)}
+                                className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+                            >
+                                <X className="w-5 h-5 text-gray-500" />
+                            </button>
+
+                            <div className="mb-6">
+                                <img src={Icaflogo} alt="ICAF Logo" className="w-20 h-15" />
+                            </div>
+
+                            <h2 className="text-2xl font-bold text-center mb-4 text-gray-800">
+                                Heads up!
+                            </h2>
+
+                            <div className="text-center mb-6">
+                                <p className="text-gray-700 leading-relaxed mb-4">
+                                    You're about to be redirected to Every.org to complete your donation.
+                                </p>
+                                <p className="text-sm text-gray-600 leading-relaxed">
+                                    An optional tip to Every.org may appear. You can set it to $0. 100% of your donation will go to ICAF.
+                                </p>
+                            </div>
+
+                            <button
+                                onClick={handleGotItClick}
+                                className="w-full py-3 px-6 rounded-full font-semibold bg-primary hover:bg-primary/90 text-white transition-colors"
+                            >
+                                Got it!
                             </button>
                         </div>
                     </div>
@@ -266,35 +338,50 @@ Washington, D.C. 20037`;
                             </button>
                         </div>
 
-                        <div className="flex gap-2">
+                        <div className="relative">
                             {isCustom ? (
-                                <div className="flex-1 relative">
-                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70 text-sm">$</span>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70 text-sm z-10">$</span>
                                     <input
                                         type="text"
                                         value={customAmount}
                                         onChange={handleCustomAmountChange}
                                         placeholder="Enter amount"
-                                        className="w-full pl-8 pr-3 py-2 bg-white/10 border border-white/30 rounded text-white placeholder-white/50 focus:outline-none focus:border-secondary-yellow focus:bg-white/15 transition-all"
+                                        className="w-full pl-8 pr-24 py-2 bg-white/10 border border-white/30 rounded text-white placeholder-white/50 focus:outline-none focus:border-secondary-yellow focus:bg-white/15 transition-all"
                                     />
+                                    <div className="absolute right-0 top-0 bottom-0 flex items-center">
+                                        <div className="w-px h-4 bg-white/30"></div>
+                                        <select
+                                            value={frequency}
+                                            onChange={(e) => setFrequency(e.target.value)}
+                                            className="px-3 py-2 bg-transparent border-none text-white focus:outline-none focus:ring-0 text-sm [&>option]:bg-white [&>option]:text-black"
+                                        >
+                                            <option>One-time</option>
+                                            <option>Monthly</option>
+                                        </select>
+                                    </div>
                                 </div>
                             ) : (
-                                <input
-                                    type="text"
-                                    value={`$${selectedAmount}`}
-                                    className="flex-1 px-3 py-2 bg-white/10 border border-white/30 rounded text-white placeholder-white/70"
-                                    readOnly
-                                />
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={`$${selectedAmount}`}
+                                        className="w-full pl-3 pr-24 py-2 bg-white/10 border border-white/30 rounded text-white placeholder-white/70"
+                                        readOnly
+                                    />
+                                    <div className="absolute right-0 top-0 bottom-0 flex items-center">
+                                        <div className="w-px h-4 bg-white/30"></div>
+                                        <select
+                                            value={frequency}
+                                            onChange={(e) => setFrequency(e.target.value)}
+                                            className="px-3 py-2 bg-transparent border-none text-white focus:outline-none focus:ring-0 text-sm [&>option]:bg-white [&>option]:text-black"
+                                        >
+                                            <option>One-time</option>
+                                            <option>Monthly</option>
+                                        </select>
+                                    </div>
+                                </div>
                             )}
-                            <select
-                                value={frequency}
-                                onChange={(e) => setFrequency(e.target.value)}
-                                className="px-3 py-2 bg-white/10 border border-white/30 rounded text-white focus:outline-none focus:border-secondary-yellow transition-all [&>option]:bg-white [&>option]:text-black"
-                            >
-                                <option>One-time</option>
-                                <option>Monthly</option>
-                                <option>Yearly</option>
-                            </select>
                         </div>
                     </div>
 
@@ -302,14 +389,13 @@ Washington, D.C. 20037`;
                         asChild
                         variant="secondary"
                         className="mt-4 h-14 self-start font-bold mb-4 rounded-full px-6 text-base tracking-wide flex items-center justify-center w-full"
+                        onClick={handleDonateClick}
                     >
                         <a
-                            href="https://icaf.org/donate"
-                            target="blank"
-                            rel="noopener noreferrer"
+                            href="#"
                             className="flex items-center gap-2"
                         >
-                            DONATE ${displayAmount} {frequency !== 'One-time' ? frequency.toUpperCase() : 'NOW'}
+                            DONATE IN 60 SECONDS
                             <HeartIcon
                                 strokeWidth={2}
                                 className="!h-5 !w-5 stroke-black lg:!h-5 lg:!w-5"
@@ -372,6 +458,10 @@ Washington, D.C. 20037`;
                             <X className="w-5 h-5 text-gray-500" />
                         </button>
 
+                        <div className="mb-6">
+                            <img src={Icaflogo} alt="ICAF Logo" className="w-20 h-15" />
+                        </div>
+
                         <h2 className="text-xl font-bold text-center mb-6 text-gray-800">
                             Mail your check to ICAF
                         </h2>
@@ -385,10 +475,59 @@ Washington, D.C. 20037`;
 
                         <button
                             onClick={handleCopyAddress}
-                            className="w-full bg-primary hover:bg-primary/90 text-white py-3 px-6 rounded-full font-semibold transition-colors flex items-center justify-center gap-2"
+                            className={`w-full py-3 px-6 rounded-full font-semibold transition-colors flex items-center justify-center gap-2 ${isCopied
+                                ? 'bg-white text-primary border-2 border-primary'
+                                : 'bg-primary hover:bg-primary/90 text-white'
+                                }`}
                         >
-                            <Copy className="w-4 h-4" />
-                            Copy to clipboard
+                            {isCopied ? (
+                                <>
+                                    <Check className="w-4 h-4" />
+                                    Copied!
+                                </>
+                            ) : (
+                                <>
+                                    <Copy className="w-4 h-4" />
+                                    Copy to clipboard
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {showRedirectModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 relative">
+                        <button
+                            onClick={() => setShowRedirectModal(false)}
+                            className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+                        >
+                            <X className="w-5 h-5 text-gray-500" />
+                        </button>
+
+                        <div className="mb-6">
+                            <img src={Icaflogo} alt="ICAF Logo" className="w-20 h-15" />
+                        </div>
+
+                        <h2 className="text-2xl font-bold text-center mb-4 text-gray-800">
+                            Heads up!
+                        </h2>
+
+                        <div className="text-center mb-6">
+                            <p className="text-gray-700 leading-relaxed mb-4">
+                                You're about to be redirected to Every.org to complete your donation.
+                            </p>
+                            <p className="text-sm text-gray-600 leading-relaxed">
+                                An optional tip to Every.org may appear. You can set it to $0. 100% of your donation will go to ICAF.
+                            </p>
+                        </div>
+
+                        <button
+                            onClick={handleGotItClick}
+                            className="w-full py-3 px-6 rounded-full font-semibold bg-primary hover:bg-primary/90 text-white transition-colors"
+                        >
+                            Got it!
                         </button>
                     </div>
                 </div>

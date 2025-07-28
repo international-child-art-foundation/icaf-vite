@@ -10,14 +10,10 @@ export default function HowWeMakeItHappen() {
     };
 
     return (
-        <div className="py-12">
-            <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold text-black mb-4">
-                    How we make it happen
-                </h2>
-            </div>
+        <div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <div className="grid grid-cols-1 2xl:grid-cols-3 gap-6">
                 {DonationUsageData.map((item) => (
                     <div
                         key={item.id}

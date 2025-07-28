@@ -21,8 +21,15 @@ const QuoteBanner: React.FC = () => {
                             <blockquote className="text-xl lg:text-2xl font-medium text-gray-900 mb-4 leading-relaxed">
                                 "Children who engage in the arts show higher levels of empathy and prosocial behavior."
                             </blockquote>
-                            <cite className="text-base text-gray-600 underline">
-                                OECD, 2013
+                            <cite className="text-base font-black text-black underline">
+                                <a
+                                    href="https://www.oecd.org/en/publications/art-for-art-s-sake_9789264180789-en.html"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:text-blue-600 transition-colors"
+                                >
+                                    OECD, 2013
+                                </a>
                             </cite>
                         </div>
                     </div>

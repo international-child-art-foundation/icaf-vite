@@ -1,7 +1,3 @@
-import { CurvedImage } from './CurvedImage';
-import MalaysiaChildren from '@/assets/donate/MalaysiaChildren.png';
-import TransparencyLogo from '@/assets/donate/TransparencyLogo.png';
-
 import Portrait1 from '@/assets/donate/Portrait1.svg';
 import Portrait2 from '@/assets/donate/Portrait2.svg';
 import { Button } from '@/components/ui/button';
@@ -13,10 +9,10 @@ import IntroBanner from '@/components/donate/IntroBanner';
 import DonationUsageCards from '@/components/donate/DonationUsageCards';
 import groupswCapitol from '@/assets/donate/groupswCapitol.png';
 import { CircleArrowUp } from 'lucide-react';
-import DonateForm from '@/components/donate/DonateForm';
 import Icaflogo from '@/assets/donate/icafLogo.svg';
 import { useState } from 'react';
 import DonationMethod from '@/components/donate/DonationMethod';
+import { DonationHeader } from '@/components/donate/DonationHeader';
 
 export default function Donate() {
   const [showRedirectModal, setShowRedirectModal] = useState(false);
@@ -36,156 +32,8 @@ export default function Donate() {
   };
 
   return (
-    <div className="font-montserrat relative w-full">
-      {/* Header */}
-      <div className="relative">
-        {/* Desktop Layout (1280px+) - Side by side */}
-        <div className="hidden h-[550px] grid-cols-1 grid-rows-1 xl:grid">
-          <div className="col-start-1 row-start-1">
-            <CurvedImage
-              src={MalaysiaChildren}
-              curveStyle={'Ellipse'}
-              darkened={true}
-              gradientDefinition={'bg-gradient-to-b from-black/70 to-black/0'}
-              objectFit="cover"
-              objectPosition="center center"
-              scale={1}
-              height="650px"
-            />
-          </div>
-          <div className="z-20 col-start-1 row-start-1 flex items-center justify-between px-8 md:px-8 lg:px-20">
-            <div className="w-full md:w-3/5">
-              <div className="mb-8">
-                <h1 className="font-montserrat mb-2 text-left text-5xl font-bold text-white md:text-6xl lg:text-7xl">
-                  Art Changes Lives,
-                </h1>
-                <h2 className="font-montserrat text-secondary-yellow text-left text-4xl font-bold md:text-5xl lg:text-6xl">
-                  You Can Too.
-                </h2>
-              </div>
-              <p className="font-montserrat mb-6 text-left text-base text-white md:text-lg lg:text-xl">
-                Your gift funds art programs for underserved schools, spotlights
-                young artists at the World Children's Festival, and delivers
-                creativity without ads through ChildArt Magazine. Empower
-                children to create their future—donate today!
-              </p>
-              <a
-                href="https://www.guidestar.org/profile/52-2032649"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="cursor-pointer transition-opacity hover:opacity-80"
-              >
-                <img
-                  src={TransparencyLogo}
-                  alt="Transparent Logo"
-                  className="h-20 w-auto md:h-20"
-                />
-              </a>
-            </div>
-            <DonateForm />
-          </div>
-        </div>
-
-        {/* Tablet Layout (1024px) - Stacked with form below image */}
-        <div className="hidden lg:block xl:hidden">
-          <div className="relative h-[400px]">
-            <CurvedImage
-              src={MalaysiaChildren}
-              curveStyle={'Ellipse'}
-              darkened={true}
-              gradientDefinition={'bg-gradient-to-b from-black/70 to-black/0'}
-              objectFit="cover"
-              objectPosition="center center"
-              scale={1}
-              height="500px"
-            />
-            <div className="absolute inset-0 z-20 flex flex-col justify-center px-8 text-center lg:px-20">
-              <div className="mb-6">
-                <h1 className="font-montserrat mb-2 text-4xl font-bold text-white lg:text-5xl">
-                  Art Changes Lives,
-                </h1>
-                <h2 className="font-montserrat text-secondary-yellow text-3xl font-bold lg:text-4xl">
-                  You Can Too.
-                </h2>
-              </div>
-              <p className="font-montserrat mx-auto mb-4 max-w-2xl text-base text-white lg:text-lg">
-                Your gift funds art programs for underserved schools, spotlights
-                young artists at the World Children's Festival, and delivers
-                creativity without ads through ChildArt Magazine. Empower
-                children to create their future—donate today!
-              </p>
-              <div className="flex justify-center">
-                <a
-                  href="https://www.guidestar.org/profile/52-2032649"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="cursor-pointer transition-opacity hover:opacity-80"
-                >
-                  <img
-                    src={TransparencyLogo}
-                    alt="Transparent Logo"
-                    className="h-20 w-auto"
-                  />
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white px-8 py-12 lg:px-20">
-            <div className="mx-auto max-w-2xl">
-              <DonateForm isMobile={true} isTablet={true} />
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Layout (768px and below) - Compact stacked */}
-        <div className="lg:hidden">
-          <div className="relative h-[600px]">
-            <CurvedImage
-              src={MalaysiaChildren}
-              curveStyle={'Ellipse'}
-              darkened={true}
-              gradientDefinition={'bg-gradient-to-b from-black/70 to-black/0'}
-              objectFit="cover"
-              objectPosition="center center"
-              scale={1}
-              height="700px"
-            />
-            <div className="absolute inset-0 z-20 flex flex-col justify-center px-6 text-center">
-              <div className="mb-4">
-                <h1 className="font-montserrat mb-2 text-2xl font-bold text-white md:text-3xl">
-                  Art Changes Lives,
-                </h1>
-                <h2 className="font-montserrat text-secondary-yellow text-xl font-bold md:text-2xl">
-                  You Can Too.
-                </h2>
-              </div>
-              <p className="font-montserrat mb-6 text-sm text-white md:text-base">
-                Your gift funds art programs for underserved schools, spotlights
-                young artists at the World Children's Festival, and delivers
-                creativity without ads through ChildArt Magazine. Empower
-                children to create their future—donate today!
-              </p>
-              <div className="mb-6 flex justify-center">
-                <a
-                  href="https://www.guidestar.org/profile/52-2032649"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="cursor-pointer transition-opacity hover:opacity-80"
-                >
-                  <img
-                    src={TransparencyLogo}
-                    alt="Transparent Logo"
-                    className="h-10 w-auto"
-                  />
-                </a>
-              </div>
-              <div className="mx-auto max-w-md">
-                <DonateForm isMobile={true} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div>
+      <DonationHeader />
 
       {/* About ICAF */}
       <div className="px-8 pb-12 pt-10 text-center md:px-8 lg:px-20">
@@ -328,6 +176,7 @@ export default function Donate() {
 
           <div className="flex flex-col items-center gap-2">
             <button
+              type="button"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className=""
             >
@@ -342,6 +191,7 @@ export default function Donate() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="relative mx-4 w-full max-w-md rounded-2xl bg-white p-8">
             <button
+              type="button"
               onClick={() => setShowRedirectModal(false)}
               className="absolute right-4 top-4 rounded-full p-2 transition-colors hover:bg-gray-100"
             >
@@ -368,6 +218,7 @@ export default function Donate() {
             </div>
 
             <button
+              type="button"
               onClick={handleGotItClick}
               className="bg-primary hover:bg-primary/90 w-full rounded-full px-6 py-3 font-semibold text-white transition-colors"
             >

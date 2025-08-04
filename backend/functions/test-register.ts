@@ -1,5 +1,6 @@
 const { DynamoDBClient, CreateTableCommand, DescribeTableCommand } = require('@aws-sdk/client-dynamodb');
-const { validateRegistrationBody, ACCESS_LEVELS } = require('../../shared/dist/api-types/registrationTypes');
+const { validateRegistrationBody } = require('../../shared/dist/api-types/registrationTypes');
+const { ROLES, calculateUserAge, determineUserType, canSubmitArtwork, getMaxConstituentsPerSeason } = require('../../shared/dist/api-types/userTypes');
 
 interface TestCase {
     name: string;
@@ -24,120 +25,72 @@ const USER_POOL_CLIENT_NAME = 'test-user-pool-client';
 
 const testCases: TestCase[] = [
     {
-        name: "✅ Successful registration (user under 18 with guardian info)",
+        name: "✅ Successful registration (user under 18)",
         event: {
             body: JSON.stringify({
                 email: "child@example.com",
                 password: "SecurePass123!",
                 f_name: "Child",
                 l_name: "User",
-                is_guardian: false,
-                g_f_name: "Parent",
-                g_l_name: "User",
                 birthdate: "2010-05-15" // Under 18
             })
         },
         expectedStatus: 201
     },
     {
-        name: "✅ Successful registration (user 18+ without guardian info)",
+        name: "✅ Successful registration (user 18+)",
         event: {
             body: JSON.stringify({
                 email: "adult@example.com",
                 password: "SecurePass123!",
                 f_name: "Adult",
                 l_name: "User",
-                is_guardian: false,
                 birthdate: "2000-05-15" // 18+
             })
         },
         expectedStatus: 201
     },
     {
-        name: "✅ Successful registration (guardian 18+ via is_guardian flag)",
+        name: "✅ Successful registration (guardian via role)",
         event: {
             body: JSON.stringify({
                 email: "guardian@example.com",
                 password: "SecurePass123!",
                 f_name: "Parent",
                 l_name: "Guardian",
-                is_guardian: true,
+                role: "guardian",
                 birthdate: "1985-03-20" // 18+
             })
         },
         expectedStatus: 201
     },
     {
-        name: "✅ Successful registration (admin via access_level)",
+        name: "✅ Successful registration (admin via role)",
         event: {
             body: JSON.stringify({
                 email: "admin@example.com",
                 password: "SecurePass123!",
                 f_name: "Admin",
                 l_name: "User",
-                access_level: "admin",
+                role: "admin",
                 birthdate: "1980-01-01"
             })
         },
         expectedStatus: 201
     },
     {
-        name: "✅ Successful registration (contributor via access_level)",
+        name: "✅ Successful registration (contributor via role)",
         event: {
             body: JSON.stringify({
                 email: "contributor@example.com",
                 password: "SecurePass123!",
                 f_name: "Contributor",
                 l_name: "User",
-                access_level: "contributor",
+                role: "contributor",
                 birthdate: "1985-06-15"
             })
         },
         expectedStatus: 201
-    },
-    {
-        name: "✅ Successful registration (is_guardian overrides access_level)",
-        event: {
-            body: JSON.stringify({
-                email: "override@example.com",
-                password: "SecurePass123!",
-                f_name: "Override",
-                l_name: "User",
-                access_level: "user",
-                is_guardian: true,
-                birthdate: "1985-06-15"
-            })
-        },
-        expectedStatus: 201
-    },
-    {
-        name: "❌ User under 18 trying to register as guardian",
-        event: {
-            body: JSON.stringify({
-                email: "childguardian@example.com",
-                password: "SecurePass123!",
-                f_name: "Child",
-                l_name: "Guardian",
-                is_guardian: true,
-                birthdate: "2010-05-15" // Under 18
-            })
-        },
-        expectedStatus: 400
-    },
-    {
-        name: "❌ User under 18 missing guardian information",
-        event: {
-            body: JSON.stringify({
-                email: "child@example.com",
-                password: "SecurePass123!",
-                f_name: "Child",
-                l_name: "User",
-                is_guardian: false,
-                // Missing g_f_name, g_l_name
-                birthdate: "2010-05-15" // Under 18
-            })
-        },
-        expectedStatus: 400
     },
     {
         name: "❌ Missing required fields",
@@ -158,9 +111,6 @@ const testCases: TestCase[] = [
                 password: "123",
                 f_name: "John",
                 l_name: "Doe",
-                is_guardian: false,
-                g_f_name: "Jane",
-                g_l_name: "Doe",
                 birthdate: "2010-05-15"
             })
         },
@@ -174,9 +124,6 @@ const testCases: TestCase[] = [
                 password: "SecurePass123!",
                 f_name: "VeryLongFirstNameThatExceedsTwentyFourCharacters",
                 l_name: "Doe",
-                is_guardian: false,
-                g_f_name: "Jane",
-                g_l_name: "Doe",
                 birthdate: "2010-05-15"
             })
         },
@@ -190,23 +137,20 @@ const testCases: TestCase[] = [
                 password: "SecurePass123!",
                 f_name: "John",
                 l_name: "Doe",
-                is_guardian: false,
-                g_f_name: "Jane",
-                g_l_name: "Doe",
                 birthdate: "2010/05/15" // Wrong format
             })
         },
         expectedStatus: 400
     },
     {
-        name: "❌ Invalid access_level",
+        name: "❌ Invalid role",
         event: {
             body: JSON.stringify({
                 email: "test@example.com",
                 password: "SecurePass123!",
                 f_name: "John",
                 l_name: "Doe",
-                access_level: "invalid_level",
+                role: "invalid_role",
                 birthdate: "2010-05-15"
             })
         },
@@ -361,68 +305,33 @@ async function createLocalStackHandler(infrastructure: any) {
             };
         }
 
-        // Valid access levels
-        const ACCESS_LEVELS = ['admin', 'contributor', 'guardian', 'user'];
-
-        // Determine access level
-        let accessLevel = 'user';
-        if (body.access_level) {
-            if (!ACCESS_LEVELS.includes(body.access_level)) {
+        // Determine role
+        let role = 'user';
+        if (body.role) {
+            if (!ROLES.includes(body.role)) {
                 return {
                     statusCode: 400,
                     body: JSON.stringify({
-                        message: 'Invalid access_level. Valid values are: admin, contributor, guardian, user'
+                        message: 'Invalid role. Valid values are: admin, contributor, guardian, user'
                     }),
                     headers: { 'Content-Type': 'application/json' }
                 };
             }
-            accessLevel = body.access_level;
+            role = body.role;
         }
 
-        // If is_guardian is true, override access_level to guardian
-        if (body.is_guardian === true) {
-            accessLevel = 'guardian';
-        }
-
-        // Calculate user's age
-        const birthDate = new Date(body.birthdate);
-        const today = new Date();
-        const age = today.getFullYear() - birthDate.getFullYear();
-        const monthDiff = today.getMonth() - birthDate.getMonth();
-        const actualAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate()) ? age - 1 : age;
-
-        // Users under 18 cannot register as guardians
-        if (body.is_guardian === true && actualAge < 18) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    message: 'Users under 18 cannot register as guardians'
-                }),
-                headers: { 'Content-Type': 'application/json' }
-            };
-        }
-
-        // Determine if guardian information is needed
-        const needsGuardianInfo = actualAge < 18 && accessLevel === 'user';
-        if (needsGuardianInfo && (!body.g_f_name || !body.g_l_name)) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    message: 'Guardian information required for users under 18'
-                }),
-                headers: { 'Content-Type': 'application/json' }
-            };
-        }
+        // Note: Users under 18 can register but cannot submit artwork
+        // They will need a guardian to submit artwork on their behalf
 
         // Mock successful registration with LocalStack
         // In a real implementation, this would call Cognito and DynamoDB
         const mockUserId = 'localstack-user-id-' + Date.now();
-        
+
         try {
             // Here you could add actual DynamoDB operations using infrastructure.dynamoClient
             // For now, we'll just simulate success
             console.log(`📝 Simulating DynamoDB write for user: ${body.email}`);
-            
+
             return {
                 statusCode: 201,
                 body: JSON.stringify({
@@ -485,7 +394,7 @@ async function runLocalStackTests() {
         }
 
         console.log(`📊 LocalStack Test Results: ${passedTests}/${totalTests} tests passed`);
-        
+
         if (passedTests === totalTests) {
             console.log('🎉 All LocalStack tests completed successfully!');
             console.log('💡 Tip: Check LocalStack dashboard at http://localhost:4566 for more details');
@@ -515,7 +424,7 @@ if (TEST_MODE === 'mock') {
 
     // Mock AWS SDK calls
     const mockHandler = async (event: any): Promise<TestResult> => {
-        const body: RegistrationBody = JSON.parse(event.body);
+        const body = JSON.parse(event.body);
 
         // Validation logic
         if (!body.email || !body.password || !body.f_name || !body.l_name || !body.birthdate) {
@@ -562,55 +471,23 @@ if (TEST_MODE === 'mock') {
             };
         }
 
-        // Determine access level
-        let accessLevel = 'user';
-        if (body.access_level) {
-            if (!ACCESS_LEVELS.includes(body.access_level)) {
+        // Determine role
+        let role = 'user';
+        if (body.role) {
+            if (!ROLES.includes(body.role)) {
                 return {
                     statusCode: 400,
                     body: JSON.stringify({
-                        message: 'Invalid access_level. Valid values are: admin, contributor, guardian, user'
+                        message: 'Invalid role. Valid values are: admin, contributor, guardian, user'
                     }),
                     headers: { 'Content-Type': 'application/json' }
                 };
             }
-            accessLevel = body.access_level;
+            role = body.role;
         }
 
-        // If is_guardian is true, override access_level to guardian
-        if (body.is_guardian === true) {
-            accessLevel = 'guardian';
-        }
-
-        // Calculate user's age
-        const birthDate = new Date(body.birthdate);
-        const today = new Date();
-        const age = today.getFullYear() - birthDate.getFullYear();
-        const monthDiff = today.getMonth() - birthDate.getMonth();
-        const actualAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate()) ? age - 1 : age;
-
-        // Users under 18 cannot register as guardians
-        if (body.is_guardian === true && actualAge < 18) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    message: 'Users under 18 cannot register as guardians'
-                }),
-                headers: { 'Content-Type': 'application/json' }
-            };
-        }
-
-        // Determine if guardian information is needed
-        const needsGuardianInfo = actualAge < 18 && accessLevel === 'user';
-        if (needsGuardianInfo && (!body.g_f_name || !body.g_l_name)) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    message: 'Guardian information required for users under 18'
-                }),
-                headers: { 'Content-Type': 'application/json' }
-            };
-        }
+        // Note: Users under 18 can register but cannot submit artwork
+        // They will need a guardian to submit artwork on their behalf
 
         // Mock successful registration
         return {
@@ -655,7 +532,7 @@ if (TEST_MODE === 'mock') {
     console.log("☁️ Using AWS mode (real AWS services)");
     // Real AWS implementation would go here
     console.log("⚠️  AWS mode not yet implemented");
-    
+
 } else {
     console.error("❌ Invalid TEST_MODE. Use 'mock', 'local', or 'aws'");
     process.exit(1);

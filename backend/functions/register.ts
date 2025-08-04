@@ -1,17 +1,18 @@
 import { CognitoIdentityProviderClient, SignUpCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
-const { validateRegistrationBody, ACCESS_LEVELS } = require('../../shared/dist/api-types/registrationTypes');
+const { validateRegistrationBody } = require('../../shared/dist/api-types/registrationTypes');
+const { ROLES, calculateUserAge, determineUserType, canSubmitArtwork, getMaxConstituentsPerSeason } = require('../../shared/dist/api-types/userTypes');
 
 /**
  * User Registration Handler
  * 
- * Guardian Logic:
- * - Users under 18 cannot register as guardians (they are typical users who need guardian info)
- * - Guardians are parents, teachers, etc. who register on behalf of users under 18
- * - The is_guardian flag determines if someone is registering as a guardian or typical user
- * - Users under 18 (typical users) require guardian information (g_f_name, g_l_name)
- * - Guardians (parents, teachers, etc.) don't need guardian info for themselves
+ * Simplified Registration Logic:
+ * - All users (guardian and regular) have the same format with f_name and l_name
+ * - No guardian information is required during registration
+ * - Users under 18 can register but cannot submit artwork
+ * - Guardians can submit artwork on behalf of others later
+ * - Access levels: admin, contributor, guardian, user
  */
 
 // Configure AWS clients based on environment
@@ -92,59 +93,31 @@ export const handler = async (event: any) => {
             };
         }
 
-        // Determine access level
-        let accessLevel = 'user'; // Default access level
+        // Determine role
+        let role = 'user'; // Default role
 
-        // If access_level is provided, validate and use it
-        if (body.access_level) {
-            if (!ACCESS_LEVELS.includes(body.access_level)) {
+        // If role is provided, validate and use it
+        if (body.role) {
+            if (!ROLES.includes(body.role)) {
                 return {
                     statusCode: 400,
                     body: JSON.stringify({
-                        message: 'Invalid access_level. Valid values are: admin, contributor, guardian, user'
+                        message: 'Invalid role. Valid values are: admin, contributor, guardian, user'
                     }),
                     headers: { 'Content-Type': 'application/json' }
                 };
             }
-            accessLevel = body.access_level;
+            role = body.role;
         }
 
-        // If is_guardian is true, override access_level to guardian
-        if (body.is_guardian === true) {
-            accessLevel = 'guardian';
-        }
+        // Calculate user's age and determine user type
+        const userAge = calculateUserAge(body.birthdate);
+        const userType = determineUserType(role);
+        const canSubmit = canSubmitArtwork(userType);
+        const maxConstituents = getMaxConstituentsPerSeason(userType);
 
-        // Calculate user's age to determine if they can register as a guardian
-        const birthDate = new Date(body.birthdate);
-        const today = new Date();
-        const age = today.getFullYear() - birthDate.getFullYear();
-        const monthDiff = today.getMonth() - birthDate.getMonth();
-        const actualAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate()) ? age - 1 : age;
-
-        // Users under 18 cannot register as guardians
-        if (body.is_guardian === true && actualAge < 18) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    message: 'Users under 18 cannot register as guardians'
-                }),
-                headers: { 'Content-Type': 'application/json' }
-            };
-        }
-
-        // Determine if guardian information is needed
-        // Users under 18 (typical users) need guardian information
-        // Guardians (parents, teachers, etc.) don't need guardian info
-        const needsGuardianInfo = actualAge < 18 && accessLevel === 'user';
-        if (needsGuardianInfo && (!body.g_f_name || !body.g_l_name)) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    message: 'Guardian information required for users under 18'
-                }),
-                headers: { 'Content-Type': 'application/json' }
-            };
-        }
+        // Note: Users under 18 can register but cannot submit artwork
+        // They will need a guardian to submit artwork on their behalf
 
         // 1. Register user in Cognito
         const cognitoParams = {
@@ -169,15 +142,9 @@ export const handler = async (event: any) => {
                     Value: body.birthdate
                 },
                 {
-                    Name: 'custom:access_level',
-                    Value: accessLevel
-                },
-                ...(needsGuardianInfo ? [
-                    {
-                        Name: 'custom:guardianId',
-                        Value: `${body.g_f_name}_${body.g_l_name}`
-                    }
-                ] : [])
+                    Name: 'custom:role',
+                    Value: role
+                }
             ]
         };
 
@@ -191,21 +158,17 @@ export const handler = async (event: any) => {
             f_name: body.f_name,
             l_name: body.l_name,
             dob: body.birthdate, // Store as dob in DynamoDB
-            role: accessLevel, // Store access_level as role in DynamoDB for compatibility
+            role: role, // Store role in DynamoDB
+            user_type: userType,
             timestamp: new Date().toISOString(),
-            can_submit: false,
-            max_constituents_per_season: ['guardian', 'contributor', 'admin'].includes(accessLevel) ? -1 : 0,
+            can_submit: canSubmit,
+            max_constituents_per_season: maxConstituents,
             has_paid: false,
             accolades: [],
             has_magazine_subscription: false,
             has_newsletter_subscription: false,
             type: 'USER',
-            user_id: userId,
-            ...(needsGuardianInfo ? {
-                guardianId: `${body.g_f_name}_${body.g_l_name}`,
-                guardianFirstName: body.g_f_name,
-                guardianLastName: body.g_l_name,
-            } : {})
+            user_id: userId
         };
 
         const dynamoParams = {
@@ -215,26 +178,7 @@ export const handler = async (event: any) => {
 
         await dynamodb.send(new PutCommand(dynamoParams));
 
-        // 3. Create guardian record if needed (for users under 18)
-        if (needsGuardianInfo && body.g_f_name && body.g_l_name) {
-            const guardianId = `${body.g_f_name}_${body.g_l_name}`;
-            const guardianRecord = {
-                PK: `GUARDIAN#${guardianId}`,
-                SK: 'PROFILE',
-                firstName: body.g_f_name,
-                lastName: body.g_l_name,
-                wards: [userId],
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-
-            const guardianParams = {
-                TableName: TABLE_NAME,
-                Item: guardianRecord
-            };
-
-            await dynamodb.send(new PutCommand(guardianParams));
-        }
+        // Note: Guardian records will be created when guardians submit artwork on behalf of others
 
         return {
             statusCode: 201,

@@ -1,13 +1,12 @@
+import { Role } from './userTypes';
+
 export type RegistrationBody = {
     email: string;
     password: string;
     f_name: string;
     l_name: string;
     birthdate: string;
-    is_guardian?: boolean;
-    access_level?: string;
-    g_f_name?: string;
-    g_l_name?: string;
+    role?: Role;
 };
 
 export type RegistrationResponse = {
@@ -18,10 +17,6 @@ export type RegistrationResponse = {
 export type RegistrationError = {
     message: string;
 };
-
-// Valid access levels in order of permissions (Admin > Contributor > Guardian > User)
-export const ACCESS_LEVELS = ['admin', 'contributor', 'guardian', 'user'] as const;
-export type AccessLevel = typeof ACCESS_LEVELS[number];
 
 export function validateRegistrationBody(body: any): body is RegistrationBody {
     return (

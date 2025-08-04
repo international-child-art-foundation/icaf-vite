@@ -16,7 +16,7 @@ fi
 if curl -s http://localhost:4566 > /dev/null 2>&1; then
     echo "✅ LocalStack is already running on http://localhost:4566"
     echo "💡 You can now run tests with:"
-    echo "   cd backend"
+    echo "   cd backend/backend-test"
     echo "   TEST_MODE=local node test-register.ts"
     echo "   TEST_MODE=local node test-user.ts"
     exit 0
@@ -44,7 +44,7 @@ for i in {1..30}; do
         echo "📍 Region: us-east-1"
         echo ""
         echo "💡 You can now run tests with:"
-        echo "   cd backend"
+        echo "   cd backend/backend-test"
         echo "   TEST_MODE=local node test-register.ts"
         echo "   TEST_MODE=local node test-user.ts"
         echo ""

@@ -1,4 +1,5 @@
 const { DynamoDBClient, CreateTableCommand, DescribeTableCommand } = require('@aws-sdk/client-dynamodb');
+const { validateRegistrationBody, ACCESS_LEVELS } = require('../../shared/dist/api-types/registrationTypes');
 
 interface TestCase {
     name: string;
@@ -6,18 +7,6 @@ interface TestCase {
         body: string;
     };
     expectedStatus?: number;
-}
-
-interface RegistrationBody {
-    email: string;
-    password: string;
-    f_name: string;
-    l_name: string;
-    birthdate: string;
-    is_guardian?: boolean;
-    access_level?: string;
-    g_f_name?: string;
-    g_l_name?: string;
 }
 
 interface TestResult {
@@ -325,7 +314,7 @@ async function createLocalStackHandler(infrastructure: any) {
 
     // Mock handler that mimics register.ts functionality with LocalStack
     return async (event: any): Promise<TestResult> => {
-        const body: RegistrationBody = JSON.parse(event.body);
+        const body = JSON.parse(event.body);
 
         // Same validation logic as mock mode
         if (!body.email || !body.password || !body.f_name || !body.l_name || !body.birthdate) {

@@ -1,6 +1,7 @@
 import { CognitoIdentityProviderClient, SignUpCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
+const { validateRegistrationBody, ACCESS_LEVELS } = require('../../shared/dist/api-types/registrationTypes');
 
 /**
  * User Registration Handler
@@ -41,9 +42,6 @@ const dynamodb = DynamoDBDocumentClient.from(dynamoClient);
 const USER_POOL_ID = process.env.USER_POOL_ID!;
 const USER_POOL_CLIENT_ID = process.env.USER_POOL_CLIENT_ID!;
 const TABLE_NAME = process.env.TABLE_NAME!;
-
-// Valid access levels in order of permissions (Admin > Contributor > Guardian > User)
-const ACCESS_LEVELS = ['admin', 'contributor', 'guardian', 'user'];
 
 export const handler = async (event: any) => {
     try {

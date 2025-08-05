@@ -1,6 +1,6 @@
-import { CognitoIdentityProviderClient, SignUpCommand } from '@aws-sdk/client-cognito-identity-provider';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
+import { SignUpCommand } from '@aws-sdk/client-cognito-identity-provider';
+import { PutCommand } from '@aws-sdk/lib-dynamodb';
+import { cognitoClient, dynamodb, USER_POOL_ID, USER_POOL_CLIENT_ID, TABLE_NAME } from '../config/aws-clients';
 const { validateRegistrationBody } = require('../../shared/dist/api-types/registrationTypes');
 const { ROLES, calculateUserAge, determineUserType, canSubmitArtwork, getMaxConstituentsPerSeason } = require('../../shared/dist/api-types/userTypes');
 
@@ -14,35 +14,6 @@ const { ROLES, calculateUserAge, determineUserType, canSubmitArtwork, getMaxCons
  * - Guardians can submit artwork on behalf of others later
  * - Access levels: admin, contributor, guardian, user
  */
-
-// Configure AWS clients based on environment
-const cognitoClient = new CognitoIdentityProviderClient({
-    region: process.env.AWS_REGION || 'us-east-1',
-    ...(process.env.NODE_ENV === 'test' && {
-        endpoint: 'http://localhost:4566', // LocalStack endpoint
-        credentials: {
-            accessKeyId: 'test',
-            secretAccessKey: 'test'
-        }
-    })
-});
-
-const dynamoClient = new DynamoDBClient({
-    region: process.env.AWS_REGION || 'us-east-1',
-    ...(process.env.NODE_ENV === 'test' && {
-        endpoint: 'http://localhost:4566', // LocalStack endpoint
-        credentials: {
-            accessKeyId: 'test',
-            secretAccessKey: 'test'
-        }
-    })
-});
-
-const dynamodb = DynamoDBDocumentClient.from(dynamoClient);
-
-const USER_POOL_ID = process.env.USER_POOL_ID!;
-const USER_POOL_CLIENT_ID = process.env.USER_POOL_CLIENT_ID!;
-const TABLE_NAME = process.env.TABLE_NAME!;
 
 export const handler = async (event: any) => {
     try {

@@ -5,6 +5,7 @@ import * as apigw from "aws-cdk-lib/aws-apigateway";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as cognito from "aws-cdk-lib/aws-cognito";
+import * as s3 from "aws-cdk-lib/aws-s3";
 
 export class InfraStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -17,6 +18,13 @@ export class InfraStack extends Stack {
       sortKey: { name: "SK", type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: RemovalPolicy.DESTROY,
+    });
+
+    // S3 Bucket for artwork storage
+    const artworkBucket = new s3.Bucket(this, "IcaFArtworkBucket", {
+      bucketName: "icaf-artwork-bucket",
+      removalPolicy: RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
     });
 
     // 2️⃣  Cognito User Pool for Authentication
@@ -118,10 +126,44 @@ export class InfraStack extends Stack {
       },
     });
 
-    // 5️⃣  Grant Lambda permissions to access DynamoDB
+    const deleteAccountFn = new NodejsFunction(this, "DeleteAccountFn", {
+      entry: "../functions/deleteAccount.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(30),
+      memorySize: 512,
+      environment: {
+        TABLE_NAME: icafTable.tableName,
+        USER_POOL_ID: userPool.userPoolId,
+        USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
+        S3_BUCKET_NAME: artworkBucket.bucketName,
+      },
+    });
+
+    const cleanupQueueProcessorFn = new NodejsFunction(this, "CleanupQueueProcessorFn", {
+      entry: "../functions/cleanupQueueProcessor.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(60),
+      memorySize: 512,
+      environment: {
+        TABLE_NAME: icafTable.tableName,
+        USER_POOL_ID: userPool.userPoolId,
+        USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
+        S3_BUCKET_NAME: artworkBucket.bucketName,
+      },
+    });
+
+    // 5️⃣  Grant Lambda permissions to access DynamoDB and S3
     icafTable.grantReadWriteData(helloFn);
     icafTable.grantReadWriteData(userFn);
     icafTable.grantReadWriteData(registerFn);
+    icafTable.grantReadWriteData(deleteAccountFn);
+    icafTable.grantReadWriteData(cleanupQueueProcessorFn);
+
+    // Grant S3 permissions to functions
+    artworkBucket.grantReadWrite(deleteAccountFn);
+    artworkBucket.grantReadWrite(cleanupQueueProcessorFn);
 
     // 6️⃣  REST API — private by default (no execute‑api wildcard policy)
     const api = new apigw.RestApi(this, "InternalApi", {
@@ -154,6 +196,12 @@ export class InfraStack extends Stack {
     const usersResource = apiResource.addResource("users");
     const profileResource = usersResource.addResource("profile");
     profileResource.addMethod("GET", new apigw.LambdaIntegration(userFn), {
+      authorizer: cognitoAuthorizer,
+      authorizationType: apigw.AuthorizationType.COGNITO,
+    });
+
+    const accountResource = usersResource.addResource("account");
+    accountResource.addMethod("DELETE", new apigw.LambdaIntegration(deleteAccountFn), {
       authorizer: cognitoAuthorizer,
       authorizationType: apigw.AuthorizationType.COGNITO,
     });

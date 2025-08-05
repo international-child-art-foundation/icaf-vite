@@ -1,19 +1,5 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
-
-// Configure AWS clients
-const dynamoClient = new DynamoDBClient({
-    region: process.env.AWS_REGION || 'us-east-1',
-    ...(process.env.NODE_ENV === 'test' && {
-        endpoint: 'http://localhost:4566', // LocalStack endpoint
-        credentials: {
-            accessKeyId: 'test',
-            secretAccessKey: 'test'
-        }
-    })
-});
-
-const dynamodb = DynamoDBDocumentClient.from(dynamoClient);
+import { GetCommand } from '@aws-sdk/lib-dynamodb';
+import { dynamodb } from '../config/aws-clients';
 
 export const handler = async (event: any) => {
     try {

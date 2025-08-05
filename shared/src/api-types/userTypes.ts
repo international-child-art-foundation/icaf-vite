@@ -41,6 +41,11 @@ export interface UserRegistrationData {
     role?: Role;
 }
 
+// Delete account request data
+export interface DeleteAccountRequest {
+    password: string; // Confirmation password
+}
+
 // User response for API calls
 export interface UserResponse {
     UUID: string;

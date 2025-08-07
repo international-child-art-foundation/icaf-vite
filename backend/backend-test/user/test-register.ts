@@ -1,6 +1,6 @@
 const { DynamoDBClient, CreateTableCommand, DescribeTableCommand } = require('@aws-sdk/client-dynamodb');
-const { validateRegistrationBody } = require('../../shared/dist/api-types/registrationTypes');
-const { ROLES, calculateUserAge, determineUserType, canSubmitArtwork, getMaxConstituentsPerSeason } = require('../../shared/dist/api-types/userTypes');
+const { validateRegistrationBody } = require('../../../shared/dist/api-types/registrationTypes');
+const { ROLES, calculateUserAge, determineUserType, canSubmitArtwork, getMaxConstituentsPerSeason } = require('../../../shared/dist/api-types/userTypes');
 
 interface TestCase {
     name: string;

@@ -2,7 +2,7 @@ import { QueryCommand, DeleteCommand, UpdateCommand } from '@aws-sdk/lib-dynamod
 import { ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3';
 import { AdminDisableUserCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { cognitoClient, dynamodb, s3Client, USER_POOL_ID, TABLE_NAME, S3_BUCKET_NAME } from '../config/aws-clients';
-import { CleanupTask, QueueItem, MAX_RETRY_COUNT } from '../../shared/src/api-types/internalTypes';
+import { CleanupTask, QueueItem, MAX_RETRY_COUNT } from '../../../shared/dist/api-types/internalTypes';
 
 export const handler = async (event: any) => {
     try {

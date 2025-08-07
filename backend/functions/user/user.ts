@@ -1,5 +1,5 @@
 import { GetCommand } from '@aws-sdk/lib-dynamodb';
-import { dynamodb } from '../config/aws-clients';
+import { dynamodb } from '../../config/aws-clients';
 
 export const handler = async (event: any) => {
     try {

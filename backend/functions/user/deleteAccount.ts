@@ -1,8 +1,8 @@
 import { AdminDisableUserCommand, AdminGetUserCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { QueryCommand, DeleteCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3';
-import { cognitoClient, dynamodb, s3Client, USER_POOL_ID, TABLE_NAME, S3_BUCKET_NAME } from '../config/aws-clients';
-import { CleanupTask } from '../../shared/src/api-types/internalTypes';
+import { cognitoClient, dynamodb, s3Client, USER_POOL_ID, TABLE_NAME, S3_BUCKET_NAME } from '../../config/aws-clients';
+import { CleanupTask } from '../../../shared/src/api-types/internalTypes';
 
 //Scenario 1: Everything works perfectly
 //User requests deletion -> Delete core profile✅ -> Delete other data✅ -> Delete S3 files✅ -> Disable Cognito✅ -> Return success(204) -> User sees "Account deleted"

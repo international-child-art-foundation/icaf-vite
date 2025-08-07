@@ -1,8 +1,8 @@
 import { SignUpCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
-import { cognitoClient, dynamodb, USER_POOL_ID, USER_POOL_CLIENT_ID, TABLE_NAME } from '../config/aws-clients';
-const { validateRegistrationBody } = require('../../shared/dist/api-types/registrationTypes');
-const { ROLES, calculateUserAge, determineUserType, canSubmitArtwork, getMaxConstituentsPerSeason } = require('../../shared/dist/api-types/userTypes');
+import { cognitoClient, dynamodb, USER_POOL_ID, USER_POOL_CLIENT_ID, TABLE_NAME } from '../../config/aws-clients';
+const { validateRegistrationBody } = require('../../../shared/dist/api-types/registrationTypes');
+const { ROLES, calculateUserAge, determineUserType, canSubmitArtwork, getMaxConstituentsPerSeason } = require('../../../shared/dist/api-types/userTypes');
 
 /**
  * User Registration Handler

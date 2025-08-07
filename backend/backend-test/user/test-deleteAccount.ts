@@ -1,7 +1,7 @@
 const { CreateTableCommand, DescribeTableCommand } = require('@aws-sdk/client-dynamodb');
 const { PutCommand, QueryCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
 const { PutObjectCommand, ListObjectsV2Command } = require('@aws-sdk/client-s3');
-const { dynamoClient, dynamodb, s3Client, TABLE_NAME, S3_BUCKET_NAME } = require('../config/aws-clients-test.js');
+const { dynamoClient, dynamodb, s3Client, TABLE_NAME, S3_BUCKET_NAME } = require('../../config/aws-clients-test.js');
 
 // Helper function to wait for table to be active
 async function waitForTableActive(tableName, maxAttempts = 10) {

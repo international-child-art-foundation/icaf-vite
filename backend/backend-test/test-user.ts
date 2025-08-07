@@ -240,7 +240,7 @@ if (TEST_MODE === 'mock') {
             process.env.AWS_REGION = REGION;
 
             // Import the user handler
-            const { handler } = require('./user.ts');
+            const { handler } = require('../functions/user');
 
             console.log("📋 Running all test cases with LocalStack...\n");
 

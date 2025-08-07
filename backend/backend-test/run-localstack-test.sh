@@ -17,8 +17,8 @@ if curl -s http://localhost:4566 > /dev/null 2>&1; then
     echo "✅ LocalStack is already running on http://localhost:4566"
     echo "💡 You can now run tests with:"
     echo "   cd backend/backend-test"
-    echo "   TEST_MODE=local node test-register.ts"
-    echo "   TEST_MODE=local node test-user.ts"
+    echo "   pnpm test"
+    echo "   pnpm test user/test-register-migrated.test.ts"
     exit 0
 fi
 
@@ -45,8 +45,8 @@ for i in {1..30}; do
         echo ""
         echo "💡 You can now run tests with:"
         echo "   cd backend/backend-test"
-        echo "   TEST_MODE=local node test-register.ts"
-        echo "   TEST_MODE=local node test-user.ts"
+        echo "   pnpm test"
+        echo "   pnpm test user/test-register-migrated.test.ts"
         echo ""
         echo "🔧 To stop LocalStack:"
         echo "   docker stop localstack"

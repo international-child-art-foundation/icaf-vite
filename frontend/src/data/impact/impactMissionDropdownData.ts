@@ -24,7 +24,7 @@ const MissionDropdownData: IAccordionCard[] = [
       'We offer art programs that complement traditional education, promoting creativity, critical thinking, and emotional intelligence. These programs provide quality educational experiences that empower children to think beyond conventional learning.',
   },
   {
-    id: 'reducing-inequalities',
+    id: 'reducing-inequities',
     title: 'Reducing Inequities',
     icon: Inequities,
     color: 'purple',

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { HeartIcon, X, Copy, Check } from 'lucide-react';
+import { HeartIcon, X, Copy, Check, Info } from 'lucide-react';
 import JustGiving from '@/assets/donate/DonateForm-JustGiving.svg';
 import NetworkForGood from '@/assets/donate/DonateForm-NetworkForGood.svg';
 import SendCheck from '@/assets/donate/DonateForm-SendACheck.svg';
 import Icaflogo from '@/assets/donate/icafLogo.svg';
+import { formatWithCommas } from '@/lib/utils';
 
 type donationFrequencies = 'one-time' | 'monthly';
 
@@ -15,6 +16,7 @@ interface DonationFormProps {
 const DonationForm = ({ whiteBackdrop }: DonationFormProps) => {
   const presetAmounts = [200, 100, 50];
   const [donationAmountString, setDonationAmountString] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
 
   const donationAmountNumeric = parseInt(
     donationAmountString.replace(/[^0-9]/g, ''),
@@ -76,6 +78,11 @@ Washington, D.C. 20037`;
   };
 
   const textColor = '';
+  const donationOptionColor = whiteBackdrop
+    ? 'border-1 text-gray-800 border-gray-800'
+    : 'border-1 border-white text-white md:text-gray-800 lg:text-white ';
+  const donationOptionCoreStyles =
+    'text-xl font-nunito rounded border px-3 py-2 transition-all duration-200';
   return (
     <>
       <div className="font-montserrat mx-auto md:block">
@@ -96,7 +103,7 @@ Washington, D.C. 20037`;
                   type="button"
                   key={amount}
                   onClick={() => handlePresetClick(amount)}
-                  className={`rounded border px-3 py-2 text-sm transition-all duration-200 ${amount === donationAmountNumeric ? 'border-secondary-yellow bg-primary text-secondary-yellow shadow-md' : 'border-2 border-gray-700 text-white md:text-gray-800 lg:text-white'} `}
+                  className={`${donationOptionCoreStyles} ${amount === donationAmountNumeric ? 'border-secondary-yellow bg-primary text-secondary-yellow shadow-md' : donationOptionColor} `}
                 >
                   ${amount}
                 </button>
@@ -104,40 +111,80 @@ Washington, D.C. 20037`;
               <button
                 type="button"
                 onClick={handleOtherClick}
-                className={`rounded border px-3 py-2 text-sm transition-all duration-200 ${activeDonationOption === 'other' ? 'border-secondary-yellow bg-primary text-secondary-yellow shadow-md' : 'border-2 border-gray-700 text-white md:text-gray-800 lg:text-white'} `}
+                className={`${donationOptionCoreStyles} ${activeDonationOption === 'other' ? 'border-secondary-yellow bg-primary text-secondary-yellow shadow-md' : donationOptionColor} `}
               >
                 Other
               </button>
             </div>
 
             <div className="relative">
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 z-10 -translate-y-1/2 transform text-sm text-white text-white/70 md:text-gray-800 lg:text-white">
+              <div className="font-nunito relative text-xl">
+                <span className="font-nunito absolute left-3 top-1/2 z-10 -translate-y-1/2 transform text-lg text-white text-white/70 md:text-gray-800 lg:text-white">
                   $
                 </span>
                 <input
                   type="text"
-                  value={donationAmountString}
+                  value={
+                    isEditing
+                      ? donationAmountString
+                      : formatWithCommas(donationAmountString)
+                  }
+                  onFocus={() => setIsEditing(true)}
+                  onBlur={() => setIsEditing(false)}
                   onChange={handleUserInput}
                   placeholder="Enter amount"
-                  className={` ${whiteBackdrop ? 'border-gray-300 text-gray-700' : 'text-white'} focus:border-secondary-yellow w-full rounded border border-white/30 bg-white/10 py-2 pl-8 pr-24 placeholder-white/50 transition-all focus:bg-white/15 focus:outline-none`}
+                  className={` ${whiteBackdrop ? 'border-gray-800 text-gray-800' : 'border-white text-white'} focus:border-secondary-yellow w-full rounded border bg-white/10 py-2 pl-8 pr-24 placeholder-white/50 transition-all focus:bg-white/15 focus:outline-none`}
                 />
                 <div className="absolute bottom-0 right-0 top-0 flex items-center">
-                  <div className="h-4 w-px bg-white/30"></div>
                   <select
                     value={frequency}
                     onChange={(e) =>
                       setFrequency(e.target.value as donationFrequencies)
                     }
-                    className="border-none bg-transparent px-3 py-2 text-sm text-white focus:outline-none focus:ring-0 [&>option]:bg-white [&>option]:text-black"
+                    className={`font-nunito border-none bg-transparent px-3 py-2 text-lg ${whiteBackdrop ? 'border-gray-800 text-gray-800' : 'text-white'} appearance-none pr-14 focus:outline-none focus:ring-0 [&>option]:bg-white [&>option]:text-black`}
                   >
                     <option>One-time</option>
                     <option>Monthly</option>
                   </select>
+                  <span
+                    className={`pointer-events-none absolute right-10 top-1/2 h-4 w-px -translate-y-1/2 ${whiteBackdrop ? 'bg-gray-500' : 'bg-white/30'}`}
+                  />
+                  <svg
+                    className={`pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 ${whiteBackdrop ? 'stroke-gray-800' : 'stroke-white'}`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      d="M6 9l6 6 6-6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>{' '}
                 </div>
               </div>
             </div>
           </div>
+
+          {donationAmountNumeric > 999999 && (
+            <div className="hidden gap-2 md:flex">
+              <Info color={`${whiteBackdrop ? 'black' : 'white'}`} />
+              <p
+                className={`${whiteBackdrop ? 'text-primary' : 'text-white'} `}
+              >
+                Please{' '}
+                <a
+                  href={'icaf.org/contact-us'}
+                  className={`underline ${whiteBackdrop ? 'text-grey-200' : 'text-'} `}
+                >
+                  {' '}
+                  Contact Us
+                </a>{' '}
+                to donate an amount this large.
+              </p>
+            </div>
+          )}
 
           <Button
             asChild
@@ -145,7 +192,7 @@ Washington, D.C. 20037`;
             className="mb-4 mt-4 flex h-14 w-full items-center justify-center self-start rounded-full px-6 text-base font-bold tracking-wide"
             onClick={handleDonateClick}
           >
-            <a href="#" className="flex items-center gap-2">
+            <a href="#" className="font-nunito text-md flex items-center gap-2">
               DONATE IN 60 SECONDS
               <HeartIcon
                 strokeWidth={2}

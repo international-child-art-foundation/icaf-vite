@@ -39,11 +39,11 @@ const AccordionCard = ({ data }: MissionDropdownProps) => {
           className={`grid transition-all duration-500 ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
         >
           <div className="overflow-hidden">
-            <p
+            <div
               className={`text-sm transition-all duration-500 ${open ? 'opacity-100' : 'opacity-0'}`}
             >
               {renderExtendedDescription(data.extendedDescription)}
-            </p>
+            </div>
           </div>
         </div>
         <ArrowDownCircle className="mt-auto cursor-pointer justify-self-center" />

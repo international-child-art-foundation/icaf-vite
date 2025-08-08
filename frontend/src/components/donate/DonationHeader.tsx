@@ -10,8 +10,8 @@ export const DonationHeader = () => {
   const size = useWindowSize();
   return (
     <div className="relative">
-      <div className="grid grid-cols-1 grid-rows-1 md:grid-rows-2 lg:grid-rows-1">
-        <div className="lg:h-unset z-20 col-start-1 row-start-1 mt-6 grid grid-cols-1 grid-rows-2 p-4 md:h-[1400px] md:p-12 lg:grid-cols-2 lg:grid-rows-1 lg:p-16">
+      <div className="grid grid-cols-1 grid-rows-1">
+        <div className="z-20 col-start-1 row-start-1 mt-6 grid grid-cols-1 grid-rows-2 p-4 md:h-[1400px] md:p-12 lg:h-auto lg:grid-cols-2 lg:grid-rows-1 lg:p-16">
           <div className="col-start-1 row-start-1">
             <DonationHeaderContent />
           </div>
@@ -27,7 +27,7 @@ export const DonationHeader = () => {
               src={MalaysiaChildren}
               curveStyle={'Ellipse'}
               darkened={true}
-              gradientDefinition={'bg-gradient-to-b from-black/70 to-black/0'}
+              gradientDefinition={'bg-gradient-to-b from-black/60 to-black/60'}
               objectFit="cover"
               objectPosition="center center"
               scale={1}
@@ -38,7 +38,7 @@ export const DonationHeader = () => {
               src={MalaysiaChildrenCropped}
               curveStyle={'Ellipse'}
               darkened={true}
-              gradientDefinition={'bg-gradient-to-b from-black/70 to-black/0'}
+              gradientDefinition={'bg-gradient-to-b from-black/60 to-black/60'}
               objectFit="cover"
               objectPosition="bottom center"
               scale={1}

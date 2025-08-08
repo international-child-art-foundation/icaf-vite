@@ -1,14 +1,13 @@
 import Portrait1 from '@/assets/donate/Portrait1.svg';
 import Portrait2 from '@/assets/donate/Portrait2.svg';
 import { Button } from '@/components/ui/button';
-import { HeartIcon, X } from 'lucide-react';
+import { ArrowUp, HeartIcon, X } from 'lucide-react';
 import { childArtExhibition } from '@/data/donate/childArtExhibitionData';
 import DonationUsageOrgCards from '@/components/donate/DonationUsageOrgCards';
 import QuoteBanner from '@/components/donate/QuoteBanner';
 import IntroBanner from '@/components/donate/IntroBanner';
 import DonationUsageCards from '@/components/donate/DonationUsageCards';
 import groupswCapitol from '@/assets/donate/groupswCapitol.png';
-import { CircleArrowUp } from 'lucide-react';
 import Icaflogo from '@/assets/donate/icafLogo.svg';
 import { useState } from 'react';
 import DonationMethod from '@/components/donate/DonationMethod';
@@ -157,9 +156,10 @@ export default function Donate() {
 
       <div className="bg-white py-16">
         <div className="mx-auto max-w-4xl text-center">
-          <h2 className="mb-8 text-3xl font-bold text-black md:text-4xl">
-            Create a <span className="font-bold">brighter future</span> with
-            your donation <span className="font-bold">today!</span>
+          <h2 className="font-inter mb-8 text-xl text-black md:text-4xl">
+            Create a <span className="font-medium italic">brighter future</span>{' '}
+            with your donation{' '}
+            <span className="font-medium italic">today!</span>
           </h2>
 
           <Button
@@ -180,9 +180,13 @@ export default function Donate() {
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className=""
             >
-              <CircleArrowUp className="text-secondary-black h-10 w-10" />
+              <div className="border-primary rounded-full border-2 p-2">
+                <ArrowUp className="text-secondary-black h-6 w-6" />
+              </div>
             </button>
-            <span className="text-sm text-gray-500">Scroll to top</span>
+            <span className="text-sm text-gray-500 underline">
+              Scroll to top
+            </span>
           </div>
         </div>
       </div>

@@ -1,2 +1,7 @@
 ignoredBuiltDependencies:
   - esbuild
+packages:
+  - "frontend"
+  - "backend"
+  - "backend/infra"
+  - "shared"

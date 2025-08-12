@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.strict.json",
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@icaf/shared": ["../shared/src"]
+    },
+    "noEmit": true
+  }
+}

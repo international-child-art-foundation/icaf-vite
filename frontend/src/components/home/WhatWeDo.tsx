@@ -1,5 +1,5 @@
 import soccer from '@/assets/shared/images/home/circle-images/soccer.webp';
-import globeKids from '@/assets/shared/images/home/circle-images/globeKids.webp';
+import globeKids from '@/assets/shared/images/home/circle-images/globe-kids.webp';
 
 const WhatWeDo = () => {
   return (

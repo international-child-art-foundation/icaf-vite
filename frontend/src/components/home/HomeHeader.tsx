@@ -55,7 +55,7 @@ const HomeHeader = () => {
           gradientDefinition={gradientDefinition}
           src={artShowcaseHeader}
           height={`${
-            size.width >= 1024 ? '770px' : size.width >= 768 ? '640px' : '500px'
+            size.width >= 1024 ? '700px' : size.width >= 768 ? '640px' : '500px'
           }`}
           objectFit="cover"
           objectPosition="center bottom"

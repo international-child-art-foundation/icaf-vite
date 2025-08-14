@@ -178,14 +178,33 @@ export async function createTestUser(userId: string, userData: Partial<any> = {}
 
 // Create test artwork data
 export async function createTestArtwork(artworkId: string, userId: string, artworkData: Partial<any> = {}): Promise<string> {
+    // Support new schema fields while keeping backward-compatible properties
+    const nowIso = new Date().toISOString();
+    const season = (artworkData as any).season ?? 'SEASON#TEST';
+
     const defaultArtworkData = {
         PK: `ART#${artworkId}`,
         SK: 'N/A',
-        artwork_id: artworkId,
+        // IDs
+        art_id: artworkId,
+        artwork_id: artworkId, // backward compatibility
         user_id: userId,
-        title: 'Test Artwork',
-        description: 'Test artwork description',
-        timestamp: new Date().toISOString(),
+        // Core
+        season: season,
+        f_name: (artworkData as any).f_name ?? 'Test',
+        age: (artworkData as any).age ?? 18,
+        is_virtual: (artworkData as any).is_virtual ?? false,
+        location: (artworkData as any).location ?? 'US',
+        is_ai_gen: (artworkData as any).is_ai_gen ?? false,
+        model: (artworkData as any).model ?? undefined,
+        is_approved: (artworkData as any).is_approved ?? false,
+        votes: (artworkData as any).votes ?? 0,
+        title: (artworkData as any).title ?? 'Test Artwork',
+        file_type: (artworkData as any).file_type ?? 'PNG',
+        // Legacy optional fields kept if provided
+        description: (artworkData as any).description ?? 'Test artwork description',
+        // Metadata
+        timestamp: nowIso,
         type: 'ART'
     };
 
@@ -196,12 +215,13 @@ export async function createTestArtwork(artworkId: string, userId: string, artwo
         Item: finalArtworkData
     }));
 
-    // Create art pointer for user
+    // Also create legacy art pointer (user → artId) for compatibility
     const artPointerData = {
         PK: `USER#${userId}`,
         SK: `ART#${artworkId}`,
         artwork_id: artworkId,
-        timestamp: new Date().toISOString(),
+        art_id: artworkId,
+        timestamp: nowIso,
         type: 'ART_PTR'
     };
 
@@ -214,14 +234,47 @@ export async function createTestArtwork(artworkId: string, userId: string, artwo
     return artworkId;
 }
 
+// Create test art pointer (season-based)
+export async function createTestArtPointer(userId: string, season: string, artId: string, artPtrData: Partial<any> = {}): Promise<{ season: string; art_id: string; }> {
+    const defaultPtrData = {
+        PK: `USER#${userId}`,
+        SK: `ART#${season}`,
+        type: 'ART_PTR',
+        user_id: userId,
+        season: season,
+        art_id: artId
+    };
+
+    const finalPtrData = { ...defaultPtrData, ...artPtrData };
+
+    await docClient.send(new PutCommand({
+        TableName: TEST_CONFIG.tableName,
+        Item: finalPtrData
+    }));
+
+    console.log(`✅ Test art pointer created for user: ${userId}, season: ${season}, art: ${artId}`);
+    return { season, art_id: artId };
+}
+
 // Create test donation data
 export async function createTestDonation(userId: string, stripeId: string, donationData: Partial<any> = {}): Promise<string> {
+    // Support both donation_id (preferred) and legacy amount field mapping
+    const donationId = (donationData as any).donation_id ?? stripeId;
+
+    let amountCents = 2500;
+    if ((donationData as any).amount_cents !== undefined) {
+        amountCents = (donationData as any).amount_cents as number;
+    } else if ((donationData as any).amount !== undefined) {
+        amountCents = Math.round(((donationData as any).amount as number) * 100);
+    }
+
     const defaultDonationData = {
         PK: `USER#${userId}`,
-        SK: `DONATION#${stripeId}`,
+        SK: `DONATION#${donationId}`,
         user_id: userId,
+        donation_id: donationId,
         stripe_id: stripeId,
-        amount: 25.00,
+        amount_cents: amountCents,
         currency: 'USD',
         timestamp: new Date().toISOString(),
         type: 'DONATION'
@@ -234,20 +287,27 @@ export async function createTestDonation(userId: string, stripeId: string, donat
         Item: finalDonationData
     }));
 
-    console.log(`✅ Test donation created: ${stripeId} for user: ${userId}`);
-    return stripeId;
+    console.log(`✅ Test donation created: ${donationId} for user: ${userId}`);
+    return donationId;
 }
 
 // Create test season data
 export async function createTestSeason(season: string, seasonData: Partial<any> = {}): Promise<string> {
+    const isActive = (seasonData as any).is_active ?? true;
+    const sk = `#ACTIVE#${String(isActive)}#SEASON#${season}`;
+
     const defaultSeasonData = {
         PK: 'SEASON',
-        SK: season,
+        SK: sk,
         season: season,
-        name: `Test Season ${season}`,
+        colloq_name: `Test Season ${season}`,
         start_date: '2024-01-01',
         end_date: '2024-12-31',
-        is_active: true,
+        payment_required: false,
+        max_user_submissions: 1,
+        can_vote: true,
+        total_votes: 0,
+        is_active: Boolean(isActive),
         timestamp: new Date().toISOString(),
         type: 'SEASON'
     };
@@ -259,8 +319,60 @@ export async function createTestSeason(season: string, seasonData: Partial<any> 
         Item: finalSeasonData
     }));
 
-    console.log(`✅ Test season created: ${season}`);
+    console.log(`✅ Test season created: ${season} (active=${finalSeasonData.is_active})`);
     return season;
+}
+
+// Create test vote pointer data
+export async function createTestVotePointer(userId: string, season: string, artId: string, voteData: Partial<any> = {}): Promise<{ season: string; timestamp: number; art_id: string; }> {
+    // Timestamp must be numeric per schema; allow override for deterministic tests
+    const timestamp = (voteData as any).timestamp ?? Date.now();
+
+    const defaultVoteData = {
+        PK: `USER#${userId}`,
+        SK: `VOTE#${season}#TIMESTAMP#${timestamp}`,
+        type: 'VOTE_PTR',
+        user_id: userId,
+        season: season,
+        timestamp: typeof timestamp === 'number' ? timestamp : Number(timestamp),
+        art_id: artId
+    };
+
+    const finalVoteData = { ...defaultVoteData, ...voteData };
+
+    await docClient.send(new PutCommand({
+        TableName: TEST_CONFIG.tableName,
+        Item: finalVoteData
+    }));
+
+    console.log(`✅ Test vote pointer created for user: ${userId}, season: ${season}, art: ${artId}`);
+    return { season, timestamp: finalVoteData.timestamp, art_id: artId };
+}
+
+// Create admin action entry
+export async function createTestAdminAction(userId: string, action: string, adminActionData: Partial<any> = {}): Promise<string> {
+    const nowIso: string = (adminActionData as any).timestamp ?? new Date().toISOString();
+
+    const defaultAdminAction = {
+        PK: `USER#${userId}`,
+        SK: `ADMIN_ACTION#${nowIso}`,
+        type: 'ADMIN_ACTION',
+        user_id: userId,
+        action: action,
+        done_by: (adminActionData as any).done_by ?? 'system@test',
+        reason: (adminActionData as any).reason ?? 'Test admin action',
+        timestamp: nowIso
+    };
+
+    const finalAdminAction = { ...defaultAdminAction, ...adminActionData };
+
+    await docClient.send(new PutCommand({
+        TableName: TEST_CONFIG.tableName,
+        Item: finalAdminAction
+    }));
+
+    console.log(`✅ Test admin action created for user: ${userId}, action: ${finalAdminAction.action}`);
+    return nowIso;
 }
 
 // Export clients for use in tests

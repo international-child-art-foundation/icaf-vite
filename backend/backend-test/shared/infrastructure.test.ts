@@ -107,7 +107,8 @@ describe('Shared Test Infrastructure', () => {
             const validDonationData = {
                 user_id: 'user-123',
                 stripe_id: 'stripe_123',
-                amount: 25.00,
+                donation_id: 'don_123',
+                amount_cents: 2500,
                 timestamp: new Date().toISOString(),
                 type: 'DONATION'
             };
@@ -120,7 +121,7 @@ describe('Shared Test Infrastructure', () => {
     describe('Season Management', () => {
         test('should create season successfully', async () => {
             const seasonId = await TestSetup.createSeasonWithPrefix(testPrefix, 'current', {
-                name: '2024 Art Competition'
+                colloq_name: '2024 Art Competition'
             });
 
             expect(seasonId).toBeDefined();
@@ -130,9 +131,14 @@ describe('Shared Test Infrastructure', () => {
         test('should validate season data correctly', () => {
             const validSeasonData = {
                 season: '2024',
-                name: 'Test Season',
+                colloq_name: 'Test Season',
                 start_date: '2024-01-01',
                 end_date: '2024-12-31',
+                payment_required: false,
+                max_user_submissions: 1,
+                can_vote: true,
+                total_votes: 0,
+                is_active: true,
                 timestamp: new Date().toISOString(),
                 type: 'SEASON'
             };

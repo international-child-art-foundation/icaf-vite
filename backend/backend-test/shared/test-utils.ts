@@ -1,4 +1,4 @@
-import { createTestUser, createTestArtwork, createTestDonation, createTestSeason, cleanupTestData } from './test-infrastructure';
+import { createTestUser, createTestArtwork, createTestDonation, createTestSeason, createTestVotePointer, createTestArtPointer, createTestAdminAction, cleanupTestData } from './test-infrastructure';
 
 // Test data generators
 export class TestDataGenerator {
@@ -18,6 +18,14 @@ export class TestDataGenerator {
 
     static generateSeason(prefix: string = 'test'): string {
         return `${prefix}-season-${++this.counter}`;
+    }
+
+    static generateVoteTimestamp(): number {
+        return Date.now();
+    }
+
+    static generateAdminTimestamp(): string {
+        return new Date().toISOString();
     }
 }
 
@@ -88,18 +96,32 @@ export const USER_TEMPLATES = {
 // Test artwork data templates
 export const ARTWORK_TEMPLATES = {
     basic: {
+        season: 'SEASON#TEST',
+        f_name: 'Test',
+        age: 18,
+        is_virtual: false,
+        location: 'US',
+        is_ai_gen: false,
+        model: undefined,
+        is_approved: false,
+        votes: 0,
         title: 'Test Artwork',
-        description: 'A test artwork for testing purposes',
-        medium: 'Digital',
-        dimensions: '1920x1080',
-        file_size: 1024000
+        file_type: 'PNG',
+        description: 'A test artwork for testing purposes'
     },
     detailed: {
+        season: 'SEASON#TEST',
+        f_name: 'Detailed',
+        age: 20,
+        is_virtual: false,
+        location: 'US',
+        is_ai_gen: false,
+        model: undefined,
+        is_approved: true,
+        votes: 5,
         title: 'Detailed Test Artwork',
+        file_type: 'JPEG',
         description: 'A detailed test artwork with more information',
-        medium: 'Oil on Canvas',
-        dimensions: '24x36 inches',
-        file_size: 2048000,
         tags: ['landscape', 'nature', 'colorful']
     }
 };
@@ -107,40 +129,71 @@ export const ARTWORK_TEMPLATES = {
 // Test donation data templates
 export const DONATION_TEMPLATES = {
     basic: {
-        amount: 25.00,
+        amount_cents: 2500,
         currency: 'USD',
         status: 'succeeded'
     },
     large: {
-        amount: 100.00,
+        amount_cents: 10000,
         currency: 'USD',
         status: 'succeeded'
     },
     failed: {
-        amount: 25.00,
+        amount_cents: 2500,
         currency: 'USD',
         status: 'failed'
+    }
+};
+
+// Admin action templates
+export const ADMIN_ACTION_TEMPLATES = {
+    ban: {
+        action: 'ban',
+        reason: 'Violation of guidelines',
+        done_by: 'admin@test'
+    },
+    unban: {
+        action: 'unban',
+        reason: 'Appeal accepted',
+        done_by: 'admin@test'
+    },
+    reject: {
+        action: 'reject',
+        reason: 'Inappropriate content',
+        done_by: 'moderator@test'
     }
 };
 
 // Test season data templates
 export const SEASON_TEMPLATES = {
     current: {
-        name: 'Current Test Season',
+        colloq_name: 'Current Test Season',
         start_date: '2024-01-01',
         end_date: '2024-12-31',
+        payment_required: false,
+        max_user_submissions: 1,
+        can_vote: true,
+        total_votes: 0,
         is_active: true
     },
     past: {
-        name: 'Past Test Season',
+        colloq_name: 'Past Test Season',
         start_date: '2023-01-01',
         end_date: '2023-12-31',
+        payment_required: false,
+        max_user_submissions: 1,
+        can_vote: false,
+        total_votes: 0,
         is_active: false
     },
     future: {
-        name: 'Future Test Season',
+        colloq_name: 'Future Test Season',
         start_date: '2025-01-01',
         end_date: '2025-12-31',
+        payment_required: true,
+        max_user_submissions: 1,
+        can_vote: false,
+        total_votes: 0,
         is_active: false
     }
 };
@@ -175,6 +228,26 @@ export class TestSetup {
         return season;
     }
 
+    static async createVotePointerWithPrefix(prefix: string, userId: string, season?: string, artId?: string, customData: any = {}) {
+        const resolvedSeason = season ?? TestDataGenerator.generateSeason(prefix);
+        const resolvedArtId = artId ?? TestDataGenerator.generateArtworkId(prefix);
+        const timestamp = customData.timestamp ?? TestDataGenerator.generateVoteTimestamp();
+        return createTestVotePointer(userId, resolvedSeason, resolvedArtId, { ...customData, timestamp });
+    }
+
+    static async createArtPointerWithPrefix(prefix: string, userId: string, season?: string, artId?: string, customData: any = {}) {
+        const resolvedSeason = season ?? TestDataGenerator.generateSeason(prefix);
+        const resolvedArtId = artId ?? TestDataGenerator.generateArtworkId(prefix);
+        return createTestArtPointer(userId, resolvedSeason, resolvedArtId, { ...customData });
+    }
+
+    static async createAdminActionWithPrefix(prefix: string, userId: string, template: keyof typeof ADMIN_ACTION_TEMPLATES = 'ban', customData: any = {}) {
+        const data = { ...ADMIN_ACTION_TEMPLATES[template], ...customData };
+        const timestamp = data.timestamp ?? TestDataGenerator.generateAdminTimestamp();
+        await createTestAdminAction(userId, data.action, { ...data, timestamp });
+        return timestamp as string;
+    }
+
     static async cleanupTestData(prefix: string) {
         await cleanupTestData(prefix);
     }
@@ -188,18 +261,31 @@ export class TestValidator {
     }
 
     static validateArtworkData(artworkData: any): boolean {
-        const requiredFields = ['artwork_id', 'user_id', 'title', 'timestamp', 'type'];
-        return requiredFields.every(field => artworkData.hasOwnProperty(field));
+        const requiredFields = ['user_id', 'title', 'timestamp', 'type'];
+        const hasRequired = requiredFields.every(field => artworkData.hasOwnProperty(field));
+        const hasArtId = artworkData.hasOwnProperty('art_id') || artworkData.hasOwnProperty('artwork_id');
+        const hasSeason = artworkData.hasOwnProperty('season');
+        return hasRequired && hasArtId && hasSeason;
     }
 
     static validateDonationData(donationData: any): boolean {
-        const requiredFields = ['user_id', 'stripe_id', 'amount', 'timestamp', 'type'];
-        return requiredFields.every(field => donationData.hasOwnProperty(field));
+        const baseFields = ['user_id', 'stripe_id', 'timestamp', 'type'];
+        const hasBase = baseFields.every(field => donationData.hasOwnProperty(field));
+        const hasAmount = donationData.hasOwnProperty('amount') || donationData.hasOwnProperty('amount_cents');
+        const hasDonationId = donationData.hasOwnProperty('donation_id');
+        return hasBase && hasAmount && hasDonationId;
     }
 
     static validateSeasonData(seasonData: any): boolean {
-        const requiredFields = ['season', 'name', 'start_date', 'end_date', 'timestamp', 'type'];
-        return requiredFields.every(field => seasonData.hasOwnProperty(field));
+        const requiredFields = ['season', 'colloq_name', 'start_date', 'end_date', 'timestamp', 'type', 'is_active'];
+        const baseOk = requiredFields.every(field => seasonData.hasOwnProperty(field));
+        const extras = ['payment_required', 'max_user_submissions', 'can_vote', 'total_votes'];
+        return baseOk && extras.every(field => seasonData.hasOwnProperty(field));
+    }
+
+    static validateAdminActionData(adminActionData: any): boolean {
+        const requiredFields = ['user_id', 'action', 'done_by', 'timestamp', 'reason', 'type'];
+        return requiredFields.every(field => adminActionData.hasOwnProperty(field));
     }
 }
 

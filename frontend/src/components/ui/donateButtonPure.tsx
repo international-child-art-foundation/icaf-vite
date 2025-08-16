@@ -2,9 +2,13 @@ import { Button } from '@/components/ui/button';
 
 interface DonateButtonProps {
   className?: string;
+  text?: string;
 }
 
-const DonateButtonPure: React.FC<DonateButtonProps> = ({ className }) => {
+const DonateButtonPure: React.FC<DonateButtonProps> = ({
+  className,
+  text = 'Donate',
+}) => {
   return (
     <div className="flex justify-center">
       <Button
@@ -18,8 +22,7 @@ const DonateButtonPure: React.FC<DonateButtonProps> = ({ className }) => {
           rel="noopener noreferrer"
           className="flex items-center"
         >
-
-          Donate
+          {text}
         </a>
       </Button>
     </div>

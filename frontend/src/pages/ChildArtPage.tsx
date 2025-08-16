@@ -2,7 +2,6 @@ import { CurvedImage } from './CurvedImage';
 import MagazineCarousel from '../components/childArt/MagazineCarousel';
 
 import magazineCoverLarge from '@/assets/shared/images/navigation/programs/childArtMagazine.webp';
-import magazineCoverSmall from '@/assets/shared/images/navigation/programs/childArtMagazine_small.webp';
 
 import DonateButtonPartnersPage from '@/components/ui/donateButtonPartnersPage';
 
@@ -16,7 +15,6 @@ export default function ChildArtPage() {
           <div className="col-start-1 row-start-1">
             <CurvedImage
               src={magazineCoverLarge}
-              srcMobile={magazineCoverSmall}
               curveStyle="Ellipse"
               darkened={true}
             />

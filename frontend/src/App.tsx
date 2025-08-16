@@ -7,6 +7,8 @@ import Partners from './pages/Partners';
 import About from './pages/About';
 import { Route, Routes } from 'react-router-dom';
 import ChildArtPage from './pages/ChildArtPage';
+import Impact from './pages/Impact';
+import Donate from './pages/Donate';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -27,6 +29,8 @@ export default function App() {
           <Route path="/programs/outreach" element={<ChildArtPage />} />
           <Route path="/about/partners" element={<Partners />} />
           <Route path="/about" element={<About />} />
+          <Route path="/about/impact" element={<Impact />} />
+          <Route path="/donate" element={<Donate />} />
         </Routes>
       </main>
       <Footer />

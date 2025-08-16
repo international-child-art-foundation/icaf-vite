@@ -82,6 +82,7 @@ describe('Shared Test Infrastructure', () => {
                 artwork_id: 'art-123',
                 user_id: 'user-123',
                 title: 'Test Artwork',
+                season: 'SEASON#TEST',
                 timestamp: new Date().toISOString(),
                 type: 'ART'
             };

@@ -241,7 +241,7 @@ export class TestSetup {
         return createTestArtPointer(userId, resolvedSeason, resolvedArtId, { ...customData });
     }
 
-    static async createAdminActionWithPrefix(prefix: string, userId: string, template: keyof typeof ADMIN_ACTION_TEMPLATES = 'ban', customData: any = {}) {
+    static async createAdminActionWithPrefix(_prefix: string, userId: string, template: keyof typeof ADMIN_ACTION_TEMPLATES = 'ban', customData: any = {}) {
         const data = { ...ADMIN_ACTION_TEMPLATES[template], ...customData };
         const timestamp = data.timestamp ?? TestDataGenerator.generateAdminTimestamp();
         await createTestAdminAction(userId, data.action, { ...data, timestamp });
@@ -261,11 +261,10 @@ export class TestValidator {
     }
 
     static validateArtworkData(artworkData: any): boolean {
-        const requiredFields = ['user_id', 'title', 'timestamp', 'type'];
+        const requiredFields = ['user_id', 'title', 'timestamp', 'type', 'season'];
         const hasRequired = requiredFields.every(field => artworkData.hasOwnProperty(field));
         const hasArtId = artworkData.hasOwnProperty('art_id') || artworkData.hasOwnProperty('artwork_id');
-        const hasSeason = artworkData.hasOwnProperty('season');
-        return hasRequired && hasArtId && hasSeason;
+        return hasRequired && hasArtId;
     }
 
     static validateDonationData(donationData: any): boolean {

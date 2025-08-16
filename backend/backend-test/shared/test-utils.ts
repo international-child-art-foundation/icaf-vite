@@ -16,6 +16,10 @@ export class TestDataGenerator {
         return `${prefix}_stripe_${++this.counter}_${Date.now()}`;
     }
 
+    static generateDonationId(prefix: string = 'test'): string {
+        return `${prefix}_stripe_${++this.counter}_${Date.now()}`;
+    }
+
     static generateSeason(prefix: string = 'test'): string {
         return `${prefix}-season-${++this.counter}`;
     }

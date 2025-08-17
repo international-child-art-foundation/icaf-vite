@@ -47,7 +47,7 @@ export const MoreCarousel = () => {
         />
       </div>
 
-      <h2 className="mb-10 text-center font-sans text-3xl font-bold">
+      <h2 className="mb-10 text-center font-sans text-3xl font-bold lg:text-[40px]">
         More On Our Site
       </h2>
 

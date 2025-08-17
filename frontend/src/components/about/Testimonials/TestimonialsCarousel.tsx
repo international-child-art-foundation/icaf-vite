@@ -34,7 +34,7 @@ export const TestimonialsCarousel = () => {
 
   return (
     <section className="bg-white py-6 md:py-20">
-      <h2 className="mb-10 text-center font-sans text-3xl font-bold">
+      <h2 className="mb-10 text-center font-sans text-3xl font-bold lg:text-[40px]">
         Testimonials
       </h2>
 

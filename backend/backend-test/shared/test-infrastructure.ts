@@ -83,6 +83,20 @@ export async function createTestTable(): Promise<void> {
     console.log('🔧 Setting up test infrastructure...');
 
     try {
+        // Check if table already exists first
+        try {
+            await dynamoClient.send(new DescribeTableCommand({
+                TableName: TABLE_SCHEMA.TableName
+            }));
+            console.log(`✅ DynamoDB Table already exists: ${TABLE_SCHEMA.TableName}`);
+            return;
+        } catch (error: any) {
+            if (error.name !== 'ResourceNotFoundException') {
+                throw error;
+            }
+            // Table doesn't exist, create it
+        }
+
         console.log(`📝 Creating DynamoDB Table: ${TABLE_SCHEMA.TableName}...`);
 
         try {
@@ -139,9 +153,13 @@ export async function cleanupTestData(prefix: string): Promise<void> {
             console.log('ℹ️  No test data to clean up');
         }
 
-    } catch (error) {
-        console.error('❌ Error cleaning up test data:', error);
-        throw error;
+    } catch (error: any) {
+        if (error.name === 'ResourceNotFoundException') {
+            console.log('ℹ️  Table does not exist, skipping cleanup');
+        } else {
+            console.error('❌ Error cleaning up test data:', error);
+            throw error;
+        }
     }
 }
 

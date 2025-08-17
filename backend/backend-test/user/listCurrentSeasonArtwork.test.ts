@@ -96,8 +96,10 @@ describe('listCurrentSeasonArtwork (user)', () => {
     });
 
     test('400 when user has no submission in any active season', async () => {
-        // Note: Other tests may have left active seasons in DB, which is realistic
-        // This test verifies behavior when user has no artwork in any active season
+        // Create an active season to ensure we test the "no submission" logic
+        // rather than the "no active season" logic
+        const activeSeason = getUniqueSeason('active');
+        await createTestSeason(activeSeason, { is_active: true });
 
         const userId = TestDataGenerator.generateUserId(testPrefix);
         await createTestUser(userId, { role: 'user' });

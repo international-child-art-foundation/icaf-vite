@@ -43,10 +43,26 @@ for i in {1..30}; do
         echo "📍 Endpoint: http://localhost:4566"
         echo "📍 Region: us-east-1"
         echo ""
+        echo "🌱 Setting up preset test database..."
+        
+        # Setup the preset database
+        if npx ts-node setup-test-db.ts; then
+            echo "✅ Preset test database ready!"
+        else
+            echo "⚠️ Warning: Failed to setup preset database"
+            echo "💡 You can manually setup later with: npx ts-node setup-test-db.ts"
+        fi
+        
+        echo ""
         echo "💡 You can now run tests with:"
         echo "   cd backend/backend-test"
         echo "   pnpm test"
-        echo "   pnpm test user/test-register-migrated.test.ts"
+        echo "   pnpm test examples/preset-database-example.test.ts"
+        echo ""
+        echo "🔧 Database management:"
+        echo "   npx ts-node setup-test-db.ts          # Seed database"
+        echo "   npx ts-node setup-test-db.ts --clean   # Clean database" 
+        echo "   npx ts-node setup-test-db.ts --reseed  # Reseed database"
         echo ""
         echo "🔧 To stop LocalStack:"
         echo "   docker stop localstack"

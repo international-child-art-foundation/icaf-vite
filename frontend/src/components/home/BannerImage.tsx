@@ -1,18 +1,18 @@
 import { BannerItem } from '@/types/BannerItem';
 import { ribbonPaths } from '@/types/RibbonTypes';
 import { useId } from 'react';
-
 interface BannerImageProps {
   data: BannerItem;
-  height: string;
+  height: number;
 }
 
-export const BannerImage = ({ data, height = '550px' }: BannerImageProps) => {
+export const BannerImage = ({ data, height = 550 }: BannerImageProps) => {
   const baseId = useId();
   const topClipId = `${baseId}-top`;
   const bottomClipId = `${baseId}-bottom`;
   const topClipClass = `clipped-top-${baseId}`;
   const bottomClipClass = `clipped-bottom-${baseId}`;
+  const effectiveHeight = height - 100;
 
   return (
     <div className="relative w-full">
@@ -37,50 +37,32 @@ export const BannerImage = ({ data, height = '550px' }: BannerImageProps) => {
       `}</style>
       <div
         className="relative grid w-full grid-cols-1 grid-rows-1"
-        style={{ height }}
+        style={{ height: effectiveHeight }}
       >
         <div
           className={`${bottomClipClass} relative col-start-1 row-start-1 w-full overflow-hidden`}
-          style={{ height }}
+          style={{ height: effectiveHeight }}
         >
           <div
             className={`${topClipClass} relative col-start-1 row-start-1 grid h-full w-full overflow-hidden`}
           >
             <div className="col-start-1 row-start-1 h-full w-full bg-[#DA1E40]" />
-
-            {/* {darkened && (
-              <div
-                className={`col-start-1 row-start-1 w-full ${gradientDefinition ? gradientDefinition : 'bg-gradient-to-r from-black/80 via-black/0 to-black/0'}`}
-                style={{ height }}
-              />
-            )} */}
           </div>
         </div>
         <div
           className={`${bottomClipClass} relative col-start-1 row-start-1 mt-12 w-full overflow-hidden`}
-          style={{ height }}
+          style={{ height: effectiveHeight }}
         >
           <div
             className={`${topClipClass} relative col-start-1 row-start-1 grid h-full w-full overflow-hidden`}
           >
-            <img
-              src={data.src}
-              className="col-start-1 row-start-1 h-full w-full"
-              style={{
-                objectFit: data.objectFit,
-                objectPosition: data.objectPosition,
-                transform: `scale(${data.scale})`,
-                transformOrigin: 'center center',
-              }}
-              alt="Banner image"
-            />
-
-            {/* {darkened && (
-              <div
-                className={`col-start-1 row-start-1 w-full ${gradientDefinition ? gradientDefinition : 'bg-gradient-to-r from-black/80 via-black/0 to-black/0'}`}
-                style={{ height }}
+            <div className={`h-[600px] overflow-hidden`}>
+              <img
+                src={data.src}
+                className={`col-start-1 row-start-1 h-[600px] w-full ${data.objectFit && 'object-' + data.objectFit} ${data.objectPosition}`}
+                alt="Banner image"
               />
-            )} */}
+            </div>
           </div>
         </div>
       </div>

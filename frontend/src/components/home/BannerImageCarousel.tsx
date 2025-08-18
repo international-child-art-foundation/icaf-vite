@@ -22,16 +22,16 @@ export function BannerImageCarousel({
   let carousel_height;
   switch (true) {
     case size.width > 1024:
-      carousel_height = '700px';
+      carousel_height = 700;
       break;
     case size.width > 768:
-      carousel_height = '600px';
+      carousel_height = 600;
       break;
     case size.width > 640:
-      carousel_height = '500px';
+      carousel_height = 500;
       break;
     default:
-      carousel_height = '400px';
+      carousel_height = 400;
       break;
   }
 
@@ -49,18 +49,20 @@ export function BannerImageCarousel({
 
   const layerBase =
     'absolute inset-0 transition-opacity ease-in-out motion-reduce:transition-none';
-  const durationClass = `duration-[${transitionMs}ms]`;
 
   return (
     <div
-      className={`relative h-[${carousel_height}] overflow-hidden ${className}`}
+      className={`relative overflow-hidden ${className}`}
+      style={{ height: carousel_height }}
     >
       {items.map((item, i) => (
         <div
           key={item.id ?? i}
-          className={`${layerBase} ${durationClass} ${
-            i === index ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`${layerBase} ${i === index ? 'opacity-100' : 'opacity-0'}`}
+          style={{
+            height: carousel_height,
+            transitionDuration: `${transitionMs}ms`,
+          }}
           aria-hidden={i !== index}
         >
           <BannerImage data={item} height={carousel_height} />

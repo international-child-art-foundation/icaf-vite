@@ -22,7 +22,7 @@ export function BannerImageCarousel({
   let carousel_height;
   switch (true) {
     case size.width > 1024:
-      carousel_height = 700;
+      carousel_height = 800;
       break;
     case size.width > 768:
       carousel_height = 600;

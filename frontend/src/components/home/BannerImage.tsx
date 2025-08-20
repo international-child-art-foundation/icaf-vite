@@ -56,11 +56,15 @@ export const BannerImage = ({ data, height = 550 }: BannerImageProps) => {
           <div
             className={`${topClipClass} relative col-start-1 row-start-1 grid h-full w-full overflow-hidden`}
           >
-            <div className={`h-[600px] overflow-hidden`}>
+            <div
+              className={`overflow-hidden`}
+              style={{ height: effectiveHeight }}
+            >
               <img
                 src={data.src}
-                className={`col-start-1 row-start-1 h-[600px] w-full ${data.objectFit && 'object-' + data.objectFit} ${data.objectPosition}`}
+                className={`col-start-1 row-start-1 w-full ${data.objectFit && 'object-' + data.objectFit} ${data.objectPosition}`}
                 alt="Banner image"
+                style={{ height: effectiveHeight }}
               />
             </div>
           </div>

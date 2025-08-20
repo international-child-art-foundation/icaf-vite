@@ -24,7 +24,7 @@ export const handler = async (event: ApiEvent) => {
         const lastEvaluatedKey = qp.last_evaluated_key ? JSON.parse(decodeURIComponent(String(qp.last_evaluated_key))) : undefined;
         const seasonFilter = qp.season_filter; // 'active', 'all', or specific season
 
-        // 3) Get active seasons (for highlighting and filtering)
+        // 3) Get current active season(s) (for highlighting)
         let activeSeasons: string[] = [];
         try {
             const seasonResult = await dynamodb.send(new QueryCommand({
@@ -47,39 +47,38 @@ export const handler = async (event: ApiEvent) => {
             console.warn('Failed to get active seasons:', error);
         }
 
-        // 4) Query Art_Ptr pointers for this user
+        // 4) Query Vote_Ptr pointers for this user
         const ptrQueryParams = {
             TableName: TABLE_NAME,
             KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
             ExpressionAttributeValues: {
                 ':pk': `USER#${userId}`,
-                ':sk': 'ART#'
+                ':sk': 'VOTE#'
             },
             Limit: limit * 3, // Query more to account for filtering
-            ScanIndexForward: false,
+            ScanIndexForward: false, // Most recent first
             ...(lastEvaluatedKey && { ExclusiveStartKey: lastEvaluatedKey })
         };
 
         const ptrResult = await dynamodb.send(new QueryCommand(ptrQueryParams));
-        const pointers = ptrResult.Items || [];
+        const votePointers = ptrResult.Items || [];
 
-        // 5) Filter by season if specified
-        let filteredPointers = pointers;
+        // Filter by season if specified
+        let filteredPointers = votePointers;
         if (seasonFilter && seasonFilter !== 'all') {
             if (seasonFilter === 'active') {
-                // Filter to only active seasons
-                filteredPointers = pointers.filter(pointer => {
-                    // Extract season from SK: ART#<season>
-                    const skParts = pointer.SK?.split('#') || [];
-                    const artSeason = skParts[1] || pointer.season;
-                    return activeSeasons.includes(artSeason);
+                // Parse season from compound_sk: VOTE#<season>#TIMESTAMP#<timestamp>
+                filteredPointers = votePointers.filter(pointer => {
+                    const skParts = pointer.compound_sk?.split('#') || [];
+                    const voteSeason = skParts[1] || pointer.season;
+                    return activeSeasons.includes(voteSeason);
                 });
             } else {
-                // Filter to specific season
-                filteredPointers = pointers.filter(pointer => {
-                    const skParts = pointer.SK?.split('#') || [];
-                    const artSeason = skParts[1] || pointer.season;
-                    return artSeason === seasonFilter;
+                // Specific season filter
+                filteredPointers = votePointers.filter(pointer => {
+                    const skParts = pointer.compound_sk?.split('#') || [];
+                    const voteSeason = skParts[1] || pointer.season;
+                    return voteSeason === seasonFilter;
                 });
             }
         }
@@ -87,7 +86,7 @@ export const handler = async (event: ApiEvent) => {
         // Limit after filtering
         filteredPointers = filteredPointers.slice(0, limit);
 
-        // Deduplicate by art_id to avoid duplicate BatchGet keys (legacy pointer + season pointer)
+        // Deduplicate by art_id to avoid duplicate BatchGet keys
         const uniqueArtIds: string[] = Array.from(
             new Set(
                 filteredPointers
@@ -96,7 +95,7 @@ export const handler = async (event: ApiEvent) => {
             )
         );
 
-        // 6) Resolve corresponding ART entities via BatchGet
+        // 5) Resolve corresponding ART entities via BatchGet
         const artKeys = uniqueArtIds.map((artId: string) => ({ PK: `ART#${artId}`, SK: 'N/A' }));
 
         let artsById: Record<string, any> = {};
@@ -115,39 +114,45 @@ export const handler = async (event: ApiEvent) => {
             }
         }
 
-        // 7) Build artworks from unique art records and sort by actual art timestamp desc
-        const artworks = uniqueArtIds.map(artId => {
-            const art = artsById[artId];
-            const ts = art?.timestamp || '';
-            const season = art?.season || '';
-            const isActiveSeason = activeSeasons.includes(season);
+        // 6) Build votes with artwork details and highlight current season
+        const votes = filteredPointers.map(pointer => {
+            const art = artsById[pointer.art_id];
+            const isCurrentSeason = pointer.season === currentActiveSeason;
+            
+            // Parse compound_sk to extract season and timestamp
+            // Format: VOTE#<season>#TIMESTAMP#<timestamp>
+            const skParts = pointer.compound_sk?.split('#') || [];
+            const voteTimestamp = skParts[3] ? parseInt(skParts[3]) : pointer.timestamp;
+            const voteSeason = skParts[1] || pointer.season;
             
             return {
-                artwork_id: artId,
-                title: art?.title || '',
-                submission_date: ts,
-                is_approved: Boolean(art?.is_approved),
-                votes: Number.isFinite(art?.votes) ? art.votes : 0,
-                season: season || '',
-                is_active_season: isActiveSeason,
-                image_url: art?.image_url || ''
+                vote_id: `VOTE_${pointer.user_id}_${pointer.art_id}_${voteTimestamp}`,
+                art_id: pointer.art_id,
+                artwork_title: art?.title || '',
+                artwork_image_url: art?.image_url || '',
+                season: voteSeason || '',
+                is_active_season: activeSeasons.includes(voteSeason),
+                voted_at: new Date(voteTimestamp * 1000).toISOString(),
+                vote_count_at_time: art?.votes || 0,
+                artwork_status: art?.is_approved ? 'approved' : 'pending'
             };
         });
 
-        artworks.sort((a, b) => String(b.submission_date).localeCompare(String(a.submission_date)));
+        // Sort by timestamp descending (most recent first)
+        votes.sort((a, b) => new Date(b.voted_at).getTime() - new Date(a.voted_at).getTime());
 
-        // 8) Calculate summary stats
-        const activeSeasonArtworks = artworks.filter(art => art.is_active_season).length;
-        const totalArtworks = artworks.length;
+        // 7) Calculate summary stats
+        const activeSeasonVotes = votes.filter(v => v.is_active_season).length;
+        const totalVotes = votes.length;
 
-        // 9) Response
+        // 8) Response
         return {
             statusCode: 200,
             body: JSON.stringify({
-                artworks,
+                votes,
                 summary: {
-                    total_artworks: totalArtworks,
-                    active_season_artworks: activeSeasonArtworks,
+                    total_votes: totalVotes,
+                    active_season_votes: activeSeasonVotes,
                     active_seasons: activeSeasons
                 },
                 pagination: {
@@ -160,7 +165,7 @@ export const handler = async (event: ApiEvent) => {
             headers: { 'Content-Type': 'application/json' }
         };
     } catch (error: any) {
-        console.error('Error listing artwork submissions:', error);
+        console.error('Error listing user votes:', error);
         return {
             statusCode: 500,
             body: JSON.stringify({ message: 'Internal server error' }),

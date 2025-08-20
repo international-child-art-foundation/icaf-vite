@@ -104,12 +104,13 @@ describe('listArtworkSubmissions (user)', () => {
         expect(res1.statusCode).toBe(200);
         const body1 = JSON.parse(res1.body);
         expect(body1.artworks.length).toBe(1);
-        expect(typeof body1.last_evaluated_key === 'string' && body1.last_evaluated_key.length > 0).toBe(true);
+        expect(body1.pagination.has_more).toBe(true);
+        expect(typeof body1.pagination.last_evaluated_key === 'string' && body1.pagination.last_evaluated_key.length > 0).toBe(true);
 
         // Second page with cursor
         const res2 = await listArtworkSubmissions({
             requestContext: { authorizer: { claims: { sub: userId } } },
-            queryStringParameters: { limit: '1', last_evaluated_key: body1.last_evaluated_key }
+            queryStringParameters: { limit: '1', last_evaluated_key: body1.pagination.last_evaluated_key }
         } as any);
         expect(res2.statusCode).toBe(200);
         const body2 = JSON.parse(res2.body);
@@ -118,10 +119,12 @@ describe('listArtworkSubmissions (user)', () => {
 
     test('500 when internal error occurs', async () => {
         const userId = TestDataGenerator.generateUserId('TEST_USER');
-        // Mock DDB to throw once
+        // Mock DDB to throw on the second call (the critical user query)
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const awsClients = require('../../config/aws-clients');
-        const spy = jest.spyOn(awsClients.dynamodb, 'send').mockRejectedValueOnce(new Error('boom'));
+        const spy = jest.spyOn(awsClients.dynamodb, 'send')
+            .mockResolvedValueOnce({ Items: [] }) // First call (seasons) succeeds
+            .mockRejectedValueOnce(new Error('boom')); // Second call (user pointers) fails
         const res = await listArtworkSubmissions({
             requestContext: { authorizer: { claims: { sub: userId } } },
             queryStringParameters: { limit: '20' }

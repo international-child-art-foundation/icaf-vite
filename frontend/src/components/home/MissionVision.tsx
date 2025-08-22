@@ -1,53 +1,59 @@
-import mapBg1024 from '@/assets/shared/images/home/map-bg/map-bg-1024w.webp';
-import mapBg428 from '@/assets/shared/images/home/map-bg/map-bg-428w.webp';
+import missionVisionBackgroundLarge from '@/assets/home/MissionVisionLarge.webp';
+import missionVisionBackgroundSmall from '@/assets/home/MissionVisionSmall.webp';
 import { ClickIcon } from '@/assets/shared/icons/ClickIcon';
 import { VisibilityIcon } from '@/assets/shared/icons/VisibilityIcon';
-import StepperLineIcon from '@/assets/shared/icons/StepperLineIcon';
 
 const MissionVision = () => {
   return (
-    <div className="relative inline-block">
-      <picture>
-        <source media="(min-width: 1024px)" srcSet={mapBg1024} />
-        <source media="(max-width: 1023px)" srcSet={mapBg428} />
+    <div className="relative grid w-full max-w-screen-2xl grid-cols-1 grid-rows-1">
+      <picture className="col-start-1 row-start-1 mt-16">
+        <source
+          media="(min-width: 1024px)"
+          srcSet={missionVisionBackgroundLarge}
+        />
+        <source
+          media="(max-width: 1023px)"
+          srcSet={missionVisionBackgroundSmall}
+        />
         <img
-          src={mapBg1024}
+          src={missionVisionBackgroundLarge}
           alt="Map Background"
-          className="m-auto h-[1060px] w-[438px] object-cover object-center lg:h-[785px] lg:w-[1024px]"
+          className="m-auto object-cover object-center"
           loading="lazy"
         />
       </picture>
-      <div className="absolute top-[190px] flex max-w-[428px] flex-col items-center justify-center lg:top-[140px] lg:max-w-[1024px]">
+      <div className="col-start-1 row-start-1 flex flex-col gap-0 px-8 sm:gap-20 md:gap-12 md:px-12 lg:gap-28 lg:px-16 xl:gap-40 xl:px-20">
         <h1 className="font-montserrat text-center text-[32px] font-extrabold leading-6 text-black lg:text-[40px]">
-          Mission & Vision
+          Why ICAF?
         </h1>
-        <div className="mx-auto mt-12 flex flex-col items-start gap-12 px-6 lg:flex-row lg:items-center lg:gap-12">
-          <div className="flex flex-col gap-8 lg:max-w-[520px] lg:gap-10">
+        <div className="mx-auto mt-12 flex flex-col items-start gap-12 lg:flex-row lg:items-center lg:gap-12">
+          <div className="flex flex-col gap-8 lg:flex-row lg:gap-10">
             <div className="flex flex-col gap-4 lg:flex-row">
               <div className="flex items-center gap-2">
                 <ClickIcon />
-                <h1 className="font-montserrat text-primary text-[32px] font-extrabold leading-6">
+                <h1 className="font-montserrat text-tertiary-blue text-2xl font-semibold leading-6 md:text-4xl">
                   Mission
                 </h1>
               </div>
-              <p className="font-sans text-base text-black">
-                To inspire kids to imagine, create, and care for each other.
+              <p className="font-openSans text-base text-black">
+                To seed students’ imagination, cultivate their creativity, and
+                grow mutual empathy through the power of art.
               </p>
             </div>
             <div className="flex flex-col gap-4 lg:flex-row">
               <div className="flex items-center gap-2">
                 <VisibilityIcon />
-                <h1 className="font-montserrat text-error text-[32px] font-extrabold leading-6">
+                <h1 className="font-montserrat text-error text-2xl font-semibold leading-6 md:text-4xl">
                   Vision
                 </h1>
               </div>
-              <p className="font-sans text-base text-black">
-                We envision a world where everyone is creative and kind,
-                achieving success and happiness together.
+              <p className="font-openSans text-base text-black">
+                To democratize creativity and mainstream empathy for shared
+                prosperity and a more perfect union.
               </p>
             </div>
           </div>
-          <div className="flex gap-3">
+          {/* <div className="flex gap-3">
             <StepperLineIcon />
             <div className="mt-6 flex flex-col">
               <h1 className="font-montserrat text-2xl font-semibold text-black">
@@ -78,7 +84,7 @@ const MissionVision = () => {
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

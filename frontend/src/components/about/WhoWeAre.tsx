@@ -25,7 +25,7 @@ export default function WhoWeAre() {
           <h3 className="lg:text-x my-4 text-2xl font-semibold">
             International Child Art Foundation
           </h3>
-          <div className="lg:text-x border-secondary-red my-4 rounded-full border-4"></div>
+          <div className="lg:text-x border-tertiary-red my-4 rounded-full border-4"></div>
           <p className="my-4 font-sans lg:text-xl">
             Founded in the District of Columbia in 1997 as a 501(c)(3) nonprofit
             with federal tax# 52-2032649, the International Child Art Foundation

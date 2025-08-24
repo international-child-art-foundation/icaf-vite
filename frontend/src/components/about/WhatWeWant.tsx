@@ -1,16 +1,26 @@
 import waveUrl from '@/assets/shared/images/about/Group 515076.svg';
 import www1 from '@/assets/shared/images/about/rectangleHeart.webp';
 import www2 from '@/assets/shared/images/about/rectangleGlobe.webp';
+import www1Large from '@/assets/shared/images/about/rectangleHeartLarge.png';
+import www2Large from '@/assets/shared/images/about/rectangleGlobeLarge.png';
 import { AboutGraphic2 } from '@/assets/shared/images/about/AboutGraphic2';
 
 export default function WhatWeWant() {
   const cards = [
     {
-      src: www1,
+      mobileSrc: www1,
+      desktopSrc: www1Large,
       titleTop: 'A Better World',
       titleBottom: 'Brighter Future',
+      alt: 'Heart Shaped Globe',
     },
-    { src: www2, titleTop: 'Creativity', titleBottom: 'Art' },
+    {
+      mobileSrc: www2,
+      desktopSrc: www2Large,
+      titleTop: 'Creativity',
+      titleBottom: 'Art',
+      alt: 'Children Holding Hands Around Globe',
+    },
   ];
   return (
     <section className="mt-28 overflow-visible lg:mt-32">
@@ -27,28 +37,32 @@ export default function WhatWeWant() {
               What We Want
             </h2>
           </div>
-          <div className="absolute right-0 top-0 z-[-10] translate-x-[20%] translate-y-[-20%] transform sm:translate-x-[30%] sm:translate-y-[80%] lg:translate-x-[-10%] lg:translate-y-[50%]">
+          <div className="absolute right-0 top-0 z-[-10] translate-x-[20%] translate-y-[-20%] transform sm:translate-x-[30%] md:translate-y-[80%] lg:translate-x-[-10%] lg:translate-y-[50%]">
             <AboutGraphic2 className="h-56 w-56 lg:h-72 lg:w-72" />
           </div>
-          <div className="absolute left-0 top-0 z-[-10] translate-x-[-80%] translate-y-[40%] transform sm:translate-x-[-40%] sm:translate-y-[80%] lg:translate-x-[10%] lg:translate-y-[50%] xl:translate-x-[10%] xl:translate-y-[20%]">
+          <div className="absolute left-0 top-0 z-[-10] translate-x-[-80%] translate-y-[40%] transform sm:translate-x-[-40%] md:translate-y-[80%] lg:translate-x-[10%] lg:translate-y-[50%] xl:translate-x-[10%] xl:translate-y-[20%]">
             <AboutGraphic2 className="h-56 w-56 lg:h-72 lg:w-72" />
           </div>
-          <div className="flex flex-col overflow-visible sm:flex-row sm:gap-8 md:gap-12 lg:px-32 xl:gap-20 xl:px-48 2xl:gap-24 2xl:px-56">
-            {cards.map(({ src, titleTop, titleBottom }) => (
-              <div key={titleTop} className="relative">
-                <picture className="flex items-center justify-center">
+          <div className="flex flex-col overflow-visible md:flex-row md:justify-center md:gap-8 lg:gap-20 lg:px-32 xl:px-48 2xl:gap-32 2xl:px-56">
+            {cards.map((card) => (
+              <div
+                key={card.titleTop}
+                className="relative flex items-center justify-center"
+              >
+                <picture>
+                  <source srcSet={card.desktopSrc} media="(min-width: 768px)" />
                   <img
-                    src={src}
-                    alt=""
+                    src={card.mobileSrc}
+                    alt={card.alt}
                     loading="lazy"
-                    className="sm:h-[382px] md:h-[430px] xl:h-[450px] 2xl:h-[520px]"
+                    className="object-cover"
                   />
                 </picture>
 
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-lg font-semibold text-white">
-                  <span>{titleTop}</span>
+                  <span>{card.titleTop}</span>
                   <span>&</span>
-                  <span>{titleBottom}</span>
+                  <span>{card.titleBottom}</span>
                 </div>
               </div>
             ))}

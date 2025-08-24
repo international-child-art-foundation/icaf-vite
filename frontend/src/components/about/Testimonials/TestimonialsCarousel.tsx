@@ -7,8 +7,10 @@ import {
 import { testimonials } from '@/lib/testimonials';
 import { TestimonialCard } from './TestimonialsCard';
 import { useState, useEffect } from 'react';
-
 import CarouselArrowsDots from './CarouselArrowsDots';
+import { YellowBlob } from '@/assets/shared/images/about/YellowBlob';
+import { BlueBlob } from '@/assets/shared/images/about/BlueBlob';
+import { RedBlob } from '@/assets/shared/images/about/RedBlob';
 
 export const TestimonialsCarousel = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -33,10 +35,14 @@ export const TestimonialsCarousel = () => {
   const n = testimonials.length;
 
   return (
-    <section className="bg-white py-6 md:py-20">
+    <section className="relative bg-white py-6 md:py-20">
       <h2 className="mb-10 text-center font-sans text-3xl font-bold lg:text-[40px]">
         Testimonials
       </h2>
+      {/* Color blobs behind the card  */}
+      <YellowBlob className="top-22 absolute hidden sm:left-[-15rem] sm:top-20 sm:block sm:rotate-180 sm:scale-110 md:left-[-12rem] md:top-36 md:scale-105 lg:left-[-1rem] lg:top-40 lg:rotate-0 lg:scale-x-[85%] xl:left-8 xl:scale-100 2xl:left-20 2xl:top-52 2xl:scale-125" />
+      <BlueBlob className="top-22 absolute left-1/2 -translate-x-1/2 scale-x-[85%] xl:scale-100 2xl:top-52 2xl:scale-125" />
+      <RedBlob className="top-22 absolute hidden sm:right-[-15rem] sm:top-20 sm:block sm:rotate-180 sm:scale-110 md:right-[-12rem] md:top-36 md:scale-105 lg:right-[-1rem] lg:top-40 lg:rotate-0 lg:scale-x-[85%] xl:right-8 xl:scale-100 2xl:right-20 2xl:top-52 2xl:scale-125" />
 
       <Carousel
         setApi={setApi}
@@ -48,25 +54,14 @@ export const TestimonialsCarousel = () => {
       >
         <CarouselContent className="">
           {testimonials.map((testimonial, index) => {
-            // Tracking the location of the visible indexes to assign the correct blob color in TestimonialCard
-            const leftIndex = (selectedIndex - 1 + n) % n;
-            const rightIndex = (selectedIndex + 1) % n;
-
-            let blobColor: 'yellow' | 'blue' | 'red' | '' = '';
-
-            if (index === selectedIndex) blobColor = 'blue';
-            else if (index === leftIndex) blobColor = 'yellow';
-            else if (index === rightIndex) blobColor = 'red';
-
             return (
               <CarouselItem
                 key={testimonial.id}
-                className="mx-0 basis-[75%] pl-4 sm:basis-1/2 md:basis-[45%] lg:basis-1/3"
+                className="basis-[75%] pl-4 sm:basis-1/2 md:basis-[45%] lg:basis-[31%]"
               >
                 <TestimonialCard
                   testimonial={testimonial}
                   active={selectedIndex === index}
-                  blobColor={blobColor}
                 />
               </CarouselItem>
             );

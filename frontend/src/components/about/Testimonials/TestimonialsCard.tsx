@@ -8,32 +8,16 @@ import {
 } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { QuoteIcon } from '@/assets/shared/icons/QuoteIcon';
-import { YellowBlob } from '@/assets/shared/images/about/YellowBlob';
-import { RedBlob } from '@/assets/shared/images/about/RedBlob';
-import { BlueBlob } from '@/assets/shared/images/about/BlueBlob';
 
 export const TestimonialCard = ({
   testimonial,
   active,
-  blobColor,
 }: {
   testimonial: Testimonial;
   active: boolean;
-  blobColor: string;
 }) => {
   return (
     <div className="relative flex h-[450px] items-center 2xl:h-[550px]">
-      {/* Color blob behind the card  */}
-      {blobColor === 'yellow' && (
-        <YellowBlob className="absolute right-2 top-0 lg:right-[-1.20rem] lg:scale-x-[85%] xl:right-8 xl:scale-100 2xl:right-14 2xl:top-10 2xl:scale-125" />
-      )}
-      {blobColor === 'red' && (
-        <RedBlob className="absolute left-1 top-0 lg:left-[-1.20rem] lg:scale-x-[85%] xl:left-8 xl:scale-100 2xl:left-14 2xl:top-10 2xl:scale-125" />
-      )}
-      {blobColor === 'blue' && (
-        <BlueBlob className="absolute left-1/2 top-0 -translate-x-1/2 scale-x-[85%] xl:scale-100 2xl:top-10 2xl:scale-125" />
-      )}
-
       <Card
         className={`mx-auto h-[400px] w-[300px] items-center gap-4 rounded-[40px] p-6 shadow-md transition-all duration-300 xl:w-[360px] xl:px-10 2xl:h-[490px] 2xl:w-[390px] 2xl:px-12 ${active ? 'scale-100' : 'scale-90'}`}
       >

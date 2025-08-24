@@ -33,7 +33,7 @@ export default function WhatWeWant() {
 
         <div className="absolute inset-0 z-10 flex h-full flex-col justify-center text-center">
           <div>
-            <h2 className="font-montserrat text-[40px] font-extrabold sm:mb-8">
+            <h2 className="font-montserrat text-[40px] font-extrabold md:mb-16">
               What We Want
             </h2>
           </div>

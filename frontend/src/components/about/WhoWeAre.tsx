@@ -47,7 +47,7 @@ export default function WhoWeAre() {
               src={ICAFAboutImage}
               loading="lazy"
               alt="children showing artwork"
-              className="border-secondary-red h-full w-full rounded-[42px] border-4 object-cover"
+              className="border-tertiary-red h-full w-full rounded-[42px] border-4 object-cover"
             />
           </picture>
         </div>

@@ -1,8 +1,8 @@
 import waveUrl from '@/assets/shared/images/about/Group 515076.svg';
 import www1 from '@/assets/shared/images/about/rectangleHeart.webp';
 import www2 from '@/assets/shared/images/about/rectangleGlobe.webp';
-import www1Large from '@/assets/shared/images/about/rectangleHeartLarge.png';
-import www2Large from '@/assets/shared/images/about/rectangleGlobeLarge.png';
+import www1Large from '@/assets/shared/images/about/rectangleHeartLarge.webp';
+import www2Large from '@/assets/shared/images/about/rectangleGlobeLarge.webp';
 import { AboutGraphic2 } from '@/assets/shared/images/about/AboutGraphic2';
 
 export default function WhatWeWant() {

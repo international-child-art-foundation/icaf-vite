@@ -1,4 +1,4 @@
-import heroImage from '@/assets/shared/images/about/aboutUs.webp';
+import heroImage from '@/assets/shared/images/about/AboutUsHero.webp';
 import WhoWeAre from '@/components/about/WhoWeAre';
 import { CurvedImage } from './CurvedImage';
 import WhatWeWant from '@/components/about/WhatWeWant';
@@ -16,7 +16,10 @@ export default function About() {
         {/* Hero Section */}
         <div>
           <figure className="relative">
-            <CurvedImage src={heroImage} />
+            <CurvedImage
+              src={heroImage}
+              gradientDefinition="bg-[linear-gradient(to_bottom,rgba(0,0,0,0.7)_1%,rgba(255,255,255,0.2)_20%,rgba(255,255,255,0)_40%)]"
+            />
             <figcaption className="sr-only">About Us hero image</figcaption>
             <div className="absolute inset-0 top-1/3 flex justify-center text-[40px] font-extrabold text-white lg:text-[60px]">
               <h1>About Us</h1>

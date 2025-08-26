@@ -32,8 +32,6 @@ export const TestimonialsCarousel = () => {
   const handleNext = () => api?.scrollNext();
   const handleSelect = (index: number) => api?.scrollTo(index);
 
-  const n = testimonials.length;
-
   return (
     <section className="relative bg-white py-6 md:py-20">
       <h2 className="mb-10 text-center font-sans text-3xl font-bold lg:text-[40px]">

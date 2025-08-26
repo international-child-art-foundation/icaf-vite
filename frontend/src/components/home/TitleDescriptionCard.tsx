@@ -15,7 +15,7 @@ export const TitleDescriptionCard = ({
 }: TitleDescriptionCardProps) => {
   return (
     <div
-      className={`grid-col grid gap-4 rounded-[20px] border-4 p-9 ${FlairColorMap[color]?.border} ${className}`}
+      className={`flex h-full flex-col flex-wrap justify-evenly gap-2 rounded-[20px] border-4 p-9 ${FlairColorMap[color]?.border} ${className}`}
     >
       <p className="font-montserrat text-4xl font-extrabold">{title}</p>
       <p>{description}</p>

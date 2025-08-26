@@ -21,7 +21,7 @@ export const ActivityItem = ({ item, expanded, toggle }: ActivityItemProps) => {
           <p
             className={`font-open-sans duration-400 grid transition-all ${expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'} text-xl`}
           >
-            <div className="overflow-hidden">{item.description}</div>
+            <span className="overflow-hidden">{item.description}</span>
           </p>
         </div>
         <div className="absolute bottom-6 left-0 right-0 flex justify-center">

@@ -7,9 +7,9 @@ const WhatWeDo = () => {
     <div className="relative">
       <img
         src={redBlueFirework}
-        className="absolute w-32 sm:right-8 md:right-24 md:w-48 lg:right-48 xl:right-80"
+        className="absolute -top-12 hidden w-32 sm:right-8 sm:block md:right-24 md:w-48 lg:right-48 xl:right-80"
       />
-      <div className="z-10 flex flex-col items-center gap-6 p-6 py-24 lg:gap-10 lg:p-10 lg:py-[130px]">
+      <div className="z-10 flex flex-col items-center gap-6 p-6 py-24 lg:gap-10 lg:p-10 lg:py-[50px]">
         <h1 className="font-montserrat text-[32px] font-extrabold leading-6 text-black lg:text-[40px]">
           What we do
         </h1>

@@ -42,35 +42,44 @@ export const CurvedImage = ({
         }
       `}</style>
 
-      <div className={`relative grid w-full grid-cols-1 grid-rows-1`} style={{ height }}>
-        <div 
+      <div
+        className={`relative grid w-full grid-cols-1 grid-rows-1`}
+        style={{ height }}
+      >
+        <div
           className={`${clipPathClass} relative col-start-1 row-start-1 grid w-full overflow-hidden`}
           style={{ height: `calc(${height} + 20px)` }}
         >
-          <div className={`bg-tertiary-blue col-start-1 row-start-1 h-full w-full`} />
-        </div>
-        
-        <div className={`${clipPathClass} relative col-start-1 row-start-1 grid h-full w-full overflow-hidden`}>
-          <div className={`bg-tertiary-blue col-start-1 row-start-1 h-full w-full`} />
+          <div
+            className={`bg-tertiary-blue col-start-1 row-start-1 h-full w-full`}
+          />
         </div>
 
-        <div 
+        <div
+          className={`${clipPathClass} relative col-start-1 row-start-1 grid h-full w-full overflow-hidden`}
+        >
+          <div
+            className={`bg-tertiary-blue col-start-1 row-start-1 h-full w-full`}
+          />
+        </div>
+
+        <div
           className={`${clipPathClass} relative col-start-1 row-start-1 w-full overflow-hidden`}
           style={{ height }}
         >
           <img
             src={src}
-            className="col-start-1 row-start-1 w-full h-full"
+            className="col-start-1 row-start-1 h-full w-full"
             style={{
               objectFit: objectFit,
               objectPosition: objectPosition,
               transform: `scale(${scale})`,
-              transformOrigin: 'center center'
+              transformOrigin: 'center center',
             }}
             alt="Header image"
           />
         </div>
-        
+
         {darkened && (
           <div
             className={`${clipPathClass} relative col-start-1 row-start-1 w-full overflow-hidden ${gradientDefinition ? gradientDefinition : 'bg-gradient-to-r from-black/80 via-black/0 to-black/0'}`}

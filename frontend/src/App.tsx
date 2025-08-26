@@ -4,6 +4,7 @@ import Footer from '@/components/shared/Footer';
 import './index.css';
 import Home from './pages/Home';
 import Partners from './pages/Partners';
+import About from './pages/About';
 import { Route, Routes } from 'react-router-dom';
 import ChildArtPage from './pages/ChildArtPage';
 import Impact from './pages/Impact';
@@ -27,6 +28,7 @@ export default function App() {
 
           <Route path="/programs/outreach" element={<ChildArtPage />} />
           <Route path="/about/partners" element={<Partners />} />
+          <Route path="/about" element={<About />} />
           <Route path="/about/impact" element={<Impact />} />
           <Route path="/donate" element={<Donate />} />
         </Routes>

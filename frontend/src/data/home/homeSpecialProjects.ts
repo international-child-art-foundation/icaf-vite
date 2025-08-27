@@ -19,7 +19,7 @@ export const specialProjectData: TSpecialProjectGroup = [
     title: 'My Favorite Sport 2024',
     description: 'A global art contest to celebrate the Paris Games',
     href: 'https://myfavoritesport.org/',
-    color: 'red',
+    color: 'blue',
   },
   {
     id: 3,
@@ -27,6 +27,6 @@ export const specialProjectData: TSpecialProjectGroup = [
     title: 'VR Heaven 2025/2026',
     description: 'Virtual Reality that brings Heaven to Earth',
     href: 'https://worldchildrensfestival.org/',
-    color: 'red',
+    color: 'yellow',
   },
 ];

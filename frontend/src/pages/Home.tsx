@@ -11,7 +11,7 @@ import { SpecialProjects } from '@/components/home/SpecialProjects';
 
 export default function Home() {
   return (
-    <div className="m-0 flex w-full flex-col items-center gap-20 p-0">
+    <div className="relative m-0 flex w-full flex-col items-center gap-20 overflow-hidden p-0">
       <HomeHeader />
       <MissionVision />
       <BannerImageCarousel items={bannerItems} displayMs={2000} />

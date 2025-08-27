@@ -1,14 +1,65 @@
+import { Button } from '../ui/button';
 import { specialProjectData } from '@/data/home/homeSpecialProjects';
 import { ProjectWindows } from './ProjectWindows';
+import Firework from '@/assets/impact/Firework.png';
+import Ribbons from '@/assets/home/Ribbons.png';
 
 export const SpecialProjects = () => {
   return (
-    <div className="flex flex-col gap-4 px-8 md:px-12 lg:px-16 xl:px-20">
-      <p className="font-montserrat text-center text-[40px] font-extrabold">
-        Special Projects Websites
-      </p>
-      <div>
-        <ProjectWindows windowArray={specialProjectData} />
+    <div className="relative flex flex-col gap-28">
+      <div className="relative z-10 px-8 md:px-12 lg:px-16 xl:px-20">
+        <p className="font-montserrat text-center text-[40px] font-extrabold">
+          Special Projects Websites
+        </p>
+        <div>
+          <ProjectWindows windowArray={specialProjectData} />
+        </div>
+      </div>
+      <div className="relative z-10 px-8 md:px-12 lg:px-16 xl:px-20">
+        <div className="relative max-w-screen-2xl gap-8 overflow-clip">
+          <div className="relative z-10 rounded-xl bg-[#dfe7f8] p-10 sm:py-8 md:py-12 lg:py-16 xl:py-24">
+            {' '}
+            <p className="font-montserrat mb-8 text-2xl font-semibold sm:max-w-[75%]">
+              Your donation today will bring the arts to more children and help
+              them become creative and empathic.
+            </p>
+            <div className="inline-grid grid-cols-2 gap-2">
+              <Button
+                asChild
+                className="bg-secondary-yellow w-auto rounded-full font-semibold text-black"
+                variant={'secondary'}
+              >
+                <a
+                  href="https://icaf.org/donate"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  Donate
+                </a>
+              </Button>
+              <Button
+                asChild
+                className="rounded-full font-semibold"
+                variant="default"
+              >
+                <a
+                  href="https://icaf.org/donate"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  Contact Us
+                </a>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <img
+        src={Firework}
+        className="absolute bottom-0 right-0 z-20 scale-50 md:scale-75 lg:scale-100"
+      />
+      <div className="absolute z-[-1] origin-[10%_90%] rotate-[80deg] overflow-hidden sm:origin-[10%_100%] md:-right-20 md:bottom-0 md:w-[2000px] md:rotate-[0deg]">
+        <img className="min-w-[900px]" src={Ribbons} />
       </div>
     </div>
   );

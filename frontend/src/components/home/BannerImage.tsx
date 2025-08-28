@@ -50,7 +50,7 @@ export const BannerImage = ({ data, height = 550 }: BannerImageProps) => {
           </div>
         </div>
         <div
-          className={`${bottomClipClass} relative col-start-1 row-start-1 mt-12 w-full overflow-hidden`}
+          className={`${bottomClipClass} relative col-start-1 row-start-1 mt-4 w-full overflow-hidden lg:mt-8`}
           style={{ height: effectiveHeight }}
         >
           <div

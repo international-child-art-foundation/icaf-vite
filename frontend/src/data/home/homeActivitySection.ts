@@ -1,12 +1,12 @@
 import { IActivitySection } from '@/types/HomeActivities';
-import craftsImage from '@/assets/home/Crafts.png';
-import capitolImage from '@/assets/home/Capitol.png';
-import environmentImage from '@/assets/home/Environment.png';
-import heartImage from '@/assets/home/Heart.png';
-import lectureImage from '@/assets/home/Lecture.png';
-import presentationImage from '@/assets/home/Presentation.png';
-import olympiadImage from '@/assets/home/Olympiad.png';
-import magazineImage from '@/assets/home/Magazine.png';
+import craftsImage from '@/assets/home/Crafts.webp';
+import capitolImage from '@/assets/home/Capitol.webp';
+import environmentImage from '@/assets/home/Environment.webp';
+import heartImage from '@/assets/home/Heart.webp';
+import lectureImage from '@/assets/home/Lecture.webp';
+import presentationImage from '@/assets/home/Presentation.webp';
+import olympiadImage from '@/assets/home/Olympiad.webp';
+import magazineImage from '@/assets/home/Magazine.webp';
 
 export const HomeActivities: IActivitySection = [
   [

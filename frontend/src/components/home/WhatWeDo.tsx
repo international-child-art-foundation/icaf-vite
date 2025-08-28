@@ -1,15 +1,15 @@
 import soccer from '@/assets/shared/images/home/circle-images/soccer.webp';
 import globeKids from '@/assets/shared/images/home/circle-images/globe-kids.webp';
-import redBlueFirework from '@/assets/home/RedBlueFirework.png';
+import redBlueFirework from '@/assets/home/RedBlueFirework.svg';
 
 const WhatWeDo = () => {
   return (
     <div className="relative">
       <img
         src={redBlueFirework}
-        className="absolute -top-12 hidden w-32 sm:right-8 sm:block md:right-24 md:w-48 lg:right-48 xl:right-80"
+        className="absolute -top-28 hidden w-32 sm:right-8 sm:block md:right-24 md:w-48 lg:right-48 xl:-top-20 xl:right-[300px]"
       />
-      <div className="z-10 flex flex-col items-center gap-6 p-6 py-24 lg:gap-10 lg:p-10 lg:py-[50px]">
+      <div className="z-10 flex flex-col items-center gap-6 p-6 lg:gap-10 lg:p-10 lg:py-[50px]">
         <h1 className="font-montserrat text-[32px] font-extrabold leading-6 text-black lg:text-[40px]">
           What we do
         </h1>

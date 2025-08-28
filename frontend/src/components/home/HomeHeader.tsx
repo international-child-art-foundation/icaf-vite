@@ -3,7 +3,7 @@ import { HeartIcon } from '@/assets/shared/icons/HeartIcon';
 import { CurvedImage } from '@/pages/CurvedImage';
 import { useNavigate } from 'react-router-dom';
 import { useWindowSize } from 'usehooks-ts';
-import artShowcaseHeader from '@/assets/home/ArtShowcaseHeader.png';
+import artShowcaseHeader from '@/assets/home/ArtShowcaseHeader.webp';
 
 const HomeHeader = () => {
   const navigate = useNavigate();

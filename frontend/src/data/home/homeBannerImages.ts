@@ -1,7 +1,7 @@
-import BannerImage1 from '@/assets/home/BannerImage1.png';
-import BannerImage2 from '@/assets/home/BannerImage2.png';
-import BannerImage3 from '@/assets/home/BannerImage3.png';
-import BannerImage4 from '@/assets/home/BannerImage4.png';
+import BannerImage1 from '@/assets/home/BannerImage1.webp';
+import BannerImage2 from '@/assets/home/BannerImage2.webp';
+import BannerImage3 from '@/assets/home/BannerImage3.webp';
+import BannerImage4 from '@/assets/home/BannerImage4.webp';
 import { BannerItem } from '@/types/BannerItem';
 
 export const bannerItems: BannerItem[] = [

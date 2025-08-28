@@ -1,7 +1,7 @@
 import { TSpecialProjectGroup } from '@/types/SpecialProjectTypes';
-import Wcf from '@/assets/home/WCF.png';
-import Swimmer from '@/assets/home/Swimmer.png';
-import Phoenix from '@/assets/home/Phoenix.png';
+import Wcf from '@/assets/home/WCF.webp';
+import Swimmer from '@/assets/home/Swimmer.webp';
+import Phoenix from '@/assets/home/Phoenix.webp';
 
 export const specialProjectData: TSpecialProjectGroup = [
   {

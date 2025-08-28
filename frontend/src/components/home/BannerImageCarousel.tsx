@@ -1,4 +1,3 @@
-// BannerImageCarousel.tsx
 import React from 'react';
 import { BannerItem } from '@/types/BannerItem';
 import { BannerImage } from './BannerImage';

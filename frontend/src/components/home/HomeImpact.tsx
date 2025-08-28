@@ -4,10 +4,10 @@ export const HomeImpact = () => {
   return (
     <div className="flex flex-col gap-8 px-8 md:px-12 lg:px-16 xl:px-20">
       <div className="flex flex-col gap-7">
-        <p className="font-montserrat text-center text-5xl font-extrabold">
+        <p className="font-montserrat text-center text-[2rem] font-extrabold xl:text-[40px]">
           Educational & Cultural Impact
         </p>
-        <p className="text-center font-sans text-2xl">
+        <p className="font-sans text-base md:text-center xl:text-2xl">
           ICAF serves American children as their national art and creativity
           organization and the world’s children as their global art and
           creativity organization.

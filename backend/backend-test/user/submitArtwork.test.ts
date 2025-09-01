@@ -1,5 +1,4 @@
-import { describe, beforeAll, afterAll, beforeEach, afterEach, test, expect } from '@jest/globals';
-import { handler } from '../../functions/user/submitArtwork';
+let submitArtwork: (event: any) => Promise<any>;
 import { createTestTable, cleanupTestData, createTestUser } from '../shared/test-infrastructure';
 import { TestDataGenerator } from '../shared/simple-test-helpers';
 import { PRESET_TEST_DATA } from '../shared/simple-preset-db';
@@ -8,6 +7,16 @@ describe('Submit Artwork API', () => {
     let testUserIds: string[] = [];
 
     beforeAll(async () => {
+        process.env.NODE_ENV = 'test';
+        process.env.AWS_REGION = process.env.AWS_REGION || 'us-east-1';
+        process.env.TABLE_NAME = process.env.TABLE_NAME || 'icaf-test-table';
+        process.env.S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || 'icaf-test-bucket';
+
+        // Defer require until env vars are set
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { handler } = require('../../functions/user/submitArtwork');
+        submitArtwork = handler;
+
         await createTestTable();
     });
 
@@ -69,7 +78,7 @@ describe('Submit Artwork API', () => {
             })
         };
 
-        const result = await handler(event);
+        const result = await submitArtwork(event);
 
         expect(result.statusCode).toBe(201);
 
@@ -98,7 +107,7 @@ describe('Submit Artwork API', () => {
             })
         };
 
-        const result = await handler(event);
+        const result = await submitArtwork(event);
 
         expect(result.statusCode).toBe(401);
         expect(JSON.parse(result.body).message).toBe('Unauthorized');
@@ -119,7 +128,7 @@ describe('Submit Artwork API', () => {
             body: 'invalid json'
         };
 
-        const result = await handler(event);
+        const result = await submitArtwork(event);
 
         expect(result.statusCode).toBe(400);
         expect(JSON.parse(result.body).message).toBe('Invalid JSON in request body');
@@ -150,7 +159,7 @@ describe('Submit Artwork API', () => {
             })
         };
 
-        const result = await handler(event);
+        const result = await submitArtwork(event);
 
         expect(result.statusCode).toBe(400);
 
@@ -193,7 +202,7 @@ describe('Submit Artwork API', () => {
             })
         };
 
-        const result = await handler(event);
+        const result = await submitArtwork(event);
 
         expect(result.statusCode).toBe(400);
         expect(JSON.parse(result.body).message).toBe('Requested season is not active');
@@ -232,7 +241,7 @@ describe('Submit Artwork API', () => {
             })
         };
 
-        const result = await handler(event);
+        const result = await submitArtwork(event);
 
         expect(result.statusCode).toBe(403);
         expect(JSON.parse(result.body).message).toBe('User is not authorized to submit artwork');
@@ -274,11 +283,11 @@ describe('Submit Artwork API', () => {
         };
 
         // First submission should succeed
-        const firstResult = await handler(event);
+        const firstResult = await submitArtwork(event);
         expect(firstResult.statusCode).toBe(201);
 
         // Second submission should fail
-        const secondResult = await handler(event);
+        const secondResult = await submitArtwork(event);
         expect(secondResult.statusCode).toBe(409);
         expect(JSON.parse(secondResult.body).message).toBe('You have already submitted artwork for this season');
     });
@@ -318,7 +327,7 @@ describe('Submit Artwork API', () => {
             })
         };
 
-        const result = await handler(event);
+        const result = await submitArtwork(event);
 
         expect(result.statusCode).toBe(201);
 

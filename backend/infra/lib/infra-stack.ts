@@ -5,6 +5,7 @@ import * as apigw from "aws-cdk-lib/aws-apigateway";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as cognito from "aws-cdk-lib/aws-cognito";
+import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
 
 export class InfraStack extends Stack {
@@ -154,16 +155,34 @@ export class InfraStack extends Stack {
       },
     });
 
+    const submitArtworkFn = new NodejsFunction(this, "SubmitArtworkFn", {
+      entry: "../functions/user/submitArtwork.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(30),
+      memorySize: 512,
+      environment: {
+        TABLE_NAME: icafTable.tableName,
+        USER_POOL_ID: userPool.userPoolId,
+        USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
+        S3_BUCKET_NAME: artworkBucket.bucketName,
+      },
+    });
+
     // 5️⃣  Grant Lambda permissions to access DynamoDB and S3
     icafTable.grantReadWriteData(helloFn);
     icafTable.grantReadWriteData(userFn);
     icafTable.grantReadWriteData(registerFn);
     icafTable.grantReadWriteData(deleteAccountFn);
     icafTable.grantReadWriteData(cleanupQueueProcessorFn);
+    icafTable.grantReadWriteData(submitArtworkFn);
 
     // Grant S3 permissions to functions
     artworkBucket.grantReadWrite(deleteAccountFn);
     artworkBucket.grantReadWrite(cleanupQueueProcessorFn);
+    artworkBucket.grantReadWrite(submitArtworkFn);
+
+    // Note: Lambda invoke permissions for processImage will be added when that function is implemented
 
     // 6️⃣  REST API — private by default (no execute‑api wildcard policy)
     const api = new apigw.RestApi(this, "InternalApi", {
@@ -202,6 +221,12 @@ export class InfraStack extends Stack {
 
     const accountResource = usersResource.addResource("account");
     accountResource.addMethod("DELETE", new apigw.LambdaIntegration(deleteAccountFn), {
+      authorizer: cognitoAuthorizer,
+      authorizationType: apigw.AuthorizationType.COGNITO,
+    });
+
+    const artworkResource = usersResource.addResource("artwork");
+    artworkResource.addMethod("POST", new apigw.LambdaIntegration(submitArtworkFn), {
       authorizer: cognitoAuthorizer,
       authorizationType: apigw.AuthorizationType.COGNITO,
     });

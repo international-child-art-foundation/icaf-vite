@@ -1,3 +1,4 @@
 export * from "./api-types/apiUserTypes"
+export * from "./api-types/artworkTypes"
 export * from "./api-types/registrationTypes"
 export * from "./api-types/userTypes"

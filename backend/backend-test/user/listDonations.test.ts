@@ -10,9 +10,9 @@ describe('listDonations (user)', () => {
         process.env.NODE_ENV = 'test';
         process.env.AWS_REGION = process.env.AWS_REGION || 'us-east-1';
         process.env.TABLE_NAME = process.env.TABLE_NAME || 'icaf-test-table';
-        // Defer require until env vars are set
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        listDonations = require('../../functions/user/listDonations').handler;
+        // Defer import until env vars are set
+        const { handler } = await import('../../functions/user/listDonations');
+        listDonations = handler;
         await createTestTable();
     });
 
@@ -173,9 +173,9 @@ describe('listDonations (user)', () => {
     test('500 when internal error occurs', async () => {
         const userId = TestDataGenerator.generateUserId(testPrefix);
         // Mock DDB to throw
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const awsClients = require('../../config/aws-clients');
-        const spy = jest.spyOn(awsClients.dynamodb, 'send').mockRejectedValueOnce(new Error('boom'));
+        const awsClients = await import('../../config/aws-clients');
+        const spy = jest.spyOn(awsClients.dynamodb, 'send') as jest.MockedFunction<any>;
+        spy.mockRejectedValueOnce(new Error('boom'));
 
         const res = await listDonations({
             requestContext: { authorizer: { claims: { sub: userId } } },

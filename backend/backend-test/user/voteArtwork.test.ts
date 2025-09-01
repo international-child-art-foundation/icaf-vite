@@ -18,9 +18,9 @@ describe('voteArtwork (user)', () => {
         process.env.NODE_ENV = 'test';
         process.env.AWS_REGION = process.env.AWS_REGION || 'us-east-1';
         process.env.TABLE_NAME = process.env.TABLE_NAME || 'icaf-test-table';
-        // Defer require until env vars are set
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        voteArtwork = require('../../functions/user/voteArtwork').handler;
+        // Defer import until env vars are set
+        const { handler } = await import('../../functions/user/voteArtwork');
+        voteArtwork = handler;
         await createTestTable();
     });
 

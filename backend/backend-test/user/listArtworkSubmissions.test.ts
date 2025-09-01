@@ -10,9 +10,9 @@ describe('listArtworkSubmissions (user)', () => {
         process.env.NODE_ENV = 'test';
         process.env.AWS_REGION = process.env.AWS_REGION || 'us-east-1';
         process.env.TABLE_NAME = process.env.TABLE_NAME || 'icaf-test-table';
-        // Defer requiring the handler until env vars are set so TABLE_NAME is defined
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        listArtworkSubmissions = require('../../functions/user/listArtworkSubmissions').handler;
+        // Defer importing the handler until env vars are set so TABLE_NAME is defined
+        const { handler } = await import('../../functions/user/listArtworkSubmissions');
+        listArtworkSubmissions = handler;
         await createTestTable();
     });
 
@@ -120,10 +120,9 @@ describe('listArtworkSubmissions (user)', () => {
     test('500 when internal error occurs', async () => {
         const userId = TestDataGenerator.generateUserId('TEST_USER');
         // Mock DDB to throw on the second call (the critical user query)
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const awsClients = require('../../config/aws-clients');
-        const spy = jest.spyOn(awsClients.dynamodb, 'send')
-            .mockResolvedValueOnce({ Items: [] }) // First call (seasons) succeeds
+        const awsClients = await import('../../config/aws-clients');
+        const spy = jest.spyOn(awsClients.dynamodb, 'send') as jest.MockedFunction<any>;
+        spy.mockResolvedValueOnce({ Items: [] }) // First call (seasons) succeeds
             .mockRejectedValueOnce(new Error('boom')); // Second call (user pointers) fails
         const res = await listArtworkSubmissions({
             requestContext: { authorizer: { claims: { sub: userId } } },

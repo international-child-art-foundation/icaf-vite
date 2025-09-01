@@ -1,5 +1,5 @@
 import { GetCommand, QueryCommand, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
-import { dynamodb, TABLE_NAME, S3_BUCKET_NAME } from '../../config/aws-clients';
+import { dynamodb, TABLE_NAME } from '../../config/aws-clients';
 import { SubmitArtworkRequest, validateSubmissionData } from '../../../shared/src/api-types/artworkTypes';
 
 type ApiEvent = {

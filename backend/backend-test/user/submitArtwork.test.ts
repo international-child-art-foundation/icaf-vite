@@ -12,9 +12,8 @@ describe('Submit Artwork API', () => {
         process.env.TABLE_NAME = process.env.TABLE_NAME || 'icaf-test-table';
         process.env.S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || 'icaf-test-bucket';
 
-        // Defer require until env vars are set
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { handler } = require('../../functions/user/submitArtwork');
+        // Defer import until env vars are set
+        const { handler } = await import('../../functions/user/submitArtwork');
         submitArtwork = handler;
 
         await createTestTable();

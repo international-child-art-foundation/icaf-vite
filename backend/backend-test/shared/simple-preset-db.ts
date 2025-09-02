@@ -18,7 +18,7 @@ export const TEST_CONFIG = {
         accessKeyId: 'test',
         secretAccessKey: 'test'
     },
-    tableName: 'icaf-test-table'
+    tableName: process.env.TABLE_NAME || 'icaf-test-table'
 };
 
 // Table schema

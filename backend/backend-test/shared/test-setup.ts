@@ -9,6 +9,11 @@
 import { setupPresetDatabase, cleanupPresetDatabase } from './simple-preset-db';
 import { createTestTable } from './test-infrastructure';
 
+// Set test environment variables
+process.env.NODE_ENV = 'test';
+process.env.TABLE_NAME = 'icaf-test-table';  // 统一的测试表名
+process.env.AWS_REGION = 'us-east-1';
+
 // global setup - run once before all tests
 beforeAll(async () => {
     console.log('🔧 Setting up global test environment...');

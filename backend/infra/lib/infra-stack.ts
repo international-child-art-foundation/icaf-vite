@@ -169,6 +169,17 @@ export class InfraStack extends Stack {
       },
     });
 
+    const listSeasonFn = new NodejsFunction(this, "ListSeasonFn", {
+      entry: "../functions/anyone/listSeason.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(10),
+      memorySize: 256,
+      environment: {
+        TABLE_NAME: icafTable.tableName,
+      },
+    });
+
     // 5️⃣  Grant Lambda permissions to access DynamoDB and S3
     icafTable.grantReadWriteData(helloFn);
     icafTable.grantReadWriteData(userFn);
@@ -176,6 +187,7 @@ export class InfraStack extends Stack {
     icafTable.grantReadWriteData(deleteAccountFn);
     icafTable.grantReadWriteData(cleanupQueueProcessorFn);
     icafTable.grantReadWriteData(submitArtworkFn);
+    icafTable.grantReadData(listSeasonFn); // Only read access needed for listing seasons
 
     // Grant S3 permissions to functions
     artworkBucket.grantReadWrite(deleteAccountFn);
@@ -230,5 +242,9 @@ export class InfraStack extends Stack {
       authorizer: cognitoAuthorizer,
       authorizationType: apigw.AuthorizationType.COGNITO,
     });
+
+    // Public season endpoint (no authentication required)
+    const seasonResource = apiResource.addResource("season");
+    seasonResource.addMethod("GET", new apigw.LambdaIntegration(listSeasonFn));
   }
 }

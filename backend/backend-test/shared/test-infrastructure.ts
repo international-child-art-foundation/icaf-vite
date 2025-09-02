@@ -1,4 +1,4 @@
-import { DynamoDBClient, CreateTableCommand, DescribeTableCommand, ScalarAttributeType, KeyType, BillingMode } from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, CreateTableCommand, DescribeTableCommand, ScalarAttributeType, KeyType, BillingMode, ProjectionType } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, DeleteCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
 
 // Test configuration
@@ -12,7 +12,7 @@ export const TEST_CONFIG = {
     tableName: 'icaf-test-table'
 };
 
-// DynamoDB Table Schema based on your specification
+// DynamoDB Table Schema with GSIs
 export const TABLE_SCHEMA = {
     TableName: TEST_CONFIG.tableName,
     KeySchema: [
@@ -21,7 +21,29 @@ export const TABLE_SCHEMA = {
     ],
     AttributeDefinitions: [
         { AttributeName: 'PK', AttributeType: ScalarAttributeType.S },
-        { AttributeName: 'SK', AttributeType: ScalarAttributeType.S }
+        { AttributeName: 'SK', AttributeType: ScalarAttributeType.S },
+        { AttributeName: 'GSI1PK', AttributeType: ScalarAttributeType.S },
+        { AttributeName: 'GSI1SK', AttributeType: ScalarAttributeType.S },
+        { AttributeName: 'GSI2PK', AttributeType: ScalarAttributeType.S },
+        { AttributeName: 'GSI2SK', AttributeType: ScalarAttributeType.S }
+    ],
+    GlobalSecondaryIndexes: [
+        {
+            IndexName: 'GSI1',
+            KeySchema: [
+                { AttributeName: 'GSI1PK', KeyType: KeyType.HASH },
+                { AttributeName: 'GSI1SK', KeyType: KeyType.RANGE }
+            ],
+            Projection: { ProjectionType: ProjectionType.ALL }
+        },
+        {
+            IndexName: 'GSI2',
+            KeySchema: [
+                { AttributeName: 'GSI2PK', KeyType: KeyType.HASH },
+                { AttributeName: 'GSI2SK', KeyType: KeyType.RANGE }
+            ],
+            Projection: { ProjectionType: ProjectionType.ALL }
+        }
     ],
     BillingMode: BillingMode.PAY_PER_REQUEST
 };

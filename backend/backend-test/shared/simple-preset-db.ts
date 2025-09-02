@@ -7,7 +7,7 @@
  * 3. Avoid each test creating its own data
  */
 
-import { DynamoDBClient, CreateTableCommand, DescribeTableCommand, ScalarAttributeType, KeyType, BillingMode } from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, CreateTableCommand, DescribeTableCommand } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, BatchWriteCommand, ScanCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 
 // Test configuration
@@ -21,19 +21,8 @@ export const TEST_CONFIG = {
     tableName: process.env.TABLE_NAME || 'icaf-test-table'
 };
 
-// Table schema
-export const TABLE_SCHEMA = {
-    TableName: TEST_CONFIG.tableName,
-    KeySchema: [
-        { AttributeName: 'PK', KeyType: KeyType.HASH },
-        { AttributeName: 'SK', KeyType: KeyType.RANGE }
-    ],
-    AttributeDefinitions: [
-        { AttributeName: 'PK', AttributeType: ScalarAttributeType.S },
-        { AttributeName: 'SK', AttributeType: ScalarAttributeType.S }
-    ],
-    BillingMode: BillingMode.PAY_PER_REQUEST
-};
+// Import shared table schema
+import { TABLE_SCHEMA } from './test-infrastructure';
 
 // Initialize clients
 const dynamoClient = new DynamoDBClient(TEST_CONFIG);

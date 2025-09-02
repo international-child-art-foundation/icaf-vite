@@ -1,5 +1,6 @@
 export * from "./api-types/apiUserTypes"
 export * from "./api-types/artworkTypes"
+export * from "./api-types/galleryTypes"
 export * from "./api-types/registrationTypes"
 export * from "./api-types/seasonTypes"
 export * from "./api-types/userTypes"

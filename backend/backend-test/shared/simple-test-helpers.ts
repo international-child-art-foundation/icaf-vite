@@ -59,22 +59,42 @@ export class TempTestData {
      */
     static async createTempArtwork(prefix: string, userId: string, artworkData: any = {}): Promise<string> {
         const artworkId = TestDataGenerator.generateArtworkId(prefix);
+        const timestamp = artworkData.timestamp || new Date().toISOString();
+        const season = artworkData.season || PRESET_TEST_DATA.seasons.CURRENT_SEASON;
+        const votes = artworkData.votes || 0;
+        const isApproved = artworkData.is_approved !== undefined ? artworkData.is_approved : false;
+
+        // Prepare base item
+        const item: any = {
+            PK: `ART#${artworkId}`,
+            SK: 'N/A',
+            art_id: artworkId,
+            user_id: userId,
+            title: 'Temp Artwork',
+            season: season,
+            votes: votes,
+            is_approved: isApproved,
+            timestamp: timestamp,
+            type: 'ART',
+            ...artworkData
+        };
+
+        // Add GSI fields only if artwork is approved (sparse GSI)
+        if (isApproved) {
+            const paddedVotes = votes.toString().padStart(7, '0'); // Left-pad votes: 0000001
+
+            // GSI1 fields for time-based sorting
+            item.GSI1PK = `SEASON#${season}`;
+            item.GSI1SK = `TIMESTAMP#${timestamp}#ART#${artworkId}`;
+
+            // GSI2 fields for vote-based sorting
+            item.GSI2PK = `SEASON#${season}`;
+            item.GSI2SK = `VOTES#${paddedVotes}#TIMESTAMP#${timestamp}#ART#${artworkId}`;
+        }
 
         await docClient.send(new PutCommand({
             TableName: TEST_CONFIG.tableName,
-            Item: {
-                PK: `ART#${artworkId}`,
-                SK: 'N/A',
-                art_id: artworkId,
-                user_id: userId,
-                title: 'Temp Artwork',
-                season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
-                votes: 0,
-                is_approved: false,
-                timestamp: new Date().toISOString(),
-                type: 'ART',
-                ...artworkData
-            }
+            Item: item
         }));
 
         return artworkId;

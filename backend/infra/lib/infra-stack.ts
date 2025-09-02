@@ -21,6 +21,23 @@ export class InfraStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
+    // Add GSIs for Gallery functionality - matching actual database structure
+    // GSI1 - Time Sorted (Season): for newest/oldest artwork queries
+    icafTable.addGlobalSecondaryIndex({
+      indexName: "GSI1",
+      partitionKey: { name: "GSI1PK", type: dynamodb.AttributeType.STRING }, // SEASON#<id>
+      sortKey: { name: "GSI1SK", type: dynamodb.AttributeType.STRING }, // TIMESTAMP#<timestamp>#ART#<art_id>
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    // GSI2 - Vote Sorted (Season): for highest/lowest voted artwork queries  
+    icafTable.addGlobalSecondaryIndex({
+      indexName: "GSI2",
+      partitionKey: { name: "GSI2PK", type: dynamodb.AttributeType.STRING }, // SEASON#<id>
+      sortKey: { name: "GSI2SK", type: dynamodb.AttributeType.STRING }, // VOTES#<votes>#TIMESTAMP#<timestamp>#ART#<art_id>
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
     // S3 Bucket for artwork storage
     const artworkBucket = new s3.Bucket(this, "IcaFArtworkBucket", {
       bucketName: "icaf-artwork-bucket",
@@ -180,6 +197,17 @@ export class InfraStack extends Stack {
       },
     });
 
+    const galleryArtworksFn = new NodejsFunction(this, "GalleryArtworksFn", {
+      entry: "../functions/anyone/gallery/galleryArtworks.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(15),
+      memorySize: 512,
+      environment: {
+        TABLE_NAME: icafTable.tableName,
+      },
+    });
+
     // 5️⃣  Grant Lambda permissions to access DynamoDB and S3
     icafTable.grantReadWriteData(helloFn);
     icafTable.grantReadWriteData(userFn);
@@ -188,6 +216,7 @@ export class InfraStack extends Stack {
     icafTable.grantReadWriteData(cleanupQueueProcessorFn);
     icafTable.grantReadWriteData(submitArtworkFn);
     icafTable.grantReadData(listSeasonFn); // Only read access needed for listing seasons
+    icafTable.grantReadData(galleryArtworksFn); // Only read access needed for gallery queries
 
     // Grant S3 permissions to functions
     artworkBucket.grantReadWrite(deleteAccountFn);
@@ -246,5 +275,11 @@ export class InfraStack extends Stack {
     // Public season endpoint (no authentication required)
     const seasonResource = apiResource.addResource("season");
     seasonResource.addMethod("GET", new apigw.LambdaIntegration(listSeasonFn));
+
+    // Public gallery endpoints (no authentication required)
+    const galleryResource = apiResource.addResource("gallery");
+    const artworksResource = galleryResource.addResource("artworks");
+    const sortTypeResource = artworksResource.addResource("{sortType}");
+    sortTypeResource.addMethod("GET", new apigw.LambdaIntegration(galleryArtworksFn));
   }
 }

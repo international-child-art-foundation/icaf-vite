@@ -5,7 +5,7 @@
  * simple, efficient, and easy to maintain
  */
 
-import { PRESET_TEST_DATA, PresetEvents, TestAssertions, TempTestData } from '../shared/simple-test-helpers';
+import { PRESET_TEST_DATA, PresetEvents, TestAssertions, TempTestData } from '../shared/simple-preset-db';
 
 // mock register handler (in actual case, this will be the real Lambda function)
 const mockRegisterHandler = async (event: any) => {
@@ -111,7 +111,7 @@ describe('user register test - simplified version', () => {
                 expectedError: 'Missing required fields'
             },
             {
-                    name: 'missing password',
+                name: 'missing password',
                 data: {
                     email: 'test@example.com',
                     f_name: 'Test',

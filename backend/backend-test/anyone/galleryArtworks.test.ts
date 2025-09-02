@@ -9,7 +9,7 @@
  * - Response format validation
  */
 
-import { TestAssertions, TempTestData } from '../shared/simple-test-helpers';
+import { TestAssertions, TempTestData } from '../shared/simple-preset-db';
 import { handler } from '../../functions/anyone/gallery/galleryArtworks';
 import { GalleryResponse } from '../../../shared/src/api-types/galleryTypes';
 

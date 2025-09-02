@@ -8,7 +8,7 @@
  */
 
 import { DynamoDBClient, CreateTableCommand, DescribeTableCommand } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, BatchWriteCommand, ScanCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, BatchWriteCommand, ScanCommand, DeleteCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 
 // Test configuration
 export const TEST_CONFIG = {
@@ -547,3 +547,282 @@ export async function resetPresetDatabase(): Promise<void> {
 
 // Export DynamoDB client for testing
 export { docClient };
+
+// ============================================================================
+// TEMPORARY TEST DATA TOOLS (merged from simple-test-helpers.ts)
+// ============================================================================
+
+/**
+ * Test data ID generator
+ */
+export class TestDataGenerator {
+    private static counter = 0;
+
+    static generateId(prefix: string = 'TEST'): string {
+        return `${prefix}_${++this.counter}_${Date.now()}`;
+    }
+
+    static generateUserId(prefix: string = 'TEST_USER'): string {
+        return this.generateId(prefix);
+    }
+
+    static generateArtworkId(prefix: string = 'TEST_ART'): string {
+        return this.generateId(prefix);
+    }
+}
+
+/**
+ * Temporary test data creator (for tests that need special data)
+ */
+export class TempTestData {
+    /**
+     * Create temporary user (will be cleaned up after test)
+     */
+    static async createTempUser(prefix: string, userData: any = {}): Promise<string> {
+        const userId = TestDataGenerator.generateUserId(prefix);
+
+        await docClient.send(new PutCommand({
+            TableName: TEST_CONFIG.tableName,
+            Item: {
+                PK: `USER#${userId}`,
+                SK: 'PROFILE',
+                user_id: userId,
+                f_name: 'Temp',
+                l_name: 'User',
+                dob: '2000-01-01',
+                role: 'user',
+                timestamp: new Date().toISOString(),
+                type: 'USER',
+                ...userData
+            }
+        }));
+
+        return userId;
+    }
+
+    /**
+     * Create temporary artwork
+     */
+    static async createTempArtwork(prefix: string, userId: string, artworkData: any = {}): Promise<string> {
+        const artworkId = TestDataGenerator.generateArtworkId(prefix);
+        const timestamp = artworkData.timestamp || new Date().toISOString();
+        const season = artworkData.season || PRESET_TEST_DATA.seasons.CURRENT_SEASON;
+        const votes = artworkData.votes || 0;
+        const isApproved = artworkData.is_approved !== undefined ? artworkData.is_approved : false;
+
+        // Prepare base item
+        const item: any = {
+            PK: `ART#${artworkId}`,
+            SK: 'N/A',
+            art_id: artworkId,
+            user_id: userId,
+            title: 'Temp Artwork',
+            season: season,
+            votes: votes,
+            is_approved: isApproved,
+            timestamp: timestamp,
+            type: 'ART',
+            ...artworkData
+        };
+
+        // Add GSI fields only if artwork is approved (sparse GSI)
+        if (isApproved) {
+            const paddedVotes = votes.toString().padStart(7, '0'); // Left-pad votes: 0000001
+
+            // GSI1 fields for time-based sorting
+            item.GSI1PK = `SEASON#${season}`;
+            item.GSI1SK = `TIMESTAMP#${timestamp}#ART#${artworkId}`;
+
+            // GSI2 fields for vote-based sorting
+            item.GSI2PK = `SEASON#${season}`;
+            item.GSI2SK = `VOTES#${paddedVotes}#TIMESTAMP#${timestamp}#ART#${artworkId}`;
+        }
+
+        await docClient.send(new PutCommand({
+            TableName: TEST_CONFIG.tableName,
+            Item: item
+        }));
+
+        return artworkId;
+    }
+
+    /**
+     * Cleanup temporary test data by prefix
+     */
+    static async cleanup(prefix: string): Promise<void> {
+        try {
+            const result = await docClient.send(new ScanCommand({
+                TableName: TEST_CONFIG.tableName,
+                FilterExpression: 'contains(PK, :prefix) OR contains(art_id, :prefix) OR contains(user_id, :prefix)',
+                ExpressionAttributeValues: {
+                    ':prefix': prefix
+                }
+            }));
+
+            if (result.Items && result.Items.length > 0) {
+                console.log(`🧹 Cleaning up ${result.Items.length} temporary items with prefix: ${prefix}`);
+
+                // Delete items one by one
+                for (const item of result.Items) {
+                    await docClient.send(new DeleteCommand({
+                        TableName: TEST_CONFIG.tableName,
+                        Key: {
+                            PK: item.PK,
+                            SK: item.SK
+                        }
+                    }));
+                }
+
+                console.log(`✅ Cleaned up ${result.Items.length} temporary items`);
+            }
+        } catch (error) {
+            console.error('❌ Error cleaning up temporary data:', error);
+            throw error;
+        }
+    }
+}
+
+/**
+ * Test event generators for Lambda functions
+ */
+export class TestEventGenerator {
+    /**
+     * Create authenticated event with user context
+     */
+    static createAuthEvent(userId: string, userInfo: any = {}): any {
+        return {
+            requestContext: {
+                authorizer: {
+                    claims: {
+                        sub: userId,
+                        'cognito:username': userId,
+                        ...userInfo
+                    }
+                }
+            },
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+    }
+
+    /**
+     * Generate POST event with body
+     */
+    static createPostEvent(userId: string, body: any, userInfo: any = {}): any {
+        return {
+            ...this.createAuthEvent(userId, userInfo),
+            body: JSON.stringify(body),
+            httpMethod: 'POST'
+        };
+    }
+
+    /**
+     * Generate GET event with query parameters
+     */
+    static createGetEvent(userId: string, queryParams: any = {}, userInfo: any = {}): any {
+        return {
+            ...this.createAuthEvent(userId, userInfo),
+            queryStringParameters: queryParams,
+            httpMethod: 'GET'
+        };
+    }
+}
+
+/**
+ * Backward compatibility - preset events using preset data
+ */
+export const PresetEvents = {
+    /**
+     * Create authenticated event using preset user
+     */
+    createAuthEvent: (presetUserKey: keyof typeof PRESET_TEST_DATA.users, userInfo: any = {}) => {
+        const userId = PRESET_TEST_DATA.users[presetUserKey];
+        return TestEventGenerator.createAuthEvent(userId, userInfo);
+    },
+
+    /**
+     * Create POST event using preset user
+     */
+    createPostEvent: (presetUserKey: keyof typeof PRESET_TEST_DATA.users, body: any, userInfo: any = {}) => {
+        const userId = PRESET_TEST_DATA.users[presetUserKey];
+        return TestEventGenerator.createPostEvent(userId, body, userInfo);
+    },
+
+    /**
+     * Create GET event using preset user
+     */
+    createGetEvent: (presetUserKey: keyof typeof PRESET_TEST_DATA.users, queryParams: any = {}, userInfo: any = {}) => {
+        const userId = PRESET_TEST_DATA.users[presetUserKey];
+        return TestEventGenerator.createGetEvent(userId, queryParams, userInfo);
+    },
+
+    // Backward compatibility - simplified method names
+    childUser: (userInfo: any = {}) => {
+        const userId = PRESET_TEST_DATA.users.CHILD_USER;
+        return TestEventGenerator.createAuthEvent(userId, userInfo);
+    },
+
+    adultUser: (userInfo: any = {}) => {
+        const userId = PRESET_TEST_DATA.users.ADULT_USER;
+        return TestEventGenerator.createAuthEvent(userId, userInfo);
+    },
+
+    guardianUser: (userInfo: any = {}) => {
+        const userId = PRESET_TEST_DATA.users.GUARDIAN_USER;
+        return TestEventGenerator.createAuthEvent(userId, userInfo);
+    },
+
+    adminUser: (userInfo: any = {}) => {
+        const userId = PRESET_TEST_DATA.users.ADMIN_USER;
+        return TestEventGenerator.createAuthEvent(userId, userInfo);
+    },
+
+    bannedUser: (userInfo: any = {}) => {
+        const userId = PRESET_TEST_DATA.users.BANNED_USER;
+        return TestEventGenerator.createAuthEvent(userId, userInfo);
+    }
+};
+
+/**
+ * Test assertion helpers
+ */
+export class TestAssertions {
+    /**
+     * Validate Lambda response structure
+     */
+    static validateLambdaResponse(response: any): void {
+        expect(response).toHaveProperty('statusCode');
+        expect(response).toHaveProperty('body');
+        expect(response).toHaveProperty('headers');
+        expect(typeof response.statusCode).toBe('number');
+        expect(typeof response.body).toBe('string');
+        expect(typeof response.headers).toBe('object');
+    }
+
+    /**
+     * Validate successful response
+     */
+    static validateSuccessResponse(response: any, expectedStatusCode: number = 200): void {
+        this.validateLambdaResponse(response);
+        expect(response.statusCode).toBe(expectedStatusCode);
+
+        const body = JSON.parse(response.body);
+        expect(body).not.toHaveProperty('error');
+    }
+
+    /**
+     * Validate error response
+     */
+    static validateErrorResponse(response: any, expectedStatusCode: number, expectedErrorMessage?: string): void {
+        this.validateLambdaResponse(response);
+        expect(response.statusCode).toBe(expectedStatusCode);
+
+        const body = JSON.parse(response.body);
+        expect(body).toHaveProperty('error');
+
+        if (expectedErrorMessage) {
+            expect(body.error).toContain(expectedErrorMessage);
+        }
+    }
+}

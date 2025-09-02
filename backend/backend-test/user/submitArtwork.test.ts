@@ -1,6 +1,6 @@
 let submitArtwork: (event: any) => Promise<any>;
 import { createTestTable, cleanupTestData, createTestUser } from '../shared/test-infrastructure';
-import { TestDataGenerator } from '../shared/simple-test-helpers';
+import { TestDataGenerator } from '../shared/simple-preset-db';
 import { PRESET_TEST_DATA } from '../shared/simple-preset-db';
 
 describe('Submit Artwork API', () => {

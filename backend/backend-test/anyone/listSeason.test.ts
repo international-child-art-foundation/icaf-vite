@@ -8,7 +8,7 @@
  * - Error handling
  */
 
-import { TestAssertions, TempTestData } from '../shared/simple-test-helpers';
+import { TestAssertions, TempTestData } from '../shared/simple-preset-db';
 import { handler } from '../../functions/anyone/listSeason';
 import { Season } from '../../../shared/src/api-types/seasonTypes';
 

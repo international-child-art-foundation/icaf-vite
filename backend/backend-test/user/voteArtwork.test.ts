@@ -7,7 +7,7 @@
 
 let voteArtwork: (event: any) => Promise<any>;
 
-import { PRESET_TEST_DATA, PresetEvents, TempTestData } from '../shared/simple-test-helpers';
+import { PRESET_TEST_DATA, PresetEvents, TempTestData } from '../shared/simple-preset-db';
 import { createTestTable, createTestSeason, createTestUser, createTestArtwork, cleanupTestData, TEST_PREFIXES } from '../shared/test-infrastructure';
 import { TestDataGenerator } from '../shared/test-utils';
 

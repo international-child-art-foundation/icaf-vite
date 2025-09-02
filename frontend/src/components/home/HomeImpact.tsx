@@ -1,8 +1,14 @@
 // import { VideoWrapper } from '../shared/VideoWrapper';
+import RedFirework from '@/assets/home/RedFirework.svg';
 import { TitleDescriptionCard } from './TitleDescriptionCard';
+
 export const HomeImpact = () => {
   return (
-    <div className="flex flex-col gap-8 px-8 md:px-12 lg:px-16 xl:px-20">
+    <div className="relative flex flex-col gap-8 px-8 md:px-12 lg:px-16 lg:pt-16 xl:px-20">
+      <img
+        src={RedFirework}
+        className="absolute -top-16 right-4 hidden h-auto w-16 md:block md:w-32 lg:w-48"
+      />
       <div className="flex flex-col gap-7">
         <p className="font-montserrat text-center text-[2rem] font-extrabold xl:text-[40px]">
           Educational & Cultural Impact

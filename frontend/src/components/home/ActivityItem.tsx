@@ -19,7 +19,7 @@ export const ActivityItem = ({ item, expanded, toggle }: ActivityItemProps) => {
             {item.title}
           </p>
           <p
-            className={`font-open-sans duration-400 grid transition-all ${expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'} text-xl`}
+            className={`font-open-sans duration-400 grid transition-all ${expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'} text-base md:text-xl`}
           >
             <span className="overflow-hidden">{item.description}</span>
           </p>

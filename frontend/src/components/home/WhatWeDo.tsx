@@ -9,7 +9,7 @@ const WhatWeDo = () => {
         src={redBlueFirework}
         className="absolute -top-28 hidden w-32 sm:right-8 sm:block md:right-24 md:w-48 lg:right-48 xl:-top-20 xl:right-[300px]"
       />
-      <div className="z-10 flex flex-col items-center gap-6 p-6 lg:gap-10 lg:p-10 lg:py-[50px]">
+      <div className="z-10 flex flex-col items-center gap-6 p-6 pt-0 lg:gap-10 lg:p-10 lg:py-[50px]">
         <h1 className="font-montserrat text-[32px] font-extrabold leading-6 text-black lg:text-[40px]">
           What we do
         </h1>

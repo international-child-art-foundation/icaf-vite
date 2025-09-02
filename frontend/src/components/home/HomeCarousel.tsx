@@ -45,7 +45,7 @@ export const HomeCarousel = () => {
   };
 
   return (
-    <div className="mx-auto w-full pb-16 pt-0 md:pt-0 lg:flex lg:items-start">
+    <div className="mx-auto w-full py-8 lg:flex lg:items-start">
       <div className="w-full">
         <Carousel
           opts={{

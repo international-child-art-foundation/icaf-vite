@@ -208,6 +208,17 @@ export class InfraStack extends Stack {
       },
     });
 
+    const gallerySeasonsFn = new NodejsFunction(this, "GallerySeasonsFn", {
+      entry: "../functions/anyone/gallery/gallerySeasons.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(15),
+      memorySize: 512,
+      environment: {
+        TABLE_NAME: icafTable.tableName,
+      },
+    });
+
     // 5️⃣  Grant Lambda permissions to access DynamoDB and S3
     icafTable.grantReadWriteData(helloFn);
     icafTable.grantReadWriteData(userFn);
@@ -217,6 +228,7 @@ export class InfraStack extends Stack {
     icafTable.grantReadWriteData(submitArtworkFn);
     icafTable.grantReadData(listSeasonFn); // Only read access needed for listing seasons
     icafTable.grantReadData(galleryArtworksFn); // Only read access needed for gallery queries
+    icafTable.grantReadData(gallerySeasonsFn); // Only read access needed for gallery seasons queries
 
     // Grant S3 permissions to functions
     artworkBucket.grantReadWrite(deleteAccountFn);
@@ -273,13 +285,19 @@ export class InfraStack extends Stack {
     });
 
     // Public season endpoint (no authentication required)
-    const seasonResource = apiResource.addResource("season");
-    seasonResource.addMethod("GET", new apigw.LambdaIntegration(listSeasonFn));
+    const seasonListResource = apiResource.addResource("season");
+    seasonListResource.addMethod("GET", new apigw.LambdaIntegration(listSeasonFn));
 
     // Public gallery endpoints (no authentication required)
     const galleryResource = apiResource.addResource("gallery");
     const artworksResource = galleryResource.addResource("artworks");
     const sortTypeResource = artworksResource.addResource("{sortType}");
     sortTypeResource.addMethod("GET", new apigw.LambdaIntegration(galleryArtworksFn));
+
+    // Public gallery seasons endpoints (no authentication required)
+    const seasonsResource = galleryResource.addResource("seasons");
+    const seasonResource = seasonsResource.addResource("{season}");
+    const seasonArtworksResource = seasonResource.addResource("artworks");
+    seasonArtworksResource.addMethod("GET", new apigw.LambdaIntegration(gallerySeasonsFn));
   }
 }

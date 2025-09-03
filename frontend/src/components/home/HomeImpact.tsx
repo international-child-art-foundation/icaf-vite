@@ -1,6 +1,8 @@
-// import { VideoWrapper } from '../shared/VideoWrapper';
 import RedFirework from '@/assets/home/RedFirework.svg';
 import { TitleDescriptionCard } from './TitleDescriptionCard';
+import { VideoWrapper } from '../shared/VideoWrapper';
+import IcafHomeVideo from '@/assets/home/icaf-overview-cropped.mp4';
+import IcafHomeVideoThumb from '@/assets/home/icaf-overview-cropped-thumb.webp';
 
 export const HomeImpact = () => {
   return (
@@ -40,10 +42,12 @@ export const HomeImpact = () => {
           />
         </div>
         <div className="lg:col-span-7 lg:col-start-4 lg:row-span-4 lg:row-start-1">
-          <div className="h-full min-h-[400px] w-full rounded-[20px] bg-gray-400">
-            <p className="m-auto h-full w-full text-center">TODO: Add video</p>
-          </div>
-          {/* <VideoWrapper src={}/> */}
+          <VideoWrapper
+            lazyMode="idle"
+            thumbnail={IcafHomeVideoThumb}
+            curved={true}
+            src={IcafHomeVideo}
+          />
         </div>
         <div className="lg:col-span-10 lg:col-start-1 lg:row-span-2 lg:row-start-5">
           <TitleDescriptionCard

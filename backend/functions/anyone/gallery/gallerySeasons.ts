@@ -15,22 +15,10 @@ import {
     isValidGallerySeasonsSortType
 } from '../../../../shared/src/api-types/gallerySeasonsTypes';
 import { executeGallerySeasonsQuery, validateSeasonForGallery } from './gallerySeasonsShared';
+import { ApiGatewayEvent, HTTP_STATUS } from '../../../../shared/src/api-types/commonTypes';
+import { CommonErrors } from '../../../../shared/src/api-types/errorTypes';
 
-// Error response for gallery seasons APIs
-interface GallerySeasonsErrorResponse {
-    message: string;
-    error?: string;
-    sort?: GallerySeasonsSortType;
-    season?: string;
-}
-
-type APIGatewayEvent = {
-    pathParameters?: { season?: string };
-    queryStringParameters?: Record<string, string> | null;
-    httpMethod: string;
-};
-
-export const handler = async (event: APIGatewayEvent): Promise<{
+export const handler = async (event: ApiGatewayEvent): Promise<{
     statusCode: number;
     body: string;
     headers: Record<string, string>;
@@ -38,25 +26,13 @@ export const handler = async (event: APIGatewayEvent): Promise<{
     try {
         // 1. Validate HTTP method
         if (event.httpMethod !== 'GET') {
-            return {
-                statusCode: 405,
-                body: JSON.stringify({
-                    message: 'Method not allowed. Use GET.'
-                } as GallerySeasonsErrorResponse),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.methodNotAllowed();
         }
 
         // 2. Extract and validate season from path
         const season = event.pathParameters?.season;
         if (!season?.trim()) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    message: 'Season parameter is required in path'
-                } as GallerySeasonsErrorResponse),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.badRequest('Season parameter is required in path');
         }
 
         // 3. Parse and validate query parameters
@@ -64,103 +40,57 @@ export const handler = async (event: APIGatewayEvent): Promise<{
 
         // Validate required sort parameter
         if (!queryParams.sort?.trim()) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    message: 'Sort parameter is required. Must be one of: newest, oldest, highest_votes, lowest_votes',
-                    season
-                } as GallerySeasonsErrorResponse),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.badRequest('Sort parameter is required. Must be one of: newest, oldest, highest_votes, lowest_votes');
         }
 
         if (!isValidGallerySeasonsSortType(queryParams.sort)) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    message: 'Invalid sort parameter. Must be one of: newest, oldest, highest_votes, lowest_votes',
-                    sort: queryParams.sort,
-                    season
-                } as GallerySeasonsErrorResponse),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.badRequest('Invalid sort parameter. Must be one of: newest, oldest, highest_votes, lowest_votes');
         }
 
         // Validate limit parameter if provided
         if (queryParams.limit !== undefined) {
             if (!/^\d+$/.test(queryParams.limit)) {
-                return {
-                    statusCode: 400,
-                    body: JSON.stringify({
-                        message: 'Limit must be a number between 1 and 100',
-                        sort: queryParams.sort,
-                        season
-                    } as GallerySeasonsErrorResponse),
-                    headers: { 'Content-Type': 'application/json' }
-                };
+                return CommonErrors.badRequest('Limit must be a number between 1 and 100');
             }
 
             const limit = parseInt(queryParams.limit);
             if (limit < 1 || limit > 100) {
-                return {
-                    statusCode: 400,
-                    body: JSON.stringify({
-                        message: 'Limit must be a number between 1 and 100',
-                        sort: queryParams.sort,
-                        season
-                    } as GallerySeasonsErrorResponse),
-                    headers: { 'Content-Type': 'application/json' }
-                };
+                return CommonErrors.badRequest('Limit must be a number between 1 and 100');
             }
         }
 
-        // 4. Build gallery seasons query parameters
-        const galleryParams: GallerySeasonsQueryParams = {
-            sort: queryParams.sort as GallerySeasonsSortType,
-            limit: queryParams.limit ? parseInt(queryParams.limit) : 20,
-            last_evaluated_key: queryParams.last_evaluated_key
-        };
-
-        // 5. Validate season exists and has artworks
-        const isValidSeason = await validateSeasonForGallery(season);
-        if (!isValidSeason) {
-            return {
-                statusCode: 404,
-                body: JSON.stringify({
-                    message: 'Season not found or no artworks available',
-                    season,
-                    sort: queryParams.sort
-                } as GallerySeasonsErrorResponse),
-                headers: { 'Content-Type': 'application/json' }
-            };
+        // 4. Validate season exists and is accessible
+        const seasonValidation = await validateSeasonForGallery(season);
+        if (!seasonValidation) {
+            return CommonErrors.notFound('Season not found or no artworks available');
         }
 
-        // 6. Execute gallery seasons query
-        const response: GallerySeasonsResponse = await executeGallerySeasonsQuery(
-            galleryParams.sort,
-            galleryParams,
-            season
-        );
+        // 5. Execute the gallery query
+        const queryParamsTyped: GallerySeasonsQueryParams = {
+            sort: queryParams.sort as GallerySeasonsSortType,
+            limit: queryParams.limit ? parseInt(queryParams.limit) : 20
+        };
 
-        // 7. Return successful response
+        const result = await executeGallerySeasonsQuery(queryParams.sort as GallerySeasonsSortType, queryParamsTyped, season);
+
+        // 6. Return response
+        const response: GallerySeasonsResponse = {
+            artworks: result.artworks,
+            pagination: {
+                has_more: result.pagination.has_more,
+                last_evaluated_key: result.pagination.last_evaluated_key
+            }
+        };
+
         return {
-            statusCode: 200,
+            statusCode: HTTP_STATUS.OK,
             body: JSON.stringify(response),
             headers: { 'Content-Type': 'application/json' }
         };
 
     } catch (error: any) {
-        console.error(`Error in gallery seasons query for season ${event.pathParameters?.season}:`, error);
-
-        return {
-            statusCode: 500,
-            body: JSON.stringify({
-                message: 'Internal server error while fetching gallery season artworks',
-                error: error.message,
-                season: event.pathParameters?.season,
-                sort: event.queryStringParameters?.sort
-            } as GallerySeasonsErrorResponse),
-            headers: { 'Content-Type': 'application/json' }
-        };
+        console.error('Error in gallery seasons handler:', error);
+        return CommonErrors.internalServerError('Internal server error while fetching gallery seasons');
     }
 };
+

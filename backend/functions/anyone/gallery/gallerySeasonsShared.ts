@@ -90,7 +90,10 @@ export async function executeGallerySeasonsQuery(
 
         return {
             artworks,
-            last_evaluated_key: encodedKey || null
+            pagination: {
+                has_more: !!result.LastEvaluatedKey,
+                last_evaluated_key: encodedKey || null
+            }
         };
     } catch (error: any) {
         if (error.name === 'ResourceNotFoundException') {

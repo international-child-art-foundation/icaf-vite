@@ -40,7 +40,19 @@ export const PRESET_TEST_DATA = {
         // New: Users for testing different season scenarios
         USER_WITH_ACTIVE_SUBMISSION: 'PRESET_USER_ACTIVE_001',
         USER_WITH_INACTIVE_SUBMISSION: 'PRESET_USER_INACTIVE_001',
-        USER_WITHOUT_SUBMISSION: 'PRESET_USER_NONE_001'
+        USER_WITHOUT_SUBMISSION: 'PRESET_USER_NONE_001',
+        // Additional users for pagination testing
+        PAGINATION_USER_1: 'PRESET_PAGINATION_USER_001',
+        PAGINATION_USER_2: 'PRESET_PAGINATION_USER_002',
+        PAGINATION_USER_3: 'PRESET_PAGINATION_USER_003',
+        PAGINATION_USER_4: 'PRESET_PAGINATION_USER_004',
+        PAGINATION_USER_5: 'PRESET_PAGINATION_USER_005',
+        // Additional users for better pagination testing
+        PAGINATION_USER_6: 'PRESET_PAGINATION_USER_006',
+        PAGINATION_USER_7: 'PRESET_PAGINATION_USER_007',
+        PAGINATION_USER_8: 'PRESET_PAGINATION_USER_008',
+        PAGINATION_USER_9: 'PRESET_PAGINATION_USER_009',
+        PAGINATION_USER_10: 'PRESET_PAGINATION_USER_010'
     },
 
     // Season data
@@ -59,7 +71,19 @@ export const PRESET_TEST_DATA = {
         AI_ARTWORK: 'PRESET_ARTWORK_003',
         // New: Artworks for testing different scenarios
         ACTIVE_SEASON_ARTWORK: 'PRESET_ARTWORK_ACTIVE_001',
-        INACTIVE_SEASON_ARTWORK: 'PRESET_ARTWORK_INACTIVE_001'
+        INACTIVE_SEASON_ARTWORK: 'PRESET_ARTWORK_INACTIVE_001',
+        // Additional artworks for pagination testing
+        PAGINATION_ARTWORK_1: 'PRESET_ARTWORK_PAGINATION_001',
+        PAGINATION_ARTWORK_2: 'PRESET_ARTWORK_PAGINATION_002',
+        PAGINATION_ARTWORK_3: 'PRESET_ARTWORK_PAGINATION_003',
+        PAGINATION_ARTWORK_4: 'PRESET_ARTWORK_PAGINATION_004',
+        PAGINATION_ARTWORK_5: 'PRESET_ARTWORK_PAGINATION_005',
+        // Additional artworks for better pagination testing
+        PAGINATION_ARTWORK_6: 'PRESET_ARTWORK_PAGINATION_006',
+        PAGINATION_ARTWORK_7: 'PRESET_ARTWORK_PAGINATION_007',
+        PAGINATION_ARTWORK_8: 'PRESET_ARTWORK_PAGINATION_008',
+        PAGINATION_ARTWORK_9: 'PRESET_ARTWORK_PAGINATION_009',
+        PAGINATION_ARTWORK_10: 'PRESET_ARTWORK_PAGINATION_010'
     },
 
     // Donation data
@@ -121,6 +145,140 @@ const PRESET_ENTITIES = [
         role: 'admin',
         can_submit: true,
         max_constituents_per_season: -1,
+        has_paid: true,
+        timestamp: '2024-01-01T00:00:00.000Z',
+        type: 'USER'
+    },
+
+    // Additional users for pagination testing
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_1}`,
+        SK: 'PROFILE',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_1,
+        f_name: 'PaginationUser1',
+        l_name: 'Test',
+        dob: '1995-01-01',
+        role: 'user',
+        can_submit: true,
+        has_paid: true,
+        timestamp: '2024-01-01T00:00:00.000Z',
+        type: 'USER'
+    },
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_2}`,
+        SK: 'PROFILE',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_2,
+        f_name: 'PaginationUser2',
+        l_name: 'Test',
+        dob: '1996-02-02',
+        role: 'user',
+        can_submit: true,
+        has_paid: true,
+        timestamp: '2024-01-01T00:00:00.000Z',
+        type: 'USER'
+    },
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_3}`,
+        SK: 'PROFILE',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_3,
+        f_name: 'PaginationUser3',
+        l_name: 'Test',
+        dob: '1997-03-03',
+        role: 'user',
+        can_submit: true,
+        has_paid: true,
+        timestamp: '2024-01-01T00:00:00.000Z',
+        type: 'USER'
+    },
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_4}`,
+        SK: 'PROFILE',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_4,
+        f_name: 'PaginationUser4',
+        l_name: 'Test',
+        dob: '1998-04-04',
+        role: 'user',
+        can_submit: true,
+        has_paid: true,
+        timestamp: '2024-01-01T00:00:00.000Z',
+        type: 'USER'
+    },
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_5}`,
+        SK: 'PROFILE',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_5,
+        f_name: 'PaginationUser5',
+        l_name: 'Test',
+        dob: '1999-05-05',
+        role: 'user',
+        can_submit: true,
+        has_paid: true,
+        timestamp: '2024-01-01T00:00:00.000Z',
+        type: 'USER'
+    },
+
+    // Additional users for better pagination testing
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_6}`,
+        SK: 'PROFILE',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_6,
+        f_name: 'PaginationUser6',
+        l_name: 'Test',
+        dob: '1994-06-06',
+        role: 'user',
+        can_submit: true,
+        has_paid: true,
+        timestamp: '2024-01-01T00:00:00.000Z',
+        type: 'USER'
+    },
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_7}`,
+        SK: 'PROFILE',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_7,
+        f_name: 'PaginationUser7',
+        l_name: 'Test',
+        dob: '1993-07-07',
+        role: 'user',
+        can_submit: true,
+        has_paid: true,
+        timestamp: '2024-01-01T00:00:00.000Z',
+        type: 'USER'
+    },
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_8}`,
+        SK: 'PROFILE',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_8,
+        f_name: 'PaginationUser8',
+        l_name: 'Test',
+        dob: '1992-08-08',
+        role: 'user',
+        can_submit: true,
+        has_paid: true,
+        timestamp: '2024-01-01T00:00:00.000Z',
+        type: 'USER'
+    },
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_9}`,
+        SK: 'PROFILE',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_9,
+        f_name: 'PaginationUser9',
+        l_name: 'Test',
+        dob: '1991-09-09',
+        role: 'user',
+        can_submit: true,
+        has_paid: true,
+        timestamp: '2024-01-01T00:00:00.000Z',
+        type: 'USER'
+    },
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_10}`,
+        SK: 'PROFILE',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_10,
+        f_name: 'PaginationUser10',
+        l_name: 'Test',
+        dob: '1990-10-10',
+        role: 'user',
+        can_submit: true,
         has_paid: true,
         timestamp: '2024-01-01T00:00:00.000Z',
         type: 'USER'
@@ -227,7 +385,13 @@ const PRESET_ENTITIES = [
         votes: 25,
         file_type: 'PNG',
         timestamp: '2024-01-15T10:00:00.000Z',
-        type: 'ART'
+        type: 'ART',
+        // GSI1 fields for time-based sorting
+        GSI1PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI1SK: `TIMESTAMP#2024-01-15T10:00:00.000Z#ART#${PRESET_TEST_DATA.artworks.APPROVED_ARTWORK}`,
+        // GSI2 fields for vote-based sorting
+        GSI2PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI2SK: `VOTES#0000025#TIMESTAMP#2024-01-15T10:00:00.000Z#ART#${PRESET_TEST_DATA.artworks.APPROVED_ARTWORK}`
     },
     {
         PK: `ART#${PRESET_TEST_DATA.artworks.PENDING_ARTWORK}`,
@@ -313,6 +477,312 @@ const PRESET_ENTITIES = [
         art_id: PRESET_TEST_DATA.artworks.INACTIVE_SEASON_ARTWORK
     },
 
+    // Additional artworks for pagination testing - all in CURRENT_SEASON
+    {
+        PK: `ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_1}`,
+        SK: 'N/A',
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_1,
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_1,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        f_name: 'PaginationUser1',
+        age: 29,
+        title: 'Pagination Art 1',
+        is_approved: true,
+        votes: 30,
+        file_type: 'PNG',
+        location: 'Test Location 1',
+        timestamp: '2024-01-20T09:00:00.000Z',
+        type: 'ART',
+        // GSI1 fields for time-based sorting
+        GSI1PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI1SK: `TIMESTAMP#2024-01-20T09:00:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_1}`,
+        // GSI2 fields for vote-based sorting
+        GSI2PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI2SK: `VOTES#0000030#TIMESTAMP#2024-01-20T09:00:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_1}`
+    },
+    {
+        PK: `ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_2}`,
+        SK: 'N/A',
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_2,
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_2,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        f_name: 'PaginationUser2',
+        age: 28,
+        title: 'Pagination Art 2',
+        is_approved: true,
+        votes: 22,
+        file_type: 'JPEG',
+        location: 'Test Location 2',
+        timestamp: '2024-01-25T11:30:00.000Z',
+        type: 'ART',
+        // GSI1 fields for time-based sorting
+        GSI1PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI1SK: `TIMESTAMP#2024-01-25T11:30:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_2}`,
+        // GSI2 fields for vote-based sorting
+        GSI2PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI2SK: `VOTES#0000022#TIMESTAMP#2024-01-25T11:30:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_2}`
+    },
+    {
+        PK: `ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_3}`,
+        SK: 'N/A',
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_3,
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_3,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        f_name: 'PaginationUser3',
+        age: 27,
+        title: 'Pagination Art 3',
+        is_approved: true,
+        votes: 18,
+        file_type: 'PNG',
+        location: 'Test Location 3',
+        timestamp: '2024-01-30T14:15:00.000Z',
+        type: 'ART',
+        // GSI1 fields for time-based sorting
+        GSI1PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI1SK: `TIMESTAMP#2024-01-30T14:15:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_3}`,
+        // GSI2 fields for vote-based sorting
+        GSI2PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI2SK: `VOTES#0000018#TIMESTAMP#2024-01-30T14:15:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_3}`
+    },
+    {
+        PK: `ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_4}`,
+        SK: 'N/A',
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_4,
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_4,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        f_name: 'PaginationUser4',
+        age: 26,
+        title: 'Pagination Art 4',
+        is_approved: true,
+        votes: 12,
+        file_type: 'JPEG',
+        location: 'Test Location 4',
+        timestamp: '2024-02-05T16:45:00.000Z',
+        type: 'ART',
+        // GSI1 fields for time-based sorting
+        GSI1PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI1SK: `TIMESTAMP#2024-02-05T16:45:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_4}`,
+        // GSI2 fields for vote-based sorting
+        GSI2PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI2SK: `VOTES#0000012#TIMESTAMP#2024-02-05T16:45:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_4}`
+    },
+    {
+        PK: `ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_5}`,
+        SK: 'N/A',
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_5,
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_5,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        f_name: 'PaginationUser5',
+        age: 25,
+        title: 'Pagination Art 5',
+        is_approved: true,
+        votes: 8,
+        file_type: 'PNG',
+        location: 'Test Location 5',
+        timestamp: '2024-02-10T10:20:00.000Z',
+        type: 'ART',
+        // GSI1 fields for time-based sorting
+        GSI1PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI1SK: `TIMESTAMP#2024-02-10T10:20:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_5}`,
+        // GSI2 fields for vote-based sorting
+        GSI2PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI2SK: `VOTES#0000008#TIMESTAMP#2024-02-10T10:20:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_5}`
+    },
+
+    // Additional artworks for better pagination testing
+    {
+        PK: `ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_6}`,
+        SK: 'N/A',
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_6,
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_6,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        f_name: 'PaginationUser6',
+        age: 30,
+        title: 'Pagination Art 6',
+        is_approved: true,
+        votes: 6,
+        file_type: 'PNG',
+        location: 'Test Location 6',
+        timestamp: '2024-02-15T08:30:00.000Z',
+        type: 'ART',
+        // GSI1 fields for time-based sorting
+        GSI1PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI1SK: `TIMESTAMP#2024-02-15T08:30:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_6}`,
+        // GSI2 fields for vote-based sorting
+        GSI2PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI2SK: `VOTES#0000006#TIMESTAMP#2024-02-15T08:30:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_6}`
+    },
+    {
+        PK: `ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_7}`,
+        SK: 'N/A',
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_7,
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_7,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        f_name: 'PaginationUser7',
+        age: 31,
+        title: 'Pagination Art 7',
+        is_approved: true,
+        votes: 4,
+        file_type: 'JPEG',
+        location: 'Test Location 7',
+        timestamp: '2024-02-20T12:15:00.000Z',
+        type: 'ART',
+        // GSI1 fields for time-based sorting
+        GSI1PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI1SK: `TIMESTAMP#2024-02-20T12:15:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_7}`,
+        // GSI2 fields for vote-based sorting
+        GSI2PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI2SK: `VOTES#0000004#TIMESTAMP#2024-02-20T12:15:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_7}`
+    },
+    {
+        PK: `ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_8}`,
+        SK: 'N/A',
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_8,
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_8,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        f_name: 'PaginationUser8',
+        age: 32,
+        title: 'Pagination Art 8',
+        is_approved: true,
+        votes: 2,
+        file_type: 'PNG',
+        location: 'Test Location 8',
+        timestamp: '2024-02-25T15:45:00.000Z',
+        type: 'ART',
+        // GSI1 fields for time-based sorting
+        GSI1PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI1SK: `TIMESTAMP#2024-02-25T15:45:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_8}`,
+        // GSI2 fields for vote-based sorting
+        GSI2PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI2SK: `VOTES#0000002#TIMESTAMP#2024-02-25T15:45:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_8}`
+    },
+    {
+        PK: `ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_9}`,
+        SK: 'N/A',
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_9,
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_9,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        f_name: 'PaginationUser9',
+        age: 33,
+        title: 'Pagination Art 9',
+        is_approved: true,
+        votes: 1,
+        file_type: 'JPEG',
+        location: 'Test Location 9',
+        timestamp: '2024-03-01T09:20:00.000Z',
+        type: 'ART',
+        // GSI1 fields for time-based sorting
+        GSI1PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI1SK: `TIMESTAMP#2024-03-01T09:20:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_9}`,
+        // GSI2 fields for vote-based sorting
+        GSI2PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI2SK: `VOTES#0000001#TIMESTAMP#2024-03-01T09:20:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_9}`
+    },
+    {
+        PK: `ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_10}`,
+        SK: 'N/A',
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_10,
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_10,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        f_name: 'PaginationUser10',
+        age: 34,
+        title: 'Pagination Art 10',
+        is_approved: true,
+        votes: 0,
+        file_type: 'PNG',
+        location: 'Test Location 10',
+        timestamp: '2024-03-05T11:10:00.000Z',
+        type: 'ART',
+        // GSI1 fields for time-based sorting
+        GSI1PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI1SK: `TIMESTAMP#2024-03-05T11:10:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_10}`,
+        // GSI2 fields for vote-based sorting
+        GSI2PK: `SEASON#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        GSI2SK: `VOTES#0000000#TIMESTAMP#2024-03-05T11:10:00.000Z#ART#${PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_10}`
+    },
+
+    // Additional artwork pointers for pagination testing
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_1}`,
+        SK: `ART#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        type: 'ART_PTR',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_1,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_1
+    },
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_2}`,
+        SK: `ART#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        type: 'ART_PTR',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_2,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_2
+    },
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_3}`,
+        SK: `ART#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        type: 'ART_PTR',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_3,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_3
+    },
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_4}`,
+        SK: `ART#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        type: 'ART_PTR',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_4,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_4
+    },
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_5}`,
+        SK: `ART#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        type: 'ART_PTR',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_5,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_5
+    },
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_6}`,
+        SK: `ART#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        type: 'ART_PTR',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_6,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_6
+    },
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_7}`,
+        SK: `ART#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        type: 'ART_PTR',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_7,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_7
+    },
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_8}`,
+        SK: `ART#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        type: 'ART_PTR',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_8,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_8
+    },
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_9}`,
+        SK: `ART#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        type: 'ART_PTR',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_9,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_9
+    },
+    {
+        PK: `USER#${PRESET_TEST_DATA.users.PAGINATION_USER_10}`,
+        SK: `ART#${PRESET_TEST_DATA.seasons.CURRENT_SEASON}`,
+        type: 'ART_PTR',
+        user_id: PRESET_TEST_DATA.users.PAGINATION_USER_10,
+        season: PRESET_TEST_DATA.seasons.CURRENT_SEASON,
+        art_id: PRESET_TEST_DATA.artworks.PAGINATION_ARTWORK_10
+    },
+
     // Donations
     {
         PK: `USER#${PRESET_TEST_DATA.users.ADULT_USER}`,
@@ -376,6 +846,10 @@ export class SimplePresetDB {
 
             // 3. Populate preset data
             await this.seedData();
+
+            // 4. Wait for GSI indexes to be fully active
+            console.log('⏳ Waiting for GSI indexes to be fully active...');
+            await this.waitForGSIActive();
 
             this.isSetup = true;
             console.log('✅ Preset test database setup complete!');
@@ -485,6 +959,41 @@ export class SimplePresetDB {
         }
 
         throw new Error('Table failed to become active');
+    }
+
+    // Private method: wait for GSI indexes to be active
+    private async waitForGSIActive(): Promise<void> {
+        console.log('⏳ Waiting for GSI indexes to be active...');
+
+        for (let attempt = 1; attempt <= 30; attempt++) {
+            try {
+                const result = await dynamoClient.send(new DescribeTableCommand({
+                    TableName: TABLE_SCHEMA.TableName
+                }));
+
+                const table = result.Table;
+                if (!table) {
+                    throw new Error('Table not found');
+                }
+
+                // Check if all GSI indexes are active
+                const gsiIndexes = table.GlobalSecondaryIndexes || [];
+                const activeIndexes = gsiIndexes.filter(index => index.IndexStatus === 'ACTIVE');
+
+                if (gsiIndexes.length > 0 && activeIndexes.length === gsiIndexes.length) {
+                    console.log(`✅ All ${gsiIndexes.length} GSI indexes are active`);
+                    return;
+                }
+
+                console.log(`   Attempt ${attempt}/30: ${activeIndexes.length}/${gsiIndexes.length} GSI indexes active`);
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds between attempts
+            } catch (error) {
+                console.log(`   Attempt ${attempt}/30: Error checking GSI status: ${error}`);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+        }
+
+        console.log('⚠️  GSI indexes may not be fully active, continuing anyway...');
     }
 
     // Private method: seed data

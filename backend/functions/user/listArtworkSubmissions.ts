@@ -1,21 +1,14 @@
 import { BatchGetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { dynamodb, TABLE_NAME } from '../../config/aws-clients';
+import { ApiGatewayEvent, HTTP_STATUS } from '../../../shared/src/api-types/commonTypes';
+import { CommonErrors } from '../../../shared/src/api-types/errorTypes';
 
-type ApiEvent = {
-    requestContext?: { authorizer?: { claims?: { sub?: string } } };
-    queryStringParameters?: Record<string, string | undefined>;
-};
-
-export const handler = async (event: ApiEvent) => {
+export const handler = async (event: ApiGatewayEvent) => {
     try {
         // 1) Auth
         const userId = event.requestContext?.authorizer?.claims?.sub;
         if (!userId) {
-            return {
-                statusCode: 401,
-                body: JSON.stringify({ message: 'Unauthorized' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.unauthorized();
         }
 
         // 2) Params
@@ -35,14 +28,14 @@ export const handler = async (event: ApiEvent) => {
                     ':sk': '#ACTIVE#true#'
                 }
             }));
-            
+
             // Get all active seasons
             activeSeasons = (seasonResult.Items || []).map(season => {
                 // Extract season name from compound_sk: #ACTIVE#<boolean>#SEASON#<season>
                 const skParts = season.compound_sk?.split('#') || [];
                 return skParts[4] || season.season || '';
             }).filter(Boolean);
-            
+
         } catch (error) {
             console.warn('Failed to get active seasons:', error);
         }
@@ -121,7 +114,7 @@ export const handler = async (event: ApiEvent) => {
             const ts = art?.timestamp || '';
             const season = art?.season || '';
             const isActiveSeason = activeSeasons.includes(season);
-            
+
             return {
                 artwork_id: artId,
                 title: art?.title || '',
@@ -142,7 +135,7 @@ export const handler = async (event: ApiEvent) => {
 
         // 9) Response
         return {
-            statusCode: 200,
+            statusCode: HTTP_STATUS.OK,
             body: JSON.stringify({
                 artworks,
                 summary: {
@@ -161,10 +154,6 @@ export const handler = async (event: ApiEvent) => {
         };
     } catch (error: any) {
         console.error('Error listing artwork submissions:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: 'Internal server error' }),
-            headers: { 'Content-Type': 'application/json' }
-        };
+        return CommonErrors.internalServerError();
     }
 };

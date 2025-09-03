@@ -3,6 +3,8 @@ import { QueryCommand, DeleteCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3';
 import { cognitoClient, dynamodb, s3Client, USER_POOL_ID, TABLE_NAME, S3_BUCKET_NAME } from '../../config/aws-clients';
 import { CleanupTask } from '../../../shared/src/api-types/internalTypes';
+import { ApiGatewayEvent, HTTP_STATUS } from '../../../shared/src/api-types/commonTypes';
+import { CommonErrors } from '../../../shared/src/api-types/errorTypes';
 
 //Scenario 1: Everything works perfectly
 //User requests deletion -> Delete core profile✅ -> Delete other data✅ -> Delete S3 files✅ -> Disable Cognito✅ -> Return success(204) -> User sees "Account deleted"
@@ -14,16 +16,12 @@ import { CleanupTask } from '../../../shared/src/api-types/internalTypes';
 //Scenario 3: Core profile deletion fails
 //User requests deletion -> Delete core profile❌ -> Return error immediately(500) -> User sees "Deletion failed, please retry" -> All data remains intact
 
-export const handler = async (event: any) => {
+export const handler = async (event: ApiGatewayEvent) => {
     try {
         const userId = event.requestContext?.authorizer?.claims?.sub;
 
         if (!userId) {
-            return {
-                statusCode: 401,
-                body: JSON.stringify({ message: 'Unauthorized' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.unauthorized();
         }
 
         // Parse request body
@@ -31,11 +29,7 @@ export const handler = async (event: any) => {
         const { password } = body;
 
         if (!password) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ message: 'Password confirmation is required' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.badRequest('Password confirmation is required');
         }
 
         // Verify user exists in Cognito
@@ -46,11 +40,7 @@ export const handler = async (event: any) => {
             }));
         } catch (error: any) {
             if (error.name === 'UserNotFoundException') {
-                return {
-                    statusCode: 404,
-                    body: JSON.stringify({ message: 'User not found' }),
-                    headers: { 'Content-Type': 'application/json' }
-                };
+                return CommonErrors.notFound('User not found');
             }
             throw error;
         }
@@ -74,11 +64,7 @@ export const handler = async (event: any) => {
         } catch (error: any) {
             // If profile deletion fails, return error immediately
             console.error('Failed to delete user profile:', error);
-            return {
-                statusCode: 500,
-                body: JSON.stringify({ message: 'Failed to delete account. Please try again.' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.internalServerError('Failed to delete account. Please try again.');
         }
 
         // 2. Query and delete all USER#<uid> prefixed entries (non-critical)
@@ -183,18 +169,14 @@ export const handler = async (event: any) => {
 
         // Return success immediately - user sees account as deleted
         return {
-            statusCode: 204,
+            statusCode: HTTP_STATUS.NO_CONTENT,
             body: '',
             headers: { 'Content-Type': 'application/json' }
         };
 
     } catch (error: any) {
         console.error('Error deleting user account:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: 'Internal server error' }),
-            headers: { 'Content-Type': 'application/json' }
-        };
+        return CommonErrors.internalServerError();
     }
 };
 

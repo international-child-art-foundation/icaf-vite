@@ -1,8 +1,10 @@
 import { SignUpCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { cognitoClient, dynamodb, USER_POOL_ID, USER_POOL_CLIENT_ID, TABLE_NAME } from '../../config/aws-clients';
-const { validateRegistrationBody } = require('../../../shared/dist/api-types/registrationTypes');
-const { ROLES, calculateUserAge, determineUserType, canSubmitArtwork, getMaxConstituentsPerSeason } = require('../../../shared/dist/api-types/userTypes');
+import { validateRegistrationBody } from '../../../shared/src/api-types/registrationTypes';
+import { ROLES, calculateUserAge, determineUserType, canSubmitArtwork, getMaxConstituentsPerSeason } from '../../../shared/src/api-types/userTypes';
+import { ApiGatewayEvent, HTTP_STATUS } from '../../../shared/src/api-types/commonTypes';
+import { CommonErrors, createErrorResponse } from '../../../shared/src/api-types/errorTypes';
 
 /**
  * User Registration Handler
@@ -15,53 +17,29 @@ const { ROLES, calculateUserAge, determineUserType, canSubmitArtwork, getMaxCons
  * - Access levels: admin, contributor, guardian, user
  */
 
-export const handler = async (event: any) => {
+export const handler = async (event: ApiGatewayEvent) => {
     try {
-        const body = JSON.parse(event.body);
+        const body = JSON.parse(event.body || '{}');
 
         // Validate required fields
         if (!body.email || !body.password || !body.f_name || !body.l_name || !body.birthdate) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    message: 'Missing required fields: email, password, f_name, l_name, birthdate'
-                }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.badRequest('Missing required fields: email, password, f_name, l_name, birthdate');
         }
 
         // Validate field lengths
         if (body.f_name.length > 24 || body.l_name.length > 24) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    message: 'First name and last name must be 24 characters or less'
-                }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.badRequest('First name and last name must be 24 characters or less');
         }
 
         // Validate date format (YYYY-MM-DD)
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if (!dateRegex.test(body.birthdate)) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    message: 'Birthdate must be in YYYY-MM-DD format'
-                }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.badRequest('Birthdate must be in YYYY-MM-DD format');
         }
 
         // Check password strength
         if (body.password.length < 8) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    message: 'Password must be at least 8 characters long'
-                }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.badRequest('Password must be at least 8 characters long');
         }
 
         // Determine role
@@ -69,16 +47,10 @@ export const handler = async (event: any) => {
 
         // If role is provided, validate and use it
         if (body.role) {
-            if (!ROLES.includes(body.role)) {
-                return {
-                    statusCode: 400,
-                    body: JSON.stringify({
-                        message: 'Invalid role. Valid values are: admin, contributor, guardian, user'
-                    }),
-                    headers: { 'Content-Type': 'application/json' }
-                };
+            if (!ROLES.includes(body.role as any)) {
+                return CommonErrors.badRequest('Invalid role. Valid values are: admin, contributor, guardian, user');
             }
-            role = body.role;
+            role = body.role as any;
         }
 
         // Calculate user's age and determine user type
@@ -152,7 +124,7 @@ export const handler = async (event: any) => {
         // Note: Guardian records will be created when guardians submit artwork on behalf of others
 
         return {
-            statusCode: 201,
+            statusCode: HTTP_STATUS.CREATED,
             body: JSON.stringify({
                 UUID: userId
             }),
@@ -164,32 +136,13 @@ export const handler = async (event: any) => {
 
         // Handle Cognito errors
         if (error.name === 'UsernameExistsException') {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    message: 'User with this email already exists'
-                }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.badRequest('User with this email already exists');
         }
 
         if (error.name === 'InvalidPasswordException') {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    message: 'Password does not meet requirements'
-                }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.badRequest('Password does not meet requirements');
         }
 
-        return {
-            statusCode: 500,
-            body: JSON.stringify({
-                message: 'Internal server error during registration',
-                error: error.message
-            }),
-            headers: { 'Content-Type': 'application/json' }
-        };
+        return CommonErrors.internalServerError('Internal server error during registration');
     }
 }; 

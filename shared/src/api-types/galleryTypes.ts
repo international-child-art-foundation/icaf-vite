@@ -23,9 +23,12 @@ export interface GalleryResponse {
     artworks: ArtworkEntity[];
     count: number;
     hasMore: boolean;
-    lastEvaluatedKey?: string;
     season: string;
     sortType: SortType;
+    pagination: {
+        has_more: boolean;
+        last_evaluated_key?: string;
+    };
 }
 
 // Validation helper for sort types

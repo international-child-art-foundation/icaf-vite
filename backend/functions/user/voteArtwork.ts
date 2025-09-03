@@ -1,31 +1,21 @@
 import { GetCommand, PutCommand, UpdateCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { dynamodb, TABLE_NAME } from '../../config/aws-clients';
+import { ApiGatewayEvent, HTTP_STATUS } from '../../../shared/src/api-types/commonTypes';
+import { CommonErrors } from '../../../shared/src/api-types/errorTypes';
+import { canUserVoteForArtwork, extractSeasonFromSK } from '../../../shared/src/api-types/businessLogic';
 
-type ApiEvent = {
-    requestContext?: { authorizer?: { claims?: { sub?: string } } };
-    pathParameters?: { art_id?: string };
-};
-
-export const handler = async (event: ApiEvent) => {
+export const handler = async (event: ApiGatewayEvent) => {
     try {
         // Auth
         const userId = event.requestContext?.authorizer?.claims?.sub;
         if (!userId) {
-            return {
-                statusCode: 401,
-                body: JSON.stringify({ message: 'Unauthorized' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.unauthorized();
         }
 
         // Get artwork ID from path parameters
         const artId = event.pathParameters?.art_id;
         if (!artId) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ message: 'Artwork ID is required' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.badRequest('Artwork ID is required');
         }
 
         // Get artwork details
@@ -39,29 +29,17 @@ export const handler = async (event: ApiEvent) => {
 
         const artwork = artworkResult.Item;
         if (!artwork) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ message: 'Artwork not found' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.badRequest('Artwork not found');
         }
 
         // Check if artwork is approved
         if (!artwork.is_approved) {
-            return {
-                statusCode: 403,
-                body: JSON.stringify({ message: 'Cannot vote for unapproved artwork' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.forbidden('Cannot vote for unapproved artwork');
         }
 
         // Check if user is trying to vote for their own artwork
         if (artwork.user_id === userId) {
-            return {
-                statusCode: 403,
-                body: JSON.stringify({ message: 'Cannot vote for your own artwork' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.forbidden('Cannot vote for your own artwork');
         }
 
         // Get current active seasons
@@ -76,19 +54,16 @@ export const handler = async (event: ApiEvent) => {
 
         const activeSeasons = new Set<string>((seasonsResult.Items || []).map(s => {
             const sk: string = s.SK;
-            const idx = sk.indexOf('#SEASON#');
-            return idx >= 0 ? sk.substring(idx + '#SEASON#'.length) : s.season;
+            return extractSeasonFromSK(sk);
         }));
 
-        // Check if artwork belongs to current active season
-        const artworkSeason = artwork.season;
-        if (!artworkSeason || !activeSeasons.has(artworkSeason)) {
-            return {
-                statusCode: 403,
-                body: JSON.stringify({ message: 'Voting not allowed for this season' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+        // Check if user can vote for this artwork
+        const voteValidation = canUserVoteForArtwork(userId, artwork as any, activeSeasons);
+        if (!voteValidation.canVote) {
+            return CommonErrors.forbidden(voteValidation.reason || 'Voting not allowed');
         }
+
+        const artworkSeason = artwork.season;
 
         // Check if user has already voted in this season
         const existingVoteResult = await dynamodb.send(new GetCommand({
@@ -100,11 +75,7 @@ export const handler = async (event: ApiEvent) => {
         }));
 
         if (existingVoteResult.Item) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ message: 'Already voted for this artwork' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.badRequest('Already voted for this artwork');
         }
 
         // Create vote record
@@ -142,7 +113,7 @@ export const handler = async (event: ApiEvent) => {
 
         // Return success response
         return {
-            statusCode: 201,
+            statusCode: HTTP_STATUS.CREATED,
             body: JSON.stringify({
                 success: true,
                 vote_id: voteId,
@@ -156,10 +127,6 @@ export const handler = async (event: ApiEvent) => {
 
     } catch (error: any) {
         console.error('Error processing vote:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: 'Internal server error' }),
-            headers: { 'Content-Type': 'application/json' }
-        };
+        return CommonErrors.internalServerError();
     }
 };

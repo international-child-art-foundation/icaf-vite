@@ -18,7 +18,10 @@ export interface GallerySeasonsQueryParams {
 // Gallery seasons API response format
 export interface GallerySeasonsResponse {
     artworks: GallerySeasonsArtwork[];
-    last_evaluated_key?: string | null;
+    pagination: {
+        has_more: boolean;
+        last_evaluated_key?: string | null;
+    };
 }
 
 // Simplified artwork format for gallery seasons

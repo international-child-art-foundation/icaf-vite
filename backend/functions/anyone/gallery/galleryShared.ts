@@ -22,8 +22,7 @@ import { QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { dynamodb, TABLE_NAME } from '../../../config/aws-clients';
 import {
     SortType,
-    GalleryQueryParams,
-    GalleryResponse
+    GalleryQueryParams
 } from '../../../../shared/src/api-types/galleryTypes';
 import { ArtworkEntity } from '../../../../shared/src/api-types/artworkTypes';
 
@@ -89,7 +88,17 @@ const QUERY_CONFIGS: Record<SortType, GSIQueryConfig> = {
 export async function executeGalleryQuery(
     sortType: SortType,
     params: GalleryQueryParams
-): Promise<GalleryResponse> {
+): Promise<{
+    artworks: ArtworkEntity[];
+    count: number;
+    hasMore: boolean;
+    season: string;
+    sortType: SortType;
+    pagination: {
+        has_more: boolean;
+        last_evaluated_key?: string;
+    };
+}> {
 
     const config = QUERY_CONFIGS[sortType];
     const limit = Math.min(params.limit || 20, 100);
@@ -110,17 +119,21 @@ export async function executeGalleryQuery(
     // Add pagination if provided
     if (params.lastEvaluatedKey) {
         try {
-            queryParams.ExclusiveStartKey = JSON.parse(
-                Buffer.from(params.lastEvaluatedKey, 'base64').toString()
-            );
+            const decodedKey = Buffer.from(params.lastEvaluatedKey, 'base64').toString();
+            queryParams.ExclusiveStartKey = JSON.parse(decodedKey);
         } catch (error) {
+            console.error('❌ Pagination: Error decoding lastEvaluatedKey:', error);
             // Return empty result instead of throwing error for invalid pagination key
             return {
                 artworks: [],
                 count: 0,
                 hasMore: false,
                 season: params.season,
-                sortType
+                sortType,
+                pagination: {
+                    has_more: false,
+                    last_evaluated_key: undefined
+                }
             };
         }
     }
@@ -143,9 +156,12 @@ export async function executeGalleryQuery(
             artworks,
             count: artworks.length,
             hasMore: !!result.LastEvaluatedKey,
-            lastEvaluatedKey: encodedLastKey,
             season: params.season,
-            sortType
+            sortType,
+            pagination: {
+                has_more: !!result.LastEvaluatedKey,
+                last_evaluated_key: encodedLastKey
+            }
         };
 
     } catch (error: any) {

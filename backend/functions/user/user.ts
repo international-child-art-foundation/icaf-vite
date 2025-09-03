@@ -1,69 +1,53 @@
 import { GetCommand } from '@aws-sdk/lib-dynamodb';
-import { dynamodb } from '../../config/aws-clients';
+import { dynamodb, TABLE_NAME } from '../../config/aws-clients';
+import { ApiGatewayEvent, HTTP_STATUS } from '../../../shared/src/api-types/commonTypes';
+import { CommonErrors } from '../../../shared/src/api-types/errorTypes';
 
-export const handler = async (event: any) => {
+export const handler = async (event: ApiGatewayEvent) => {
     try {
+        // Auth
         const userId = event.requestContext?.authorizer?.claims?.sub;
-
         if (!userId) {
-            return {
-                statusCode: 401,
-                body: JSON.stringify({ message: 'Unauthorized' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.unauthorized();
         }
 
-        // Get user profile from DynamoDB
-        const tableName = process.env.TABLE_NAME!;
-
-        const getParams = {
-            TableName: tableName,
+        // Get user profile
+        const userResult = await dynamodb.send(new GetCommand({
+            TableName: TABLE_NAME,
             Key: {
                 PK: `USER#${userId}`,
                 SK: 'PROFILE'
             }
-        };
+        }));
 
-        const result = await dynamodb.send(new GetCommand(getParams));
-
-        if (!result.Item) {
-            return {
-                statusCode: 404,
-                body: JSON.stringify({ message: 'User profile not found' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+        const user = userResult.Item;
+        if (!user) {
+            return CommonErrors.notFound('User profile not found');
         }
 
-        const userProfile = result.Item;
-
-        // Map DynamoDB data to API response format
-        const response = {
-            UUID: userProfile.user_id || userId,
-            email: event.requestContext?.authorizer?.claims?.email || userProfile.email,
-            f_name: userProfile.f_name,
-            l_name: userProfile.l_name,
-            role: userProfile.role || 'user',
-            has_cur_season_submission: userProfile.can_submit || false,
-            has_magazine_subscription: userProfile.has_magazine_subscription || false,
-            has_newsletter_subscription: userProfile.has_newsletter_subscription || false,
-            g_f_name: userProfile.guardianFirstName,
-            g_l_name: userProfile.guardianLastName,
-            birthdate: userProfile.dob
+        // Return user profile (excluding sensitive fields)
+        const userProfile = {
+            user_id: user.user_id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            age: user.age,
+            location: user.location,
+            can_submit: user.can_submit,
+            has_paid: user.has_paid,
+            created_at: user.created_at,
+            updated_at: user.updated_at
         };
 
         return {
-            statusCode: 200,
-            body: JSON.stringify(response),
+            statusCode: HTTP_STATUS.OK,
+            body: JSON.stringify(userProfile),
             headers: { 'Content-Type': 'application/json' }
         };
 
     } catch (error: any) {
-        console.error('Error fetching user profile:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: 'Internal server error' }),
-            headers: { 'Content-Type': 'application/json' }
-        };
+        console.error('Error getting user profile:', error);
+        return CommonErrors.internalServerError();
     }
 };
 

@@ -1,30 +1,23 @@
 import { QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { dynamodb, TABLE_NAME } from '../../config/aws-clients';
+import { ApiGatewayEvent, HTTP_STATUS } from '../../../shared/src/api-types/commonTypes';
+import { CommonErrors } from '../../../shared/src/api-types/errorTypes';
 
-type ApiEvent = {
-    requestContext?: { authorizer?: { claims?: { sub?: string } } };
-    queryStringParameters?: Record<string, string | undefined>;
-};
-
-export const handler = async (event: ApiEvent) => {
+export const handler = async (event: ApiGatewayEvent) => {
     try {
-        // Auth
+        // 1) Auth
         const userId = event.requestContext?.authorizer?.claims?.sub;
         if (!userId) {
-            return {
-                statusCode: 401,
-                body: JSON.stringify({ message: 'Unauthorized' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.unauthorized();
         }
 
-        // Parse query parameters
-        const limit = parseInt(event.queryStringParameters?.limit || '20');
-        const lastEvaluatedKeyParam = event.queryStringParameters?.last_evaluated_key;
-        const lastEvaluatedKey = lastEvaluatedKeyParam ? JSON.parse(lastEvaluatedKeyParam) : undefined;
+        // 2) Params
+        const qp = event.queryStringParameters || {};
+        const limit = Number.parseInt(String(qp.limit || '20'), 10) || 20;
+        const lastEvaluatedKey = qp.last_evaluated_key ? JSON.parse(decodeURIComponent(String(qp.last_evaluated_key))) : undefined;
 
-        // Query user's donations
-        const queryParams = {
+        // 3) Query donations for this user
+        const donationQueryParams = {
             TableName: TABLE_NAME,
             KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
             ExpressionAttributeValues: {
@@ -33,45 +26,48 @@ export const handler = async (event: ApiEvent) => {
             },
             Limit: limit,
             ScanIndexForward: false, // Most recent first
-            ExclusiveStartKey: lastEvaluatedKey
+            ...(lastEvaluatedKey && { ExclusiveStartKey: lastEvaluatedKey })
         };
 
-        const result = await dynamodb.send(new QueryCommand(queryParams));
-        const items = result.Items || [];
+        const donationResult = await dynamodb.send(new QueryCommand(donationQueryParams));
+        const donations = donationResult.Items || [];
 
-        // Transform data
-        const donations = items.map(item => ({
-            donation_id: item.SK.replace('DONATION#', ''),
-            amount_cent: item.amount_cents,
-            timestamp: item.timestamp,
-            currency: item.currency
+        // 4) Format donations
+        const formattedDonations = donations.map(donation => ({
+            donation_id: donation.donation_id || '',
+            amount_cent: donation.amount_cents || 0,
+            currency: donation.currency || 'USD',
+            status: donation.status || 'pending',
+            timestamp: donation.timestamp || '',
+            message: donation.message || '',
+            anonymous: Boolean(donation.anonymous)
         }));
 
-        // Calculate total amount for current page
-        const total_amount_cent = donations.reduce((sum, d) => sum + d.amount_cent, 0);
+        // 5) Calculate summary
+        const totalAmountCents = formattedDonations.reduce((sum, d) => sum + d.amount_cent, 0);
+        const totalDonations = formattedDonations.length;
 
-        // Build response
-        const responseBody: any = {
-            donations,
-            total_amount_cent
-        };
-
-        if (result.LastEvaluatedKey) {
-            responseBody.last_evaluated_key = JSON.stringify(result.LastEvaluatedKey);
-        }
-
+        // 6) Response
         return {
-            statusCode: 200,
-            body: JSON.stringify(responseBody),
+            statusCode: HTTP_STATUS.OK,
+            body: JSON.stringify({
+                donations: formattedDonations,
+                total_amount_cent: totalAmountCents,
+                summary: {
+                    total_donations: totalDonations,
+                    currency: 'USD'
+                },
+                pagination: {
+                    has_more: Boolean(donationResult.LastEvaluatedKey),
+                    ...(donationResult.LastEvaluatedKey && {
+                        last_evaluated_key: encodeURIComponent(JSON.stringify(donationResult.LastEvaluatedKey))
+                    })
+                }
+            }),
             headers: { 'Content-Type': 'application/json' }
         };
-
     } catch (error: any) {
         console.error('Error listing donations:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: 'Internal server error' }),
-            headers: { 'Content-Type': 'application/json' }
-        };
+        return CommonErrors.internalServerError();
     }
 };

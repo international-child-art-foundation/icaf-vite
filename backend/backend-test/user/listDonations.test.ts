@@ -66,7 +66,9 @@ describe('listDonations (user)', () => {
             currency: 'USD'
         });
 
-        expect(body.total_amount_cent).toBe(7500); // $25 + $50 = $75
+        // Check pagination
+        expect(body.pagination).toBeDefined();
+        expect(body.pagination.has_more).toBe(false);
         expect(body.last_evaluated_key).toBeUndefined(); // No pagination needed
     });
 
@@ -91,7 +93,8 @@ describe('listDonations (user)', () => {
         expect(Array.isArray(body.donations)).toBe(true);
         expect(body.donations.length).toBe(0);
         expect(body.total_amount_cent).toBe(0);
-        expect(body.last_evaluated_key).toBeUndefined();
+        expect(body.pagination.has_more).toBe(false);
+        expect(body.pagination.last_evaluated_key).toBeUndefined();
     });
 
     test('200 with pagination support', async () => {
@@ -130,14 +133,15 @@ describe('listDonations (user)', () => {
         const body1 = JSON.parse(res1.body);
         expect(body1.donations.length).toBe(2);
         expect(body1.total_amount_cent).toBe(5000); // Most recent 2: $30 + $20 = $50
-        expect(body1.last_evaluated_key).toBeDefined();
+        expect(body1.pagination.has_more).toBe(true);
+        expect(body1.pagination.last_evaluated_key).toBeDefined();
 
         // Second page
         const res2 = await listDonations({
             requestContext: { authorizer: { claims: { sub: userId } } },
             queryStringParameters: {
                 limit: '2',
-                last_evaluated_key: body1.last_evaluated_key
+                last_evaluated_key: body1.pagination.last_evaluated_key
             }
         } as any);
 
@@ -145,7 +149,8 @@ describe('listDonations (user)', () => {
         const body2 = JSON.parse(res2.body);
         expect(body2.donations.length).toBe(1);
         expect(body2.total_amount_cent).toBe(1000); // Remaining: $10
-        expect(body2.last_evaluated_key).toBeUndefined(); // No more pages
+        expect(body2.pagination.has_more).toBe(false);
+        expect(body2.pagination.last_evaluated_key).toBeUndefined(); // No more pages
     });
 
     test('handles different currencies correctly', async () => {

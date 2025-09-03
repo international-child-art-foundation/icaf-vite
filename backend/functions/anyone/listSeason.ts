@@ -6,6 +6,8 @@ import {
     ListSeasonResponse,
     Season
 } from '../../../shared/src/api-types/seasonTypes';
+import { ApiGatewayEvent, HTTP_STATUS } from '../../../shared/src/api-types/commonTypes';
+import { CommonErrors } from '../../../shared/src/api-types/errorTypes';
 
 /**
  * List Seasons Handler
@@ -20,7 +22,7 @@ import {
  * This endpoint is accessible to anyone (no authentication required).
  */
 
-export const handler = async (event: any): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
+export const handler = async (event: ApiGatewayEvent): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
     try {
         // Parse query parameters
         const queryParams = event.queryStringParameters || {};
@@ -29,14 +31,7 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
         // Validate query parameters
         const validationErrors = validateListSeasonParams(queryParams);
         if (validationErrors.length > 0) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    message: 'Invalid query parameters',
-                    errors: validationErrors
-                }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.badRequest('Invalid query parameters', validationErrors);
         }
 
         let dynamoQueryParams;
@@ -102,20 +97,13 @@ export const handler = async (event: any): Promise<{ statusCode: number; body: s
         }
 
         return {
-            statusCode: 200,
+            statusCode: HTTP_STATUS.OK,
             body: JSON.stringify(response),
             headers: { 'Content-Type': 'application/json' }
         };
 
     } catch (error: any) {
         console.error('Error fetching seasons:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({
-                message: 'Internal server error while fetching seasons',
-                error: error.message
-            }),
-            headers: { 'Content-Type': 'application/json' }
-        };
+        return CommonErrors.internalServerError('Internal server error while fetching seasons');
     }
 };

@@ -1,55 +1,34 @@
 import { GetCommand, QueryCommand, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
 import { dynamodb, TABLE_NAME } from '../../config/aws-clients';
 import { SubmitArtworkRequest, validateSubmissionData } from '../../../shared/src/api-types/artworkTypes';
+import { ApiGatewayEvent, HTTP_STATUS } from '../../../shared/src/api-types/commonTypes';
+import { CommonErrors } from '../../../shared/src/api-types/errorTypes';
+import { canUserSubmitArtwork, isSeasonActive } from '../../../shared/src/api-types/businessLogic';
 
-type ApiEvent = {
-    requestContext?: { authorizer?: { claims?: { sub?: string } } };
-    body?: string;
-};
-
-export const handler = async (event: ApiEvent) => {
+export const handler = async (event: ApiGatewayEvent) => {
     try {
         // 1) Auth
         const userId = event.requestContext?.authorizer?.claims?.sub;
         if (!userId) {
-            return {
-                statusCode: 401,
-                body: JSON.stringify({ message: 'Unauthorized' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.unauthorized();
         }
 
         // 2) Parse request body
         if (!event.body) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ message: 'Request body is required' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.badRequest('Request body is required');
         }
 
         let submissionData: SubmitArtworkRequest;
         try {
             submissionData = JSON.parse(event.body);
         } catch (error) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ message: 'Invalid JSON in request body' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.badRequest('Invalid JSON in request body');
         }
 
         // 3) Validate submission data
         const validationErrors = validateSubmissionData(submissionData);
         if (validationErrors.length > 0) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    message: 'Validation failed',
-                    errors: validationErrors
-                }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.badRequest('Validation failed', validationErrors);
         }
 
         // 4) Check if requested season is active and get its configuration
@@ -62,12 +41,8 @@ export const handler = async (event: ApiEvent) => {
         }));
 
         const season = seasonResult.Item;
-        if (!season || !season.is_active) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ message: 'Requested season is not active' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+        if (!isSeasonActive(season)) {
+            return CommonErrors.badRequest('Requested season is not active');
         }
 
         // 5) Check user eligibility and payment status
@@ -80,30 +55,16 @@ export const handler = async (event: ApiEvent) => {
         }));
 
         const user = userResult.Item;
-        if (!user) {
-            return {
-                statusCode: 404,
-                body: JSON.stringify({ message: 'User profile not found' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
-        }
 
-        // Check if user can submit
-        if (!user.can_submit) {
-            return {
-                statusCode: 403,
-                body: JSON.stringify({ message: 'User is not authorized to submit artwork' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+        // Check if user can submit using business logic function
+        const submissionValidation = canUserSubmitArtwork(user, season);
+        if (!submissionValidation.canSubmit) {
+            return CommonErrors.forbidden(submissionValidation.reason || 'User is not authorized to submit artwork');
         }
 
         // Check payment requirement
-        if (season.payment_required && !user.has_paid) {
-            return {
-                statusCode: 402,
-                body: JSON.stringify({ message: 'Payment required for this season' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+        if (season && season.payment_required && user && !user.has_paid) {
+            return CommonErrors.paymentRequired();
         }
 
         // 6) Check submission limits based on user role and season configuration
@@ -120,33 +81,21 @@ export const handler = async (event: ApiEvent) => {
         const submissionCount = existingSubmissions.length;
 
         // Get max submissions for this user/season
-        let maxSubmissions = season.max_user_submissions || 1;
-        if (user.role === 'guardian' && user.max_constituents_per_season) {
+        let maxSubmissions = season?.max_user_submissions || 1;
+        if (user && user.role === 'guardian' && user.max_constituents_per_season) {
             maxSubmissions = user.max_constituents_per_season;
-        } else if (user.role === 'admin') {
+        } else if (user && user.role === 'admin') {
             maxSubmissions = -1; // Unlimited for admins
         }
 
         // Check if user has reached submission limit
         if (maxSubmissions !== -1 && submissionCount >= maxSubmissions) {
-            return {
-                statusCode: 429,
-                body: JSON.stringify({
-                    message: `Maximum submissions reached for this season (${maxSubmissions})`,
-                    current_count: submissionCount,
-                    max_allowed: maxSubmissions
-                }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+            return CommonErrors.tooManyRequests(`Maximum submissions reached for this season (${maxSubmissions})`, submissionCount, maxSubmissions);
         }
 
         // Check for duplicate submission (prevent same user submitting multiple times to same season)
-        if (user.role === 'user' && submissionCount > 0) {
-            return {
-                statusCode: 409,
-                body: JSON.stringify({ message: 'You have already submitted artwork for this season' }),
-                headers: { 'Content-Type': 'application/json' }
-            };
+        if (user && user.role === 'user' && submissionCount > 0) {
+            return CommonErrors.conflict('You have already submitted artwork for this season');
         }
 
         // 7) Generate unique artwork ID and timestamp
@@ -213,11 +162,7 @@ export const handler = async (event: ApiEvent) => {
         } catch (transactionError: any) {
             console.error('Transaction failed:', transactionError);
             if (transactionError.name === 'ConditionalCheckFailedException') {
-                return {
-                    statusCode: 409,
-                    body: JSON.stringify({ message: 'Artwork submission already exists' }),
-                    headers: { 'Content-Type': 'application/json' }
-                };
+                return CommonErrors.conflict('Artwork submission already exists');
             }
             throw transactionError; // Re-throw unexpected errors
         }
@@ -226,7 +171,7 @@ export const handler = async (event: ApiEvent) => {
 
         // 12) Return success response
         return {
-            statusCode: 201,
+            statusCode: HTTP_STATUS.CREATED,
             body: JSON.stringify({
                 success: true,
                 artwork_id: artworkId,
@@ -243,10 +188,6 @@ export const handler = async (event: ApiEvent) => {
 
     } catch (error: any) {
         console.error('Error submitting artwork:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: 'Internal server error' }),
-            headers: { 'Content-Type': 'application/json' }
-        };
+        return CommonErrors.internalServerError();
     }
 };

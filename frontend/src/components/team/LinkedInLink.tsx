@@ -8,7 +8,7 @@ export const LinkedInLink = ({ src }: LinkedinLinkProps) => {
   return (
     <div>
       <a
-        className="mx-auto flex gap-2 justify-self-center text-center"
+        className="mx-auto flex justify-center gap-2 text-center"
         href={src}
         target="_blank"
         rel="noopener noreferrer"

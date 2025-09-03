@@ -49,7 +49,6 @@ export interface ArtworkEntity {
     file_type: FileType;
     is_approved: boolean;
     votes: number;
-    image_url?: string;
     timestamp: string;
     type: 'ART';
 }

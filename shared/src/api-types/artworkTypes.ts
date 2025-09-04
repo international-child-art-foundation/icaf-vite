@@ -62,19 +62,6 @@ export interface ArtPtrEntity {
     type: 'ART_PTR';
 }
 
-// Season entity data structure
-export interface SeasonEntity {
-    season: string;
-    colloq_name: string;
-    start_date: string;
-    end_date: string;
-    payment_required: boolean;
-    max_user_submissions: number;
-    can_vote: boolean;
-    is_active: boolean;
-    timestamp: string;
-    type: 'SEASON';
-}
 
 // Validation helper functions
 export function isValidFileType(fileType: string): fileType is FileType {

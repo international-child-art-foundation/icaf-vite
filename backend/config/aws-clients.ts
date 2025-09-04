@@ -2,6 +2,7 @@ import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { S3Client } from '@aws-sdk/client-s3';
+import { LambdaClient } from '@aws-sdk/client-lambda';
 
 // Common AWS client configuration
 const createAWSClientConfig = () => ({
@@ -25,6 +26,7 @@ export const s3Client = new S3Client({
         forcePathStyle: true // Required for LocalStack S3
     })
 });
+export const lambdaClient = new LambdaClient(createAWSClientConfig());
 
 // Environment variables
 export const USER_POOL_ID = process.env.USER_POOL_ID!;

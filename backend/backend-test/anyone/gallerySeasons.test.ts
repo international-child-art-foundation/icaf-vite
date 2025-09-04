@@ -71,7 +71,9 @@ describe('Gallery Seasons API tests', () => {
 
             expect(response.statusCode).toBe(200);
             expect(responseBody).toHaveProperty('artworks');
-            expect(responseBody).toHaveProperty('last_evaluated_key');
+            expect(responseBody).toHaveProperty('pagination');
+            expect(responseBody.pagination).toHaveProperty('has_more');
+            expect(responseBody.pagination).toHaveProperty('last_evaluated_key');
             expect(Array.isArray(responseBody.artworks)).toBe(true);
             expect(responseBody.artworks.length).toBeGreaterThan(0);
 

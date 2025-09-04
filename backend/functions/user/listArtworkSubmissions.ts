@@ -123,7 +123,6 @@ export const handler = async (event: ApiGatewayEvent) => {
                 votes: Number.isFinite(art?.votes) ? art.votes : 0,
                 season: season || '',
                 is_active_season: isActiveSeason,
-                image_url: art?.image_url || ''
             };
         });
 

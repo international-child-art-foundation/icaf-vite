@@ -102,7 +102,6 @@ export const handler = async (event: ApiGatewayEvent) => {
                         votes: Number.isFinite(artwork.votes) ? artwork.votes : 0,
                         season: season,
                         is_active_season: isActiveSeason,
-                        image_url: artwork.image_url || '',
                         vote_timestamp: vote.timestamp || ''
                     });
                 }

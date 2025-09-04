@@ -124,7 +124,6 @@ export const handler = async (event: ApiGatewayEvent) => {
             file_type: submissionData.file_type.toUpperCase(),
             is_approved: false,
             votes: 0,
-            image_url: '', // Will be updated after image upload
             timestamp: timestamp,
             type: 'ART'
         };

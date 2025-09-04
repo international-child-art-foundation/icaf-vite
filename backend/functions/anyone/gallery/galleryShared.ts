@@ -50,7 +50,6 @@ function formatArtworkEntity(item: any): ArtworkEntity {
         file_type: item.file_type,
         is_approved: item.is_approved || false,
         votes: item.votes || 0,
-        image_url: item.image_url,
         timestamp: item.timestamp,
         type: 'ART' as const
     };

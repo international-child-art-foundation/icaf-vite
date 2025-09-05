@@ -1236,6 +1236,18 @@ export class TestEventGenerator {
             httpMethod: 'GET'
         };
     }
+
+    /**
+     * Generate PATCH event with body and path parameters
+     */
+    static createPatchEvent(userId: string, body: any, pathParams: any = {}, userInfo: any = {}): any {
+        return {
+            ...this.createAuthEvent(userId, userInfo),
+            body: JSON.stringify(body),
+            pathParameters: pathParams,
+            httpMethod: 'PATCH'
+        };
+    }
 }
 
 /**
@@ -1264,6 +1276,14 @@ export const PresetEvents = {
     createGetEvent: (presetUserKey: keyof typeof PRESET_TEST_DATA.users, queryParams: any = {}, userInfo: any = {}) => {
         const userId = PRESET_TEST_DATA.users[presetUserKey];
         return TestEventGenerator.createGetEvent(userId, queryParams, userInfo);
+    },
+
+    /**
+     * Create PATCH event using preset user
+     */
+    createPatchEvent: (presetUserKey: keyof typeof PRESET_TEST_DATA.users, body: any, pathParams: any = {}, userInfo: any = {}) => {
+        const userId = PRESET_TEST_DATA.users[presetUserKey];
+        return TestEventGenerator.createPatchEvent(userId, body, pathParams, userInfo);
     },
 
     // Backward compatibility - simplified method names

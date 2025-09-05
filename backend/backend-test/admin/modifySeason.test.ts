@@ -54,10 +54,9 @@ describe('modifySeason test', () => {
         });
 
         it('should return 403 when user is not admin', async () => {
-            const event = PresetEvents.createPostEvent('ADULT_USER', {
-                season_id: 'test_season',
+            const event = PresetEvents.createPatchEvent('ADULT_USER', {
                 start_date: '2024-03-01T00:00:00Z'
-            });
+            }, { id: 'test_season' });
 
             const response = await handler(event);
 
@@ -77,10 +76,9 @@ describe('modifySeason test', () => {
                 is_active: true
             });
 
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: 'test_season',
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 start_date: '2024-03-01T00:00:00Z'
-            });
+            }, { id: 'test_season' });
 
             const response = await handler(event);
 
@@ -94,7 +92,7 @@ describe('modifySeason test', () => {
     describe('Request Validation', () => {
         it('should return 400 when request body is missing', async () => {
             const event = {
-                ...PresetEvents.createPostEvent('ADMIN_USER', {}),
+                ...PresetEvents.createPatchEvent('ADMIN_USER', {}, { id: 'test_season' }),
                 body: null
             };
 
@@ -103,33 +101,30 @@ describe('modifySeason test', () => {
             expect(response.statusCode).toBe(400); // Request body is required
         });
 
-        it('should return 400 when season_id is missing', async () => {
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
+        it('should return 400 when season_id is missing from path', async () => {
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 start_date: '2024-03-01T00:00:00Z'
-            });
+            }, {}); // No id in path parameters
 
             const response = await handler(event);
 
             expect(response.statusCode).toBe(400);
-            expect(response.body).toContain('season_id is required');
+            expect(response.body).toContain('Season ID is required in path');
         });
 
-        it('should return 400 when season_id is empty', async () => {
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: '',
+        it('should return 400 when season_id is empty in path', async () => {
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 start_date: '2024-03-01T00:00:00Z'
-            });
+            }, { id: '' }); // Empty id in path parameters
 
             const response = await handler(event);
 
             expect(response.statusCode).toBe(400);
-            expect(response.body).toContain('season_id is required');
+            expect(response.body).toContain('Season ID is required in path');
         });
 
         it('should return 400 when no fields are provided for modification', async () => {
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: 'test_season'
-            });
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {}, { id: 'test_season' });
 
             const response = await handler(event);
 
@@ -138,10 +133,9 @@ describe('modifySeason test', () => {
         });
 
         it('should return 400 when start_date is invalid', async () => {
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: 'test_season',
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 start_date: 'invalid-date'
-            });
+            }, { id: 'test_season' });
 
             const response = await handler(event);
 
@@ -150,10 +144,9 @@ describe('modifySeason test', () => {
         });
 
         it('should return 400 when end_date is invalid', async () => {
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: 'test_season',
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 end_date: 'invalid-date'
-            });
+            }, { id: 'test_season' });
 
             const response = await handler(event);
 
@@ -162,11 +155,10 @@ describe('modifySeason test', () => {
         });
 
         it('should return 400 when end_date is before start_date', async () => {
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: 'test_season',
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 start_date: '2024-03-01T00:00:00Z',
                 end_date: '2024-02-01T00:00:00Z'
-            });
+            }, { id: 'test_season' });
 
             const response = await handler(event);
 
@@ -175,10 +167,9 @@ describe('modifySeason test', () => {
         });
 
         it('should return 400 when startSilently is not boolean', async () => {
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: 'test_season',
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 startSilently: 'not-boolean'
-            });
+            }, { id: 'test_season' });
 
             const response = await handler(event);
 
@@ -187,10 +178,9 @@ describe('modifySeason test', () => {
         });
 
         it('should return 400 when endSilently is not boolean', async () => {
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: 'test_season',
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 endSilently: 'not-boolean'
-            });
+            }, { id: 'test_season' });
 
             const response = await handler(event);
 
@@ -201,10 +191,9 @@ describe('modifySeason test', () => {
 
     describe('Season Existence', () => {
         it('should return 404 when season does not exist', async () => {
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: 'nonexistent_season',
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 start_date: '2024-03-01T00:00:00Z'
-            });
+            }, { id: 'nonexistent_season' });
 
             const response = await handler(event);
 
@@ -225,10 +214,9 @@ describe('modifySeason test', () => {
                 is_active: true
             });
 
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: 'existing_season',
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 start_date: '2024-03-01T00:00:00Z'
-            });
+            }, { id: 'existing_season' });
 
             const response = await handler(event);
 
@@ -267,10 +255,9 @@ describe('modifySeason test', () => {
         });
 
         it('should successfully modify start_date and return 200', async () => {
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: testSeasonId,
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 start_date: '2024-03-01T00:00:00Z'
-            });
+            }, { id: testSeasonId });
 
             const response = await handler(event);
 
@@ -295,10 +282,9 @@ describe('modifySeason test', () => {
         });
 
         it('should successfully modify end_date and return 200', async () => {
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: testSeasonId,
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 end_date: '2024-06-30T23:59:59Z'
-            });
+            }, { id: testSeasonId });
 
             const response = await handler(event);
 
@@ -316,11 +302,10 @@ describe('modifySeason test', () => {
         });
 
         it('should successfully modify both dates and return 200', async () => {
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: testSeasonId,
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 start_date: '2024-03-01T00:00:00Z',
                 end_date: '2024-06-30T23:59:59Z'
-            });
+            }, { id: testSeasonId });
 
             const response = await handler(event);
 
@@ -339,11 +324,10 @@ describe('modifySeason test', () => {
         });
 
         it('should successfully modify boolean flags and return 200', async () => {
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: testSeasonId,
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 startSilently: true,
                 endSilently: false
-            });
+            }, { id: testSeasonId });
 
             const response = await handler(event);
 
@@ -362,13 +346,12 @@ describe('modifySeason test', () => {
         });
 
         it('should successfully modify all fields and return 200', async () => {
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: testSeasonId,
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 start_date: '2024-03-01T00:00:00Z',
                 end_date: '2024-06-30T23:59:59Z',
                 startSilently: true,
                 endSilently: false
-            });
+            }, { id: testSeasonId });
 
             const response = await handler(event);
 
@@ -414,10 +397,9 @@ describe('modifySeason test', () => {
             // Mock Lambda error response
             mockLambdaInvoke.mockRejectedValue(new Error('Lambda service unavailable'));
 
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: errorTestSeasonId,
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 start_date: '2024-03-01T00:00:00Z'
-            });
+            }, { id: errorTestSeasonId });
 
             const response = await handler(event);
 
@@ -435,10 +417,9 @@ describe('modifySeason test', () => {
                 }))
             });
 
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: errorTestSeasonId,
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 start_date: '2024-03-01T00:00:00Z'
-            });
+            }, { id: errorTestSeasonId });
 
             const response = await handler(event);
 
@@ -466,11 +447,10 @@ describe('modifySeason test', () => {
         });
 
         it('should reject when end_date equals start_date', async () => {
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: edgeCaseSeasonId,
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 start_date: '2024-03-01T00:00:00Z',
                 end_date: '2024-03-01T00:00:00Z'
-            });
+            }, { id: edgeCaseSeasonId });
 
             const response = await handler(event);
 
@@ -488,11 +468,10 @@ describe('modifySeason test', () => {
                 }))
             });
 
-            const event = PresetEvents.createPostEvent('ADMIN_USER', {
-                season_id: edgeCaseSeasonId,
+            const event = PresetEvents.createPatchEvent('ADMIN_USER', {
                 startSilently: false,
                 endSilently: false
-            });
+            }, { id: edgeCaseSeasonId });
 
             const response = await handler(event);
 

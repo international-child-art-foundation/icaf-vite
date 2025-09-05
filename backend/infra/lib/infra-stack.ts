@@ -219,6 +219,42 @@ export class InfraStack extends Stack {
       },
     });
 
+    // Admin functions
+    const createSeasonFn = new NodejsFunction(this, "CreateSeasonFn", {
+      entry: "../functions/admin/createSeason.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(30),
+      memorySize: 512,
+      environment: {
+        TABLE_NAME: icafTable.tableName,
+        SEASON_MANAGER_FUNCTION_NAME: "SeasonManager",
+      },
+    });
+
+    const modifySeasonFn = new NodejsFunction(this, "ModifySeasonFn", {
+      entry: "../functions/admin/modifySeason.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(30),
+      memorySize: 512,
+      environment: {
+        TABLE_NAME: icafTable.tableName,
+        SEASON_MANAGER_FUNCTION_NAME: "SeasonManager",
+      },
+    });
+
+    const getSeasonFn = new NodejsFunction(this, "GetSeasonFn", {
+      entry: "../functions/admin/getSeason.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(10),
+      memorySize: 256,
+      environment: {
+        TABLE_NAME: icafTable.tableName,
+      },
+    });
+
     // 5️⃣  Grant Lambda permissions to access DynamoDB and S3
     icafTable.grantReadWriteData(helloFn);
     icafTable.grantReadWriteData(userFn);
@@ -230,10 +266,28 @@ export class InfraStack extends Stack {
     icafTable.grantReadData(galleryArtworksFn); // Only read access needed for gallery queries
     icafTable.grantReadData(gallerySeasonsFn); // Only read access needed for gallery seasons queries
 
+    // Admin functions permissions
+    icafTable.grantReadWriteData(createSeasonFn);
+    icafTable.grantReadWriteData(modifySeasonFn);
+    icafTable.grantReadData(getSeasonFn); // Only read access needed for getting season
+
     // Grant S3 permissions to functions
     artworkBucket.grantReadWrite(deleteAccountFn);
     artworkBucket.grantReadWrite(cleanupQueueProcessorFn);
     artworkBucket.grantReadWrite(submitArtworkFn);
+
+    // Grant Lambda invoke permissions for admin functions
+    createSeasonFn.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ["lambda:InvokeFunction"],
+      resources: ["arn:aws:lambda:*:*:function:SeasonManager"],
+    }));
+
+    modifySeasonFn.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ["lambda:InvokeFunction"],
+      resources: ["arn:aws:lambda:*:*:function:SeasonManager"],
+    }));
 
     // Note: Lambda invoke permissions for processImage will be added when that function is implemented
 
@@ -295,9 +349,34 @@ export class InfraStack extends Stack {
     sortTypeResource.addMethod("GET", new apigw.LambdaIntegration(galleryArtworksFn));
 
     // Public gallery seasons endpoints (no authentication required)
-    const seasonsResource = galleryResource.addResource("seasons");
-    const seasonResource = seasonsResource.addResource("{season}");
-    const seasonArtworksResource = seasonResource.addResource("artworks");
+    const gallerySeasonsResource = galleryResource.addResource("seasons");
+    const gallerySeasonResource = gallerySeasonsResource.addResource("{season}");
+    const seasonArtworksResource = gallerySeasonResource.addResource("artworks");
     seasonArtworksResource.addMethod("GET", new apigw.LambdaIntegration(gallerySeasonsFn));
+
+    // Admin endpoints (require authentication and admin role)
+    const adminResource = apiResource.addResource("admin");
+    const adminSeasonsResource = adminResource.addResource("seasons");
+
+    // Create season endpoint
+    adminSeasonsResource.addMethod("POST", new apigw.LambdaIntegration(createSeasonFn), {
+      authorizer: cognitoAuthorizer,
+      authorizationType: apigw.AuthorizationType.COGNITO,
+    });
+
+    // Season-specific endpoints
+    const adminSeasonResource = adminSeasonsResource.addResource("{id}");
+
+    // Get season endpoint
+    adminSeasonResource.addMethod("GET", new apigw.LambdaIntegration(getSeasonFn), {
+      authorizer: cognitoAuthorizer,
+      authorizationType: apigw.AuthorizationType.COGNITO,
+    });
+
+    // Modify season endpoint (PATCH for partial updates)
+    adminSeasonResource.addMethod("PATCH", new apigw.LambdaIntegration(modifySeasonFn), {
+      authorizer: cognitoAuthorizer,
+      authorizationType: apigw.AuthorizationType.COGNITO,
+    });
   }
 }

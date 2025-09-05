@@ -107,6 +107,22 @@ export interface CreateSeasonResponse {
     };
 }
 
+// Request interface for modifying season dates
+export interface ModifySeasonRequest {
+    season_id: string;
+    start_date?: string;
+    end_date?: string;
+    startSilently?: boolean;
+    endSilently?: boolean;
+}
+
+// Response interface for season modification
+export interface ModifySeasonResponse {
+    message: string;
+    season_id: string;
+    updated_fields: string[];
+}
+
 // Validation helper for query parameters
 export function validateListSeasonParams(params: any): string[] {
     const errors: string[] = [];
@@ -116,6 +132,73 @@ export function validateListSeasonParams(params: any): string[] {
     }
 
     return errors;
+}
+
+// Validation function for modify season request
+export function validateModifySeasonRequest(data: ModifySeasonRequest): string[] {
+    const errors: string[] = [];
+
+    validateModifySeasonId(data, errors);
+    validateModifySeasonDates(data, errors);
+    validateModifySeasonBooleans(data, errors);
+    validateModifySeasonFields(data, errors);
+
+    return errors;
+}
+
+function validateModifySeasonId(data: ModifySeasonRequest, errors: string[]): void {
+    if (!data.season_id || typeof data.season_id !== 'string' || data.season_id.trim().length === 0) {
+        errors.push('season_id is required and must be a non-empty string');
+    }
+}
+
+function validateModifySeasonDates(data: ModifySeasonRequest, errors: string[]): void {
+    if (data.start_date !== undefined) {
+        if (typeof data.start_date !== 'string') {
+            errors.push('start_date must be a string if provided');
+        } else {
+            const startDate = new Date(data.start_date);
+            if (isNaN(startDate.getTime())) {
+                errors.push('start_date must be a valid date string if provided');
+            }
+        }
+    }
+
+    if (data.end_date !== undefined) {
+        if (typeof data.end_date !== 'string') {
+            errors.push('end_date must be a string if provided');
+        } else {
+            const endDate = new Date(data.end_date);
+            if (isNaN(endDate.getTime())) {
+                errors.push('end_date must be a valid date string if provided');
+            }
+        }
+    }
+
+    // Validate date logic if both dates are provided
+    if (data.start_date && data.end_date) {
+        const startDate = new Date(data.start_date);
+        const endDate = new Date(data.end_date);
+        if (endDate <= startDate) {
+            errors.push('end_date must be after start_date');
+        }
+    }
+}
+
+function validateModifySeasonBooleans(data: ModifySeasonRequest, errors: string[]): void {
+    if (data.startSilently !== undefined && typeof data.startSilently !== 'boolean') {
+        errors.push('startSilently must be a boolean if provided');
+    }
+
+    if (data.endSilently !== undefined && typeof data.endSilently !== 'boolean') {
+        errors.push('endSilently must be a boolean if provided');
+    }
+}
+
+function validateModifySeasonFields(data: ModifySeasonRequest, errors: string[]): void {
+    if (!data.start_date && !data.end_date && data.startSilently === undefined && data.endSilently === undefined) {
+        errors.push('At least one field (start_date, end_date, startSilently, or endSilently) must be provided for modification');
+    }
 }
 
 // Validation helper for create season request

@@ -255,6 +255,17 @@ export class InfraStack extends Stack {
       },
     });
 
+    const alterUserRoleFn = new NodejsFunction(this, "AlterUserRoleFn", {
+      entry: "../functions/admin/alterUserRole.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(15),
+      memorySize: 512,
+      environment: {
+        TABLE_NAME: icafTable.tableName,
+      },
+    });
+
     // 5️⃣  Grant Lambda permissions to access DynamoDB and S3
     icafTable.grantReadWriteData(helloFn);
     icafTable.grantReadWriteData(userFn);
@@ -270,6 +281,7 @@ export class InfraStack extends Stack {
     icafTable.grantReadWriteData(createSeasonFn);
     icafTable.grantReadWriteData(modifySeasonFn);
     icafTable.grantReadData(getSeasonFn); // Only read access needed for getting season
+    icafTable.grantReadWriteData(alterUserRoleFn); // Read and write access for user role updates
 
     // Grant S3 permissions to functions
     artworkBucket.grantReadWrite(deleteAccountFn);
@@ -375,6 +387,16 @@ export class InfraStack extends Stack {
 
     // Modify season endpoint (PATCH for partial updates)
     adminSeasonResource.addMethod("PATCH", new apigw.LambdaIntegration(modifySeasonFn), {
+      authorizer: cognitoAuthorizer,
+      authorizationType: apigw.AuthorizationType.COGNITO,
+    });
+
+    // Admin user management endpoints
+    const adminUsersResource = adminResource.addResource("users");
+    const adminUserResource = adminUsersResource.addResource("{id}");
+
+    // Alter user role endpoint (PATCH for partial updates)
+    adminUserResource.addMethod("PATCH", new apigw.LambdaIntegration(alterUserRoleFn), {
       authorizer: cognitoAuthorizer,
       authorizationType: apigw.AuthorizationType.COGNITO,
     });

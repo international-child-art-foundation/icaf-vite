@@ -83,11 +83,63 @@ export function getMaxConstituentsPerSeason(userType: UserType): number {
     switch (userType) {
         case 'admin':
         case 'contributor':
-        case 'guardian':
             return -1; // Unlimited
+        case 'guardian':
+            return 50; // Limited to 50 constituents
         case 'user':
-            return 1; // Can submit for themselves
+            return 0; // Cannot submit for others
         default:
             return 0;
     }
+}
+
+// Request interface for altering user role (legacy - with user_id in body)
+export interface AlterUserRoleRequest {
+    user_id: string;
+    new_role: Role;
+}
+
+// Request interface for altering user role (RESTful - user_id in path)
+export interface AlterUserRoleBodyRequest {
+    new_role: Role;
+}
+
+// Response interface for altering user role
+export interface AlterUserRoleResponse {
+    message: string;
+    user_id: string;
+    old_role: Role;
+    new_role: Role;
+    max_constituents_per_season: number; // 0 if user, 50 if guardian, -1 if contributor/admin
+    updated_fields: string[];
+}
+
+// Validation function for alter user role request (legacy)
+export function validateAlterUserRoleRequest(data: any): string[] {
+    const errors: string[] = [];
+    
+    if (!data.user_id || typeof data.user_id !== 'string') {
+        errors.push('user_id is required and must be a string');
+    }
+    
+    if (!data.new_role || typeof data.new_role !== 'string') {
+        errors.push('new_role is required and must be a string');
+    } else if (!ROLES.includes(data.new_role)) {
+        errors.push(`new_role must be one of: ${ROLES.join(', ')}`);
+    }
+    
+    return errors;
+}
+
+// Validation function for alter user role body request (RESTful)
+export function validateAlterUserRoleBodyRequest(data: any): string[] {
+    const errors: string[] = [];
+    
+    if (!data.new_role || typeof data.new_role !== 'string') {
+        errors.push('new_role is required and must be a string');
+    } else if (!ROLES.includes(data.new_role)) {
+        errors.push(`new_role must be one of: ${ROLES.join(', ')}`);
+    }
+    
+    return errors;
 } 

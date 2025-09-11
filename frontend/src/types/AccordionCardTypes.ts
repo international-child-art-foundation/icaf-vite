@@ -14,7 +14,7 @@ export type ExtendedDescription = string | Block[];
 export interface IAccordionCard {
   id: string;
   title: string;
-  icon: string;
+  icon: React.ComponentType<{ colorClass: string }>;
   shortDescription?: string;
   extendedDescription: string | ExtendedDescription;
   color: ColorKey;

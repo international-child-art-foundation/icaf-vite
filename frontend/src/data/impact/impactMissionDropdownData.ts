@@ -1,16 +1,16 @@
 import { IAccordionCard } from '@/types/AccordionCardTypes';
-import HelpingHand from '@/assets/impact/HelpingHand.svg';
-import Education from '@/assets/impact/Education.svg';
-import Inequities from '@/assets/impact/Inequities.svg';
-import Health from '@/assets/impact/Health.svg';
-import GenderEquality from '@/assets/impact/GenderEquality.svg';
-import Peace from '@/assets/impact/Peace.svg';
+import { HelpingHandIcon } from '@/assets/shared/icons/HelpingHandIcon';
+import { EducationIcon } from '@/assets/shared/icons/EducationIcon';
+import { InequitiesIcon } from '@/assets/shared/icons/InequitiesIcon';
+import { HealthIcon } from '@/assets/shared/icons/HealthIcon';
+import { GenderEqualityIcon } from '@/assets/shared/icons/GenderEqualityIcon';
+import { PeaceIcon } from '@/assets/shared/icons/PeaceIcon';
 
 const MissionDropdownData: IAccordionCard[] = [
   {
     id: 'reducing-poverty',
     title: 'Reducing Poverty',
-    icon: HelpingHand,
+    icon: HelpingHandIcon,
     color: 'red',
     extendedDescription:
       'We encourage creativity and innovation among children, which can lead to future opportunities in the creative industries. By nurturing their talents, the foundation helps children develop skills that can contribute to economic growth and reduce poverty.',
@@ -18,7 +18,7 @@ const MissionDropdownData: IAccordionCard[] = [
   {
     id: 'providing-quality-education',
     title: 'Providing Quality Education',
-    icon: Education,
+    icon: EducationIcon,
     color: 'yellow',
     extendedDescription:
       'We offer art programs that complement traditional education, promoting creativity, critical thinking, and emotional intelligence. These programs provide quality educational experiences that empower children to think beyond conventional learning.',
@@ -26,7 +26,7 @@ const MissionDropdownData: IAccordionCard[] = [
   {
     id: 'reducing-inequities',
     title: 'Reducing Inequities',
-    icon: Inequities,
+    icon: InequitiesIcon,
     color: 'purple',
     extendedDescription:
       'Our global reach ensures that children from diverse backgrounds, including those in underserved communities, have access to art education and creative opportunities. This helps bridge the gap between different socioeconomic groups and promotes inclusivity.',
@@ -34,7 +34,7 @@ const MissionDropdownData: IAccordionCard[] = [
   {
     id: 'promoting-good-health',
     title: 'Promoting Good Health',
-    icon: Health,
+    icon: HealthIcon,
     color: 'blue',
     extendedDescription:
       'ICAF recognizes the therapeutic benefits of art in promoting mental and emotional well-being. By engaging children in creative activities, the foundation contributes to their overall health, helping them express emotions, reduce stress, and build resilience.',
@@ -42,7 +42,7 @@ const MissionDropdownData: IAccordionCard[] = [
   {
     id: 'ensuring-gender-equality',
     title: 'Ensuring Gender Equality',
-    icon: GenderEquality,
+    icon: GenderEqualityIcon,
     color: 'green',
     extendedDescription:
       'We promote equal participation of boys and girls in its programs, ensuring that all children, regardless of gender, have equal opportunities to develop their artistic talents and express their creativity.',
@@ -50,7 +50,7 @@ const MissionDropdownData: IAccordionCard[] = [
   {
     id: 'building-peace',
     title: 'Building Peace',
-    icon: Peace,
+    icon: PeaceIcon,
     color: 'red',
     extendedDescription:
       'Through global art exhibitions and collaborations, we foster cross-cultural understanding and dialogue among children. By encouraging them to create art that reflects their experiences and aspirations, the foundation helps build a culture of peace and tolerance from a young age.',

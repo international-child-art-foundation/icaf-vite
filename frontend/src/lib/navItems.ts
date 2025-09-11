@@ -97,7 +97,7 @@ export const navItems: NavItem[] = [
       },
       {
         label: "World Children's Festival",
-        href: '/programs/outreach',
+        href: '/programs/worldchildrensfestival',
         imageSrc: world,
         alt: "World Children's Festival",
         hoverDescription: '',

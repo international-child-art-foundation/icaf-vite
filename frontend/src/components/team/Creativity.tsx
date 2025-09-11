@@ -10,7 +10,7 @@ export const Creativity = () => {
         </p>
         <div className="xl:grid xl:grid-cols-2 xl:grid-rows-1">
           <ClippedBanner height={445}>
-            <div className="flex h-full bg-[#2057CC]/10">
+            <div className="flex h-full bg-[#2057CC]/10 p-2">
               <div className="mx-auto flex max-w-[400px] flex-col justify-center gap-4 text-center">
                 <p className="font-montserrat text-[22px] font-semibold">
                   Our team is united by a passion for empowering children
@@ -25,12 +25,10 @@ export const Creativity = () => {
             </div>
           </ClippedBanner>
           <ClippedBanner height={445}>
-            <div className="h-full w-full">
-              <img
-                className="h-full w-full object-cover object-[50%_25%]"
-                src={Hand}
-              />
-            </div>
+            <div
+              className="h-full w-full bg-cover bg-[50%_50%]"
+              style={{ backgroundImage: `url(${Hand})` }}
+            />
           </ClippedBanner>
         </div>
       </div>

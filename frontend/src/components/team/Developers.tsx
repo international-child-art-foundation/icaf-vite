@@ -70,7 +70,7 @@ export const DevelopersLarge = () => {
     <div className="relative flex flex-col gap-4">
       <div className="grid grid-cols-1 grid-rows-1">
         <div className="relative z-10 col-start-1 row-start-1 content-center p-4 py-12">
-          <div className="bg-background relative grid h-[485px] grid-cols-2 overflow-hidden rounded-[40px] shadow-[0px_4px_17px_0px_rgba(21,20,20,0.1)]">
+          <div className="bg-background relative grid min-h-[485px] grid-cols-2 overflow-hidden rounded-[40px] shadow-[0px_4px_17px_0px_rgba(21,20,20,0.1)]">
             <div className="relative grid max-h-full grid-cols-1 grid-rows-1 overflow-hidden">
               <img
                 src={DevelopersImage}
@@ -78,7 +78,7 @@ export const DevelopersLarge = () => {
               />
             </div>
 
-            <div className="relative flex max-h-full flex-col items-center justify-center gap-4 px-4 sm:px-8 md:px-16 lg:px-20 xl:px-32">
+            <div className="relative flex max-h-full flex-col items-center justify-center gap-4 px-4 py-12 sm:px-8 md:px-16 lg:px-20 xl:px-32">
               <img src={Spaceship} className="h-[70px] w-[70px]" />
               <div className="flex flex-col gap-2 text-center">
                 <div className="text-primary text-[22px] font-bold">

@@ -19,6 +19,7 @@ export default function VerticalTimeline({ items }: verticalTimelineProps) {
                 color={item.color}
                 day={item.day}
                 lineDescription={item.lineDescription}
+                alignDirection={item.alignDirectionMobile}
               />
             </div>
 
@@ -34,59 +35,89 @@ export default function VerticalTimeline({ items }: verticalTimelineProps) {
       </div>
 
       {/***Tablet + Desktop Vertical Timeline Version***/}
-      <div className="mx-4 hidden h-[1200px] grid-cols-3 md:grid">
-        {/* Diamond on timeline */}
-        {items.map((item) => (
-          <React.Fragment key={item.day}>
-            {(item.day === 'Day 1' || item.day === 'Day 3') && (
-              <>
-                {/*Spacer Div*/}
-                <div />
+      <div className="relative mx-12 mt-8 hidden h-[720px] md:block">
+        {items.map((item) => {
+          return (
+            <div key={item.day} className="relative mb-20 flex justify-center">
+              {/* Timeline line and diamond */}
+              <DiamondShape
+                color={item.color}
+                day={item.day}
+                lineDescription={item.lineDescriptionDesktop}
+                alignDirection={item.alignDirectionDesktop}
+              />
 
-                <div className="relative flex items-start justify-center">
-                  <DiamondShape
-                    color={item.color}
-                    day={item.day}
-                    lineDescription={item.lineDescription}
-                    isOddDay={item.isOddDay}
-                  />
-                </div>
-
-                {/* Day Content  */}
-                <div className="pt-20">
-                  <h3 className="font-montserrat text-2xl font-extrabold">
-                    {item.title}
-                  </h3>
-                  <p className="text-xl font-light">{item.paragraph}</p>
-                </div>
-              </>
-            )}
-
-            {(item.day === 'Day 2' || item.day === 'Day 4') && (
-              <>
-                {/* Day Content  */}
-                <div className="pt-20">
-                  <h3 className="font-montserrat text-2xl font-extrabold">
-                    {item.title}
-                  </h3>
-                  <p className="text-xl font-light">{item.paragraph}</p>
-                </div>
-
-                <div className="relative flex items-start justify-center">
-                  <DiamondShape
-                    color={item.color}
-                    day={item.day}
-                    lineDescription={item.lineDescription}
-                    isOddDay={item.isOddDay}
-                  />
-                </div>
-                {/*Spacer Div*/}
-                <div />
-              </>
-            )}
-          </React.Fragment>
-        ))}
+              {/* Content */}
+              <div
+                className={`absolute top-20 ${
+                  item.alignDirectionDesktop === 'left'
+                    ? 'right-[61%] lg:right-[58%]'
+                    : 'left-[61%] lg:left-[58%]'
+                }`}
+              >
+                <h3 className="font-montserrat text-2xl font-extrabold">
+                  {item.title}
+                </h3>
+                <p className="text-xl font-light">{item.paragraph}</p>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </>
   );
 }
+
+// {/* <div className="mx-4 mt-8 hidden h-[1000px] grid-cols-3 md:mx-12 md:grid">
+//   {/* Diamond on timeline */}
+//   {items.map((item) => (
+//     <React.Fragment key={item.day}>
+//       {(item.day === 'Day 1' || item.day === 'Day 3') && (
+//         <>
+//           {/*Spacer Div*/}
+//           <div />
+
+//           <div className="relative flex items-start justify-center">
+//             <DiamondShape
+//               color={item.color}
+//               day={item.day}
+//               lineDescription={item.lineDescriptionDesktop}
+//               alignDirection={item.alignDirectionDesktop}
+//             />
+//           </div>
+
+//           {/* Day Content  */}
+//           <div className="pt-20">
+//             <h3 className="font-montserrat text-2xl font-extrabold">
+//               {item.title}
+//             </h3>
+//             <p className="text-xl font-light">{item.paragraph}</p>
+//           </div>
+//         </>
+//       )}
+
+//       {(item.day === 'Day 2' || item.day === 'Day 4') && (
+//         <>
+//           {/* Day Content  */}
+//           <div className="pt-20">
+//             <h3 className="font-montserrat text-2xl font-extrabold">
+//               {item.title}
+//             </h3>
+//             <p className="text-xl font-light">{item.paragraph}</p>
+//           </div>
+
+//           <div className="relative flex items-start justify-center">
+//             <DiamondShape
+//               color={item.color}
+//               day={item.day}
+//               lineDescription={item.lineDescriptionDesktop}
+//               alignDirection={item.alignDirectionDesktop}
+//             />
+//           </div>
+//           {/*Spacer Div*/}
+//           <div />
+//         </>
+//       )}
+//     </React.Fragment>
+//   ))}
+// </div>; */}

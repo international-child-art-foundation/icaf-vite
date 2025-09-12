@@ -2,16 +2,15 @@ interface DiamondShapeProps {
   color: string;
   day: string;
   lineDescription: string;
-  isOddDay: string;
+  alignDirection: string;
 }
 
 export const DiamondShape = ({
   color,
   day,
   lineDescription,
-  isOddDay,
+  alignDirection,
 }: DiamondShapeProps) => {
-  console.log(isOddDay);
   return (
     <div className="relative flex justify-center">
       <svg
@@ -29,7 +28,7 @@ export const DiamondShape = ({
       </svg>
       <div className={`bg-primary absolute ${lineDescription} w-1`} />
       {/* Red Dotted Line + Pill */}
-      {isOddDay === 'true' ? (
+      {alignDirection === 'right' ? (
         <div className={`absolute left-10 top-3 flex items-center gap-2`}>
           <div className="h-px w-12 border-t-2 border-dashed border-[#DA1E40]" />
           <div className="w-[100px] rounded-full bg-[#DA1E40] px-4 py-2 text-center text-lg font-semibold text-white">

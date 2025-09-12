@@ -49,7 +49,7 @@ export default function WCFHeader() {
         <figcaption className="sr-only">
           World Children's Festival hero image
         </figcaption>
-        <div className="absolute inset-0 top-8 mx-4 w-[85%] text-white sm:w-[70%] md:top-10 lg:top-16 lg:w-[65%] xl:mx-8">
+        <div className="absolute inset-0 top-8 mx-4 w-[85%] text-white sm:w-[70%] md:top-10 md:mx-8 lg:top-16 lg:w-[65%] xl:mx-8">
           <h1 className="font-montserrat text-3xl font-extrabold lg:text-[40px] xl:text-[60px]">
             World Children's Festival
           </h1>

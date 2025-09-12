@@ -4,6 +4,9 @@ export interface TimeLineItem {
   paragraph: string;
   color: ColorKey;
   lineDescription: string;
-  isOddDay: string;
+  lineDescriptionDesktop: string;
+  alignDirectionMobile: DirectionKey;
+  alignDirectionDesktop: DirectionKey;
 }
 type ColorKey = '#DA1E40' | '#2057CC';
+type DirectionKey = 'right' | 'left';

@@ -9,7 +9,9 @@ const VerticalTimelineData: TimeLineItem[] = [
       'Dive into activities focusing on our planet and children’s well-being.',
     color: '#DA1E40',
     lineDescription: 'top-5 h-[300px]',
-    isOddDay: 'true',
+    lineDescriptionDesktop: 'top-5 h-[200px]',
+    alignDirectionMobile: 'right',
+    alignDirectionDesktop: 'right',
   },
   {
     day: 'Day 2',
@@ -18,7 +20,9 @@ const VerticalTimelineData: TimeLineItem[] = [
       'Unleash your imagination with innovative art projects and inspiring performances.',
     color: '#2057CC',
     lineDescription: 'h-[350px]',
-    isOddDay: 'false',
+    lineDescriptionDesktop: 'h-[200px]',
+    alignDirectionMobile: 'right',
+    alignDirectionDesktop: 'left',
   },
   {
     day: 'Day 3',
@@ -26,8 +30,10 @@ const VerticalTimelineData: TimeLineItem[] = [
     paragraph:
       'Dive into activities focusing on our planet and children’s well-being.',
     color: '#DA1E40',
-    lineDescription: 'h-[300px]',
-    isOddDay: 'true',
+    lineDescription: 'h-[320px]',
+    lineDescriptionDesktop: 'h-[200px]',
+    alignDirectionMobile: 'right',
+    alignDirectionDesktop: 'right',
   },
   {
     day: 'Day 4',
@@ -35,8 +41,10 @@ const VerticalTimelineData: TimeLineItem[] = [
     paragraph:
       'Celebrate the achievements of young artists before they return home with a life-changing experience.',
     color: '#2057CC',
-    lineDescription: ' ',
-    isOddDay: 'false',
+    lineDescription: '',
+    lineDescriptionDesktop: '',
+    alignDirectionMobile: 'right',
+    alignDirectionDesktop: 'left',
   },
 ];
 

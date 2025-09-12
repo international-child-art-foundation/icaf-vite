@@ -3,10 +3,10 @@ import WCFHeader from '@/components/worldChildrensFestival/WCFHeader';
 
 export default function WorldChildrensFestival() {
   return (
-    <section className="">
+    <div className="">
       <WCFHeader />
       <FestivalHighlights />
       <div className=""></div>
-    </section>
+    </div>
   );
 }

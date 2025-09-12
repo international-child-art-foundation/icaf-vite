@@ -19,7 +19,7 @@ const AccordionCard = ({ data }: MissionDropdownProps) => {
       onClick={() => setOpen((prev) => !prev)}
     >
       <div className="grid-col grid h-full flex-col justify-items-center gap-2">
-        <data.icon colorClass={iconColor} />
+        <data.Icon colorClass={iconColor} />
         <div className="min-h-[50px] content-center">
           <p className="text-center text-xl font-semibold">{data.title}</p>
         </div>

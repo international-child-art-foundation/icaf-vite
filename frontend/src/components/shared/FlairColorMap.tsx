@@ -29,5 +29,23 @@ export const FlairColorMap = {
     background: 'bg-secondary-green',
     icon: 'text-secondary-green',
   },
+  black: {
+    borderHover: 'hover:border-black',
+    border: 'border-black',
+    background: 'bg-black',
+    icon: 'text-black',
+  },
+  tertiaryBlue: {
+    borderHover: 'hover:border-tertiary-blue',
+    border: 'border-tertiary-blue',
+    background: 'bg-tertiary-blue',
+    icon: 'text-tertiary-blue',
+  },
+  tertiaryPurple: {
+    borderHover: 'hover:border-tertiary-purple',
+    border: 'border-tertiary-purple',
+    background: 'bg-tertiary-purple',
+    icon: 'text-tertiary-purple',
+  },
 } as const;
 export type ColorKey = keyof typeof FlairColorMap;

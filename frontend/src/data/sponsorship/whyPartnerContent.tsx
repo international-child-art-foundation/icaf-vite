@@ -3,6 +3,7 @@ import sponsorArt1 from '@/assets/sponsorship/SponsorArt1.webp';
 import sponsorArt2 from '@/assets/sponsorship/SponsorArt2.webp';
 import sponsorArt3 from '@/assets/sponsorship/SponsorArt3.webp';
 import { RoundedBorderImg } from '@/components/sponsorship/RoundedBorderImg';
+import { FiveCards } from '@/components/sponsorship/FiveCards';
 
 export const theoryOfChange: IContentCallout = {
   title: 'Theory of Change',
@@ -15,7 +16,7 @@ export const theoryOfChange: IContentCallout = {
   ),
   content: <RoundedBorderImg img={sponsorArt1} color="red" />,
   color: 'red',
-  textOnLeft: true,
+  textOnLeft: false,
 };
 
 export const outreach: IContentCallout = {
@@ -29,7 +30,7 @@ export const outreach: IContentCallout = {
   ),
   content: <RoundedBorderImg img={sponsorArt2} color="blue" />,
   color: 'blue',
-  textOnLeft: false,
+  textOnLeft: true,
 };
 
 export const whatWeDo: IContentCallout = {
@@ -62,18 +63,18 @@ export const whatWeDo: IContentCallout = {
   ),
   content: <RoundedBorderImg img={sponsorArt3} color="yellow" />,
   color: 'yellow',
-  textOnLeft: true,
+  textOnLeft: false,
 };
 
-// export const alignment: IContentCallout = {
-//   title: 'Alignment with UN Goals',
-//   description: (
-//     <p className="font-sans">
-//       ICAF’s programs and activities uniquely advance five of the United
-//       Nations' most important goals.
-//     </p>
-//   ),
-//   content: five icon thing,
-//   color: 'green',
-//   textOnLeft: false,
-// };
+export const alignment: IContentCallout = {
+  title: 'Alignment with UN Goals',
+  description: (
+    <p className="font-sans text-[20px]">
+      ICAF’s programs and activities uniquely advance five of the United
+      Nations' most important goals.
+    </p>
+  ),
+  content: <FiveCards />,
+  color: 'green',
+  textOnLeft: true,
+};

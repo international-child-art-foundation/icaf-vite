@@ -2,6 +2,7 @@ import {
   theoryOfChange,
   outreach,
   whatWeDo,
+  alignment,
 } from '@/data/sponsorship/whyPartnerContent';
 import { ContentCallout } from './ContentCallout';
 
@@ -21,8 +22,8 @@ export const WhyPartner = () => {
         <ContentCallout {...theoryOfChange} />
         <ContentCallout {...outreach} />
         <ContentCallout {...whatWeDo} />
+        <ContentCallout {...alignment} />
       </div>
-      {/* <ContentCallout {...alignment} /> */}
     </div>
   );
 };

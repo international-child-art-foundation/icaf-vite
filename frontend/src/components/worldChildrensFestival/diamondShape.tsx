@@ -30,7 +30,7 @@ export const DiamondShape = ({
       {/* Red Dotted Line + Pill */}
       {alignDirection === 'right' ? (
         <div className={`absolute left-10 top-3 flex items-center gap-2`}>
-          <div className="h-px w-12 border-t-2 border-dashed border-[#DA1E40]" />
+          <div className="h-px w-12 border-t-2 border-dashed border-[#DA1E40] xl:w-20 2xl:w-28" />
           <div className="w-[100px] rounded-full bg-[#DA1E40] px-4 py-2 text-center text-lg font-semibold text-white">
             {day}
           </div>
@@ -40,7 +40,7 @@ export const DiamondShape = ({
           <div className="w-[100px] rounded-full bg-[#DA1E40] px-4 py-2 text-center text-lg font-semibold text-white">
             {day}
           </div>
-          <div className="h-px w-12 border-t-2 border-dashed border-[#DA1E40]" />
+          <div className="h-px w-12 border-t-2 border-dashed border-[#DA1E40] xl:w-20 2xl:w-28" />
         </div>
       )}
     </div>

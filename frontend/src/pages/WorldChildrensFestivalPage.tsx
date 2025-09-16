@@ -8,7 +8,7 @@ export default function WorldChildrensFestival() {
       <WCFHeader />
       <FestivalHighlights />
       <OurLegacy />
-      <div className=""></div>
+      <div className="h-40 overflow-hidden">hey there next section</div>
     </div>
   );
 }

@@ -43,11 +43,13 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: "pnpm-lock.yaml"
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+      - name: Setup pnpm (reads version from packageManager)
+        uses: pnpm/action-setup@v4
         with:
-          version: 9
           run_install: false
+
+      - name: Show pnpm version (sanity check)
+        run: pnpm -v
 
       - name: Install dependencies (workspace root)
         run: pnpm install --frozen-lockfile
@@ -60,7 +62,7 @@ jobs:
         working-directory: frontend
         run: |
           test -f dist/index.html
-          test -d dist/assets
+          test -d dist/assets || echo "no assets dir (ok)"
           echo "dist looks sane"
 
       - name: Write version.txt

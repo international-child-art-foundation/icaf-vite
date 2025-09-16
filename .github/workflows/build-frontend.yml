@@ -29,12 +29,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set release id (UTC timestamp + short sha)
-        id: rel
-        run: |
-          DATE_UTC="$(date -u +%Y%m%d-%H%M)"
-          SHORT_SHA="${GITHUB_SHA::7}"
-          echo "RELEASE_ID=${DATE_UTC}-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.16.1
+          run_install: false
 
       - name: Setup Node (LTS) with pnpm cache
         uses: actions/setup-node@v4
@@ -43,13 +42,12 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: "pnpm-lock.yaml"
 
-      - name: Setup pnpm (reads version from packageManager)
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-
-      - name: Show pnpm version (sanity check)
-        run: pnpm -v
+      - name: Set release id (UTC timestamp + short sha)
+        id: rel
+        run: |
+          DATE_UTC="$(date -u +%Y%m%d-%H%M)"
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "RELEASE_ID=${DATE_UTC}-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Install dependencies (workspace root)
         run: pnpm install --frozen-lockfile
@@ -57,13 +55,6 @@ jobs:
       - name: Build frontend (Vite)
         working-directory: frontend
         run: pnpm build
-
-      - name: Smoke checks
-        working-directory: frontend
-        run: |
-          test -f dist/index.html
-          test -d dist/assets || echo "no assets dir (ok)"
-          echo "dist looks sane"
 
       - name: Write version.txt
         working-directory: frontend

@@ -15,14 +15,15 @@ export const pastFestivalsData: PastFestivalsData[] = [
     id: 1,
     title: 'Empathy for a Better World',
     paragraph:
-      'Featured creativity workshops, cultural performances, and leadership training',
+      'Featured creativity workshops, cultural performances, and leadership training.',
     color: '#EE2F4D',
     src: pastFestival_1,
   },
   {
     id: 2,
     title: 'Creativity, Diversity, & Unity',
-    paragraph: 'Global collaboration through interactive arts and storytelling',
+    paragraph:
+      'Global collaboration through interactive arts and storytelling.',
     color: '#FFBC42',
     src: pastFestival_2,
   },
@@ -30,8 +31,8 @@ export const pastFestivalsData: PastFestivalsData[] = [
     id: 3,
     title: 'Peace & Creativity',
     paragraph:
-      'A landmark event showcasing art, dance, and music from young talents worldwide',
-    color: '#FFBC42',
+      'A landmark event showcasing art, dance, and music from young talents worldwide.',
+    color: '#2057CC',
     src: pastFestival_3,
   },
 ];

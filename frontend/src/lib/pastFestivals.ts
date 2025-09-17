@@ -2,6 +2,8 @@ import pastFestival_1 from '@/assets/worldChildrensFestival/pastFestival_1.png';
 import pastFestival_2 from '@/assets/worldChildrensFestival/pastFestival_2.png';
 import pastFestival_3 from '@/assets/worldChildrensFestival/pastFestival_3.png';
 
+//At this time missing video links for each video, and may need a poster to lay over the video.
+
 export interface PastFestivalsData {
   id: number;
   title: string;

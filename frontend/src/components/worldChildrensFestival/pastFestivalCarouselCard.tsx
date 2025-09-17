@@ -13,14 +13,14 @@ export default function PastFestivalsCarouselCard({
   item,
 }: PastFestivalsCarouselCardProps) {
   return (
-    <div className="mx-4 mb-4 grid grid-cols-12 gap-4">
+    <div className="mx-4 mb-4 grid grid-cols-12 gap-4 md:mx-8">
       {/*Video */}
-      <div className="col-span-12 h-48 rounded-xl bg-gray-500">
+      <div className="col-span-12 h-48 rounded-xl bg-gray-500 sm:h-[365px] lg:col-span-9 lg:row-span-1 lg:h-[330px] xl:h-[410px] 2xl:h-[500px]">
         <VideoPlayer src="" poster="" className="h-full w-full object-cover" />
       </div>
       {/*Text Card */}
       <div
-        className="col-span-7 h-48 rounded-xl border-4 p-2"
+        className="col-span-7 h-48 rounded-xl border-4 p-2 sm:col-span-9 md:flex md:h-64 md:flex-col md:items-start md:justify-center md:gap-8 md:p-8 lg:col-span-12 lg:row-start-2 lg:h-28 lg:gap-4 xl:h-32"
         style={{ borderColor: item.color }}
       >
         <div className="font-montserrat text-base font-extrabold">
@@ -29,7 +29,7 @@ export default function PastFestivalsCarouselCard({
         <p className="font-sans text-base font-normal">{item.paragraph}</p>
       </div>
       {/*Image Card */}
-      <div className="col-span-5 h-48 rounded-xl">
+      <div className="col-span-5 h-48 rounded-xl sm:col-span-3 md:h-64 lg:col-span-3 lg:row-span-1 lg:h-[330px] xl:h-[410px] 2xl:h-[500px]">
         <img className="h-full w-full rounded-xl object-cover" src={item.src} />
       </div>
     </div>

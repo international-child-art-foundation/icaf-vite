@@ -6,7 +6,7 @@ import WFCCTA from '@/components/worldChildrensFestival/wfcCTA';
 
 export default function WorldChildrensFestival() {
   return (
-    <div className="">
+    <div className="overflow-hidden">
       <WCFHeader />
       <FestivalHighlights />
       <OurLegacy />

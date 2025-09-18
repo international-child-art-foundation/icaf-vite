@@ -1,7 +1,8 @@
 import FestivalHighlights from '@/components/worldChildrensFestival/festivalHighlights';
 import OurLegacy from '@/components/worldChildrensFestival/ourLegacy';
 import PastFestivalsCarousel from '@/components/worldChildrensFestival/pastFestivalsCarousel';
-import WCFHeader from '@/components/worldChildrensFestival/WCFHeader';
+import WCFHeader from '@/components/worldChildrensFestival/wcfHeader';
+import WFCCTA from '@/components/worldChildrensFestival/wfcCTA';
 
 export default function WorldChildrensFestival() {
   return (
@@ -10,7 +11,7 @@ export default function WorldChildrensFestival() {
       <FestivalHighlights />
       <OurLegacy />
       <PastFestivalsCarousel />
-      <div className="h-40 overflow-hidden">hey there next section</div>
+      <WFCCTA />
     </div>
   );
 }

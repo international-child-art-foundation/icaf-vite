@@ -2,7 +2,7 @@ import { PastFestivalsData } from '@/lib/pastFestivals';
 import VideoPlayer from '../about/VideoPlayer';
 
 /**
- * Note: VideoPlayer component is awaiting and Src/ poster.  When those are provided they need to be added to the pastFestivalData, update typechecks, update VideoPlayer props, then remove temporary bg-gray-500 from parent div.
+ * Note: VideoPlayer component is awaiting Src/poster properties.  When those are provided they need to be added to the pastFestivalData, update typechecks, update VideoPlayer props, then remove temporary bg-gray-500 from parent div.
  */
 
 interface PastFestivalsCarouselCardProps {

@@ -2,6 +2,12 @@ import React from 'react';
 import { TimeLineItem } from '@/types/WCFVerticalTimelineTypes';
 import { DiamondShape } from '@/components/worldChildrensFestival/diamondShape';
 import { AboutGraphic2 } from '@/assets/shared/images/about/AboutGraphic2';
+
+/**
+ * This component maps over the TimeLineItem to create the full timeline.
+ *  There are two seperate setups, one for mobile and one for md+/desktop
+ */
+
 interface verticalTimelineProps {
   items: TimeLineItem[];
 }
@@ -10,7 +16,7 @@ export default function VerticalTimeline({ items }: verticalTimelineProps) {
   return (
     <>
       {/***Mobile Vertical Timeline Version***/}
-      <div className="mx-4 mt-4 grid h-[1200px] grid-cols-[auto_1fr] gap-x-10 md:hidden">
+      <div className="mt-4 grid h-[1200px] grid-cols-[auto_1fr] gap-x-10 px-6 md:hidden">
         {/* Diamond on timeline */}
         {items.map((item) => (
           <React.Fragment key={item.day}>
@@ -35,8 +41,8 @@ export default function VerticalTimeline({ items }: verticalTimelineProps) {
       </div>
 
       {/***Tablet + Desktop Vertical Timeline Version***/}
-      <div className="relative mx-12 mt-8 hidden h-[720px] md:block">
-        <div className="absolute -top-28 left-0">
+      <div className="relative mt-8 hidden h-[720px] md:block md:px-12 lg:px-16 xl:px-20">
+        <div className="absolute -top-8 left-12 lg:left-20">
           <AboutGraphic2 className="h-44 w-44 xl:h-60 xl:w-60" />
         </div>
         {items.map((item) => {
@@ -70,57 +76,3 @@ export default function VerticalTimeline({ items }: verticalTimelineProps) {
     </>
   );
 }
-
-// {/* <div className="mx-4 mt-8 hidden h-[1000px] grid-cols-3 md:mx-12 md:grid">
-//   {/* Diamond on timeline */}
-//   {items.map((item) => (
-//     <React.Fragment key={item.day}>
-//       {(item.day === 'Day 1' || item.day === 'Day 3') && (
-//         <>
-//           {/*Spacer Div*/}
-//           <div />
-
-//           <div className="relative flex items-start justify-center">
-//             <DiamondShape
-//               color={item.color}
-//               day={item.day}
-//               lineDescription={item.lineDescriptionDesktop}
-//               alignDirection={item.alignDirectionDesktop}
-//             />
-//           </div>
-
-//           {/* Day Content  */}
-//           <div className="pt-20">
-//             <h3 className="font-montserrat text-2xl font-extrabold">
-//               {item.title}
-//             </h3>
-//             <p className="text-xl font-light">{item.paragraph}</p>
-//           </div>
-//         </>
-//       )}
-
-//       {(item.day === 'Day 2' || item.day === 'Day 4') && (
-//         <>
-//           {/* Day Content  */}
-//           <div className="pt-20">
-//             <h3 className="font-montserrat text-2xl font-extrabold">
-//               {item.title}
-//             </h3>
-//             <p className="text-xl font-light">{item.paragraph}</p>
-//           </div>
-
-//           <div className="relative flex items-start justify-center">
-//             <DiamondShape
-//               color={item.color}
-//               day={item.day}
-//               lineDescription={item.lineDescriptionDesktop}
-//               alignDirection={item.alignDirectionDesktop}
-//             />
-//           </div>
-//           {/*Spacer Div*/}
-//           <div />
-//         </>
-//       )}
-//     </React.Fragment>
-//   ))}
-// </div>; */}

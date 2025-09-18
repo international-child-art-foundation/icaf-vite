@@ -13,7 +13,7 @@ export default function PastFestivalsCarouselCard({
   item,
 }: PastFestivalsCarouselCardProps) {
   return (
-    <div className="mx-4 mb-4 grid grid-cols-12 gap-4 md:mx-8">
+    <div className="mb-4 grid grid-cols-12 gap-4 px-6 md:px-12 lg:px-16 xl:px-20">
       {/*Video */}
       <div className="col-span-12 h-48 rounded-xl bg-gray-500 sm:h-[365px] lg:col-span-9 lg:row-span-1 lg:h-[330px] xl:h-[410px] 2xl:h-[500px]">
         <VideoPlayer src="" poster="" className="h-full w-full object-cover" />

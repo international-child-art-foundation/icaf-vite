@@ -1,3 +1,9 @@
+/**
+ * This component displays the decorative diamond, dotted lines, and pill shape for day.
+ * All md and larger views have a left/right layout while the mobile only has left.
+ * This is done by passing TimeLineItem.alignDirectionMobile in as the alignDirection prop which is either left or right.
+ */
+
 interface DiamondShapeProps {
   color: string;
   day: string;

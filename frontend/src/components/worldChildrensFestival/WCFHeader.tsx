@@ -18,7 +18,7 @@ export default function WCFHeader() {
     'bg-gradient-to-r from-black/80 from-0% via-black/40 via-[60%] to-white/20 to-100%';
   const gradientSM = 'bg-black/50';
 
-  const heightMD = '700px';
+  const heightMD = '750px';
   const heightSM = '800px';
 
   let gradientDefinition;
@@ -49,7 +49,7 @@ export default function WCFHeader() {
         <figcaption className="sr-only">
           World Children's Festival hero image
         </figcaption>
-        <div className="absolute inset-0 top-8 mx-4 w-[85%] text-white sm:w-[70%] md:top-10 md:mx-8 lg:top-16 lg:w-[65%] xl:mx-8">
+        <div className="absolute inset-0 top-8 w-[85%] px-6 text-white sm:w-[70%] md:top-10 md:px-12 lg:top-16 lg:w-[65%] lg:px-16 xl:px-20">
           <h1 className="font-montserrat text-3xl font-extrabold lg:text-[40px] xl:text-[60px]">
             World Children's Festival
           </h1>

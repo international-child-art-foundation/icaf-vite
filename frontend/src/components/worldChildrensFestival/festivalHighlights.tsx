@@ -47,6 +47,9 @@ const VerticalTimelineData: TimeLineItem[] = [
     alignDirectionDesktop: 'left',
   },
 ];
+/**
+ * This component stores the TimeLineItem which helps design the vertical timeline.  It also serves as the section container.  The TimeLineItem is passed into the VerticalTimeline component which is the actual timeline
+ */
 
 export default function FestivalHighlights() {
   return (

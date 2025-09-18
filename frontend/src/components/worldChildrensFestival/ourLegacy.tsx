@@ -10,6 +10,10 @@ import { BlueBanner } from '@/assets/worldChildrensFestival/blueBanner';
 import Graphic from '@/assets/shared/images/about/more/Group 514888.svg';
 import { AboutGraphic2 } from '@/assets/shared/images/about/AboutGraphic2';
 
+/**
+ *
+ *Contains largely decorative elements (e.g., the Congress image, fireworks, stripe, and banner), as well as the content and a link to the WFC website.
+ */
 export default function OurLegacy() {
   return (
     <section>
@@ -60,14 +64,14 @@ export default function OurLegacy() {
           </div>
 
           {/* Content Section */}
-          <div className="relative z-40 mx-auto px-4 pt-16 lg:pt-28">
+          <div className="relative z-40 px-6 pt-16 md:px-12 lg:px-16 lg:pt-28 xl:px-20">
             {/* Heading */}
             <h2 className="my-8 text-center text-3xl font-extrabold lg:mb-16 lg:text-[40px]">
               Our Legacy
             </h2>
 
             {/* Content Grid */}
-            <div className="mx-4 grid max-h-[750px] lg:grid-cols-2">
+            <div className="grid max-h-[750px] lg:grid-cols-2">
               <img
                 src={ourLegacyImage}
                 alt="Festival scene"

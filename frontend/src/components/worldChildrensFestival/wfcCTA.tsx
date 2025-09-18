@@ -1,9 +1,12 @@
 import { Button } from '../ui/button';
 import Girl from '@/assets/worldChildrensFestival/girlPaintHands.png';
 
+/**
+ * Call to Action component.  Blue background with text/button linking outside page.  Absolute positioned girl for decoration
+ */
 export default function WFCCTA() {
   return (
-    <section className="mx-4 my-16 md:my-32 lg:mx-8 xl:my-40">
+    <section className="my-16 px-6 md:mt-32 md:px-12 lg:px-16 xl:mb-20 xl:mt-40 xl:px-20">
       <div className="relative flex h-[400px] items-center rounded-3xl bg-[#2057CC24] xl:h-[475px]">
         {/**Content Container */}
         <div className="flex flex-col px-4 lg:px-8">

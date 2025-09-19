@@ -30,7 +30,11 @@ export default function PastFestivalsCarouselCard({
       </div>
       {/*Image Card */}
       <div className="col-span-5 h-48 rounded-xl sm:col-span-3 md:h-64 lg:col-span-3 lg:row-span-1 lg:h-[330px] xl:h-[410px] 2xl:h-[500px]">
-        <img className="h-full w-full rounded-xl object-cover" src={item.src} />
+        <img
+          className="h-full w-full rounded-xl object-cover"
+          loading="lazy"
+          src={item.src}
+        />
       </div>
     </div>
   );

@@ -17,6 +17,7 @@ export default function OurLegacyDecorative() {
           <div className="pointer-events-none relative left-1/2 w-[130%] -translate-x-1/2 sm:bottom-[-10%] sm:left-1/2 md:bottom-0 2xl:bottom-[-12%]">
             <img
               src={Graphic}
+              loading="lazy"
               className="pointer-events-none h-auto w-full object-cover"
             />
           </div>
@@ -32,6 +33,7 @@ export default function OurLegacyDecorative() {
         {/*Capitol Building Image*/}
         <img
           src={congress}
+          loading="lazy"
           alt="Capitol building"
           className="2xl:[700px] xl:tranlate-y-[75%] absolute top-0 z-[-10] w-[270px] translate-y-[-80%] sm:w-[350px] sm:translate-y-[-76%] md:translate-y-[-85%] lg:w-[470px] lg:translate-y-[-65%] xl:w-[600px] xl:translate-y-[-72%]"
         />
@@ -46,6 +48,7 @@ export default function OurLegacyDecorative() {
 
         <div className="absolute -top-72 hidden translate-x-[160%] sm:block sm:translate-x-[220%] md:translate-x-[250%] lg:-top-96 lg:translate-x-[280%] 2xl:-top-[450px]">
           <img
+            loading="lazy"
             src={YellowConfetti}
             className="h-48 w-48 lg:h-64 lg:w-64 xl:h-80 xl:w-80 2xl:h-96 2xl:w-96"
           />

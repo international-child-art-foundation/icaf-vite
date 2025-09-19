@@ -11,7 +11,7 @@ import { Button } from '../ui/button';
 export default function WCFHeader() {
   const size = useWindowSize();
   const gradientXL =
-    'bg-[linear-gradient(to_right,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.6)_40%,rgba(0,0,0,0.1)_60%,rgba(255,255,255,0.2)_100%)]';
+    'bg-[linear-gradient(to_right,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.6)_40%,rgba(0,0,0,0.1)_80%,rgba(255,255,255,0.2)_100%)]';
   const gradientLG =
     'bg-[linear-gradient(to_right,rgba(0,0,0,0.75)_0%,rgba(0,0,0,0.5)_50%,rgba(0,0,0,0.15)_70%,rgba(255,255,255,0.15)_100%)]';
   const gradientMD =

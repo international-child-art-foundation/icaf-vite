@@ -9,8 +9,8 @@ export default function WFCCTA() {
     <section className="my-16 px-6 md:mt-32 md:px-12 lg:px-16 xl:mb-20 xl:mt-40 xl:px-20">
       <div className="relative flex h-[400px] items-center rounded-3xl bg-[#2057CC24] xl:h-[475px]">
         {/**Content Container */}
-        <div className="flex flex-col px-4 lg:px-8">
-          <h2 className="font-montserrat mb-2 text-3xl font-extrabold lg:text-[40px]">
+        <div className="flex flex-col px-8 lg:px-14 xl:px-16">
+          <h2 className="font-montserrat z-10 mb-2 text-3xl font-extrabold lg:text-[40px]">
             Be Part of the Movement
           </h2>
           <p className="my-4 font-sans text-xl font-normal md:max-w-[50%] lg:max-w-[60%] xl:text-2xl">

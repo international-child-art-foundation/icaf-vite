@@ -118,14 +118,14 @@ jobs:
           RewriteRule ^releases/ - [L]
           RewriteCond %{ENV:APP_REWRITTEN} !=1
           RewriteCond %{REQUEST_URI} !^/releases/
-          RewriteCond %{REQUEST_URI} \.(?:css|js|mjs|map|png|jpe?g|gif|svg|webp|ico|json|txt|xml|webmanifest|woff2?|ttf|eot)$ [NC]
+          RewriteCond %{REQUEST_URI} \.(?:css|js|mjs|map|png|jpe?g|gif|svg|webp|ico|json|txt|xml|webmanifest|woff2?|ttf|eot|mp4|webm|ogv)$ [NC]
           RewriteRule ^ /releases/%{ENV:RELEASE}%{REQUEST_URI} [E=APP_REWRITTEN:1,PT,L]
           RewriteCond %{ENV:APP_REWRITTEN} !=1
           RewriteCond %{REQUEST_URI} !^/releases/
           RewriteRule ^ /releases/%{ENV:RELEASE}/index.html [E=APP_REWRITTEN:1,PT,L]
 
           <IfModule mod_headers.c>
-            <FilesMatch "\.(js|mjs|css|svg|png|jpg|jpeg|webp|gif|ico|json|woff2?|ttf|eot)$">
+            <FilesMatch "\.(js|mjs|css|svg|png|jpg|jpeg|webp|gif|ico|json|woff2?|ttf|eot|mp4|webm|ogv)$">
               Header set Cache-Control "public, max-age=31536000, immutable"
             </FilesMatch>
             <FilesMatch "\.html$">

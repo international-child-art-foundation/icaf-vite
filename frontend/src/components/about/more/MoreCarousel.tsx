@@ -5,7 +5,7 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel';
 import { useState, useEffect } from 'react';
-import { moreOnOurSiteData } from '@/lib/moreOnOurSite';
+import { moreOnOurSiteData } from '@/data/about/moreOnOurSite';
 
 import CarouselArrowsDots from '@/components/about/testimonials/CarouselArrowsDots';
 import { MoreCard } from './MoreCard';

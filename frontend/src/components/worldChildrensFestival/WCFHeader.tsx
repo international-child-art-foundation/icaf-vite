@@ -49,8 +49,8 @@ export default function WCFHeader() {
         <figcaption className="sr-only">
           World Children's Festival hero image
         </figcaption>
-        <div className="absolute inset-0 top-8 w-[85%] px-6 text-white sm:w-[70%] md:top-10 md:px-12 lg:top-16 lg:w-[65%] lg:px-16 xl:px-20">
-          <h1 className="font-montserrat text-3xl font-extrabold lg:text-[40px] xl:text-[60px]">
+        <div className="absolute inset-0 top-8 w-[85%] px-6 text-white sm:w-[70%] md:top-10 md:px-12 lg:top-16 lg:w-[65%] lg:px-16 xl:w-[75%] xl:px-20">
+          <h1 className="font-montserrat text-3xl font-extrabold lg:text-[40px] xl:text-6xl">
             World Children's Festival
           </h1>
           <h3 className="my-2 font-bold md:my-4 lg:text-2xl xl:my-0 xl:mb-6 xl:mt-10">
@@ -58,7 +58,7 @@ export default function WCFHeader() {
           </h3>
           <p className="mb-2 text-base font-normal md:mb-4 md:text-xl xl:mb-6">
             Every four years, the World Children's Festival (WCF) turns the
-            National Mall across from the U.S Capitol inoto a global stage for a
+            National Mall across from the U.S Capitol into a global stage for a
             three-day celebration of creativity, diversity, and unity. More than
             a festival, it's a movement—empowering children through art,
             education, and collaboration

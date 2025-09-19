@@ -6,7 +6,7 @@ import {
 } from '@/components/ui/carousel';
 import { useState, useEffect } from 'react';
 import CarouselArrowsDots from '@/components/about/Testimonials/CarouselArrowsDots';
-import { pastFestivalsData } from '@/lib/pastFestivals';
+import { pastFestivalsData } from '@/data/wcf/pastFestivals';
 import PastFestivalsCarouselCard from './pastFestivalCarouselCard';
 
 export default function PastFestivalsCarousel() {

@@ -1,9 +1,9 @@
-import BoardOfDirectorsImage from '../assets/shared/images/about/more/Board.webp';
-import FinancialsImage from '../assets/shared/images/about/more/Financials.webp';
-import TeamImage from '../assets/shared/images/about/more/Team.webp';
-import EthicsImage from '../assets/shared/images/about/more/Ethics.webp';
-import PartnersImage from '../assets/shared/images/about/more/Partners.webp';
-import ImpactImage from '../assets/shared/images/about/more/Impact.webp';
+import BoardOfDirectorsImage from '@/assets/shared/images/about/more/Board.webp';
+import FinancialsImage from '@/assets/shared/images/about/more/Financials.webp';
+import TeamImage from '@/assets/shared/images/about/more/Team.webp';
+import EthicsImage from '@/assets/shared/images/about/more/Ethics.webp';
+import PartnersImage from '@/assets/shared/images/about/more/Partners.webp';
+import ImpactImage from '@/assets/shared/images/about/more/Impact.webp';
 
 //images converted to webp, but may need check resizing later
 export interface MoreOnOurSite {

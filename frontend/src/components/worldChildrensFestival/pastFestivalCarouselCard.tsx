@@ -1,4 +1,4 @@
-import { PastFestivalsData } from '@/lib/pastFestivals';
+import { PastFestivalsData } from '@/data/wcf/pastFestivals';
 import VideoPlayer from '../about/VideoPlayer';
 
 /**

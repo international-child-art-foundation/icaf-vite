@@ -1,4 +1,4 @@
-import CousumanoImage from '../assets/shared/images/about/Cosumano.webp';
+import CousumanoImage from '@/assets/shared/images/about/Cosumano.webp';
 
 export interface Testimonial {
   id: number;

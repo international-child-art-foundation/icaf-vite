@@ -28,10 +28,13 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
 
-          <Route path="/programs/outreach" element={<ChildArtPage />} />
           <Route
-            path="/programs/worldchildrensfestival"
+            path="/programs/world-childrens-festival"
             element={<WorldChildrensFestival />}
+          />
+          <Route
+            path="/programs/childart-magazine"
+            element={<ChildArtPage />}
           />
           <Route path="/about/partners" element={<Partners />} />
           <Route path="/about" element={<About />} />

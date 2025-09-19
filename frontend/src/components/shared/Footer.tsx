@@ -45,7 +45,7 @@ const icons = [
 
 const Footer = () => {
   return (
-    <footer className="2xl:min:h-[310px] relative z-20 mx-auto min-h-[670px] w-full bg-primary font-sans lg:min-h-[480px] xl:min-h-[310px]">
+    <footer className="2xl:min:h-[310px] bg-primary relative z-20 mx-auto min-h-[670px] w-full font-sans lg:min-h-[480px] xl:min-h-[310px]">
       <div className="mx-5% mx-auto flex flex-wrap justify-between gap-y-10 px-8 pb-10 pt-14 md:max-w-[750px] md:px-12 lg:max-w-screen-2xl lg:gap-y-16 lg:px-16 lg:py-10 xl:grid xl:auto-rows-min xl:grid-cols-12 xl:gap-x-8 xl:gap-y-16 xl:px-20">
         {/* Newsletter */}
         <div className="footer-inverse col-span-2 w-full space-y-4 text-base tracking-wide lg:order-1 lg:w-[42%] lg:space-y-6 lg:text-lg xl:col-span-5 xl:w-full 2xl:text-xl">
@@ -148,14 +148,14 @@ const Footer = () => {
           <div className="grid grid-cols-1 xl:grid-cols-10">
             {/* Donate Button */}
             <div className="ml-auto grid w-full grid-cols-2 gap-4 lg:mx-auto lg:max-w-[45%] xl:order-last xl:col-span-7 xl:col-start-4 xl:max-w-full xl:grid-cols-1 2xl:col-span-5 2xl:col-start-6">
-              <DonateButton className="lg:h-14 lg:text-base" title="Donate" />
+              <DonateButton className="lg:h-14 lg:text-base" text="Donate" />
 
               {/* Contact Us Button */}
               <div className="flex justify-center">
                 <Button
                   asChild
                   variant="outline"
-                  className="h-14 w-full rounded-full border-2 bg-primary text-base font-medium tracking-wide text-white hover:font-semibold lg:h-14 lg:text-base"
+                  className="bg-primary h-14 w-full rounded-full border-2 text-base font-medium tracking-wide text-white hover:font-semibold lg:h-14 lg:text-base"
                 >
                   <a
                     href="https://icaf.org/about/contact-us"
@@ -171,7 +171,7 @@ const Footer = () => {
           </div>
         </div>
         {/* Copyright Notice */}
-        <div className="footer-inverse order-5 w-full place-items-center bg-primary text-center text-sm lg:flex lg:items-center lg:justify-center lg:text-sm xl:col-span-12 xl:mx-auto">
+        <div className="footer-inverse bg-primary order-5 w-full place-items-center text-center text-sm lg:flex lg:items-center lg:justify-center lg:text-sm xl:col-span-12 xl:mx-auto">
           <span className="text-lg lg:pr-2 lg:text-2xl">©</span> 2025
           International Children Art Foundation | 2549 Virginia Avenue, NW |
           Washington, DC 20037

@@ -27,7 +27,7 @@ export const BannerImage = ({ data, height = 550 }: BannerImageProps) => {
         </defs>
       </svg>
 
-      <style jsx>{`
+      <style>{`
         .${topClipClass} {
           clip-path: url(#${topClipId});
         }

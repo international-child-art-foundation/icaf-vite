@@ -1,0 +1,79 @@
+name: Build Frontend (icaf)
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "frontend/**"
+      - "shared/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "package.json"
+      - "tsconfig.json"
+      - "tsconfig.*.json"
+      - "frontend/tsconfig*.json"
+      - "frontend/vite.config.*"
+  workflow_dispatch: {}
+
+concurrency:
+  group: build-frontend-main
+  cancel-in-progress: true
+
+jobs:
+  build_frontend:
+    runs-on: ubuntu-latest
+    env:
+      SITE_NAME: icaf
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.16.1
+          run_install: false
+
+      - name: Setup Node (LTS) with pnpm cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "pnpm-lock.yaml"
+
+      - name: Set release id (UTC timestamp + short sha)
+        id: rel
+        run: |
+          DATE_UTC="$(date -u +%Y%m%d-%H%M)"
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "RELEASE_ID=${DATE_UTC}-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Install dependencies (workspace root)
+        run: pnpm install --frozen-lockfile
+
+      - name: Build frontend (Vite)
+        working-directory: frontend
+        run: pnpm build
+
+      - name: Write version.txt
+        working-directory: frontend
+        run: |
+          {
+            echo "site=${SITE_NAME}"
+            echo "release=${{ steps.rel.outputs.RELEASE_ID }}"
+            echo "repo=${GITHUB_REPOSITORY}"
+            echo "commit=${GITHUB_SHA}"
+            echo "run_url=https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo "node=$(node -v)"
+            echo "pnpm=$(pnpm -v)"
+          } > dist/version.txt
+          cat dist/version.txt
+
+      - name: Upload artifact (dist only)
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-${{ env.SITE_NAME }}-${{ steps.rel.outputs.RELEASE_ID }}
+          path: frontend/dist/**
+          if-no-files-found: error
+          retention-days: 14

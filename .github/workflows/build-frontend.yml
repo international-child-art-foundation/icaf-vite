@@ -1,4 +1,4 @@
-name: Build Frontend (icaf)
+name: Build & Deploy Frontend (icaf)
 
 on:
   push:
@@ -24,6 +24,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SITE_NAME: icaf
+    outputs:
+      release_id: ${{ steps.rel.outputs.RELEASE_ID }}
 
     steps:
       - name: Checkout
@@ -68,12 +70,78 @@ jobs:
             echo "node=$(node -v)"
             echo "pnpm=$(pnpm -v)"
           } > dist/version.txt
-          cat dist/version.txt
 
       - name: Upload artifact (dist only)
         uses: actions/upload-artifact@v4
         with:
           name: frontend-${{ env.SITE_NAME }}-${{ steps.rel.outputs.RELEASE_ID }}
-          path: frontend/dist/**
+          path: frontend/dist
           if-no-files-found: error
           retention-days: 14
+
+  deploy_release:
+    name: Deploy release over SFTP
+    needs: build_frontend
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-icaf-${{ needs.build_frontend.outputs.release_id }}
+          path: release
+
+      - name: Show downloaded files (debug)
+        run: ls -laR release
+
+      - name: Upload via SFTP (mirror full to versioned folder)
+        uses: milanmk/actions-file-deployer@1.16
+        with:
+          remote-protocol: "sftp"
+          remote-host: ${{ secrets.SFTP_HOST }}
+          remote-user: ${{ secrets.SFTP_USER }}
+          remote-password: ${{ secrets.SFTP_PASSWORD }}
+          local-path: "release/frontend/dist"
+          remote-path: "/releases/${{ needs.build_frontend.outputs.release_id }}"
+          sync: "full"
+          debug: "false"
+
+      - name: Generate .htaccess pointer with current release
+        run: |
+          mkdir -p htaccess_out
+          cat > htaccess_out/.htaccess <<'HTACCESS'
+          RewriteEngine On
+          RewriteRule ^ - [E=RELEASE:${{ needs.build_frontend.outputs.release_id }}]
+          RewriteRule ^(favicon\.ico|robots\.txt|sitemap\.xml|manifest\.webmanifest)$ releases/%{ENV:RELEASE}/$1 [L]
+          RewriteRule ^(sw\.js|workbox-[^/]+\.js)$ releases/%{ENV:RELEASE}/$1 [L]
+          RewriteRule ^assets/(.*)$ releases/%{ENV:RELEASE}/assets/$1 [L]
+          RewriteRule ^$ releases/%{ENV:RELEASE}/index.html [L]
+          RewriteCond %{REQUEST_FILENAME} !-f
+          RewriteCond %{REQUEST_FILENAME} !-d
+          RewriteRule . releases/%{ENV:RELEASE}/index.html [L]
+          <IfModule mod_headers.c>
+            <FilesMatch "\.(js|mjs|css|svg|png|jpg|jpeg|webp|gif|ico|json|woff2?|ttf|eot)$">
+              Header set Cache-Control "public, max-age=31536000, immutable"
+            </FilesMatch>
+            <FilesMatch "\.html$">
+              Header set Cache-Control "no-cache, no-store, must-revalidate"
+            </FilesMatch>
+          </IfModule>
+          <IfModule mod_deflate.c>
+            AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json image/svg+xml
+          </IfModule>
+          Options -Indexes
+          HTACCESS
+
+      - name: Upload .htaccess pointer to docroot
+        uses: milanmk/actions-file-deployer@1.16
+        with:
+          remote-protocol: "sftp"
+          remote-host: ${{ secrets.SFTP_HOST }}
+          remote-user: ${{ secrets.SFTP_USER }}
+          remote-password: ${{ secrets.SFTP_PASSWORD }}
+          local-path: "htaccess_out"
+          remote-path: "/"
+          sync: "full"
+          debug: "false"

@@ -1,6 +1,6 @@
-import pastFestival_1 from '@/assets/worldChildrensFestival/pastFestival_1.png';
-import pastFestival_2 from '@/assets/worldChildrensFestival/pastFestival_2.png';
-import pastFestival_3 from '@/assets/worldChildrensFestival/pastFestival_3.png';
+import pastFestival_1 from '@/assets/worldChildrensFestival/pastFestival_1.webp';
+import pastFestival_2 from '@/assets/worldChildrensFestival/pastFestival_2.webp';
+import pastFestival_3 from '@/assets/worldChildrensFestival/pastFestival_3.webp';
 
 //At this time missing video links for each video, and may need a poster to lay over the video.
 

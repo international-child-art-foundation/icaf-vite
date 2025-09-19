@@ -1,4 +1,4 @@
-import ourLegacyImage from '@/assets/worldChildrensFestival/ourLegacy.jpg';
+import ourLegacyImage from '@/assets/worldChildrensFestival/ourLegacy.webp';
 import { CircleArrowRight } from 'lucide-react';
 import OurLegacyDecorative from './ourLegacyDecorative';
 
@@ -14,7 +14,7 @@ export default function OurLegacy() {
       <OurLegacyDecorative />
 
       {/* Content Section */}
-      <div className="relative z-40 px-6 pt-16 md:px-12 lg:px-16 lg:pt-28 xl:px-20">
+      <div className="relative z-40 px-6 pt-16 md:px-12 lg:px-16 lg:pt-36 xl:px-20">
         {/* Heading */}
         <h2 className="my-8 text-center text-3xl font-extrabold lg:mb-16 lg:text-[40px]">
           Our Legacy
@@ -25,10 +25,10 @@ export default function OurLegacy() {
           <img
             src={ourLegacyImage}
             alt="Festival scene"
-            className="max-h-[330px] w-full rounded-t-2xl object-cover shadow-md lg:order-2 lg:h-full lg:rounded-tl-none lg:rounded-tr-2xl"
+            className="max-h-[330px] w-full rounded-t-2xl object-cover shadow-md lg:order-2 lg:h-full lg:max-h-[540px] lg:rounded-tl-none lg:rounded-tr-2xl xl:max-h-[470px]"
           />
-          <div className="rounded-b-2xl bg-[#FCEED5] shadow-md md:h-[330px] lg:order-1 lg:rounded-b-none lg:rounded-l-2xl">
-            <div className="p-6">
+          <div className="rounded-b-2xl bg-[#FCEED5] shadow-md md:flex md:h-[330px] md:flex-col md:items-start md:justify-center lg:order-1 lg:h-[540px] lg:rounded-b-none lg:rounded-l-2xl xl:h-[470px]">
+            <div className="p-6 lg:p-12">
               <h3 className="font-montserrat text-2xl font-extrabold">
                 World Children’s Festival 2025
               </h3>

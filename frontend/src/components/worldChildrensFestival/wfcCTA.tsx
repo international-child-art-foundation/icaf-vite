@@ -1,5 +1,5 @@
 import { Button } from '../ui/button';
-import Girl from '@/assets/worldChildrensFestival/girlPaintHands.png';
+import Girl from '@/assets/worldChildrensFestival/girlPaintHands.webp';
 
 /**
  * Call to Action component.  Blue background with text/button linking outside page.  Absolute positioned girl for decoration

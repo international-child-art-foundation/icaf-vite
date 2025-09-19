@@ -1,4 +1,4 @@
-import { Testimonial } from '@/lib/testimonials';
+import { Testimonial } from '@/data/about/testimonials';
 import {
   Card,
   CardContent,

@@ -5,19 +5,11 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel';
 import { useState, useEffect } from 'react';
-import { moreOnOurSiteData } from '@/data/about/moreOnOurSite';
-
 import CarouselArrowsDots from '@/components/about/testimonials/CarouselArrowsDots';
-import { MoreCard } from './MoreCard';
-import Graphic from '@/assets/shared/images/about/more/Group 514888.svg';
+import { pastFestivalsData } from '@/data/wcf/pastFestivals';
+import PastFestivalsCarouselCard from './pastFestivalCarouselCard';
 
-/**
- * This component is built on top of Shadcn's carousel with custom CarouselArrowsDots navigation
- * Each slide renders a <MoreCard /> with title, description, and image
- * Renders from the `moreOnOurSiteData` array located in lib folder
- */
-
-export const MoreCarousel = () => {
+export default function PastFestivalsCarousel() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [api, setApi] = useState<CarouselApi>();
 
@@ -38,18 +30,12 @@ export const MoreCarousel = () => {
   const handleSelect = (index: number) => api?.scrollTo(index);
 
   return (
-    <section className="relative h-full overflow-visible bg-white py-6 md:py-20">
-      {/*Decoration */}
-      <div className="pointer-events-none absolute bottom-0 left-[40%] w-[150%] -translate-x-1/2 sm:bottom-[-10%] sm:left-[50%] md:bottom-0 2xl:bottom-[-12%]">
-        <img
-          src={Graphic}
-          className="pointer-events-none h-auto w-full object-cover"
-        />
+    <section className="pt-40 md:pt-60 xl:pt-80">
+      <div>
+        <h2 className="my-8 text-center text-3xl font-extrabold lg:mb-16 lg:text-[40px]">
+          Past Festivals
+        </h2>
       </div>
-
-      <h2 className="mb-10 text-center font-sans text-3xl font-bold lg:text-[40px]">
-        More On Our Site
-      </h2>
 
       <Carousel
         setApi={setApi}
@@ -59,17 +45,17 @@ export const MoreCarousel = () => {
         }}
       >
         <CarouselContent className="">
-          {moreOnOurSiteData.map((item) => {
+          {pastFestivalsData.map((item) => {
             return (
               <CarouselItem key={item.id}>
-                <MoreCard item={item} />
+                <PastFestivalsCarouselCard item={item} />
               </CarouselItem>
             );
           })}
         </CarouselContent>
         <div className="md:py-4">
           <CarouselArrowsDots
-            items={moreOnOurSiteData}
+            items={pastFestivalsData}
             onPrevious={handlePrevious}
             onNext={handleNext}
             onSelect={handleSelect}
@@ -79,4 +65,4 @@ export const MoreCarousel = () => {
       </Carousel>
     </section>
   );
-};
+}

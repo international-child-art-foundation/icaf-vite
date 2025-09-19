@@ -9,6 +9,7 @@ import { Route, Routes } from 'react-router-dom';
 import ChildArtPage from './pages/ChildArtPage';
 import Impact from './pages/Impact';
 import Donate from './pages/Donate';
+import WorldChildrensFestival from './pages/WorldChildrensFestivalPage';
 import { Team } from './pages/Team';
 
 export const metadata = {
@@ -27,6 +28,10 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
 
+          <Route
+            path="/programs/world-childrens-festival"
+            element={<WorldChildrensFestival />}
+          />
           <Route
             path="/programs/childart-magazine"
             element={<ChildArtPage />}

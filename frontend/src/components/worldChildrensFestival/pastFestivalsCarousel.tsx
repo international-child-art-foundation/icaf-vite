@@ -30,7 +30,7 @@ export default function PastFestivalsCarousel() {
   const handleSelect = (index: number) => api?.scrollTo(index);
 
   return (
-    <section className="pt-16 lg:pt-32 xl:pt-64">
+    <section className="pt-40 md:pt-72 xl:pt-96">
       <div>
         <h2 className="my-8 text-center text-3xl font-extrabold lg:mb-16 lg:text-[40px]">
           Past Festivals

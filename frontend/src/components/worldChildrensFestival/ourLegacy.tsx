@@ -31,13 +31,13 @@ export default function OurLegacy() {
           <div className="rounded-b-2xl bg-[#FCEED5] shadow-md md:flex md:h-[330px] md:flex-col md:items-start md:justify-center lg:order-1 lg:h-[540px] lg:rounded-b-none lg:rounded-l-2xl xl:h-[470px]">
             <div className="p-6 lg:p-12">
               <h3 className="font-montserrat text-2xl font-extrabold">
-                World Children’s Festival 2025
+                World Children’s Festival 2026
               </h3>
               <p className="mt-4 text-xl font-normal">
                 Since its inception, the World Children’s Festival has brought
                 together young artists, educators, and thought leaders from
                 around the world to celebrate creativity and promote
-                cross-cultural understanding.
+                cross-cultural understanding and global competencies.
               </p>
               <a
                 href="https://worldchildrensfestival.org/"

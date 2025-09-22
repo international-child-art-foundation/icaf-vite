@@ -59,8 +59,8 @@ export default function WCFHeader() {
           <p className="mb-2 text-base font-normal md:mb-4 md:text-xl xl:mb-6">
             Every four years, the World Children's Festival (WCF) turns the
             National Mall across from the U.S Capitol into a global stage for a
-            three-day celebration of creativity, diversity, and unity. More than
-            a festival, it's a movement—empowering children through art,
+            three-day celebration of creativity, empathy, and unity. More than a
+            festival, it's a movement—empowering children through art,
             education, and collaboration
           </p>
           <p className="mb-2 text-base font-normal md:mb-4 md:text-xl xl:mb-6">

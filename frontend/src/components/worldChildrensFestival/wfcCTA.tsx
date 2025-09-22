@@ -15,9 +15,9 @@ export default function WFCCTA() {
           </h2>
           <p className="my-4 font-sans text-xl font-normal md:max-w-[50%] lg:max-w-[60%] xl:text-2xl">
             {' '}
-            The 7th World Children's Festival is coming in June 2026. Join us in
-            Washington, D.C, to experience the power of creativity, empathy, and
-            leadership in action.
+            The 7th World Children’s Festival is scheduled for June 30 - July 2,
+            2026. Join the children at the National Mall across the U.S. Capitol
+            or support them with you donation today.
           </p>
           <a
             href="https://worldchildrensfestival.org/"

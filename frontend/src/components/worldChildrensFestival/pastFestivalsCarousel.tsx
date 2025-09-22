@@ -4,25 +4,53 @@ import {
   CarouselItem,
   type CarouselApi,
 } from '@/components/ui/carousel';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import CarouselArrowsDots from '@/components/about/testimonials/CarouselArrowsDots';
 import { pastFestivalsData } from '@/data/wcf/pastFestivals';
 import PastFestivalsCarouselCard from './pastFestivalCarouselCard';
+import type { VideoHandle } from '../shared/VideoWrapper';
 
 export default function PastFestivalsCarousel() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [api, setApi] = useState<CarouselApi>();
+  const videoRefs = useRef<Array<VideoHandle | null>>([]);
+
+  if (videoRefs.current.length !== pastFestivalsData.length) {
+    videoRefs.current = new Array(pastFestivalsData.length).fill(
+      null,
+    ) as (VideoHandle | null)[];
+  }
 
   useEffect(() => {
-    if (!api) {
-      return;
-    }
+    if (!api) return;
 
-    setSelectedIndex(api.selectedScrollSnap());
+    const updateSelected = () => setSelectedIndex(api.selectedScrollSnap());
 
-    api.on('select', () => {
-      setSelectedIndex(api.selectedScrollSnap());
-    });
+    const pauseNonVisible = () => {
+      const visible = new Set(api.slidesInView());
+      videoRefs.current.forEach((handle, idx) => {
+        if (!visible.has(idx)) handle?.pause();
+      });
+    };
+
+    updateSelected();
+    pauseNonVisible();
+
+    const onSelect = () => {
+      updateSelected();
+      pauseNonVisible();
+    };
+    const onSettle = () => {
+      pauseNonVisible();
+    };
+
+    api.on('select', onSelect);
+    api.on('settle', onSettle);
+
+    return () => {
+      api.off('select', onSelect);
+      api.off('settle', onSettle);
+    };
   }, [api]);
 
   const handlePrevious = () => api?.scrollPrev();
@@ -44,15 +72,19 @@ export default function PastFestivalsCarousel() {
           loop: true,
         }}
       >
-        <CarouselContent className="">
-          {pastFestivalsData.map((item) => {
-            return (
-              <CarouselItem key={item.id}>
-                <PastFestivalsCarouselCard item={item} />
-              </CarouselItem>
-            );
-          })}
+        <CarouselContent>
+          {pastFestivalsData.map((item, index) => (
+            <CarouselItem key={item.id}>
+              <PastFestivalsCarouselCard
+                item={item}
+                videoRef={(handle) => {
+                  videoRefs.current[index] = handle;
+                }}
+              />
+            </CarouselItem>
+          ))}
         </CarouselContent>
+
         <div className="md:py-4">
           <CarouselArrowsDots
             items={pastFestivalsData}

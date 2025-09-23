@@ -4,7 +4,7 @@ import {
   CarouselItem,
   type CarouselApi,
 } from '@/components/ui/carousel';
-import { testimonials } from '@/lib/testimonials';
+import { testimonials } from '@/data/about/testimonials';
 import { TestimonialCard } from './TestimonialsCard';
 import { useState, useEffect } from 'react';
 import CarouselArrowsDots from '../../shared/CarouselArrowsDots';

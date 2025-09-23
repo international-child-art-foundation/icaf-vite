@@ -1,13 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { Play } from 'lucide-react';
 
+export type VideoHandle = {
+  play: () => void;
+  pause: () => void;
+  isStarted: () => boolean;
+};
+
 interface VideoWrapperProps {
   src: string;
   thumbnail: string;
   curved?: boolean;
   className?: string;
-  /** "idle" => attach src after page load; "viewport" => when near viewport; "off" => only on click */
   lazyMode?: 'idle' | 'viewport' | 'off';
+  videoRef?: (handle: VideoHandle | null) => void;
 }
 
 export const VideoWrapper = ({
@@ -16,10 +22,11 @@ export const VideoWrapper = ({
   curved,
   className,
   lazyMode = 'idle',
+  videoRef,
 }: VideoWrapperProps) => {
   const [started, setStarted] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string | undefined>(undefined);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const videoElRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const startPlayback = () => {
@@ -27,23 +34,41 @@ export const VideoWrapper = ({
       if (!videoSrc) setVideoSrc(src);
       setStarted(true);
       requestAnimationFrame(() => {
-        videoRef.current?.play().catch(() => {});
+        videoElRef.current?.play().catch(() => {});
       });
     }
   };
 
   useEffect(() => {
+    if (!videoRef) return;
+
+    const handle: VideoHandle = {
+      play: () => {
+        if (!started) {
+          setVideoSrc((s) => s ?? src);
+          setStarted(true);
+        }
+        videoElRef.current?.play().catch(() => {});
+      },
+      pause: () => {
+        videoElRef.current?.pause();
+      },
+      isStarted: () => started,
+    };
+
+    videoRef(handle);
+    return () => videoRef(null);
+  }, [videoRef, started, src]);
+
+  useEffect(() => {
     if (started || videoSrc || lazyMode === 'off') return;
 
     let cleanup: (() => void) | undefined;
-
     const attach = () => setVideoSrc(src);
 
     if (lazyMode === 'idle') {
       const runIdle = () => {
-        const ric = window.requestIdleCallback as
-          | ((cb: () => void, opts?: { timeout?: number }) => number)
-          | undefined;
+        const ric = window.requestIdleCallback;
         if (ric) {
           const id = ric(attach, { timeout: 2000 });
           return () => window.cancelIdleCallback?.(id);
@@ -90,7 +115,7 @@ export const VideoWrapper = ({
       ].join(' ')}
     >
       <video
-        ref={videoRef}
+        ref={videoElRef}
         src={videoSrc}
         className="h-full w-full"
         controls={started}

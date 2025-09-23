@@ -9,6 +9,7 @@ import { Route, Routes } from 'react-router-dom';
 import ChildArtPage from './pages/ChildArtPage';
 import Impact from './pages/Impact';
 import Donate from './pages/Donate';
+import WorldChildrensFestival from './pages/WorldChildrensFestivalPage';
 import { Team } from './pages/Team';
 import { Sponsorship } from './pages/Sponsorship';
 
@@ -28,7 +29,14 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
 
-          <Route path="/programs/outreach" element={<ChildArtPage />} />
+          <Route
+            path="/programs/world-childrens-festival"
+            element={<WorldChildrensFestival />}
+          />
+          <Route
+            path="/programs/childart-magazine"
+            element={<ChildArtPage />}
+          />
           <Route path="/about/partners" element={<Partners />} />
           <Route path="/about" element={<About />} />
           <Route path="/about/impact" element={<Impact />} />

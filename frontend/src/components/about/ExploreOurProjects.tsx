@@ -1,5 +1,5 @@
 import { Card, CardContent, CardFooter } from '../ui/card';
-import ICAFVideo from '@/assets/shared/media/icaf-overview.mp4';
+import ICAFVideo from '@/assets/shared/media/icaf-overview-cropped.mp4';
 import Poster from '@/assets/shared/images/about/map-video-cover.webp';
 import { FavoriteSportLogo } from '@/assets/shared/images/about/FavoriteSportLogo';
 import { ChevronRight } from 'lucide-react';

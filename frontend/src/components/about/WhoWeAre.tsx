@@ -35,10 +35,7 @@ export default function WhoWeAre() {
             art.
           </p>
           <div className="flex justify-start">
-            <DonateButton
-              title="Donate to our campaign"
-              className="w-[268px]"
-            />
+            <DonateButton text="Donate to our campaign" className="w-[268px]" />
           </div>
         </div>
         <div className="my-4 h-[350px] w-full md:h-[475px] lg:h-96 lg:w-1/2 lg:pl-32 xl:h-[400px] 2xl:h-[455px] 2xl:pl-36">

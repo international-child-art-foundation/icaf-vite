@@ -11,6 +11,12 @@ export const FlairColorMap = {
     background: 'bg-secondary-yellow',
     icon: 'text-secondary-yellow',
   },
+  tertiaryYellow: {
+    borderHover: 'hover:border-tertiary-yellow',
+    border: 'border-tertiary-yellow',
+    background: 'bg-tertiary-yellow',
+    icon: 'text-tertiary-yellow',
+  },
   purple: {
     borderHover: 'hover:border-secondary-purple',
     border: 'border-secondary-purple',
@@ -22,6 +28,12 @@ export const FlairColorMap = {
     border: 'border-secondary-blue',
     background: 'bg-secondary-blue',
     icon: 'text-secondary-blue',
+  },
+  tertiaryBlue: {
+    borderHover: 'hover:border-tertiary-blue',
+    border: 'border-tertiary-blue',
+    background: 'bg-tertiary-blue',
+    icon: 'text-tertiary-blue',
   },
   green: {
     borderHover: 'hover:border-secondary-green',

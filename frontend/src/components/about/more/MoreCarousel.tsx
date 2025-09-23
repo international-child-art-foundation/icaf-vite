@@ -7,7 +7,7 @@ import {
 import { useState, useEffect } from 'react';
 import { moreOnOurSiteData } from '@/lib/moreOnOurSite';
 
-import CarouselArrowsDots from '../testimonials/CarouselArrowsDots';
+import CarouselArrowsDots from '../testimonial/CarouselArrowsDots';
 import { MoreCard } from './MoreCard';
 import Graphic from '@/assets/shared/images/about/more/Group 514888.svg';
 

@@ -4,7 +4,7 @@ import { CurvedImage } from './CurvedImage';
 import WhatWeWant from '@/components/about/WhatWeWant';
 import YourDonations from '@/components/about/YourDonations';
 // import Testimonials from '@/components/about/Testimonials/Testimonials';
-import { TestimonialsCarousel } from '@/components/about/testimonials/TestimonialsCarousel';
+import { TestimonialsCarousel } from '@/components/about/testimonial/TestimonialsCarousel';
 import { MoreCarousel } from '@/components/about/more/MoreCarousel';
 import ExploreOurProjects from '@/components/about/ExploreOurProjects';
 import HowWeDoIt from '@/components/about/HowWeDoIt';

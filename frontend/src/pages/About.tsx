@@ -2,7 +2,7 @@ import heroImage from '@/assets/shared/images/about/AboutUsHero.webp';
 import WhoWeAre from '@/components/about/WhoWeAre';
 import { CurvedImage } from './CurvedImage';
 import WhatWeWant from '@/components/about/WhatWeWant';
-import YourDonations from '@/components/about/YourDonations';
+import YourDonations from '@/components/shared/YourDonations';
 // import Testimonials from '@/components/about/Testimonials/Testimonials';
 import { TestimonialsCarousel } from '@/components/about/testimonial/TestimonialsCarousel';
 import { MoreCarousel } from '@/components/about/more/MoreCarousel';
@@ -38,9 +38,7 @@ export default function About() {
       {/* Explore Our Projects */}
 
       <TestimonialsCarousel />
-      <div className="px-6 lg:px-10 xl:px-20">
-        <YourDonations />
-      </div>
+      <YourDonations />
     </div>
   );
 }

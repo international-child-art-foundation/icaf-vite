@@ -11,6 +11,7 @@ import Impact from './pages/Impact';
 import Donate from './pages/Donate';
 import WorldChildrensFestival from './pages/WorldChildrensFestivalPage';
 import { Team } from './pages/Team';
+import { Sponsorship } from './pages/Sponsorship';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -41,6 +42,7 @@ export default function App() {
           <Route path="/about/impact" element={<Impact />} />
           <Route path="/about/team" element={<Team />} />
           <Route path="/donate" element={<Donate />} />
+          <Route path="/sponsorship" element={<Sponsorship />} />
         </Routes>
       </main>
       <Footer />

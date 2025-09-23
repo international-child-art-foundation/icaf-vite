@@ -7,7 +7,7 @@ import {
 import { testimonials } from '@/data/about/testimonials';
 import { TestimonialCard } from './TestimonialsCard';
 import { useState, useEffect } from 'react';
-import CarouselArrowsDots from './CarouselArrowsDots';
+import CarouselArrowsDots from '../../shared/CarouselArrowsDots';
 import { YellowBlob } from '@/assets/shared/images/about/YellowBlob';
 import { BlueBlob } from '@/assets/shared/images/about/BlueBlob';
 import { RedBlob } from '@/assets/shared/images/about/RedBlob';
@@ -33,7 +33,7 @@ export const TestimonialsCarousel = () => {
   const handleSelect = (index: number) => api?.scrollTo(index);
 
   return (
-    <section className="relative bg-white py-6 md:py-20">
+    <section className="relative select-none bg-white py-6 md:py-20">
       <h2 className="mb-10 text-center font-sans text-3xl font-bold lg:text-[40px]">
         Testimonials
       </h2>

@@ -45,7 +45,7 @@ module.exports = {
           red: 'hsl(var(--tertiary-red)  / <alpha-value>)',
           yellow: 'hsl(var(--tertiary-yellow)  / <alpha-value>)',
           green: 'hsl(var(--tertiary-green)  / <alpha-value>)',
-          green: 'hsl(var(--tertiary-purple)  / <alpha-value>)',
+          purple: 'hsl(var(--tertiary-purple)  / <alpha-value>)',
         },
         muted: {
           DEFAULT: 'hsl(var(--muted))',

@@ -5,21 +5,15 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel';
 import { useState, useEffect } from 'react';
-import { moreOnOurSiteData } from '@/data/about/moreOnOurSite';
+import CarouselArrowsDots from '../shared/CarouselArrowsDots';
+import { partnerTestimonialData } from '@/data/sponsorship/partnerTestimonials';
+import { PartnerTestimonialCard } from './PartnerTestimonialCard';
+import { useWindowSize } from 'usehooks-ts';
 
-import CarouselArrowsDots from '../../shared/CarouselArrowsDots';
-import { MoreCard } from './MoreCard';
-import Graphic from '@/assets/shared/images/about/more/Group 514888.svg';
-
-/**
- * This component is built on top of Shadcn's carousel with custom CarouselArrowsDots navigation
- * Each slide renders a <MoreCard /> with title, description, and image
- * Renders from the `moreOnOurSiteData` array located in lib folder
- */
-
-export const MoreCarousel = () => {
+export const PartnerTestimonialCarousel = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [api, setApi] = useState<CarouselApi>();
+  const size = useWindowSize();
 
   useEffect(() => {
     if (!api) {
@@ -38,17 +32,9 @@ export const MoreCarousel = () => {
   const handleSelect = (index: number) => api?.scrollTo(index);
 
   return (
-    <section className="relative h-full overflow-visible bg-white py-6 md:py-20">
-      {/*Decoration */}
-      <div className="pointer-events-none absolute bottom-0 left-[40%] w-[150%] -translate-x-1/2 sm:bottom-[-10%] sm:left-[50%] md:bottom-0 2xl:bottom-[-12%]">
-        <img
-          src={Graphic}
-          className="pointer-events-none h-auto w-full object-cover"
-        />
-      </div>
-
+    <section className="relative max-w-screen-2xl bg-white px-8 md:px-12 lg:px-16 xl:px-20">
       <h2 className="mb-10 text-center font-sans text-3xl font-bold lg:text-[40px]">
-        More On Our Site
+        What Partners Say
       </h2>
 
       <Carousel
@@ -57,19 +43,24 @@ export const MoreCarousel = () => {
           align: 'center',
           loop: true,
         }}
+        className="mx-auto"
       >
         <CarouselContent className="">
-          {moreOnOurSiteData.map((item) => {
+          {partnerTestimonialData.map((data) => {
             return (
-              <CarouselItem key={item.id}>
-                <MoreCard item={item} />
+              <CarouselItem key={data.id} className="overflow-hidden">
+                <PartnerTestimonialCard
+                  data={data}
+                  windowWidth={size.width}
+                  windowHeight={size.height}
+                />
               </CarouselItem>
             );
           })}
         </CarouselContent>
         <div className="md:py-4">
           <CarouselArrowsDots
-            items={moreOnOurSiteData}
+            items={partnerTestimonialData}
             onPrevious={handlePrevious}
             onNext={handleNext}
             onSelect={handleSelect}

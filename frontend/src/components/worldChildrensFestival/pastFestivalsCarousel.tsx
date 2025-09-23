@@ -5,7 +5,7 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel';
 import { useState, useEffect, useRef } from 'react';
-import CarouselArrowsDots from '@/components/about/testimonials/CarouselArrowsDots';
+import CarouselArrowsDots from '@/components/about/testimonial/CarouselArrowsDots';
 import { pastFestivalsData } from '@/data/wcf/pastFestivals';
 import PastFestivalsCarouselCard from './pastFestivalCarouselCard';
 import type { VideoHandle } from '../shared/VideoWrapper';

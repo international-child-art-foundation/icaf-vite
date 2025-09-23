@@ -6,12 +6,14 @@ export interface IContentCallout {
   color: ColorKey;
   description: ReactNode;
   content: ReactNode;
+  firework?: boolean;
+  fireworkClasses?: string;
   textOnLeft: boolean;
 }
 
 export interface IBrandCampaignCard {
   id: string;
-  mainImg: string;
+  mainImg?: string;
   logo?: string;
 }
 

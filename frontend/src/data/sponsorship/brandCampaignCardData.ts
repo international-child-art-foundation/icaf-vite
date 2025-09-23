@@ -23,4 +23,12 @@ export const brandCampaignCardData: IBrandCampaignCard[] = [
     mainImg: sponsorFaber,
     logo: FaberCastellLogo,
   },
+  // TODO: placeholder
+  {
+    id: 'placeholder1',
+  },
+  // TODO: placeholder
+  {
+    id: 'placeholder2',
+  },
 ];

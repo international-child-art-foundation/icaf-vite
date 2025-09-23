@@ -29,12 +29,6 @@ export const FlairColorMap = {
     background: 'bg-secondary-blue',
     icon: 'text-secondary-blue',
   },
-  tertiaryBlue: {
-    borderHover: 'hover:border-tertiary-blue',
-    border: 'border-tertiary-blue',
-    background: 'bg-tertiary-blue',
-    icon: 'text-tertiary-blue',
-  },
   green: {
     borderHover: 'hover:border-secondary-green',
     border: 'border-secondary-green',

@@ -5,6 +5,7 @@ import { SponsorBrandCarousel } from '@/components/sponsorship/SponsorBrandCarou
 import { BrandImpact } from '@/components/sponsorship/BrandImpact';
 import { SponsorshipCTA } from '@/components/sponsorship/SponsorshipCTA';
 import { PartnerTestimonialCarousel } from '@/components/sponsorship/PartnerTestimonialCarousel';
+import YourDonations from '@/components/shared/YourDonations';
 
 export const Sponsorship = () => {
   return (
@@ -17,6 +18,7 @@ export const Sponsorship = () => {
         <BrandImpact />
         <SponsorshipCTA />
         <PartnerTestimonialCarousel />
+        <YourDonations />
       </div>
     </div>
   );

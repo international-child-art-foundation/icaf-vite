@@ -1,8 +1,7 @@
 import handshake from '@/assets/sponsorship/handshake.svg';
-import { brandCampaignCardData } from '@/data/sponsorship/brandCampaignCardData';
-import { BrandCampaignCard } from './BrandCampaignCard';
 import { ExperimentalBrandingCarousel } from './ExperimentalBrandingCarousel';
 import groupIcon from '@/assets/sponsorship/GroupIcon.svg';
+import { BrandImpactCarousel } from './BrandImpactCarousel';
 
 export const BrandImpact = () => {
   return (
@@ -16,11 +15,7 @@ export const BrandImpact = () => {
           Cause Marketing
         </p>
       </div>
-      <div className="grid grid-cols-3 grid-rows-1 gap-4">
-        {brandCampaignCardData.map((data) => (
-          <BrandCampaignCard key={data.id} {...data} />
-        ))}
-      </div>
+      <BrandImpactCarousel />
       <div>
         <div className="bg-tertiary-blue flex flex-col items-center gap-6 rounded-[20px] py-6 text-center md:gap-10 md:py-10">
           <img src={groupIcon} className="mx-auto" />

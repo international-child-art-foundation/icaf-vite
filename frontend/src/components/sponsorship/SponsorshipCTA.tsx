@@ -1,6 +1,4 @@
-import { Button } from '../ui/button';
-import { HeartIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import DonateButton from '@/components/ui/donateButton';
 
 export const SponsorshipCTA = () => {
   return (
@@ -13,25 +11,10 @@ export const SponsorshipCTA = () => {
           Let’s build a peaceful, creative, and caring world with children’s
           help.
         </p>
-        <Button
-          variant="secondary"
-          size="lg"
-          className="mx-auto rounded-[40px]"
-        >
-          <div className="flex flex-row gap-2 px-2">
-            <HeartIcon
-              strokeWidth={2}
-              className="!h-6 !w-6 stroke-black lg:!h-6 lg:!w-6"
-            />
-
-            <Link
-              className="font-open-sans text-base font-semibold"
-              to="/donate"
-            >
-              Sponsor our campaign
-            </Link>
-          </div>
-        </Button>
+        <DonateButton
+          className="mb-2 lg:h-14 lg:text-base"
+          text="Support Children's Creativity"
+        />
       </div>
     </div>
   );

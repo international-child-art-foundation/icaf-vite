@@ -16,6 +16,8 @@ export const theoryOfChange: IContentCallout = {
   ),
   content: <RoundedBorderImg img={sponsorArt1} color="red" />,
   color: 'red',
+  firework: true,
+  fireworkClasses: 'absolute -bottom-12 lg:-top-16 -right-12 ',
   textOnLeft: false,
 };
 
@@ -30,6 +32,8 @@ export const outreach: IContentCallout = {
   ),
   content: <RoundedBorderImg img={sponsorArt2} color="blue" />,
   color: 'blue',
+  firework: true,
+  fireworkClasses: 'absolute -bottom-12 lg:-bottom-20 -left-20',
   textOnLeft: true,
 };
 
@@ -76,5 +80,8 @@ export const alignment: IContentCallout = {
   ),
   content: <FiveCards />,
   color: 'green',
+  firework: true,
+  fireworkClasses:
+    'absolute bottom-0 lg:-top-12 lg:-left-12 right-0 sm:w-32 w-20',
   textOnLeft: true,
 };

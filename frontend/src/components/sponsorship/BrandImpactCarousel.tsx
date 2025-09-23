@@ -6,10 +6,10 @@ import {
 } from '@/components/ui/carousel';
 import { useState, useEffect } from 'react';
 import CarouselArrowsDots from '../shared/CarouselArrowsDots';
-import { experimentalBrandingCarouselData } from '@/data/sponsorship/experimentalBranding';
-import { ExperimentalBrandingCard } from './ExperimentalBrandingCard';
+import { brandCampaignCardData } from '@/data/sponsorship/brandCampaignCardData';
+import { BrandCampaignCard } from './BrandCampaignCard';
 
-export const ExperimentalBrandingCarousel = () => {
+export const BrandImpactCarousel = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [api, setApi] = useState<CarouselApi>();
 
@@ -40,17 +40,20 @@ export const ExperimentalBrandingCarousel = () => {
         className="mx-auto"
       >
         <CarouselContent className="">
-          {experimentalBrandingCarouselData.map((data) => {
+          {brandCampaignCardData.map((data, i) => {
             return (
-              <CarouselItem key={data.id} className="pl-4">
-                <ExperimentalBrandingCard data={data} />
+              <CarouselItem
+                key={data.id}
+                className="basis-[70%] pl-4 md:basis-[43%]"
+              >
+                <BrandCampaignCard data={data} isActive={selectedIndex === i} />
               </CarouselItem>
             );
           })}
         </CarouselContent>
         <div className="pt-4">
           <CarouselArrowsDots
-            items={experimentalBrandingCarouselData}
+            items={brandCampaignCardData}
             onPrevious={handlePrevious}
             onNext={handleNext}
             onSelect={handleSelect}

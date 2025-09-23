@@ -10,14 +10,14 @@ export const ExperimentalBrandingCard = ({
 }: ExperimentalBrandingCardProps) => {
   return (
     <div
-      className={`relative grid h-[650px] grid-rows-10 overflow-hidden rounded-3xl border-4 ${FlairColorMap[data.color].border}`}
+      className={`relative grid h-[650px] grid-rows-10 overflow-hidden rounded-3xl border-4 ${FlairColorMap[data.color].border} select-none`}
     >
       <div className="row-span-8 row-start-1">
         {data.largeImgSrc ? (
           <img
             src={data.largeImgSrc}
             alt=""
-            className="h-full w-full object-cover"
+            className="min-h-full min-w-full object-cover"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gray-300">

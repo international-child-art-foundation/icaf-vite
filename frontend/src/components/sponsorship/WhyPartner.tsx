@@ -8,7 +8,7 @@ import { ContentCallout } from './ContentCallout';
 
 export const WhyPartner = () => {
   return (
-    <div className="flex flex-col gap-20">
+    <div className="relative flex flex-col gap-20 overflow-hidden">
       <div className="flex flex-col gap-4 text-center">
         <p className="font-montserrat text-[40px] font-extrabold">
           Why Partner with ICAF
@@ -18,7 +18,7 @@ export const WhyPartner = () => {
           business.
         </p>
       </div>
-      <div className="flex flex-col gap-24">
+      <div className="relative flex flex-col gap-24">
         <ContentCallout {...theoryOfChange} />
         <ContentCallout {...outreach} />
         <ContentCallout {...whatWeDo} />

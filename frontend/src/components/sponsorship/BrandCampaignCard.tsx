@@ -1,4 +1,4 @@
-import { IBrandCampaignCard } from '@/types/SponsorshipBrandCampaignCard';
+import { IBrandCampaignCard } from '@/types/SponsorshipTypes';
 
 export const BrandCampaignCard = ({ mainImg, logo }: IBrandCampaignCard) => {
   return (

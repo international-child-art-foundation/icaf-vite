@@ -1,5 +1,5 @@
 import { FlairColorMap } from '../shared/FlairColorMap';
-import { IContentCallout } from '@/types/ContentCalloutTypes';
+import { IContentCallout } from '@/types/SponsorshipTypes';
 import { useWindowSize } from 'usehooks-ts';
 
 export const ContentCallout = ({

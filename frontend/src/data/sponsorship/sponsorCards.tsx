@@ -1,4 +1,4 @@
-import { ISponsorCard } from '@/types/SponsorCardTypes';
+import { ISponsorCard } from '@/types/SponsorshipTypes';
 import { HealthIcon } from '@/assets/shared/icons/HealthIcon';
 import { EducationIcon } from '@/assets/shared/icons/EducationIcon';
 import { GenderEqualityIcon } from '@/assets/shared/icons/GenderEqualityIcon';

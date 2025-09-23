@@ -1,4 +1,4 @@
-import { ISponsorCard } from '@/types/SponsorCardTypes';
+import { ISponsorCard } from '@/types/SponsorshipTypes';
 import { FlairColorMap } from '../shared/FlairColorMap';
 
 export const GoalCard = ({ color, text, Icon }: ISponsorCard) => {

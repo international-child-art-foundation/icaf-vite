@@ -7,7 +7,7 @@ import {
 import { testimonials } from '@/lib/testimonials';
 import { TestimonialCard } from './TestimonialsCard';
 import { useState, useEffect } from 'react';
-import CarouselArrowsDots from './CarouselArrowsDots';
+import CarouselArrowsDots from '../../shared/CarouselArrowsDots';
 import { YellowBlob } from '@/assets/shared/images/about/YellowBlob';
 import { BlueBlob } from '@/assets/shared/images/about/BlueBlob';
 import { RedBlob } from '@/assets/shared/images/about/RedBlob';

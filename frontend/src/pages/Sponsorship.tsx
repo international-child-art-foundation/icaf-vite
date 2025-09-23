@@ -3,6 +3,8 @@ import { WhyPartner } from '@/components/sponsorship/WhyPartner';
 import { SponsorImpact } from '@/components/sponsorship/SponsorImpact';
 import { SponsorBrandCarousel } from '@/components/sponsorship/SponsorBrandCarousel';
 import { BrandImpact } from '@/components/sponsorship/BrandImpact';
+import { SponsorshipCTA } from '@/components/sponsorship/SponsorshipCTA';
+import { PartnerTestimonialCarousel } from '@/components/sponsorship/PartnerTestimonialCarousel';
 
 export const Sponsorship = () => {
   return (
@@ -13,9 +15,8 @@ export const Sponsorship = () => {
         <SponsorImpact />
         <SponsorBrandCarousel />
         <BrandImpact />
-        {/* 
-      <SponsorshipCTA />
-      <SponsorshipPartnerCarousel /> */}
+        <SponsorshipCTA />
+        <PartnerTestimonialCarousel />
       </div>
     </div>
   );

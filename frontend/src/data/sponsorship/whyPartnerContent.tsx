@@ -1,4 +1,4 @@
-import { IContentCallout } from '@/types/ContentCalloutTypes';
+import { IContentCallout } from '@/types/SponsorshipTypes';
 import sponsorArt1 from '@/assets/sponsorship/SponsorArt1.webp';
 import sponsorArt2 from '@/assets/sponsorship/SponsorArt2.webp';
 import sponsorArt3 from '@/assets/sponsorship/SponsorArt3.webp';

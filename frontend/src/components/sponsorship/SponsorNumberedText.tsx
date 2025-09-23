@@ -1,4 +1,4 @@
-import { ISponsorImpact } from '@/types/SponsorImpactTypes';
+import { ISponsorImpact } from '@/types/SponsorshipTypes';
 import { FlairColorMap } from '../shared/FlairColorMap';
 
 interface SponsorNumberedTextProps {

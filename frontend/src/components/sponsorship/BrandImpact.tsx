@@ -1,6 +1,8 @@
 import handshake from '@/assets/sponsorship/handshake.svg';
-import { brandCampaignCardData } from '@/data/sponsorship/BrandCampaignCardData';
+import { brandCampaignCardData } from '@/data/sponsorship/brandCampaignCardData';
 import { BrandCampaignCard } from './BrandCampaignCard';
+import { ExperimentalBrandingCarousel } from './ExperimentalBrandingCarousel';
+import groupIcon from '@/assets/sponsorship/GroupIcon.svg';
 
 export const BrandImpact = () => {
   return (
@@ -18,6 +20,16 @@ export const BrandImpact = () => {
         {brandCampaignCardData.map((data) => (
           <BrandCampaignCard key={data.id} {...data} />
         ))}
+      </div>
+      <div>
+        <div className="bg-tertiary-blue flex flex-col items-center gap-6 rounded-[20px] py-6 text-center md:gap-10 md:py-10">
+          <img src={groupIcon} className="mx-auto" />
+          <p className="font-montserrat text-2xl font-semibold text-white">
+            Experimental Branding
+          </p>
+        </div>
+
+        <ExperimentalBrandingCarousel />
       </div>
     </div>
   );

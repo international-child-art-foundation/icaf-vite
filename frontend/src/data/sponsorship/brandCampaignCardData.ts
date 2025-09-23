@@ -1,4 +1,4 @@
-import { IBrandCampaignCard } from '@/types/SponsorshipBrandCampaignCard';
+import { IBrandCampaignCard } from '@/types/SponsorshipTypes';
 import sponsorFourSeasons from '@/assets/sponsorship/SponsorFourSeasons.webp';
 import sponsorMadewell from '@/assets/sponsorship/SponsorMadewell.webp';
 import sponsorFaber from '@/assets/sponsorship/SponsorFaber.webp';

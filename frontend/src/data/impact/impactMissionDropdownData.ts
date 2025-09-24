@@ -1,7 +1,7 @@
 import { IAccordionCard } from '@/types/AccordionCardTypes';
 import { HelpingHandIcon } from '@/assets/shared/icons/HelpingHandIcon';
 import { EducationIcon } from '@/assets/shared/icons/EducationIcon';
-import { InequitiesIcon } from '@/assets/shared/icons/InequitiesIcon';
+import { GroupIcon } from '@/assets/shared/icons/GroupIcon';
 import { HealthIcon } from '@/assets/shared/icons/HealthIcon';
 import { GenderEqualityIcon } from '@/assets/shared/icons/GenderEqualityIcon';
 import { PeaceIcon } from '@/assets/shared/icons/PeaceIcon';
@@ -26,7 +26,7 @@ const MissionDropdownData: IAccordionCard[] = [
   {
     id: 'reducing-inequities',
     title: 'Reducing Inequities',
-    Icon: InequitiesIcon,
+    Icon: GroupIcon,
     color: 'purple',
     extendedDescription:
       'Our global reach ensures that children from diverse backgrounds, including those in underserved communities, have access to art education and creative opportunities. This helps bridge the gap between different socioeconomic groups and promotes inclusivity.',

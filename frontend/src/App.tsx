@@ -12,6 +12,7 @@ import Donate from './pages/Donate';
 import WorldChildrensFestival from './pages/WorldChildrensFestivalPage';
 import { Team } from './pages/Team';
 import { Sponsorship } from './pages/Sponsorship';
+import { HealingArts } from './pages/HealingArts';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -37,6 +38,7 @@ export default function App() {
             path="/programs/childart-magazine"
             element={<ChildArtPage />}
           />
+          <Route path="/programs/healing-arts" element={<HealingArts />} />
           <Route path="/about/partners" element={<Partners />} />
           <Route path="/about" element={<About />} />
           <Route path="/about/impact" element={<Impact />} />

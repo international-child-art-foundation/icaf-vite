@@ -2,7 +2,7 @@ import { ISponsorCard } from '@/types/SponsorshipTypes';
 import { HealthIcon } from '@/assets/shared/icons/HealthIcon';
 import { EducationIcon } from '@/assets/shared/icons/EducationIcon';
 import { GenderEqualityIcon } from '@/assets/shared/icons/GenderEqualityIcon';
-import { InequitiesIcon } from '@/assets/shared/icons/InequitiesIcon';
+import { GroupIcon } from '@/assets/shared/icons/GroupIcon';
 import { PeaceIcon } from '@/assets/shared/icons/PeaceIcon';
 
 export const healthSponsorCard: ISponsorCard = {
@@ -25,7 +25,7 @@ export const genderEqualitySponsorCard: ISponsorCard = {
 
 export const inequitiesSponsorCard: ISponsorCard = {
   color: 'blue',
-  Icon: InequitiesIcon,
+  Icon: GroupIcon,
   text: 'Reduce inequality',
 };
 

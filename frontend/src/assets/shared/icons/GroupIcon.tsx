@@ -1,8 +1,8 @@
-export type InequitiesIconProps = {
+export type GroupIconProps = {
   colorClass: string; // expects a tailwind variable as class (e.g. text-secondary-blue)
 };
 
-export const InequitiesIcon = ({ colorClass }: InequitiesIconProps) => {
+export const GroupIcon = ({ colorClass }: GroupIconProps) => {
   return (
     <svg
       width="80"

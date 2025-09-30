@@ -9,6 +9,8 @@ import LegoLogo from '@/assets/sponsorship/LegoLogo.webp';
 import MadewellLogo from '@/assets/sponsorship/MadewellLogo.webp';
 import SafiloLogo from '@/assets/sponsorship/Safilo.webp';
 import WacomLogo from '@/assets/sponsorship/Wacom.webp';
+import IspoLogo from '@/assets/sponsorship/Ispo_logo_resized.webp';
+import CannesLogo from '@/assets/sponsorship/CannesLions_Logo-1_resized.webp';
 
 export const sponsorCarouselImages: ICarouselImage[] = [
   {
@@ -51,4 +53,6 @@ export const sponsorCarouselImages: ICarouselImage[] = [
     id: 10,
     image: WacomLogo,
   },
+  { id: 11, image: CannesLogo },
+  { id: 12, image: IspoLogo },
 ];

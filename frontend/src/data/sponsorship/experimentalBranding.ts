@@ -1,6 +1,12 @@
 import { TExperimentalBrandingCarousel } from '@/types/SponsorshipTypes';
 import legoExhibitImg from '@/assets/sponsorship/LegoExhibit.webp';
 import legoLogo from '@/assets/sponsorship/LegoLogo.webp';
+import anthropologieLogo from '@/assets/sponsorship/anthropologie.svg';
+import anthropologiePromotion from '@/assets/sponsorship/HolidayAnimals_small.webp';
+import rothLogo from '@/assets/sponsorship/Roth Gallery logo.webp';
+import rothPromotion from '@/assets/sponsorship/Roth Gallery.webp';
+import cannesLionsPromotion from '@/assets/sponsorship/Cannes Lions.webp';
+import cannesLionsLogo from '@/assets/sponsorship/cannes-lions-logo.svg';
 
 export const experimentalBrandingCarouselData: TExperimentalBrandingCarousel = [
   {
@@ -9,24 +15,22 @@ export const experimentalBrandingCarouselData: TExperimentalBrandingCarousel = [
     logoSrc: legoLogo,
     color: 'tertiaryBlue',
   },
-  // TODO: Placeholder
   {
-    id: 'placeholder1',
-    color: 'blue',
+    id: 'anthro',
+    color: 'green',
+    largeImgSrc: anthropologiePromotion,
+    logoSrc: anthropologieLogo,
   },
-  // TODO: Placeholder
   {
-    id: 'placeholder2',
-    color: 'blue',
+    id: 'roth-gallery',
+    color: 'red',
+    largeImgSrc: rothPromotion,
+    logoSrc: rothLogo,
   },
-  // TODO: Placeholder
   {
-    id: 'placeholder3',
-    color: 'blue',
-  },
-  // TODO: Placeholder
-  {
-    id: 'placeholder4',
-    color: 'blue',
+    id: 'cannes-lions',
+    color: 'purple',
+    largeImgSrc: cannesLionsPromotion,
+    logoSrc: cannesLionsLogo,
   },
 ];

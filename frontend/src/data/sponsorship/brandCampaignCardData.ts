@@ -6,6 +6,8 @@ import sponsorFaber from '@/assets/sponsorship/SponsorFaber.webp';
 import FaberCastellLogo from '@/assets/sponsorship/FaberCastellLogo.webp';
 import FourSeasonsLogo from '@/assets/sponsorship/FourSeasonsLogo.webp';
 import MadewellLogo from '@/assets/sponsorship/MadewellLogo.webp';
+import AnthroLogo from '@/assets/sponsorship/Anthropologie.webp';
+import AnthroContent from '@/assets/sponsorship/Anthro 1.webp';
 
 export const brandCampaignCardData: IBrandCampaignCard[] = [
   {
@@ -23,12 +25,9 @@ export const brandCampaignCardData: IBrandCampaignCard[] = [
     mainImg: sponsorFaber,
     logo: FaberCastellLogo,
   },
-  // TODO: placeholder
   {
-    id: 'placeholder1',
-  },
-  // TODO: placeholder
-  {
-    id: 'placeholder2',
+    id: 'anthropologie',
+    mainImg: AnthroContent,
+    logo: AnthroLogo,
   },
 ];

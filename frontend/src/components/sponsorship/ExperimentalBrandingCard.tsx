@@ -12,7 +12,6 @@ export const ExperimentalBrandingCard = ({
   data,
 }: ExperimentalBrandingCardProps) => {
   const [open, setOpen] = useState(false);
-
   return (
     <div
       className={`relative grid h-[650px] grid-rows-10 overflow-hidden rounded-3xl border-4 ${FlairColorMap[data.color].border} select-none`}

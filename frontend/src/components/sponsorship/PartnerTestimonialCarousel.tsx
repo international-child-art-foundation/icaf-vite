@@ -48,7 +48,7 @@ export const PartnerTestimonialCarousel = () => {
         <CarouselContent className="">
           {partnerTestimonialData.map((data) => {
             return (
-              <CarouselItem key={data.id} className="overflow-hidden">
+              <CarouselItem key={data.id} className="">
                 <PartnerTestimonialCard
                   data={data}
                   windowWidth={size.width}

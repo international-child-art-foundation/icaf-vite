@@ -16,11 +16,11 @@ export const PartnerTestimonialCard = ({
   return (
     <div className="relative select-none py-12">
       <div className="bg-background relative z-10 mx-auto flex min-h-[470px] w-[90%] overflow-hidden rounded-3xl py-8 shadow-[2px_4px_12px_0px_rgba(0,0,0,0.25)] md:min-h-[380px] md:py-8 lg:py-12 xl:py-16">
-        {data.content && data.speakerTitle ? (
+        {data.content && data.speakerName ? (
           <div className="mx-auto flex w-[90%] flex-col gap-5 md:w-[90%] lg:w-[80%] xl:w-[77%]">
             <div className="flex flex-col gap-2">
               <div
-                className={`overflow-hidden rounded-full border-2 ${FlairColorMap[data.color].border} mx-auto h-14 w-14`}
+                className={`content-center overflow-hidden rounded-full border-2 ${FlairColorMap[data.color].border} mx-auto h-14 w-14`}
               >
                 <img src={data.logo} className="object-cover" />
               </div>

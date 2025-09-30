@@ -44,9 +44,9 @@ export const SponsorBrandCarousel = () => {
             className="w-full"
           >
             <div className="overflow-hidden rounded-lg pr-0">
-              <CarouselContent className="flex justify-around">
+              <CarouselContent className="flex select-none justify-around">
                 {sponsorCarouselImages.map((logo) => (
-                  <CarouselItem key={logo.id} className="basis-1/8">
+                  <CarouselItem key={logo.id} className="basis-1/8 my-auto">
                     <div className="w-full overflow-hidden rounded-md px-6">
                       <img src={logo.image} className="w-full object-cover" />
                     </div>

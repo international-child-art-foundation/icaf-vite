@@ -9,6 +9,8 @@ export interface IGoalCard {
 }
 
 export interface IResourceLink {
+  id: string;
   title: string;
-  resourceType?: string;
+  type?: string;
+  href: string;
 }

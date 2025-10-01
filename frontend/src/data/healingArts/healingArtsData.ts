@@ -1,4 +1,4 @@
-import { IGoalCard } from '@/types/HealingArtsTypes';
+import { IGoalCard, IResourceLink } from '@/types/HealingArtsTypes';
 import { LeafIcon } from '@/assets/shared/icons/LeafIcon';
 import { HeartsIcon } from '@/assets/shared/icons/HeartsIcon';
 import { HeartHeadIcon } from '@/assets/shared/icons/HeartHeadIcon';
@@ -38,5 +38,38 @@ export const GoalCards: IGoalCard[] = [
     title: 'Restore Resilience',
     description:
       'Accelerating emotional healing to nurture optimism and leadership. ',
+  },
+];
+
+export const ResourceLinks: IResourceLink[] = [
+  {
+    id: 'thanksgiving-in-palestine',
+    title: 'Thanksgiving in Palestine',
+    type: 'PDF',
+    href: '/doc/thanksgiving_in_palestine.pdf',
+  },
+  {
+    id: 'placeholder1',
+    title: 'Thanksgiving in Palestine',
+    type: 'PDF',
+    href: '/doc/thanksgiving_in_palestine.pdf',
+  },
+  {
+    id: 'placeholder2',
+    title: 'Thanksgiving in Palestine',
+    type: 'PDF',
+    href: '/doc/thanksgiving_in_palestine.pdf',
+  },
+  {
+    id: 'placeholder3',
+    title: 'Thanksgiving in Palestine',
+    type: 'PDF',
+    href: '/doc/thanksgiving_in_palestine.pdf',
+  },
+  {
+    id: 'placeholder4',
+    title: 'Thanksgiving in Palestine',
+    type: 'PDF',
+    href: '/doc/thanksgiving_in_palestine.pdf',
   },
 ];

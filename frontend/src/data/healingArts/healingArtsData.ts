@@ -46,7 +46,7 @@ export const ResourceLinks: IResourceLink[] = [
     id: 'thanksgiving-in-palestine',
     title: 'Thanksgiving in Palestine',
     type: 'PDF',
-    href: '/doc/thanksgiving_in_palestine.pdf',
+    href: '/documents/thanksgiving_in_palestine.pdf',
   },
   // TODO: Replace placeholder
   // Find pakistan earthquake relief effort pdf
@@ -59,18 +59,18 @@ export const ResourceLinks: IResourceLink[] = [
     id: 'katrina-healing-arts',
     title: 'Katrina Healing Arts',
     type: 'Teacher’s Perspective',
-    href: "/doc/Katrina Healing Arts Program - A Schoolteacher's Perspective.pdf",
+    href: "/documents/Katrina Healing Arts Program - A Schoolteacher's Perspective.pdf",
   },
   {
     id: 'who-mental-health',
     title: 'WHO: Expanding Mental Health Awareness in Youth',
     type: 'PDF',
-    href: '/doc/Expanding Awareness of Mental Health in Childhood and Adolescence.pdf',
+    href: '/documents/Expanding Awareness of Mental Health in Childhood and Adolescence.pdf',
   },
   {
     id: 'destruction-reconstruction-prevention',
     title: 'Destruction, Reconstruction & Prevention – World Bank',
     type: 'PDF',
-    href: '/doc/Destruction, Reconstruction & Prevention.pdf',
+    href: '/documents/Destruction, Reconstruction & Prevention.pdf',
   },
 ];

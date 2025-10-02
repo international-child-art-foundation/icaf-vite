@@ -115,13 +115,13 @@ jobs:
           RewriteEngine On
           Options -MultiViews
           RewriteRule ^ - [E=RELEASE:${{ needs.build_frontend.outputs.release_id }}]
-          RewriteRule ^releases/ - [L]
+          RewriteRule ^(?:releases|magazines|documents)/ - [L]
           RewriteCond %{ENV:APP_REWRITTEN} !=1
-          RewriteCond %{REQUEST_URI} !^/releases/
+          RewriteCond %{REQUEST_URI} !^/(?:releases|magazines|documents)/
           RewriteCond %{REQUEST_URI} \.(?:css|js|mjs|map|png|jpe?g|gif|svg|webp|ico|json|txt|xml|webmanifest|woff2?|ttf|eot|mp4|webm|ogv)$ [NC]
           RewriteRule ^ /releases/%{ENV:RELEASE}%{REQUEST_URI} [E=APP_REWRITTEN:1,PT,L]
           RewriteCond %{ENV:APP_REWRITTEN} !=1
-          RewriteCond %{REQUEST_URI} !^/releases/
+          RewriteCond %{REQUEST_URI} !^/(?:releases|magazines|documents)/
           RewriteRule ^ /releases/%{ENV:RELEASE}/index.html [E=APP_REWRITTEN:1,PT,L]
 
           <IfModule mod_headers.c>

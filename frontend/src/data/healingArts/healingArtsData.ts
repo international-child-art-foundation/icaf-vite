@@ -1,4 +1,4 @@
-import { IGoalCard } from '@/types/HealingArtsTypes';
+import { IGoalCard, IResourceLink } from '@/types/HealingArtsTypes';
 import { LeafIcon } from '@/assets/shared/icons/LeafIcon';
 import { HeartsIcon } from '@/assets/shared/icons/HeartsIcon';
 import { HeartHeadIcon } from '@/assets/shared/icons/HeartHeadIcon';
@@ -38,5 +38,39 @@ export const GoalCards: IGoalCard[] = [
     title: 'Restore Resilience',
     description:
       'Accelerating emotional healing to nurture optimism and leadership. ',
+  },
+];
+
+export const ResourceLinks: IResourceLink[] = [
+  {
+    id: 'thanksgiving-in-palestine',
+    title: 'Thanksgiving in Palestine',
+    type: 'PDF',
+    href: '/doc/thanksgiving_in_palestine.pdf',
+  },
+  // TODO: Replace placeholder
+  // Find pakistan earthquake relief effort pdf
+  {
+    id: 'placeholder',
+    title: 'Pakistan’s Earthquake Relief Efforts',
+    type: 'PDF',
+  },
+  {
+    id: 'katrina-healing-arts',
+    title: 'Katrina Healing Arts',
+    type: 'Teacher’s Perspective',
+    href: "/doc/Katrina Healing Arts Program - A Schoolteacher's Perspective.pdf",
+  },
+  {
+    id: 'who-mental-health',
+    title: 'WHO: Expanding Mental Health Awareness in Youth',
+    type: 'PDF',
+    href: '/doc/Expanding Awareness of Mental Health in Childhood and Adolescence.pdf',
+  },
+  {
+    id: 'destruction-reconstruction-prevention',
+    title: 'Destruction, Reconstruction & Prevention – World Bank',
+    type: 'PDF',
+    href: '/doc/Destruction, Reconstruction & Prevention.pdf',
   },
 ];

@@ -48,28 +48,29 @@ export const ResourceLinks: IResourceLink[] = [
     type: 'PDF',
     href: '/doc/thanksgiving_in_palestine.pdf',
   },
+  // TODO: Replace placeholder
+  // Find pakistan earthquake relief effort pdf
   {
-    id: 'placeholder1',
-    title: 'Thanksgiving in Palestine',
+    id: 'placeholder',
+    title: 'Pakistan’s Earthquake Relief Efforts',
     type: 'PDF',
-    href: '/doc/thanksgiving_in_palestine.pdf',
   },
   {
-    id: 'placeholder2',
-    title: 'Thanksgiving in Palestine',
-    type: 'PDF',
-    href: '/doc/thanksgiving_in_palestine.pdf',
+    id: 'katrina-healing-arts',
+    title: 'Katrina Healing Arts',
+    type: 'Teacher’s Perspective',
+    href: "/doc/Katrina Healing Arts Program - A Schoolteacher's Perspective.pdf",
   },
   {
-    id: 'placeholder3',
-    title: 'Thanksgiving in Palestine',
+    id: 'who-mental-health',
+    title: 'WHO: Expanding Mental Health Awareness in Youth',
     type: 'PDF',
-    href: '/doc/thanksgiving_in_palestine.pdf',
+    href: '/doc/Expanding Awareness of Mental Health in Childhood and Adolescence.pdf',
   },
   {
-    id: 'placeholder4',
-    title: 'Thanksgiving in Palestine',
+    id: 'destruction-reconstruction-prevention',
+    title: 'Destruction, Reconstruction & Prevention – World Bank',
     type: 'PDF',
-    href: '/doc/thanksgiving_in_palestine.pdf',
+    href: '/doc/Destruction, Reconstruction & Prevention.pdf',
   },
 ];

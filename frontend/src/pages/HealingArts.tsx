@@ -3,6 +3,7 @@ import { ProgramPhilosophy } from '@/components/healingArts/ProgramPhilosophy';
 import { AidMap } from '@/components/healingArts/AidMap';
 import { ImpactVideo } from '@/components/healingArts/ImpactVideo';
 import { AchievementsAndResources } from '@/components/healingArts/AchievementsAndResources';
+import YourDonations from '@/components/shared/YourDonations';
 
 export const HealingArts = () => {
   return (
@@ -13,6 +14,9 @@ export const HealingArts = () => {
         <AidMap />
         <ImpactVideo />
         <AchievementsAndResources />
+      </div>
+      <div className="mt-12">
+        <YourDonations />
       </div>
     </div>
   );

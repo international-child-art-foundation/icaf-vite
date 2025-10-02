@@ -33,10 +33,10 @@ export const ImpactVideoThreeRows = () => {
           <div className="relative overflow-hidden rounded-xl">
             <img
               src={healingArtsImg}
-              className="rounded-[16px] object-contain"
+              className="mx-auto rounded-[16px] object-contain"
             />
           </div>
-          <Button size="lg" className="self-start rounded-full px-12">
+          <Button size="lg" className="mx-auto self-start rounded-full px-12">
             <Link to="/gallery" className="font-sans text-xl">
               View art gallery
             </Link>
@@ -69,10 +69,10 @@ export const ImpactVideoTwoRows = () => {
               </Link>
             </Button>
           </div>
-          <div className="relative overflow-hidden rounded-xl">
+          <div className="relative ml-auto mr-0 overflow-hidden rounded-xl">
             <img
               src={healingArtsImg}
-              className="max-h-full w-full rounded-[16px] object-contain"
+              className="ml-auto mr-0 max-h-full rounded-[16px] object-contain"
             />
           </div>
         </div>

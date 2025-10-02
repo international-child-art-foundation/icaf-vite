@@ -12,5 +12,5 @@ export interface IResourceLink {
   id: string;
   title: string;
   type?: string;
-  href: string;
+  href?: string;
 }

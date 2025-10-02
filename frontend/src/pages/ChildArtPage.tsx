@@ -4,6 +4,9 @@ import MagazineCarousel from '../components/childArt/MagazineCarousel';
 import magazineCoverLarge from '@/assets/shared/images/navigation/programs/childArtMagazine.webp';
 
 import DonateButtonPartnersPage from '@/components/ui/donateButtonPartnersPage';
+import DonationCTA from '@/components/shared/DonationCTA';
+import BackIssueGrid from '@/components/childArt/BackIssueGrid';
+import TestimonialBlock from '@/components/childArt/TestimonialBlock';
 
 export default function ChildArtPage() {
   return (
@@ -48,6 +51,13 @@ export default function ChildArtPage() {
       <div className="mt-0 w-full">
         <MagazineCarousel />
       </div>
+
+      <BackIssueGrid />
+
+      <TestimonialBlock />
+
+      {/* Donation CTA Section */}
+      <DonationCTA />
     </div>
   );
 }

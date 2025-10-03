@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Button } from '../ui/button';
-import { VideoWrapperPlaceholder } from '../shared/VideoWrapperPlaceholder';
+import { VideoWrapper } from '../shared/VideoWrapper';
 import healingArtsImg from '@/assets/shared/images/navigation/programs/healingArtsProgram_smaller.webp';
 import { useWindowSize } from 'usehooks-ts';
+import healingArtsVideo from '@/assets/healingArts/healing-arts.mp4';
+import healingArtsThumb from '@/assets/healingArts/healing-arts-thumb.webp';
 
 export const ImpactVideo = () => {
   const size = useWindowSize();
@@ -14,12 +16,11 @@ export const ImpactVideo = () => {
 };
 
 export const ImpactVideoThreeRows = () => {
-  // TODO: Replace VideoWrapperPlaceholder with actual video
   return (
     <div>
       <div className="relative flex w-full flex-col gap-8 overflow-hidden rounded-xl 2xl:flex-row">
         <div className="relative h-full w-full overflow-hidden rounded-xl 2xl:basis-[70%]">
-          <VideoWrapperPlaceholder />
+          <VideoWrapper src={healingArtsVideo} thumbnail={healingArtsThumb} />
         </div>
         <div className="flex h-auto w-full flex-col justify-between gap-4 overflow-hidden rounded-[20px] bg-[#DFE7F8] p-8 2xl:basis-[30%]">
           <div className="relative flex flex-col gap-10">
@@ -48,12 +49,11 @@ export const ImpactVideoThreeRows = () => {
 };
 
 export const ImpactVideoTwoRows = () => {
-  // TODO: Replace VideoWrapperPlaceholder with actual video
   return (
     <div>
       <div className="relative flex flex-col gap-8 overflow-hidden rounded-xl 2xl:flex-row">
         <div className="relative h-full w-full overflow-hidden rounded-xl">
-          <VideoWrapperPlaceholder />
+          <VideoWrapper src={healingArtsVideo} thumbnail={healingArtsThumb} />
         </div>
         <div className="flex h-[250px] w-full flex-row justify-between gap-4 overflow-hidden rounded-[20px] bg-[#DFE7F8] p-8 2xl:h-auto 2xl:w-[400px] 2xl:flex-col 2xl:gap-4">
           <div className="relative flex flex-col gap-10">

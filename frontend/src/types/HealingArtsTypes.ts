@@ -8,9 +8,12 @@ export interface IGoalCard {
   description: string;
 }
 
+type TBehavior = 'link' | 'modal';
+
 export interface IResourceLink {
   id: string;
   title: string;
-  type?: string;
+  behavior: TBehavior;
+  fileType?: string;
   href?: string;
 }

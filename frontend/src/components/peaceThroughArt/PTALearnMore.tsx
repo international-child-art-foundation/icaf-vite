@@ -15,6 +15,8 @@ export const PTALearnMore = () => {
                 <a
                   className="font-bold hover:underline hover:decoration-2"
                   href={learnMoreItem.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   {learnMoreItem.title}
                 </a>

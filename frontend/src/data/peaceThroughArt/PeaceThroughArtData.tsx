@@ -79,10 +79,12 @@ export const PTALearnMoreData: IPTALabeledLink[] = [
   },
   {
     source: 'SchoolArts',
-    title: 'Peace Through Art and Sport',
+    title: 'An Invitation to Repair the World',
+    link: '/documents/SchoolArts Magazine_Jan 2017_ICAF.pdf',
   },
   {
     source: 'ChildArt',
-    title: 'Special 9/11 Messages for Children',
+    title: 'Special Messages',
+    link: '/documents/Special Messages_ChildArt magazine.pdf',
   },
 ];

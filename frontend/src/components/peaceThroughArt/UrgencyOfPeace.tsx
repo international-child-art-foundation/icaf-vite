@@ -24,7 +24,7 @@ export const UrgencyOfPeace = () => {
             className="h-[256px] w-[288px] sm:scale-75 lg:scale-100"
           />
         </div>
-        <div className="flex h-full w-full items-end justify-end">
+        <div className="flex h-full w-full items-end justify-center md:justify-end">
           <img src={usImg} className="-mt-16" />
         </div>
       </div>

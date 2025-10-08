@@ -11,3 +11,9 @@ export interface IYoungArtistArtworks {
   label: string;
   imgSrc: string;
 }
+
+export interface IPTALabeledLink {
+  source: string;
+  title: string;
+  link?: string;
+}

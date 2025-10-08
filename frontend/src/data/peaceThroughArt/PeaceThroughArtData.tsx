@@ -1,4 +1,8 @@
-import { IPTACard, IYoungArtistArtworks } from '@/types/PeaceThroughArtTypes';
+import {
+  IPTACard,
+  IPTALabeledLink,
+  IYoungArtistArtworks,
+} from '@/types/PeaceThroughArtTypes';
 import artAdibHayat from '@/assets/peaceThroughArt/Adib Hayat, 11, Lebanon.webp';
 import artAmalAlHajj from '@/assets/peaceThroughArt/Amal Al Hajj (age 9) Yemen 1.webp';
 import artAmirReza from '@/assets/peaceThroughArt/Amir Reza,9, Iran.webp';
@@ -59,4 +63,26 @@ export const YoungArtistArtworks: IYoungArtistArtworks[] = [
   },
   { id: 11, label: 'Miryam Baadasa, 11, Palestine', imgSrc: artMiryamBaadsa },
   { id: 12, label: 'Tessa Rae Crisman, 11, Colorado', imgSrc: artTessaCrisman },
+];
+
+export const PTALearnMoreData: IPTALabeledLink[] = [
+  // TODO: Find links for all entries
+  {
+    source: 'The Lancet',
+    title: 'Developing Children’s Creativity to Foster Peace',
+    link: "/documents/Ishaq - Children's Creativity to Foster Peace.pdf",
+  },
+  {
+    source: 'UNESCO Journal',
+    title: 'Prosperity and Peace Through Art',
+    link: '/documents/Prosperity and Peace through Art.pdf',
+  },
+  {
+    source: 'SchoolArts',
+    title: 'Peace Through Art and Sport',
+  },
+  {
+    source: 'ChildArt',
+    title: 'Special 9/11 Messages for Children',
+  },
 ];

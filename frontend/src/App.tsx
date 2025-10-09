@@ -14,6 +14,7 @@ import { Team } from './pages/Team';
 import { Sponsorship } from './pages/Sponsorship';
 import { HealingArts } from './pages/HealingArts';
 import { PeaceThroughArt } from './pages/PeaceThroughArt';
+import { Student } from './pages/Student';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -40,6 +41,7 @@ export default function App() {
             element={<ChildArtPage />}
           />
           <Route path="/programs/healing-arts" element={<HealingArts />} />
+          <Route path="/get-involved/student" element={<Student />} />
           <Route
             path="/programs/peace-through-art"
             element={<PeaceThroughArt />}

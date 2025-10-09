@@ -1,4 +1,4 @@
-import creativityImg from '@/assets/student/spreadCreativity.png';
+import creativityImg from '@/assets/student/spreadCreativity.webp';
 import { Link } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { HeartIcon } from '@/assets/shared/icons/HeartIcon';

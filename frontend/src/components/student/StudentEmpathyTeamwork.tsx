@@ -1,4 +1,4 @@
-import yellowFirework from '@/assets/student/yellowFirework.png';
+import yellowFirework from '@/assets/student/yellowFirework.webp';
 
 export const StudentEmpathyTeamwork = () => {
   return (

@@ -111,19 +111,19 @@ const DesktopNav: React.FC = () => {
             key={item.key}
             onMouseEnter={() => throttledHover(item.label)}
             onClick={() => handleClick(item.href)}
-            className={`group relative text-lg hover:cursor-pointer hover:text-primary ${
+            className={`hover:text-primary group relative text-lg hover:cursor-pointer ${
               activeItem === item.label ? 'text-primary' : 'text-black'
             }`}
           >
             {item.navLabel}
             {/*Nav Item Underline Animation*/}
-            <span className="absolute left-1/2 top-7 h-[1px] w-0 -translate-x-1/2 transform bg-primary transition-all duration-300 ease-in-out group-hover:w-full"></span>
+            <span className="bg-primary absolute left-1/2 top-7 h-[1px] w-0 -translate-x-1/2 transform transition-all duration-300 ease-in-out group-hover:w-full"></span>
           </a>
         ))}
 
         {/* Donate Button */}
         <div onMouseEnter={() => throttledHover('')}>
-          <DonateButton className="w-32" />
+          <DonateButton className="w-32" text="Donate" />
         </div>
       </div>
 

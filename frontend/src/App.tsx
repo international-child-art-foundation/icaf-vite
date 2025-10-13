@@ -4,9 +4,17 @@ import Footer from '@/components/shared/Footer';
 import './index.css';
 import Home from './pages/Home';
 import Partners from './pages/Partners';
+import About from './pages/About';
 import { Route, Routes } from 'react-router-dom';
 import ChildArtPage from './pages/ChildArtPage';
 import Impact from './pages/Impact';
+import Donate from './pages/Donate';
+import WorldChildrensFestival from './pages/WorldChildrensFestivalPage';
+import { Team } from './pages/Team';
+import { Sponsorship } from './pages/Sponsorship';
+import { HealingArts } from './pages/HealingArts';
+import { PeaceThroughArt } from './pages/PeaceThroughArt';
+import { Student } from './pages/Student';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -24,9 +32,26 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
 
-          <Route path="/programs/outreach" element={<ChildArtPage />} />
+          <Route
+            path="/programs/world-childrens-festival"
+            element={<WorldChildrensFestival />}
+          />
+          <Route
+            path="/programs/childart-magazine"
+            element={<ChildArtPage />}
+          />
+          <Route path="/programs/healing-arts" element={<HealingArts />} />
+          <Route path="/get-involved/student" element={<Student />} />
+          <Route
+            path="/programs/peace-through-art"
+            element={<PeaceThroughArt />}
+          />
           <Route path="/about/partners" element={<Partners />} />
+          <Route path="/about" element={<About />} />
           <Route path="/about/impact" element={<Impact />} />
+          <Route path="/about/team" element={<Team />} />
+          <Route path="/donate" element={<Donate />} />
+          <Route path="/sponsorship" element={<Sponsorship />} />
         </Routes>
       </main>
       <Footer />

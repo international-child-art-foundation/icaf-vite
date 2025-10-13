@@ -1,6 +1,6 @@
 import { CurvedImage } from './CurvedImage';
 import WorldMural from '@/assets/impact/WorldMural.png';
-import MissionDropdowns from '@/components/impact/MissionDropdowns';
+import AccordionDropdowns from '@/components/shared/AccordionDropdowns';
 import MissionDropdownData from '@/data/impact/impactMissionDropdownData';
 import DancingImg from '@/assets/impact/Dancing.png';
 import { Button } from '@/components/ui/button';
@@ -39,7 +39,7 @@ const Impact = () => {
             empathetically can help achieve six important goals set by the
             United Nations. These goals include:
           </p>
-          <MissionDropdowns data={MissionDropdownData} />
+          <AccordionDropdowns data={MissionDropdownData} />
         </div>
         {/* Making an Impact section */}
         <div className="grid-col grid max-w-screen-2xl gap-20 px-8 md:px-12 lg:px-16 xl:px-20">

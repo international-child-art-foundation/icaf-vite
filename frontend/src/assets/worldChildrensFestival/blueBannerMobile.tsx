@@ -1,0 +1,16 @@
+import { SVGProps } from 'react';
+
+export const BlueBannerMobile = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 428 1015"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    preserveAspectRatio="none"
+    {...props}
+  >
+    <path
+      d="M-17 989.071V0C74.5 46.8995 157.052 48.7413 241.5 16.5306C328.5 -16.6532 415 10.2467 439.641 33.5113L440.641 989.071C351.621 940.828 260.32 958.919 225.797 973.995C89.4722 1038.47 7.13036 1010.91 -17 989.071Z"
+      fill="#A5C2FF"
+    />
+  </svg>
+);

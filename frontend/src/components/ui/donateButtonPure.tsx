@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 interface DonateButtonProps {
   className?: string;
@@ -16,14 +17,9 @@ const DonateButtonPure: React.FC<DonateButtonProps> = ({
         variant="secondary"
         className={`h-14 w-full rounded-full text-base font-semibold tracking-wide ${className}`}
       >
-        <a
-          href="https://icaf.org/donate"
-          target="blank"
-          rel="noopener noreferrer"
-          className="flex items-center"
-        >
+        <Link to="/donate" className="flex items-center">
           {text}
-        </a>
+        </Link>
       </Button>
     </div>
   );

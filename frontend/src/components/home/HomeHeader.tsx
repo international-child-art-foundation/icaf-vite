@@ -1,29 +1,67 @@
 import { Button } from '@/components/ui/button';
-import { Heart } from 'lucide-react';
+import { HeartIcon } from '@/assets/shared/icons/HeartIcon';
+import { CurvedImage } from '@/pages/CurvedImage';
+import { useNavigate } from 'react-router-dom';
+import { useWindowSize } from 'usehooks-ts';
+import artShowcaseHeader from '@/assets/home/ArtShowcaseHeader.webp';
 
 const HomeHeader = () => {
-  return (
-    <section className="relative z-10 mt-[98px]">
-      <div className="top-0 m-auto flex h-full w-full max-w-screen-2xl flex-col px-8 md:px-12 lg:px-16 xl:px-20">
-        <div className="mt-10 w-full sm:w-2/3 md:mt-20 md:w-3/5 xl:mt-24">
-          <h1 className="font-montserrat text-4xl font-extrabold md:text-[32px] lg:text-[40px] xl:text-6xl 2xl:text-5xl">
-            Welcome to ICAF:
-            <p>Arts = Creativity + Empathy</p>
-            <p>for a prosperous + peaceful future</p>
-          </h1>
-          <p className="font-openSans mt-4 hidden text-base font-normal md:text-xl lg:block lg:text-base xl:text-xl xl:font-semibold">
-            Transforming young lives since 1997.
-          </p>
-        </div>
+  const navigate = useNavigate();
+  const size = useWindowSize();
+  const gradientXL =
+    'bg-[linear-gradient(to_right,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.6)_40%,rgba(0,0,0,0.1)_60%,rgba(255,255,255,0.2)_100%)]';
+  const gradientLG =
+    'bg-[linear-gradient(to_right,rgba(0,0,0,0.75)_0%,rgba(0,0,0,0.5)_50%,rgba(0,0,0,0.15)_70%,rgba(255,255,255,0.15)_100%)]';
+  const gradientMD =
+    'bg-gradient-to-r from-black/80 from-0% via-black/40 via-[60%] to-white/20 to-100%';
+  const gradientSM = 'bg-black/50';
 
-        <div className="mt-7 sm:mt-4 md:mt-8 lg:mt-4 xl:mt-8">
-          <Button>
-            {' '}
-            <Heart /> Donate to our campaign
-          </Button>
+  let gradientDefinition;
+  if (size.width >= 1280) {
+    gradientDefinition = gradientXL;
+  } else if (size.width >= 1024) {
+    gradientDefinition = gradientLG;
+  } else if (size.width >= 640) {
+    gradientDefinition = gradientMD;
+  } else {
+    gradientDefinition = gradientSM;
+  }
+
+  return (
+    <div className="grid w-full grid-cols-1 grid-rows-1">
+      <div className="font-montserrat z-10 col-start-1 row-start-1 mt-8 flex max-w-screen-2xl flex-col gap-4 p-10 px-8 text-3xl font-extrabold text-white md:mt-20 md:px-12 md:text-4xl lg:mt-28 lg:px-16 lg:text-6xl xl:px-20">
+        <div className="block">
+          <p>Welcome to ICAF</p>
+          <p>Inspiring Creativity,</p>
+          <p>Transforming Lives</p>
         </div>
+        <p className="font-openSans text-lg font-normal text-white md:max-w-[50%]">
+          Empowering the next generation through the arts since 1997.
+        </p>
+        <Button
+          variant="secondary"
+          className="h-14 self-start rounded-full px-6 text-base tracking-wide"
+          onClick={() => void navigate('/donate')}
+        >
+          <HeartIcon
+            strokeWidth={2}
+            className="!h-5 !w-5 stroke-black lg:mr-0 lg:!h-5 lg:!w-5"
+          />
+          Donate to our campaign
+        </Button>
       </div>
-    </section>
+      <div className="col-start-1 row-start-1">
+        <CurvedImage
+          gradientDefinition={gradientDefinition}
+          src={artShowcaseHeader}
+          height={`${
+            size.width >= 1024 ? '700px' : size.width >= 768 ? '640px' : '500px'
+          }`}
+          objectFit="cover"
+          objectPosition="center bottom"
+        />
+      </div>
+    </div>
   );
 };
 

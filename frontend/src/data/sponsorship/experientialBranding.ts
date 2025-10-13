@@ -1,4 +1,4 @@
-import { TExperimentalBrandingCarousel } from '@/types/SponsorshipTypes';
+import { TExperientialBrandingCarousel } from '@/types/SponsorshipTypes';
 import legoExhibitImg from '@/assets/sponsorship/LegoExhibit.webp';
 import legoLogo from '@/assets/sponsorship/LegoLogo.webp';
 import anthropologieLogo from '@/assets/sponsorship/anthropologie.svg';
@@ -8,7 +8,7 @@ import rothPromotion from '@/assets/sponsorship/Roth Gallery.webp';
 import cannesLionsPromotion from '@/assets/sponsorship/Cannes Lions.webp';
 import cannesLionsLogo from '@/assets/sponsorship/cannes-lions-logo.svg';
 
-export const experimentalBrandingCarouselData: TExperimentalBrandingCarousel = [
+export const experientialBrandingCarouselData: TExperientialBrandingCarousel = [
   {
     id: 'lego',
     largeImgSrc: legoExhibitImg,

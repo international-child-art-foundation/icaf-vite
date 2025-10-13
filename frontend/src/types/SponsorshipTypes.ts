@@ -30,14 +30,14 @@ export interface ISponsorCard {
   color: ColorKey;
 }
 
-export interface IExperimentalBrandingCard {
+export interface IExperientialBrandingCard {
   id: string;
   largeImgSrc?: string;
   logoSrc?: string;
   color: ColorKey;
 }
 
-export type TExperimentalBrandingCarousel = IExperimentalBrandingCard[];
+export type TExperientialBrandingCarousel = IExperientialBrandingCard[];
 
 export interface IPartnerTestimonialCard {
   id: string;

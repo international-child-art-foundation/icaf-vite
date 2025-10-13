@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
-import { IExperimentalBrandingCard } from '@/types/SponsorshipTypes';
+import { IExperientialBrandingCard } from '@/types/SponsorshipTypes';
 import { FlairColorMap } from '../shared/FlairColorMap';
 
-interface ExperimentalBrandingCardProps {
-  data: IExperimentalBrandingCard;
+interface ExperientialBrandingCardProps {
+  data: IExperientialBrandingCard;
 }
 
-export const ExperimentalBrandingCard = ({
+export const ExperientialBrandingCard = ({
   data,
-}: ExperimentalBrandingCardProps) => {
+}: ExperientialBrandingCardProps) => {
   const [open, setOpen] = useState(false);
   return (
     <div

@@ -1248,6 +1248,29 @@ export class TestEventGenerator {
             httpMethod: 'PATCH'
         };
     }
+
+    /**
+     * Generate PUT event with body and path parameters
+     */
+    static createPutEvent(userId: string, body: any, pathParams: any = {}, userInfo: any = {}): any {
+        return {
+            ...this.createAuthEvent(userId, userInfo),
+            body: JSON.stringify(body),
+            pathParameters: pathParams,
+            httpMethod: 'PUT'
+        };
+    }
+
+    /**
+     * Generate DELETE event with path parameters
+     */
+    static createDeleteEvent(userId: string, pathParams: any = {}, userInfo: any = {}): any {
+        return {
+            ...this.createAuthEvent(userId, userInfo),
+            pathParameters: pathParams,
+            httpMethod: 'DELETE'
+        };
+    }
 }
 
 /**
@@ -1284,6 +1307,22 @@ export const PresetEvents = {
     createPatchEvent: (presetUserKey: keyof typeof PRESET_TEST_DATA.users, body: any, pathParams: any = {}, userInfo: any = {}) => {
         const userId = PRESET_TEST_DATA.users[presetUserKey];
         return TestEventGenerator.createPatchEvent(userId, body, pathParams, userInfo);
+    },
+
+    /**
+     * Create PUT event using preset user
+     */
+    createPutEvent: (presetUserKey: keyof typeof PRESET_TEST_DATA.users, body: any, pathParams: any = {}, userInfo: any = {}) => {
+        const userId = PRESET_TEST_DATA.users[presetUserKey];
+        return TestEventGenerator.createPutEvent(userId, body, pathParams, userInfo);
+    },
+
+    /**
+     * Create DELETE event using preset user
+     */
+    createDeleteEvent: (presetUserKey: keyof typeof PRESET_TEST_DATA.users, pathParams: any = {}, userInfo: any = {}) => {
+        const userId = PRESET_TEST_DATA.users[presetUserKey];
+        return TestEventGenerator.createDeleteEvent(userId, pathParams, userInfo);
     },
 
     // Backward compatibility - simplified method names

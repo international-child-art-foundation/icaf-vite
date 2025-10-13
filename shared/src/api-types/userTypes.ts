@@ -142,4 +142,85 @@ export function validateAlterUserRoleBodyRequest(data: any): string[] {
     }
     
     return errors;
+}
+
+// Request interface for updating user (unified PATCH API)
+export interface UpdateUserRequest {
+    new_role?: Role;
+    can_submit?: boolean;
+    ban_reason?: string; // Required when can_submit is set to false
+}
+
+// Response interface for user update operations
+export interface UpdateUserResponse {
+    message: string;
+    user_id: string;
+    is_banned: boolean;
+    can_submit: boolean;
+    role: Role;
+    max_constituents_per_season: number;
+    admin_action_id?: string; // Only present if actions were taken
+    timestamp: string;
+    updated_fields: string[];
+}
+
+// Legacy interfaces (keep for backward compatibility)
+export interface BanUserRequest {
+    reason: string;
+}
+
+export interface UnbanUserRequest {}
+
+export interface BanUnbanUserResponse {
+    message: string;
+    user_id: string;
+    is_banned: boolean;
+    can_submit: boolean;
+    admin_action_id: string;
+    timestamp: string;
+}
+
+// Validation function for update user request
+export function validateUpdateUserRequest(data: any): string[] {
+    const errors: string[] = [];
+    
+    if (data.new_role !== undefined) {
+        if (typeof data.new_role !== 'string') {
+            errors.push('new_role must be a string');
+        } else if (!ROLES.includes(data.new_role)) {
+            errors.push(`new_role must be one of: ${ROLES.join(', ')}`);
+        }
+    }
+    
+    if (data.can_submit !== undefined && typeof data.can_submit !== 'boolean') {
+        errors.push('can_submit must be a boolean');
+    }
+    
+    if (data.can_submit === false && (!data.ban_reason || typeof data.ban_reason !== 'string' || data.ban_reason.trim().length === 0)) {
+        errors.push('ban_reason is required when banning a user');
+    }
+    
+    if (data.ban_reason !== undefined && data.can_submit !== false) {
+        errors.push('ban_reason can only be provided when can_submit is false');
+    }
+    
+    // At least one field must be provided
+    if (data.new_role === undefined && data.can_submit === undefined) {
+        errors.push('At least one field (new_role or can_submit) must be provided');
+    }
+    
+    return errors;
+}
+
+// Legacy validation function for ban user request
+export function validateBanUserRequest(data: any): string[] {
+    const errors: string[] = [];
+    
+    if (!data.reason || typeof data.reason !== 'string') {
+        errors.push('reason is required and must be a string');
+    } else if (data.reason.trim().length === 0) {
+        errors.push('reason cannot be empty');
+    }
+    
+    return errors;
 } 

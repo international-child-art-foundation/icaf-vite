@@ -215,12 +215,42 @@ export function validateUpdateUserRequest(data: any): string[] {
 // Legacy validation function for ban user request
 export function validateBanUserRequest(data: any): string[] {
     const errors: string[] = [];
-    
+
     if (!data.reason || typeof data.reason !== 'string') {
         errors.push('reason is required and must be a string');
     } else if (data.reason.trim().length === 0) {
         errors.push('reason cannot be empty');
     }
-    
+
+    return errors;
+}
+
+// Request interface for removing all user artwork
+export interface RemoveAllUserArtworkRequest {
+    reason: string;
+}
+
+// Response interface for removing all user artwork
+export interface RemoveAllUserArtworkResponse {
+    message: string;
+    user_id: string;
+    artworks_removed: number;
+    total_artworks: number;
+    deleted_artwork_ids: string[];
+    failed_deletions: { art_id: string; reason: string }[];
+    admin_action_id: string;
+    timestamp: string;
+}
+
+// Validation function for remove all user artwork request
+export function validateRemoveAllUserArtworkRequest(data: any): string[] {
+    const errors: string[] = [];
+
+    if (!data.reason || typeof data.reason !== 'string') {
+        errors.push('reason is required and must be a string');
+    } else if (data.reason.trim().length === 0) {
+        errors.push('reason cannot be empty');
+    }
+
     return errors;
 } 

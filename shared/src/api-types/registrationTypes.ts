@@ -48,4 +48,15 @@ export type VerifyAccountResponse = {
     f_name: string;
     l_name: string;
     role: string;
+};
+
+// Change Password types
+export type ChangePasswordRequest = {
+    access_token: string;
+    old_password: string;
+    new_password: string;
+};
+
+export type ChangePasswordResponse = {
+    message: string;
 }; 

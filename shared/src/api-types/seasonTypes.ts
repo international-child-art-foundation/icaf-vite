@@ -316,3 +316,46 @@ export function validateWaiveSeasonFeeRequest(data: any): string[] {
 
     return errors;
 }
+
+// Request interface for updating season submission limit
+export interface UpdateSeasonSubmissionLimitRequest {
+    max_user_submissions: number;
+    reason: string;
+}
+
+// Response interface for updating season submission limit
+export interface UpdateSeasonSubmissionLimitResponse {
+    message: string;
+    season: string;
+    season_name: string;
+    old_max_user_submissions: number;
+    max_user_submissions: number;
+    is_active: boolean;
+    admin_action_id: string;
+    timestamp: string;
+}
+
+// Validation function for update season submission limit request
+export function validateUpdateSeasonSubmissionLimitRequest(data: any): string[] {
+    const errors: string[] = [];
+
+    // Validate max_user_submissions
+    if (data.max_user_submissions === undefined || data.max_user_submissions === null) {
+        errors.push('max_user_submissions is required');
+    } else if (typeof data.max_user_submissions !== 'number') {
+        errors.push('max_user_submissions must be a number');
+    } else if (!Number.isInteger(data.max_user_submissions)) {
+        errors.push('max_user_submissions must be an integer');
+    } else if (data.max_user_submissions !== -1 && data.max_user_submissions < 1) {
+        errors.push('max_user_submissions must be -1 (unlimited) or a positive integer (>= 1)');
+    }
+
+    // Validate reason
+    if (!data.reason || typeof data.reason !== 'string') {
+        errors.push('reason is required and must be a string');
+    } else if (data.reason.trim().length === 0) {
+        errors.push('reason cannot be empty');
+    }
+
+    return errors;
+}

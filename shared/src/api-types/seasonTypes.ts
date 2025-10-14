@@ -287,3 +287,32 @@ function validateOptionalFields(data: CreateSeasonRequest, errors: string[]): vo
         errors.push('endSilently must be a boolean if provided');
     }
 }
+
+// Request interface for waiving season fee
+export interface WaiveSeasonFeeRequest {
+    reason: string;
+}
+
+// Response interface for waiving season fee
+export interface WaiveSeasonFeeResponse {
+    message: string;
+    season: string;
+    season_name: string;
+    payment_required: boolean;
+    is_active: boolean;
+    admin_action_id: string;
+    timestamp: string;
+}
+
+// Validation function for waive season fee request
+export function validateWaiveSeasonFeeRequest(data: any): string[] {
+    const errors: string[] = [];
+
+    if (!data.reason || typeof data.reason !== 'string') {
+        errors.push('reason is required and must be a string');
+    } else if (data.reason.trim().length === 0) {
+        errors.push('reason cannot be empty');
+    }
+
+    return errors;
+}

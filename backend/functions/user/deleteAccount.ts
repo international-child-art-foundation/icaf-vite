@@ -67,6 +67,45 @@ export const handler = async (event: ApiGatewayEvent) => {
             return CommonErrors.internalServerError('Failed to delete account. Please try again.');
         }
 
+        // 1.5. Delete user artworks - ART entities (critical - must succeed)
+        try {
+            // Query Art_Ptr to get all artwork IDs
+            const artPtrResult = await dynamodb.send(new QueryCommand({
+                TableName: TABLE_NAME,
+                KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+                ExpressionAttributeValues: {
+                    ':pk': `USER#${userId}`,
+                    ':sk': 'ART#'
+                }
+            }));
+
+            const artPointers = artPtrResult.Items || [];
+
+            // Extract unique art IDs
+            const artIds = Array.from(new Set(
+                artPointers
+                    .map(ptr => ptr.art_id || ptr.artwork_id)
+                    .filter(Boolean)
+            )) as string[];
+
+            // Delete all ART entities
+            for (const artId of artIds) {
+                await dynamodb.send(new DeleteCommand({
+                    TableName: TABLE_NAME,
+                    Key: {
+                        PK: `ART#${artId}`,
+                        SK: 'N/A'
+                    }
+                }));
+            }
+
+            console.log(`Deleted ${artIds.length} artwork entities`);
+        } catch (error: any) {
+            // If artwork deletion fails, return error immediately
+            console.error('Failed to delete user artworks:', error);
+            return CommonErrors.internalServerError('Failed to delete account. Please try again.');
+        }
+
         // 2. Query and delete all USER#<uid> prefixed entries (non-critical)
         try {
             const queryParams = {

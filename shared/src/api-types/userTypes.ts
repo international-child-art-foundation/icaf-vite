@@ -275,4 +275,38 @@ export interface GetArtworkSubmitterEmailResponse {
     email: string;
     email_verified: boolean;
     username: string;
+}
+
+// Request interface for admin deleting user account
+export interface DeleteUserAccountRequest {
+    reason: string;
+    delete_from_cognito?: boolean;
+}
+
+// Response interface for admin deleting user account
+export interface DeleteUserAccountResponse {
+    message: string;
+    user_id: string;
+    artworks_deleted: number;
+    entries_deleted: number;
+    cognito_deleted: boolean;
+    admin_action_id: string;
+    timestamp: string;
+}
+
+// Validation function for delete user account request
+export function validateDeleteUserAccountRequest(data: any): string[] {
+    const errors: string[] = [];
+
+    if (!data.reason || typeof data.reason !== 'string') {
+        errors.push('reason is required and must be a string');
+    } else if (data.reason.trim().length === 0) {
+        errors.push('reason cannot be empty');
+    }
+
+    if (data.delete_from_cognito !== undefined && typeof data.delete_from_cognito !== 'boolean') {
+        errors.push('delete_from_cognito must be a boolean if provided');
+    }
+
+    return errors;
 } 

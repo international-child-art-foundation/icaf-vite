@@ -265,4 +265,14 @@ export interface GetUserCognitoInfoResponse {
     enabled: boolean;
     user_create_date?: string;
     user_last_modified_date?: string;
+}
+
+// Response interface for getting artwork submitter email
+export interface GetArtworkSubmitterEmailResponse {
+    art_id: string;
+    artwork_title: string;
+    user_id: string;
+    email: string;
+    email_verified: boolean;
+    username: string;
 } 

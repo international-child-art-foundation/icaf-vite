@@ -78,3 +78,33 @@ export function isValidDonationStatus(status: string): status is EveryOrgDonatio
 export function shouldProcessDonation(status: string): boolean {
     return status === 'completed';
 }
+
+// Admin: Get all donations response
+export interface AdminDonationItem {
+    donation_id: string;
+    user_id: string;
+    amount_cents: number;
+    currency: string;
+    status: string;
+    timestamp: string;
+    stripe_id?: string;
+    message?: string;
+    anonymous: boolean;
+    donor_name?: string; // f_name + l_name (if not anonymous)
+}
+
+export interface AdminGetAllDonationsResponse {
+    donations: AdminDonationItem[];
+    summary: {
+        total_donations: number;
+        total_amount_cents: number;
+        succeeded_count: number;
+        succeeded_amount_cents: number;
+        pending_count: number;
+        failed_count: number;
+    };
+    pagination: {
+        has_more: boolean;
+        last_evaluated_key?: string;
+    };
+}

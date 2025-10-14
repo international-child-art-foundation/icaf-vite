@@ -253,4 +253,16 @@ export function validateRemoveAllUserArtworkRequest(data: any): string[] {
     }
 
     return errors;
+}
+
+// Response interface for getting user Cognito information
+export interface GetUserCognitoInfoResponse {
+    user_id: string;
+    email: string;
+    email_verified: boolean;
+    username: string;
+    user_status: string;
+    enabled: boolean;
+    user_create_date?: string;
+    user_last_modified_date?: string;
 } 

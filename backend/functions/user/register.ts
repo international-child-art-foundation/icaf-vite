@@ -1,10 +1,8 @@
 import { SignUpCommand } from '@aws-sdk/client-cognito-identity-provider';
-import { PutCommand } from '@aws-sdk/lib-dynamodb';
-import { cognitoClient, dynamodb, USER_POOL_ID, USER_POOL_CLIENT_ID, TABLE_NAME } from '../../config/aws-clients';
-import { validateRegistrationBody } from '../../../shared/src/api-types/registrationTypes';
-import { ROLES, calculateUserAge, determineUserType, canSubmitArtwork, getMaxConstituentsPerSeason } from '../../../shared/src/api-types/userTypes';
+import { cognitoClient, USER_POOL_CLIENT_ID } from '../../config/aws-clients';
+import { ROLES } from '../../../shared/src/api-types/userTypes';
 import { ApiGatewayEvent, HTTP_STATUS } from '../../../shared/src/api-types/commonTypes';
-import { CommonErrors, createErrorResponse } from '../../../shared/src/api-types/errorTypes';
+import { CommonErrors } from '../../../shared/src/api-types/errorTypes';
 
 /**
  * User Registration Handler
@@ -53,15 +51,6 @@ export const handler = async (event: ApiGatewayEvent) => {
             role = body.role as any;
         }
 
-        // Calculate user's age and determine user type
-        const userAge = calculateUserAge(body.birthdate);
-        const userType = determineUserType(role);
-        const canSubmit = canSubmitArtwork(userType);
-        const maxConstituents = getMaxConstituentsPerSeason(userType);
-
-        // Note: Users under 18 can register but cannot submit artwork
-        // They will need a guardian to submit artwork on their behalf
-
         // 1. Register user in Cognito
         const cognitoParams = {
             ClientId: USER_POOL_CLIENT_ID,
@@ -94,39 +83,14 @@ export const handler = async (event: ApiGatewayEvent) => {
         const signUpResult = await cognitoClient.send(new SignUpCommand(cognitoParams));
         const userId = signUpResult.UserSub;
 
-        // 2. Create user record in DynamoDB
-        const userRecord = {
-            PK: `USER#${userId}`,
-            SK: 'PROFILE',
-            f_name: body.f_name,
-            l_name: body.l_name,
-            dob: body.birthdate, // Store as dob in DynamoDB
-            role: role, // Store role in DynamoDB
-            user_type: userType,
-            timestamp: new Date().toISOString(),
-            can_submit: canSubmit,
-            max_constituents_per_season: maxConstituents,
-            has_paid: false,
-            accolades: [],
-            has_magazine_subscription: false,
-            has_newsletter_subscription: false,
-            type: 'USER',
-            user_id: userId
-        };
-
-        const dynamoParams = {
-            TableName: TABLE_NAME,
-            Item: userRecord
-        };
-
-        await dynamodb.send(new PutCommand(dynamoParams));
-
-        // Note: Guardian records will be created when guardians submit artwork on behalf of others
+        // Note: DynamoDB USER entity will be created when user verifies their account
+        // This allows users to register in Cognito first, then complete their profile later
 
         return {
             statusCode: HTTP_STATUS.CREATED,
             body: JSON.stringify({
-                UUID: userId
+                message: 'User registered successfully in Cognito. Please verify your account to complete registration.',
+                user_id: userId
             }),
             headers: { 'Content-Type': 'application/json' }
         };

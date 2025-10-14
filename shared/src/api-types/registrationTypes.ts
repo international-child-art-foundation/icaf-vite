@@ -35,4 +35,17 @@ export const DEFAULT_REGISTRATION_BODY: RegistrationBody = {
     f_name: '',
     l_name: '',
     birthdate: ''
+};
+
+// Verify Account types
+export type VerifyAccountRequest = {
+    email: string;
+};
+
+export type VerifyAccountResponse = {
+    message: string;
+    user_id: string;
+    f_name: string;
+    l_name: string;
+    role: string;
 }; 

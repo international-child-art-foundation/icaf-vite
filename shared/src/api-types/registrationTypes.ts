@@ -117,4 +117,13 @@ export type LoginResponse = {
     user_id: string;
     email: string;
     role: string;
+};
+
+// Logout types
+export type LogoutRequest = {
+    // Empty - accessToken read from Cookie header
+};
+
+export type LogoutResponse = {
+    message: string;
 }; 

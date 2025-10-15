@@ -44,3 +44,11 @@ export const HTTP_STATUS = {
 } as const;
 
 export type HttpStatus = typeof HTTP_STATUS[keyof typeof HTTP_STATUS];
+
+// API Gateway response types
+export interface ApiGatewayResponse {
+    statusCode: number;
+    body: string;
+    headers: Record<string, string>;
+    multiValueHeaders?: Record<string, string[]>;
+}

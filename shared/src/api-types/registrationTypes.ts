@@ -104,4 +104,17 @@ export type ResendVerificationEmailResponse = {
     message: string;
     delivery_medium: string; // e.g., "EMAIL"
     destination: string; // Masked email like "j***@example.com"
+};
+
+// Login types
+export type LoginRequest = {
+    email: string;
+    password: string;
+};
+
+export type LoginResponse = {
+    message: string;
+    user_id: string;
+    email: string;
+    role: string;
 }; 

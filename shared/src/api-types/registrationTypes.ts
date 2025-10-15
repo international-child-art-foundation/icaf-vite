@@ -148,4 +148,16 @@ export type ConfirmForgotPasswordRequest = {
 
 export type ConfirmForgotPasswordResponse = {
     message: string;
+};
+
+// Get Auth Status types
+export type GetAuthStatusRequest = {
+    // Empty - accessToken read from Cookie header
+};
+
+export type GetAuthStatusResponse = {
+    authenticated: boolean;
+    user_id?: string;
+    email?: string;
+    role?: string;
 }; 

@@ -59,4 +59,49 @@ export type ChangePasswordRequest = {
 
 export type ChangePasswordResponse = {
     message: string;
+};
+
+// Magazine Subscription types
+export type SubscribeMagazineRequest = {
+    // TODO: Add payment fields after meeting decision
+    // Possible fields:
+    // - donation_amount_cents?: number;
+    // - payment_method_id?: string; // Stripe payment method
+    // - billing_address?: Address;
+};
+
+export type SubscribeMagazineResponse = {
+    message: string;
+    has_magazine_subscription: boolean;
+    subscription_date: string;
+    // TODO: Add after meeting decision
+    // - subscription_id?: string;
+    // - end_date?: string; // if subscription-based
+    // - amount_paid_cents?: number;
+};
+
+export type UnsubscribeMagazineRequest = {
+    // TODO: Add fields after meeting decision
+    // Possible fields:
+    // - reason?: string; // cancellation reason
+};
+
+export type UnsubscribeMagazineResponse = {
+    message: string;
+    has_magazine_subscription: boolean;
+    unsubscription_date: string;
+    // TODO: Add after meeting decision
+    // - refund_amount_cents?: number;
+    // - refund_id?: string;
+};
+
+// Resend Verification Email types
+export type ResendVerificationEmailRequest = {
+    email: string;
+};
+
+export type ResendVerificationEmailResponse = {
+    message: string;
+    delivery_medium: string; // e.g., "EMAIL"
+    destination: string; // Masked email like "j***@example.com"
 }; 

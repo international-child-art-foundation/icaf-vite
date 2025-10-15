@@ -126,4 +126,26 @@ export type LogoutRequest = {
 
 export type LogoutResponse = {
     message: string;
+};
+
+// Forgot Password types
+export type ForgotPasswordRequest = {
+    email: string;
+};
+
+export type ForgotPasswordResponse = {
+    message: string;
+    delivery_medium: string; // e.g., "EMAIL"
+    destination: string; // Masked email like "u***@e***.com"
+};
+
+// Confirm Forgot Password types
+export type ConfirmForgotPasswordRequest = {
+    email: string;
+    code: string; // 6-digit verification code
+    new_password: string;
+};
+
+export type ConfirmForgotPasswordResponse = {
+    message: string;
 }; 

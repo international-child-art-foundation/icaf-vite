@@ -1,4 +1,4 @@
-import { GetCommand, QueryCommand, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
+import { GetCommand, QueryCommand, TransactWriteCommand, BatchGetCommand } from '@aws-sdk/lib-dynamodb';
 import { dynamodb, TABLE_NAME } from '../../config/aws-clients';
 import { SubmitArtworkRequest, validateSubmissionData } from '../../../shared/src/api-types/artworkTypes';
 import { ApiGatewayEvent, HTTP_STATUS } from '../../../shared/src/api-types/commonTypes';
@@ -68,23 +68,51 @@ export const handler = async (event: ApiGatewayEvent) => {
         }
 
         // 6) Check submission limits based on user role and season configuration
+        // Note: This endpoint is for submitting user's own artwork (is_virtual = false)
+        // Guardian submissions for constituents (is_virtual = true) use submitArtworkForConstituent endpoint
         const existingSubmissionsResult = await dynamodb.send(new QueryCommand({
             TableName: TABLE_NAME,
             KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
             ExpressionAttributeValues: {
                 ':pk': `USER#${userId}`,
-                ':sk': `ART#${submissionData.season}`
+                ':sk': `ART#${submissionData.season}#`
             }
         }));
 
         const existingSubmissions = existingSubmissionsResult.Items || [];
-        const submissionCount = existingSubmissions.length;
+
+        // Extract art_ids from Art_Ptr entities
+        const artIds = existingSubmissions.map((ptr: any) => ptr.art_id).filter(Boolean);
+
+        // Count only non-virtual (user's own) submissions
+        let ownSubmissionCount = 0;
+        if (artIds.length > 0) {
+            // Batch get Art entities to check is_virtual flag
+            // Art entity has PK: ART#<art_id> and SK: 'N/A'
+            const batchGetResult = await dynamodb.send(new BatchGetCommand({
+                RequestItems: {
+                    [TABLE_NAME]: {
+                        Keys: artIds.map((artId: string) => ({
+                            PK: `ART#${artId}`,
+                            SK: 'N/A'
+                        }))
+                    }
+                }
+            }));
+
+            const artworks = batchGetResult.Responses?.[TABLE_NAME] || [];
+
+            // Filter for is_virtual = false (user's own submissions only)
+            const ownArtworks = artworks.filter((art: any) => art.is_virtual === false);
+            ownSubmissionCount = ownArtworks.length;
+        }
+
+        const submissionCount = ownSubmissionCount;
 
         // Get max submissions for this user/season
+        // All users (including guardians) use season's max_user_submissions for their own artwork
         let maxSubmissions = season?.max_user_submissions || 1;
-        if (user && user.role === 'guardian' && user.max_constituents_per_season) {
-            maxSubmissions = user.max_constituents_per_season;
-        } else if (user && user.role === 'admin') {
+        if (user && user.role === 'admin') {
             maxSubmissions = -1; // Unlimited for admins
         }
 
@@ -130,7 +158,7 @@ export const handler = async (event: ApiGatewayEvent) => {
 
         const artPtrEntity = {
             PK: `USER#${userId}`,
-            SK: `ART#${submissionData.season}#${artworkId}`,
+            SK: `ART#${submissionData.season}#ID#${artworkId}`,
             artwork_id: artworkId,
             art_id: artworkId,
             season: submissionData.season,

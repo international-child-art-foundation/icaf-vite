@@ -26,3 +26,6 @@ public
 *.sln
 *.sw?
 *.tsbuildinfo
+
+# LocalStack
+.localstack

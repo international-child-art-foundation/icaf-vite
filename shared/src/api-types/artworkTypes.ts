@@ -63,6 +63,34 @@ export interface ArtPtrEntity {
 }
 
 
+// List Constituent Artworks types
+export interface ListConstituentArtworksRequest {
+    season?: string;
+    limit?: number;
+    last_key?: string;
+}
+
+export interface ConstituentArtworkItem {
+    art_id: string;
+    season: string;
+    f_name: string;
+    age: number;
+    title: string;
+    location: string;
+    is_ai_gen: boolean;
+    model?: string;
+    is_approved: boolean;
+    votes: number;
+    file_type: FileType;
+    timestamp: string;
+}
+
+export interface ListConstituentArtworksResponse {
+    artworks: ConstituentArtworkItem[];
+    has_more: boolean;
+    last_key?: string;
+}
+
 // Validation helper functions
 export function isValidFileType(fileType: string): fileType is FileType {
     return SUPPORTED_FILE_TYPES.includes(fileType as FileType);

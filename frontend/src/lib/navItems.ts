@@ -37,7 +37,7 @@ export interface NavItem {
 export const navItems: NavItem[] = [
   {
     key: 'about',
-    label: 'ABOUT',
+    label: 'About',
     navLabel: 'About',
     href: '/about',
     col: 4,
@@ -76,7 +76,7 @@ export const navItems: NavItem[] = [
   },
   {
     key: 'programs',
-    label: 'PROGRAMS',
+    label: 'Programs',
     navLabel: 'Programs',
     href: '/programs',
     col: 6,
@@ -127,7 +127,7 @@ export const navItems: NavItem[] = [
   },
   {
     key: 'get-involved',
-    label: 'GET INVOLVED',
+    label: 'Get Involved',
     navLabel: 'Get Involved',
     href: '/get-involved',
     col: 4,
@@ -164,7 +164,7 @@ export const navItems: NavItem[] = [
   },
   {
     key: 'news-events',
-    label: 'NEWS & EVENTS',
+    label: 'News & Events',
     navLabel: 'News & Events',
     href: '/news-events',
     col: 2,
@@ -187,7 +187,7 @@ export const navItems: NavItem[] = [
   },
   {
     key: 'sponsorship',
-    label: 'SPONSORSHIP',
+    label: 'Sponsorship',
     navLabel: 'Sponsorship',
     href: '/sponsorship',
     col: 0,
@@ -195,13 +195,13 @@ export const navItems: NavItem[] = [
   },
   {
     key: 'gallery',
-    label: 'GALLERY',
+    label: 'Gallery',
     navLabel: 'Gallery',
     href: '/gallery',
     col: 2,
     children: [
       {
-        label: 'Gallery',
+        label: 'Recent',
         href: '/gallery/recent',
         imageSrc: gallery,
         alt: 'Recent art',

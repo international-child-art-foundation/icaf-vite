@@ -4,8 +4,28 @@ import MagazineCarousel from '../components/childArt/MagazineCarousel';
 import magazineCoverLarge from '@/assets/shared/images/navigation/programs/childArtMagazine.webp';
 
 import DonateButtonPartnersPage from '@/components/ui/donateButtonPartnersPage';
+import BackIssueGrid from '@/components/childArt/BackIssueGrid';
+import TestimonialBlock from '@/components/childArt/TestimonialBlock';
+import YourDonations from '@/components/shared/YourDonations';
+import { useWindowSize } from 'usehooks-ts';
 
 export default function ChildArtPage() {
+  const size = useWindowSize();
+
+  let gradientDefinition;
+  if (size.width >= 1280) {
+    gradientDefinition =
+      'bg-[linear-gradient(to_right,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.7)_50%,rgba(0,0,0,0.4)_75%,rgba(255,255,255,0.15)_100%)]';
+  } else if (size.width >= 1024) {
+    gradientDefinition =
+      'bg-[linear-gradient(to_right,rgba(0,0,0,0.75)_0%,rgba(0,0,0,0.65)_55%,rgba(0,0,0,0.45)_80%,rgba(255,255,255,0.1)_100%)]';
+  } else if (size.width >= 640) {
+    gradientDefinition =
+      'bg-gradient-to-r from-black/90 from-0% via-black/60 via-[65%] to-black/50 to-100%';
+  } else {
+    gradientDefinition = 'bg-black/75';
+  }
+
   return (
     <div className="flex flex-col items-center">
       {/* === Hero Section with Curved Image === */}
@@ -16,7 +36,7 @@ export default function ChildArtPage() {
             <CurvedImage
               src={magazineCoverLarge}
               curveStyle="Ellipse"
-              darkened={true}
+              gradientDefinition={gradientDefinition}
             />
           </div>
 
@@ -48,6 +68,13 @@ export default function ChildArtPage() {
       <div className="mt-0 w-full">
         <MagazineCarousel />
       </div>
+
+      <BackIssueGrid />
+
+      <TestimonialBlock />
+
+      {/* Donation CTA Section */}
+      <YourDonations />
     </div>
   );
 }

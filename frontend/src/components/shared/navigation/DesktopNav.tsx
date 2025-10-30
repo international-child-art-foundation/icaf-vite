@@ -24,7 +24,7 @@ const DesktopNav: React.FC = () => {
   const runHover = useCallback((label: string): void => {
     if (label === activeItemRef.current) return;
     setPrevItem(activeItemRef.current);
-    if (!label || label === 'SPONSORSHIP') {
+    if (!label || label === 'Sponsorship') {
       setIsLeaving(true);
       setActiveItem('');
       setTimeout(() => setPrevItem(''), HEADERCOOLDOWN);
@@ -134,7 +134,7 @@ const DesktopNav: React.FC = () => {
           ref={dropdownRef}
           onMouseLeave={(event) => handleMouseLeaveDropdown(event)}
         >
-          {prevItem !== 'SPONSORSHIP' && (
+          {prevItem !== 'Sponsorship' && (
             <div className={`dropdown-inner static ${isLeaving ? 'exit' : ''}`}>
               <DesktopNavDropdown
                 activeItem={prevItem || ''}

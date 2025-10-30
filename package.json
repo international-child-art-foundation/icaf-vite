@@ -5,8 +5,10 @@
   "workspaces": [
     "frontend",
     "backend",
+    "backend/infra",
     "shared"
   ],
+  "packageManager": "pnpm@10.16.1",
   "scripts": {
     "dev": "pnpm --filter @icaf/frontend dev",
     "clean": "tsc -b --clean",

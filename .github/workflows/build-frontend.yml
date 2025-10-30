@@ -1,0 +1,153 @@
+name: Build & Deploy Frontend (icaf)
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "frontend/**"
+      - "shared/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "package.json"
+      - "tsconfig.json"
+      - "tsconfig.*.json"
+      - "frontend/tsconfig*.json"
+      - "frontend/vite.config.*"
+  workflow_dispatch: {}
+
+concurrency:
+  group: build-frontend-main
+  cancel-in-progress: true
+
+jobs:
+  build_frontend:
+    runs-on: ubuntu-latest
+    env:
+      SITE_NAME: icaf
+    outputs:
+      release_id: ${{ steps.rel.outputs.RELEASE_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.16.1
+          run_install: false
+
+      - name: Setup Node (LTS) with pnpm cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "pnpm-lock.yaml"
+
+      - name: Set release id (UTC timestamp + short sha)
+        id: rel
+        run: |
+          DATE_UTC="$(date -u +%Y%m%d-%H%M)"
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "RELEASE_ID=${DATE_UTC}-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Install dependencies (workspace root)
+        run: pnpm install --frozen-lockfile
+
+      - name: Build frontend (Vite)
+        working-directory: frontend
+        run: pnpm build
+
+      - name: Write version.txt
+        working-directory: frontend
+        run: |
+          {
+            echo "site=${SITE_NAME}"
+            echo "release=${{ steps.rel.outputs.RELEASE_ID }}"
+            echo "repo=${GITHUB_REPOSITORY}"
+            echo "commit=${GITHUB_SHA}"
+            echo "run_url=https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo "node=$(node -v)"
+            echo "pnpm=$(pnpm -v)"
+          } > dist/version.txt
+
+      - name: Upload artifact (dist only)
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-${{ env.SITE_NAME }}-${{ steps.rel.outputs.RELEASE_ID }}
+          path: frontend/dist
+          if-no-files-found: error
+          retention-days: 14
+
+  deploy_release:
+    name: Deploy release over SFTP
+    needs: build_frontend
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-icaf-${{ needs.build_frontend.outputs.release_id }}
+          path: release
+
+      - name: Upload via SFTP (mirror full to versioned folder)
+        uses: milanmk/actions-file-deployer@1.16
+        with:
+          remote-protocol: "sftp"
+          remote-host: ${{ secrets.SFTP_HOST }}
+          remote-user: ${{ secrets.SFTP_USER }}
+          remote-password: ${{ secrets.SFTP_PASSWORD }}
+          local-path: "release"
+          remote-path: "/releases/${{ needs.build_frontend.outputs.release_id }}"
+          sync: "full"
+          debug: "false"
+
+      - name: Generate .htaccess pointer with current release
+        run: |
+          mkdir -p htaccess_out
+          cat > htaccess_out/.htaccess <<'HTACCESS'
+          RewriteEngine On
+          RewriteCond %{HTTPS} !=on
+          RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+          RewriteBase /
+          Options -MultiViews
+          RewriteRule ^ - [E=RELEASE:${{ needs.build_frontend.outputs.release_id }}]
+          RewriteRule ^(?:releases|ChildArt|documents)/ - [L,NC]
+          RewriteCond %{ENV:APP_REWRITTEN} !=1
+          RewriteCond %{REQUEST_URI} !^/(?:releases|ChildArt|documents)/ [NC]
+          RewriteCond %{REQUEST_URI} \.(?:css|js|mjs|map|png|jpe?g|gif|svg|webp|avif|ico|json|txt|xml|webmanifest|woff2?|ttf|eot|mp4|webm|ogv|wasm)$ [NC]
+          RewriteRule ^ /releases/%{ENV:RELEASE}%{REQUEST_URI} [E=APP_REWRITTEN:1,PT,L]
+          RewriteCond %{ENV:APP_REWRITTEN} !=1
+          RewriteCond %{REQUEST_URI} !^/(?:releases|ChildArt|documents)/ [NC]
+          RewriteRule ^ /releases/%{ENV:RELEASE}/index.html [E=APP_REWRITTEN:1,PT,L]
+          <IfModule mod_headers.c>
+            <FilesMatch "\.(js|mjs|css|svg|png|jpg|jpeg|webp|avif|gif|ico|json|woff2?|ttf|eot|mp4|webm|ogv|wasm)$">
+              Header set Cache-Control "public, max-age=31536000, immutable"
+            </FilesMatch>
+            <FilesMatch "\.html$">
+              Header set Cache-Control "no-cache, no-store, must-revalidate"
+            </FilesMatch>
+          </IfModule>
+          <IfModule mod_deflate.c>
+            AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json image/svg+xml
+          </IfModule>
+          Options -Indexes
+          HTACCESS
+
+      - name: Upload .htaccess pointer to docroot
+        uses: milanmk/actions-file-deployer@1.16
+        with:
+          remote-protocol: "sftp"
+          remote-host: ${{ secrets.SFTP_HOST }}
+          remote-user: ${{ secrets.SFTP_USER }}
+          remote-password: ${{ secrets.SFTP_PASSWORD }}
+          local-path: "htaccess_out"
+          remote-path: "/"
+          sync: "full"
+          debug: "false"

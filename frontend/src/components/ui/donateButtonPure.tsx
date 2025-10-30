@@ -1,10 +1,15 @@
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 interface DonateButtonProps {
   className?: string;
+  text?: string;
 }
 
-const DonateButtonPure: React.FC<DonateButtonProps> = ({ className }) => {
+const DonateButtonPure: React.FC<DonateButtonProps> = ({
+  className,
+  text = 'Donate',
+}) => {
   return (
     <div className="flex justify-center">
       <Button
@@ -12,15 +17,9 @@ const DonateButtonPure: React.FC<DonateButtonProps> = ({ className }) => {
         variant="secondary"
         className={`h-14 w-full rounded-full text-base font-semibold tracking-wide ${className}`}
       >
-        <a
-          href="https://icaf.org/donate"
-          target="blank"
-          rel="noopener noreferrer"
-          className="flex items-center"
-        >
-
-          Donate
-        </a>
+        <Link to="/donate" className="flex items-center">
+          {text}
+        </Link>
       </Button>
     </div>
   );

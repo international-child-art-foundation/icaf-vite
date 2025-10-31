@@ -108,7 +108,7 @@
 
 @keyframes dropIn {
   from {
-    transform: translate(0, -250px);
+    transform: translate(0, -100%);
     opacity: 1;
   }
   to {
@@ -118,12 +118,12 @@
 }
 
 @keyframes dropOut {
-  0% {
+  from {
     transform: translate(0, 0);
     opacity: 1;
   }
-  100% {
-    transform: translate(0, -250px);
+  to {
+    transform: translate(0, -100%);
     opacity: 1;
   }
 }
@@ -133,6 +133,7 @@
   inset: 0;
   visibility: hidden;
   opacity: 0;
+  transform: translate(0, -100%);
 }
 
 .dropdown-inner.static {
@@ -144,7 +145,7 @@
 .dropdown-inner.animated {
   visibility: visible;
   opacity: 1;
-  transform: translate(20px, -250px);
+  transform: translate(0, -100%);
   animation: dropIn 0.25s ease-out forwards;
 }
 
@@ -155,6 +156,7 @@
 .dropdown-inner.exit.static {
   animation: dropOut 0.25s ease-in forwards;
 }
+
 .clipped-image-top {
   clip-path: url(#wave-clip-top);
 }

@@ -1,7 +1,7 @@
 import RedFirework from '@/assets/home/RedFirework.svg';
 import { TitleDescriptionCard } from './TitleDescriptionCard';
 import { VideoWrapper } from '../shared/VideoWrapper';
-import IcafHomeVideo from '@/assets/home/icaf-overview-cropped.mp4';
+import IcafHomeVideo from '@/assets/shared/media/icaf-overview-cropped.mp4';
 import IcafHomeVideoThumb from '@/assets/home/icaf-overview-cropped-thumb.webp';
 
 export const HomeImpact = () => {

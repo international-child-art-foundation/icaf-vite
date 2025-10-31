@@ -5,9 +5,9 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel';
 import { useState, useEffect } from 'react';
-import { moreOnOurSiteData } from '@/lib/moreOnOurSite';
+import { moreOnOurSiteData } from '@/data/about/moreOnOurSite';
 
-import CarouselArrowsDots from '../testimonials/CarouselArrowsDots';
+import CarouselArrowsDots from '../../shared/CarouselArrowsDots';
 import { MoreCard } from './MoreCard';
 import Graphic from '@/assets/shared/images/about/more/Group 514888.svg';
 

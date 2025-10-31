@@ -36,7 +36,7 @@ export const CurvedImage = ({
         </defs>
       </svg>
 
-      <style jsx>{`
+      <style>{`
         .${clipPathClass} {
           clip-path: url(#${clipPathId});
         }

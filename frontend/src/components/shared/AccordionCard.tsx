@@ -10,17 +10,16 @@ interface MissionDropdownProps {
 
 const AccordionCard = ({ data }: MissionDropdownProps) => {
   const [open, setOpen] = useState(false);
+  const iconColor = FlairColorMap[data.color]?.icon;
+
   return (
     <div
       key={data.id}
       className={`mx-auto w-full rounded-3xl border-4 ${open && data.backgroundColor && FlairColorMap[data.color]?.background} bg-opacity-8 transition-colors duration-500 ${FlairColorMap[data.color]?.border} cursor-pointer p-12`}
       onClick={() => setOpen((prev) => !prev)}
     >
-      <div className="grid-col grid h-full flex-col gap-2">
-        <img
-          src={data.icon}
-          className="pointer-events-none mx-auto h-[80px] w-[80px] select-none"
-        />
+      <div className="grid-col grid h-full flex-col justify-items-center gap-2">
+        <data.Icon colorClass={iconColor} />
         <div className="min-h-[50px] content-center">
           <p className="text-center text-xl font-semibold">{data.title}</p>
         </div>

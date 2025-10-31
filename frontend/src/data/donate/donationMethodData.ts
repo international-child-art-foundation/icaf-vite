@@ -1,7 +1,7 @@
-import handshake from '@/assets/donate/handshake.svg';
-import gift from '@/assets/donate/gift.svg';
-import users from '@/assets/donate/users.svg';
 import { IAccordionCard } from '@/types/AccordionCardTypes';
+import { HandshakeIcon } from '@/assets/shared/icons/HandshakeIcon';
+import { GiftIcon } from '@/assets/shared/icons/GiftIcon';
+import { UsersIcon } from '@/assets/shared/icons/UsersIcon';
 
 export const donationMethodData: IAccordionCard[] = [
   {
@@ -10,7 +10,7 @@ export const donationMethodData: IAccordionCard[] = [
     shortDescription: 'Make a tax-smart gift through your Donor Advised Fund.',
     extendedDescription:
       "Use any DAF giving platform, such as Fidelity Charitable, Private Bank of America or DAF Giving 360. International Child Art Foundation's EIN (Federal Tax ID) is 52-2032649.",
-    icon: handshake,
+    Icon: HandshakeIcon,
     color: 'red',
     backgroundColor: true,
   },
@@ -69,7 +69,7 @@ export const donationMethodData: IAccordionCard[] = [
         ],
       },
     ],
-    icon: gift,
+    Icon: GiftIcon,
     color: 'yellow',
     backgroundColor: true,
   },
@@ -80,7 +80,7 @@ export const donationMethodData: IAccordionCard[] = [
       'Double your impact. Ask your employer to match your donation.',
     extendedDescription:
       'Many companies match employee donations as part of their social responsibility programs. Check with your employer, your gift to ICAF could be doubled or even tripled, at no extra cost to you.',
-    icon: users,
+    Icon: UsersIcon,
     color: 'blue',
     backgroundColor: true,
   },

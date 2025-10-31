@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { MoreOnOurSite } from '@/lib/moreOnOurSite';
+import { MoreOnOurSite } from '@/data/about/moreOnOurSite';
 import { HeartIcon } from 'lucide-react';
 
 /**

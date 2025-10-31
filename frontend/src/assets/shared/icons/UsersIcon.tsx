@@ -1,0 +1,24 @@
+export type UsersIconProps = {
+  colorClass: string; // expects a tailwind variable as class (e.g. text-secondary-blue)
+};
+
+export const UsersIcon = ({ colorClass }: UsersIconProps) => {
+  return (
+    <svg
+      width="57"
+      height="51"
+      viewBox="0 0 57 51"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={colorClass}
+    >
+      <path
+        d="M31.375 48.5V42.75C31.375 34.8109 24.9391 28.375 17 28.375C9.06091 28.375 2.625 34.8109 2.625 42.75V48.5H31.375ZM31.375 48.5H54.375V45.625C54.375 37.1566 47.9391 31.25 40 31.25C35.9367 31.25 32.2671 33.0483 29.6527 35.9394M25.625 11.125C25.625 15.8885 21.7635 19.75 17 19.75C12.2365 19.75 8.375 15.8885 8.375 11.125C8.375 6.36154 12.2365 2.5 17 2.5C21.7635 2.5 25.625 6.36154 25.625 11.125ZM45.75 16.875C45.75 20.0506 43.1756 22.625 40 22.625C36.8244 22.625 34.25 20.0506 34.25 16.875C34.25 13.6994 36.8244 11.125 40 11.125C43.1756 11.125 45.75 13.6994 45.75 16.875Z"
+        stroke="currentColor"
+        stroke-width="3.45"
+        stroke-linecap="round"
+        stroke-linejoin="bevel"
+      />
+    </svg>
+  );
+};

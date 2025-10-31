@@ -7,14 +7,19 @@ import {
 } from '@/components/ui/carousel';
 import { useState, useEffect } from 'react';
 import { CarouselApi } from '@/components/ui/carousel';
-
-import { magazineCovers } from '@/data/magazineCovers';
-
+import { getMagazines } from '@/server_asset_handlers/magazines';
 import { Button } from '../ui/button';
-
-const TOTAL_PAGES = magazineCovers.length;
+import { IMagazine } from '@/types/Magazines';
+import { Link } from 'react-router-dom';
 
 export default function MagazineCarousel() {
+  const [magazines, setMagazines] = useState<IMagazine[]>([]);
+
+  useEffect(() => {
+    getMagazines().then(setMagazines).catch(console.error);
+  }, []);
+  const TOTAL_PAGES = magazines.length;
+
   const [page, setPage] = useState(0);
   const progressPercent = ((page + 1) / TOTAL_PAGES) * 100;
 
@@ -34,16 +39,10 @@ export default function MagazineCarousel() {
     };
   }, [api]);
 
-  // const handleSlideChange = (newPage: number) => {
-  //   setPage(newPage);
-  // };
-
   return (
-    // <div className="lg:gap- w-full py-16 pl-8 pr-0 lg:flex lg:items-start">
     <div className="mx-auto w-full max-w-screen-2xl px-8 pb-16 pt-0 md:px-12 md:pt-0 lg:flex lg:items-start lg:px-16 lg:pt-0 xl:px-20">
       {/* left - description */}
       <div className="w-full pb-16 lg:w-1/3 lg:pb-0">
-        {/* <div className="mx-auto max-w-screen-2xl px-8 md:px-12 lg:px-16 xl:px-20"> */}
         <h2 className="mb-4 text-2xl font-bold">Latest Issues</h2>
         <p className="mb-2 font-semibold text-blue-700">
           Subscription is $30 per year
@@ -59,16 +58,14 @@ export default function MagazineCarousel() {
           variant="default"
           size="lg"
         >
-          Subscribe
+          <Link to={'/donate'}>Subscribe</Link>
         </Button>
       </div>
-      {/* </div> */}
       {/* right - Carousel */}
       <div className="w-full lg:w-2/3 lg:pl-16">
         <h2 className="mb-4 text-xl font-bold italic md:text-left lg:text-2xl xl:text-3xl">
           <span className="font-semibold italic">ChildArt</span> Magazine Art
         </h2>
-        {/* <div className="-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20"> */}
         <Carousel
           opts={{
             align: 'start',
@@ -80,14 +77,14 @@ export default function MagazineCarousel() {
         >
           <div className="-mr-8 pr-0 md:-mr-12 lg:-mr-16 xl:-mr-20">
             <CarouselContent className="-ml-4 flex">
-              {magazineCovers.map((cover) => (
+              {magazines.map((magazine) => (
                 <CarouselItem
-                  key={cover.name}
+                  key={magazine.name}
                   className="basis-[42%] pl-4 md:basis-1/4 lg:basis-[40%]"
                 >
                   <img
-                    src={cover.image}
-                    alt={cover.name}
+                    src={magazine.cover}
+                    alt={magazine.name}
                     className="aspect-[3/4] w-full rounded object-cover shadow-md"
                   />
                 </CarouselItem>
@@ -130,6 +127,5 @@ export default function MagazineCarousel() {
         </Carousel>
       </div>
     </div>
-    // </div>
   );
 }

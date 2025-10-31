@@ -77,7 +77,7 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
                         } `}
                       >
                         <h3
-                          className={`text-2xl font-bold leading-loose tracking-wide text-text-inverse ${
+                          className={`text-text-inverse text-2xl font-bold leading-loose tracking-wide ${
                             item.col > 3 ? `xl:max-w-48` : ''
                           } `}
                         >
@@ -85,7 +85,7 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
                         </h3>
                       </div>
                       <div
-                        className={`absolute px-8 text-text-inverse opacity-0 transition-all duration-300 group-hover:opacity-100 ${
+                        className={`text-text-inverse absolute px-8 opacity-0 transition-all duration-300 group-hover:opacity-100 ${
                           child.hoverDescription !== ''
                             ? 'group-hover:translate-y-[-120px]'
                             : 'group-hover:translate-y-[-50px]'
@@ -109,7 +109,7 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
                   ))}
               </div>
               {/* Bottom Label*/}
-              <div className="flex h-16 items-center gap-2 bg-primary font-sans text-lg font-semibold text-text-inverse">
+              <div className="bg-primary text-text-inverse flex h-16 items-center gap-2 font-sans text-lg font-semibold">
                 <NavGraphic />
                 <div>{item.label}</div>
               </div>

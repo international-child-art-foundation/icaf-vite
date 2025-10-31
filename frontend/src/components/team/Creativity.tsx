@@ -10,7 +10,7 @@ export const Creativity = () => {
       <div className="xl:grid xl:grid-cols-2 xl:grid-rows-1">
         <ClippedBanner height={445}>
           <div className="flex h-full bg-[#2057CC]/10 p-2">
-            <div className="mx-auto flex flex-col justify-center gap-4 p-8 text-left md:max-w-[450px] md:p-0">
+            <div className="mx-auto flex flex-col justify-center gap-4 p-8 pt-1 text-left sm:pt-8 md:max-w-[450px] md:p-0">
               <p className="font-montserrat text-[24px] font-semibold">
                 Our team is united by a passion for{' '}
                 <span className="text-primary font-bold">

@@ -1,10 +1,10 @@
 import TeamHeader from '@/components/team/TeamHeader';
 import { staffData } from '@/data/team/staffData';
 import { TeamStaff } from '@/components/team/TeamStaff';
-import { TeamDesignDev } from '@/components/team/TeamDesignDev';
 import { Creativity } from '@/components/team/Creativity';
 import { ScrollToTop } from '@/components/team/ScrollToTop';
 import { useRef } from 'react';
+import { TeamExtendedStaff } from './TeamExtendedStaff';
 
 export const Team = () => {
   const HEADER_OFFSET = 110;
@@ -24,9 +24,12 @@ export const Team = () => {
   return (
     <div className="flex flex-col">
       <TeamHeader scrollFunction={scrollToSection} />
-      <div ref={staffRef} className="flex flex-col gap-16">
+      <div
+        ref={staffRef}
+        className="flex max-w-screen-2xl flex-col gap-16 px-8 md:px-12 lg:px-16 xl:px-20"
+      >
         <TeamStaff staffData={staffData} />
-        <TeamDesignDev />
+        <TeamExtendedStaff />
         <Creativity />
         <ScrollToTop scrollFunction={scrollToSection} />
       </div>

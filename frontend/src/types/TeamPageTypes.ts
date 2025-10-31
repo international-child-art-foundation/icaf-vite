@@ -2,7 +2,8 @@ export interface IStaffItem {
   src?: string;
   name: string;
   title: string;
-  description: string;
+  link?: string;
+  description?: string;
   linkedin?: string;
 }
 

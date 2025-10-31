@@ -16,13 +16,13 @@ const TeamHeader = ({ scrollFunction }: TeamHeaderProps) => {
       'bg-[linear-gradient(to_bottom,rgba(255,255,255,0.05)_0%,rgba(0,0,0,0.05)_22%,rgba(0,0,0,0.55)_35%,rgba(0,0,0,0.84)_74%,rgba(0,0,0,1)_85%)]';
   } else if (size.width >= 1024) {
     gradientDefinition =
-      'bg-[linear-gradient(to_bottom,rgba(255,255,255,0.05)_0%,rgba(0,0,0,0.05)22%,rgba(0,0,0,0.57)_35%,rgba(0,0,0,0.84)_74%,rgba(0,0,0,1)_85%)]';
+      'bg-[linear-gradient(to_bottom,rgba(255,255,255,0.05)_0%,rgba(0,0,0,0.05)_22%,rgba(0,0,0,0.57)_35%,rgba(0,0,0,0.84)_74%,rgba(0,0,0,1)_85%)]';
   } else if (size.width >= 640) {
     gradientDefinition =
-      'bg-[linear-gradient(to_bottom,rgba(255,255,255,0.05)_0%,rgba(0,0,0,0.05)22%,rgba(0,0,0,0.57)_35%,rgba(0,0,0,0.84)_74%,rgba(0,0,0,1)_85%)]';
+      'bg-[linear-gradient(to_bottom,rgba(255,255,255,0.05)_0%,rgba(0,0,0,0.05)_22%,rgba(0,0,0,0.57)_35%,rgba(0,0,0,0.84)_74%,rgba(0,0,0,1)_85%)]';
   } else {
     gradientDefinition =
-      'bg-[linear-gradient(to_bottom,rgba(255,255,255,0.05)_0%,rgba(0,0,0,0.05)22%,rgba(0,0,0,0.57)_35%,rgba(0,0,0,0.84)_74%,rgba(0,0,0,1)_85%)]';
+      'bg-[linear-gradient(to_bottom,rgba(255,255,255,0.05)_0%,rgba(0,0,0,0.05)_22%,rgba(0,0,0,0.57)_35%,rgba(0,0,0,0.84)_74%,rgba(0,0,0,1)_85%)]';
   }
 
   return (
@@ -38,7 +38,7 @@ const TeamHeader = ({ scrollFunction }: TeamHeaderProps) => {
           they bring ICAF’s vision to life.
         </p>
         <div
-          className="mx-auto mt-12 flex h-[50px] w-[50px] cursor-pointer items-center rounded-full border-2 border-[#FFD743] text-center md:mt-4 lg:mt-2 xl:mt-8"
+          className="mx-auto mt-0 flex h-[50px] w-[50px] cursor-pointer items-center rounded-full border-2 border-[#FFD743] text-center sm:mt-8 md:mt-4 lg:mt-2 xl:mt-8"
           onClick={scrollFunction}
         >
           <ArrowDown className="mx-auto" />

@@ -118,13 +118,13 @@ jobs:
           RewriteBase /
           Options -MultiViews
           RewriteRule ^ - [E=RELEASE:${{ needs.build_frontend.outputs.release_id }}]
-          RewriteRule ^(?:releases|ChildArt|documents)/ - [L,NC]
+          RewriteRule ^(?:releases|ChildArt|documents|data)/ - [L,NC]
           RewriteCond %{ENV:APP_REWRITTEN} !=1
-          RewriteCond %{REQUEST_URI} !^/(?:releases|ChildArt|documents)/ [NC]
+          RewriteCond %{REQUEST_URI} !^/(?:releases|ChildArt|documents|data)/ [NC]
           RewriteCond %{REQUEST_URI} \.(?:css|js|mjs|map|png|jpe?g|gif|svg|webp|avif|ico|json|txt|xml|webmanifest|woff2?|ttf|eot|mp4|webm|ogv|wasm)$ [NC]
           RewriteRule ^ /releases/%{ENV:RELEASE}%{REQUEST_URI} [E=APP_REWRITTEN:1,PT,L]
           RewriteCond %{ENV:APP_REWRITTEN} !=1
-          RewriteCond %{REQUEST_URI} !^/(?:releases|ChildArt|documents)/ [NC]
+          RewriteCond %{REQUEST_URI} !^/(?:releases|ChildArt|documents|data)/ [NC]
           RewriteRule ^ /releases/%{ENV:RELEASE}/index.html [E=APP_REWRITTEN:1,PT,L]
           <IfModule mod_headers.c>
             <FilesMatch "\.(js|mjs|css|svg|png|jpg|jpeg|webp|avif|gif|ico|json|woff2?|ttf|eot|mp4|webm|ogv|wasm)$">

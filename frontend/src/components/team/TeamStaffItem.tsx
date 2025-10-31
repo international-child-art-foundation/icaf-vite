@@ -11,7 +11,7 @@ export const TeamStaffItem = ({ data, height, width }: TeamStaffItem) => {
   return (
     <div>
       <div
-        className={`flex h-full flex-col items-center gap-6 overflow-hidden text-center`}
+        className={`group flex h-full flex-col items-center gap-6 overflow-hidden text-left`}
         style={{ width: width + 'px' }}
       >
         {data.src ? (
@@ -34,18 +34,18 @@ export const TeamStaffItem = ({ data, height, width }: TeamStaffItem) => {
             </div>
           </div>
         )}
-        <div className="flex flex-col gap-2 text-center">
+        <div className="flex w-full flex-col gap-0 text-left">
           {data.link ? (
             <a
               href={data.link}
               rel="noopener noreferrer"
               target="_blank"
-              className="font-montserrat text-2xl font-semibold decoration-2 hover:underline"
+              className="font-montserrat text-2xl font-semibold decoration-2 group-hover:underline"
             >
               {data.name}
             </a>
           ) : (
-            <p className="font-montserrat text-2xl font-semibold decoration-2 hover:underline">
+            <p className="font-montserrat text-2xl font-semibold decoration-2 group-hover:underline">
               {data.name}
             </p>
           )}

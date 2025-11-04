@@ -15,6 +15,7 @@ import { Sponsorship } from './pages/Sponsorship';
 import { HealingArts } from './pages/HealingArts';
 import { PeaceThroughArt } from './pages/PeaceThroughArt';
 import { Student } from './pages/Student';
+import { MagazineAccess } from './components/access/MagazineAccess';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -52,6 +53,7 @@ export default function App() {
           <Route path="/about/team" element={<Team />} />
           <Route path="/donate" element={<Donate />} />
           <Route path="/sponsorship" element={<Sponsorship />} />
+          <Route path="/childart/access" element={<MagazineAccess />} />
         </Routes>
       </main>
       <Footer />

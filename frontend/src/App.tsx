@@ -53,7 +53,7 @@ export default function App() {
           <Route path="/about/team" element={<Team />} />
           <Route path="/donate" element={<Donate />} />
           <Route path="/sponsorship" element={<Sponsorship />} />
-          <Route path="/childart/access" element={<MagazineAccess />} />
+          <Route path="/access" element={<MagazineAccess />} />
         </Routes>
       </main>
       <Footer />

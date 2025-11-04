@@ -1,5 +1,4 @@
 import { IStaffItem } from '@/types/TeamPageTypes';
-import { LinkedInLink } from './LinkedInLink';
 
 interface TeamStaffItem {
   data: IStaffItem;
@@ -51,11 +50,6 @@ export const TeamStaffItem = ({ data, height, width }: TeamStaffItem) => {
         <p className="font-sans text-xl">{data.title}</p>
         <p>{data.description}</p>
       </div>
-      {data.linkedin && (
-        <div className="mt-auto">
-          <LinkedInLink src={data.linkedin} />
-        </div>
-      )}
     </div>
   );
 };

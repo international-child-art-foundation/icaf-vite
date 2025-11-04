@@ -4,7 +4,6 @@ export interface IStaffItem {
   title: string;
   link?: string;
   description?: string;
-  linkedin?: string;
 }
 
 export type TStaffData = IStaffItem[];

@@ -10,7 +10,7 @@ export const TeamCard = ({
 }: ITeamCardData) => {
   return (
     <div
-      className={`h-full ${FlairColorMap[color].border} w-full content-center overflow-hidden rounded-[24px] border-2 px-8 py-12 shadow-[1px_4px_4px_rgba(0,0,0,0.1)] xl:content-normal ${FlairColorMap[color]?.background} hover:bg-opacity-8 bg-opacity-0 transition-all duration-300`}
+      className={`h-full ${FlairColorMap[color].border} w-full content-center overflow-hidden rounded-[24px] border-2 px-8 py-12 shadow-[1px_4px_4px_rgba(0,0,0,0.1)] xl:content-normal xl:px-12 2xl:px-16 ${FlairColorMap[color]?.background} hover:bg-opacity-8 bg-opacity-0 transition-all duration-300`}
     >
       <div className="lg:max-w-unset mx-auto flex max-w-[380px] flex-col flex-wrap content-center gap-10 text-center text-[18px] leading-[26px]">
         <div className="flex flex-col gap-4">

@@ -9,6 +9,7 @@ import { HeartArrowIcon } from '@/assets/shared/icons/HeartArrowIcon';
 import { InputIconWrapper } from '../ui/InputIconWrapper';
 import { Mail } from 'lucide-react';
 import DonateButton from '../ui/donateButton';
+import { Link } from 'react-router-dom';
 
 const icons = [
   {
@@ -152,19 +153,14 @@ const Footer = () => {
 
               {/* Contact Us Button */}
               <div className="flex justify-center">
-                <Button
-                  asChild
-                  variant="outline"
-                  className="bg-primary h-14 w-full rounded-full border-2 text-base font-medium tracking-wide text-white hover:font-semibold lg:h-14 lg:text-base"
-                >
-                  <a
-                    href="https://icaf.org/about/contact-us"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                <Link to={'/contact'} className="w-full">
+                  <Button
+                    variant="outline"
+                    className="bg-primary h-14 w-full rounded-full border-2 text-base font-medium tracking-wide text-white hover:font-semibold lg:h-14 lg:text-base"
                   >
                     Contact Us
-                  </a>
-                </Button>
+                  </Button>
+                </Link>
               </div>
             </div>
             <HeartArrowIcon className="mt-4 h-8 w-16 overflow-visible lg:mt-0 lg:h-9 lg:w-16 lg:pl-44 xl:my-auto xl:h-8 xl:w-20 xl:pl-0 2xl:col-span-2 2xl:col-start-3 2xl:h-10 2xl:w-24" />

@@ -5,7 +5,7 @@ import './index.css';
 import Home from './pages/Home';
 import Partners from './pages/Partners';
 import About from './pages/About';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import ChildArtPage from './pages/ChildArtPage';
 import Impact from './pages/Impact';
 import Donate from './pages/Donate';
@@ -17,6 +17,7 @@ import { PeaceThroughArt } from './pages/PeaceThroughArt';
 import { Student } from './pages/Student';
 import { MagazineAccess } from './components/access/MagazineAccess';
 import { Page404 } from './pages/Page404';
+import { Contact } from './pages/Contact';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -55,6 +56,16 @@ export default function App() {
           <Route path="/donate" element={<Donate />} />
           <Route path="/sponsorship" element={<Sponsorship />} />
           <Route path="/access" element={<MagazineAccess />} />
+          <Route
+            path="/contact-us"
+            element={<Navigate to="/contact" replace />}
+          />
+          <Route
+            path="/about/contact-us"
+            element={<Navigate to="/contact" replace />}
+          />
+          <Route path="/contact" element={<Contact />} />
+
           <Route path="*" element={<Page404 />} />
         </Routes>
       </main>

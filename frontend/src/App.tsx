@@ -16,6 +16,7 @@ import { HealingArts } from './pages/HealingArts';
 import { PeaceThroughArt } from './pages/PeaceThroughArt';
 import { Student } from './pages/Student';
 import { MagazineAccess } from './components/access/MagazineAccess';
+import { Page404 } from './pages/Page404';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -27,9 +28,9 @@ export const metadata = {
 
 export default function App() {
   return (
-    <div className="mx-auto box-border flex min-h-screen w-full max-w-screen-2xl flex-col px-0">
+    <div className="relative mx-auto box-border flex min-h-screen w-full max-w-screen-2xl flex-col px-0">
       <NavigationBar />
-      <main className="mt-[98px] flex-1">
+      <main className="relative mt-[98px] flex flex-1 flex-col">
         <Routes>
           <Route path="/" element={<Home />} />
 
@@ -54,6 +55,7 @@ export default function App() {
           <Route path="/donate" element={<Donate />} />
           <Route path="/sponsorship" element={<Sponsorship />} />
           <Route path="/access" element={<MagazineAccess />} />
+          <Route path="*" element={<Page404 />} />
         </Routes>
       </main>
       <Footer />

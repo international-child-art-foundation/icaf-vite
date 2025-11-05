@@ -7,41 +7,27 @@ import { LightbulbIcon } from '@/assets/shared/icons/LightbulbIcon';
 
 export const designerData: IGroupsAndMembers[] = [
   {
-    name: 'Graphic Designer',
-    members: [{ name: 'Jia Yu', link: 'https://jiayu-design.com/' }],
-  },
-  {
     name: 'UX/UI Manager',
     members: [{ name: 'Sarita Lewis', link: 'https://sarita-lewis.com/' }],
   },
   {
-    name: 'UX Researcher ',
+    name: 'UX Researcher',
     members: [
       {
-        name: 'Florencia Gatti ',
+        name: 'Florencia Gatti',
         link: 'https://www.linkedin.com/in/mflorencia-gatti/',
       },
     ],
   },
   {
     name: 'Graphic Artist',
-    members: [{ name: 'Shuchen Wang' }],
+    members: [{ name: 'Shuchen Wang', link: 'https://shuchenwang.com/about' }],
   },
   {
-    name: 'Graphics Manager',
+    name: 'Creative Directors',
     members: [
-      { name: 'Marc Forton', link: 'https://mafmovement.com/' },
+      { name: 'Mark Forton', link: 'https://mafmovement.com/' },
       { name: 'Jia Yu', link: 'https://jiayu-design.com/' },
-    ],
-  },
-  {
-    name: 'UX/UI Designer',
-    members: [
-      { name: 'Chih-Wei Huang' },
-      {
-        name: 'Florencia Gatti',
-        link: 'https://www.linkedin.com/in/mflorencia-gatti/',
-      },
     ],
   },
 ];
@@ -93,8 +79,8 @@ export const TeamCardData: ITeamCardData[] = [
     groupsOfMembers: designerData,
   },
   {
-    title: `Program and 
-    Operations Officers`,
+    title: `Program Officers`,
+    subtitle: 'Helping ICAF’s operations and activities',
     color: 'green',
     Icon: SpaceshipIcon,
     groupsOfMembers: officerData,

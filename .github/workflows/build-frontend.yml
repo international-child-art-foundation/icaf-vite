@@ -127,8 +127,8 @@ jobs:
           RewriteBase /
           Options -MultiViews
           RewriteRule ^ - [E=RELEASE:${{ needs.build_frontend.outputs.release_id }}]
-          RewriteRule ^(?:releases|ChildArt|documents|data|php-api|config)/ - [L,NC]
           RewriteRule ^php-api/(.*)$ /releases/%{ENV:RELEASE}/php-api/$1 [PT,L,NC]
+          RewriteRule ^(?:releases|ChildArt|documents|data|config)/ - [L,NC]
           RewriteCond %{ENV:APP_REWRITTEN} !=1
           RewriteCond %{REQUEST_URI} !^/(?:releases|ChildArt|documents|data)/ [NC]
           RewriteCond %{REQUEST_URI} \.(?:css|js|mjs|map|png|jpe?g|gif|svg|webp|avif|ico|json|txt|xml|webmanifest|woff2?|ttf|eot|mp4|webm|ogv|wasm)$ [NC]

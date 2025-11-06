@@ -169,7 +169,7 @@ const Footer = () => {
         {/* Copyright Notice */}
         <div className="footer-inverse bg-primary order-5 w-full place-items-center text-center text-sm lg:flex lg:items-center lg:justify-center lg:text-sm xl:col-span-12 xl:mx-auto">
           <span className="text-lg lg:pr-2 lg:text-2xl">©</span> 2025
-          International Children Art Foundation | 2549 Virginia Avenue, NW |
+          International Child Art Foundation | 2549 Virginia Avenue, NW |
           Washington, DC 20037
         </div>
       </div>

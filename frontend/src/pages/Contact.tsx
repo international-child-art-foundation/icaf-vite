@@ -139,13 +139,9 @@ export const Contact = () => {
         International Child Art Foundation
       </p>
       <p className="text-2xl leading-8">
-        123 Main Street
+        Post Office Box 58133
         <br />
-        Suite 400
-        <br />
-        Washington, DC 20001
-        <br />
-        United States
+        Washington, D.C. 20037
       </p>
     </div>
   );
@@ -161,18 +157,6 @@ export const Contact = () => {
         <div className="row-span-2 row-start-1 rounded-xl bg-slate-200/70 lg:col-span-2 lg:col-start-1 lg:row-span-1 lg:row-start-1" />
 
         <div className="col-span-1 col-start-1 row-span-2 row-start-1 m-6 rounded-2xl bg-white p-6 shadow-xl md:p-8">
-          <div
-            className={
-              status === 'ok'
-                ? 'block text-center text-xl font-bold text-green-700'
-                : 'hidden'
-            }
-            role="status"
-            aria-live="polite"
-          >
-            Thanks for contacting ICAF!
-          </div>
-
           <form
             id="contactUsForm"
             ref={formRef}
@@ -197,6 +181,17 @@ export const Contact = () => {
                 </div>
               </div>
             )}
+            <div
+              className={
+                status === 'ok'
+                  ? 'block text-center text-xl font-bold text-green-700'
+                  : 'hidden'
+              }
+              role="status"
+              aria-live="polite"
+            >
+              Thanks for contacting ICAF!
+            </div>
 
             <input
               type="text"

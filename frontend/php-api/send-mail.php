@@ -5,10 +5,11 @@ require_once "Mail.php";
 require_once "Mail/mime.php";
 
 // ---- config ----
-$to         = "noah.zaranka@icaf.org";
+// TODO: Finalize addresses
+$to = "noah.zaranka@icaf.org";
 $mailDomain = "icaf.org";
-$username   = "no-reply@" . $mailDomain;
-$from       = "ICAF <no-reply@" . $mailDomain . ">";
+$username = "no-reply@" . $mailDomain;
+$from = "ICAF <no-reply@" . $mailDomain . ">";
 
 header("Referrer-Policy: no-referrer");
 header("X-Content-Type-Options: nosniff");
@@ -64,8 +65,38 @@ function h(string $s): string {
   return htmlspecialchars($s, ENT_QUOTES, "UTF-8");
 }
 
-// accept only the current "contact-us" flow
-$type    = (string)($_POST["type"] ?? "");
+$type = (string)($_POST["type"] ?? "");
+
+if ($type === "subscribe") {
+  $email = clamp_utf8(trim((string)($_POST["email"] ?? "")), LIMIT_EMAIL);
+  if (!is_valid_email($email)) {
+    exit("invalid_request");
+  }
+  $subject = "{$email} would like to subscribe to the ICAF newsletter";
+  $headers = [
+    "From" => $from,
+    "To" => $to,
+    "Subject" => $subject,
+    "Content-Type" => "text/html; charset=UTF-8"
+  ];
+  $smtp = Mail::factory("smtp", [
+    "host"     => "ssl://smtp.ionos.com",
+    "port"     => 465,
+    "auth"     => true,
+    "username" => $username,
+    "password" => $password,
+    "timeout"  => 10,
+    "persist"  => false
+  ]);
+  $result = $smtp->send($to, $headers, $subject);
+  if (\PEAR::isError($result)) {
+    echo "<p>An error occurred while sending the email. Please try again later.</p>";
+    exit;
+  }
+  echo "success";
+  exit;
+}
+
 $name    = clamp_utf8(trim((string)($_POST["name"] ?? "")),    LIMIT_NAME);
 $email   = clamp_utf8(trim((string)($_POST["email"] ?? "")),   LIMIT_EMAIL);
 $subject = clamp_utf8(trim((string)($_POST["subject"] ?? "")), LIMIT_SUBJECT);

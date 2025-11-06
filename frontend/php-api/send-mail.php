@@ -1,94 +1,136 @@
 <?php
+declare(strict_types=1);
+
 require_once "Mail.php";
+require_once "Mail/mime.php";
+
+// ---- config ----
+$to         = "123@test.org";
+$mailDomain = "test.org";
+$username   = "no-reply@" . $mailDomain;
+$from       = "ICAF <no-reply@" . $mailDomain . ">";
+
+header("Referrer-Policy: no-referrer");
+header("X-Content-Type-Options: nosniff");
+
+function bail(int $code, string $msg = ""): never {
+  http_response_code($code);
+  if ($msg !== "") {
+    header("Content-Type: application/json; charset=UTF-8");
+    echo json_encode(["error" => $msg], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+  } else {
+    header("Content-Length: 0");
+  }
+  exit;
+}
+
+if (($_SERVER["REQUEST_METHOD"] ?? "") !== "POST") {
+  header("Allow: POST");
+  bail(405);
+}
+
+$ct = (string)($_SERVER["CONTENT_TYPE"] ?? "");
+if (stripos($ct, "application/x-www-form-urlencoded") !== 0) {
+  bail(415, "unsupported_media_type");
+}
+
+if ((int)($_SERVER["CONTENT_LENGTH"] ?? 0) > 64 * 1024) {
+  bail(413, "payload_too_large");
+}
+
 require $_SERVER["DOCUMENT_ROOT"] . "/config/config.php";
-$password = $mail_password;
+$password = $mail_password ?? "";
 
-$username = "no-reply@icaf.org";
-$from = "no-reply@icaf.org";
-$password = $config["mail_password"];
-
-// GLOBALS
-// TODO: Change "to" address
-$to = "noah.zaranka@icaf.org";
-$body = "";
-
-// Validate POST data
-$allowedKeys = ['name', 'email', 'senderEmail', 'recipientEmail', 'relationship', 'message', 'type', 'inLovingMemoryOf', 'sendername', 'senderemail', 'artloveremail', 'occasion'];
-$sanitized = []; // Initialize the sanitized array
-foreach ($_POST as $label => $content) {
-  if (!in_array($label, $allowedKeys)) {
-    continue;
-  }
-  $sanitized[$label] = htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
-  if ($label !== 'type') {
-    $body .= "<h2>{$label}</h2> <p style='margin:5px 0 0 20px'>" . nl2br($sanitized[$label]) . "</p>";
-  }
+if (!empty($_POST["website"] ?? "")) {
+  bail(400, "bad_request");
 }
 
-if (!isset($sanitized['type'])) {
-    exit('invalid_request');
+const LIMIT_NAME    = 100;
+const LIMIT_EMAIL   = 254;
+const LIMIT_SUBJECT = 200;
+const LIMIT_MESSAGE = 5000;
+
+function clamp_utf8(string $s, int $n): string {
+  return mb_strlen($s, "UTF-8") > $n ? mb_substr($s, 0, $n, "UTF-8") : $s;
+}
+function header_safe(string $s): string {
+  if (preg_match("/\r|\n/", $s)) bail(422, "invalid_chars");
+  return $s;
+}
+function is_valid_email(string $email): bool {
+  return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+}
+function h(string $s): string {
+  return htmlspecialchars($s, ENT_QUOTES, "UTF-8");
 }
 
-switch ($sanitized['type']) {
-  case "subscribe":
-    $subject = "{$sanitized['email']} would like to subscribe to the ICAF newsletter";
-    $body = $subject;
-    break;
-  case "contact-us":
-    $subject = "Message from {$sanitized['name']}";
-    break;
-  case "membership":
-    $subject = "New membership application {$sanitized['email']}";
-    break;
-  case "art-lovers":
-    $subject = "Art Lovers request for {$sanitized['name']}";
-    break;
-  case "in-loving-memory":
-    $subject = "In Loving Memory request for {$sanitized['inLovingMemoryOf']}";
-    break;
-  default:
-    exit('invalid_type');
+// accept only the current "contact-us" flow
+$type    = (string)($_POST["type"] ?? "");
+$name    = clamp_utf8(trim((string)($_POST["name"] ?? "")),    LIMIT_NAME);
+$email   = clamp_utf8(trim((string)($_POST["email"] ?? "")),   LIMIT_EMAIL);
+$subject = clamp_utf8(trim((string)($_POST["subject"] ?? "")), LIMIT_SUBJECT);
+$message = clamp_utf8(trim((string)($_POST["message"] ?? "")), LIMIT_MESSAGE);
+
+if ($type !== "contact-us") {
+  bail(422, "unsupported_type");
 }
 
-$headers = [
-  'From' => "ICAF <$from>",
-  'To' => $to,
-  'Subject' => $subject,
-  'Content-Type' => 'text/html; charset=UTF-8'
-];
-
-function trySendMail($host, $port, $username, $password, $to, $headers, $body) {
-    $smtp = Mail::factory('smtp', [
-        'host' => $host,
-        'port' => $port,
-        'auth' => true,
-        'username' => $username,
-        'password' => $password,
-        'timeout' => 10,
-        'persist' => false
-    ]);
-    
-    return $smtp->send($to, $headers, $body);
+if ($name === "" || $subject === "" || $message === "" || !is_valid_email($email)) {
+  bail(422, "invalid_input");
 }
 
-$configs = [
-    ['host' => 'ssl://smtp.ionos.com', 'port' => 465]
-];
+header_safe($name);
+header_safe($subject);
+header_safe($email);
 
-$success = false;
+$replyTo = $email;
 
-foreach ($configs as $configItem) { 
-    $mail = trySendMail($configItem['host'], $configItem['port'], $username, $password, $to, $headers, $body);
-    
-    if (!PEAR::isError($mail)) {
-        $success = true;
-        break;
-    }
+$mailSubject = "Message from {$name}: {$subject}";
+
+$textBody = "Contact Message\n"
+          . "Name: {$name}\n"
+          . "Email: {$email}\n"
+          . "Subject: {$subject}\n\n"
+          . "Message:\n{$message}\n";
+
+$htmlBody = "<h2>Contact Message</h2>"
+          . "<p><strong>Name:</strong> " . h($name) . "<br>"
+          . "<strong>Email:</strong> " . h($email) . "</p>"
+          . "<p><strong>Subject:</strong> " . h($subject) . "</p>"
+          . "<div><strong>Message:</strong><br>" . nl2br(h($message)) . "</div>";
+
+$mime = new Mail_mime(["eol" => "\r\n"]);
+$mime->setTXTBody($textBody);
+$mime->setHTMLBody($htmlBody);
+
+$body    = $mime->get([
+  "text_charset" => "UTF-8",
+  "html_charset" => "UTF-8",
+  "head_charset" => "UTF-8",
+]);
+$headers = $mime->headers([
+  "From"         => $from,
+  "To"           => $to,
+  "Reply-To"     => $replyTo,
+  "Subject"      => $mailSubject,
+  "MIME-Version" => "1.0",
+]);
+
+$smtp = Mail::factory("smtp", [
+  "host"     => "ssl://smtp.ionos.com",
+  "port"     => 465,
+  "auth"     => true,
+  "username" => $username,
+  "password" => $password,
+  "timeout"  => 10,
+  "persist"  => false
+]);
+
+$result = $smtp->send($to, $headers, $body);
+
+if (\PEAR::isError($result)) {
+  bail(500, "send_failed");
 }
 
-if ($success) {
-    echo "success";
-} else {
-    echo "<p>An error occurred while sending the email. Please try again later.</p>";
-}
-?>
+header("Content-Type: application/json; charset=UTF-8");
+echo json_encode(["ok" => true], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

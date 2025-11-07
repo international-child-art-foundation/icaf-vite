@@ -82,7 +82,7 @@ function Footer() {
           <p className="block">Get our quarterly newsletter</p>
           <div className="flex flex-col gap-2">
             <form
-              onSubmit={() => onSubscribe}
+              onSubmit={(e) => void onSubscribe(e)}
               className="flex flex-wrap items-center gap-1 text-stone-700 focus-within:text-stone-900 lg:flex-nowrap lg:gap-2 xl:max-w-[85%]"
             >
               <div className="flex h-11 w-full flex-auto items-center rounded-full bg-white pl-4 pr-2 lg:h-10">

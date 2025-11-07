@@ -18,6 +18,7 @@ import { Student } from './pages/Student';
 import { MagazineAccess } from './components/access/MagazineAccess';
 import { Page404 } from './pages/Page404';
 import { Contact } from './pages/Contact';
+import { News } from './pages/News';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -65,6 +66,7 @@ export default function App() {
             element={<Navigate to="/contact" replace />}
           />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/news-events/news" element={<News />} />
 
           <Route path="*" element={<Page404 />} />
         </Routes>

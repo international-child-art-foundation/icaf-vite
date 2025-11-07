@@ -7,11 +7,16 @@ import {
 } from '@/components/ui/accordion';
 import { useState } from 'react';
 import { toUpper } from 'lodash';
+import { Link } from 'react-router-dom';
 
 type Child = {
   label: string;
   href: string;
   key?: string;
+};
+
+type MobileNavMenuProps = {
+  onCloseMenu?: () => void;
 };
 
 const isVisitable = (item: NavItem) =>
@@ -20,7 +25,7 @@ const isVisitable = (item: NavItem) =>
 const hasChildren = (item: NavItem) =>
   Array.isArray(item.children) && item.children.length > 0;
 
-const MobileNavMenu = () => {
+const MobileNavMenu = ({ onCloseMenu }: MobileNavMenuProps) => {
   const [openAccordian, setOpenAccordian] = useState<string | undefined>();
 
   return (
@@ -47,13 +52,14 @@ const MobileNavMenu = () => {
               );
             }
             return (
-              <a
+              <Link
                 key={item.key}
-                href={href}
+                to={href}
                 className="block px-1 py-2 text-base font-semibold"
+                onClick={onCloseMenu}
               >
                 {toUpper(item.label)}
-              </a>
+              </Link>
             );
           }
 
@@ -77,9 +83,14 @@ const MobileNavMenu = () => {
                 {contentChildren.map((child) => {
                   const key = child.key ?? `${item.key}:${child.href}`;
                   return (
-                    <a key={key} href={child.href} className="block">
+                    <Link
+                      key={key}
+                      to={child.href}
+                      className="block"
+                      onClick={onCloseMenu}
+                    >
                       {child.label}
-                    </a>
+                    </Link>
                   );
                 })}
               </AccordionContent>

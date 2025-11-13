@@ -2,6 +2,7 @@ export interface IicafTimelineEvent {
   year: number;
   title: string;
   description: string;
+  willBreak?: boolean; // If the text is too long for a single line, true
 }
 
 export type IicafTimelineData = IicafTimelineEvent[];
@@ -18,12 +19,14 @@ export const icafTimelineData: IicafTimelineData = [
     title: 'First National Children’s Art Festival',
     description:
       'Hosted America’s first national children’s art festival; launched ChildArt magazine.',
+    willBreak: true,
   },
   {
     year: 1999,
     title: 'First World Children’s Festival',
     description:
       'Held on the National Mall, Washington, D.C.; exhibitions at UN and World Bank/IMF.',
+    willBreak: true,
   },
   {
     year: 2001,
@@ -48,6 +51,7 @@ export const icafTimelineData: IicafTimelineData = [
     title: 'Arts Olympiad in Olympic Bids',
     description:
       'Arts Olympiad featured in Olympic bid campaigns; launched post-disaster recovery art program with the World Bank.',
+    willBreak: true,
   },
   {
     year: 2006,
@@ -66,11 +70,13 @@ export const icafTimelineData: IicafTimelineData = [
     title: 'Healing Arts for Disaster Recovery',
     description:
       'Programs for children in Haiti and Chile; organized International Children’s Panel in Riyadh.',
+    willBreak: true,
   },
   {
     year: 2011,
     title: 'Award to W.K. Kellogg Foundation',
     description: 'W.K. Kellogg Foundation received the World Children’s Award.',
+    willBreak: true,
   },
   {
     year: 2012,
@@ -92,16 +98,19 @@ export const icafTimelineData: IicafTimelineData = [
     year: 2015,
     title: '5th World Children’s Festival',
     description: 'Held on the White House Ellipse, Washington, D.C.',
+    willBreak: true,
   },
   {
     year: 2017,
     title: 'ChildArt – Brain Science Issue',
     description: 'Published with Johns Hopkins Brain Science Institute.',
+    willBreak: true,
   },
   {
     year: 2018,
     title: 'ChildArt – Architecture Issue',
     description: 'Published with the American Institute of Architects.',
+    willBreak: true,
   },
   {
     year: 2020,
@@ -116,3 +125,10 @@ export const icafTimelineData: IicafTimelineData = [
       'Featured in Los Angeles Times; published ChildArt AI edition.',
   },
 ];
+
+export const leftIcafTimelineData: IicafTimelineData = icafTimelineData.filter(
+  (_, idx) => idx % 2 == 0,
+);
+export const rightIcafTimelineData: IicafTimelineData = icafTimelineData.filter(
+  (_, idx) => idx % 2 == 1,
+);

@@ -15,17 +15,17 @@ export const TimelineSideDesktop = ({
   className,
   width,
 }: TimelineSideDesktopProps) => {
-  const bothClasses = `w-[${width}px] `;
-  const leftClasses = bothClasses + `justify-items-start`;
-  const rightClasses = bothClasses + ` justify-items-end`;
+  const leftClasses = `justify-items-start`;
+  const rightClasses = ` justify-items-end`;
   return (
     <div
       className={`${side === 'left' ? leftClasses : rightClasses} ${className}`}
-      style={
-        side === 'left'
+      style={{
+        width: `${width}px`,
+        ...(side === 'left'
           ? { marginRight: `${width - 28}px` }
-          : { marginLeft: `${width - 28}px` }
-      }
+          : { marginLeft: `${width - 28}px` }),
+      }}
     >
       {data.map((timelineEvent: IicafTimelineEvent, idx) => (
         <TimelineEventDesktop

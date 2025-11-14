@@ -9,7 +9,8 @@ export const HistoryTimelineDesktop = () => {
         ICAF Timeline
       </div>
       <div
-        className={`mx-auto flex w-[${TIMELINE_WIDTH}px] flex-col items-center`}
+        className={`mx-auto flex flex-col items-center`}
+        style={{ width: TIMELINE_WIDTH }}
       >
         <div className="bg-tertiary-red h-7 w-7 rounded-full"></div>
         <div className="bg-tertiary-red h-24 w-1"></div>

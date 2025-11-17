@@ -1,4 +1,5 @@
 import { HistoryHeader } from '@/components/history/HistoryHeader';
+import { HistoryMomentsCarousel } from '@/components/history/HistoryMomentsCarousel';
 import { HistoryTimelineDesktop } from '@/components/history/HistoryTimelineDesktop';
 import { HistoryTimelineMobile } from '@/components/history/HistoryTimelineMobile';
 import { useWindowSize } from 'usehooks-ts';
@@ -16,6 +17,7 @@ export const History = () => {
         ) : (
           <HistoryTimelineMobile />
         )}
+        <HistoryMomentsCarousel />
       </div>
     </div>
   );

@@ -14,7 +14,7 @@ export const TimelineEventDesktop = ({
   description,
   side,
   visible,
-  willBreak,
+  willBreakDesktop,
 }: TimelineEventDesktopProps) => {
   const size = useWindowSize();
   const titleDescriptionWidth = size.width >= 1300 ? 500 : 350;
@@ -26,7 +26,7 @@ export const TimelineEventDesktop = ({
     >
       <div className="relative flex flex-row items-center gap-4">
         <p
-          className={` ${willBreak && size.width < 1300 ? 'mb-36' : 'mb-28'} font-montserrat pointer-events-none absolute mb-32 select-none text-[78px] font-extrabold text-[#D5D5D5] drop-shadow-md ${side === 'left' ? 'right-[160px]' : 'left-[160px]'}`}
+          className={` ${willBreakDesktop && size.width < 1300 ? 'mb-36' : 'mb-28'} font-montserrat pointer-events-none absolute mb-32 select-none text-[78px] font-extrabold text-[#D5D5D5] drop-shadow-md ${side === 'left' ? 'right-[160px]' : 'left-[160px]'}`}
         >
           {year}
         </p>
@@ -37,7 +37,7 @@ export const TimelineEventDesktop = ({
           {title}
         </p>
         <p
-          className={`absolute ${willBreak && size.width < 1300 ? 'mt-[264px]' : 'mt-60'} h-[200px] w-[350px] ${side === 'left' ? 'right-[160px] text-right' : 'left-[160px]'}`}
+          className={`absolute ${willBreakDesktop && size.width < 1300 ? 'mt-[264px]' : 'mt-60'} h-[200px] w-[350px] ${side === 'left' ? 'right-[160px] text-right' : 'left-[160px]'}`}
           style={{ width: titleDescriptionWidth }}
         >
           {description}

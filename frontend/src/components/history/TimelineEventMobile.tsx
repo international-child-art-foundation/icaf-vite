@@ -5,31 +5,35 @@ export const TimelineEventMobile = ({
   year,
   title,
   description,
-  willBreak,
+  willBreakMobile,
 }: IicafTimelineEvent) => {
   const size = useWindowSize();
-  const titleDescriptionWidth = size.width >= 1300 ? 500 : 500;
-  const bars = Array.from({ length: 11 });
+  const titleDescriptionWidth = size.width >= 700 ? 500 : 375;
+  const bars = Array.from({ length: size.width > 700 ? 11 : 13 });
 
   return (
     <div className={`relative flex w-full flex-col gap-0`}>
-      <div className="-ml-3 flex flex-row items-center gap-2">
+      <div
+        className={`-ml-3 flex flex-row items-center ${size.width > 768 && size.width < 1024 ? 'gap-10' : 'gap-2'}`}
+      >
         <div className={`bg-primary h-7 w-7 rounded-full`}></div>
-        <div className="h-1 min-w-[100px] rounded-full bg-black"></div>
+        <div
+          className={`h-1 w-[40px] ${size.width > 768 ? 'grow' : ''} rounded-full bg-black sm:w-[100px]`}
+        ></div>
         <div className="relative flex flex-row items-center gap-4">
           <p
-            className={` ${willBreak ? 'mb-40' : 'mb-28'} font-montserrat pointer-events-none absolute mb-32 select-none text-[78px] font-extrabold text-[#D5D5D5] drop-shadow-md`}
+            className={` ${willBreakMobile ? 'mb-40' : 'mb-28'} font-montserrat pointer-events-none absolute mb-32 select-none text-[78px] font-extrabold text-[#D5D5D5] drop-shadow-md`}
           >
             {year}
           </p>
           <p
-            className={`text-tertiary-blue font-montserrat h-[80px] content-center text-[32px] font-extrabold`}
+            className={`text-tertiary-blue font-montserrat h-[80px] content-center text-[30px] font-extrabold leading-[34px]`}
             style={{ width: titleDescriptionWidth }}
           >
             {title}
           </p>
           <p
-            className={`absolute ${willBreak ? 'mt-[310px]' : 'mt-60'} h-[200px] text-lg`}
+            className={`absolute ${willBreakMobile ? 'mt-[280px]' : 'mt-60'} h-[200px] text-lg`}
             style={{ width: titleDescriptionWidth }}
           >
             {description}

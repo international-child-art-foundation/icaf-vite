@@ -19,7 +19,7 @@ export const HistoryMomentsCarousel = () => {
     { src: DCMayorImg, title: 'DC Mayor', id: 'dcmayor' },
   ];
 
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(1);
   const [api, setApi] = useState<CarouselApi>();
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export const HistoryMomentsCarousel = () => {
   const handleSelect = (index: number) => api?.scrollTo(index);
 
   return (
-    <section className="relative bg-white py-6 md:pt-20">
+    <section className="relative bg-white py-6">
       <Carousel
         setApi={setApi}
         opts={{

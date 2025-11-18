@@ -13,7 +13,7 @@ export const HistoryMomentCard = ({
     <div
       className={`${isActive ? 'scale-100 md:scale-[0.85]' : 'scale-95 md:scale-[0.7]'} relative select-none transition-transform duration-300`}
     >
-      <div className="border-tertiary-red relative flex flex-col overflow-hidden rounded-xl border-4">
+      <div className="relative flex flex-col overflow-hidden rounded-xl shadow-md">
         {cardData.src ? (
           <img className="" src={cardData.src} />
         ) : (

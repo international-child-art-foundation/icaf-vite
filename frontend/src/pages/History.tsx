@@ -1,7 +1,7 @@
 import { HistoryHeader } from '@/components/history/HistoryHeader';
 import { HistoryMomentsCarousel } from '@/components/history/HistoryMomentsCarousel';
-import { HistoryTimelineDesktop } from '@/components/history/HistoryTimelineDesktop';
-import { HistoryTimelineMobile } from '@/components/history/HistoryTimelineMobile';
+import { HistoryTimeline } from '@/components/history/HistoryTimeline';
+import { YourDonationGiraffe } from '@/components/history/YourDonationGiraffe';
 import { useWindowSize } from 'usehooks-ts';
 
 export const History = () => {
@@ -13,11 +13,12 @@ export const History = () => {
         <HistoryHeader />
 
         {size.width >= 1024 ? (
-          <HistoryTimelineDesktop />
+          <HistoryTimeline mode={'desktop'} />
         ) : (
-          <HistoryTimelineMobile />
+          <HistoryTimeline mode={'mobile'} />
         )}
         <HistoryMomentsCarousel />
+        <YourDonationGiraffe />
       </div>
     </div>
   );

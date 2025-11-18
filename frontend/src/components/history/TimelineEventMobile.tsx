@@ -8,7 +8,7 @@ export const TimelineEventMobile = ({
   willBreakMobile,
 }: IicafTimelineEvent) => {
   const size = useWindowSize();
-  const titleDescriptionWidth = size.width >= 700 ? 500 : 375;
+  const titleDescriptionWidth = size.width >= 700 ? 530 : 375;
   const bars = Array.from({ length: size.width > 700 ? 11 : 13 });
 
   return (

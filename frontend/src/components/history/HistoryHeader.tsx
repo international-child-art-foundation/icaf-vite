@@ -1,5 +1,5 @@
 import { CurvedImage } from '@/pages/CurvedImage';
-import headerImg from '@/assets/history/historyHeader.webp';
+import headerImg from '@/assets/history/HistoryHeader.webp';
 import { OpinionatedGradients } from '@/data/gradientDefinition';
 import { useWindowSize } from 'usehooks-ts';
 import DonateButtonPartnersPage from '../ui/donateButtonPartnersPage';

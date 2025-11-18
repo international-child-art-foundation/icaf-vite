@@ -9,7 +9,7 @@ export const History = () => {
 
   return (
     <div>
-      <div>
+      <div className="overflow-hidden">
         <HistoryHeader />
 
         {size.width >= 1024 ? (

@@ -14,9 +14,31 @@ import { TMomentsCarouselData } from '@/types/History';
 
 export const HistoryMomentsCarousel = () => {
   const carouselImages: TMomentsCarouselData[] = [
-    { src: foundingImg, title: 'The Founding of ICAF', id: 'icaffounding' },
-    { src: MagazineCover, title: 'ChildArt Magazine Cover', id: 'magazine' },
-    { src: DCMayorImg, title: 'DC Mayor', id: 'dcmayor' },
+    {
+      src: foundingImg,
+      title: 'The Founding of ICAF',
+      description:
+        "ICAF was founded in 1997 to promote children's creativity worldwide.",
+      id: 'icaffounding',
+    },
+    {
+      src: MagazineCover,
+      title: 'The Power of Words',
+      description: (
+        <div>
+          In 2023, ICAF published{' '}
+          <span className="italic">The Power of Words</span> — an issue of
+          ChildArt magazine focused on how words change lives.
+        </div>
+      ),
+      id: 'magazine',
+    },
+    {
+      src: DCMayorImg,
+      title: "Children's Peace Day",
+      description: `September 11 was designated as "Children's Peace Day" by the Mayor of Washington, D.C. in 2003.`,
+      id: 'dcmayor',
+    },
   ];
 
   const [selectedIndex, setSelectedIndex] = useState(1);
@@ -48,7 +70,7 @@ export const HistoryMomentsCarousel = () => {
         }}
         className="mx-auto"
       >
-        <CarouselContent className="">
+        <CarouselContent className="" allowOverflow={true}>
           {carouselImages.map((data, i) => {
             return (
               <CarouselItem

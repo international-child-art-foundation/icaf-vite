@@ -19,7 +19,7 @@ import { MagazineAccess } from './components/access/MagazineAccess';
 import { Page404 } from './pages/Page404';
 import { Contact } from './pages/Contact';
 import { News } from './pages/News';
-import { History } from './pages/history';
+import { History } from './pages/History';
 
 export const metadata = {
   title: 'Home | ICAF',

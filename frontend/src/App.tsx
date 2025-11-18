@@ -19,6 +19,7 @@ import { MagazineAccess } from './components/access/MagazineAccess';
 import { Page404 } from './pages/Page404';
 import { Contact } from './pages/Contact';
 import { News } from './pages/News';
+import { History } from './pages/history';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -50,10 +51,12 @@ export default function App() {
             path="/programs/peace-through-art"
             element={<PeaceThroughArt />}
           />
-          <Route path="/about/partners" element={<Partners />} />
           <Route path="/about" element={<About />} />
+          <Route path="/about/partners" element={<Partners />} />
           <Route path="/about/impact" element={<Impact />} />
           <Route path="/about/team" element={<Team />} />
+          <Route path="/about/history" element={<History />} />
+
           <Route path="/donate" element={<Donate />} />
           <Route path="/sponsorship" element={<Sponsorship />} />
           <Route path="/access" element={<MagazineAccess />} />

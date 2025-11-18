@@ -66,11 +66,11 @@ export const HistoryTimeline = ({ mode }: HistoryTimelineProps) => {
         />
         <img
           src={yellowPuddle}
-          className="absolute top-[55%] z-0 opacity-[60%] lg:-right-48 lg:top-[65%] lg:opacity-100"
+          className="absolute top-[55%] z-0 opacity-[60%] lg:-right-48 lg:top-[55%] lg:opacity-100"
         />
         <img
           src={smallYellowPuddle}
-          className="absolute -right-24 top-[80%] lg:right-96 lg:top-[64%]"
+          className="absolute -right-24 top-[80%] lg:right-96 lg:top-[54%]"
         />
         <img
           src={redBlueFirework}

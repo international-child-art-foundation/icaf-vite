@@ -20,6 +20,7 @@ import { Page404 } from './pages/Page404';
 import { Contact } from './pages/Contact';
 import { News } from './pages/News';
 import { History } from './pages/History';
+import { ArtsOlympiad } from './pages/ArtsOlympiad';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -70,6 +71,7 @@ export default function App() {
           />
           <Route path="/contact" element={<Contact />} />
           <Route path="/news-events/news" element={<News />} />
+          <Route path="/programs/arts-olympiad" element={<ArtsOlympiad />} />
 
           <Route path="*" element={<Page404 />} />
         </Routes>

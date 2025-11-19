@@ -4,15 +4,15 @@ import { Button } from '../ui/button';
 export const ArtsOlympiadCTA = () => {
   return (
     <div className="relative mb-24 mt-12">
-      <div className="relative flex h-[300px] grid-rows-2 flex-col items-center rounded-xl bg-blue-100 p-12 px-24 md:grid md:grid-cols-2 md:grid-rows-1">
-        <div className="relative flex flex-col gap-4">
+      <div className="relative flex flex-col items-center gap-4 rounded-xl bg-blue-100 p-12 px-24 md:grid md:h-[300px] md:grid-cols-2 md:grid-rows-1">
+        <div className="relative order-2 flex flex-col gap-4 md:order-1">
           <p className="font-montserrat text-3xl font-semibold">
             Ready to express your creativity?
           </p>
           <p className="font-montserrat text-xl">
             Sign up today and get inspired!
           </p>
-          <span>
+          <span className="mx-auto md:mx-0">
             <a
               href="https://myfavoritesport.org"
               target="_blank"
@@ -25,7 +25,7 @@ export const ArtsOlympiadCTA = () => {
         </div>
         <img
           src={ArtsOlympiadLogo}
-          className="absolute right-12 ml-auto h-[400px]"
+          className="order-1 h-[400px] md:absolute md:right-12 md:order-2 md:ml-auto"
         />
       </div>
     </div>

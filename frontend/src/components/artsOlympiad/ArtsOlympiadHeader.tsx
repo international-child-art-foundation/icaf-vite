@@ -12,9 +12,11 @@ export const ArtsOlympiadHeader = () => {
   } else if (size.width >= 1024) {
     gradientDefinition = OpinionatedGradients.lg;
   } else if (size.width >= 640) {
-    gradientDefinition = OpinionatedGradients.md;
+    gradientDefinition =
+      'bg-[linear-gradient(to_bottom,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.6)_50%,rgba(0,0,0,0.15)_80%,rgba(255,255,255,0.15)_100%)]';
   } else {
-    gradientDefinition = OpinionatedGradients.sm;
+    gradientDefinition =
+      'bg-[linear-gradient(to_bottom,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.6)_50%,rgba(0,0,0,0.15)_80%,rgba(255,255,255,0.15)_100%)]';
   }
 
   return (

@@ -78,7 +78,7 @@ export const GuidelineCard = ({
             return (
               <p
                 key={item[0]}
-                className="min-w-[100%] font-sans text-lg font-light"
+                className="min-w-[100%] font-sans text-base font-light md:text-lg"
               >
                 {item}
               </p>

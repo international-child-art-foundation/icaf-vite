@@ -30,8 +30,8 @@ export const ClimateChangeHeader = () => {
           facing irreversible climate change.
         </p>
         <p className="font-openSans text-xl font-normal text-white lg:max-w-[50%] xl:max-w-[50%]">
-          The future belongs to the children. They alone have the power to shape
-          a tomorrow in which green spaces, clean air, and clear water are
+          The future belongs to the children. Together, we have the power to
+          shape a tomorrow in which green spaces, clean air, and clear water are
           plentiful.
         </p>
       </div>

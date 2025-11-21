@@ -19,10 +19,10 @@ export const ClimateChangeVideoCallout = ({
 
   return (
     <div
-      className={`border-primary/50 relative grid grid-cols-1 gap-8 rounded-xl border-2 bg-blue-100/50 p-8 ${columnTemplate} lg:grid-rows-1`}
+      className={`border-primary/50 relative grid grid-cols-1 gap-8 rounded-2xl border-2 bg-blue-100/50 sm:rounded-xl sm:p-8 ${columnTemplate} lg:grid-rows-1`}
     >
       <div
-        className={` ${side === 'left' ? 'lg:order-2' : 'lg:order-1'} relative order-2 flex h-full flex-col gap-4`}
+        className={` ${side === 'left' ? 'lg:order-2' : 'lg:order-1'} relative order-2 flex h-full flex-col gap-4 p-8 pt-0 sm:p-0`}
       >
         <p className="font-montserrat text-2xl font-semibold">{title}</p>
 

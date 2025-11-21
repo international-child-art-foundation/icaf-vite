@@ -2,7 +2,7 @@ import { linkClasses } from '@/data/linkClasses';
 
 import muralOne from '@/assets/climateChange/AO2 Bahrain. Islam Hasan (10 Bahrain).webp';
 import muralTwo from '@/assets/climateChange/AO4 Nigeria. Judith Yahaya 12.webp';
-import muralThree from '@/assets/climateCHange/AO5 USA. Alina Ponomarenko 11. “The Camping Site”.webp';
+import muralThree from '@/assets/climateChange/AO5 USA. Alina Ponomarenko 11. “The Camping Site”.webp';
 import muralFour from '@/assets/climateChange/Peru (Carla Guadalupe Gonzalez De La Cruz, 8).webp';
 import muralFive from '@/assets/climateChange/Austria (Samara Claudia Bittermann, 10).webp';
 import { MuralCard } from './MuralCard';
@@ -14,7 +14,6 @@ export const ClimateChangeInfo = () => {
         Why care about climate change?
       </p>
 
-      {/* Text now spans full width */}
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-4 text-lg">
           <p>

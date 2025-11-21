@@ -1,6 +1,14 @@
 export type BaseField = {
-  name: 'name' | 'email' | 'subject' | 'message';
+  name:
+    | 'name'
+    | 'email'
+    | 'expertise'
+    | 'contribution'
+    | 'motivation'
+    | 'subject'
+    | 'message';
   label: string;
+  placeholder?: string;
   required?: boolean;
   autoComplete?: string;
   maxLength?: number;

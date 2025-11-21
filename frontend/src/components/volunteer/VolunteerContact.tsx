@@ -1,15 +1,16 @@
-import ContactImg from '@/assets/contact/contact-us.webp';
-import { useWindowSize } from 'usehooks-ts';
 import { useRef, useState } from 'react';
 import { Field } from '@/types/HTMLFormTypes';
 import { clamp, getString, parseApiResponse } from '@/lib/phpApiUtils';
 import { isApiSuccess } from '@/lib/phpApiUtils';
+import redBlueFirework from '@/assets/home/RedBlueFirework.svg';
 
 const LIMITS = {
   name: 100,
   email: 254,
-  subject: 200,
-  message: 5000,
+  expertise: 1000,
+  contribution: 1000,
+  motivation: 1500,
+  messageTotal: 5000,
 } as const;
 
 const FIELDS: readonly Field[] = [
@@ -32,21 +33,28 @@ const FIELDS: readonly Field[] = [
     maxLength: LIMITS.email,
   },
   {
-    kind: 'input',
-    name: 'subject',
-    label: 'Subject*',
-    type: 'text',
-    required: true,
-    autoComplete: 'on',
-    maxLength: LIMITS.subject,
+    kind: 'textarea',
+    name: 'expertise',
+    label: 'Area of expertise',
+    rows: 4,
+    required: false,
+    maxLength: LIMITS.expertise,
   },
   {
     kind: 'textarea',
-    name: 'message',
-    label: 'Message*',
-    rows: 8,
+    name: 'contribution',
+    label: 'What you would like to do*',
+    rows: 4,
     required: true,
-    maxLength: LIMITS.message,
+    maxLength: LIMITS.contribution,
+  },
+  {
+    kind: 'textarea',
+    name: 'motivation',
+    label: 'Why you want to join ICAF*',
+    rows: 4,
+    required: true,
+    maxLength: LIMITS.motivation,
   },
 ] as const;
 
@@ -55,15 +63,37 @@ async function postContact(form: HTMLFormElement): Promise<void> {
 
   const name = clamp(getString(fd, 'name').trim(), LIMITS.name);
   const email = clamp(getString(fd, 'email').trim(), LIMITS.email);
-  const subject = clamp(getString(fd, 'subject').trim(), LIMITS.subject);
-  const message = clamp(getString(fd, 'message').trim(), LIMITS.message);
+  const expertise = clamp(getString(fd, 'expertise').trim(), LIMITS.expertise);
+  const contribution = clamp(
+    getString(fd, 'contribution').trim(),
+    LIMITS.contribution,
+  );
+  const motivation = clamp(
+    getString(fd, 'motivation').trim(),
+    LIMITS.motivation,
+  );
+
+  const combinedMessageRaw = [
+    'Area of expertise:',
+    expertise || '(not provided)',
+    '',
+    'How I can help:',
+    contribution || '(not provided)',
+    '',
+    'Why I want to volunteer:',
+    motivation || '(not provided)',
+  ].join('\n');
+
+  const message = clamp(combinedMessageRaw, LIMITS.messageTotal);
 
   const params = new URLSearchParams();
-  params.set('type', 'contact-us');
+  params.set('type', 'volunteer');
   params.set('name', name);
   params.set('email', email);
-  params.set('subject', subject);
   params.set('message', message);
+  params.set('expertise', expertise);
+  params.set('contribution', contribution);
+  params.set('motivation', motivation);
 
   const res = await fetch('/php-api/send-mail.php', {
     method: 'POST',
@@ -80,8 +110,7 @@ async function postContact(form: HTMLFormElement): Promise<void> {
   throw new Error('send_failed');
 }
 
-export const Contact = () => {
-  const size = useWindowSize();
+export const VolunteerContact = () => {
   const [status, setStatus] = useState<'idle' | 'sending' | 'ok' | 'err'>(
     'idle',
   );
@@ -99,33 +128,26 @@ export const Contact = () => {
       .catch(() => setStatus('err'));
   };
 
-  const address = (
-    <div className="mx-auto mt-12 max-w-2xl text-black">
-      <p className="text-2xl font-bold">Address</p>
-      <p className="mt-1 text-2xl font-extrabold">
-        International Child Art Foundation
-      </p>
-      <p className="text-2xl leading-8">
-        Post Office Box 58133
-        <br />
-        Washington, D.C. 20037
-      </p>
-    </div>
-  );
-
   return (
-    <div className="max-w-screen-2xl px-8 py-12 md:px-12 lg:px-16 xl:px-20">
+    <div className="relative max-w-screen-2xl px-8 py-12 md:px-12 lg:px-16 xl:px-20">
+      <img
+        src={redBlueFirework}
+        className="absolute right-4 top-12 z-[5] hidden h-64 w-64 opacity-50 lg:block"
+      />
+
       <div className="mb-10">
-        <h1 className="font-montserrat text-5xl font-semibold">Contact Us</h1>
-        <p className="text-2xl">We would love to hear from you.</p>
+        <h1 className="font-montserrat text-4xl font-semibold">
+          Volunteer with ICAF
+        </h1>
+        <p className="text-2xl">
+          Share a bit about yourself and how you'd like to help.
+        </p>
       </div>
 
-      <div className="flex w-full grid-cols-1 grid-rows-2 flex-col rounded-xl lg:grid lg:grid-cols-[1fr_1fr] lg:grid-rows-[1fr_0.5fr] lg:bg-inherit">
-        <div className="row-span-2 row-start-1 rounded-xl bg-slate-200/70 lg:col-span-2 lg:col-start-1 lg:row-span-1 lg:row-start-1" />
-
-        <div className="col-span-1 col-start-1 row-span-2 row-start-1 m-6 rounded-2xl bg-white p-6 shadow-xl md:p-8">
+      <div className="relative flex w-full flex-col rounded-xl bg-slate-200/50">
+        <div className="z-10 m-6 mx-auto w-full max-w-[min(600px,95%)] rounded-2xl bg-white p-6 shadow-xl md:p-8">
           <form
-            id="contactUsForm"
+            id="volunteerForm"
             ref={formRef}
             className="flex h-full flex-col gap-6"
             noValidate
@@ -137,7 +159,7 @@ export const Contact = () => {
                   className="mb-4 text-center text-sm font-semibold text-red-600"
                   role="alert"
                 >
-                  Sorry, we couldn’t send your message. Please try again.
+                  Sorry, we couldn't send your message. Please try again.
                 </div>
                 <div
                   className="mb-4 text-center text-sm font-semibold text-red-600"
@@ -157,7 +179,7 @@ export const Contact = () => {
               role="status"
               aria-live="polite"
             >
-              Thanks for contacting ICAF!
+              Thanks for your interest in volunteering with ICAF!
             </div>
 
             <input
@@ -213,35 +235,24 @@ export const Contact = () => {
               );
             })}
 
-            <input type="hidden" name="type" value="contact-us" />
+            <input type="hidden" name="type" value="volunteer" />
 
             <button
               type="submit"
               disabled={status === 'sending'}
               className="mt-auto w-full rounded-full bg-yellow-400 px-6 py-3 text-center text-sm font-bold tracking-widest text-slate-900 transition hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:opacity-60"
             >
-              {status === 'sending' ? 'Sending…' : 'Send Message'}
+              {status === 'sending' ? 'Sending…' : 'Submit Form'}
             </button>
           </form>
         </div>
-
-        <div className="col-start-2 row-start-1 flex flex-col items-center p-6">
-          <div className="flex flex-col">
-            <div className="h-[500px] w-full">
-              <img
-                src={ContactImg}
-                alt="Contact illustration"
-                className="h-full rounded-xl object-cover"
-              />
-            </div>
-            <p className="mt-4 text-center text-lg text-slate-600">
-              Jesse Lackey, age 10, Alabama
-            </p>
-          </div>
-        </div>
-        {size.width >= 1024 && address}
       </div>
-      {size.width < 1024 && address}
+      <div className="ml-auto mt-4 max-w-2xl text-black">
+        <p className="mx-8 text-center text-2xl lg:text-right">
+          If you would prefer to contact us by email, please send your message
+          to <span className="font-semibold">childart@icaf.org</span>.
+        </p>
+      </div>
     </div>
   );
 };

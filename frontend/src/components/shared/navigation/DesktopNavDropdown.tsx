@@ -46,7 +46,7 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
               <div
                 className="grid h-64 cursor-pointer overflow-hidden"
                 style={{
-                  gridTemplateColumns: `repeat(${item.col}, 1fr)`,
+                  gridTemplateColumns: `repeat(${item.children?.length ?? 0}, 1fr)`,
                 }}
               >
                 {item.children &&
@@ -78,7 +78,9 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
                       >
                         <h3
                           className={`text-text-inverse text-2xl font-bold leading-loose tracking-wide ${
-                            item.col > 3 ? `xl:max-w-48` : ''
+                            (item.children?.length ?? 0 > 3)
+                              ? `xl:max-w-48`
+                              : ''
                           } `}
                         >
                           {child.label}

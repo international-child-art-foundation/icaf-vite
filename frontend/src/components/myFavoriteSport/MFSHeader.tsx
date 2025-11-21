@@ -4,7 +4,7 @@ import ArtsOlympiadHeaderImg from '@/assets/arts-olympiad/Arjaa Raghu (age 11) I
 
 import { useWindowSize } from 'usehooks-ts';
 
-export const ArtsOlympiadHeader = () => {
+export const MFSHeader = () => {
   const size = useWindowSize();
   let gradientDefinition;
   if (size.width >= 1280) {

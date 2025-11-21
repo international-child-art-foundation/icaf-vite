@@ -1,4 +1,4 @@
-export const ArtsOlympiadVision = () => {
+export const MFSVision = () => {
   return (
     <div className="mt-6">
       <div className="flex flex-col gap-6">

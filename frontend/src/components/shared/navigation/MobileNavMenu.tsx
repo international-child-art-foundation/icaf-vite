@@ -9,18 +9,13 @@ import { useState } from 'react';
 import { toUpper } from 'lodash';
 import { Link } from 'react-router-dom';
 
-type Child = {
-  label: string;
-  href: string;
-  key?: string;
-};
+import { NavChild } from '@/lib/navItems';
 
 type MobileNavMenuProps = {
   onCloseMenu?: () => void;
 };
 
-const isVisitable = (item: NavItem) =>
-  typeof item.href === 'string' && item.href.length > 0;
+const isVisitable = (item: NavItem) => item.href && item.href.length > 0;
 
 const hasChildren = (item: NavItem) =>
   Array.isArray(item.children) && item.children.length > 0;
@@ -39,7 +34,7 @@ const MobileNavMenu = ({ onCloseMenu }: MobileNavMenuProps) => {
       >
         {navItems.map((item: NavItem) => {
           const visitable = isVisitable(item);
-          const children = (item.children ?? []) as Child[];
+          const children = item.children as NavChild[];
           const hasKids = hasChildren(item);
 
           if (!hasKids) {
@@ -63,25 +58,14 @@ const MobileNavMenu = ({ onCloseMenu }: MobileNavMenuProps) => {
             );
           }
 
-          const contentChildren: Child[] = visitable
-            ? [
-                {
-                  label: item.label,
-                  href: item.href,
-                  key: `${item.key}__self`,
-                },
-                ...children,
-              ]
-            : children;
-
           return (
             <AccordionItem value={item.key} key={item.key}>
               <AccordionTrigger className="flex justify-between font-semibold">
                 {toUpper(item.label)}
               </AccordionTrigger>
               <AccordionContent className="space-y-2 pl-4 text-base font-normal">
-                {contentChildren.map((child) => {
-                  const key = child.key ?? `${item.key}:${child.href}`;
+                {children.map((child) => {
+                  const key = `${item.key}:${child.href}`;
                   return (
                     <Link
                       key={key}

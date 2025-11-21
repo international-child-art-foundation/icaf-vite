@@ -8,14 +8,11 @@ import healing from '../assets/shared/images/navigation/programs/healingArtsProg
 import peace from '../assets/shared/images/navigation/programs/peaceThroughArt_small.webp';
 import theArtOlypiad from '../assets/shared/images/navigation/programs/theArtOlympiad_small.webp';
 import world from '../assets/shared/images/navigation/programs/worldChildrensFestival_small.webp';
-import corporate from '../assets/shared/images/navigation/getInvolved/corporatePartnership.webp';
 import professional from '../assets/shared/images/navigation/getInvolved/professional.webp';
 import student from '../assets/shared/images/navigation/getInvolved/student_small.webp';
 import volunteer from '../assets/shared/images/navigation/getInvolved/volunteer.webp';
 import latest from '../assets/shared/images/navigation/news/latestNews_small.webp';
 import upcoming from '../assets/shared/images/navigation/news/upcomingEvents.webp';
-import annual from '../assets/shared/images/navigation/gallery/annualReports.webp';
-import gallery from '../assets/shared/images/navigation/gallery/gallery.webp';
 
 export interface NavChild {
   label: string;
@@ -29,8 +26,7 @@ export interface NavItem {
   key: string;
   label: string;
   navLabel: string;
-  href: string;
-  col: number;
+  href?: string;
   children?: NavChild[];
 }
 
@@ -40,7 +36,6 @@ export const navItems: NavItem[] = [
     label: 'About',
     navLabel: 'About',
     href: '/about',
-    col: 4,
     children: [
       {
         label: 'History',
@@ -78,8 +73,6 @@ export const navItems: NavItem[] = [
     key: 'programs',
     label: 'Programs',
     navLabel: 'Programs',
-    href: '/programs',
-    col: 6,
     children: [
       {
         label: 'Arts Olympiad',
@@ -129,8 +122,6 @@ export const navItems: NavItem[] = [
     key: 'get-involved',
     label: 'Get Involved',
     navLabel: 'Get Involved',
-    href: '/get-involved',
-    col: 4,
     children: [
       {
         label: 'Volunteer',
@@ -153,21 +144,19 @@ export const navItems: NavItem[] = [
         alt: 'Make a donation',
         hoverDescription: '',
       },
-      {
-        label: 'Corporate Partnerships',
-        href: '/get-involved/corporation',
-        imageSrc: corporate,
-        alt: 'Make a donation',
-        hoverDescription: '',
-      },
+      // {
+      //   label: 'Corporate Partnerships',
+      //   href: '/get-involved/corporation',
+      //   imageSrc: corporate,
+      //   alt: 'Make a donation',
+      //   hoverDescription: '',
+      // },
     ],
   },
   {
     key: 'news-events',
     label: 'News & Events',
     navLabel: 'News & Events',
-    href: '/news-events',
-    col: 2,
     children: [
       {
         label: 'Latest News',
@@ -190,30 +179,28 @@ export const navItems: NavItem[] = [
     label: 'Sponsorship',
     navLabel: 'Sponsorship',
     href: '/sponsorship',
-    col: 0,
     children: [],
   },
-  {
-    key: 'gallery',
-    label: 'Gallery',
-    navLabel: 'Gallery',
-    href: '/gallery',
-    col: 2,
-    children: [
-      {
-        label: 'Recent',
-        href: '/gallery/recent',
-        imageSrc: gallery,
-        alt: 'Recent art',
-        hoverDescription: '',
-      },
-      {
-        label: 'Annual Reports',
-        href: '/gallery/all',
-        imageSrc: annual,
-        alt: 'All submissions',
-        hoverDescription: '',
-      },
-    ],
-  },
+  // {
+  //   key: 'gallery',
+  //   label: 'Gallery',
+  //   navLabel: 'Gallery',
+  //   href: '/gallery',
+  //   children: [
+  //     {
+  //       label: 'Recent',
+  //       href: '/gallery/recent',
+  //       imageSrc: gallery,
+  //       alt: 'Recent art',
+  //       hoverDescription: '',
+  //     },
+  //     {
+  //       label: 'Annual Reports',
+  //       href: '/gallery/all',
+  //       imageSrc: annual,
+  //       alt: 'All submissions',
+  //       hoverDescription: '',
+  //     },
+  //   ],
+  // },
 ];

@@ -46,11 +46,13 @@ const DesktopNav: React.FC = () => {
     return () => throttledHover.cancel();
   }, [throttledHover]);
 
-  const handleClick = (href: string) => {
-    setIsLeaving(true);
-    setActiveItem('');
-    setPrevItem('');
-    void navigate(href);
+  const handleClick = (href: string | undefined) => {
+    if (href) {
+      setIsLeaving(true);
+      setActiveItem('');
+      setPrevItem('');
+      void navigate(href);
+    }
   };
 
   const handleMouseLeaveDropdown = (event: React.MouseEvent) => {

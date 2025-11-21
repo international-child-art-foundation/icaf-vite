@@ -1,8 +1,8 @@
-import { ArtsOlympiadCardData } from '@/data/artsOlympiad/artsOlympiadTodoData';
+import { ArtsOlympiadCardData } from '@/data/myFavoriteSport/MFSTodoData';
 import { FlairColorMap } from '../shared/FlairColorMap';
 import { Button } from '../ui/button';
 
-export const ArtsOlympiadCards = () => {
+export const MFSCards = () => {
   return (
     <div className="flex flex-col gap-8">
       <p className="font-montserrat text-3xl font-semibold">Get Involved!</p>

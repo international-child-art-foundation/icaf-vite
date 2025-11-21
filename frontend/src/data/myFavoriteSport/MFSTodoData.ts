@@ -1,4 +1,4 @@
-import { IArtsOlympiadCard } from '@/types/ArtsOlympiadTypes';
+import { IArtsOlympiadCard } from '@/types/MFSTypes';
 
 export const ArtsOlympiadCardData: IArtsOlympiadCard[] = [
   {

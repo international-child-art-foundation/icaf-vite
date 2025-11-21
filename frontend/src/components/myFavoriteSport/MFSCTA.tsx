@@ -1,7 +1,7 @@
 import ArtsOlympiadLogo from '@/assets/arts-olympiad/MFS_Logo_V3.svg';
 import { Button } from '../ui/button';
 
-export const ArtsOlympiadCTA = () => {
+export const MFSCTA = () => {
   return (
     <div className="relative mb-24 mt-12">
       <div className="relative flex flex-col items-center gap-4 rounded-xl bg-blue-100 p-12 px-24 md:grid md:h-[300px] md:grid-cols-2 md:grid-rows-1">

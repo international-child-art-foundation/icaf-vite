@@ -4,7 +4,7 @@ import img2 from '@/assets/arts-olympiad/submission-2.webp';
 import img3 from '@/assets/arts-olympiad/_MG_8137.webp';
 import img4 from '@/assets/arts-olympiad/submission-4.webp';
 
-import { GuidelineCard } from '@/components/artsOlympiad/GuidelineCard';
+import { GuidelineCard } from '@/components/myFavoriteSport/MFSGuidelineCard';
 import { gsap } from 'gsap';
 import { Flip } from 'gsap/all';
 
@@ -52,7 +52,7 @@ const cardData = [
   },
 ];
 
-export const ArtsOlympiadGuidelines = () => {
+export const MFSGuidelines = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const handleCardClick = (index: number) => {

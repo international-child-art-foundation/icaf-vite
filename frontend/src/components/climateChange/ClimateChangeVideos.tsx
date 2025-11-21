@@ -3,23 +3,18 @@ import { ClimateChangeVideoCalloutData } from '@/data/climateChange/climateChang
 
 export const ClimateChangeVideos = () => {
   return (
-    <div>
+    <div className="mb-16 flex flex-col gap-8">
       <div className="flex flex-col gap-8">
-        <p>
-          ICAF has also partnered with the U.S. Fish and Wildlife Service, the
-          Endangered Species Coalition, and the Association of Zoos and
-          Aquariums, to promote the “Saving Endangered Species Youth Art
-          Contest” and to select the winners.{' '}
+        <p className="font-montserrat text-3xl font-semibold">
+          ICAF Initiatives
         </p>
-        <div className="flex flex-col gap-8">
-          {ClimateChangeVideoCalloutData.map((data, idx) => (
-            <ClimateChangeVideoCallout
-              key={data.title}
-              {...data}
-              side={idx % 2 == 0 ? 'right' : 'left'}
-            />
-          ))}
-        </div>
+        {ClimateChangeVideoCalloutData.map((data, idx) => (
+          <ClimateChangeVideoCallout
+            key={data.title}
+            {...data}
+            side={idx % 2 == 0 ? 'right' : 'left'}
+          />
+        ))}
       </div>
     </div>
   );

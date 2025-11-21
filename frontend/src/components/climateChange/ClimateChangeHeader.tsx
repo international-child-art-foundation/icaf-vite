@@ -1,6 +1,6 @@
 import { CurvedImage } from '@/pages/CurvedImage';
 import { OpinionatedGradients } from '@/data/gradientDefinition';
-import ClimateChangeHeaderImg from '@/assets/climateChange/mural-making.webp';
+import ClimateChangeHeaderImg from '@/assets/climateChange/climateChangeHeader.webp';
 
 import { useWindowSize } from 'usehooks-ts';
 
@@ -21,8 +21,8 @@ export const ClimateChangeHeader = () => {
   return (
     <div className="grid w-full grid-cols-1 grid-rows-1">
       <div className="font-montserrat z-10 col-start-1 row-start-1 mt-24 flex max-w-screen-2xl flex-col gap-2 p-6 text-3xl font-extrabold text-white sm:gap-4 sm:p-10 sm:px-8 md:mt-8 md:px-12 md:text-4xl lg:mt-20 lg:px-16 lg:text-6xl xl:px-20">
-        <div className="font-montserrat block text-[30px] font-extrabold leading-[40px] sm:text-[40px] sm:leading-[50px] md:text-[60px] md:leading-[70px]">
-          <p>Climate Change</p>
+        <div className="font-montserrat block text-[30px] font-extrabold leading-[40px] sm:text-[40px] sm:leading-[50px] md:text-[60px] md:leading-[70px] lg:max-w-[60%]">
+          <p>Climate Change Awareness</p>
         </div>
         <p className="font-openSans text-xl font-normal text-white lg:max-w-[50%] xl:max-w-[50%]">
           Today, young people all over the world are at the forefront of
@@ -39,9 +39,10 @@ export const ClimateChangeHeader = () => {
         <CurvedImage
           gradientDefinition={gradientDefinition}
           src={ClimateChangeHeaderImg}
-          height={'600px'}
+          height={'700px'}
           objectFit="cover"
-          objectPosition="center center"
+          scale={1}
+          objectPosition="top right"
         />
       </div>
     </div>

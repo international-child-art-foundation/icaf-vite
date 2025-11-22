@@ -7,9 +7,8 @@ import redBlueFirework from '@/assets/home/RedBlueFirework.svg';
 const LIMITS = {
   name: 100,
   email: 254,
-  expertise: 1000,
-  contribution: 1000,
-  motivation: 1500,
+  organization: 500,
+  subject: 200,
   messageTotal: 5000,
 } as const;
 
@@ -33,28 +32,29 @@ const FIELDS: readonly Field[] = [
     maxLength: LIMITS.email,
   },
   {
-    kind: 'textarea',
-    name: 'expertise',
-    label: 'Area of expertise',
-    rows: 4,
+    kind: 'input',
+    name: 'organization',
+    label: 'Organization',
+    type: 'text',
     required: false,
-    maxLength: LIMITS.expertise,
+    maxLength: LIMITS.organization,
+  },
+  {
+    kind: 'input',
+    name: 'subject',
+    label: 'Subject',
+    type: 'text',
+    required: false,
+    autoComplete: 'on',
+    maxLength: LIMITS.subject,
   },
   {
     kind: 'textarea',
-    name: 'contribution',
-    label: 'What you would like to do*',
-    rows: 4,
+    name: 'message',
+    label: 'Message*',
+    rows: 6,
     required: true,
-    maxLength: LIMITS.contribution,
-  },
-  {
-    kind: 'textarea',
-    name: 'motivation',
-    label: 'Why you want to join ICAF*',
-    rows: 4,
-    required: true,
-    maxLength: LIMITS.motivation,
+    maxLength: LIMITS.messageTotal,
   },
 ] as const;
 
@@ -63,37 +63,20 @@ async function postContact(form: HTMLFormElement): Promise<void> {
 
   const name = clamp(getString(fd, 'name').trim(), LIMITS.name);
   const email = clamp(getString(fd, 'email').trim(), LIMITS.email);
-  const expertise = clamp(getString(fd, 'expertise').trim(), LIMITS.expertise);
-  const contribution = clamp(
-    getString(fd, 'contribution').trim(),
-    LIMITS.contribution,
+  const organization = clamp(
+    getString(fd, 'organization').trim(),
+    LIMITS.organization,
   );
-  const motivation = clamp(
-    getString(fd, 'motivation').trim(),
-    LIMITS.motivation,
-  );
-
-  const combinedMessageRaw = [
-    'Area of expertise:',
-    expertise || '(not provided)',
-    '',
-    'How I can help:',
-    contribution || '(not provided)',
-    '',
-    'Why I want to volunteer:',
-    motivation || '(not provided)',
-  ].join('\n');
-
-  const message = clamp(combinedMessageRaw, LIMITS.messageTotal);
+  const subject = clamp(getString(fd, 'subject').trim(), LIMITS.subject);
+  const message = clamp(getString(fd, 'message').trim(), LIMITS.messageTotal);
 
   const params = new URLSearchParams();
-  params.set('type', 'volunteer');
+  params.set('type', 'professionals');
   params.set('name', name);
   params.set('email', email);
+  params.set('organization', organization);
+  params.set('subject', subject);
   params.set('message', message);
-  params.set('expertise', expertise);
-  params.set('contribution', contribution);
-  params.set('motivation', motivation);
 
   const res = await fetch('/php-api/send-mail.php', {
     method: 'POST',
@@ -110,7 +93,7 @@ async function postContact(form: HTMLFormElement): Promise<void> {
   throw new Error('send_failed');
 }
 
-export const VolunteerContact = () => {
+export const ProfessionalsContact = () => {
   const [status, setStatus] = useState<'idle' | 'sending' | 'ok' | 'err'>(
     'idle',
   );
@@ -137,17 +120,17 @@ export const VolunteerContact = () => {
 
       <div className="mb-10">
         <h1 className="font-montserrat text-4xl font-semibold">
-          Volunteer with ICAF
+          Professionals & Partners
         </h1>
         <p className="text-2xl">
-          Share a bit about yourself and how you'd like to help.
+          Share how you or your organization would like to work with ICAF.
         </p>
       </div>
 
       <div className="relative flex w-full flex-col rounded-xl bg-slate-200/50">
         <div className="z-10 m-6 mx-auto w-full max-w-[min(600px,95%)] rounded-2xl bg-white p-6 shadow-xl md:p-8">
           <form
-            id="volunteerForm"
+            id="professionalsForm"
             ref={formRef}
             className="flex h-full flex-col gap-6"
             noValidate
@@ -179,7 +162,7 @@ export const VolunteerContact = () => {
               role="status"
               aria-live="polite"
             >
-              Thanks for your interest in volunteering with ICAF!
+              Thanks for reaching out to ICAF!
             </div>
 
             <input
@@ -235,7 +218,7 @@ export const VolunteerContact = () => {
               );
             })}
 
-            <input type="hidden" name="type" value="volunteer" />
+            <input type="hidden" name="type" value="professionals" />
 
             <button
               type="submit"
@@ -247,6 +230,7 @@ export const VolunteerContact = () => {
           </form>
         </div>
       </div>
+
       <div className="ml-auto mt-4 max-w-2xl text-black">
         <p className="mx-8 text-center text-2xl lg:text-right">
           If you would prefer to contact us by email, please send your message

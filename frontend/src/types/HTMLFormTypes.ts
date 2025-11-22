@@ -6,7 +6,8 @@ export type BaseField = {
     | 'contribution'
     | 'motivation'
     | 'subject'
-    | 'message';
+    | 'message'
+    | 'organization';
   label: string;
   placeholder?: string;
   required?: boolean;

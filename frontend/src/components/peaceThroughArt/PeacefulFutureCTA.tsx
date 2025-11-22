@@ -1,4 +1,4 @@
-import globeImg from '@/assets/peaceThroughArt/New-York-_Michael-Wong_---11-ai-brush-removebg-zcxjjze 2.webp';
+import globeImg from '@/assets/shared/images/New-York-_Michael-Wong_---11.webp';
 import { Button } from '../ui/button';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';

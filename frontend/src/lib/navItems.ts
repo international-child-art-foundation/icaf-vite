@@ -131,8 +131,8 @@ export const navItems: NavItem[] = [
         hoverDescription: '',
       },
       {
-        label: 'Profesional',
-        href: '/get-involved/professional',
+        label: 'Profesionals',
+        href: '/get-involved/professionals',
         imageSrc: professional,
         alt: 'Make a donation',
         hoverDescription: '',

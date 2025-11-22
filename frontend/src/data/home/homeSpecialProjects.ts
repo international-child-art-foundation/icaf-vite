@@ -7,7 +7,7 @@ export const specialProjectData: TSpecialProjectGroup = [
   {
     id: 1,
     image: Wcf,
-    title: 'World Children’s Festival 2025',
+    title: 'World Children’s Festival 2026',
     description:
       'A three-day celebration of American values of creativity, diversity, and unity',
     href: 'https://worldchildrensfestival.org/',

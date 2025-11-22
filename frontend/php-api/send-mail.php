@@ -217,6 +217,49 @@ if ($type === "business") {
   send_mail_json($email, $mailSubject, $textBody, $htmlBody);
 }
 
+// ---- professionals ----
+if ($type === "professionals") {
+  $organization = clamp_utf8(trim((string)($_POST["organization"] ?? "")), LIMIT_ORGANIZATION);
+  $subject      = clamp_utf8(trim((string)($_POST["subject"] ?? "")),      LIMIT_SUBJECT);
+  $message      = clamp_utf8(trim((string)($_POST["message"] ?? "")),      LIMIT_MESSAGE);
+
+  // Required: name, email, message
+  if ($name === "" || !is_valid_email($email) || $message === "") {
+    bail(422, "invalid_input");
+  }
+
+  header_safe($name);
+  header_safe($email);
+  if ($subject !== "") {
+    header_safe($subject);
+  }
+
+  if ($subject === "") {
+    $mailSubject = "Professionals contact from {$name}";
+  } else {
+    $mailSubject = "Professionals contact from {$name}: {$subject}";
+  }
+
+  $orgDisplay     = $organization === "" ? "(not provided)" : $organization;
+  $subjectDisplay = $subject === "" ? "(not provided)" : $subject;
+
+  $textBody = "Professionals Contact\n"
+            . "Name: {$name}\n"
+            . "Email: {$email}\n"
+            . "Organization: {$orgDisplay}\n"
+            . "Subject: {$subjectDisplay}\n\n"
+            . "Message:\n{$message}\n";
+
+  $htmlBody = "<h2>Professionals Contact</h2>"
+            . "<p><strong>Name:</strong> " . h($name) . "<br>"
+            . "<strong>Email:</strong> " . h($email) . "<br>"
+            . "<strong>Organization:</strong> " . h($orgDisplay) . "</p>"
+            . "<p><strong>Subject:</strong> " . h($subjectDisplay) . "</p>"
+            . "<div><strong>Message:</strong><br>" . nl2br(h($message)) . "</div>";
+
+  send_mail_json($email, $mailSubject, $textBody, $htmlBody);
+}
+
 // ---- contact-us ----
 $subject = clamp_utf8(trim((string)($_POST["subject"] ?? "")), LIMIT_SUBJECT);
 $message = clamp_utf8(trim((string)($_POST["message"] ?? "")), LIMIT_MESSAGE);

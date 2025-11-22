@@ -1,5 +1,5 @@
 import ArtsOlympiadHero from '@/assets/artsOlympiad/arts-olympiad-hero.webp';
-import ArtsOlympiadTorch from '@/assets/artsOlympiad/arts-olympiad-7-transparent.svg';
+import ArtsOlympiadTorch from '@/assets/shared/images/arts-olympiad-7-transparent.svg';
 import ArtsOlympiadColoring from '@/assets/artsOlympiad/arts-olympiad-coloring.webp';
 import ArtsOlympiadPainting from '@/assets/artsOlympiad/arts-olympiad-painting.webp';
 

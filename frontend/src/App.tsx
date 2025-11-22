@@ -23,6 +23,7 @@ import { History } from './pages/History';
 import { ArtsOlympiad } from './pages/ArtsOlympiad';
 import { ClimateChange } from './pages/ClimateChange';
 import { Volunteer } from './pages/Volunteer';
+import { Professionals } from './pages/Professionals';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -76,6 +77,10 @@ export default function App() {
           <Route path="/programs/arts-olympiad" element={<ArtsOlympiad />} />
           <Route path="/programs/climate-change" element={<ClimateChange />} />
           <Route path="/get-involved/volunteer" element={<Volunteer />} />
+          <Route
+            path="/get-involved/professionals"
+            element={<Professionals />}
+          />
 
           <Route path="*" element={<Page404 />} />
         </Routes>

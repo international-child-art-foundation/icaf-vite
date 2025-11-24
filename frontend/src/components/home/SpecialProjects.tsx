@@ -15,7 +15,7 @@ export const SpecialProjects = () => {
           <img className="" src={smallBlueFirework} />
         </div>
         <p className="font-montserrat text-center text-[32px] font-extrabold md:text-[40px]">
-          Special Projects Websites
+          Special Project Websites
         </p>
         <div>
           <ProjectWindows windowArray={specialProjectData} />

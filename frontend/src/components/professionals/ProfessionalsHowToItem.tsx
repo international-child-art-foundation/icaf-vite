@@ -9,15 +9,17 @@ export const ProfessionalsHowToItem = ({
 }: IProfessionalsHowToItem) => {
   return (
     <div
-      className={`${FlairColorMap[color].border} flex max-w-screen-2xl flex-row gap-8 overflow-hidden rounded-xl border-4 p-4 px-8 md:px-12 lg:px-16 xl:px-20`}
+      className={`${FlairColorMap[color].border} ${FlairColorMap[color].backgroundHover} mx-4 grid max-w-screen-2xl grid-cols-[100px_2px_1fr] flex-row items-center gap-8 overflow-hidden rounded-xl border-4 p-4 px-4 md:mx-6 md:grid-cols-[150px_2px_1fr] md:px-6 lg:mx-8 lg:px-8 xl:mx-10 xl:px-10`}
     >
-      <div className="grid grid-cols-[150px_1fr] items-center overflow-hidden">
-        <img src={imgSrc} className="w-[150px] object-cover" />
+      <div className="items-center overflow-hidden">
+        <img src={imgSrc} className="object-cover" />
       </div>
-      <div className="h-full w-[10px] bg-gray-500"></div>
+      <div className="my-auto h-[50%] w-[2px] bg-gray-200"></div>
       <div className="flex flex-col justify-center">
-        <p className="font-montserrat font-xl text-xl font-semibold">{title}</p>
-        <p>{description}</p>
+        <p className="font-montserrat font-xl text-xl font-semibold lg:text-2xl">
+          {title}
+        </p>
+        <p className="text-normal lg:text-lg">{description}</p>
       </div>
     </div>
   );

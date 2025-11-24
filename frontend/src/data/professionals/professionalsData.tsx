@@ -4,12 +4,21 @@ import aoLogo from '@/assets/shared/images/arts-olympiad-7-transparent.svg';
 import globe from '@/assets/shared/images/New-York-_Michael-Wong_---11.webp';
 import { linkClasses } from '../linkClasses';
 import yellowFirework from '@/assets/shared/images/yellowFirework.webp';
+import { Link } from 'react-router-dom';
 
 export const professionalsData: IProfessionalsHowToItem[] = [
   {
     title: 'Arts Olympiad',
-    description:
-      ' You can encourage your school to participate in the 7th Arts Olympiad in 2025. ',
+    description: (
+      <p>
+        You can encourage your school to participate in the
+        <Link to="/programs/arts-olympiad" className={linkClasses}>
+          {' '}
+          7th Arts Olympiad{' '}
+        </Link>
+        in 2025.
+      </p>
+    ),
     imgSrc: aoLogo,
     color: 'red',
   },
@@ -41,8 +50,16 @@ export const professionalsData: IProfessionalsHowToItem[] = [
   },
   {
     title: 'Donations',
-    description:
-      'You can adopt the ICAF as your charity by making a tax-deductible donation today.',
+    description: (
+      <p>
+        You can adopt the ICAF as your charity by making a tax-deductible
+        <Link to="/donate" className={linkClasses}>
+          {' '}
+          donation{' '}
+        </Link>
+        today.
+      </p>
+    ),
     imgSrc: yellowFirework,
     color: 'yellow',
   },

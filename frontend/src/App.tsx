@@ -24,6 +24,7 @@ import { ArtsOlympiad } from './pages/ArtsOlympiad';
 import { ClimateChange } from './pages/ClimateChange';
 import { Volunteer } from './pages/Volunteer';
 import { Professionals } from './pages/Professionals';
+import { routes } from '@/data/routes';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -64,14 +65,6 @@ export default function App() {
           <Route path="/donate" element={<Donate />} />
           <Route path="/sponsorship" element={<Sponsorship />} />
           <Route path="/access" element={<MagazineAccess />} />
-          <Route
-            path="/contact-us"
-            element={<Navigate to="/contact" replace />}
-          />
-          <Route
-            path="/about/contact-us"
-            element={<Navigate to="/contact" replace />}
-          />
           <Route path="/contact" element={<Contact />} />
           <Route path="/news-events/news" element={<News />} />
           <Route path="/programs/arts-olympiad" element={<ArtsOlympiad />} />
@@ -81,6 +74,16 @@ export default function App() {
             path="/get-involved/professionals"
             element={<Professionals />}
           />
+
+          {routes.map(({ main, aliases }) =>
+            aliases.map((alias) => (
+              <Route
+                key={alias}
+                path={alias}
+                element={<Navigate to={main} replace />}
+              />
+            )),
+          )}
 
           <Route path="*" element={<Page404 />} />
         </Routes>

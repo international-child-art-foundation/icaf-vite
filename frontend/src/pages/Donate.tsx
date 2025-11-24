@@ -1,5 +1,5 @@
-import Portrait1 from '@/assets/donate/Portrait1.svg';
-import Portrait2 from '@/assets/donate/Portrait2.svg';
+// import Portrait1 from '@/assets/donate/Portrait1.svg';
+// import Portrait2 from '@/assets/donate/Portrait2.svg';
 import { Button } from '@/components/ui/button';
 import { ArrowUp, HeartIcon, X } from 'lucide-react';
 import { childArtExhibition } from '@/data/donate/childArtExhibitionData';
@@ -68,7 +68,7 @@ export default function Donate() {
                 Every piece of art here tells a story of hope and resilience.
                 Here's a glimpse of the talent you're supporting.
               </p>
-              <div className="mb-8 flex items-center justify-center gap-2">
+              {/* <div className="mb-8 flex items-center justify-center gap-2">
                 <div className="relative flex -space-x-2">
                   <img
                     src={Portrait1}
@@ -89,7 +89,7 @@ export default function Donate() {
                 <p className="text-sm text-black">
                   Join 254 others who donated this month!
                 </p>
-              </div>
+              </div> */}
             </div>
 
             <div className="flex flex-row items-start justify-center gap-8 md:flex-col">

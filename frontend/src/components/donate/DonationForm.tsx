@@ -211,37 +211,37 @@ Washington, D.C. 20037`;
               Other Donation Methods
             </h3>
             <div className="flex justify-center gap-6">
-              <div className="flex flex-col items-center">
-                <div className="border-1 mb-2 flex h-16 w-16 items-center justify-center rounded-full border bg-white">
-                  <img
-                    src={NetworkForGood}
-                    alt="Network for Good"
-                    className="h-10 w-10 object-contain"
-                  />
-                </div>
-                <a
-                  href="#"
-                  className="hover:text-secondary-yellow text-xs text-white transition-colors md:text-gray-800 lg:text-white"
-                >
+              <a
+                href="https://www.networkforgood.org/donation/MakeDonation.aspx?ORGID2=522032649&vlrStratCode=nZXb2ZdCu0mkYBGguVqwHg3Urn4pNhQPKO6LvPJDxffjfPYvs02mtIFg%2b23WunIU"
+                className="hover:text-secondary-yellow text-xs text-white transition-colors md:text-gray-800 lg:text-white"
+              >
+                <div className="flex flex-col items-center">
+                  <div className="border-1 mb-2 flex h-16 w-16 items-center justify-center rounded-full border bg-white">
+                    <img
+                      src={NetworkForGood}
+                      alt="Network for Good"
+                      className="h-10 w-10 object-contain"
+                    />
+                  </div>
                   Network for good
-                </a>
-              </div>
-
-              <div className="flex flex-col items-center">
-                <div className="border-1 mb-2 flex h-16 w-16 items-center justify-center rounded-full border bg-white">
-                  <img
-                    src={JustGiving}
-                    alt="JustGiving"
-                    className="h-10 w-10 object-contain"
-                  />
                 </div>
-                <a
-                  href="#"
-                  className="hover:text-secondary-yellow text-xs text-white transition-colors md:text-gray-800 lg:text-white"
-                >
+              </a>
+
+              <a
+                href="https://www.justgiving.com/internationalchildartfoundation"
+                className="hover:text-secondary-yellow text-xs text-white transition-colors md:text-gray-800 lg:text-white"
+              >
+                <div className="flex flex-col items-center">
+                  <div className="border-1 mb-2 flex h-16 w-16 items-center justify-center rounded-full border bg-white">
+                    <img
+                      src={JustGiving}
+                      alt="JustGiving"
+                      className="h-10 w-10 object-contain"
+                    />
+                  </div>
                   JustGiving
-                </a>
-              </div>
+                </div>
+              </a>
 
               <div className="flex flex-col items-center">
                 <button

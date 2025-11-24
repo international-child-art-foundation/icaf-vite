@@ -19,6 +19,7 @@ export interface NavChild {
   href: string;
   imageSrc: string;
   alt: string;
+  external?: boolean;
   hoverDescription: string;
 }
 
@@ -167,7 +168,8 @@ export const navItems: NavItem[] = [
       },
       {
         label: 'Upcoming Events',
-        href: '/news-events/events',
+        href: 'https://worldchildrensfestival.org/',
+        external: true,
         imageSrc: upcoming,
         alt: 'Upcoming events',
         hoverDescription: '',

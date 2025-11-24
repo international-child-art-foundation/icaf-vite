@@ -243,7 +243,7 @@ Washington, D.C. 20037`;
                 </div>
               </a>
 
-              <div className="flex flex-col items-center">
+              <div className="group flex flex-col items-center">
                 <button
                   type="button"
                   onClick={handleSendCheckClick}
@@ -258,7 +258,7 @@ Washington, D.C. 20037`;
                 <button
                   type="button"
                   onClick={handleSendCheckClick}
-                  className="hover:text-secondary-yellow text-xs text-white transition-colors md:text-gray-800 lg:text-white"
+                  className="group-hover:text-secondary-yellow text-xs text-white transition-colors md:text-gray-800 lg:text-white"
                 >
                   Send a Check
                 </button>

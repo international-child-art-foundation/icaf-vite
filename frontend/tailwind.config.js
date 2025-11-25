@@ -96,26 +96,14 @@ module.exports = {
         nunito: ['Nunito Variable', 'sans-serif'],
       },
       keyframes: {
-        'accordion-down': {
-          from: {
-            height: '0',
-          },
-          to: {
-            height: 'var(--radix-accordion-content-height)',
-          },
-        },
-        'accordion-up': {
-          from: {
-            height: 'var(--radix-accordion-content-height)',
-          },
-          to: {
-            height: '0',
-          },
+        'heart-pulse': {
+          '0%': { fill: '##fb857c' },
+          '50%': { fill: '#f45c57' },
+          '100%': { fill: '##fb857c' },
         },
       },
       animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
+        'heart-pulse': 'heart-pulse 3s ease-in-out infinite',
       },
     },
   },

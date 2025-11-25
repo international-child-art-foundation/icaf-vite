@@ -1,11 +1,8 @@
 // import { sharedOpenGraph } from '@/data/shared-metadata';
 import NavigationBar from '@/components/shared/NavigationBar';
-import { Button } from '@/components/ui/button';
-import DonateButtonPure from '@/components/ui/donateButtonPure';
-import DonateButtonPartnersPage from '@/components/ui/donateButtonPartnersPage';
+import DonateButton from '@/components/ui/donateButton';
 import { CurvedImage } from '@/pages/CurvedImage';
 import {
-  fireworkImage,
   partnersBackgroundImage,
   worldBankLogo,
   unicefLogo,
@@ -33,6 +30,9 @@ import { IPartners } from 'types/partners';
 import { PartnerItem } from '@/components/partners/PartnerItem';
 import { useState, useEffect } from 'react';
 import { CarouselSharedContent } from '@/components/partners/CarouselSharedContent';
+import { useWindowSize } from 'usehooks-ts';
+import { OpinionatedGradients } from '@/data/gradientDefinition';
+import YourDonations from '@/components/shared/YourDonations';
 
 // add metadata
 // export const metadata = {
@@ -166,6 +166,20 @@ export default function Partners() {
     }
   };
 
+  const size = useWindowSize();
+
+  let gradientDefinition;
+  if (size.width >= 1280) {
+    gradientDefinition =
+      'bg-[linear-gradient(to_right,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.6)_40%,rgba(0,0,0,0.4)_60%,rgba(0,0,0,0)_100%)]';
+  } else if (size.width >= 1024) {
+    gradientDefinition = OpinionatedGradients.lg;
+  } else if (size.width >= 640) {
+    gradientDefinition = OpinionatedGradients.sm;
+  } else {
+    gradientDefinition = OpinionatedGradients.sm;
+  }
+
   return (
     <div className="mx-auto box-border flex min-h-screen w-full max-w-screen-2xl flex-col px-0">
       <NavigationBar />
@@ -174,7 +188,11 @@ export default function Partners() {
         <div className="relative w-full">
           <div className="grid grid-cols-1 grid-rows-1">
             <div className="col-start-1 row-start-1">
-              <CurvedImage src={partnersBackgroundImage} darkened={true} />
+              <CurvedImage
+                src={partnersBackgroundImage}
+                darkened={true}
+                gradientDefinition={gradientDefinition}
+              />
             </div>
             <div className="relative z-10 col-start-1 row-start-1">
               <div className="container mx-auto flex h-full items-start px-8 pt-20 md:items-center md:px-12 md:pt-0 lg:px-16 xl:px-20">
@@ -191,7 +209,7 @@ export default function Partners() {
                     the power of art to young minds, making a global impact.
                   </p>
                   <div className="mb-6 flex justify-start sm:mb-8 md:mb-12 lg:mb-16">
-                    <DonateButtonPartnersPage className="!w-auto border-0 !px-8 text-gray-900 shadow-lg hover:shadow-xl" />
+                    <DonateButton text="Donate to our Campaign" />
                   </div>
                 </div>
               </div>
@@ -245,39 +263,7 @@ export default function Partners() {
         </section>
 
         {/* Donation CTA Section */}
-        <section className="relative mx-2 my-8 max-w-screen-2xl rounded-xl bg-blue-50 p-8 py-8 md:mx-4 md:p-8 lg:mx-6 lg:p-12 xl:p-16">
-          <div className="flex flex-col">
-            <div className="max-w-2xl">
-              <h2 className="font-montserrat mb-4 text-lg font-bold sm:text-xl md:text-2xl">
-                Your donation today will bring the arts to more children and
-                help them become creative and empathic.
-              </h2>
-              <div className="mt-6 flex space-x-2 sm:space-x-4 md:mt-8">
-                <DonateButtonPure className="w-32 text-sm sm:w-40 sm:text-base" />
-                <Button
-                  asChild
-                  variant="outline"
-                  className="h-14 rounded-full border-2 border-blue-700 bg-blue-700 px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:border-blue-800 hover:bg-blue-800 sm:px-6 sm:text-base md:px-8"
-                >
-                  <a
-                    href="https://icaf.org/about/contact-us"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Contact Us
-                  </a>
-                </Button>
-              </div>
-            </div>
-            <div className="absolute right-8 top-6 w-24 sm:bottom-4 sm:right-4 sm:top-auto sm:w-32 md:bottom-0 md:right-8 md:w-48 lg:w-56">
-              <img
-                src={fireworkImage}
-                alt="Colorful fireworks illustration"
-                className="w-full"
-              />
-            </div>
-          </div>
-        </section>
+        <YourDonations />
       </main>
     </div>
   );

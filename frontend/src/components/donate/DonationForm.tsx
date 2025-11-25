@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { HeartIcon, X, Copy, Check, Info } from 'lucide-react';
+import { X, Copy, Check, Info } from 'lucide-react';
 import JustGiving from '@/assets/donate/DonateForm-JustGiving.svg';
 import NetworkForGood from '@/assets/donate/DonateForm-NetworkForGood.svg';
 import SendCheck from '@/assets/donate/DonateForm-SendACheck.svg';
 import Icaflogo from '@/assets/donate/icafLogo.svg';
 import { formatWithCommas } from '@/lib/utils';
+import DonateButton from '../ui/donateButton';
 
 type donationFrequencies = 'one-time' | 'monthly';
 
@@ -186,22 +186,13 @@ Washington, D.C. 20037`;
             </div>
           )}
 
-          <Button
-            asChild
-            variant="secondary"
-            className="mb-4 mt-4 flex h-14 w-full items-center justify-center self-start rounded-full px-6 text-base font-bold tracking-wide"
+          <DonateButton
+            text="Donate in 60 seconds"
+            iconSide="right"
             onClick={handleDonateClick}
-          >
-            <a href="#" className="font-nunito text-md flex items-center gap-2">
-              DONATE IN 60 SECONDS
-              <HeartIcon
-                strokeWidth={2}
-                className="!h-5 !w-5 stroke-black lg:!h-5 lg:!w-5"
-              />
-            </a>
-          </Button>
+          />
 
-          <p className="mb-6 text-center text-xs text-white md:text-gray-800 lg:text-white">
+          <p className="mb-6 mt-2 text-center text-xs text-white md:text-gray-800 lg:text-white">
             International Child Art Foundation's Tax ID (EIN) 52-2032649
           </p>
 
@@ -211,39 +202,39 @@ Washington, D.C. 20037`;
               Other Donation Methods
             </h3>
             <div className="flex justify-center gap-6">
-              <div className="flex flex-col items-center">
-                <div className="border-1 mb-2 flex h-16 w-16 items-center justify-center rounded-full border bg-white">
-                  <img
-                    src={NetworkForGood}
-                    alt="Network for Good"
-                    className="h-10 w-10 object-contain"
-                  />
-                </div>
-                <a
-                  href="#"
-                  className="hover:text-secondary-yellow text-xs text-white transition-colors md:text-gray-800 lg:text-white"
-                >
+              <a
+                href="https://www.networkforgood.org/donation/MakeDonation.aspx?ORGID2=522032649&vlrStratCode=nZXb2ZdCu0mkYBGguVqwHg3Urn4pNhQPKO6LvPJDxffjfPYvs02mtIFg%2b23WunIU"
+                className="hover:text-secondary-yellow text-xs text-white transition-colors md:text-gray-800 lg:text-white"
+              >
+                <div className="flex flex-col items-center">
+                  <div className="border-1 mb-2 flex h-16 w-16 items-center justify-center rounded-full border bg-white">
+                    <img
+                      src={NetworkForGood}
+                      alt="Network for Good"
+                      className="h-10 w-10 object-contain"
+                    />
+                  </div>
                   Network for good
-                </a>
-              </div>
-
-              <div className="flex flex-col items-center">
-                <div className="border-1 mb-2 flex h-16 w-16 items-center justify-center rounded-full border bg-white">
-                  <img
-                    src={JustGiving}
-                    alt="JustGiving"
-                    className="h-10 w-10 object-contain"
-                  />
                 </div>
-                <a
-                  href="#"
-                  className="hover:text-secondary-yellow text-xs text-white transition-colors md:text-gray-800 lg:text-white"
-                >
-                  JustGiving
-                </a>
-              </div>
+              </a>
 
-              <div className="flex flex-col items-center">
+              <a
+                href="https://www.justgiving.com/internationalchildartfoundation"
+                className="hover:text-secondary-yellow text-xs text-white transition-colors md:text-gray-800 lg:text-white"
+              >
+                <div className="flex flex-col items-center">
+                  <div className="border-1 mb-2 flex h-16 w-16 items-center justify-center rounded-full border bg-white">
+                    <img
+                      src={JustGiving}
+                      alt="JustGiving"
+                      className="h-10 w-10 object-contain"
+                    />
+                  </div>
+                  JustGiving
+                </div>
+              </a>
+
+              <div className="group flex flex-col items-center">
                 <button
                   type="button"
                   onClick={handleSendCheckClick}
@@ -258,7 +249,7 @@ Washington, D.C. 20037`;
                 <button
                   type="button"
                   onClick={handleSendCheckClick}
-                  className="hover:text-secondary-yellow text-xs text-white transition-colors md:text-gray-800 lg:text-white"
+                  className="group-hover:text-secondary-yellow text-xs text-white transition-colors md:text-gray-800 lg:text-white"
                 >
                   Send a Check
                 </button>

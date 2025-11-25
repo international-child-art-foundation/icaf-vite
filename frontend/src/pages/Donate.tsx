@@ -1,7 +1,6 @@
-import Portrait1 from '@/assets/donate/Portrait1.svg';
-import Portrait2 from '@/assets/donate/Portrait2.svg';
-import { Button } from '@/components/ui/button';
-import { ArrowUp, HeartIcon, X } from 'lucide-react';
+// import Portrait1 from '@/assets/donate/Portrait1.svg';
+// import Portrait2 from '@/assets/donate/Portrait2.svg';
+import { ArrowUp, X } from 'lucide-react';
 import { childArtExhibition } from '@/data/donate/childArtExhibitionData';
 import DonationUsageOrgCards from '@/components/donate/DonationUsageOrgCards';
 import QuoteBanner from '@/components/donate/QuoteBanner';
@@ -12,6 +11,7 @@ import Icaflogo from '@/assets/donate/icafLogo.svg';
 import { useState } from 'react';
 import DonationMethod from '@/components/donate/DonationMethod';
 import { DonationHeader } from '@/components/donate/DonationHeader';
+import DonateButton from '@/components/ui/donateButton';
 
 export default function Donate() {
   const [showRedirectModal, setShowRedirectModal] = useState(false);
@@ -68,7 +68,7 @@ export default function Donate() {
                 Every piece of art here tells a story of hope and resilience.
                 Here's a glimpse of the talent you're supporting.
               </p>
-              <div className="mb-8 flex items-center justify-center gap-2">
+              {/* <div className="mb-8 flex items-center justify-center gap-2">
                 <div className="relative flex -space-x-2">
                   <img
                     src={Portrait1}
@@ -89,12 +89,13 @@ export default function Donate() {
                 <p className="text-sm text-black">
                   Join 254 others who donated this month!
                 </p>
-              </div>
+              </div> */}
             </div>
 
             <div className="flex flex-row items-start justify-center gap-8 md:flex-col">
               {Array.from({ length: 2 }).map((_, rowIdx) => (
                 <div
+                  // eslint-disable-next-line react-x/no-array-index-key
                   key={rowIdx}
                   className="flex w-full flex-col justify-center gap-8 md:flex-row"
                 >
@@ -155,39 +156,35 @@ export default function Donate() {
       </div>
 
       <div className="bg-white py-16">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="font-inter mb-8 text-xl text-black md:text-4xl">
+        <div className="mx-auto flex max-w-4xl flex-col gap-6 text-center">
+          <h2 className="font-inter text-xl text-black md:text-4xl">
             Create a <span className="font-medium italic">brighter future</span>{' '}
             with your donation{' '}
             <span className="font-medium italic">today!</span>
           </h2>
 
-          <Button
-            variant="secondary"
-            className="mb-12 mt-4 h-14 self-start rounded-full px-6 text-base tracking-wide"
-            onClick={handleDonateClick}
-          >
-            <HeartIcon
-              strokeWidth={2}
-              className="!h-5 !w-5 stroke-black lg:mr-0 lg:!h-5 lg:!w-5"
+          <div className="mx-auto flex max-w-[350px] content-center">
+            <DonateButton
+              text="Donate in 60 Seconds"
+              iconSide={'right'}
+              onClick={handleDonateClick}
+              className="px-6"
             />
-            DONATE IN 60 SECONDS
-          </Button>
-
-          <div className="flex flex-col items-center gap-2">
-            <button
-              type="button"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className=""
-            >
-              <div className="border-primary rounded-full border-2 p-2">
-                <ArrowUp className="text-secondary-black h-6 w-6" />
-              </div>
-            </button>
-            <span className="text-sm text-gray-500 underline">
-              Scroll to top
-            </span>
           </div>
+        </div>
+        <div className="group mx-auto mt-12 flex cursor-pointer flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className=""
+          >
+            <div className="border-primary transition-color rounded-full border-2 p-2 duration-300 group-hover:bg-gray-100">
+              <ArrowUp className="text-secondary-black h-6 w-6" />
+            </div>
+          </button>
+          <span className="cursor-pointer text-sm text-gray-500 underline">
+            Scroll to top
+          </span>
         </div>
       </div>
 

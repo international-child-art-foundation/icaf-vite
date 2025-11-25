@@ -25,7 +25,7 @@ export const ProjectWindow = ({ windowData }: ProjectWindowProps) => {
           <p className="font-sans text-base font-light">
             {windowData.description}
           </p>
-          {windowData.href && (
+          {windowData.href ? (
             <a
               href={windowData.href}
               target="_blank"
@@ -35,6 +35,8 @@ export const ProjectWindow = ({ windowData }: ProjectWindowProps) => {
               <p>Go to Website</p>
               <img className="cursor-pointer" src={outbound} />
             </a>
+          ) : (
+            <p>Coming soon</p>
           )}
         </div>
       </div>

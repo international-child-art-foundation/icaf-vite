@@ -11,13 +11,13 @@ export const ScrollToTop = ({
   flairColor,
 }: ScrollToTopProps) => {
   return (
-    <div className="mx-auto mb-10 text-center">
+    <div className="group mx-auto mb-10 text-center">
       <div
         className="flex cursor-pointer flex-col gap-2"
         onClick={scrollFunction}
       >
         <div
-          className={`mx-auto flex h-[50px] w-[50px] cursor-pointer items-center rounded-full border-2 ${FlairColorMap[flairColor].border} text-center`}
+          className={`mx-auto flex h-[50px] w-[50px] cursor-pointer items-center rounded-full border-2 ${FlairColorMap[flairColor].border} transition-color text-center duration-300 group-hover:bg-blue-50`}
         >
           <ArrowUp className={`mx-auto ${FlairColorMap[flairColor].icon}`} />
         </div>

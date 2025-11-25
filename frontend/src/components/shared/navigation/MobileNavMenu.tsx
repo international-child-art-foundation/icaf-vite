@@ -1,4 +1,4 @@
-import { NavItem, navItems } from '@/lib/navItems';
+import { NavItem, navItems, NavChild } from '@/lib/navItems';
 import {
   Accordion,
   AccordionItem,
@@ -8,8 +8,6 @@ import {
 import { useState } from 'react';
 import { toUpper } from 'lodash';
 import { Link } from 'react-router-dom';
-
-import { NavChild } from '@/lib/navItems';
 
 type MobileNavMenuProps = {
   onCloseMenu?: () => void;
@@ -39,6 +37,7 @@ const MobileNavMenu = ({ onCloseMenu }: MobileNavMenuProps) => {
 
           if (!hasKids) {
             const href = visitable ? item.href : undefined;
+
             if (!href) {
               return (
                 <div key={item.key} className="px-1 py-2 text-base">
@@ -64,8 +63,25 @@ const MobileNavMenu = ({ onCloseMenu }: MobileNavMenuProps) => {
                 {toUpper(item.label)}
               </AccordionTrigger>
               <AccordionContent className="space-y-2 pl-4 text-base font-normal">
-                {children.map((child) => {
+                {children?.map((child) => {
                   const key = `${item.key}:${child.href}`;
+                  const isExternalChild = child.external;
+
+                  if (isExternalChild) {
+                    return (
+                      <a
+                        key={key}
+                        href={child.href}
+                        className="block"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={onCloseMenu}
+                      >
+                        {child.label}
+                      </a>
+                    );
+                  }
+
                   return (
                     <Link
                       key={key}

@@ -26,7 +26,6 @@ export const specialProjectData: TSpecialProjectGroup = [
     image: Phoenix,
     title: 'VR Heaven 2025/2026',
     description: 'Virtual Reality that brings Heaven to Earth',
-    href: 'https://worldchildrensfestival.org/',
     color: 'yellow',
   },
 ];

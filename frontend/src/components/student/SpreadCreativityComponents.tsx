@@ -35,7 +35,7 @@ const DonateButton = () => {
           strokeWidth={2}
           className="!h-5 !w-5 stroke-black lg:mr-0 lg:!h-5 lg:!w-5"
         />
-        Donate to our campaign
+        Donate to our Campaign
       </Button>
     </Link>
   );

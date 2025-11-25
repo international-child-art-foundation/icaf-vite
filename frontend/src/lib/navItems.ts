@@ -19,6 +19,7 @@ export interface NavChild {
   href: string;
   imageSrc: string;
   alt: string;
+  external?: boolean;
   hoverDescription: string;
 }
 
@@ -128,21 +129,21 @@ export const navItems: NavItem[] = [
         href: '/get-involved/volunteer',
         imageSrc: volunteer,
         alt: 'Volunteer with us',
-        hoverDescription: '',
+        hoverDescription: 'Help ICAF achieve its vision.',
       },
       {
         label: 'Profesionals',
         href: '/get-involved/professionals',
         imageSrc: professional,
-        alt: 'Make a donation',
-        hoverDescription: '',
+        alt: 'Get Involved: Professional',
+        hoverDescription: 'Collaborate professionally with ICAF.',
       },
       {
         label: 'Student',
         href: '/get-involved/student',
         imageSrc: student,
-        alt: 'Make a donation',
-        hoverDescription: '',
+        alt: 'Get Involved: Student',
+        hoverDescription: 'Express your creativity through ICAF initiatives.',
       },
       // {
       //   label: 'Corporate Partnerships',
@@ -163,14 +164,15 @@ export const navItems: NavItem[] = [
         href: '/news-events/news',
         imageSrc: latest,
         alt: 'Latest news',
-        hoverDescription: '',
+        hoverDescription: "See ICAF's recent activity.",
       },
       {
         label: 'Upcoming Events',
-        href: '/news-events/events',
+        href: 'https://worldchildrensfestival.org/',
+        external: true,
         imageSrc: upcoming,
         alt: 'Upcoming events',
-        hoverDescription: '',
+        hoverDescription: 'See what ICAF has planned for the future.',
       },
     ],
   },

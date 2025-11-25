@@ -2,12 +2,11 @@ import { CurvedImage } from './CurvedImage';
 import MagazineCarousel from '../components/childArt/MagazineCarousel';
 
 import magazineCoverLarge from '@/assets/shared/images/navigation/programs/childArtMagazine.webp';
-
-import DonateButtonPartnersPage from '@/components/ui/donateButtonPartnersPage';
 import BackIssueGrid from '@/components/childArt/BackIssueGrid';
 import TestimonialBlock from '@/components/childArt/TestimonialBlock';
 import YourDonations from '@/components/shared/YourDonations';
 import { useWindowSize } from 'usehooks-ts';
+import DonateButton from '@/components/ui/donateButton';
 
 export default function ChildArtPage() {
   const size = useWindowSize();
@@ -56,7 +55,7 @@ export default function ChildArtPage() {
                   social participation.”
                 </p>
                 <div className="flex justify-start">
-                  <DonateButtonPartnersPage className="!w-auto border-0 !px-8 text-gray-900 shadow-lg hover:shadow-xl" />
+                  <DonateButton text="Donate to our Campaign" />
                 </div>
               </div>
             </div>

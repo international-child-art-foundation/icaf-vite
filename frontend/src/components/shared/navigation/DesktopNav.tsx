@@ -1,73 +1,153 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ICAFlogo } from '@/assets/shared/logos/ICAFLogo';
 import { NavItem, navItems } from '@/lib/navItems';
 import DesktopNavDropdown from './DesktopNavDropdown';
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import DonateButton from '@/components/ui/donateButton';
-import { throttle } from 'lodash';
 
-const HEADERCOOLDOWN = 250; // ms cooldown for dropdown menu changes
+type DropdownAnimationState = {
+  progress: number;
+  zIndex: number;
+  fadingIn: boolean;
+  isOpening: boolean;
+  openingFromClosed: boolean;
+};
+
+type DropdownStateMap = Record<string, DropdownAnimationState>;
+
+const createInitialDropdownState = (): DropdownStateMap => {
+  const state: DropdownStateMap = {};
+  navItems.forEach((item) => {
+    state[item.label] = {
+      progress: 0,
+      zIndex: 0,
+      fadingIn: false,
+      isOpening: false,
+      openingFromClosed: false,
+    };
+  });
+  return state;
+};
 
 const DesktopNav: React.FC = () => {
-  const [activeItem, setActiveItem] = useState<string>('');
-  const [prevItem, setPrevItem] = useState<string>('');
-  const [isLeaving, setIsLeaving] = useState(false);
   const navigate = useNavigate();
-  const navbarRef = useRef<HTMLDivElement | null>(null);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  const activeItemRef = useRef(activeItem);
-  useEffect(() => {
-    activeItemRef.current = activeItem;
-  }, [activeItem]);
+  const [dropdownState, setDropdownState] = useState<DropdownStateMap>(() =>
+    createInitialDropdownState(),
+  );
+  const [currentItemLabel, setCurrentItemLabel] = useState<string | null>(null);
 
-  const runHover = useCallback((label: string): void => {
-    if (label === activeItemRef.current) return;
-    setPrevItem(activeItemRef.current);
-    if (!label || label === 'Sponsorship') {
-      setIsLeaving(true);
-      setActiveItem('');
-      setTimeout(() => setPrevItem(''), HEADERCOOLDOWN);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const zCounterRef = useRef<number>(1);
+
+  const collapseDropdowns = useCallback(() => {
+    setCurrentItemLabel(null);
+    setDropdownState((prev) => {
+      const next: DropdownStateMap = {};
+      for (const key of Object.keys(prev)) {
+        const prevState = prev[key];
+        next[key] = {
+          ...prevState,
+          progress: 0,
+          zIndex: 0,
+          fadingIn: false,
+          isOpening: false,
+          openingFromClosed: false,
+        };
+      }
+      return next;
+    });
+    zCounterRef.current = 1;
+  }, []);
+
+  const handleLabelClick = (href: string | undefined) => {
+    if (!href) return;
+    collapseDropdowns();
+    void navigate(href);
+  };
+
+  const handleItemHover = (item: NavItem) => {
+    const hasChildren = !!item.children && item.children.length > 0;
+
+    if (!hasChildren) {
+      setCurrentItemLabel(null);
+      collapseDropdowns();
       return;
     }
 
-    setIsLeaving(false);
-    setActiveItem(label);
-  }, []);
+    if (currentItemLabel === item.label) {
+      return;
+    }
 
-  const throttledHover = useMemo(() => {
-    return throttle(runHover, HEADERCOOLDOWN, {
-      leading: true,
-      trailing: true,
+    setCurrentItemLabel(item.label);
+
+    setDropdownState((prev) => {
+      const next: DropdownStateMap = {};
+      const currentState = prev[item.label];
+
+      const openingFromClosed = !currentState || currentState.progress === 0;
+      const hasOtherOpen = Object.entries(prev).some(
+        ([key, state]) => key !== item.label && state.progress > 0,
+      );
+
+      const newZIndex = zCounterRef.current++;
+      const shouldFadeIn = hasOtherOpen;
+
+      for (const key of Object.keys(prev)) {
+        const state = prev[key];
+
+        if (key === item.label) {
+          next[key] = {
+            progress: 1,
+            zIndex: newZIndex,
+            fadingIn: shouldFadeIn,
+            isOpening: true,
+            openingFromClosed,
+          };
+        } else {
+          if (state.progress > 0) {
+            next[key] = {
+              ...state,
+              progress: 0,
+              zIndex: state.zIndex,
+              fadingIn: false,
+              isOpening: false,
+              openingFromClosed: false,
+            };
+          } else {
+            next[key] = {
+              ...state,
+              fadingIn: false,
+              isOpening: false,
+              openingFromClosed: false,
+            };
+          }
+        }
+      }
+
+      if (!next[item.label]) {
+        next[item.label] = {
+          progress: 1,
+          zIndex: newZIndex,
+          fadingIn: shouldFadeIn,
+          isOpening: true,
+          openingFromClosed,
+        };
+      }
+
+      return next;
     });
-  }, []);
-
-  useEffect(() => {
-    return () => throttledHover.cancel();
-  }, [throttledHover]);
-
-  const handleClick = (href: string | undefined) => {
-    if (href) {
-      setIsLeaving(true);
-      setActiveItem('');
-      setPrevItem('');
-      void navigate(href);
-    }
   };
 
-  const handleMouseLeaveDropdown = (event: React.MouseEvent) => {
-    //First check if mouse moved up to navbar menu items, if not close dropdown
-    if (!navbarRef.current?.contains(event.relatedTarget as Node)) {
-      setIsLeaving(true);
-      setTimeout(() => {
-        setIsLeaving(false);
-        setActiveItem('');
-        setPrevItem('');
-      }, HEADERCOOLDOWN);
-    }
+  const handleDonateHover = () => {
+    setCurrentItemLabel(null);
+    collapseDropdowns();
   };
 
-  // //Preload of images
+  const handleDropdownItemSelected = () => {
+    collapseDropdowns();
+  };
+
   useEffect(() => {
     navItems.forEach((item) => {
       item.children?.forEach((child) => {
@@ -77,92 +157,79 @@ const DesktopNav: React.FC = () => {
     });
   }, []);
 
-  // If there is an activeItem, then we are tracking the mouse/if the mouse leaves the header nav items or dropdown we close the dropdown
   useEffect(() => {
-    if (!activeItem) return;
+    const anyOpen = Object.values(dropdownState).some(
+      (state) => state.progress > 0,
+    );
+    if (!anyOpen) {
+      return;
+    }
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const isInNavItems = navbarRef.current?.contains(e.target as Node);
-      const isInDropdown = dropdownRef.current?.contains(e.target as Node);
+    const handleMouseMove = (event: MouseEvent) => {
+      const target = event.target as Node;
+      const inHeader = headerRef.current && headerRef.current.contains(target);
 
-      if (!isInNavItems && !isInDropdown) {
-        setIsLeaving(true);
-
-        setTimeout(() => {
-          setIsLeaving(false);
-          setActiveItem('');
-          setPrevItem('');
-        }, 250);
+      if (!inHeader) {
+        collapseDropdowns();
       }
     };
 
     document.addEventListener('mousemove', handleMouseMove);
-    return () => document.removeEventListener('mousemove', handleMouseMove);
-  }, [activeItem]);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, [dropdownState, collapseDropdowns]);
 
   return (
-    <>
-      {/* Icon */}
-      <Link to={'/'} className="my-2 cursor-pointer">
+    <div
+      ref={headerRef}
+      className="relative h-full w-full items-center justify-between xl:flex"
+    >
+      <Link to="/" className="my-2 cursor-pointer">
         <ICAFlogo />
       </Link>
-      {/* Navigation Items*/}
-      <div className="flex h-full items-center space-x-6" ref={navbarRef}>
+
+      <div className="flex h-full items-center space-x-6">
         {navItems.map((item: NavItem) => (
           <a
             key={item.key}
-            onMouseEnter={() => throttledHover(item.label)}
-            onClick={() => handleClick(item.href)}
+            onMouseEnter={() => handleItemHover(item)}
+            onClick={() => handleLabelClick(item.href)}
             className={`hover:text-primary group relative text-lg hover:cursor-pointer ${
-              activeItem === item.label ? 'text-primary' : 'text-black'
+              currentItemLabel === item.label ? 'text-primary' : 'text-black'
             }`}
           >
             {item.navLabel}
-            {/*Nav Item Underline Animation*/}
             <span className="bg-primary absolute left-1/2 top-7 h-[1px] w-0 -translate-x-1/2 transform transition-all duration-300 ease-in-out group-hover:w-full"></span>
           </a>
         ))}
 
-        {/* Donate Button */}
-        <div onMouseEnter={() => throttledHover('')}>
+        <div onMouseEnter={handleDonateHover}>
           <DonateButton className="w-32" text="Donate" />
         </div>
       </div>
 
-      {/* Dropdown Section */}
-      {activeItem || isLeaving ? (
-        <nav
-          className="fixed left-1/2 top-[98px] min-h-80 w-full -translate-x-1/2 transform overflow-hidden 2xl:max-w-screen-2xl"
-          ref={dropdownRef}
-          onMouseLeave={(event) => handleMouseLeaveDropdown(event)}
-        >
-          {prevItem !== 'Sponsorship' && (
-            <div className={`dropdown-inner static ${isLeaving ? 'exit' : ''}`}>
-              <DesktopNavDropdown
-                activeItem={prevItem || ''}
-                setIsLeaving={setIsLeaving}
-                setActiveItem={setActiveItem}
-                setPrevItem={setPrevItem}
-              />
-            </div>
-          )}
+      <nav className="fixed left-1/2 top-[98px] z-40 w-full -translate-x-1/2 transform overflow-visible 2xl:max-w-screen-2xl">
+        {navItems.map((item: NavItem) => {
+          const state = dropdownState[item.label];
+          if (!state) return null;
 
-          <div
-            key={activeItem}
-            className={`dropdown-inner animated ${isLeaving ? 'exit' : ''}`}
-          >
+          return (
             <DesktopNavDropdown
-              activeItem={activeItem}
-              setIsLeaving={setIsLeaving}
-              setActiveItem={setActiveItem}
-              setPrevItem={setPrevItem}
+              key={item.key}
+              item={item}
+              progress={state.progress}
+              zIndex={state.zIndex}
+              fadingIn={state.fadingIn}
+              isOpening={state.isOpening}
+              openingFromClosed={state.openingFromClosed}
+              onItemSelected={handleDropdownItemSelected}
             />
-          </div>
-        </nav>
-      ) : (
-        ''
-      )}
-    </>
+          );
+        })}
+      </nav>
+    </div>
   );
 };
+
 export default DesktopNav;

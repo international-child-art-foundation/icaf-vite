@@ -5,6 +5,7 @@ import { FavoriteSportLogo } from '@/assets/shared/images/about/FavoriteSportLog
 import { ChevronRight } from 'lucide-react';
 import { VRHeaven } from '@/assets/shared/images/about/VRHeaven';
 import { VideoWrapper } from '../shared/VideoWrapper';
+import { Link } from 'react-router-dom';
 
 /**
  *
@@ -27,12 +28,14 @@ export default function ExploreOurProjects() {
               <FavoriteSportLogo />
             </CardContent>
             <CardFooter className="text-primary gap-1 text-lg underline">
-              <a
-                href="https://example.com/myfavoritesport"
+              <Link
+                to="https://myfavoritesport.org/"
                 className="flex flex-row items-center"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 Go to MyFavoriteSport <ChevronRight />
-              </a>
+              </Link>
             </CardFooter>
           </Card>
         </div>
@@ -42,12 +45,9 @@ export default function ExploreOurProjects() {
               <VRHeaven />
             </CardContent>
             <CardFooter className="text-primary gap-1 text-lg underline">
-              <a
-                href="https://example.com/myfavoritesport"
-                className="flex flex-row items-center"
-              >
-                Go to VRHeaven <ChevronRight />
-              </a>
+              <p className="flex flex-row items-center">
+                VRHeaven (coming soon) <ChevronRight />
+              </p>
             </CardFooter>
           </Card>
         </div>

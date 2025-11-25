@@ -1,5 +1,5 @@
 import { CurvedImage } from '@/pages/CurvedImage';
-import TeamHeaderImg from '@/assets/team/TeamHeader.webp';
+import TeamHeaderImg from '@/assets/shared/images/TeamHeader.webp';
 import { ArrowDown } from 'lucide-react';
 import { useWindowSize } from 'usehooks-ts';
 

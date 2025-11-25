@@ -39,7 +39,6 @@ export const MoreCarousel = () => {
 
   return (
     <section className="relative h-full overflow-visible bg-white py-6 md:py-20">
-      {/*Decoration */}
       <div className="pointer-events-none absolute bottom-0 left-[40%] w-[150%] -translate-x-1/2 sm:bottom-[-10%] sm:left-[50%] md:bottom-0 2xl:bottom-[-12%]">
         <img
           src={Graphic}
@@ -67,7 +66,7 @@ export const MoreCarousel = () => {
             );
           })}
         </CarouselContent>
-        <div className="md:py-4">
+        <div className="py-4">
           <CarouselArrowsDots
             items={moreOnOurSiteData}
             onPrevious={handlePrevious}

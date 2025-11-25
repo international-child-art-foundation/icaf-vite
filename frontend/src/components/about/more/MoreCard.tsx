@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { MoreOnOurSite } from '@/data/about/moreOnOurSite';
-import { HeartIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 /**
  *Renders an image and text content for the MoreCarousel
@@ -41,23 +41,22 @@ export const MoreCard = ({ item }: { item: MoreOnOurSite }) => {
             {item.description}
           </CardDescription>
           <div className="flex w-full justify-center">
-            <Button
-              variant="secondary"
-              className="text-sans h-14 w-[210px] justify-center rounded-full font-semibold text-black"
-            >
-              {/*Will need to come back and correct this link */}
-              <a
-                href="https://icaf.org/donate"
-                target="blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-4"
-              >
-                <HeartIcon
-                  strokeWidth={2}
-                  className="!h-6 !w-6 stroke-black lg:!h-6 lg:!w-6"
-                />
-                Learn More Here
-              </a>
+            <Button className="text-sans h-12 w-[180px] justify-center rounded-full font-semibold text-white">
+              {item.link &&
+                (item.external ? (
+                  <a
+                    href={item.link}
+                    target="blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4"
+                  >
+                    {item.buttonText}
+                  </a>
+                ) : (
+                  <Link to={item.link} className="flex items-center gap-4">
+                    {item.buttonText}
+                  </Link>
+                ))}
             </Button>
           </div>
         </CardHeader>

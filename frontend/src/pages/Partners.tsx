@@ -33,6 +33,8 @@ import { IPartners } from 'types/partners';
 import { PartnerItem } from '@/components/partners/PartnerItem';
 import { useState, useEffect } from 'react';
 import { CarouselSharedContent } from '@/components/partners/CarouselSharedContent';
+import { useWindowSize } from 'usehooks-ts';
+import { OpinionatedGradients } from '@/data/gradientDefinition';
 
 // add metadata
 // export const metadata = {
@@ -166,6 +168,20 @@ export default function Partners() {
     }
   };
 
+  const size = useWindowSize();
+
+  let gradientDefinition;
+  if (size.width >= 1280) {
+    gradientDefinition =
+      'bg-[linear-gradient(to_right,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.6)_40%,rgba(0,0,0,0.4)_60%,rgba(0,0,0,0)_100%)]';
+  } else if (size.width >= 1024) {
+    gradientDefinition = OpinionatedGradients.lg;
+  } else if (size.width >= 640) {
+    gradientDefinition = OpinionatedGradients.sm;
+  } else {
+    gradientDefinition = OpinionatedGradients.sm;
+  }
+
   return (
     <div className="mx-auto box-border flex min-h-screen w-full max-w-screen-2xl flex-col px-0">
       <NavigationBar />
@@ -174,7 +190,11 @@ export default function Partners() {
         <div className="relative w-full">
           <div className="grid grid-cols-1 grid-rows-1">
             <div className="col-start-1 row-start-1">
-              <CurvedImage src={partnersBackgroundImage} darkened={true} />
+              <CurvedImage
+                src={partnersBackgroundImage}
+                darkened={true}
+                gradientDefinition={gradientDefinition}
+              />
             </div>
             <div className="relative z-10 col-start-1 row-start-1">
               <div className="container mx-auto flex h-full items-start px-8 pt-20 md:items-center md:px-12 md:pt-0 lg:px-16 xl:px-20">

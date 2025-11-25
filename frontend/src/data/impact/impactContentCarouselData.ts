@@ -4,7 +4,7 @@ import camera from '@/assets/impact/camera.svg';
 import award_star from '@/assets/impact/award_star.svg';
 import painting from '@/assets/impact/Painting.png';
 import awards from '@/assets/impact/Awards.png';
-import childrenFromMalaysia from '@/assets/impact/Children from Malaysia.png';
+import childrenFromMalaysia from '@/assets/impact/Children from Malaysia.webp';
 
 export const ImpactContentCarouselData: ContentCarouselData = [
   {

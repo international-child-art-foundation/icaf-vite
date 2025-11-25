@@ -38,11 +38,10 @@ export const PTALearnMore = () => {
           </span>{' '}
           Will you be part of it?
         </p>
-        {/* TODO: Ensure volunteer page exists when this is published */}
         <Link to={'/volunteer'} className="z-20 my-2 cursor-pointer">
           <Button variant="secondary" className="mx-auto rounded-full">
             <div className="flex items-center gap-2 leading-none">
-              <p className="text-[16px]">Get Involved</p>
+              <p className="text-lg">Get Involved</p>
             </div>
           </Button>
         </Link>

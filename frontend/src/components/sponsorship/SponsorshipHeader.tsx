@@ -4,7 +4,6 @@ import { useWindowSize } from 'usehooks-ts';
 
 export const SponsorshipHeader = () => {
   const size = useWindowSize();
-  // TODO: Remove if duplicate
   const gradientXL =
     'bg-[linear-gradient(to_bottom,rgba(0,0,0,0.50)_10%,rgba(0,0,0,0.05)_70%,rgba(255,255,255,0.05)_100%)]';
   const gradientLG =

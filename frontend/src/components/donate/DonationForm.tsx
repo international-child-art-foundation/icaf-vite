@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { HeartIcon, X, Copy, Check, Info } from 'lucide-react';
+import { X, Copy, Check, Info } from 'lucide-react';
 import JustGiving from '@/assets/donate/DonateForm-JustGiving.svg';
 import NetworkForGood from '@/assets/donate/DonateForm-NetworkForGood.svg';
 import SendCheck from '@/assets/donate/DonateForm-SendACheck.svg';
 import Icaflogo from '@/assets/donate/icafLogo.svg';
 import { formatWithCommas } from '@/lib/utils';
+import DonateButton from '../ui/donateButton';
 
 type donationFrequencies = 'one-time' | 'monthly';
 
@@ -186,22 +186,13 @@ Washington, D.C. 20037`;
             </div>
           )}
 
-          <Button
-            asChild
-            variant="secondary"
-            className="mb-4 mt-4 flex h-14 w-full items-center justify-center self-start rounded-full px-6 text-base font-bold tracking-wide"
+          <DonateButton
+            text="Donate in 60 seconds"
+            iconSide="right"
             onClick={handleDonateClick}
-          >
-            <a href="#" className="font-nunito text-md flex items-center gap-2">
-              DONATE IN 60 SECONDS
-              <HeartIcon
-                strokeWidth={2}
-                className="!h-5 !w-5 stroke-black lg:!h-5 lg:!w-5"
-              />
-            </a>
-          </Button>
+          />
 
-          <p className="mb-6 text-center text-xs text-white md:text-gray-800 lg:text-white">
+          <p className="mb-6 mt-2 text-center text-xs text-white md:text-gray-800 lg:text-white">
             International Child Art Foundation's Tax ID (EIN) 52-2032649
           </p>
 

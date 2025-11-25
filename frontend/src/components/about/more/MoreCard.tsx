@@ -18,7 +18,6 @@ import { Link } from 'react-router-dom';
  *     description: string;
  *     image?: string;
  *   }
- * Todo: set the correct button link
  */
 
 export const MoreCard = ({ item }: { item: MoreOnOurSite }) => {

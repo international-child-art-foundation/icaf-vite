@@ -7,7 +7,7 @@ import { useRef } from 'react';
 import { TeamExtendedStaff } from './TeamExtendedStaff';
 
 export const Team = () => {
-  const HEADER_OFFSET = 180;
+  const HEADER_OFFSET = 110;
 
   const staffRef = useRef<HTMLDivElement | null>(null);
 

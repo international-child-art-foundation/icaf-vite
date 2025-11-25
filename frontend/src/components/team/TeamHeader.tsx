@@ -38,7 +38,7 @@ const TeamHeader = ({ scrollFunction }: TeamHeaderProps) => {
           they bring ICAF’s vision to life.
         </p>
         <div
-          className="mx-auto mt-0 flex h-[50px] w-[50px] cursor-pointer items-center rounded-full border-2 border-[#FFD743] text-center sm:mt-8 md:mt-4 lg:mt-2 xl:mt-8"
+          className="transition-color mx-auto mt-0 flex h-[50px] w-[50px] cursor-pointer items-center rounded-full border-2 border-[#FFD743] text-center duration-300 hover:bg-black sm:mt-8 md:mt-4 lg:mt-2 xl:mt-8"
           onClick={scrollFunction}
         >
           <ArrowDown className="mx-auto" />

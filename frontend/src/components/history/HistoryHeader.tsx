@@ -2,7 +2,7 @@ import { CurvedImage } from '@/pages/CurvedImage';
 import headerImg from '@/assets/history/HistoryHeader.webp';
 import { OpinionatedGradients } from '@/data/gradientDefinition';
 import { useWindowSize } from 'usehooks-ts';
-import DonateButtonPartnersPage from '../ui/donateButtonPartnersPage';
+import DonateButton from '../ui/donateButton';
 
 export const HistoryHeader = () => {
   const size = useWindowSize();
@@ -45,8 +45,8 @@ export const HistoryHeader = () => {
               milestone reflects our mission: to nurture imagination, foster
               understanding, and inspire innovation.{' '}
             </p>
-            <div className="flex justify-start">
-              <DonateButtonPartnersPage className="!w-auto border-0 !px-8 text-gray-900 shadow-lg hover:shadow-xl" />
+            <div className="flex">
+              <DonateButton text="Donate to our Campaign" />
             </div>
           </div>
         </div>

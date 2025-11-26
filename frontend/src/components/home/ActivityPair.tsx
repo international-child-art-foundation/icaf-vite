@@ -15,7 +15,7 @@ export const ActivityPair = ({
 
   return (
     <div
-      className={`grid h-[500px] max-h-full grid-cols-1 gap-6 overflow-hidden lg:h-[600px] ${expandedId === pair[0].id ? '[grid-template-rows:3fr_2fr]' : '[grid-template-rows:2fr_3fr]'} duration-400 transition-[grid-template-rows] ease-in-out`}
+      className={`grid h-[500px] max-h-full grid-cols-1 gap-2 overflow-hidden sm:gap-6 lg:h-[600px] ${expandedId === pair[0].id ? '[grid-template-rows:3fr_2fr]' : '[grid-template-rows:2fr_3fr]'} duration-400 transition-[grid-template-rows] ease-in-out`}
     >
       {pair.map((item: IActivityItem) => (
         <ActivityItem

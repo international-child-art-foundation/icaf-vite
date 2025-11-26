@@ -208,7 +208,7 @@ export default function Partners() {
                     creativity and empathy in children. Our collaborations bring
                     the power of art to young minds, making a global impact.
                   </p>
-                  <div className="mb-6 flex justify-start sm:mb-8 md:mb-12 lg:mb-16">
+                  <div className="mb-6 flex justify-start sm:mb-8 lg:mb-16">
                     <DonateButton text="Donate to our Campaign" />
                   </div>
                 </div>
@@ -219,11 +219,11 @@ export default function Partners() {
 
         {/* Global Partnerships Section */}
         <section className="py-16">
-          <div className="mx-auto max-w-screen-2xl px-8 md:px-12 lg:px-16 xl:px-20">
-            <h2 className="font-montserrat mb-12 text-center text-3xl font-bold md:text-4xl">
+          <div className="mx-auto flex max-w-screen-2xl flex-col gap-8 px-8 md:px-12 lg:gap-12 lg:px-16 xl:px-20">
+            <h2 className="font-montserrat text-center text-3xl font-bold md:text-4xl">
               Our Global Partnerships
             </h2>
-            <p className="mb-12 font-sans text-lg leading-relaxed">
+            <p className="font-sans text-lg leading-relaxed">
               ICAF collaborates on occasion with a diverse range of partners
               across nearly 100 countries to inspire and empower children
               through art and creativity. In the United States, we work closely

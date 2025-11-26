@@ -31,19 +31,15 @@ export const SpecialProjects = () => {
               them become creative and empathic.
             </p>
             <div className="inline-grid grid-cols-2 gap-2">
-              <Button
-                asChild
-                className="bg-secondary-yellow w-auto rounded-full font-semibold text-black"
-                variant={'secondary'}
-              >
-                <a
-                  href="https://icaf.org/donate"
-                  target="_blank"
-                  rel="noreferrer noopener"
+              <Link to="/donate">
+                <Button
+                  asChild
+                  className="bg-secondary-yellow w-auto rounded-full px-6 font-semibold text-black"
+                  variant={'secondary'}
                 >
-                  Donate
-                </a>
-              </Button>
+                  <p className="">Donate</p>
+                </Button>
+              </Link>
               <Link to="/contact">
                 <Button
                   asChild

@@ -12,15 +12,17 @@ import { HomeCarousel } from '@/components/home/HomeCarousel';
 
 export default function Home() {
   return (
-    <div className="relative m-0 flex w-full flex-col items-center gap-12 overflow-hidden p-0">
+    <>
       <HomeHeader />
-      <MissionVision />
-      <BannerImageCarousel items={bannerItems} displayMs={2000} />
-      <WhatWeDo />
-      <Activities activityPairs={HomeActivities} />
-      <HomeImpact />
-      <SpecialProjects />
-      <HomeCarousel />
-    </div>
+      <div className="relative m-0 flex w-full flex-col items-center gap-8 overflow-hidden p-0 md:gap-12">
+        <MissionVision />
+        <BannerImageCarousel items={bannerItems} displayMs={3000} />
+        <WhatWeDo />
+        <Activities activityPairs={HomeActivities} />
+        <HomeImpact />
+        <SpecialProjects />
+        <HomeCarousel />
+      </div>
+    </>
   );
 }

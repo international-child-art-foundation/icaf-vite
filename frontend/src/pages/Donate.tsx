@@ -31,7 +31,7 @@ export default function Donate() {
   };
 
   return (
-    <div>
+    <div className="overflow-hidden">
       <DonationHeader />
 
       {/* About ICAF */}
@@ -157,7 +157,7 @@ export default function Donate() {
 
       <div className="bg-white py-16">
         <div className="mx-auto flex max-w-4xl flex-col gap-6 text-center">
-          <h2 className="font-inter text-xl text-black md:text-4xl">
+          <h2 className="font-inter mx-4 text-xl text-black md:text-4xl">
             Create a <span className="font-medium italic">brighter future</span>{' '}
             with your donation{' '}
             <span className="font-medium italic">today!</span>

@@ -22,7 +22,7 @@ export const DonationHeaderContent = () => {
           href="https://www.guidestar.org/profile/52-2032649"
           target="_blank"
           rel="noopener noreferrer"
-          className="cursor-pointer transition-opacity hover:opacity-80"
+          className="cursor-pointer opacity-95 transition-opacity hover:opacity-100"
         >
           <img
             src={TransparencyLogo}

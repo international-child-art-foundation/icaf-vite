@@ -8,7 +8,8 @@ export const TimelineEventMobile = ({
   willBreakMobile,
 }: IicafTimelineEvent) => {
   const size = useWindowSize();
-  const titleDescriptionWidth = size.width >= 700 ? 530 : 375;
+  const titleDescriptionWidth =
+    size.width >= 700 ? 530 : size.width < 500 ? 280 : 375;
   const bars = Array.from({ length: size.width > 700 ? 11 : 13 });
 
   return (
@@ -18,7 +19,7 @@ export const TimelineEventMobile = ({
       >
         <div className={`bg-primary h-7 w-7 rounded-full`}></div>
         <div
-          className={`h-1 w-[40px] ${size.width > 768 ? 'grow' : ''} rounded-full bg-black sm:w-[100px]`}
+          className={`h-1 w-0 sm:w-[40px] ${size.width > 768 ? 'grow' : ''} rounded-full bg-black sm:w-[100px]`}
         ></div>
         <div className="relative flex flex-row items-center gap-4">
           <p
@@ -27,7 +28,7 @@ export const TimelineEventMobile = ({
             {year}
           </p>
           <p
-            className={`text-tertiary-blue font-montserrat h-[80px] content-center text-[30px] font-extrabold leading-[34px]`}
+            className={`text-tertiary-blue font-montserrat h-[80px] content-center text-[22px] font-extrabold leading-[34px] sm:text-[30px]`}
             style={{ width: titleDescriptionWidth }}
           >
             {title}

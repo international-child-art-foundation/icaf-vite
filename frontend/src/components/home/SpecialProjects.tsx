@@ -4,6 +4,7 @@ import { ProjectWindows } from './ProjectWindows';
 import Firework from '@/assets/impact/Firework.png';
 import Ribbons from '@/assets/home/Ribbons.svg';
 import smallBlueFirework from '@/assets/home/SmallBlueFirework.svg';
+import { Link } from 'react-router-dom';
 
 export const SpecialProjects = () => {
   return (
@@ -43,19 +44,15 @@ export const SpecialProjects = () => {
                   Donate
                 </a>
               </Button>
-              <Button
-                asChild
-                className="rounded-full font-semibold"
-                variant="default"
-              >
-                <a
-                  href="https://icaf.org/donate"
-                  target="_blank"
-                  rel="noreferrer noopener"
+              <Link to="/contact">
+                <Button
+                  asChild
+                  className="rounded-full font-semibold"
+                  variant="default"
                 >
-                  Contact Us
-                </a>
-              </Button>
+                  <p>Contact Us</p>
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

@@ -53,7 +53,7 @@ export const BannerImage = ({ data, height = 550 }: BannerImageProps) => {
   const textPathId = `${baseId}-text-path-${textEdge}`;
   const textPathNormalized = ribbonPaths.PeakValley.topText;
 
-  const baseText = data.bannerText || '';
+  const baseText = data.bannerText || 'INTERNATIONAL CHILD ART FOUNDATION';
   const separator = ' \u2022 ';
   const repeats = 50;
   const repeatedText = Array.from({ length: repeats })

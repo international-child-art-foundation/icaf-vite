@@ -3,7 +3,6 @@ export interface IActivityItem {
   title: string;
   description: string;
   id: number;
-  href?: string;
 }
 
 export type IActivityItemPair = [IActivityItem, IActivityItem];

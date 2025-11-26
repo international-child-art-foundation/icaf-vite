@@ -15,14 +15,12 @@ export const HomeActivities: IActivitySection = [
       title: 'The Arts Olympiad*',
       description: 'The largest-ever school art program',
       img: olympiadImage,
-      href: '/programs/arts-olympiad',
     },
     {
       id: 2,
       title: 'Peace through Art',
       description: 'Revive trust in humanity of children in conflict zones',
       img: craftsImage,
-      href: '/programs/peace-through-art',
     },
   ],
   [
@@ -31,7 +29,6 @@ export const HomeActivities: IActivitySection = [
       title: 'World Children’s Festival',
       description: 'At the National Mall across the U.S. Capitol',
       img: capitolImage,
-      href: '/programs/world-childrens-festival',
     },
     {
       id: 4,
@@ -46,7 +43,6 @@ export const HomeActivities: IActivitySection = [
       title: 'Quarterly Magazine',
       description: 'Arts learning and global competency distributed quarterly',
       img: magazineImage,
-      href: '/programs/childart-magazine',
     },
     {
       id: 6,
@@ -62,7 +58,6 @@ export const HomeActivities: IActivitySection = [
       description:
         'Revive faith in nature of child victims of natural disasters',
       img: heartImage,
-      href: '/programs/healing-arts',
     },
     {
       id: 8,

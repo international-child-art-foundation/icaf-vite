@@ -19,7 +19,7 @@ const Impact = () => {
             src={WorldMural}
             curveStyle={'Ellipse'}
             darkened={true}
-            gradientDefinition={'bg-gradient-to-b from-black/70 to-black/0'}
+            gradientDefinition={'bg-gradient-to-b from-black/50 to-black/30'}
           />
         </div>
         <p className="margin-auto font-montserrat z-20 col-start-1 row-start-1 -mt-14 content-center place-self-center text-6xl font-extrabold text-white">
@@ -30,9 +30,9 @@ const Impact = () => {
       <div className="relative mt-16 grid w-full gap-20">
         {/* Better World with Creativity Section */}
         <div className="grid max-w-screen-2xl gap-8 px-8 md:px-12 lg:px-16 xl:px-20">
-          <p className="font-montserrat text-center text-3xl font-extrabold">
+          <h2 className="font-montserrat text-center text-3xl font-extrabold">
             Building a Better World with Creativity
-          </p>
+          </h2>
           <p className="text-xl">
             At ICAF, we're working to make the world more peaceful, prosperous,
             and sustainable. We believe that helping kids grow creatively and
@@ -44,9 +44,9 @@ const Impact = () => {
         {/* Making an Impact section */}
         <div className="grid-col grid max-w-screen-2xl gap-20 px-8 md:px-12 lg:px-16 xl:px-20">
           <div className="grid gap-8">
-            <p className="font-montserrat text-center text-3xl font-extrabold">
+            <h2 className="font-montserrat text-center text-3xl font-extrabold">
               Making an Impact
-            </p>
+            </h2>
             <p className="text-xl">
               Every day, thousands of kids learn about ICAF from their friends
               or online, helping them see themselves as creative individuals.
@@ -58,27 +58,27 @@ const Impact = () => {
           <div className="grid gap-4 lg:grid-cols-2">
             <div className="order-2 flex flex-col justify-center gap-8 lg:order-1">
               <div className="grid gap-3">
-                <p className="font-montserrat text-2xl font-bold">
+                <h3 className="font-montserrat text-2xl font-bold">
                   5M Children
-                </p>
+                </h3>
                 <p className="text-xl">
                   ICAF has reached more than five million children, encouraging
                   them to create original artworks through our programs.{' '}
                 </p>
               </div>
               <div className="grid gap-3">
-                <p className="font-montserrat text-2xl font-bold">
+                <h3 className="font-montserrat text-2xl font-bold">
                   2.5M Participants
-                </p>
+                </h3>
                 <p className="text-xl">
                   Our festivals and exhibitions have attracted about 2.5 million
                   participants and visitors in major cities worldwide
                 </p>
               </div>
               <div className="grid gap-3">
-                <p className="font-montserrat text-2xl font-bold">
+                <h3 className="font-montserrat text-2xl font-bold">
                   Making People Smile since 1998
-                </p>
+                </h3>
                 <p className="text-xl">
                   Over a million children, parents, teachers, and librarians
                   have enjoyed our quarterly ChildArt magazine since 1998.
@@ -112,9 +112,9 @@ const Impact = () => {
         </div>
         {/* Children's voices section */}
         <div className="flex max-w-screen-2xl flex-col gap-8 overflow-hidden px-8 md:px-12 lg:px-16 xl:px-20">
-          <p className="font-montserrat text-center text-3xl font-extrabold">
+          <h2 className="font-montserrat text-center text-3xl font-extrabold">
             Bringing Children's Voices to the World
-          </p>
+          </h2>
           <ContentCarousel carouselData={ImpactContentCarouselData} />
         </div>
       </div>

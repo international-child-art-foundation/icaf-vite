@@ -17,12 +17,12 @@ export const TeamStaff = ({ staffData }: TeamStaffProps) => {
   return (
     <div className="flex flex-col gap-10">
       <div className="text-center">
-        <p className="font-montserrat text-[40px] font-extrabold">
+        <h2 className="font-montserrat text-[40px] font-extrabold">
           ICAF Leadership
-        </p>
-        <p className="font-sans text-2xl">
+        </h2>
+        <h3 className="font-sans text-2xl">
           Providing vision and expertise to drive ICAF’s mission forward.
-        </p>
+        </h3>
       </div>
 
       <div className={`mx-auto`} style={{ width: areaWidth }}>

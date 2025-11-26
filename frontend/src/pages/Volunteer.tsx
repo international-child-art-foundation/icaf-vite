@@ -15,6 +15,7 @@ export const Volunteer = () => {
         <img
           src={artworkShowcase}
           className="hidden h-full w-full rounded-xl object-cover md:col-span-3 md:block"
+          alt='Artwork depicting the message: "I want to make the world a beautiful place."'
         />
         <div className="relative overflow-hidden rounded-xl md:col-span-7">
           <img src={footerImg} className="object-bottom" />

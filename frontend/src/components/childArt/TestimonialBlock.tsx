@@ -14,14 +14,14 @@ export default function TestimonialBlock() {
         {/* Red block positioned relative to the card */}
         <img
           src={RedBlockSVG}
-          alt="red block"
+          alt=""
           className="absolute left-[-60px] top-[-50px] z-0 w-[360px]"
         />
 
         {/* Yellow block positioned relative to the card */}
         <img
           src={YellowBlockSVG}
-          alt="yellow block"
+          alt=""
           className="absolute bottom-[-60px] right-[-60px] z-0 w-[360px]"
         />
 
@@ -29,21 +29,21 @@ export default function TestimonialBlock() {
         {/* mobile version */}
         <img
           src={ThreeLinesMobile}
-          alt="three lines"
+          alt=""
           className="pointer-events-none absolute left-1/2 top-[40%] z-[-1] block w-[150%] max-w-none -translate-x-1/2 sm:hidden"
         />
 
         {/* default version for tablet & desktop */}
         <img
           src={ThreeLinesDefault}
-          alt="three lines"
+          alt=""
           className="pointer-events-none absolute left-1/2 top-[60%] z-[-1] hidden w-[150%] max-w-none -translate-x-1/2 sm:block xl:hidden"
         />
 
         {/* xl version (≥1536px) */}
         <img
           src={ThreeLines1536}
-          alt="three lines"
+          alt=""
           className="pointer-events-none absolute left-1/2 top-[10%] z-[-1] hidden w-[150%] max-w-none -translate-x-1/2 xl:block"
         />
 

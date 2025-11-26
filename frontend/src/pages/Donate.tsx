@@ -61,9 +61,9 @@ export default function Donate() {
         <div className="mb-6">
           <div className="mt-16">
             <div className="mb-8 text-center">
-              <h3 className="mb-4 text-3xl font-bold text-black md:text-4xl">
+              <h2 className="mb-4 text-3xl font-bold text-black md:text-4xl">
                 Art by the children we serve
-              </h3>
+              </h2>
               <p className="mb-6 text-base text-black">
                 Every piece of art here tells a story of hope and resilience.
                 Here's a glimpse of the talent you're supporting.

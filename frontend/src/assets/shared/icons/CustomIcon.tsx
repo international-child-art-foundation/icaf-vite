@@ -8,6 +8,8 @@ export const CustomIcon = (props: SVGProps<SVGSVGElement>) => (
     viewBox="0 0 108 108"
     width="80"
     height="80"
+    aria-hidden="true"
+    focusable="false"
     {...props}
   >
     <defs>

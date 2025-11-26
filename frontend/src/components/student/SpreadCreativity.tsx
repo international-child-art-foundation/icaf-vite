@@ -24,9 +24,9 @@ export const SpreadCreativity = () => {
         {size.width <= 768 && <CardContentSm />}
       </div>
       <div className="mx-auto flex max-w-[80%] flex-col gap-8">
-        <p className="font-montserrat text-center text-[40px] font-extrabold leading-[48px]">
+        <h2 className="font-montserrat text-center text-[40px] font-extrabold leading-[48px]">
           Ready to Get Creative?
-        </p>
+        </h2>
         <p className="max-w-[800px]">
           Join us and start your journey with ICAF. Whether you're drawing,
           painting, building, or imagining, your creativity has the power to

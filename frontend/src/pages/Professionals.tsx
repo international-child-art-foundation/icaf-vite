@@ -14,7 +14,7 @@ export const Professionals = () => {
         <ProfessionalsHowTo />
         <ContactForm config={contactFormConfigs['professionals']} />{' '}
         <div className="flex w-full justify-center overflow-hidden">
-          <img src={faceCollage} className="w-full min-w-[1000px]" />
+          <img src={faceCollage} className="w-full min-w-[1000px]" alt="" />
         </div>
         <div className="h-8"></div>
       </div>

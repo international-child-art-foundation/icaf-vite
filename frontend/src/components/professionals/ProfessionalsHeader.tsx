@@ -23,7 +23,7 @@ export const ProfessionalsHeader = () => {
     <div className="grid w-full grid-cols-1 grid-rows-1">
       <div className="font-montserrat sm:mt-none z-10 col-start-1 row-start-1 mt-32 flex max-w-screen-2xl flex-col gap-2 p-6 text-3xl font-extrabold text-white sm:gap-4 sm:p-10 sm:px-8 md:mt-8 md:px-12 md:text-4xl lg:mt-28 lg:px-16 lg:text-6xl xl:px-20">
         <div className="font-montserrat block text-[30px] font-extrabold leading-[40px] sm:text-[40px] sm:leading-[50px] md:text-[60px] md:leading-[70px]">
-          <p>Professionals</p>
+          <h1>Professionals</h1>
         </div>
         <p className="font-openSans text-2xl font-normal text-white lg:max-w-[50%] xl:max-w-[38%]">
           Join the children’s movement to democratize creativity and spread

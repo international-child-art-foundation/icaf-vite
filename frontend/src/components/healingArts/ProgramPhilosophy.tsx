@@ -6,9 +6,9 @@ export const ProgramPhilosophy = () => {
     <div>
       <div className="flex flex-col gap-10">
         <div className="flex flex-col gap-2 text-center">
-          <p className="font-montserrat text-2xl font-extrabold md:text-[40px] md:leading-[50px]">
+          <h2 className="font-montserrat text-2xl font-extrabold md:text-[40px] md:leading-[50px]">
             Our Program Philosophy
-          </p>
+          </h2>
           <p className="mx-auto font-sans text-[20px] md:max-w-[700px]">
             We encourage children to be active participants in their recovery,
             rather than passive victims of a disaster. Our program follows these

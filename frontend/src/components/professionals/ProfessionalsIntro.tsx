@@ -2,9 +2,9 @@ export const ProfessionalsIntro = () => {
   return (
     <div>
       <div className="mt-4 flex max-w-screen-2xl flex-col gap-8 px-8 md:px-12 lg:mt-12 lg:px-16 xl:px-20">
-        <p className="font-montserrat text-4xl font-semibold">
+        <h2 className="font-montserrat text-4xl font-semibold">
           Your Influence Can Democratize Creativity
-        </p>
+        </h2>
         <div className="flex flex-col gap-4 lg:text-lg">
           <p>
             {' '}

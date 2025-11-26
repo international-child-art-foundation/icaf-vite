@@ -23,7 +23,7 @@ export const staffData: TStaffData = [
   {
     src: AnaAlberdiImg,
     name: 'Ana Alberdi',
-    title: 'Assitant Editor, ChildArt Magazine',
+    title: 'Assistant Editor, ChildArt Magazine',
     link: 'http://www.linkedin.com/in/ana-alberdi/',
   },
   {

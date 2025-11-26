@@ -12,7 +12,7 @@ export const AidMap = () => {
         <img
           src={isSmall ? WorldMapSmall : WorldMap}
           className="w-full"
-          alt="World Map"
+          alt="World map showing various natural disasters which have associated ICAF programs"
         />
       </div>
     </div>

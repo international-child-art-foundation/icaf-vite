@@ -34,7 +34,7 @@ export const PTAHeader = () => {
         </div>
         <div className="font-montserrat z-10 col-start-1 row-start-1 mt-20 flex max-w-screen-2xl flex-col gap-10 p-6 text-3xl font-extrabold text-white sm:p-10 sm:px-8 md:px-12 md:text-4xl lg:px-16 lg:text-6xl xl:px-20">
           <div className="font-montserrat block text-[30px] font-extrabold leading-[40px] sm:text-[50px] sm:leading-[50px] md:text-[60px] md:leading-[70px]">
-            <p>Peace Through Art</p>
+            <h1>Peace Through Art</h1>
           </div>
           <p className="font-openSans text-xl font-extrabold text-white md:text-[30px] md:leading-[38px] lg:max-w-[50%]">
             "If we are to reach real peace in this world… we shall have to begin

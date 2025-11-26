@@ -1,6 +1,5 @@
 import { IActivityItem } from '@/types/HomeActivities';
 import { CircleArrowUp, CircleArrowDown } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 interface ActivityItemProps {
   item: IActivityItem;
@@ -43,6 +42,7 @@ export const ActivityItem = ({ item, expanded, toggle }: ActivityItemProps) => {
       <img
         className="col-start-1 row-start-1 h-full w-full object-cover"
         src={item.img}
+        alt=""
       />
       <div
         className={`col-start-1 row-start-1 h-full w-full bg-black transition-opacity ${expanded ? 'opacity-40' : 'opacity-0'}`}
@@ -50,11 +50,5 @@ export const ActivityItem = ({ item, expanded, toggle }: ActivityItemProps) => {
     </>
   );
 
-  return item.href ? (
-    <Link {...commonProps} to={item.href}>
-      {content}
-    </Link>
-  ) : (
-    <div {...commonProps}>{content}</div>
-  );
+  return <div {...commonProps}>{content}</div>;
 };

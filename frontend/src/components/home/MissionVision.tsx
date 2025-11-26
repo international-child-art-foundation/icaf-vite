@@ -24,9 +24,9 @@ const MissionVision = () => {
       </picture>
 
       <div className="xl:px-18 lg:gap-18 col-start-1 row-start-1 flex flex-col gap-0 px-6 sm:gap-20 md:gap-6 md:px-10 lg:px-14 xl:gap-20">
-        <h1 className="font-montserrat text-center text-[32px] font-extrabold leading-[40px] text-black lg:text-[40px] lg:leading-[48px]">
+        <h2 className="font-montserrat text-center text-[32px] font-extrabold leading-[40px] text-black lg:text-[40px] lg:leading-[48px]">
           Our Purpose
-        </h1>
+        </h2>
         <div className="mx-auto my-auto flex flex-col items-start overflow-hidden lg:flex-row lg:items-center">
           <div className="flex flex-col gap-8 lg:flex-row lg:gap-10">
             <div className="grid grid-cols-[36px_1fr] grid-rows-[36px_1fr] items-center gap-4 gap-y-2 rounded-lg bg-gradient-to-br from-white/60 via-white/50 to-white/60 p-6 transition-colors hover:bg-white/80 lg:grid lg:flex-row">

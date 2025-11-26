@@ -25,9 +25,9 @@ export const ImpactVideoThreeRows = () => {
         <div className="flex h-auto w-full flex-col justify-between gap-4 overflow-hidden rounded-[20px] bg-[#DFE7F8] p-8 2xl:basis-[30%]">
           <div className="relative flex flex-col gap-10">
             <div className="flex w-full flex-col gap-2">
-              <p className="font-montserrat text-2xl font-bold">
+              <h2 className="font-montserrat text-2xl font-bold">
                 View our impact
-              </p>
+              </h2>
               <p>See how children cope and recover from pain.</p>
             </div>
           </div>
@@ -38,7 +38,7 @@ export const ImpactVideoThreeRows = () => {
             />
           </div>
           <Button size="lg" className="mx-auto self-start rounded-full px-12">
-            <Link to="/gallery" className="font-sans text-xl">
+            <Link to="/gallery" className="font-sans text-lg">
               View art gallery
             </Link>
           </Button>

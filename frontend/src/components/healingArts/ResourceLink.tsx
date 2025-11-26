@@ -26,9 +26,9 @@ export const ResourceLink = ({
     <>
       <div className="border-primary flex w-full flex-row items-center gap-4 rounded-[26px] border-2 p-6">
         <LinkIcon color="#FFB505" className="min-h-6 min-w-6" />
-        <div>
+        <h3>
           <span className="font-bold">{title}</span> <span>({fileType})</span>
-        </div>
+        </h3>
 
         {openAsModal ? (
           <Button

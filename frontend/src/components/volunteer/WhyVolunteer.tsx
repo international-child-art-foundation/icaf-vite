@@ -8,7 +8,7 @@ export const WhyVolunteer = () => {
   return (
     <div className="max-w-screen-2xl px-8 md:pl-12 lg:pl-16 xl:pl-20">
       <div className="flex flex-col gap-8">
-        <p className={sectionTitleClasses}>Join the Team</p>
+        <h2 className={sectionTitleClasses}>Join the Team</h2>
 
         <div className="flex flex-col gap-8 lg:grid lg:grid-cols-2 lg:items-center">
           <div className="flex h-full flex-col lg:pr-8">
@@ -50,7 +50,7 @@ export const WhyVolunteer = () => {
             <img
               src={ClimateFestivalImg}
               className={rightImageClasses}
-              alt="Children collaborating on a mural at the World Children's Festival"
+              alt=""
             />
           </div>
         </div>

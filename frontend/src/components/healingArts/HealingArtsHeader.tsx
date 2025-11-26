@@ -21,8 +21,8 @@ export const HealingArtsHeader = () => {
     <div className="grid w-full grid-cols-1 grid-rows-1">
       <div className="font-montserrat z-10 col-start-1 row-start-1 flex max-w-screen-2xl flex-col gap-2 p-6 text-3xl font-extrabold text-white sm:gap-4 sm:p-10 sm:px-8 md:mt-8 md:px-12 md:text-4xl lg:mt-28 lg:px-16 lg:text-6xl xl:px-20">
         <div className="font-montserrat block text-[30px] font-extrabold leading-[40px] sm:text-[40px] sm:leading-[50px] md:text-[60px] md:leading-[70px]">
-          <p>Healing Arts Programs:</p>
-          <p className="text-tertiary-yellow">Empowering Child Survivors</p>
+          <h1>Healing Arts Programs:</h1>
+          <h2 className="text-tertiary-yellow">Empowering Child Survivors</h2>
         </div>
         <p className="font-openSans text-lg font-normal text-white lg:max-w-[50%]">
           When natural disasters strike, children often suffer in silence. Our

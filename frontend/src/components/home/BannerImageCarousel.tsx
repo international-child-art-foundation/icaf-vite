@@ -30,7 +30,7 @@ export function BannerImageCarousel({
       carousel_height = 500;
       break;
     default:
-      carousel_height = 400;
+      carousel_height = 500;
       break;
   }
 

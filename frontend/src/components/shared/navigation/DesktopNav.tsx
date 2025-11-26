@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ICAFlogo } from '@/assets/shared/logos/ICAFLogo';
 import { NavItem, navItems } from '@/lib/navItems';
 import DesktopNavDropdown from './DesktopNavDropdown';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import DonateButton from '@/components/ui/donateButton';
 
 type DropdownAnimationState = {
@@ -29,9 +29,11 @@ const createInitialDropdownState = (): DropdownStateMap => {
   return state;
 };
 
-const DesktopNav: React.FC = () => {
-  const navigate = useNavigate();
+const isInternalHref = (href: string): boolean => {
+  return href.startsWith('/') && !href.startsWith('//');
+};
 
+const DesktopNav: React.FC = () => {
   const [dropdownState, setDropdownState] = useState<DropdownStateMap>(() =>
     createInitialDropdownState(),
   );
@@ -59,12 +61,6 @@ const DesktopNav: React.FC = () => {
     });
     zCounterRef.current = 1;
   }, []);
-
-  const handleLabelClick = (href: string | undefined) => {
-    if (!href) return;
-    collapseDropdowns();
-    void navigate(href);
-  };
 
   const handleItemHover = (item: NavItem) => {
     const hasChildren = !!item.children && item.children.length > 0;
@@ -189,45 +185,90 @@ const DesktopNav: React.FC = () => {
         <ICAFlogo />
       </Link>
 
-      <div className="flex h-full items-center space-x-6">
-        {navItems.map((item: NavItem) => (
-          <a
-            key={item.key}
-            onMouseEnter={() => handleItemHover(item)}
-            onClick={() => handleLabelClick(item.href)}
-            className={`hover:text-primary group relative text-lg hover:cursor-pointer ${
-              currentItemLabel === item.label ? 'text-primary' : 'text-black'
-            }`}
-          >
-            {item.navLabel}
-            <span className="bg-primary absolute left-1/2 top-7 h-[1px] w-0 -translate-x-1/2 transform transition-all duration-300 ease-in-out group-hover:w-full"></span>
-          </a>
-        ))}
+      <div
+        className="flex h-full items-center space-x-6"
+        aria-label="Main navigation"
+      >
+        {navItems.map((item: NavItem) => {
+          const isActive = currentItemLabel === item.label;
+          const hasHref = !!item.href;
+          const internal = hasHref && isInternalHref(item.href!);
+          const hasChildren = !!item.children && item.children.length > 0;
+          const state = dropdownState[item.label];
 
-        <div onMouseEnter={handleDonateHover}>
+          const expanded = hasChildren && !!state && state.progress > 0;
+
+          const baseClassName = `group relative text-lg hover:cursor-pointer hover:text-primary ${
+            isActive ? 'text-primary' : 'text-black'
+          }`;
+
+          const commonProps = {
+            onMouseEnter: () => handleItemHover(item),
+            onFocus: () => handleItemHover(item),
+            className: baseClassName,
+            'aria-haspopup': hasChildren ? true : undefined,
+            'aria-expanded': expanded,
+          };
+
+          const content = (
+            <>
+              {item.navLabel}
+              <span className="bg-primary absolute left-1/2 top-7 h-[1px] w-0 -translate-x-1/2 transform transition-all duration-300 ease-in-out group-hover:w-full" />
+            </>
+          );
+
+          let trigger: React.ReactNode;
+
+          if (!hasHref) {
+            trigger = (
+              <button
+                type="button"
+                {...commonProps}
+                onClick={collapseDropdowns}
+              >
+                {content}
+              </button>
+            );
+          } else if (internal) {
+            trigger = (
+              <Link
+                to={item.href!}
+                {...commonProps}
+                onClick={collapseDropdowns}
+              >
+                {content}
+              </Link>
+            );
+          } else {
+            trigger = (
+              <a href={item.href} {...commonProps} onClick={collapseDropdowns}>
+                {content}
+              </a>
+            );
+          }
+
+          return (
+            <div key={item.key} className="relative">
+              {trigger}
+              {state && (
+                <DesktopNavDropdown
+                  item={item}
+                  progress={state.progress}
+                  zIndex={state.zIndex}
+                  fadingIn={state.fadingIn}
+                  isOpening={state.isOpening}
+                  openingFromClosed={state.openingFromClosed}
+                  onItemSelected={handleDropdownItemSelected}
+                />
+              )}
+            </div>
+          );
+        })}
+
+        <div onMouseEnter={handleDonateHover} onFocus={handleDonateHover}>
           <DonateButton className="w-32" text="Donate" />
         </div>
       </div>
-
-      <nav className="fixed left-1/2 top-[98px] z-40 w-full -translate-x-1/2 transform overflow-visible 2xl:max-w-screen-2xl">
-        {navItems.map((item: NavItem) => {
-          const state = dropdownState[item.label];
-          if (!state) return null;
-
-          return (
-            <DesktopNavDropdown
-              key={item.key}
-              item={item}
-              progress={state.progress}
-              zIndex={state.zIndex}
-              fadingIn={state.fadingIn}
-              isOpening={state.isOpening}
-              openingFromClosed={state.openingFromClosed}
-              onItemSelected={handleDropdownItemSelected}
-            />
-          );
-        })}
-      </nav>
     </div>
   );
 };

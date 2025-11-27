@@ -1,6 +1,7 @@
 import { AboutGraphic3 } from '@/assets/shared/images/about/AboutGraphic3';
 import { Button } from '../ui/button';
 import DonateButtonPure from '../ui/donateButtonPure';
+import { Link } from 'react-router-dom';
 
 export default function YourDonations() {
   return (
@@ -20,9 +21,11 @@ export default function YourDonations() {
           </p>
           <div className="mt-6 grid grid-cols-2 justify-center gap-2 sm:flex sm:flex-row sm:gap-8 md:justify-start">
             <DonateButtonPure className="h-12 min-w-28 max-w-40 rounded-full font-sans text-base font-semibold lg:h-14 lg:w-36 2xl:text-xl" />
-            <Button className="h-12 min-w-28 max-w-40 rounded-full font-sans text-base lg:h-14 lg:w-36 2xl:text-xl">
-              Contact Us
-            </Button>
+            <Link to="/contact">
+              <Button className="h-12 min-w-28 max-w-40 rounded-full font-sans text-base lg:h-14 lg:w-36 2xl:text-xl">
+                Contact Us
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

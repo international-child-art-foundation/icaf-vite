@@ -1,4 +1,3 @@
-// import { sharedOpenGraph } from '@/data/shared-metadata';
 import NavigationBar from '@/components/shared/NavigationBar';
 import DonateButton from '@/components/ui/donateButton';
 import { CurvedImage } from '@/pages/CurvedImage';
@@ -33,15 +32,14 @@ import { CarouselSharedContent } from '@/components/partners/CarouselSharedConte
 import { useWindowSize } from 'usehooks-ts';
 import { OpinionatedGradients } from '@/data/gradientDefinition';
 import YourDonations from '@/components/shared/YourDonations';
+import { Seo } from '@/components/shared/Seo';
 
-// add metadata
-// export const metadata = {
-//   title: 'Partners | ICAF',
-//   openGraph: {
-//     ...sharedOpenGraph,
-//     title: 'Partners | ICAF',
-//   },
-// };
+const partnersMetadata = {
+  title: 'Partners | ICAF',
+  description:
+    'ICAF partners with organizations worldwide to nurture creativity and empathy in children.',
+  path: '/partners',
+};
 
 const partners: IPartners = [
   {
@@ -181,90 +179,94 @@ export default function Partners() {
   }
 
   return (
-    <div className="mx-auto box-border flex min-h-screen w-full max-w-screen-2xl flex-col px-0">
-      <NavigationBar />
-      <main className="flex-1">
-        {/* First Section */}
-        <div className="relative w-full">
-          <div className="grid grid-cols-1 grid-rows-1">
-            <div className="col-start-1 row-start-1">
-              <CurvedImage
-                src={partnersBackgroundImage}
-                darkened={true}
-                gradientDefinition={gradientDefinition}
-              />
-            </div>
-            <div className="relative z-10 col-start-1 row-start-1">
-              <div className="container mx-auto flex h-full items-start px-8 pt-20 md:items-center md:px-12 md:pt-0 lg:px-16 xl:px-20">
-                <div className="max-w-3xl">
-                  <h1 className="font-montserrat mb-3 text-4xl font-bold text-white md:mb-4 md:text-5xl lg:mb-6 lg:text-6xl xl:text-7xl">
-                    Partners
-                  </h1>
-                  <h2 className="font-montserrat mb-3 text-xl font-light text-white md:mb-4 md:text-2xl lg:mb-6 lg:text-3xl xl:text-4xl">
-                    Inspiring the Next Generation Through Art
-                  </h2>
-                  <p className="mb-4 max-w-2xl font-sans text-base leading-relaxed text-white md:mb-6 md:text-lg lg:mb-10 lg:text-xl">
-                    ICAF partners with organizations worldwide to nurture
-                    creativity and empathy in children. Our collaborations bring
-                    the power of art to young minds, making a global impact.
-                  </p>
-                  <div className="mb-6 flex justify-start sm:mb-8 md:mb-12 lg:mb-16">
-                    <DonateButton text="Donate to our Campaign" />
+    <>
+      <Seo {...partnersMetadata} />
+      <div className="mx-auto box-border flex min-h-screen w-full max-w-screen-2xl flex-col px-0">
+        <NavigationBar />
+        <main className="flex-1">
+          {/* First Section */}
+          <div className="relative w-full">
+            <div className="grid grid-cols-1 grid-rows-1">
+              <div className="col-start-1 row-start-1">
+                <CurvedImage
+                  src={partnersBackgroundImage}
+                  darkened={true}
+                  gradientDefinition={gradientDefinition}
+                />
+              </div>
+              <div className="relative z-10 col-start-1 row-start-1">
+                <div className="container mx-auto flex h-full items-start px-8 pt-20 md:items-center md:px-12 md:pt-0 lg:px-16 xl:px-20">
+                  <div className="max-w-3xl">
+                    <h1 className="font-montserrat mb-3 text-4xl font-bold text-white md:mb-4 md:text-5xl lg:mb-6 lg:text-6xl xl:text-7xl">
+                      Partners
+                    </h1>
+                    <h2 className="font-montserrat mb-3 text-xl font-light text-white md:mb-4 md:text-2xl lg:mb-6 lg:text-3xl xl:text-4xl">
+                      Inspiring the Next Generation Through Art
+                    </h2>
+                    <p className="mb-4 max-w-2xl font-sans text-base leading-relaxed text-white md:mb-6 md:text-lg lg:mb-10 lg:text-xl">
+                      ICAF partners with organizations worldwide to nurture
+                      creativity and empathy in children. Our collaborations
+                      bring the power of art to young minds, making a global
+                      impact.
+                    </p>
+                    <div className="mb-6 flex justify-start sm:mb-8 lg:mb-16">
+                      <DonateButton text="Donate to our Campaign" />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Global Partnerships Section */}
-        <section className="py-16">
-          <div className="mx-auto max-w-screen-2xl px-8 md:px-12 lg:px-16 xl:px-20">
-            <h2 className="font-montserrat mb-12 text-center text-3xl font-bold md:text-4xl">
-              Our Global Partnerships
-            </h2>
-            <p className="mb-12 font-sans text-lg leading-relaxed">
-              ICAF collaborates on occasion with a diverse range of partners
-              across nearly 100 countries to inspire and empower children
-              through art and creativity. In the United States, we work closely
-              with schools and after-school programs to reach young minds
-              directly. Our partnerships play a vital role in our mission to
-              nurture creativity and empathy in children worldwide through the
-              powers of art (and sports).
-            </p>
+          {/* Global Partnerships Section */}
+          <section className="py-16">
+            <div className="mx-auto flex max-w-screen-2xl flex-col gap-8 px-8 md:px-12 lg:gap-12 lg:px-16 xl:px-20">
+              <h2 className="font-montserrat text-center text-3xl font-bold md:text-4xl">
+                Our Global Partnerships
+              </h2>
+              <p className="font-sans text-lg leading-relaxed">
+                ICAF collaborates on occasion with a diverse range of partners
+                across nearly 100 countries to inspire and empower children
+                through art and creativity. In the United States, we work
+                closely with schools and after-school programs to reach young
+                minds directly. Our partnerships play a vital role in our
+                mission to nurture creativity and empathy in children worldwide
+                through the powers of art (and sports).
+              </p>
 
-            {/* Partners Carousel Component */}
-            <Carousel setApi={setCarouselApi} opts={{ loop: true }}>
-              <CarouselContent>
-                {partners.map((partner, index) => {
-                  return (
-                    <CarouselItem
-                      className="basis-2/3 md:basis-1/2 lg:basis-1/4"
-                      key={partner.name}
-                    >
-                      <PartnerItem
-                        partner={partner}
-                        index={index}
-                        activeCarouselIndex={currentPartner}
-                        carouselLength={partners.length}
-                        scrollToPartner={scrollToPartner}
-                      />
-                    </CarouselItem>
-                  );
-                })}
-              </CarouselContent>
-              <CarouselSharedContent
-                partners={partners}
-                activeIndex={currentPartner}
-                scrollToPartner={scrollToPartner}
-              />
-            </Carousel>
-          </div>
-        </section>
+              {/* Partners Carousel Component */}
+              <Carousel setApi={setCarouselApi} opts={{ loop: true }}>
+                <CarouselContent>
+                  {partners.map((partner, index) => {
+                    return (
+                      <CarouselItem
+                        className="basis-2/3 md:basis-1/2 lg:basis-1/4"
+                        key={partner.name}
+                      >
+                        <PartnerItem
+                          partner={partner}
+                          index={index}
+                          activeCarouselIndex={currentPartner}
+                          carouselLength={partners.length}
+                          scrollToPartner={scrollToPartner}
+                        />
+                      </CarouselItem>
+                    );
+                  })}
+                </CarouselContent>
+                <CarouselSharedContent
+                  partners={partners}
+                  activeIndex={currentPartner}
+                  scrollToPartner={scrollToPartner}
+                />
+              </Carousel>
+            </div>
+          </section>
 
-        {/* Donation CTA Section */}
-        <YourDonations />
-      </main>
-    </div>
+          {/* Donation CTA Section */}
+          <YourDonations />
+        </main>
+      </div>
+    </>
   );
 }

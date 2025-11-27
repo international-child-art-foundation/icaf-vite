@@ -14,12 +14,12 @@ export const FutureWithoutHate = () => {
           />
         </div>
         <div className="col-start-1 row-start-1 mt-48 flex select-none justify-center md:mt-80">
-          <img src={threeLines} className="object-cover"></img>
+          <img src={threeLines} className="object-cover" alt=""></img>
         </div>
         <div className="col-start-1 row-start-1 flex h-full w-full flex-col justify-center gap-6 text-center">
-          <p className="font-montserrat text-[40px] font-extrabold">
+          <h2 className="font-montserrat text-[40px] font-extrabold">
             A Future Without Hate
-          </p>
+          </h2>
           <p className="">
             ICAF’s <span className="font-bold"> Peace Through Art </span>
             programs are designed to:

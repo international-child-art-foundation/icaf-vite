@@ -8,11 +8,12 @@ const WhatWeDo = () => {
       <img
         src={redBlueFirework}
         className="absolute -top-32 hidden w-32 sm:left-8 sm:block md:left-24 md:w-48 lg:left-48 xl:-top-24 xl:left-[300px]"
+        alt=""
       />
       <div className="z-10 flex flex-col items-center gap-6 p-6 pt-0 lg:gap-10 lg:p-10 lg:py-[50px]">
-        <h1 className="font-montserrat text-[32px] font-extrabold leading-6 text-black lg:text-[40px]">
+        <h2 className="font-montserrat text-[32px] font-extrabold leading-6 text-black lg:text-[40px]">
           What we do
-        </h1>
+        </h2>
         <p className="font-sans text-xl font-normal text-black lg:text-center">
           ICAF empowers children by seeding their imagination, cultivating
           creativity, and growing mutual empathy as building blocks for a more
@@ -27,7 +28,7 @@ const WhatWeDo = () => {
             <img
               src={soccer}
               className="h-[272px] w-[223px] lg:h-[204px] lg:w-[167px]"
-              alt="Soccer Kids"
+              alt=""
               loading="lazy"
             />
             <div className="flex flex-row gap-7 lg:flex-col lg:items-center lg:gap-2">
@@ -44,7 +45,7 @@ const WhatWeDo = () => {
             <img
               src={globeKids}
               className="h-[184px] w-[223px] lg:h-[204px] lg:w-[248px]"
-              alt="Soccer Kids"
+              alt=""
               loading="lazy"
             />
             <div className="flex flex-row gap-7 lg:flex-col lg:items-center lg:gap-2">

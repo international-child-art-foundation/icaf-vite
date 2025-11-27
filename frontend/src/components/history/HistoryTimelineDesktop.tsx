@@ -54,6 +54,7 @@ export const HistoryTimelineDesktop = () => {
         <img
           src={threeLines}
           className="absolute w-full object-cover md:-bottom-80 xl:-bottom-96"
+          alt=""
         />
       </div>
     </div>

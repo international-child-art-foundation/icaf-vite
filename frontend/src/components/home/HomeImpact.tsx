@@ -10,11 +10,12 @@ export const HomeImpact = () => {
       <img
         src={RedFirework}
         className="absolute -top-16 right-4 hidden h-auto w-16 md:block md:w-32 lg:w-48"
+        alt=""
       />
       <div className="flex flex-col gap-7">
-        <p className="font-montserrat text-center text-[2rem] font-extrabold xl:text-[40px]">
+        <h2 className="font-montserrat text-center text-[2rem] font-extrabold xl:text-[40px]">
           Educational & Cultural Impact
-        </p>
+        </h2>
         <p className="font-sans text-base md:text-center xl:text-2xl">
           ICAF serves American children as their national art and creativity
           organization and the world’s children as their global art and

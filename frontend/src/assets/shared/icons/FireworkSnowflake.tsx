@@ -18,6 +18,8 @@ export const FireworkSnowflake = ({
       viewBox="0 0 169 169"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      focusable="false"
       className={`${colorClass} ${className}`}
     >
       <g opacity="0.4">

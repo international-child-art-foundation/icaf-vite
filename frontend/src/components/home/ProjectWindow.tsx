@@ -16,6 +16,7 @@ export const ProjectWindow = ({ windowData }: ProjectWindowProps) => {
           <img
             src={windowData.image}
             className="scale-100 transition-transform duration-300 ease-out group-hover:scale-[1.1]"
+            alt=""
           />
         </div>
         <div
@@ -33,7 +34,7 @@ export const ProjectWindow = ({ windowData }: ProjectWindowProps) => {
               className="mx-auto flex cursor-pointer select-none gap-1"
             >
               <p>Go to Website</p>
-              <img className="cursor-pointer" src={outbound} />
+              <img alt="" className="cursor-pointer" src={outbound} />
             </a>
           ) : (
             <p>Coming soon</p>

@@ -4,18 +4,28 @@ import { StudentCreativity } from '@/components/student/StudentCreativity';
 import { StudentEmpathyTeamwork } from '@/components/student/StudentEmpathyTeamwork';
 import { JoinTheFun } from '@/components/student/JoinTheFun';
 import { SpreadCreativity } from '@/components/student/SpreadCreativity';
+import { Seo } from '@/components/shared/Seo';
+
+const studentMetadata = {
+  title: 'Student | ICAF',
+  description: 'Bring your ideas to life by joining ICAF’s creative programs.',
+  path: '/get-involved/student',
+};
 
 export const Student = () => {
   return (
-    <div>
-      <StudentHeader />
-      <div className="flex max-w-screen-2xl flex-col gap-12 px-8 md:px-12 lg:px-16 xl:px-20">
-        <StudentCreativity />
-        <StudentEmpathyTeamwork />
+    <>
+      <Seo {...studentMetadata} />
+      <div>
+        <StudentHeader />
+        <div className="flex max-w-screen-2xl flex-col gap-12 px-8 md:px-12 lg:px-16 xl:px-20">
+          <StudentCreativity />
+          <StudentEmpathyTeamwork />
+        </div>
+        <JoinTheFun />
+        <SpreadCreativity />
+        <YourDonations />
       </div>
-      <JoinTheFun />
-      <SpreadCreativity />
-      <YourDonations />
-    </div>
+    </>
   );
 };

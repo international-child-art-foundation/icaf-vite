@@ -32,7 +32,7 @@ export const HistoryHeader = () => {
         <div className="container mx-auto flex h-full items-start px-8 pt-20 md:items-center md:px-12 md:pt-0 lg:px-16 xl:px-20">
           <div className="text-white">
             <h1 className="font-montserrat mb-3 text-4xl font-bold md:mb-4 md:text-5xl lg:mb-6 lg:text-6xl xl:text-7xl">
-              <span className="">Our History </span>
+              Our History
             </h1>
             <p className="mb-6 max-w-2xl font-sans text-base leading-relaxed md:text-lg lg:text-xl">
               Since its founding in 1997, the International Child Art Foundation

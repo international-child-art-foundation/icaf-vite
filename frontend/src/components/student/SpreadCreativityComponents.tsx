@@ -5,9 +5,9 @@ import { HeartIcon } from '@/assets/shared/icons/HeartIcon';
 
 const Title = () => {
   return (
-    <p className="font-montserrat text-[36px] font-extrabold">
+    <h2 className="font-montserrat text-[36px] font-extrabold">
       Help Us Spread Creativity!
-    </p>
+    </h2>
   );
 };
 

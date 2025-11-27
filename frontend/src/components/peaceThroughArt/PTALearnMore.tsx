@@ -6,7 +6,9 @@ export const PTALearnMore = () => {
   return (
     <div className="max-w-screen-2xl px-8 py-16 sm:pt-32 md:px-12 lg:px-16 lg:pt-32 xl:px-20 xl:pt-12">
       <div className="flex flex-col gap-4 rounded-[20px] bg-[#FFF2D9] p-8 py-12">
-        <p className="font-montserrat text-[40px] font-extrabold">Learn More</p>
+        <h2 className="font-montserrat text-[40px] font-extrabold">
+          Learn More
+        </h2>
         <div className="font-open-sans flex flex-col gap-2 text-[24px]">
           {PTALearnMoreData.map((learnMoreItem) =>
             learnMoreItem.link ? (
@@ -41,7 +43,7 @@ export const PTALearnMore = () => {
         <Link to={'/volunteer'} className="z-20 my-2 cursor-pointer">
           <Button variant="secondary" className="mx-auto rounded-full">
             <div className="flex items-center gap-2 leading-none">
-              <p className="text-lg">Get Involved</p>
+              <p className="px-6 text-xl">Get Involved</p>
             </div>
           </Button>
         </Link>

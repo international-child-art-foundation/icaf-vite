@@ -8,7 +8,6 @@ export const bannerItems: BannerItem[] = [
   {
     id: 'waving_flag',
     src: BannerImage1,
-    bannerText: 'INTERNATIONAL CHILD ART FOUNDATION',
     bannerColor: 'red',
     objectFit: 'cover',
     objectPosition: 'object-[65%_35%]',
@@ -16,7 +15,6 @@ export const bannerItems: BannerItem[] = [
   {
     id: 'flags',
     src: BannerImage2,
-    bannerText: 'INTERNATIONAL CHILD ART FOUNDATION',
     bannerColor: 'blue',
     objectFit: 'cover',
     objectPosition: 'object-bottom',
@@ -24,7 +22,6 @@ export const bannerItems: BannerItem[] = [
   {
     id: 'fingerpainting',
     src: BannerImage3,
-    bannerText: 'INTERNATIONAL CHILD ART FOUNDATION',
     bannerColor: 'red',
     objectFit: 'cover',
     objectPosition: 'object-bottom',
@@ -32,7 +29,6 @@ export const bannerItems: BannerItem[] = [
   {
     id: 'wcf',
     src: BannerImage4,
-    bannerText: 'INTERNATIONAL CHILD ART FOUNDATION',
     bannerColor: 'blue',
     objectFit: 'cover',
     objectPosition: 'object-bottom',

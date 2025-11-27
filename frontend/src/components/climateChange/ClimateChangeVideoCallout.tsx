@@ -24,7 +24,7 @@ export const ClimateChangeVideoCallout = ({
       <div
         className={` ${side === 'left' ? 'lg:order-2' : 'lg:order-1'} relative order-2 flex h-full flex-col gap-4 p-8 pt-0 sm:p-0`}
       >
-        <p className="font-montserrat text-2xl font-semibold">{title}</p>
+        <h3 className="font-montserrat text-2xl font-semibold">{title}</h3>
 
         <div className="flex flex-1 items-center">
           <p className="text-lg">{description}</p>

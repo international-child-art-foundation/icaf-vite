@@ -6,20 +6,31 @@ import { BrandImpact } from '@/components/sponsorship/BrandImpact';
 import { SponsorshipCTA } from '@/components/sponsorship/SponsorshipCTA';
 import { PartnerTestimonialCarousel } from '@/components/sponsorship/PartnerTestimonialCarousel';
 import YourDonations from '@/components/shared/YourDonations';
+import { Seo } from '@/components/shared/Seo';
+
+const sponsorshipMetadata = {
+  title: 'Sponsorship | ICAF',
+  description:
+    'Join ICAF in uplifting children’s creativity while strengthening your organization’s presence as a champion of young people',
+  path: '/sponsorship',
+};
 
 export const Sponsorship = () => {
   return (
-    <div>
-      <SponsorshipHeader />
-      <div className="flex flex-col gap-16">
-        <WhyPartner />
-        <SponsorImpact />
-        <SponsorBrandCarousel />
-        <BrandImpact />
-        <SponsorshipCTA />
-        <PartnerTestimonialCarousel />
-        <YourDonations />
+    <>
+      <Seo {...sponsorshipMetadata} />
+      <div>
+        <SponsorshipHeader />
+        <div className="flex flex-col gap-16">
+          <WhyPartner />
+          <SponsorImpact />
+          <SponsorBrandCarousel />
+          <BrandImpact />
+          <SponsorshipCTA />
+          <PartnerTestimonialCarousel />
+          <YourDonations />
+        </div>
       </div>
-    </div>
+    </>
   );
 };

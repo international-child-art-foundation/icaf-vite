@@ -1,4 +1,7 @@
+// TODO: replace site URL on publish
+export const SITE_URL = 'https://revise.icaf.org';
+
 export const sharedOpenGraph = {
-  description: '',
-  images: [],
+  siteName: 'International Child Art Foundation',
+  defaultImage: `${SITE_URL}/og-image.png`,
 };

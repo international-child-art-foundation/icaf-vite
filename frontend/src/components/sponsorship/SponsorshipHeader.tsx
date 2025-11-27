@@ -32,9 +32,9 @@ export const SponsorshipHeader = () => {
         />
       </div>
       <div className="z-10 col-start-1 row-start-1 mb-20 flex items-center justify-self-center">
-        <p className="text-center text-[40px] font-extrabold text-white sm:text-[60px]">
+        <h1 className="text-center text-[40px] font-extrabold text-white sm:text-[60px]">
           Sponsorship
-        </p>
+        </h1>
       </div>
     </div>
   );

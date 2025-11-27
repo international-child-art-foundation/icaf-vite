@@ -8,9 +8,9 @@ export const JoinTheFun = () => {
   return (
     <div className="my-24 mb-16 md:my-32">
       <div className="mx-auto flex flex-col gap-10 px-8">
-        <p className="font-montserrat text-center text-[40px] font-extrabold leading-[48px]">
+        <h2 className="font-montserrat text-center text-[40px] font-extrabold leading-[48px]">
           Join the Fun with ICAF!
-        </p>
+        </h2>
         <div className="mx-auto grid w-full grid-cols-1 grid-rows-3 gap-11 xl:grid-cols-3 xl:grid-rows-1">
           {studentParticipationItems.map((item) => (
             <div
@@ -23,14 +23,14 @@ export const JoinTheFun = () => {
                 >
                   <img src={item.imgSrc} className="h-13 m-auto w-auto" />
                 </div>
-                <p className="font-montserrat text-center text-[24px] font-semibold leading-[39px] md:text-[31px] lg:text-left">
+                <h3 className="font-montserrat text-center text-[24px] font-semibold leading-[39px] md:text-[31px] lg:text-left">
                   {item.title}
-                </p>
-                <p
+                </h3>
+                <h4
                   className={`font-montserrat text-center text-[24px] font-bold leading-[32px] ${FlairColorMap[item.color].icon} `}
                 >
                   {item.forAges}
-                </p>
+                </h4>
                 <p className="font-montserrat text-xl font-normal">
                   {item.bodyText1}
                 </p>

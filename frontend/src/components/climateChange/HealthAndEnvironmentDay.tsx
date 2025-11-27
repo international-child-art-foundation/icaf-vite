@@ -9,9 +9,9 @@ export const HealthAndEnvironmentDay = () => {
   return (
     <div>
       <div className="flex flex-col gap-8">
-        <p className={sectionTitleClasses}>
+        <h2 className={sectionTitleClasses}>
           A Festival for Creativity, Empathy, and Unity
-        </p>
+        </h2>
 
         <div className="flex flex-col gap-8 lg:grid lg:grid-cols-2 lg:items-center">
           <div className="flex h-full flex-col lg:pr-8">
@@ -35,7 +35,9 @@ export const HealthAndEnvironmentDay = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Button>Visit the Festival Website</Button>
+                <Button className="px-6 text-lg">
+                  Visit the Festival Website
+                </Button>
               </a>
             </div>
           </div>

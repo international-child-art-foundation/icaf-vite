@@ -4,7 +4,15 @@ import { TeamStaff } from '@/components/team/TeamStaff';
 import { Creativity } from '@/components/team/Creativity';
 import { ScrollToTop } from '@/components/team/ScrollToTop';
 import { useRef } from 'react';
-import { TeamExtendedStaff } from './TeamExtendedStaff';
+import { TeamExtendedStaff } from '../components/team/TeamExtendedStaff';
+import { Seo } from '@/components/shared/Seo';
+
+const teamMetadata = {
+  title: 'Team | ICAF',
+  description:
+    'ICAF’s team is a dedicated group of creatives, educators, and professionals working together to help young artists express their imagination.',
+  path: '/about/team',
+};
 
 export const Team = () => {
   const HEADER_OFFSET = 110;
@@ -22,20 +30,23 @@ export const Team = () => {
   };
 
   return (
-    <div className="flex flex-col">
-      <TeamHeader scrollFunction={scrollToSection} />
-      <div
-        ref={staffRef}
-        className="flex max-w-screen-2xl flex-col gap-16 px-8 md:px-12 lg:px-16 xl:px-20"
-      >
-        <TeamStaff staffData={staffData} />
-        <TeamExtendedStaff />
-        <Creativity />
-        <ScrollToTop
-          scrollFunction={scrollToSection}
-          flairColor={'primaryBlue'}
-        />
+    <>
+      <Seo {...teamMetadata} />
+      <div className="flex flex-col">
+        <TeamHeader scrollFunction={scrollToSection} />
+        <div
+          ref={staffRef}
+          className="flex max-w-screen-2xl flex-col gap-16 px-8 md:px-12 lg:px-16 xl:px-20"
+        >
+          <TeamStaff staffData={staffData} />
+          <TeamExtendedStaff />
+          <Creativity />
+          <ScrollToTop
+            scrollFunction={scrollToSection}
+            flairColor={'primaryBlue'}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 };

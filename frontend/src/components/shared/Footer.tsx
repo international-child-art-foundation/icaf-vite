@@ -14,32 +14,32 @@ import { useState } from 'react';
 const icons = [
   {
     SVGcomponent: FacebookIcon,
-    altText: "Visit the International Child Art Foundation's Facebook page",
+    altText: 'Facebook link',
     href: 'https://www.facebook.com/ICAF.org',
   },
   {
     SVGcomponent: InstagramIcon,
-    altText: "Visit the International Child Art Foundation's Instagram page",
+    altText: 'Instagram link',
     href: 'https://www.instagram.com/intlchildartfoundation/',
   },
   {
     SVGcomponent: YoutubeIcon,
-    altText: "Visit the International Child Art Foundation's Youtube page",
+    altText: 'Youtube link',
     href: 'https://www.youtube.com/channel/UCvvipwdFEaNnTSv0EIhznaQ',
   },
   {
     SVGcomponent: TwitterIcon,
-    altText: "Visit the International Child Art Foundation's Twitter page",
+    altText: 'Twitter link',
     href: 'https://www.twitter.com/ICAF_org',
   },
   {
     SVGcomponent: PinterestIcon,
-    altText: "Visit the International Child Art Foundation's Pinterest page",
+    altText: 'Pinterest link',
     href: 'https://www.pinterest.com/icaf/',
   },
   {
     SVGcomponent: LinkedinIcon,
-    altText: "Visit the International Child Art Foundation's Linkedin page",
+    altText: 'Linkedin link',
     href: 'https://www.linkedin.com/company/international-child-art-foundation',
   },
 ];

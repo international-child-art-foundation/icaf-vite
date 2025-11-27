@@ -53,7 +53,7 @@ export const BannerImage = ({ data, height = 550 }: BannerImageProps) => {
   const textPathId = `${baseId}-text-path-${textEdge}`;
   const textPathNormalized = ribbonPaths.PeakValley.topText;
 
-  const baseText = data.bannerText || '';
+  const baseText = data.bannerText || 'INTERNATIONAL CHILD ART FOUNDATION';
   const separator = ' \u2022 ';
   const repeats = 50;
   const repeatedText = Array.from({ length: repeats })
@@ -137,7 +137,7 @@ export const BannerImage = ({ data, height = 550 }: BannerImageProps) => {
 
         {hasText && textPathScaled && (
           <svg
-            className="pointer-events-none z-20 col-start-1 row-start-1 mt-1 md:mt-0 lg:-mt-1"
+            className="pointer-events-none z-20 col-start-1 row-start-1 mt-[3px] md:mt-[2px] lg:-mt-1"
             width="100%"
             height={effectiveHeight}
             viewBox={`0 0 ${containerWidth} ${effectiveHeight}`}

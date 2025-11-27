@@ -65,7 +65,11 @@ export const HomeCarousel = () => {
                   className="basis-full pl-4 sm:basis-1/2 lg:basis-1/3 xl:basis-[25%]"
                 >
                   <div className="w-full overflow-hidden rounded-md shadow-md">
-                    <img src={cover.image} className="w-full object-cover" />
+                    <img
+                      src={cover.image}
+                      className="w-full object-cover"
+                      alt=""
+                    />
                   </div>
                 </CarouselItem>
               ))}

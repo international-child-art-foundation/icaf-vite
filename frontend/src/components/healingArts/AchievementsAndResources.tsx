@@ -6,9 +6,9 @@ export const AchievementsAndResources = () => {
   return (
     <div className="flex flex-col gap-10">
       <div className="text-center">
-        <p className="font-montserrat text-[40px] font-extrabold">
+        <h2 className="font-montserrat text-[40px] font-extrabold">
           What We've Achieved
-        </p>
+        </h2>
         <p className="font-sans text-xl">
           See the outcomes of some of our initiatives.
         </p>

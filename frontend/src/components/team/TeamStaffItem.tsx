@@ -17,6 +17,7 @@ export const TeamStaffItem = ({ data, height, width }: TeamStaffItem) => {
           <img
             src={data.src}
             className="h-full w-full rounded-3xl object-cover"
+            alt=""
           />
         </div>
       ) : (

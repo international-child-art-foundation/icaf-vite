@@ -21,7 +21,7 @@ const AccordionCard = ({ data }: MissionDropdownProps) => {
       <div className="grid-col grid h-full flex-col justify-items-center gap-2">
         <data.Icon colorClass={iconColor} />
         <div className="min-h-[50px] content-center">
-          <p className="text-center text-xl font-semibold">{data.title}</p>
+          <h4 className="text-center text-xl font-semibold">{data.title}</h4>
         </div>
         <div
           className={`grid transition-all duration-500 ${open ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'}`}

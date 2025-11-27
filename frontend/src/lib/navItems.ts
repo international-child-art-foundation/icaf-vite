@@ -18,7 +18,7 @@ export interface NavChild {
   label: string;
   href: string;
   imageSrc: string;
-  alt: string;
+  alt?: string;
   external?: boolean;
   hoverDescription: string;
 }
@@ -42,21 +42,18 @@ export const navItems: NavItem[] = [
         label: 'History',
         href: '/about/history',
         imageSrc: history,
-        alt: 'Our history',
         hoverDescription: "Learn about ICAF's history, see where it all began.",
       },
       {
         label: 'Team',
         href: '/about/team',
         imageSrc: team,
-        alt: 'Our team',
         hoverDescription: 'Learn about the people that work in ICAF.',
       },
       {
         label: 'Partners',
         href: '/about/partners',
         imageSrc: partner,
-        alt: 'Our partners',
         hoverDescription:
           'List of organizations and companies ICAF works with.',
       },
@@ -64,7 +61,6 @@ export const navItems: NavItem[] = [
         label: 'Impact',
         href: '/about/impact',
         imageSrc: impact,
-        alt: 'Our partners',
         hoverDescription:
           'List of organizations and companies ICAF works with.',
       },
@@ -79,42 +75,36 @@ export const navItems: NavItem[] = [
         label: 'Arts Olympiad',
         href: '/programs/arts-olympiad',
         imageSrc: theArtOlypiad,
-        alt: 'The Art Olympiad gallery',
         hoverDescription: '',
       },
       {
         label: 'ChildArt Magazine',
         href: '/programs/childart-magazine',
         imageSrc: childArt,
-        alt: 'Child Art Magazine',
         hoverDescription: '',
       },
       {
         label: "World Children's Festival",
         href: '/programs/world-childrens-festival',
         imageSrc: world,
-        alt: "World Children's Festival",
         hoverDescription: '',
       },
       {
         label: 'Peace Through Art',
         href: '/programs/peace-through-art',
         imageSrc: peace,
-        alt: 'Peace',
         hoverDescription: '',
       },
       {
         label: 'Climate Change',
         href: '/programs/climate-change',
         imageSrc: climate,
-        alt: 'Climate Change',
         hoverDescription: '',
       },
       {
         label: 'Healing Arts Program',
         href: '/programs/healing-arts',
         imageSrc: healing,
-        alt: 'healing',
         hoverDescription: '',
       },
     ],
@@ -128,21 +118,18 @@ export const navItems: NavItem[] = [
         label: 'Volunteer',
         href: '/get-involved/volunteer',
         imageSrc: volunteer,
-        alt: 'Volunteer with us',
         hoverDescription: 'Help ICAF achieve its vision.',
       },
       {
         label: 'Profesionals',
         href: '/get-involved/professionals',
         imageSrc: professional,
-        alt: 'Get Involved: Professional',
         hoverDescription: 'Collaborate professionally with ICAF.',
       },
       {
         label: 'Student',
         href: '/get-involved/student',
         imageSrc: student,
-        alt: 'Get Involved: Student',
         hoverDescription: 'Express your creativity through ICAF initiatives.',
       },
       // {
@@ -163,7 +150,6 @@ export const navItems: NavItem[] = [
         label: 'Latest News',
         href: '/news-events/news',
         imageSrc: latest,
-        alt: 'Latest news',
         hoverDescription: "See ICAF's recent activity.",
       },
       {
@@ -171,7 +157,6 @@ export const navItems: NavItem[] = [
         href: 'https://worldchildrensfestival.org/',
         external: true,
         imageSrc: upcoming,
-        alt: 'Upcoming events',
         hoverDescription: 'See what ICAF has planned for the future.',
       },
     ],

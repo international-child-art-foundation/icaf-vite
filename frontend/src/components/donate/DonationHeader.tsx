@@ -16,7 +16,7 @@ export const DonationHeader = () => {
           <DonationHeaderContent />
         </div>
 
-        <div className="mx-auto max-w-md md:row-start-2 md:mt-32 lg:row-start-1 lg:mt-0">
+        <div className="mx-auto -mt-12 max-w-md md:row-start-2 md:mt-32 lg:row-start-1 lg:mt-0">
           <DonationForm whiteBackdrop={size.width < 1024 && size.width > 768} />
         </div>
       </div>

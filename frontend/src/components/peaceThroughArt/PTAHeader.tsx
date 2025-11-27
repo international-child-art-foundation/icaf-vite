@@ -9,7 +9,7 @@ export const PTAHeader = () => {
   const gradientLG =
     'bg-[linear-gradient(to_right,rgba(0,0,0,0.75)_0%,rgba(0,0,0,0.5)_50%,rgba(0,0,0,0.15)_70%,rgba(255,255,255,0.15)_100%)]';
   const gradientMD =
-    'bg-gradient-to-r from-black/80 from-0% via-black/40 via-[60%] to-white/20 to-100%';
+    'bg-gradient-to-r from-black/80 from-0% via-black/40 via-[60%] to-black/30 to-100%';
   const gradientSM = 'bg-black/70';
 
   let gradientDefinition;
@@ -32,14 +32,17 @@ export const PTAHeader = () => {
             gradientDefinition={gradientDefinition}
           />
         </div>
-        <div className="font-montserrat z-10 col-start-1 row-start-1 mt-20 flex max-w-screen-2xl flex-col gap-10 p-6 text-3xl font-extrabold text-white sm:p-10 sm:px-8 md:px-12 md:text-4xl lg:px-16 lg:text-6xl xl:px-20">
-          <div className="font-montserrat block text-[30px] font-extrabold leading-[40px] sm:text-[50px] sm:leading-[50px] md:text-[60px] md:leading-[70px]">
-            <p>Peace Through Art</p>
+        <div className="font-montserrat z-10 col-start-1 row-start-1 mt-20 flex max-w-screen-2xl flex-col gap-10 p-6 text-3xl font-extrabold text-white sm:p-10 sm:px-8 md:px-12 md:text-4xl lg:mt-4 lg:max-w-[55%] lg:px-16 lg:text-6xl xl:mt-12 xl:px-20">
+          <div className="font-montserrat block text-4xl font-extrabold sm:text-[50px] sm:leading-[50px] md:text-[60px] md:leading-[70px]">
+            <h1>Peace Through Art</h1>
           </div>
-          <p className="font-openSans text-xl font-extrabold text-white md:text-[30px] md:leading-[38px] lg:max-w-[50%]">
-            "If we are to reach real peace in this world… we shall have to begin
-            with children." - Mahatma Gandhi{' '}
-          </p>
+          <div>
+            <p className="font-openSans text-xl font-bold text-white md:text-[30px] md:leading-[38px]">
+              "If we are to reach real peace in this world… we shall have to
+              begin with children."
+            </p>
+            <p className="text-right text-xl italic">- Mahatma Gandhi </p>
+          </div>
         </div>
       </div>
     </div>

@@ -36,9 +36,9 @@ export const YoungArtistCarousel = () => {
       </div>
 
       <div className="z-10 col-start-1 row-start-1 flex flex-col justify-center gap-4 px-4 py-8 md:mt-12 xl:mt-0">
-        <p className="font-montserrat text-center text-[40px] font-extrabold leading-[48px]">
+        <h2 className="font-montserrat text-center text-[40px] font-extrabold leading-[48px]">
           Inspiring Young Artists
-        </p>
+        </h2>
         <p className="text-center">Their art speaks louder than words.</p>
 
         <Carousel
@@ -67,10 +67,12 @@ export const YoungArtistCarousel = () => {
                 <div className="relative h-full w-full overflow-hidden">
                   <img
                     src={artwork.imgSrc}
-                    alt={artwork.label}
+                    alt=""
                     className="h-[200px] w-full rounded-[20px] object-cover shadow-sm sm:h-[300px] md:h-[420px] lg:h-[480px]"
                   />
-                  <p className="mt-2 text-center font-bold">{artwork.label}</p>
+                  <h3 className="mt-2 text-center font-bold">
+                    {artwork.label}
+                  </h3>
                 </div>
               </CarouselItem>
             ))}

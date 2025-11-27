@@ -68,7 +68,7 @@ export function BannerImageCarousel({
         </div>
       ))}
 
-      <span className="sr-only" aria-live="polite">
+      <span className="sr-only">
         Slide {index + 1} of {items.length}
       </span>
     </div>

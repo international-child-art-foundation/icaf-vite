@@ -26,7 +26,7 @@ export const DonationHeaderContent = () => {
         >
           <img
             src={TransparencyLogo}
-            alt="Transparent Logo"
+            alt="Candid's Platinum Seal of Transparency, 2025"
             className="h-20 w-auto md:h-20"
           />
         </a>

@@ -5,9 +5,9 @@ export const UrgencyOfPeace = () => {
   return (
     <div className="flex flex-col xl:px-24">
       <div className="z-20 flex flex-col items-center gap-10 text-center">
-        <p className="text-[40px] font-extrabold leading-[48px]">
+        <h2 className="text-[40px] font-extrabold leading-[48px]">
           The Urgency of Peace
-        </p>
+        </h2>
         <p className="z-20">
           War, destruction, and division dominate our daily headlines, prompting
           children to wonder why people and nations struggle to coexist. Why
@@ -22,16 +22,17 @@ export const UrgencyOfPeace = () => {
           <img
             src={blueFirework}
             className="h-[256px] w-[288px] sm:scale-75 lg:scale-100"
+            alt=""
           />
         </div>
         <div className="flex h-full w-full items-end justify-center md:justify-end">
-          <img src={usImg} className="-mt-16" />
+          <img src={usImg} className="-mt-16" alt="" />
         </div>
       </div>
       <div className="flex flex-col items-center gap-10 text-center">
-        <p className="mt-12 text-[40px] font-extrabold leading-[48px]">
+        <h2 className="mt-12 text-[40px] font-extrabold leading-[48px]">
           The Power of Art to Heal
-        </p>
+        </h2>
         <p>
           In response to the 9/11 terrorist attacks, ICAF developed a{' '}
           <span className="font-bold">Peace Through Art Program </span>

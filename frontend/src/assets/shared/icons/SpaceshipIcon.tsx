@@ -14,6 +14,8 @@ export const SpaceshipIcon = ({
       viewBox="0 0 70 71"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      focusable="false"
       className={`${colorClass} ${className}`}
     >
       <circle cx="35" cy="35.5" r="35" fill="currentColor" />

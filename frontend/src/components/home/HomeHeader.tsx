@@ -29,13 +29,13 @@ const HomeHeader = () => {
     <div className="grid w-full grid-cols-1 grid-rows-1">
       <div className="font-montserrat z-10 col-start-1 row-start-1 mt-8 flex max-w-screen-2xl flex-col gap-4 p-10 px-8 text-3xl font-extrabold text-white md:mt-20 md:px-12 md:text-4xl lg:mt-28 lg:px-16 lg:text-6xl xl:px-20">
         <div className="block">
-          <p>Welcome to ICAF</p>
-          <p>Inspiring Creativity,</p>
-          <p>Transforming Lives</p>
+          <h2>Welcome to ICAF</h2>
+          <h2>Inspiring Creativity,</h2>
+          <h2>Transforming Lives</h2>
         </div>
-        <p className="font-openSans text-lg font-normal text-white md:max-w-[50%]">
+        <h3 className="font-openSans text-lg font-normal text-white md:max-w-[50%]">
           Empowering the next generation through the arts since 1997.
-        </p>
+        </h3>
         <div className="max-w-[300px]">
           <DonateButton text="Donate to our Campaign" />
         </div>

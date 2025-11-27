@@ -4,19 +4,20 @@ import { ProjectWindows } from './ProjectWindows';
 import Firework from '@/assets/impact/Firework.png';
 import Ribbons from '@/assets/home/Ribbons.svg';
 import smallBlueFirework from '@/assets/home/SmallBlueFirework.svg';
+import { Link } from 'react-router-dom';
 
 export const SpecialProjects = () => {
   return (
     <div className="relative flex flex-col gap-28">
       <div className="relative z-10 flex flex-col gap-10 px-8 md:px-12 lg:px-16 xl:px-20">
         <div className="absolute inset-x-0 -top-8 flex justify-center gap-[500px] md:gap-[600px]">
-          <img className="" src={smallBlueFirework} />
+          <img className="" src={smallBlueFirework} alt="" />
 
-          <img className="" src={smallBlueFirework} />
+          <img className="" src={smallBlueFirework} alt="" />
         </div>
-        <p className="font-montserrat text-center text-[32px] font-extrabold md:text-[40px]">
+        <h2 className="font-montserrat text-center text-[32px] font-extrabold md:text-[40px]">
           Special Project Websites
-        </p>
+        </h2>
         <div>
           <ProjectWindows windowArray={specialProjectData} />
         </div>
@@ -30,32 +31,24 @@ export const SpecialProjects = () => {
               them become creative and empathic.
             </p>
             <div className="inline-grid grid-cols-2 gap-2">
-              <Button
-                asChild
-                className="bg-secondary-yellow w-auto rounded-full font-semibold text-black"
-                variant={'secondary'}
-              >
-                <a
-                  href="https://icaf.org/donate"
-                  target="_blank"
-                  rel="noreferrer noopener"
+              <Link to="/donate">
+                <Button
+                  asChild
+                  className="bg-secondary-yellow w-auto rounded-full px-6 font-semibold text-black"
+                  variant={'secondary'}
                 >
-                  Donate
-                </a>
-              </Button>
-              <Button
-                asChild
-                className="rounded-full font-semibold"
-                variant="default"
-              >
-                <a
-                  href="https://icaf.org/donate"
-                  target="_blank"
-                  rel="noreferrer noopener"
+                  <p className="">Donate</p>
+                </Button>
+              </Link>
+              <Link to="/contact">
+                <Button
+                  asChild
+                  className="rounded-full font-semibold"
+                  variant="default"
                 >
-                  Contact Us
-                </a>
-              </Button>
+                  <p>Contact Us</p>
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -63,6 +56,7 @@ export const SpecialProjects = () => {
       <img
         src={Firework}
         className="absolute -right-36 bottom-24 z-0 scale-50 sm:-right-24 sm:bottom-0 sm:z-20 md:-right-16 md:scale-[60%] lg:-right-4 lg:scale-75 xl:right-0 xl:scale-100"
+        alt=""
       />
       <div className="absolute origin-[10%_90%] rotate-[80deg] overflow-hidden sm:origin-[10%_100%] md:-bottom-20 md:-right-20 md:w-[1500px] md:origin-[0%_0%] md:rotate-[0deg]">
         <img className="min-w-[900px]" src={Ribbons} />

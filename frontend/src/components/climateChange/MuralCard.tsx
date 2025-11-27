@@ -15,7 +15,7 @@ const muralTagClasses =
 export const MuralCard = ({ src, name, age, className }: MuralCardProps) => {
   return (
     <div className={`${muralCardBaseClasses} ${className ?? ''}`}>
-      <img src={src} className={muralImageClasses} />
+      <img src={src} className={muralImageClasses} alt="" />
       <div className={muralOverlayWrapperClasses}>
         <p className={muralTagClasses}>
           {name}

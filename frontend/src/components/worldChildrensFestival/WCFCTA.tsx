@@ -1,10 +1,7 @@
 import { Button } from '../ui/button';
 import Girl from '@/assets/worldChildrensFestival/girlPaintHands.webp';
 
-/**
- * Call to Action component.  Blue background with text/button linking outside page.  Absolute positioned girl for decoration
- */
-export default function WFCCTA() {
+export default function WCFCTA() {
   return (
     <section className="my-16 px-6 md:mt-32 md:px-12 lg:px-16 xl:mb-20 xl:mt-40 xl:px-20">
       <div className="relative flex h-[400px] items-center rounded-3xl bg-[#2057CC24] xl:h-[475px]">

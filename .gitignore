@@ -13,7 +13,11 @@ dist-ssr
 *.local
 .env
 .env.local
-public
+
+# Large/external asset folders (symlinked for local dev)
+frontend/public/ChildArt/*
+frontend/public/data/*
+frontend/public/documents/*
 
 # Editor directories and files
 .vscode/*

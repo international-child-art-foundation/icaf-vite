@@ -1,13 +1,13 @@
 import { CurvedImage } from './CurvedImage';
-import WorldMural from '@/assets/impact/WorldMural.png';
+import WorldMural from '@/assets/impact/WorldMural.webp';
 import AccordionDropdowns from '@/components/shared/AccordionDropdowns';
 import MissionDropdownData from '@/data/impact/impactMissionDropdownData';
-import DancingImg from '@/assets/impact/Dancing.png';
+import DancingImg from '@/assets/impact/Dancing.webp';
 import { Button } from '@/components/ui/button';
 import { HeartIcon } from 'lucide-react';
 import { ContentCarousel } from '@/components/impact/ContentCarousel';
 import { ImpactContentCarouselData } from '@/data/impact/impactContentCarouselData';
-import Firework from '@/assets/impact/Firework.png';
+import Firework from '@/assets/impact/Firework.webp';
 import { Seo } from '@/components/shared/Seo';
 
 const impactMetadata = {

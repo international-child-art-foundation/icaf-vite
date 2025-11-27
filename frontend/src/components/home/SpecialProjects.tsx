@@ -1,7 +1,7 @@
 import { Button } from '../ui/button';
 import { specialProjectData } from '@/data/home/homeSpecialProjects';
 import { ProjectWindows } from './ProjectWindows';
-import Firework from '@/assets/impact/Firework.png';
+import Firework from '@/assets/impact/Firework.webp';
 import Ribbons from '@/assets/home/Ribbons.svg';
 import smallBlueFirework from '@/assets/home/SmallBlueFirework.svg';
 import { Link } from 'react-router-dom';

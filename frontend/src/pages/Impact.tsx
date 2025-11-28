@@ -3,12 +3,11 @@ import WorldMural from '@/assets/impact/WorldMural.webp';
 import AccordionDropdowns from '@/components/shared/AccordionDropdowns';
 import MissionDropdownData from '@/data/impact/impactMissionDropdownData';
 import DancingImg from '@/assets/impact/Dancing.webp';
-import { Button } from '@/components/ui/button';
-import { HeartIcon } from 'lucide-react';
 import { ContentCarousel } from '@/components/impact/ContentCarousel';
 import { ImpactContentCarouselData } from '@/data/impact/impactContentCarouselData';
-import Firework from '@/assets/impact/Firework.webp';
 import { Seo } from '@/components/shared/Seo';
+import DonateButton from '@/components/ui/donateButton';
+import YourDonations from '@/components/shared/YourDonations';
 
 const impactMetadata = {
   title: 'Impact | ICAF',
@@ -94,24 +93,12 @@ const Impact = () => {
                     have enjoyed our quarterly ChildArt magazine since 1998.
                   </p>
                 </div>
-                <Button
-                  asChild
-                  variant="secondary"
-                  className="mt-4 h-14 self-start rounded-full px-6 text-base tracking-wide"
-                >
-                  <a
-                    href="https://icaf.org/donate"
-                    target="blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center"
-                  >
-                    <HeartIcon
-                      strokeWidth={2}
-                      className="!h-5 !w-5 stroke-black lg:mr-0 lg:!h-5 lg:!w-5"
-                    />
-                    Donate to our Campaign
-                  </a>
-                </Button>
+                <div className="mx-auto flex">
+                  <DonateButton
+                    text="Donate to our Campaign"
+                    className="px-6"
+                  />
+                </div>
               </div>
               <div className="relative order-1 content-center lg:order-2">
                 <div className="relative h-full self-center overflow-hidden rounded-[30px]">
@@ -132,46 +119,7 @@ const Impact = () => {
           </div>
         </div>
         {/* Donation section */}
-        <div className="relative max-w-screen-2xl gap-8 overflow-clip px-8 py-20 md:px-12 lg:px-16 xl:px-20">
-          <div className="relative rounded-xl bg-[#2057CC23] p-10 sm:py-8 md:py-12 lg:py-16 xl:py-24">
-            <p className="font-montserrat mb-8 text-2xl font-semibold sm:max-w-[75%]">
-              Your donation today will bring the arts to more children and help
-              them become creative and empathic.
-            </p>
-            <div className="inline-grid grid-cols-2 gap-2">
-              <Button
-                asChild
-                className="bg-secondary-yellow w-auto rounded-full font-semibold text-black"
-                variant={'secondary'}
-              >
-                <a
-                  href="https://icaf.org/donate"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
-                  Donate
-                </a>
-              </Button>
-              <Button
-                asChild
-                className="rounded-full font-semibold"
-                variant="default"
-              >
-                <a
-                  href="https://icaf.org/donate"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
-                  Contact Us
-                </a>
-              </Button>
-            </div>
-            <img
-              src={Firework}
-              className="sm:bottom-unset pointer-events-none absolute -right-6 -top-12 w-[30%] max-w-24 select-none sm:-right-6 sm:top-0 sm:max-w-80"
-            />
-          </div>
-        </div>
+        <YourDonations />
       </div>
     </>
   );

@@ -19,10 +19,13 @@ export default function YourDonations() {
             Your donation today will bring the arts to more children and help
             them become creative and empathic
           </p>
-          <div className="mt-6 grid grid-cols-2 justify-center gap-2 sm:flex sm:flex-row sm:gap-8 md:justify-start">
-            <DonateButtonPure className="h-12 min-w-28 max-w-40 rounded-full font-sans text-base font-semibold lg:h-14 lg:w-36 2xl:text-xl" />
-            <Link to="/contact">
-              <Button className="h-12 min-w-28 max-w-40 rounded-full font-sans text-base lg:h-14 lg:w-36 2xl:text-xl">
+          <div className="mt-6 grid grid-cols-2 justify-center gap-2 sm:mx-auto sm:w-[80%] sm:gap-8 md:mx-[unset] md:w-[60%] md:justify-start lg:flex lg:flex-row lg:gap-6">
+            <DonateButtonPure className="justify-left h-12 rounded-full font-sans text-base font-semibold lg:h-14 lg:w-36 2xl:text-xl" />
+            <Link
+              to="/contact"
+              className="lg:justify-left flex h-12 w-full justify-center lg:inline-block lg:h-14 lg:w-40"
+            >
+              <Button className="h-full w-full rounded-full font-sans text-base 2xl:text-xl">
                 Contact Us
               </Button>
             </Link>

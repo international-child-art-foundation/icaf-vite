@@ -27,7 +27,7 @@ export const SpecialProjects = () => {
           <div className="relative z-10 rounded-xl bg-[#dfe7f8] p-10 sm:py-8 md:py-12 lg:py-16 xl:py-24">
             {' '}
             <p className="font-montserrat mb-8 text-2xl font-semibold sm:max-w-[75%]">
-              “Let us join hands to make our world more human!”—Pascal
+              “Let’s join hands to make our world more human!”—Pascal
             </p>
             <div className="inline-grid grid-cols-2 gap-2">
               <Link to="/donate">

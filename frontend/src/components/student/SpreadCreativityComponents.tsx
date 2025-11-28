@@ -40,7 +40,7 @@ export const CardContentXl = () => {
       <div className="flex flex-col gap-8 p-4">
         <Title />
         <Description />
-        <DonateButton text="Donate to our Campaign" />
+        <DonateButton text="Donate to our Campaign" className="max-w-[300px]" />
       </div>
     </div>
   );
@@ -53,7 +53,7 @@ export const CardContentMdLg = () => {
         <SideImg />
         <Description />
       </div>
-      <DonateButton text="Donate to our Campaign" />
+      <DonateButton text="Donate to our Campaign" className="px-6" />
     </div>
   );
 };

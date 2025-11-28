@@ -31,6 +31,6 @@ export const bannerItems: BannerItem[] = [
     src: BannerImage4,
     bannerColor: 'blue',
     objectFit: 'cover',
-    objectPosition: 'object-bottom',
+    objectPosition: 'object-top',
   },
 ];

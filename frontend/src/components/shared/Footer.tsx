@@ -75,6 +75,8 @@ function Footer() {
     }
   }
 
+  const year = new Date().getFullYear();
+
   return (
     <footer className="2xl:min:h-[310px] bg-primary relative z-20 mx-auto min-h-[670px] w-full font-sans lg:min-h-[480px] xl:min-h-[310px]">
       <div className="mx-5% mx-auto flex flex-wrap justify-between gap-y-10 px-8 pb-10 pt-14 md:max-w-[750px] md:px-12 lg:max-w-screen-2xl lg:gap-y-16 lg:px-16 lg:py-10 xl:grid xl:auto-rows-min xl:grid-cols-12 xl:gap-x-8 xl:gap-y-16 xl:px-20">
@@ -151,25 +153,27 @@ function Footer() {
         </div>
         <div className="footer-inverse w-full text-base lg:order-2 lg:w-auto lg:text-base xl:col-span-2 xl:col-start-6">
           <ol className="grid grid-cols-2 gap-x-8 gap-y-5 lg:grid-cols-1 lg:gap-y-4 lg:pl-0 lg:pr-14">
-            <div className="break-words">
+            {/* <div className="break-words">
               <a href="/faq">FAQs</a>
+            </div> */}
+            <div className="break-words">
+              <Link to="/contact">Contact Us</Link>
             </div>
             <div className="break-words">
               <a
-                href="https://icaf.org/about/contact-us"
-                target="blank"
+                href="/documents/ICAF_Website_Terms_of_Use.pdf"
+                target="_blank"
                 rel="noopener noreferrer"
               >
-                Contact Us
-              </a>
-            </div>
-            <div className="break-words">
-              <a href="https://icaf.org/resource/documents/ICAF.website.-.Terms.of.Use.pdf">
                 Terms of use
               </a>
             </div>
             <div className="break-words">
-              <a href="https://icaf.org/resource/documents/ICAF.website.-.Privacy.Policy.pdf">
+              <a
+                href="/documents/ICAF_Website_Privacy_Policy.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Privacy policy
               </a>
             </div>
@@ -194,7 +198,7 @@ function Footer() {
           </div>
         </div>
         <div className="footer-inverse bg-primary order-5 w-full place-items-center text-center text-sm lg:flex lg:items-center lg:justify-center lg:text-sm xl:col-span-12 xl:mx-auto">
-          <span className="text-lg lg:pr-2 lg:text-2xl">©</span> 2025
+          <span className="text-lg lg:pr-2 lg:text-2xl">©</span> {year}{' '}
           International Child Art Foundation | Post Office Box 58133 |
           Washington, DC 20037
         </div>

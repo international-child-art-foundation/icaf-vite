@@ -28,7 +28,7 @@ const MissionVision = () => {
           Our Purpose
         </h2>
         <div className="mx-auto my-auto flex flex-col items-start overflow-hidden lg:flex-row lg:items-center">
-          <div className="flex flex-col gap-8 lg:flex-row lg:gap-10">
+          <div className="flex gap-8 lg:grid lg:grid-cols-2 lg:grid-rows-1 lg:gap-10">
             <div className="grid grid-cols-[36px_1fr] grid-rows-[36px_1fr] items-center gap-4 gap-y-2 rounded-lg bg-gradient-to-br from-white/60 via-white/50 to-white/60 p-6 transition-colors hover:bg-white/80 lg:grid lg:flex-row">
               <ClickIcon className="col-start-1 row-start-1 lg:col-start-1 lg:row-start-1" />
               <h1 className="font-montserrat text-tertiary-blue col-start-2 row-start-1 text-3xl font-semibold leading-6 md:text-4xl lg:col-start-2 lg:row-start-1">
@@ -39,7 +39,8 @@ const MissionVision = () => {
                 <span className="font-semibold"> imagination</span>, cultivate
                 their <span className="font-semibold">creativity</span>, and{' '}
                 grow mutual <span className="font-semibold">empathy</span>{' '}
-                through the power of art.{' '}
+                through the power of art for a peaceful, prosperous, and
+                sustainable future.
               </p>
             </div>
             <div className="grid grid-cols-[36px_1fr] grid-rows-[36px_1fr] items-center gap-4 gap-y-2 rounded-lg bg-gradient-to-br from-white/60 via-white/50 to-white/60 p-6 transition-colors hover:bg-white/80 lg:grid lg:flex-row">
@@ -50,7 +51,7 @@ const MissionVision = () => {
               <p className="font-openSans col-span-2 col-start-1 row-start-2 text-base text-black lg:col-start-2 lg:row-start-2 lg:text-2xl">
                 To <span className="font-semibold">democratize creativity</span>{' '}
                 and <span className="font-semibold">mainstream empathy</span>{' '}
-                for shared prosperity and a more perfect union.{' '}
+                for shared prosperity and “a more perfect union.”
               </p>
             </div>
           </div>

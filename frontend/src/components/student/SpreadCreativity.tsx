@@ -27,7 +27,7 @@ export const SpreadCreativity = () => {
         <h2 className="font-montserrat text-center text-[40px] font-extrabold leading-[48px]">
           Ready to Get Creative?
         </h2>
-        <p className="max-w-[800px]">
+        <p className="max-w-[800px] text-xl">
           Join us and start your journey with ICAF. Whether you're drawing,
           painting, building, or imagining, your creativity has the power to
           change the world!

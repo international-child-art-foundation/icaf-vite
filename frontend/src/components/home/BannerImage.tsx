@@ -1,10 +1,10 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useId, useRef, useState, useMemo, useLayoutEffect } from 'react';
 import { BannerItem } from '@/types/BannerItem';
 import { ribbonPaths } from '@/types/RibbonTypes';
 
 interface BannerImageProps {
   data: BannerItem;
-  height: number;
+  height?: number;
 }
 
 function scalePath(
@@ -26,51 +26,88 @@ function scalePath(
 }
 
 export const BannerImage = ({ data, height = 550 }: BannerImageProps) => {
+  const dur = 900;
+  const toPercent = dur * 1.4;
+
   const baseId = useId();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const element = containerRef.current;
     if (!element) return;
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const width = entry.contentRect.width;
-        setContainerWidth(width);
-      }
-    });
-    observer.observe(element);
-    return () => observer.disconnect();
+
+    const measure = () => {
+      const rect = element.getBoundingClientRect();
+      setContainerWidth(rect.width);
+    };
+
+    measure();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(() => {
+        measure();
+      });
+      observer.observe(element);
+      return () => observer.disconnect();
+    } else {
+      window.addEventListener('resize', measure);
+      return () => window.removeEventListener('resize', measure);
+    }
   }, []);
 
   const topClipId = `${baseId}-top`;
   const bottomClipId = `${baseId}-bottom`;
-  const topClipClass = `clipped-top-${baseId}`;
-  const bottomClipClass = `clipped-bottom-${baseId}`;
   const effectiveHeight = height - 100;
 
-  const textEdge = 'top';
-  const textPathId = `${baseId}-text-path-${textEdge}`;
+  const textPathId = `${baseId}-text-path-top`;
   const textPathNormalized = ribbonPaths.PeakValley.topText;
 
   const baseText = data.bannerText || 'INTERNATIONAL CHILD ART FOUNDATION';
   const separator = ' \u2022 ';
   const repeats = 50;
-  const repeatedText = Array.from({ length: repeats })
-    .map(() => baseText)
-    .join(separator);
 
-  const hasText = baseText.length > 0 && containerWidth > 0;
+  const repeatedText = useMemo(
+    () =>
+      Array.from({ length: repeats })
+        .map(() => baseText)
+        .join(separator),
+    [baseText],
+  );
+
+  const hasText =
+    !!textPathNormalized && baseText.length > 0 && containerWidth > 0;
   const verticalTextOffset = effectiveHeight * 0.05;
-  const textPathScaled =
-    hasText && textPathNormalized
-      ? scalePath(
-          textPathNormalized,
-          containerWidth,
-          effectiveHeight,
-          verticalTextOffset,
-        )
-      : '';
+
+  const textPathScaled = useMemo(
+    () =>
+      hasText && textPathNormalized
+        ? scalePath(
+            textPathNormalized,
+            containerWidth,
+            effectiveHeight,
+            verticalTextOffset,
+          )
+        : '',
+    [
+      hasText,
+      textPathNormalized,
+      containerWidth,
+      effectiveHeight,
+      verticalTextOffset,
+    ],
+  );
+
+  const imageClassName = useMemo(() => {
+    const classes = ['col-start-1', 'row-start-1', 'w-full'];
+    if (data.objectFit) {
+      classes.push(`object-${data.objectFit}`);
+    }
+    if (data.objectPosition) {
+      classes.push(data.objectPosition);
+    }
+    return classes.join(' ');
+  }, [data.objectFit, data.objectPosition]);
 
   return (
     <div className="relative w-full xl:mt-12" ref={containerRef}>
@@ -85,25 +122,17 @@ export const BannerImage = ({ data, height = 550 }: BannerImageProps) => {
         </defs>
       </svg>
 
-      <style>{`
-        .${topClipClass} {
-          clip-path: url(#${topClipId});
-        }
-        .${bottomClipClass} {
-          clip-path: url(#${bottomClipId});
-        }
-      `}</style>
-
       <div
         className="relative grid w-full grid-cols-1 grid-rows-1"
         style={{ height: effectiveHeight }}
       >
         <div
-          className={`${bottomClipClass} relative col-start-1 row-start-1 w-full overflow-hidden`}
-          style={{ height: effectiveHeight }}
+          className="relative col-start-1 row-start-1 w-full overflow-hidden"
+          style={{ height: effectiveHeight, clipPath: `url(#${bottomClipId})` }}
         >
           <div
-            className={`${topClipClass} relative col-start-1 row-start-1 grid h-full w-full overflow-hidden`}
+            className="relative col-start-1 row-start-1 grid h-full w-full overflow-hidden"
+            style={{ clipPath: `url(#${topClipId})` }}
           >
             <div
               className="col-start-1 row-start-1 h-full w-full bg-[#DA1E40]"
@@ -113,11 +142,12 @@ export const BannerImage = ({ data, height = 550 }: BannerImageProps) => {
         </div>
 
         <div
-          className={`${bottomClipClass} relative col-start-1 row-start-1 mt-8 w-full overflow-hidden md:mt-10 lg:mt-12`}
-          style={{ height: effectiveHeight }}
+          className="relative col-start-1 row-start-1 mt-8 w-full overflow-hidden md:mt-10 lg:mt-12"
+          style={{ height: effectiveHeight, clipPath: `url(#${bottomClipId})` }}
         >
           <div
-            className={`${topClipClass} relative col-start-1 row-start-1 grid h-full w-full overflow-hidden`}
+            className="relative col-start-1 row-start-1 grid h-full w-full overflow-hidden"
+            style={{ clipPath: `url(#${topClipId})` }}
           >
             <div
               className="overflow-hidden"
@@ -125,9 +155,7 @@ export const BannerImage = ({ data, height = 550 }: BannerImageProps) => {
             >
               <img
                 src={data.src}
-                className={`col-start-1 row-start-1 w-full ${
-                  data.objectFit && 'object-' + data.objectFit
-                } ${data.objectPosition}`}
+                className={imageClassName}
                 alt="Banner image"
                 style={{ height: effectiveHeight }}
               />
@@ -149,14 +177,14 @@ export const BannerImage = ({ data, height = 550 }: BannerImageProps) => {
             <text
               fill="#ffffff"
               fontWeight="500"
-              className="text-base md:text-lg lg:text-xl"
+              className="select-none text-base md:text-lg lg:text-xl"
             >
               <textPath href={`#${textPathId}`} startOffset="0%">
                 <animate
                   attributeName="startOffset"
                   from="0%"
-                  to="-100%"
-                  dur={`${Math.max(baseText.length * 2, 10)}s`}
+                  to={`-${toPercent}%`}
+                  dur={`${dur}s`}
                   repeatCount="indefinite"
                 />
                 {repeatedText}

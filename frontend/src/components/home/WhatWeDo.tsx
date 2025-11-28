@@ -7,27 +7,29 @@ const WhatWeDo = () => {
     <div className="relative">
       <img
         src={redBlueFirework}
-        className="absolute -top-32 hidden w-32 sm:left-8 sm:block md:left-24 md:w-48 lg:left-48 xl:-top-24 xl:left-[300px]"
+        className="absolute -top-32 hidden w-32 sm:left-8 sm:block md:left-12 md:w-48 lg:left-48 xl:-top-24 xl:left-[0px]"
         alt=""
       />
       <div className="z-10 flex flex-col items-center gap-6 p-6 pt-0 lg:gap-10 lg:p-10 lg:py-[50px]">
         <h2 className="font-montserrat text-[32px] font-extrabold leading-6 text-black lg:text-[40px]">
           What we do
         </h2>
-        <p className="font-sans text-xl font-normal text-black lg:text-center">
-          ICAF empowers children by seeding their imagination, cultivating
-          creativity, and growing mutual empathy as building blocks for a more
-          peaceful, prosperous, and sustainable future.
-        </p>
-        <p className="font-montserrat mt-4 text-2xl font-bold text-black lg:mt-5 lg:text-center">
-          We focus on what’s important for schoolchildren: How they view
-          themselves. Our Holistic identity development has two phases:
-        </p>
-        <div className="mt-9 flex max-w-[402px] flex-col items-center gap-8 lg:max-w-[700px] lg:flex-row lg:gap-[60px]">
+        <div>
+          <p className="font-sans text-2xl font-normal text-black lg:text-center">
+            We focus on what’s critically important in formative years:{' '}
+            <span className="font-semibold">how students view themselves.</span>
+          </p>
+          <p className="mt-4 text-2xl text-black lg:mt-5 lg:text-center">
+            We have created a{' '}
+            <span className="font-semibold">two-stage approach</span> for
+            holistic identity development.
+          </p>
+        </div>
+        <div className="mt-9 flex max-w-[402px] flex-col items-center gap-8 lg:max-w-[800px] lg:flex-row lg:gap-[60px]">
           <div className="flex flex-1 flex-col items-center gap-4 lg:gap-6">
             <img
               src={soccer}
-              className="h-[272px] w-[223px] lg:h-[204px] lg:w-[167px]"
+              className="h-[204px] lg:h-[204px]"
               alt=""
               loading="lazy"
             />
@@ -36,24 +38,20 @@ const WhatWeDo = () => {
                 01
               </h1>
               <p className="font-sans text-xl text-black lg:text-center">
-                Combine art and sport to develop "artist athletes"
+                Consilience of art and sports to nurture “artist-athletes.”
               </p>
             </div>
           </div>
 
           <div className="flex flex-1 flex-col items-center gap-4 lg:gap-6">
-            <img
-              src={globeKids}
-              className="h-[184px] w-[223px] lg:h-[204px] lg:w-[248px]"
-              alt=""
-              loading="lazy"
-            />
+            <img src={globeKids} className="h-[204px]" alt="" loading="lazy" />
             <div className="flex flex-row gap-7 lg:flex-col lg:items-center lg:gap-2">
               <h1 className="font-montserrat text-2xl font-semibold text-black">
                 02
               </h1>
               <p className="font-sans text-xl text-black lg:text-center">
-                Infuse creativity with empathy to grow "creative empaths"
+                Consonance of creativity and empathy to inspire
+                “creative-empaths.”
               </p>
             </div>
           </div>

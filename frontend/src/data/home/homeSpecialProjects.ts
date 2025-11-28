@@ -7,17 +7,18 @@ export const specialProjectData: TSpecialProjectGroup = [
   {
     id: 1,
     image: Wcf,
-    title: 'World Children’s Festival 2026',
+    title: '7th World Children’s Festival ',
     description:
-      'A three-day celebration of American values of creativity, diversity, and unity',
+      'A three-day celebration on the National Mall of children’s creativity and America’s 250th Anniversary.',
     href: 'https://worldchildrensfestival.org/',
     color: 'red',
   },
   {
     id: 2,
     image: Swimmer,
-    title: 'My Favorite Sport 2024',
-    description: 'A global art contest to celebrate the Paris Games',
+    title: 'My Favorite Sport',
+    description:
+      'An online art contest for young people’s interactive engagement in the Games.',
     href: 'https://myfavoritesport.org/',
     color: 'blue',
   },

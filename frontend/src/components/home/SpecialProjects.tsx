@@ -27,14 +27,13 @@ export const SpecialProjects = () => {
           <div className="relative z-10 rounded-xl bg-[#dfe7f8] p-10 sm:py-8 md:py-12 lg:py-16 xl:py-24">
             {' '}
             <p className="font-montserrat mb-8 text-2xl font-semibold sm:max-w-[75%]">
-              Your donation today will bring the arts to more children and help
-              them become creative and empathic.
+              “Let’s join hands to make our world more human!”—Pascal
             </p>
             <div className="inline-grid grid-cols-2 gap-2">
               <Link to="/donate">
                 <Button
                   asChild
-                  className="bg-secondary-yellow w-auto rounded-full px-6 font-semibold text-black"
+                  className="bg-secondary-yellow w-auto rounded-full p-6 px-8 text-lg font-semibold text-black"
                   variant={'secondary'}
                 >
                   <p className="">Donate</p>
@@ -43,7 +42,7 @@ export const SpecialProjects = () => {
               <Link to="/contact">
                 <Button
                   asChild
-                  className="rounded-full font-semibold"
+                  className="rounded-full p-6 text-lg font-semibold"
                   variant="default"
                 >
                   <p>Contact Us</p>

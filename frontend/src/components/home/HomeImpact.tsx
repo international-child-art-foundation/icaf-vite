@@ -37,7 +37,7 @@ export const HomeImpact = () => {
           <TitleDescriptionCard
             title={'Advocacy'}
             description={
-              'ICAF is the largest child art exhibitor and organizer of youth panels at conferences.'
+              'ICAF promotes children’s art as the most honest and pure form of human creative expression.'
             }
             color={'blue'}
           />
@@ -54,7 +54,7 @@ export const HomeImpact = () => {
           <TitleDescriptionCard
             title={'5M'}
             description={
-              'Over the past 26 years, about five million students worldwide have produced art under ICAF programs.'
+              'Over the past 29 years, more than five million students have produced original works under ICAF programs, and nearly two million people have attended ICAF’s festivals, exhibitions, and events.'
             }
             color={'yellow'}
           />

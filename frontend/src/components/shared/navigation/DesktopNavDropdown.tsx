@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { NavItem } from '@/lib/navItems';
 import { NavGraphic } from '@/assets/shared/images/navigation/navGraphic';
 import { CircleArrowRight } from 'lucide-react';
@@ -8,7 +8,6 @@ interface DesktopNavDropdownProps {
   item: NavItem;
   progress: number;
   zIndex: number;
-  fadingIn: boolean;
   isOpening: boolean;
   openingFromClosed: boolean;
   onItemSelected?: () => void;
@@ -20,30 +19,11 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
   item,
   progress,
   zIndex,
-  fadingIn,
   isOpening,
   openingFromClosed,
   onItemSelected,
 }) => {
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
-  const [opacity, setOpacity] = useState(1);
-
-  useEffect(() => {
-    if (!fadingIn) {
-      setOpacity(1);
-      return;
-    }
-
-    setOpacity(0);
-
-    const timeoutId = window.setTimeout(() => {
-      setOpacity(1);
-    }, 40);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [fadingIn]);
 
   const handleSelect = (index: number) => {
     setSelectedImage(index);
@@ -56,9 +36,7 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
     return null;
   }
 
-  const visibleHeight = MAX_DROPDOWN_HEIGHT * progress;
-
-  const heightDuration = 350;
+  const heightDuration = 500;
 
   const easing = isOpening
     ? openingFromClosed
@@ -67,29 +45,30 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
     : 'cubic-bezier(0.25, 0.1, 0.25, 1)';
 
   const containerStyle: React.CSSProperties = {
-    height: `${visibleHeight}px`,
-    opacity,
+    height: `${MAX_DROPDOWN_HEIGHT}px`,
     zIndex,
     overflow: 'hidden',
     position: 'fixed',
     left: 0,
     right: 0,
     top: '98px',
-    transition: `height ${heightDuration}ms ${easing}, opacity 500ms ease-out`,
+    transform: `translateY(${(progress - 1) * MAX_DROPDOWN_HEIGHT}px)`,
+    transition: `transform ${heightDuration}ms ${easing}`,
     pointerEvents: progress > 0 ? 'auto' : 'none',
   };
 
-  const innerStyle: React.CSSProperties = {
-    transform: `translateY(${visibleHeight - MAX_DROPDOWN_HEIGHT}px)`,
-    transition: `transform ${heightDuration}ms ${easing}`,
-  };
+  const innerStyle: React.CSSProperties = {};
 
   return (
-    <div style={containerStyle} aria-hidden={progress === 0}>
-      <div className="mx-auto w-full overflow-visible 2xl:max-w-screen-2xl">
+    <div
+      style={containerStyle}
+      aria-hidden={progress === 0}
+      className="relative"
+    >
+      <div className="relative mx-auto w-full overflow-visible 2xl:max-w-screen-2xl">
         <div style={innerStyle}>
           <div
-            className="grid h-64 cursor-pointer overflow-hidden"
+            className="relative grid h-64 cursor-pointer overflow-hidden"
             style={{
               gridTemplateColumns: `repeat(${item.children.length}, 1fr)`,
             }}
@@ -99,7 +78,7 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
 
               const tileContent = (
                 <>
-                  <div className="relative w-full">
+                  <div className="relative z-0 w-full">
                     <img
                       src={child.imageSrc}
                       alt={child.alt}

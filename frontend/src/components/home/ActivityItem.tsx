@@ -45,7 +45,7 @@ export const ActivityItem = ({ item, expanded, toggle }: ActivityItemProps) => {
         alt=""
       />
       <div
-        className={`col-start-1 row-start-1 h-full w-full bg-black transition-opacity ${expanded ? 'opacity-40' : 'opacity-0'}`}
+        className={`col-start-1 row-start-1 h-full w-full bg-black ${expanded ? 'opacity-40' : 'opacity-0'}`}
       ></div>
     </>
   );

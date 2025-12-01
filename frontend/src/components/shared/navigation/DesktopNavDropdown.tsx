@@ -32,6 +32,12 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
     }
   };
 
+  const handleSelectParent = () => {
+    if (onItemSelected) {
+      onItemSelected();
+    }
+  };
+
   if (!item.children || item.children.length === 0) {
     return null;
   }
@@ -161,10 +167,21 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
             })}
           </div>
 
-          <div className="bg-primary text-text-inverse flex h-16 items-center gap-2 font-sans text-lg font-semibold">
-            <NavGraphic />
-            <div>{item.label}</div>
-          </div>
+          {item.href ? (
+            <Link
+              className="bg-primary text-text-inverse group flex h-16 items-center gap-2 font-sans text-lg font-semibold"
+              to={item.href}
+              onClick={() => handleSelectParent()}
+            >
+              <NavGraphic />
+              <p className="group-hover:underline">{item.label}</p>
+            </Link>
+          ) : (
+            <div className="bg-primary text-text-inverse flex h-16 items-center gap-2 font-sans text-lg font-semibold">
+              <NavGraphic />
+              <p>{item.label}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

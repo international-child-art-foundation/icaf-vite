@@ -8,7 +8,6 @@ import DonateButton from '@/components/ui/donateButton';
 type DropdownAnimationState = {
   progress: number;
   zIndex: number;
-  fadingIn: boolean;
   isOpening: boolean;
   openingFromClosed: boolean;
 };
@@ -21,7 +20,6 @@ const createInitialDropdownState = (): DropdownStateMap => {
     state[item.label] = {
       progress: 0,
       zIndex: 0,
-      fadingIn: false,
       isOpening: false,
       openingFromClosed: false,
     };
@@ -47,12 +45,9 @@ const DesktopNav: React.FC = () => {
     setDropdownState((prev) => {
       const next: DropdownStateMap = {};
       for (const key of Object.keys(prev)) {
-        const prevState = prev[key];
         next[key] = {
-          ...prevState,
           progress: 0,
           zIndex: 0,
-          fadingIn: false,
           isOpening: false,
           openingFromClosed: false,
         };
@@ -82,12 +77,8 @@ const DesktopNav: React.FC = () => {
       const currentState = prev[item.label];
 
       const openingFromClosed = !currentState || currentState.progress === 0;
-      const hasOtherOpen = Object.entries(prev).some(
-        ([key, state]) => key !== item.label && state.progress > 0,
-      );
 
       const newZIndex = zCounterRef.current++;
-      const shouldFadeIn = hasOtherOpen;
 
       for (const key of Object.keys(prev)) {
         const state = prev[key];
@@ -96,7 +87,6 @@ const DesktopNav: React.FC = () => {
           next[key] = {
             progress: 1,
             zIndex: newZIndex,
-            fadingIn: shouldFadeIn,
             isOpening: true,
             openingFromClosed,
           };
@@ -106,14 +96,12 @@ const DesktopNav: React.FC = () => {
               ...state,
               progress: 0,
               zIndex: state.zIndex,
-              fadingIn: false,
               isOpening: false,
               openingFromClosed: false,
             };
           } else {
             next[key] = {
               ...state,
-              fadingIn: false,
               isOpening: false,
               openingFromClosed: false,
             };
@@ -125,7 +113,6 @@ const DesktopNav: React.FC = () => {
         next[item.label] = {
           progress: 1,
           zIndex: newZIndex,
-          fadingIn: shouldFadeIn,
           isOpening: true,
           openingFromClosed,
         };
@@ -179,14 +166,35 @@ const DesktopNav: React.FC = () => {
   return (
     <div
       ref={headerRef}
-      className="relative h-full w-full items-center justify-between xl:flex"
+      className="relative mx-auto h-full w-full max-w-screen-2xl items-center justify-between px-8 md:px-12 lg:px-16 xl:flex xl:px-20"
     >
-      <Link to="/" className="my-2 cursor-pointer">
+      {navItems.map((item: NavItem) => {
+        const state = dropdownState[item.label];
+
+        if (!state) {
+          return null;
+        }
+
+        return (
+          <DesktopNavDropdown
+            key={`dropdown-${item.key}`}
+            item={item}
+            progress={state.progress}
+            zIndex={state.zIndex}
+            isOpening={state.isOpening}
+            openingFromClosed={state.openingFromClosed}
+            onItemSelected={handleDropdownItemSelected}
+          />
+        );
+      })}
+
+      <div className="absolute left-0 top-0 z-30 h-full w-full bg-white"></div>
+      <Link to="/" className="z-50 my-2 cursor-pointer">
         <ICAFlogo />
       </Link>
 
       <div
-        className="flex h-full items-center space-x-6"
+        className="relative z-30 flex h-full items-center space-x-6"
         aria-label="Main navigation"
       >
         {navItems.map((item: NavItem) => {
@@ -198,14 +206,13 @@ const DesktopNav: React.FC = () => {
 
           const expanded = hasChildren && !!state && state.progress > 0;
 
-          const baseClassName = `group relative text-lg hover:cursor-pointer hover:text-primary ${
+          const baseClassName = `group relative text-lg hover:cursor-pointer hover:text-primary z-50 ${
             isActive ? 'text-primary' : 'text-black'
           }`;
 
           const commonProps = {
             onMouseEnter: () => handleItemHover(item),
             onFocus: () => handleItemHover(item),
-            className: baseClassName,
             'aria-haspopup': hasChildren ? true : undefined,
             'aria-expanded': expanded,
           };
@@ -213,7 +220,7 @@ const DesktopNav: React.FC = () => {
           const content = (
             <>
               {item.navLabel}
-              <span className="bg-primary absolute left-1/2 top-7 h-[1px] w-0 -translate-x-1/2 transform transition-all duration-300 ease-in-out group-hover:w-full" />
+              <span className="bg-primary absolute left-1/2 top-7 z-[200] h-[1px] w-0 -translate-x-1/2 transform transition-all duration-300 ease-in-out group-hover:w-full" />
             </>
           );
 
@@ -225,6 +232,7 @@ const DesktopNav: React.FC = () => {
                 type="button"
                 {...commonProps}
                 onClick={collapseDropdowns}
+                className={baseClassName}
               >
                 {content}
               </button>
@@ -235,32 +243,27 @@ const DesktopNav: React.FC = () => {
                 to={item.href!}
                 {...commonProps}
                 onClick={collapseDropdowns}
+                className={baseClassName}
               >
                 {content}
               </Link>
             );
           } else {
             trigger = (
-              <a href={item.href} {...commonProps} onClick={collapseDropdowns}>
+              <a
+                href={item.href}
+                {...commonProps}
+                onClick={collapseDropdowns}
+                className={baseClassName}
+              >
                 {content}
               </a>
             );
           }
 
           return (
-            <div key={item.key} className="relative">
+            <div key={item.key} className="relative z-40">
               {trigger}
-              {state && (
-                <DesktopNavDropdown
-                  item={item}
-                  progress={state.progress}
-                  zIndex={state.zIndex}
-                  fadingIn={state.fadingIn}
-                  isOpening={state.isOpening}
-                  openingFromClosed={state.openingFromClosed}
-                  onItemSelected={handleDropdownItemSelected}
-                />
-              )}
             </div>
           );
         })}

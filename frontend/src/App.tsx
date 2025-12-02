@@ -91,7 +91,7 @@ export default function App() {
     <div className="relative mx-auto box-border flex min-h-screen w-full max-w-screen-2xl flex-col px-0">
       <NavigationBar />
       <main className="relative mt-[98px] flex flex-1 flex-col">
-        <Suspense fallback={<div className="p-4">Loading…</div>}>
+        <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<Home />} />
 

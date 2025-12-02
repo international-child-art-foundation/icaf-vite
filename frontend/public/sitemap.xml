@@ -1,58 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- TODO: Update to icaf.org on publish -->
   <url>
-    <loc>https://revise.icaf.org/</loc>
+    <loc>https://icaf.org/</loc>
   </url>
   <url>
-    <loc>https://revise.icaf.org/donate</loc>
+    <loc>https://icaf.org/donate</loc>
   </url>
   <url>
-    <loc>https://revise.icaf.org/contact</loc>
+    <loc>https://icaf.org/contact</loc>
   </url>
   <url>
-    <loc>https://revise.icaf.org/about</loc>
+    <loc>https://icaf.org/about</loc>
   </url>
   <url>
-    <loc>https://revise.icaf.org/about/history</loc>
+    <loc>https://icaf.org/about/history</loc>
   </url>
   <url>
-    <loc>https://revise.icaf.org/about/team</loc>
+    <loc>https://icaf.org/about/team</loc>
   </url>
   <url>
-    <loc>https://revise.icaf.org/about/partners</loc>
+    <loc>https://icaf.org/about/partners</loc>
   </url>
   <url>
-    <loc>https://revise.icaf.org/about/impact</loc>
+    <loc>https://icaf.org/about/impact</loc>
   </url>
   <url>
-    <loc>https://revise.icaf.org/programs/arts-olympiad</loc>
+    <loc>https://icaf.org/programs/arts-olympiad</loc>
   </url>
   <url>
-    <loc>https://revise.icaf.org/programs/childart-magazine</loc>
+    <loc>https://icaf.org/programs/childart-magazine</loc>
   </url>
   <url>
-    <loc>https://revise.icaf.org/programs/peace-through-art</loc>
+    <loc>https://icaf.org/programs/peace-through-art</loc>
   </url>
   <url>
-    <loc>https://revise.icaf.org/programs/climate-change</loc>
+    <loc>https://icaf.org/programs/climate-change</loc>
   </url>
   <url>
-    <loc>https://revise.icaf.org/programs/healing-arts</loc>
+    <loc>https://icaf.org/programs/healing-arts</loc>
   </url>
   <url>
-    <loc>https://revise.icaf.org/get-involved/volunteer</loc>
+    <loc>https://icaf.org/get-involved/volunteer</loc>
   </url>
   <url>
-    <loc>https://revise.icaf.org/get-involved/professional</loc>
+    <loc>https://icaf.org/get-involved/professional</loc>
   </url>
   <url>
-    <loc>https://revise.icaf.org/get-involved/student</loc>
+    <loc>https://icaf.org/get-involved/student</loc>
   </url>
   <url>
-    <loc>https://revise.icaf.org/news-events/news</loc>
+    <loc>https://icaf.org/news-events/news</loc>
   </url>
   <url>
-    <loc>https://revise.icaf.org/sponsorship</loc>
+    <loc>https://icaf.org/sponsorship</loc>
   </url>
 </urlset>

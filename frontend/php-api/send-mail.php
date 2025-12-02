@@ -5,8 +5,7 @@ require_once "Mail.php";
 require_once "Mail/mime.php";
 
 // ---- config ----
-// TODO: Finalize addresses
-$to = "noah.zaranka@icaf.org";
+$to = "childart@icaf.org";
 $mailDomain = "icaf.org";
 $username = "no-reply@" . $mailDomain;
 $from = "ICAF <no-reply@" . $mailDomain . ">";

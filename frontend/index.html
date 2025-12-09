@@ -14,6 +14,21 @@
       content="The International Child Art Foundation (ICAF) nurtures children's creativity and empathy through global art programs, festivals, and education."
     />
 
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        window.dataLayer.push(arguments);
+      }
+      window.gtag = window.gtag || gtag;
+
+      gtag('js', new Date());
+      gtag('consent', 'default', { analytics_storage: 'denied' });
+    </script>
+
     <meta name="theme-color" content="#0f4c81" />
   </head>
   <body>

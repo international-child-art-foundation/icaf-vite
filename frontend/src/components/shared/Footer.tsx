@@ -10,6 +10,7 @@ import { Mail } from 'lucide-react';
 import DonateButton from '../ui/donateButton';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { useGlobalContext } from './GlobalContext';
 
 const icons = [
   {
@@ -45,6 +46,7 @@ const icons = [
 ];
 
 function Footer() {
+  const { setCookieBannerVisible } = useGlobalContext();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'ok' | 'err'>(
     'idle',
@@ -176,6 +178,12 @@ function Footer() {
               >
                 Privacy policy
               </a>
+            </div>
+            <div
+              className="cursor-pointer break-words"
+              onClick={() => setCookieBannerVisible(true)}
+            >
+              Cookie Settings
             </div>
           </ol>
         </div>

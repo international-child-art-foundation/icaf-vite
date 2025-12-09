@@ -24,6 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SITE_NAME: icaf
+      VITE_GA_MEASUREMENT_ID: G-CX1QXSQK8B
     outputs:
       release_id: ${{ steps.rel.outputs.RELEASE_ID }}
 

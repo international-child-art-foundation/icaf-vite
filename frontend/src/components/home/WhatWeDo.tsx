@@ -10,22 +10,22 @@ const WhatWeDo = () => {
         className="absolute -top-32 hidden w-32 sm:left-8 sm:block md:left-12 md:w-48 lg:left-48 xl:-top-24 xl:left-[0px]"
         alt=""
       />
-      <div className="z-10 flex flex-col items-center gap-6 p-6 pt-0 lg:gap-10 lg:p-10 lg:py-[50px]">
-        <h2 className="font-montserrat text-[32px] font-extrabold leading-6 text-black lg:text-[40px]">
-          What we do
+      <div className="z-10 flex flex-col items-center gap-6 p-6 pt-0 lg:p-10 lg:py-[50px]">
+        <h2 className="font-montserrat text-[32px] font-extrabold text-black lg:text-[40px]">
+          What We Do
         </h2>
-        <div>
-          <p className="font-sans text-2xl font-normal text-black lg:text-center">
+        <div className="flex flex-col gap-6">
+          <p className="font-sans text-base font-normal text-black md:text-center lg:text-center xl:text-2xl">
             We focus on what’s critically important in formative years:{' '}
             <span className="font-semibold">how students view themselves.</span>
           </p>
-          <p className="mt-4 text-2xl text-black lg:mt-5 lg:text-center">
+          <p className="text-2xl font-semibold text-black lg:text-center">
             We have created a{' '}
             <span className="font-semibold">two-stage approach</span> for
             holistic identity development.
           </p>
         </div>
-        <div className="mt-9 flex max-w-[402px] flex-col items-center gap-8 lg:max-w-[800px] lg:flex-row lg:gap-[60px]">
+        <div className="flex max-w-[402px] flex-col items-center gap-8 lg:max-w-[800px] lg:flex-row lg:gap-[60px]">
           <div className="flex flex-1 flex-col items-center gap-4 lg:gap-6">
             <img
               src={soccer}

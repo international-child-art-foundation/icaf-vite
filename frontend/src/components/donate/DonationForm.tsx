@@ -15,7 +15,7 @@ interface DonationFormProps {
 
 const DonationForm = ({ whiteBackdrop }: DonationFormProps) => {
   const presetAmounts = [200, 100, 50];
-  const [donationAmountString, setDonationAmountString] = useState('');
+  const [donationAmountString, setDonationAmountString] = useState('50');
   const [isEditing, setIsEditing] = useState(false);
 
   const donationAmountNumeric = parseInt(

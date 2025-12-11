@@ -12,7 +12,7 @@ export const HomeImpact = () => {
         className="absolute -top-16 right-4 hidden h-auto w-16 md:block md:w-32 lg:w-48"
         alt=""
       />
-      <div className="flex flex-col gap-7">
+      <div className="flex flex-col gap-6">
         <h2 className="font-montserrat text-center text-[2rem] font-extrabold xl:text-[40px]">
           Educational & Cultural Impact
         </h2>
@@ -23,7 +23,7 @@ export const HomeImpact = () => {
         </p>
       </div>
 
-      <div className="grid-rows-auto relative grid max-w-screen-2xl grid-cols-1 gap-10 lg:grid-cols-10 lg:grid-rows-5">
+      <div className="grid-rows-auto relative grid max-w-screen-2xl grid-cols-1 gap-6 lg:grid-cols-10 lg:grid-rows-5">
         <div className="h-full lg:col-span-3 lg:col-start-1 lg:row-span-2 lg:row-start-1">
           <TitleDescriptionCard
             title={'Pedagogy'}

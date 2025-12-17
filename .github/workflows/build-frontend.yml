@@ -15,6 +15,9 @@ on:
       - "frontend/vite.config.*"
   workflow_dispatch: {}
 
+env:
+  SITE_NAME: icaf
+
 concurrency:
   group: build-frontend-${{ github.ref_name }}
   cancel-in-progress: true
@@ -23,7 +26,6 @@ jobs:
   build_frontend:
     runs-on: ubuntu-latest
     env:
-      SITE_NAME: icaf
       VITE_GA_MEASUREMENT_ID: G-CX1QXSQK8B
     outputs:
       release_id: ${{ steps.rel.outputs.RELEASE_ID }}
@@ -84,7 +86,7 @@ jobs:
       - name: Upload artifact (full release payload)
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-${{ env.SITE_NAME- }}${{ steps.rel.outputs.RELEASE_ID }}
+          name: frontend-${{ env.SITE_NAME }}-${{ steps.rel.outputs.RELEASE_ID }}
           path: release
           if-no-files-found: error
           retention-days: 14
@@ -103,7 +105,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: frontend-icaf-${{ needs.build_frontend.outputs.release_id }}
+          name: frontend-${{ env.SITE_NAME }}-${{ needs.build_frontend.outputs.release_id }}
           path: release
 
       - name: Upload via SFTP (mirror full to versioned folder)

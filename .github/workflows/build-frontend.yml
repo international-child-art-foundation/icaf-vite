@@ -84,7 +84,7 @@ jobs:
       - name: Upload artifact (full release payload)
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-${{ env.SITE_NAME }}-${{ steps.rel.outputs.RELEASE_ID }}
+          name: frontend-${{ env.SITE_NAME- }}${{ steps.rel.outputs.RELEASE_ID }}
           path: release
           if-no-files-found: error
           retention-days: 14

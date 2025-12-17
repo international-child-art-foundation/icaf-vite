@@ -2,7 +2,7 @@ name: Build & Deploy Frontend (icaf)
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "staging"]
     paths:
       - "frontend/**"
       - "shared/**"
@@ -16,7 +16,7 @@ on:
   workflow_dispatch: {}
 
 concurrency:
-  group: build-frontend-main
+  group: build-frontend-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -84,7 +84,7 @@ jobs:
       - name: Upload artifact (full release payload)
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-${{ env.SITE_NAME }}-${{ steps.rel.outputs.RELEASE_ID }}
+          name: frontend-${{ env.SITE_NAME- }}${{ steps.rel.outputs.RELEASE_ID }}
           path: release
           if-no-files-found: error
           retention-days: 14
@@ -93,7 +93,7 @@ jobs:
     name: Deploy release over SFTP
     needs: build_frontend
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

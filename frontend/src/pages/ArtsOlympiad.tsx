@@ -66,7 +66,7 @@ export const ArtsOlympiad = () => {
                   <span className="font-semibold">aged 8–12</span> that blends
                   creativity with physical activity. Schools, studios, and
                   homeschoolers can participate before{' '}
-                  <span className="font-semibold">December 16, 2025</span>.
+                  <span className="font-semibold">February 20, 2026</span>.
                   Winning artists will be invited to the 7th World Children’s
                   Festival in{' '}
                   <span className="font-semibold">
@@ -90,7 +90,7 @@ export const ArtsOlympiad = () => {
                 <p>
                   Create a painting, drawing, or digital artwork of yourself as
                   an Artist-Athlete playing a sport. Recommended size is 18 x 24
-                  inches.
+                  inches (45 x 65 cm).
                 </p>
                 <p>
                   Select the most original works, with a maximum of two entries
@@ -104,7 +104,7 @@ export const ArtsOlympiad = () => {
               </div>
               <div>
                 <a
-                  href="/documents/7th Arts Olympiad Art Entry Form February 2025.pdf"
+                  href="/documents/7th Arts Olympiad Art Entry Form.pdf"
                   download
                   className="bg-primary inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold tracking-[0.14em] text-[#FFD743]"
                 >
@@ -194,7 +194,7 @@ export const ArtsOlympiad = () => {
                 </div>
                 <div>
                   <a
-                    href="/documents/7th Arts Olympiad Lesson Plan February 2025.pdf"
+                    href="/documents/7th Arts Olympiad Lesson Plan.pdf"
                     download
                     className="bg-primary inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold tracking-[0.14em] text-[#FFD743]"
                   >

@@ -16,7 +16,6 @@ $from = "ICAF <no-reply@" . $mailDomain . ">";
 
 // Service Links & IDs
 $portal_link = "https://billing.stripe.com/p/login/4gM6oJffa1Rvfgia62abK00";
-$magazine_access_link = "https://icaf.org/access";
 $magazine_payment_link_id = "plink_1Sde45PpM1RM3Nq1RZVUt2sx"; 
 
 // 3. SECURITY CHECKS
@@ -75,10 +74,8 @@ if (($event['type'] ?? '') === 'checkout.session.completed') {
         
         $textBody = "Thank you for subscribing to ChildArt Magazine!\n\n"
                   . "We are so grateful for your support in fostering children's creativity and empathy.\n\n"
-                  . "YOUR ACCESS\n"
-                  . "You can access the full digital magazine archive here:\n"
-                  . "$magazine_access_link\n\n"
-                  . "Please bookmark this link for future use.\n\n"
+                  . "WHAT TO EXPECT\n"
+                  . "You will receive a new issue of ChildArt via email every quarter. Keep an eye on your inbox for our upcoming editions.\n\n"
                   . "MANAGE SUBSCRIPTION\n"
                   . "To update your payment method or manage your subscription, visit our Customer Portal:\n"
                   . "$portal_link\n\n"
@@ -108,16 +105,8 @@ if (($event['type'] ?? '') === 'checkout.session.completed') {
                                     <p style='font-size: 16px; line-height: 1.6;'>We are so grateful for your support in fostering children's creativity and empathy through the arts.</p>
                                     
                                     <div style='margin: 30px 0; padding: 25px; background-color: #f9f9f9; border-left: 4px solid #134380;'>
-                                        <p style='margin-top: 0; font-weight: bold;'>Your Digital Access</p>
-                                        <p style='font-size: 15px;'>You now have full access to our digital magazine archive. Click the button below to start reading.</p>
-                                        <table border='0' cellpadding='0' cellspacing='0' style='margin-top: 20px;'>
-                                            <tr>
-                                                <td align='center' bgcolor='#134380' style='border-radius: 5px;'>
-                                                    <a href='$magazine_access_link' target='_blank' style='padding: 12px 25px; font-size: 16px; color: #ffffff; text-decoration: none; display: inline-block; font-weight: bold;'>View Magazine Archive</a>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                        <p style='margin-bottom: 0; font-size: 13px; color: #666666; margin-top: 15px;'><em>Tip: Please bookmark the access link for easy retrieval!</em></p>
+                                        <p style='margin-top: 0; font-weight: bold;'>What to Expect</p>
+                                        <p style='font-size: 15px; margin-bottom: 0;'>As a subscriber, you will receive a new issue of ChildArt delivered directly to your email inbox every quarter. We look forward to sharing these creative journeys with you!</p>
                                     </div>
 
                                     <p style='font-size: 14px; color: #666666;'>To manage your billing details or subscription status, please visit our <a href='$portal_link' style='color: #134380; text-decoration: underline;'>Secure Customer Portal</a>.</p>

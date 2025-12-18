@@ -71,24 +71,69 @@ if (($event['type'] ?? '') === 'checkout.session.completed') {
                    ?? null;
 
     if ($customer_email) {
-        $mailSubject = "Welcome! Your Magazine Subscription is Active";
+        $mailSubject = "Welcome to ICAF! Your Magazine Subscription is Active";
         
-        $textBody = "Thank you for subscribing!\n\n"
-                  . "We are so grateful for your support.\n"
-                  . "You can access the full magazine archive here:\n"
-                  . "$magazine_access_link \n\n"
-                  . "Please bookmark this link!\n\n"
-                  . "To manage your subscription, visit our Customer Portal: $portal_link";
+        $textBody = "Thank you for subscribing to ChildArt Magazine!\n\n"
+                  . "We are so grateful for your support in fostering children's creativity and empathy.\n\n"
+                  . "YOUR ACCESS\n"
+                  . "You can access the full digital magazine archive here:\n"
+                  . "$magazine_access_link\n\n"
+                  . "Please bookmark this link for future use.\n\n"
+                  . "MANAGE SUBSCRIPTION\n"
+                  . "To update your payment method or manage your subscription, visit our Customer Portal:\n"
+                  . "$portal_link\n\n"
+                  . "Best wishes,\n"
+                  . "The ICAF Team";
 
-        $htmlBody = "<html><body>"
-                  . "<h2>Thank you for subscribing!</h2>"
-                  . "<p>We are so grateful for your support.</p>"
-                  . "<p>You can access the full magazine archive at the link below:</p>"
-                  . "<p><a href='$magazine_access_link' style='background:#134380;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;'>View Magazines</a></p>"
-                  . "<p><strong>Please bookmark this link!</strong></p>"
-                  . "<hr>"
-                  . "<p><small>To manage your subscription, please visit the <a href='$portal_link'>Stripe Portal</a>.</small></p>"
-                  . "</body></html>";
+        $htmlBody = "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        </head>
+        <body style='margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f7f9; color: #333333;'>
+            <table border='0' cellpadding='0' cellspacing='0' width='100%'>
+                <tr>
+                    <td style='padding: 20px 0;'>
+                        <table align='center' border='0' cellpadding='0' cellspacing='0' width='600' style='background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+                            <tr>
+                                <td align='center' style='padding: 40px 20px; background-color: #134380;'>
+                                    <h1 style='color: #ffffff; margin: 0; font-size: 24px; letter-spacing: 1px;'>ICAF</h1>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 40px 30px;'>
+                                    <h2 style='color: #134380; margin-top: 0;'>Thank you for subscribing to ChildArt Magazine!</h2>
+                                    <p style='font-size: 16px; line-height: 1.6;'>We are so grateful for your support in fostering children's creativity and empathy through the arts.</p>
+                                    
+                                    <div style='margin: 30px 0; padding: 25px; background-color: #f9f9f9; border-left: 4px solid #134380;'>
+                                        <p style='margin-top: 0; font-weight: bold;'>Your Digital Access</p>
+                                        <p style='font-size: 15px;'>You now have full access to our digital magazine archive. Click the button below to start reading.</p>
+                                        <table border='0' cellpadding='0' cellspacing='0' style='margin-top: 20px;'>
+                                            <tr>
+                                                <td align='center' bgcolor='#134380' style='border-radius: 5px;'>
+                                                    <a href='$magazine_access_link' target='_blank' style='padding: 12px 25px; font-size: 16px; color: #ffffff; text-decoration: none; display: inline-block; font-weight: bold;'>View Magazine Archive</a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <p style='margin-bottom: 0; font-size: 13px; color: #666666; margin-top: 15px;'><em>Tip: Please bookmark the access link for easy retrieval!</em></p>
+                                    </div>
+
+                                    <p style='font-size: 14px; color: #666666;'>To manage your billing details or subscription status, please visit our <a href='$portal_link' style='color: #134380; text-decoration: underline;'>Secure Customer Portal</a>.</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 20px 30px; background-color: #f4f7f9; text-align: center;'>
+                                    <p style='font-size: 12px; color: #999999; margin: 0;'>&copy; " . date("Y") . " International Child Art Foundation.</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>";
 
         $mime = new Mail_mime(["eol" => "\r\n"]);
         $mime->setTXTBody($textBody);

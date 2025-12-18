@@ -10,19 +10,19 @@ export const ManageSubscriptionCallout = () => {
         Manage it in our secure portal.
       </p>
       <div className="">
-        <Button
-          className="rounded-full px-6 py-3 text-base"
-          variant="default"
-          size="lg"
+        <a
+          href={'https://billing.stripe.com/p/login/4gM6oJffa1Rvfgia62abK00'}
+          target="_blank"
+          rel="noopener noreferrer"
         >
-          <a
-            href={'https://billing.stripe.com/p/login/4gM6oJffa1Rvfgia62abK00'}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Button
+            className="rounded-full px-6 py-3 text-base"
+            variant="default"
+            size="lg"
           >
             Manage Subscription
-          </a>
-        </Button>
+          </Button>
+        </a>
       </div>
     </div>
   );

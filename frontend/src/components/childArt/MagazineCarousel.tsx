@@ -53,19 +53,20 @@ export default function MagazineCarousel() {
           the title of the ChildArt issue you ordered, so we can email it to
           you.
         </p>
-        <Button
-          className="mx-auto rounded-full px-14 py-3 text-lg"
-          variant="default"
-          size="lg"
+        <a
+          href={'https://buy.stripe.com/00w14p9UQ7bPd8a6TQabK02'}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mx-auto text-center"
         >
-          <a
-            href={'https://buy.stripe.com/00w14p9UQ7bPd8a6TQabK02'}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Button
+            className="mx-auto rounded-full px-14 py-3 text-lg"
+            variant="default"
+            size="lg"
           >
             Subscribe
-          </a>
-        </Button>
+          </Button>
+        </a>
         <div className="h-[2px] bg-gray-600 shadow-md"></div>
         <ManageSubscriptionCallout />
       </div>

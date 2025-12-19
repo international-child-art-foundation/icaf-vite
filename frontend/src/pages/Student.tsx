@@ -7,9 +7,9 @@ import { SpreadCreativity } from '@/components/student/SpreadCreativity';
 import { Seo } from '@/components/shared/Seo';
 
 const studentMetadata = {
-  title: 'Student | ICAF',
+  title: 'Students | ICAF',
   description: 'Bring your ideas to life by joining ICAF’s creative programs.',
-  path: '/get-involved/student',
+  path: '/get-involved/students',
 };
 
 export const Student = () => {

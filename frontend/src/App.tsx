@@ -111,7 +111,7 @@ export default function App() {
                 element={<ChildArtPage />}
               />
               <Route path="/programs/healing-arts" element={<HealingArts />} />
-              <Route path="/get-involved/student" element={<Student />} />
+              <Route path="/get-involved/students" element={<Student />} />
               <Route
                 path="/programs/peace-through-art"
                 element={<PeaceThroughArt />}
@@ -136,7 +136,7 @@ export default function App() {
                 path="/programs/climate-change"
                 element={<ClimateChange />}
               />
-              <Route path="/get-involved/volunteer" element={<Volunteer />} />
+              <Route path="/get-involved/volunteers" element={<Volunteer />} />
               <Route
                 path="/get-involved/professionals"
                 element={<Professionals />}

@@ -7,10 +7,10 @@ import { contactFormConfigs } from '@/data/contact';
 import { Seo } from '@/components/shared/Seo';
 
 const volunteerMetadata = {
-  title: 'Volunteer | ICAF',
+  title: 'Volunteers | ICAF',
   description:
     'ICAF volunteers bring their time, skills, and heart to help children express their creativity and grow through the arts.',
-  path: '/get-involved/volunteer',
+  path: '/get-involved/volunteers',
 };
 
 export const Volunteer = () => {

@@ -115,8 +115,8 @@ export const navItems: NavItem[] = [
     navLabel: 'Get Involved',
     children: [
       {
-        label: 'Volunteer',
-        href: '/get-involved/volunteer',
+        label: 'Volunteers',
+        href: '/get-involved/volunteers',
         imageSrc: volunteer,
         hoverDescription: 'Help ICAF achieve its vision.',
       },
@@ -127,8 +127,8 @@ export const navItems: NavItem[] = [
         hoverDescription: 'Collaborate professionally with ICAF.',
       },
       {
-        label: 'Student',
-        href: '/get-involved/student',
+        label: 'Students',
+        href: '/get-involved/students',
         imageSrc: student,
         hoverDescription: 'Express your creativity through ICAF initiatives.',
       },

@@ -24,7 +24,7 @@ export const YourDonationGiraffe = () => {
           </p>
           <div className="mt-6 flex flex-row justify-center gap-8 md:justify-start">
             <DonateButtonPure className="h-12 min-w-28 max-w-40 rounded-full font-sans text-base font-semibold lg:h-14 lg:w-36 2xl:text-xl" />
-            <Link to={'/get-involved/volunteer'}>
+            <Link to={'/get-involved/volunteers'}>
               <Button className="h-12 min-w-32 max-w-40 rounded-full font-sans text-base lg:h-14 lg:w-36 2xl:text-xl">
                 Get Involved
               </Button>

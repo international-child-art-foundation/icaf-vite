@@ -43,7 +43,7 @@ export const ArtsOlympiad = () => {
             </div>
             <p className="font-openSans text-base font-semibold leading-relaxed text-slate-600 md:text-lg">
               Selected young artists will represent their school districts or
-              countries at the 7th World Children's Festival in June 2026 on the
+              countries at the 7th World Children's Festival in July 2026 on the
               National Mall in Washington, D.C.
             </p>
           </section>
@@ -70,7 +70,7 @@ export const ArtsOlympiad = () => {
                   Winning artists will be invited to the 7th World Children’s
                   Festival in{' '}
                   <span className="font-semibold">
-                    June 2026 in Washington, D.C.
+                    July 2026 in Washington, D.C.
                   </span>
                 </p>
                 <p className="font-openSans text-base font-semibold text-slate-700 md:text-lg">

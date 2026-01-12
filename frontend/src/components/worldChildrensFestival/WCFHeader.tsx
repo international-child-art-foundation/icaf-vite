@@ -69,7 +69,7 @@ export default function WCFHeader() {
             world.{' '}
           </p>
           <p className="mb-4 text-base font-normal md:mb-6 md:text-xl xl:mb-6">
-            The 7th WCF is coming in June 2026. Will you be there?
+            The 7th WCF is coming in July 2026. Will you be there?
           </p>
           <a
             href="https://worldchildrensfestival.org/"

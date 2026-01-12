@@ -1,5 +1,5 @@
 import { CurvedImage } from '@/pages/CurvedImage';
-import TeamHeaderImg from '@/assets/shared/images/TeamHeader.webp';
+import TeamHeaderImg from '@/assets/team/team.webp';
 import { ArrowDown } from 'lucide-react';
 import { useWindowSize } from 'usehooks-ts';
 
@@ -50,7 +50,7 @@ const TeamHeader = ({ scrollFunction }: TeamHeaderProps) => {
           src={TeamHeaderImg}
           height={'700px'}
           objectFit="cover"
-          objectPosition="left bottom"
+          objectPosition="center top"
         />
       </div>
     </div>

@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 const IntroBanner: React.FC = () => {
   return (
     <div className="w-full py-12">
-      <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
+      <div className="overflow-hidden rounded-2xl bg-white">
         <div className="flex flex-col-reverse lg:flex-row">
           {/* Left Section - Text and Button */}
           <div className="flex items-center justify-center bg-blue-100 p-8 lg:w-1/2 lg:p-12">

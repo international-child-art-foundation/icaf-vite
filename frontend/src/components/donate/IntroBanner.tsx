@@ -17,8 +17,8 @@ const IntroBanner: React.FC = () => {
                 worldwide, ICAF cultivates their creativity and grows mutual
                 empathy for a prosperous and peaceful future.
               </p>
-              <div className="mt-4">
-                <Link to={'/about'}>
+              <div className="mt-4 flex">
+                <Link to={'/about'} className="mx-auto">
                   <Button className="mx-auto block h-14 rounded-full px-6 text-base tracking-wide">
                     More about us
                   </Button>

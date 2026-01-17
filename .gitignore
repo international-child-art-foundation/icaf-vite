@@ -30,3 +30,6 @@ frontend/public/documents/*
 *.sln
 *.sw?
 *.tsbuildinfo
+
+# LocalStack
+.localstack

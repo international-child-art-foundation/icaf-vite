@@ -20,7 +20,7 @@ export const YourDonationGiraffe = () => {
 
           <p className="font-montserrat text-2xl font-semibold leading-relaxed md:max-w-[70%] 2xl:max-w-[70%]">
             Your donation today will bring the arts to more children and help
-            them become creative and empathic
+            them become creative and empathic.
           </p>
           <div className="mt-6 flex flex-row justify-center gap-8 md:justify-start">
             <DonateButtonPure className="h-12 min-w-28 max-w-40 rounded-full font-sans text-base font-semibold lg:h-14 lg:w-36 2xl:text-xl" />

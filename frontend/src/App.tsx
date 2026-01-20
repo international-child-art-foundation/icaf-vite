@@ -32,6 +32,9 @@ const WorldChildrensFestival = lazy(
 const Team = lazy(() =>
   import('./pages/Team').then((m) => ({ default: m.Team })),
 );
+const Leadership = lazy(() =>
+  import('./pages/Leadership').then((m) => ({ default: m.Leadership })),
+);
 const Sponsorship = lazy(() =>
   import('./pages/Sponsorship').then((m) => ({ default: m.Sponsorship })),
 );
@@ -121,6 +124,7 @@ export default function App() {
               <Route path="/about/partners" element={<Partners />} />
               <Route path="/about/impact" element={<Impact />} />
               <Route path="/about/team" element={<Team />} />
+              <Route path="/about/leadership" element={<Leadership />} />
               <Route path="/about/history" element={<History />} />
 
               <Route path="/donate" element={<Donate />} />

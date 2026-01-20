@@ -1,7 +1,8 @@
-import TeamImage from '@/assets/shared/images/TeamHeader.webp';
+import TeamImage from '@/assets/shared/images/teamHeader.webp';
 import EthicsImage from '@/assets/shared/images/about/more/Ethics.webp';
 import PartnersImage from '@/assets/shared/images/about/more/Partners.webp';
 import ImpactImage from '@/assets/shared/images/about/more/Impact.webp';
+import BoardImage from '@/assets/shared/images/icafGroupPhoto.webp';
 
 //images converted to webp, but may need check resizing later
 export interface MoreOnOurSite {
@@ -15,14 +16,15 @@ export interface MoreOnOurSite {
 }
 
 export const moreOnOurSiteData: MoreOnOurSite[] = [
-  // {
-  //   id: 1,
-  //   title: 'Leadership',
-  //   description:
-  //     "Meet the dedicated leaders who oversee ICAF's strategic direction and ensure the fulfillment of its mission. Their expertise drives the organization’s long-term success and impact.",
-  //   image: BoardOfDirectorsImage,
-  //   link: '/about/team',
-  // },
+  {
+    id: 1,
+    title: 'Leadership',
+    description:
+      "Meet the dedicated leaders who oversee ICAF's strategic direction and ensure the fulfillment of its mission. Their expertise drives the organization’s long-term success and impact.",
+    image: BoardImage,
+    buttonText: 'Meet Our Leaders',
+    link: '/about/leadership',
+  },
   // TODO: Financials page and link
   // {
   //   id: 2,

@@ -13,6 +13,7 @@ import student from '../assets/shared/images/navigation/getInvolved/student_smal
 import volunteer from '../assets/shared/images/navigation/getInvolved/volunteer.webp';
 import latest from '../assets/shared/images/navigation/news/latestNews_small.webp';
 import upcoming from '../assets/shared/images/navigation/news/upcomingEvents.webp';
+import board from '@/assets/shared/images/icafGroupPhoto.webp';
 
 export interface NavChild {
   label: string;
@@ -49,6 +50,12 @@ export const navItems: NavItem[] = [
         href: '/about/team',
         imageSrc: team,
         hoverDescription: 'Learn about the people that work in ICAF.',
+      },
+      {
+        label: 'Leadership',
+        href: '/about/leadership',
+        imageSrc: board,
+        hoverDescription: "Learn about ICAF's leadership.",
       },
       {
         label: 'Partners',

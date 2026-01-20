@@ -1,5 +1,5 @@
 import { CurvedImage } from './CurvedImage';
-import WorldMural from '@/assets/impact/worldMural.webp';
+import WorldMural from '@/assets/impact/WorldMural.webp';
 import AccordionDropdowns from '@/components/shared/AccordionDropdowns';
 import MissionDropdownData from '@/data/impact/impactMissionDropdownData';
 import DancingImg from '@/assets/impact/Dancing.webp';

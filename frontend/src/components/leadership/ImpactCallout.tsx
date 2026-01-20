@@ -1,4 +1,4 @@
-import worldMural from '@/assets/leadership/WorldMural.webp';
+import worldMural from '@/assets/leadership/worldMural.webp';
 import { Button } from '../ui/button';
 import { Link } from 'react-router-dom';
 

@@ -5,5 +5,4 @@ export interface IResearchAndPublicationsItem {
   author?: string;
   date?: string;
   link: string;
-  external: boolean;
 }

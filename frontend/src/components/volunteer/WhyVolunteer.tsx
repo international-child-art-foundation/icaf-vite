@@ -1,8 +1,8 @@
 import ClimateFestivalImg from '@/assets/volunteer/volunteerGroup.webp';
 
-const sectionTitleClasses = 'font-montserrat text-4xl font-semibold';
+const sectionTitleClasses = 'font-montserrat text-4xl font-semibold mx-auto';
 const rightImageWrapperClasses = 'overflow-hidden rounded-xl';
-const rightImageClasses = 'h-full w-full object-cover';
+const rightImageClasses = 'h-full lg:max-h-[420px] w-full object-cover';
 
 export const WhyVolunteer = () => {
   return (

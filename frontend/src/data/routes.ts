@@ -25,6 +25,10 @@ export const routes: RouteAliasGroup[] = [
     aliases: ['/team', '/staff'],
   },
   {
+    main: '/about/leadership',
+    aliases: ['/board', '/board-members', '/board-member'],
+  },
+  {
     main: '/about/history',
     aliases: ['/history', '/our-history'],
   },

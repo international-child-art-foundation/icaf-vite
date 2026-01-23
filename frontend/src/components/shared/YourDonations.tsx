@@ -17,7 +17,7 @@ export default function YourDonations() {
 
           <p className="font-montserrat text-2xl font-semibold leading-relaxed md:max-w-[85%] 2xl:max-w-[70%]">
             Your donation today will bring the arts to more children and help
-            them become creative and empathic
+            them become creative and empathic.
           </p>
           <div className="mt-6 grid grid-cols-2 justify-center gap-2 sm:mx-auto sm:w-[80%] sm:gap-8 md:mx-[unset] md:w-[60%] md:justify-start lg:flex lg:flex-row lg:gap-6">
             <DonateButtonPure className="justify-left h-12 rounded-full font-sans text-base font-semibold lg:h-14 lg:w-36 2xl:text-xl" />

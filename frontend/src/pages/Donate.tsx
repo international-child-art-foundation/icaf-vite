@@ -117,7 +117,7 @@ export default function Donate() {
                             <img
                               src={artwork.image}
                               alt={artwork.alt}
-                              className="rounded-lg shadow-md"
+                              className="rounded-lg"
                             />
                           </div>
                           <p className="text-sm font-medium text-black">

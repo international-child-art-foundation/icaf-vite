@@ -6,6 +6,7 @@ import { ScrollToTop } from '@/components/team/ScrollToTop';
 import { useRef } from 'react';
 import { TeamExtendedStaff } from '../components/team/TeamExtendedStaff';
 import { Seo } from '@/components/shared/Seo';
+import { scrollToSection } from '@/lib/utils';
 
 const teamMetadata = {
   title: 'Team | ICAF',
@@ -17,23 +18,16 @@ const teamMetadata = {
 export const Team = () => {
   const HEADER_OFFSET = 110;
 
+  const topRef = useRef<HTMLDivElement | null>(null);
   const staffRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToSection = () => {
-    if (staffRef.current) {
-      const y =
-        staffRef.current.getBoundingClientRect().top +
-        window.scrollY -
-        HEADER_OFFSET;
-      window.scrollTo({ top: y, behavior: 'smooth' });
-    }
-  };
+  const handleScrollToStaff = () => scrollToSection(staffRef, HEADER_OFFSET);
 
   return (
     <>
       <Seo {...teamMetadata} />
-      <div className="flex flex-col">
-        <TeamHeader scrollFunction={scrollToSection} />
+      <div ref={topRef} className="flex flex-col">
+        <TeamHeader scrollFunction={handleScrollToStaff} />
         <div
           ref={staffRef}
           className="flex max-w-screen-2xl flex-col gap-16 px-8 md:px-12 lg:px-16 xl:px-20"
@@ -42,8 +36,9 @@ export const Team = () => {
           <TeamExtendedStaff />
           <Creativity />
           <ScrollToTop
-            scrollFunction={scrollToSection}
+            targetRef={topRef}
             flairColor={'primaryBlue'}
+            offset={0}
           />
         </div>
       </div>

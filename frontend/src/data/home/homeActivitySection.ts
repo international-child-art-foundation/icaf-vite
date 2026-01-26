@@ -40,7 +40,7 @@ export const HomeActivities: IActivitySection = [
   [
     {
       id: 5,
-      title: 'Quarterly Magazine',
+      title: 'ChildArt Magazine',
       description:
         'An arts learning, new skill development, and global competency publication.',
       img: magazineImage,
@@ -62,7 +62,7 @@ export const HomeActivities: IActivitySection = [
     },
     {
       id: 8,
-      title: 'Research & writings',
+      title: 'Research & Publications',
       description:
         'Share with professionals what we have learned from and about children.',
       img: environmentImage,

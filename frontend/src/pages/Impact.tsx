@@ -56,11 +56,12 @@ const Impact = () => {
                 Making an Impact
               </h2>
               <p className="text-xl">
-                Every day, thousands of kids learn about ICAF from their friends
-                or online, helping them see themselves as creative individuals.
-                They realize that their imagination can lead to new discoveries
-                and innovations, and they know that their art is a true and
-                honest form of expression.
+                Every day, thousands of kids learn about ICAF and its programs
+                from their friends or online. Participation in our programs can
+                help them see themselves as creative individuals. Through art,
+                children realize that their imagination can lead to new
+                discoveries and innovations, and that their creations are a true
+                and honest form of expression.
               </p>
             </div>
             <div className="grid gap-4 lg:grid-cols-2">
@@ -81,7 +82,7 @@ const Impact = () => {
                   </h3>
                   <p className="text-xl">
                     Our festivals and exhibitions have attracted about 2.5
-                    million participants and visitors in major cities worldwide
+                    million participants and visitors in major cities worldwide.
                   </p>
                 </div>
                 <div className="grid gap-3">

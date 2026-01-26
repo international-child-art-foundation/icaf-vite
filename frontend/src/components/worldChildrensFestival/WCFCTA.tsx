@@ -14,7 +14,7 @@ export default function WCFCTA() {
             {' '}
             The 7th World Children’s Festival is scheduled for July 25–July 27,
             2026. Join the children at the National Mall across the U.S. Capitol
-            or support them with you donation today.
+            or support them with your donation today.
           </p>
           <a
             href="https://worldchildrensfestival.org/"

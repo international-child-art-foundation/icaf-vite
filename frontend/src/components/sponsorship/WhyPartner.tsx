@@ -14,7 +14,7 @@ export const WhyPartner = () => {
           Why Partner with ICAF
         </h2>
         <p className="text-lg">
-          Let customer and employees admire your company as a child-friendly
+          Let customers and employees recognize your company as a child-friendly
           business.
         </p>
       </div>

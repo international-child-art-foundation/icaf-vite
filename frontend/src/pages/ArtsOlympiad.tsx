@@ -8,7 +8,7 @@ import { Seo } from '@/components/shared/Seo';
 const artsOlympiadMetadata = {
   title: 'Arts Olympaid | ICAF',
   description:
-    'The Arts Olympiad is a school art program and an afterschool art program for students aged 8 to 12. ',
+    "ICAF's Arts Olympiad is a school art program and an afterschool art program for students aged 8 to 12. ",
   path: '/programs/arts-olympiad',
 };
 
@@ -27,10 +27,10 @@ export const ArtsOlympiad = () => {
           <section className="flex flex-col gap-4 lg:items-center">
             <div className="flex flex-col gap-6">
               <p className="font-openSans text-lg font-semibold leading-relaxed text-slate-800 md:text-xl">
-                The Arts Olympiad is a school art program and an afterschool art
-                program for students aged 8 to 12. The Arts Olympiad has grown
-                over the past 25 years into the world's largest such program,
-                partly because it is free of charge.
+                ICAF's Arts Olympiad is the largest in-school and after-school
+                arts program of its kind. Established more than 25 years ago,
+                the Arts Olympiad cultivates creativity for young students and
+                participation is free.
               </p>
             </div>
             <div className="relative h-72 w-full overflow-hidden rounded-2xl shadow-md sm:h-80 md:h-[500px]">

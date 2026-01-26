@@ -67,7 +67,7 @@ export const studentParticipationItems: IStudentParticipationItem[] = [
   },
   {
     id: 'world-childrens-festival',
-    title: <>Experience World Children’s Festival</>,
+    title: <>Experience the World Children’s Festival</>,
     forAges: 'For all ages',
     bodyText1:
       'Meet creative kids from everywhere and share your art in Washington, D.C., this summer.',

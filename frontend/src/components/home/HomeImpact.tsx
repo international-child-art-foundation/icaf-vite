@@ -17,9 +17,8 @@ export const HomeImpact = () => {
           Educational & Cultural Impact
         </h2>
         <p className="font-sans text-base md:text-center xl:text-2xl">
-          ICAF serves American children as their national art and creativity
-          organization and the world’s children as their global art and
-          creativity organization.
+          ICAF serves both American children and children across the globe as an
+          international art and creativity organization.
         </p>
       </div>
 

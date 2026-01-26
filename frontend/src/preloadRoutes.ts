@@ -11,6 +11,7 @@ const preloaders: Preloader[] = [
   () => import('./pages/WorldChildrensFestivalPage'),
   () => import('./pages/Team'),
   () => import('./pages/Leadership'),
+  () => import('./pages/ResearchAndPublications'),
   () => import('./pages/Sponsorship'),
   () => import('./pages/HealingArts'),
   () => import('./pages/PeaceThroughArt'),

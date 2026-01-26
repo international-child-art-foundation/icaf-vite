@@ -14,6 +14,7 @@ import volunteer from '../assets/shared/images/navigation/getInvolved/volunteer.
 import latest from '../assets/shared/images/navigation/news/latestNews_small.webp';
 import upcoming from '../assets/shared/images/navigation/news/upcomingEvents.webp';
 import board from '@/assets/shared/images/icafGroupPhoto.webp';
+import researchAndPublications from '@/assets/shared/images/about/UnitedStatesSLKorth.webp';
 
 export interface NavChild {
   label: string;
@@ -56,6 +57,12 @@ export const navItems: NavItem[] = [
         href: '/about/leadership',
         imageSrc: board,
         hoverDescription: "Learn about ICAF's leadership.",
+      },
+      {
+        label: 'Research & Publications',
+        href: '/about/research-and-publications',
+        imageSrc: researchAndPublications,
+        hoverDescription: 'Read our academic literature.',
       },
       {
         label: 'Partners',

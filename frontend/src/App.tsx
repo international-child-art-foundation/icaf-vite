@@ -35,6 +35,11 @@ const Team = lazy(() =>
 const Leadership = lazy(() =>
   import('./pages/Leadership').then((m) => ({ default: m.Leadership })),
 );
+const ResearchAndPublications = lazy(() =>
+  import('./pages/ResearchAndPublications').then((m) => ({
+    default: m.ResearchAndPublications,
+  })),
+);
 const Sponsorship = lazy(() =>
   import('./pages/Sponsorship').then((m) => ({ default: m.Sponsorship })),
 );
@@ -125,6 +130,10 @@ export default function App() {
               <Route path="/about/impact" element={<Impact />} />
               <Route path="/about/team" element={<Team />} />
               <Route path="/about/leadership" element={<Leadership />} />
+              <Route
+                path="/about/research-and-publications"
+                element={<ResearchAndPublications />}
+              />
               <Route path="/about/history" element={<History />} />
 
               <Route path="/donate" element={<Donate />} />

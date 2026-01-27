@@ -13,27 +13,27 @@ export const boardMembers: IBoardMember[] = [
   },
   {
     name: 'Katty Guerami',
-    title: 'Co-founder',
+    title: 'ICAF Co-founder',
     link: 'https://www.linkedin.com/in/katty-guerami-74a99014/',
   },
   {
-    name: 'D Paul Schafer',
-    title: 'ICAF Advisory Board Member',
+    name: 'D. Paul Schafer',
+    title: 'Founder, World Culture Project',
     link: 'https://www.linkedin.com/in/paul-schafer-83204527/?originalSubdomain=ca',
   },
   {
     name: 'Dr. Hina Inam',
-    title: 'ICAF Representative in Argentina',
+    title: 'Cardio Thoracic Surgeon',
     link: 'https://www.linkedin.com/in/hina-i-016b25a9/',
   },
   {
     name: 'Professor Mihai Nadin',
-    title: 'ICAF Advisory Board Member',
+    title: 'Director, Institute for Research in Anticipatory Systems',
     link: 'https://www.linkedin.com/in/nadin/',
   },
   {
     name: 'Dr. Ashfaq Ishaq',
-    title: 'Founder and Chair',
+    title: 'ICAF Founder and Chair',
     link: 'https://www.linkedin.com/in/ashfaqishaq/',
   },
   {
@@ -43,7 +43,7 @@ export const boardMembers: IBoardMember[] = [
   },
   {
     name: 'Judy Layne-Banks',
-    title: 'ICAF Arts Olympiad Organizer',
+    title: 'Artist and School Art Teacher',
     link: 'https://www.facebook.com/judy.laynebanks.9/',
   },
   {
@@ -53,12 +53,17 @@ export const boardMembers: IBoardMember[] = [
   },
   {
     name: 'Frederick Marks',
-    title: 'ICAF Advisory Board Member',
+    title: 'Visiting Scholar, Salk Institute',
     link: 'https://www.linkedin.com/in/frederick-marks-01a38b6/',
   },
   {
-    name: 'Sorasicha Nithikasem',
-    title: 'ICAF Advisory Board Member',
+    name: 'Sora Nithikasem',
+    title: 'General Surgery Resident Physician',
     link: 'https://www.linkedin.com/in/sorasicha-nithikasem-5a214642/',
+  },
+  {
+    name: 'Sergey Eylanbekov',
+    title: 'Sculptor for The Dwight D. Eisenhower Memorial',
+    link: 'https://eylanbekov.com/',
   },
 ];

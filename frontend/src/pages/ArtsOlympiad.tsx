@@ -66,12 +66,13 @@ export const ArtsOlympiad = () => {
                   <span className="font-semibold">aged 8–12</span> that blends
                   creativity with physical activity. Schools, studios, and
                   homeschoolers can participate before{' '}
-                  <span className="font-semibold">February 20, 2026</span>.
-                  Winning artists will be invited to the 7th World Children’s
-                  Festival in{' '}
+                  <span className="font-semibold">March 20, 2026</span>. Winning
+                  artists will be invited to the 7th World Children’s Festival
+                  in{' '}
                   <span className="font-semibold">
-                    July 2026 in Washington, D.C.
-                  </span>
+                    July 25-27, 2026 on the National Mall
+                  </span>{' '}
+                  across from the U.S. Capitol.
                 </p>
                 <p className="font-openSans text-base font-semibold text-slate-700 md:text-lg">
                   🛡 Officially recognized by the U.S. Olympic & Paralympic
@@ -194,7 +195,7 @@ export const ArtsOlympiad = () => {
                 </div>
                 <div>
                   <a
-                    href="/documents/7th Arts Olympiad Lesson Plan.pdf"
+                    href="/documents/7th Arts Olympiad Lesson Plan January 2026.pdf"
                     download
                     className="bg-primary inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold tracking-[0.14em] text-[#FFD743]"
                   >

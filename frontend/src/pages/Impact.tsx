@@ -37,7 +37,7 @@ const Impact = () => {
         {/* Body */}
         <div className="relative mt-16 grid w-full gap-20">
           {/* Better World with Creativity Section */}
-          <div className="grid max-w-screen-2xl gap-8 px-8 md:px-12 lg:px-16 xl:px-20">
+          <div className="max-w-screen-3xl grid gap-8 px-8 md:px-12 lg:px-16 xl:px-20">
             <h2 className="font-montserrat text-center text-3xl font-extrabold">
               Building a Better World with Creativity
             </h2>
@@ -50,7 +50,7 @@ const Impact = () => {
             <AccordionDropdowns data={MissionDropdownData} />
           </div>
           {/* Making an Impact section */}
-          <div className="grid-col grid max-w-screen-2xl gap-20 px-8 md:px-12 lg:px-16 xl:px-20">
+          <div className="grid-col max-w-screen-3xl grid gap-20 px-8 md:px-12 lg:px-16 xl:px-20">
             <div className="grid gap-8">
               <h2 className="font-montserrat text-center text-3xl font-extrabold">
                 Making an Impact
@@ -112,7 +112,7 @@ const Impact = () => {
             </div>
           </div>
           {/* Children's voices section */}
-          <div className="flex max-w-screen-2xl flex-col gap-8 overflow-hidden px-8 md:px-12 lg:px-16 xl:px-20">
+          <div className="max-w-screen-3xl flex flex-col gap-8 overflow-hidden px-8 md:px-12 lg:px-16 xl:px-20">
             <h2 className="font-montserrat text-center text-3xl font-extrabold">
               Bringing Children's Voices to the World
             </h2>

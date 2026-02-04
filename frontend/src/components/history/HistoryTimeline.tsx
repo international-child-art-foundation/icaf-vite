@@ -43,7 +43,7 @@ export const HistoryTimeline = ({ mode }: HistoryTimelineProps) => {
           </div>
         ) : (
           <div
-            className={`flex max-w-screen-2xl flex-col px-8 md:px-12 lg:px-16 xl:px-20`}
+            className={`max-w-screen-3xl flex flex-col px-8 md:px-12 lg:px-16 xl:px-20`}
           >
             <div className="bg-tertiary-red -ml-3 h-7 w-7 rounded-full"></div>
             <div className="bg-tertiary-red h-24 w-1"></div>

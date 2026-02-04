@@ -1,7 +1,7 @@
 export const ProfessionalsIntro = () => {
   return (
     <div>
-      <div className="mt-4 flex max-w-screen-2xl flex-col gap-8 px-8 md:px-12 lg:mt-12 lg:px-16 xl:px-20">
+      <div className="max-w-screen-3xl mt-4 flex flex-col gap-8 px-8 md:px-12 lg:mt-12 lg:px-16 xl:px-20">
         <h2 className="font-montserrat text-4xl font-semibold">
           Your Influence Can Democratize Creativity
         </h2>

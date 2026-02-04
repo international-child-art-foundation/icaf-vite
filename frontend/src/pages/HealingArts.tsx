@@ -19,7 +19,7 @@ export const HealingArts = () => {
       <Seo {...healingArtsMetadata} />
       <div className="">
         <HealingArtsHeader />
-        <div className="flex max-w-screen-2xl flex-col gap-12 px-8 md:px-12 lg:px-16 xl:px-20">
+        <div className="max-w-screen-3xl flex flex-col gap-12 px-8 md:px-12 lg:px-16 xl:px-20">
           <ProgramPhilosophy />
           <AidMap />
           <ImpactVideo />

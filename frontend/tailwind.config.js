@@ -4,8 +4,14 @@ module.exports = {
   content: ['./index.html', './src/**/*.{html,js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      screens: {
+        xs: '428px',
+      },
       backgroundOpacity: {
         8: '0.08',
+      },
+      maxWidth: {
+        'max-w-screen-3xl': '1920px',
       },
       borderRadius: {
         lg: 'var(--radius)',

@@ -13,11 +13,11 @@ export default function BackIssueGrid() {
   }, []);
 
   return (
-    <section className="mx-auto mt-16 w-full max-w-screen-2xl px-5 md:px-20 lg:px-20 xl:px-28 2xl:px-36">
+    <section className="max-w-screen-3xl mx-auto mt-16 w-full">
       <h2 className="mb-4 text-center text-2xl font-bold md:text-3xl">
         Back issues of <span className="italic">ChildArt</span>
       </h2>
-      <p className="text-lef mx-auto mb-8 text-gray-700">
+      <p className="mx-auto mb-8 text-left text-gray-700">
         You can choose from a list of the quarterly magazine’s past issues. Each
         magazine covers a relevant and timely subject. The information is
         presented in an exciting, colorful way for young readers to cherish.

@@ -35,7 +35,7 @@ export default function ChildArtPage() {
   return (
     <>
       <Seo {...childArtMetadata} />
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center gap-[100px] md:gap-[120px] lg:gap-[130px] xl:gap-[140px] 2xl:gap-[150px]">
         {/* === Hero Section with Curved Image === */}
         <div className="relative w-full">
           {/* Background image */}

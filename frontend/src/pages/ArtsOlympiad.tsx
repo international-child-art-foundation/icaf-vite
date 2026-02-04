@@ -17,7 +17,7 @@ export const ArtsOlympiad = () => {
     <>
       <Seo {...artsOlympiadMetadata} />
       <div className="flex w-full justify-center">
-        <main className="mt-10 flex w-full max-w-screen-2xl flex-col gap-10 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
+        <main className="max-w-screen-3xl mt-10 flex w-full flex-col gap-10 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
           <header className="flex flex-col gap-2">
             <h1 className="font-montserrat text-primary text-3xl font-extrabold md:text-4xl lg:text-5xl">
               The Arts Olympiad

@@ -36,7 +36,7 @@ export const ClimateChangeInfo = () => {
             >
               World Children's Festival
             </a>{' '}
-            which opens with{' '}
+            ,which begins with{' '}
             <a
               href="https://worldchildrensfestival.org/health-and-environment-day"
               className={linkClasses}
@@ -45,9 +45,9 @@ export const ClimateChangeInfo = () => {
             >
               Health & Environment Day
             </a>
-            , young artists learn about our changing planet, find their voice,
-            and see that their creativity can inspire action, from families and
-            classrooms to entire communities.
+            , young artists learn about our changing planet, find their voices,
+            and discover that their creativity can inspire action: within their
+            families, classrooms, and entire communities.
           </p>
         </div>
 

@@ -11,7 +11,7 @@ export const SpreadCreativity = () => {
   const size = useWindowSize();
   return (
     <div className="my-12 flex flex-col gap-32">
-      <div className="grid max-w-screen-2xl grid-cols-1 grid-rows-1 pr-4">
+      <div className="max-w-screen-3xl grid grid-cols-1 grid-rows-1 pr-4">
         <div className="col-start-1 row-start-1">
           {size.width > 768 ? (
             <img src={blueBackground} className="xl:-mt-4 xl:ml-8" />

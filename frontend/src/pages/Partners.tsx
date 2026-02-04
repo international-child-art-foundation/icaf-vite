@@ -181,7 +181,7 @@ export default function Partners() {
   return (
     <>
       <Seo {...partnersMetadata} />
-      <div className="mx-auto box-border flex min-h-screen w-full max-w-screen-2xl flex-col px-0">
+      <div className="max-w-screen-3xl mx-auto box-border flex min-h-screen w-full flex-col px-0">
         <NavigationBar />
         <main className="flex-1">
           {/* First Section */}
@@ -220,7 +220,7 @@ export default function Partners() {
 
           {/* Global Partnerships Section */}
           <section className="py-16">
-            <div className="mx-auto flex max-w-screen-2xl flex-col gap-8 px-8 md:px-12 lg:gap-12 lg:px-16 xl:px-20">
+            <div className="max-w-screen-3xl mx-auto flex flex-col gap-8 px-8 md:px-12 lg:gap-12 lg:px-16 xl:px-20">
               <h2 className="font-montserrat text-center text-3xl font-bold md:text-4xl">
                 Our Global Partnerships
               </h2>

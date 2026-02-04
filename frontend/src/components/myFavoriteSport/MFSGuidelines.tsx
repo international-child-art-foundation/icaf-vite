@@ -130,7 +130,7 @@ export const MFSGuidelines = () => {
   return (
     <section
       aria-label="Submission guidelines."
-      className="relative mb-16 mt-16 flex max-w-screen-2xl flex-col lg:mx-auto"
+      className="max-w-screen-3xl relative mb-16 mt-16 flex flex-col lg:mx-auto"
     >
       <p className="font-montserrat z-10 text-3xl font-semibold md:text-4xl">
         About the contest

@@ -35,11 +35,19 @@ export const designerData: IGroupsAndMembers[] = [
 export const officerData: IGroupsAndMembers[] = [
   {
     name: 'Social Media Officer',
-    members: [{ name: 'Xiaowei Wu' }],
+    members: [{ name: 'Ashley Bostic' }],
   },
   {
-    name: 'Arts Olympiad Officer',
-    members: [{ name: 'Gina Golden' }],
+    name: 'Program & Event Officers',
+    members: [
+      { name: 'Camie Graves' },
+      { name: 'Sylvia Tong' },
+      { name: 'Jack Wesley Wilkerson' },
+    ],
+  },
+  {
+    name: 'Writer & Researcher',
+    members: [{ name: 'Ava Saunders' }],
   },
   {
     name: 'Communications Officer',

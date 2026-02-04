@@ -27,7 +27,7 @@ const TeamHeader = ({ scrollFunction }: TeamHeaderProps) => {
 
   return (
     <div className="grid w-full grid-cols-1 grid-rows-1">
-      <div className="font-montserrat z-10 col-start-1 row-start-1 mt-44 flex max-w-screen-2xl flex-col gap-4 p-10 px-8 text-3xl font-extrabold text-white md:mt-44 md:px-12 md:text-4xl lg:mt-44 lg:px-16 lg:text-6xl xl:px-20">
+      <div className="font-montserrat max-w-screen-3xl z-10 col-start-1 row-start-1 mt-44 flex flex-col gap-4 p-10 px-8 text-3xl font-extrabold text-white md:mt-44 md:px-12 md:text-4xl lg:mt-44 lg:px-16 lg:text-6xl xl:px-20">
         <div className="flex flex-col gap-0 text-left md:gap-4 md:text-center">
           <h1 className="text-[#FFD743]">Meet the People</h1>
           <h1>Behind ICAF's Mission</h1>

@@ -11,7 +11,7 @@ export const NewsList = () => {
   }, []);
 
   return (
-    <div className="my-4 flex max-w-screen-2xl flex-col gap-2 rounded-lg bg-gray-50/40 p-4 px-2 md:my-6 md:p-6 md:px-6 lg:my-8 lg:p-8 lg:px-10 xl:my-10 xl:p-10 xl:px-14">
+    <div className="max-w-screen-3xl my-4 flex flex-col gap-2 rounded-lg bg-gray-50/40 p-4 px-2 md:my-6 md:p-6 md:px-6 lg:my-8 lg:p-8 lg:px-10 xl:my-10 xl:p-10 xl:px-14">
       {newsList.map((newsItem: INewsItem, idx) => (
         <NewsItem
           key={newsItem.body + newsItem.date + newsItem.source}

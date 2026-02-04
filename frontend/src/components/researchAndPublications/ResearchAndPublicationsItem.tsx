@@ -9,7 +9,7 @@ export const ResearchAndPublicationsItem = ({
   date,
 }: IResearchAndPublicationsItem) => {
   return (
-    <div className="bg-primary-muted/15 hover:bg-primary-muted/30 group rounded-xl p-4 transition-all sm:p-8">
+    <div className="bg-primary-muted/15 border-primary-muted/15 hover:bg-primary-muted/5 group rounded-xl border-2 p-4 transition-all sm:p-8">
       <div className="grid h-auto w-full grid-cols-2 grid-rows-[auto_1fr] gap-x-6 overflow-hidden md:h-[400px]">
         <div className="col-span-2 row-start-1 flex flex-col gap-1 md:col-span-1">
           <p className="text-md italic text-gray-900">

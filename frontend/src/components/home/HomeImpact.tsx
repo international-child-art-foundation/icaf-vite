@@ -17,13 +17,12 @@ export const HomeImpact = () => {
           Educational & Cultural Impact
         </h2>
         <p className="font-sans text-base md:text-center xl:text-2xl">
-          ICAF serves American children as their national art and creativity
-          organization and the world’s children as their global art and
-          creativity organization.
+          ICAF serves both American children and children across the globe as an
+          international art and creativity organization.
         </p>
       </div>
 
-      <div className="grid-rows-auto relative grid max-w-screen-2xl grid-cols-1 gap-6 lg:grid-cols-10 lg:grid-rows-5">
+      <div className="grid-rows-auto max-w-screen-3xl relative grid grid-cols-1 gap-6 lg:grid-cols-10 lg:grid-rows-5">
         <div className="h-full lg:col-span-3 lg:col-start-1 lg:row-span-2 lg:row-start-1">
           <TitleDescriptionCard
             title={'Pedagogy'}

@@ -16,7 +16,7 @@ export default function WorldChildrensFestival() {
   return (
     <>
       <Seo {...WCFMetadata} />
-      <div className="overflow-hidden">
+      <div className="flex flex-col gap-[100px] overflow-hidden md:gap-[120px] lg:gap-[130px] xl:gap-[140px] 2xl:gap-[150px]">
         <WCFHeader />
         <FestivalHighlights />
         <OurLegacy />

@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 import { PTALearnMoreData } from '@/data/peaceThroughArt/PeaceThroughArtData';
 export const PTALearnMore = () => {
   return (
-    <div className="max-w-screen-2xl px-8 py-16 sm:pt-32 md:px-12 lg:px-16 lg:pt-32 xl:px-20 xl:pt-12">
+    <div className="max-w-screen-3xl px-8 py-16 sm:pt-32 md:px-12 lg:px-16 lg:pt-32 xl:px-20 xl:pt-12">
       <div className="flex flex-col gap-4 rounded-[20px] bg-[#FFF2D9] p-8 py-12">
         <h2 className="font-montserrat text-[40px] font-extrabold">
           Learn More

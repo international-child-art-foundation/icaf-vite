@@ -9,7 +9,7 @@ export const specialProjectData: TSpecialProjectGroup = [
     image: Wcf,
     title: '7th World Children’s Festival ',
     description:
-      'A three-day celebration on the National Mall of children’s creativity and America’s 250th Anniversary.',
+      "A three-day celebration of children's creativity and America's 250th anniversary on the National Mall",
     href: 'https://worldchildrensfestival.org/',
     color: 'red',
   },
@@ -18,14 +18,14 @@ export const specialProjectData: TSpecialProjectGroup = [
     image: Swimmer,
     title: 'My Favorite Sport',
     description:
-      'An online art contest for young people’s interactive engagement in the Games.',
+      "An online art contest for young people's interactive engagement with the sports that inspire them",
     href: 'https://myfavoritesport.org/',
     color: 'blue',
   },
   {
     id: 3,
     image: Phoenix,
-    title: 'VR Heaven 2025/2026',
+    title: 'VR Heaven 2026',
     description: 'Virtual Reality that brings Heaven to Earth',
     color: 'yellow',
   },

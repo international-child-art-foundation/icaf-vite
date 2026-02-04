@@ -8,7 +8,7 @@ import { Seo } from '@/components/shared/Seo';
 const artsOlympiadMetadata = {
   title: 'Arts Olympaid | ICAF',
   description:
-    'The Arts Olympiad is a school art program and an afterschool art program for students aged 8 to 12. ',
+    "ICAF's Arts Olympiad is a school art program and an afterschool art program for students aged 8 to 12. ",
   path: '/programs/arts-olympiad',
 };
 
@@ -17,7 +17,7 @@ export const ArtsOlympiad = () => {
     <>
       <Seo {...artsOlympiadMetadata} />
       <div className="flex w-full justify-center">
-        <main className="mt-10 flex w-full max-w-screen-2xl flex-col gap-10 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
+        <main className="max-w-screen-3xl mt-10 flex w-full flex-col gap-10 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
           <header className="flex flex-col gap-2">
             <h1 className="font-montserrat text-primary text-3xl font-extrabold md:text-4xl lg:text-5xl">
               The Arts Olympiad
@@ -27,10 +27,10 @@ export const ArtsOlympiad = () => {
           <section className="flex flex-col gap-4 lg:items-center">
             <div className="flex flex-col gap-6">
               <p className="font-openSans text-lg font-semibold leading-relaxed text-slate-800 md:text-xl">
-                The Arts Olympiad is a school art program and an afterschool art
-                program for students aged 8 to 12. The Arts Olympiad has grown
-                over the past 25 years into the world's largest such program,
-                partly because it is free of charge.
+                ICAF's Arts Olympiad is the largest in-school and after-school
+                arts program of its kind. Established more than 25 years ago,
+                the Arts Olympiad cultivates creativity for young students and
+                participation is free.
               </p>
             </div>
             <div className="relative h-72 w-full overflow-hidden rounded-2xl shadow-md sm:h-80 md:h-[500px]">
@@ -66,12 +66,13 @@ export const ArtsOlympiad = () => {
                   <span className="font-semibold">aged 8–12</span> that blends
                   creativity with physical activity. Schools, studios, and
                   homeschoolers can participate before{' '}
-                  <span className="font-semibold">February 20, 2026</span>.
-                  Winning artists will be invited to the 7th World Children’s
-                  Festival in{' '}
+                  <span className="font-semibold">March 20, 2026</span>. Winning
+                  artists will be invited to the 7th World Children’s Festival
+                  in{' '}
                   <span className="font-semibold">
-                    July 2026 in Washington, D.C.
-                  </span>
+                    July 25-27, 2026 on the National Mall
+                  </span>{' '}
+                  across from the U.S. Capitol.
                 </p>
                 <p className="font-openSans text-base font-semibold text-slate-700 md:text-lg">
                   🛡 Officially recognized by the U.S. Olympic & Paralympic
@@ -194,7 +195,7 @@ export const ArtsOlympiad = () => {
                 </div>
                 <div>
                   <a
-                    href="/documents/7th Arts Olympiad Lesson Plan.pdf"
+                    href="/documents/7th Arts Olympiad Lesson Plan January 2026.pdf"
                     download
                     className="bg-primary inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold tracking-[0.14em] text-[#FFD743]"
                   >

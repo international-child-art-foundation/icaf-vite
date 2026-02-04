@@ -5,7 +5,7 @@ import { VisibilityIcon } from '@/assets/shared/icons/VisibilityIcon';
 
 const MissionVision = () => {
   return (
-    <div className="relative grid h-[500px] w-full max-w-screen-2xl grid-cols-1 grid-rows-1">
+    <div className="max-w-screen-3xl relative grid h-[500px] w-full grid-cols-1 grid-rows-1">
       <picture className="col-start-1 row-start-1 mt-16">
         <source
           media="(min-width: 1024px)"

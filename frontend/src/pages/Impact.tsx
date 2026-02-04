@@ -37,7 +37,7 @@ const Impact = () => {
         {/* Body */}
         <div className="relative mt-16 grid w-full gap-20">
           {/* Better World with Creativity Section */}
-          <div className="grid max-w-screen-2xl gap-8 px-8 md:px-12 lg:px-16 xl:px-20">
+          <div className="max-w-screen-3xl grid gap-8 px-8 md:px-12 lg:px-16 xl:px-20">
             <h2 className="font-montserrat text-center text-3xl font-extrabold">
               Building a Better World with Creativity
             </h2>
@@ -50,17 +50,18 @@ const Impact = () => {
             <AccordionDropdowns data={MissionDropdownData} />
           </div>
           {/* Making an Impact section */}
-          <div className="grid-col grid max-w-screen-2xl gap-20 px-8 md:px-12 lg:px-16 xl:px-20">
+          <div className="grid-col max-w-screen-3xl grid gap-20 px-8 md:px-12 lg:px-16 xl:px-20">
             <div className="grid gap-8">
               <h2 className="font-montserrat text-center text-3xl font-extrabold">
                 Making an Impact
               </h2>
               <p className="text-xl">
-                Every day, thousands of kids learn about ICAF from their friends
-                or online, helping them see themselves as creative individuals.
-                They realize that their imagination can lead to new discoveries
-                and innovations, and they know that their art is a true and
-                honest form of expression.
+                Every day, thousands of kids learn about ICAF and its programs
+                from their friends or online. Participation in our programs can
+                help them see themselves as creative individuals. Through art,
+                children realize that their imagination can lead to new
+                discoveries and innovations, and that their creations are a true
+                and honest form of expression.
               </p>
             </div>
             <div className="grid gap-4 lg:grid-cols-2">
@@ -81,7 +82,7 @@ const Impact = () => {
                   </h3>
                   <p className="text-xl">
                     Our festivals and exhibitions have attracted about 2.5
-                    million participants and visitors in major cities worldwide
+                    million participants and visitors in major cities worldwide.
                   </p>
                 </div>
                 <div className="grid gap-3">
@@ -111,7 +112,7 @@ const Impact = () => {
             </div>
           </div>
           {/* Children's voices section */}
-          <div className="flex max-w-screen-2xl flex-col gap-8 overflow-hidden px-8 md:px-12 lg:px-16 xl:px-20">
+          <div className="max-w-screen-3xl flex flex-col gap-8 overflow-hidden px-8 md:px-12 lg:px-16 xl:px-20">
             <h2 className="font-montserrat text-center text-3xl font-extrabold">
               Bringing Children's Voices to the World
             </h2>

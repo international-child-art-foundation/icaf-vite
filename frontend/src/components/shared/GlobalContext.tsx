@@ -28,24 +28,29 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderProps> = ({
 }) => {
   const [isCookieConsentAcquired, setIsCookieConsentAcquired] =
     useState<TCookieConsentStatus>(() => {
-      const curStringCookie = localStorage.getItem('cookieConsent') ?? '';
-
+      if (typeof window === 'undefined') return undefined;
+      const curStringCookie = localStorage.getItem('cookieConsent');
       if (curStringCookie === 'true') return true;
       if (curStringCookie === 'false') return false;
       return undefined;
     });
+
   const [cookieBannerVisible, setCookieBannerVisible] = useState<boolean>(
-    isCookieConsentAcquired != true && isCookieConsentAcquired != false,
+    isCookieConsentAcquired === undefined,
   );
 
   const setGlobalCookieConsentValue = useCallback((consentValue: boolean) => {
+    const status = consentValue ? 'granted' : 'denied';
     localStorage.setItem('cookieConsent', consentValue.toString());
     setIsCookieConsentAcquired(consentValue);
     setCookieBannerVisible(false);
 
     if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('consent', 'update', {
-        analytics_storage: consentValue ? 'granted' : 'denied',
+        analytics_storage: status,
+        ad_storage: status,
+        ad_user_data: status,
+        ad_personalization: status,
       });
     }
   }, []);

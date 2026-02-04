@@ -23,7 +23,7 @@ export const SpecialProjects = () => {
         </div>
       </div>
       <div className="relative z-10 px-8 md:px-12 lg:px-16 xl:px-20">
-        <div className="relative max-w-screen-2xl gap-8 overflow-clip">
+        <div className="max-w-screen-3xl relative gap-8 overflow-clip">
           <div className="relative z-10 rounded-xl bg-[#dfe7f8] p-10 sm:py-8 md:py-12 lg:py-16 xl:py-24">
             {' '}
             <p className="font-montserrat mb-8 text-2xl font-semibold sm:max-w-[75%]">

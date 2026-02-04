@@ -13,7 +13,7 @@ export const icafTimelineData: IicafTimelineData = [
     year: 1997,
     title: 'ICAF Founded',
     description:
-      'Founded ICAF as a 501(c)(3) nonprofit to promote children’s creativity worldwide.',
+      'ICAF is established as a 501(c)(3) nonprofit to promote children’s creativity worldwide.',
   },
   {
     year: 1998,

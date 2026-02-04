@@ -61,7 +61,7 @@ export default function WCFHeader() {
             National Mall across from the U.S Capitol into a global stage for a
             three-day celebration of creativity, empathy, and unity. More than a
             festival, it's a movement—empowering children through art,
-            education, and collaboration
+            education, and collaboration.
           </p>
           <p className="mb-2 text-base font-normal md:mb-4 md:text-xl xl:mb-6">
             At WCF, kids don't just create—they lead. They become

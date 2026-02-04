@@ -26,9 +26,9 @@ const VerticalTimelineData: TimeLineItem[] = [
   },
   {
     day: 'Day 3',
-    title: 'Health and Environment Day',
+    title: 'Peace and Leadership Day',
     paragraph:
-      'Dive into activities focusing on our planet and children’s well-being.',
+      'Exercise your empathy with collaborative mural making and learn to be change-makers.',
     color: '#DA1E40',
     lineDescription: 'h-[320px]',
     lineDescriptionDesktop: 'h-[200px]',
@@ -37,7 +37,7 @@ const VerticalTimelineData: TimeLineItem[] = [
   },
   {
     day: 'Day 4',
-    title: 'WCF Awards Banquettion Day',
+    title: 'WCF Awards Banquet Day',
     paragraph:
       'Celebrate the achievements of young artists before they return home with a life-changing experience.',
     color: '#2057CC',

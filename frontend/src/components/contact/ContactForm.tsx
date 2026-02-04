@@ -349,7 +349,7 @@ export const ContactForm = ({ config }: ContactFormProps) => {
     return (
       <div
         ref={containerRef}
-        className="max-w-screen-2xl px-8 py-12 md:px-12 lg:px-16 xl:px-20"
+        className="max-w-screen-3xl px-8 py-12 md:px-12 lg:px-16 xl:px-20"
       >
         <div className="mb-10">
           <h1 className="font-montserrat text-5xl font-semibold">
@@ -393,7 +393,7 @@ export const ContactForm = ({ config }: ContactFormProps) => {
   return (
     <div
       ref={containerRef}
-      className="relative max-w-screen-2xl px-8 py-12 md:px-12 lg:px-16 xl:px-20"
+      className="max-w-screen-3xl relative px-8 py-12 md:px-12 lg:px-16 xl:px-20"
     >
       {config.backgroundDecorationSrc && (
         <img

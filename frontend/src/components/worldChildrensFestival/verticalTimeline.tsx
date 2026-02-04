@@ -16,7 +16,7 @@ export default function VerticalTimeline({ items }: verticalTimelineProps) {
   return (
     <>
       {/***Mobile Vertical Timeline Version***/}
-      <div className="mt-4 grid h-[1200px] grid-cols-[auto_1fr] gap-x-10 px-6 md:hidden">
+      <div className="grid h-[1200px] grid-cols-[auto_1fr] gap-x-10 px-6 md:hidden">
         {/* Diamond on timeline */}
         {items.map((item) => (
           <React.Fragment key={item.day}>
@@ -41,7 +41,7 @@ export default function VerticalTimeline({ items }: verticalTimelineProps) {
       </div>
 
       {/***Tablet + Desktop Vertical Timeline Version***/}
-      <div className="relative mt-8 hidden h-[720px] md:block md:px-12 lg:px-16 xl:px-20">
+      <div className="relative hidden h-[720px] md:block md:px-12 lg:px-16 xl:px-20">
         <div className="absolute -top-8 left-12 lg:left-20">
           <AboutGraphic2 className="h-44 w-44 xl:h-60 xl:w-60" />
         </div>

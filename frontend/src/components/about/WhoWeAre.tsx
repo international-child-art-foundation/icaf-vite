@@ -65,7 +65,9 @@ export default function WhoWeAre() {
           <div className="font-sans">
             <h5 className="my-4 text-xl font-semibold">The Arts Olympiad</h5>
             <p className="my-4 lg:text-xl">
-              Over the years it has grown into the world’s largest art program.
+              Since its inception 25 years ago, the Arts Olympiad has grown into
+              the world's largest art program for children, inspiring the
+              creation of art by participants around the world.
             </p>
           </div>
           <div className="font-sans">

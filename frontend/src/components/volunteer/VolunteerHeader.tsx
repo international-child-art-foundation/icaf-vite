@@ -21,7 +21,7 @@ export const VolunteerHeader = () => {
 
   return (
     <div className="grid w-full grid-cols-1 grid-rows-1">
-      <div className="font-montserrat z-10 col-start-1 row-start-1 flex max-w-screen-2xl flex-col gap-2 p-6 text-3xl font-extrabold text-white sm:gap-4 sm:p-10 sm:px-8 md:mt-8 md:px-12 md:text-4xl lg:mt-28 lg:px-16 lg:text-6xl xl:px-20">
+      <div className="font-montserrat max-w-screen-3xl z-10 col-start-1 row-start-1 flex flex-col gap-2 p-6 text-3xl font-extrabold text-white sm:gap-4 sm:p-10 sm:px-8 md:mt-8 md:px-12 md:text-4xl lg:mt-28 lg:px-16 lg:text-6xl xl:px-20">
         <div className="font-montserrat block text-[30px] font-extrabold leading-[40px] sm:text-[40px] sm:leading-[50px] md:text-[60px] md:leading-[70px]">
           <h1>Volunteers</h1>
         </div>

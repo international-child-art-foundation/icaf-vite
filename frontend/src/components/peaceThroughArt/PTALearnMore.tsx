@@ -40,7 +40,10 @@ export const PTALearnMore = () => {
           </span>{' '}
           Will you be part of it?
         </p>
-        <Link to={'/volunteers'} className="z-20 my-2 cursor-pointer">
+        <Link
+          to={'/get-involved/volunteers'}
+          className="z-20 my-2 cursor-pointer"
+        >
           <Button variant="secondary" className="mx-auto rounded-full">
             <div className="flex items-center gap-2 leading-none">
               <p className="px-6 text-xl">Get Involved</p>

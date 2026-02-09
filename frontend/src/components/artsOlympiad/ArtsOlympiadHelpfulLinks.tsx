@@ -1,10 +1,6 @@
 import { artsOlympiadHelpfulLinks } from '@/data/artsOlympiad/artsOlympiadData';
 import type { ArtsOlympiadHelpfulLink } from '@/types/ArtsOlympiadTypes';
 
-import FacebookIcon from '@/assets/artsOlympiad/facebook.svg';
-import XIcon from '@/assets/artsOlympiad/x.svg';
-import InstagramIcon from '@/assets/artsOlympiad/instagram.svg';
-
 export const ArtsOlympiadHelpfulLinks = () => {
   const renderLinkCard = (item: ArtsOlympiadHelpfulLink) => {
     const isExternal = item.external !== false;
@@ -44,43 +40,6 @@ export const ArtsOlympiadHelpfulLinks = () => {
         <ul className="link-card-container grid w-full grid-flow-col gap-5 overflow-x-auto py-8 md:gap-6 xl:grid-cols-5 xl:grid-rows-1 xl:flex-wrap xl:justify-center xl:gap-5 xl:overflow-hidden">
           {artsOlympiadHelpfulLinks.map(renderLinkCard)}
         </ul>
-        <div className="helpful-links-button mt-4 flex items-center justify-center gap-12 py-6">
-          <div className="social-media flex gap-12">
-            <a
-              href="http://www.facebook.com/ICAF.org"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                src={FacebookIcon}
-                alt="ICAF on Facebook"
-                className="h-[52.5px] w-[54px] drop-shadow-md"
-              />
-            </a>
-            <a
-              href="https://x.com/ICAF_org"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                src={XIcon}
-                alt="ICAF on X"
-                className="h-[52.5px] w-[54px] drop-shadow-md"
-              />
-            </a>
-            <a
-              href="https://www.instagram.com/intlchildartfoundation/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                src={InstagramIcon}
-                alt="ICAF on Instagram"
-                className="h-[52.5px] w-[54px] drop-shadow-md"
-              />
-            </a>
-          </div>
-        </div>
       </div>
     </section>
   );

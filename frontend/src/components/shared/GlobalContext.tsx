@@ -3,6 +3,7 @@ import React, {
   useState,
   use,
   useCallback,
+  useEffect,
   ReactNode,
 } from 'react';
 
@@ -39,13 +40,9 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderProps> = ({
     isCookieConsentAcquired === undefined,
   );
 
-  const setGlobalCookieConsentValue = useCallback((consentValue: boolean) => {
-    const status = consentValue ? 'granted' : 'denied';
-    localStorage.setItem('cookieConsent', consentValue.toString());
-    setIsCookieConsentAcquired(consentValue);
-    setCookieBannerVisible(false);
-
-    if (typeof window !== 'undefined' && window.gtag) {
+  useEffect(() => {
+    if (isCookieConsentAcquired !== undefined && window.gtag) {
+      const status = isCookieConsentAcquired ? 'granted' : 'denied';
       window.gtag('consent', 'update', {
         analytics_storage: status,
         ad_storage: status,
@@ -53,6 +50,12 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderProps> = ({
         ad_personalization: status,
       });
     }
+  }, [isCookieConsentAcquired]);
+
+  const setGlobalCookieConsentValue = useCallback((consentValue: boolean) => {
+    localStorage.setItem('cookieConsent', consentValue.toString());
+    setIsCookieConsentAcquired(consentValue);
+    setCookieBannerVisible(false);
   }, []);
 
   const value = React.useMemo<GlobalContextType>(

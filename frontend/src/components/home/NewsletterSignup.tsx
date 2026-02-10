@@ -3,7 +3,6 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Mail } from 'lucide-react';
 import Ribbons from '@/assets/home/Ribbons.svg';
-import smallBlueFirework from '@/assets/home/SmallBlueFirework.svg';
 import { linkClasses } from '@/data/linkClasses';
 
 export const NewsletterSignup = () => {
@@ -54,19 +53,6 @@ export const NewsletterSignup = () => {
     <div className="relative flex w-full flex-col gap-20 py-12">
       <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-8 px-8 md:px-12 lg:px-16 xl:px-20">
         <div className="relative z-10 flex flex-col gap-6">
-          <div className="absolute inset-x-0 -top-12 flex justify-center gap-[400px] md:gap-[500px]">
-            <img
-              className="pointer-events-none w-16 select-none md:w-24"
-              src={smallBlueFirework}
-              alt=""
-            />
-            <img
-              className="pointer-events-none w-16 select-none md:w-24"
-              src={smallBlueFirework}
-              alt=""
-            />
-          </div>
-
           <h2 className="font-montserrat text-center text-[32px] font-extrabold text-black md:text-[40px]">
             Stay Connected
           </h2>

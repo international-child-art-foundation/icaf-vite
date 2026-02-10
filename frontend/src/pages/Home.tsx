@@ -9,6 +9,7 @@ import { HomeActivities } from '@/data/home/homeActivitySection';
 import { HomeCarousel } from '@/components/home/HomeCarousel';
 import { Seo } from '@/components/shared/Seo';
 import { NewsletterSignup } from '@/components/home/NewsletterSignup';
+import { SpecialProjects } from '@/components/home/SpecialProjects';
 
 const homeMetadata = {
   title: 'Home | ICAF',
@@ -28,6 +29,7 @@ export default function Home() {
         <WhatWeDo />
         <Activities activityPairs={HomeActivities} />
         <HomeImpact />
+        <SpecialProjects />
         <NewsletterSignup />
         <HomeCarousel />
       </div>

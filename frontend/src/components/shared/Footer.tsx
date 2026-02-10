@@ -55,20 +55,33 @@ function Footer() {
   async function onSubscribe(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!email.trim()) return;
+
     setStatus('sending');
+
     const params = new URLSearchParams();
     params.set('type', 'subscribe');
     params.set('email', email.trim());
+
     try {
       const res = await fetch('/php-api/send-mail.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params.toString(),
       });
+
       const text = (await res.text()).trim().toLowerCase();
+
       if (text === 'success') {
         setStatus('ok');
         setEmail('');
+
+        // Notify Google Analytics
+        if (typeof window.gtag === 'function') {
+          window.gtag('event', 'generate_lead', {
+            event_label: 'footer_newsletter',
+            method: 'newsletter_form',
+          });
+        }
       } else {
         setStatus('err');
       }

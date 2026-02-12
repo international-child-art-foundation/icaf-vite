@@ -99,7 +99,7 @@ export const NewsletterSignup = () => {
                 </Button>
               </form>
 
-              <div className="min-h-[2rem]">
+              <div className="">
                 {status === 'ok' && (
                   <p
                     className="mt-4 text-center text-sm font-semibold text-green-600 md:pl-6 md:text-left"

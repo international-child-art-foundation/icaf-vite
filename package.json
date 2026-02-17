@@ -13,10 +13,20 @@
     "dev": "pnpm --filter @icaf/frontend dev",
     "clean": "tsc -b --clean",
     "check": "tsc -b && pnpm --filter @icaf/frontend lint",
-    "build": "pnpm run build:shared && pnpm --filter @icaf/frontend build",
-    "build:shared": "pnpm --filter @icaf/shared build"
+    "build": "pnpm run build:shared && pnpm run build:backend && pnpm --filter @icaf/frontend build",
+    "build:shared": "pnpm --filter @icaf/shared build",
+    "build:backend": "pnpm --filter @icaf/backend build",
+    "test:backend": "pnpm --filter @icaf/backend test",
+    "dev:backend": "pnpm --filter @icaf/backend dev"
   },
   "devDependencies": {
     "typescript": "~5.7.2"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.863.0",
+    "@aws-sdk/client-s3": "^3.863.0",
+    "@aws-sdk/client-lambda": "^3.863.0",
+    "@aws-sdk/client-sqs": "^3.863.0",
+    "@aws-sdk/client-ses": "^3.863.0"
   }
 }

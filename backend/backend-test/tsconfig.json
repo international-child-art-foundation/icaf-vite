@@ -1,0 +1,14 @@
+{
+    "extends": "../../tsconfig.strict.json",
+    "compilerOptions": {
+        "target": "ES2020",
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true
+    },
+    "include": [
+        "**/*.ts"
+    ]
+}

@@ -14,8 +14,8 @@ import { Link } from 'react-router-dom';
 
 export default function ExploreOurProjects() {
   return (
-    <section className="my-10 md:my-20 lg:mx-24 xl:mx-0">
-      <div className="my-10">
+    <section className="lg:mx-24 xl:mx-0">
+      <div className="mb-10">
         <h2 className="text-center text-3xl font-extrabold lg:mb-16 lg:text-[40px]">
           Explore our projects
         </h2>

@@ -15,7 +15,7 @@ export const News = () => {
       <Seo {...newsMetadata} />
       <div>
         <div>
-          <div className="space-between mt-12 grid grid-cols-2 grid-rows-1 px-8 md:px-12 lg:px-16 xl:px-20">
+          <div className="space-between mt-12 grid grid-cols-2 grid-rows-1">
             <div>
               <h1 className="text-primary font-montserrat mt-12 max-w-screen-2xl text-4xl font-bold">
                 News

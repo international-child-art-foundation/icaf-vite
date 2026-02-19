@@ -10,9 +10,9 @@ const contactMetadata = {
 
 export const Contact = () => {
   return (
-    <>
+    <div className="mx-auto max-w-screen-2xl">
       <Seo {...contactMetadata} />
       <ContactForm config={contactFormConfigs['contact-us']} />
-    </>
+    </div>
   );
 };

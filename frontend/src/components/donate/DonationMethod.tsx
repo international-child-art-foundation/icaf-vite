@@ -3,7 +3,7 @@ import AccordionDropdowns from '../shared/AccordionDropdowns';
 
 export default function DonationMethod() {
   return (
-    <div className="py-16">
+    <div className="mx-auto max-w-screen-2xl py-16">
       {/* Header */}
       <div className="mb-12 text-center">
         <h2 className="mb-4 text-3xl font-bold text-black md:text-4xl">

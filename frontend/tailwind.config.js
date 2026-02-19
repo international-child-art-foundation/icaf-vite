@@ -7,6 +7,12 @@ module.exports = {
       backgroundOpacity: {
         8: '0.08',
       },
+      maxWidth: {
+        content: '1376px',
+        breakout: '1536px',
+        site: '1920px',
+      },
+      screens: { '3xl': '1920px' },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
@@ -15,7 +21,6 @@ module.exports = {
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
-
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
@@ -74,13 +79,10 @@ module.exports = {
           600: 'hsl(var(--gray-600))',
           900: 'hsl(var(--gray-900))',
         },
-
         black: 'hsl(var(--black))',
-
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
-
         chart: {
           1: 'hsl(var(--chart-1))',
           2: 'hsl(var(--chart-2))',

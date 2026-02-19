@@ -99,7 +99,23 @@
     @apply bg-background text-foreground;
   }
 }
-
+@layer utilities {
+  .w-site {
+    @apply max-w-site mx-auto w-full px-6;
+  }
+  .w-content {
+    @apply max-w-content mx-auto w-full;
+  }
+  .w-breakout {
+    @apply max-w-breakout mx-auto w-full;
+  }
+  .content-gap {
+    @apply gap-[100px] md:gap-[120px] lg:gap-[130px] xl:gap-[140px] 2xl:gap-[150px];
+  }
+  .mobile-maxw {
+    @apply;
+  }
+}
 .footer-inverse {
   color: hsl(var(--text-inverse));
 }

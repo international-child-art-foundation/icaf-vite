@@ -33,14 +33,14 @@ export const TestimonialsCarousel = () => {
   const handleSelect = (index: number) => api?.scrollTo(index);
 
   return (
-    <section className="relative select-none bg-white py-6 md:py-20">
+    <section className="relative mx-auto max-w-screen-2xl select-none bg-white">
       <h2 className="mb-10 text-center font-sans text-3xl font-bold lg:text-[40px]">
         Testimonials
       </h2>
       {/* Color blobs behind the card  */}
-      <YellowBlob className="top-22 absolute hidden sm:left-[-15rem] sm:top-20 sm:block sm:rotate-180 sm:scale-110 md:left-[-12rem] md:top-36 md:scale-105 lg:left-[-1rem] lg:top-40 lg:rotate-0 lg:scale-x-[85%] xl:left-8 xl:scale-100 2xl:left-20 2xl:top-52 2xl:scale-125" />
-      <BlueBlob className="top-22 absolute left-1/2 -translate-x-1/2 scale-x-[85%] xl:scale-100 2xl:top-52 2xl:scale-125" />
-      <RedBlob className="top-22 absolute hidden sm:right-[-15rem] sm:top-20 sm:block sm:rotate-180 sm:scale-110 md:right-[-12rem] md:top-36 md:scale-105 lg:right-[-1rem] lg:top-40 lg:rotate-0 lg:scale-x-[85%] xl:right-8 xl:scale-100 2xl:right-20 2xl:top-52 2xl:scale-125" />
+      <YellowBlob className="top-22 absolute hidden sm:left-[-15rem] sm:top-20 sm:block sm:rotate-180 sm:scale-110 md:left-[-12rem] md:top-36 md:scale-105 lg:left-[-1rem] lg:top-40 lg:rotate-0 lg:scale-x-[85%] xl:left-8 xl:scale-100 2xl:left-20 2xl:top-36 2xl:scale-125" />
+      <BlueBlob className="top-22 absolute left-1/2 -translate-x-1/2 scale-x-[85%] xl:scale-100 2xl:top-36 2xl:scale-125" />
+      <RedBlob className="top-22 absolute hidden sm:right-[-15rem] sm:top-20 sm:block sm:rotate-180 sm:scale-110 md:right-[-12rem] md:top-36 md:scale-105 lg:right-[-1rem] lg:top-40 lg:rotate-0 lg:scale-x-[85%] xl:right-8 xl:scale-100 2xl:right-20 2xl:top-36 2xl:scale-125" />
 
       <Carousel
         setApi={setApi}

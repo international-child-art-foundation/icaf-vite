@@ -18,7 +18,7 @@ export const ContentCallout = ({
   const textOrder = size.width <= 1024 ? 'order-1' : !textOnLeft && 'order-1';
 
   return (
-    <div className="relative z-10 flex max-w-screen-2xl gap-12 px-8 md:px-12 lg:px-16 xl:px-20">
+    <div className="relative z-10 flex max-w-screen-2xl gap-12">
       <div className="relative flex w-full flex-col justify-end gap-[5%] lg:flex-row">
         <div className={`${contentOrder} grid-col relative grid basis-[43%]`}>
           <div className="relative z-10 col-start-1 row-start-1">{content}</div>

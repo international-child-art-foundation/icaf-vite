@@ -21,14 +21,15 @@ export const History = () => {
       <div>
         <div className="overflow-hidden">
           <HistoryHeader />
-
-          {size.width >= 1024 ? (
-            <HistoryTimeline mode={'desktop'} />
-          ) : (
-            <HistoryTimeline mode={'mobile'} />
-          )}
-          <HistoryMomentsCarousel />
-          <YourDonationGiraffe />
+          <div className="mx-auto max-w-screen-2xl">
+            {size.width >= 1024 ? (
+              <HistoryTimeline mode={'desktop'} />
+            ) : (
+              <HistoryTimeline mode={'mobile'} />
+            )}
+            <HistoryMomentsCarousel />
+            <YourDonationGiraffe />
+          </div>
         </div>
       </div>
     </>

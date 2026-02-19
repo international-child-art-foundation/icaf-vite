@@ -58,7 +58,7 @@ const items: AccordionStatsItem[] = [
 export default function HowWeDoIt() {
   const [active, setActive] = useState<number>(0);
   return (
-    <section className="my-16">
+    <section className="max-w-screen-2xl">
       <h2 className="font-montserrat mb-10 text-center text-3xl font-extrabold lg:text-[40px]">
         How We Do It
       </h2>

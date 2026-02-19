@@ -22,7 +22,7 @@ export const Activities = ({ activityPairs }: ActivitiesProps) => {
           />
         ))}
       </div>
-      <p className="max-w-screen-2xl px-8 md:px-12 lg:px-16 xl:px-20">
+      <p className="max-w-screen-2xl">
         *The mark “Arts Olympiad” is used under license from the U.S. Olympic
         and Paralympic Committee.
       </p>

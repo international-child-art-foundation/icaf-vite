@@ -22,8 +22,8 @@ export default function Home() {
   return (
     <>
       <Seo {...homeMetadata} />
-      <HomeHeader />
-      <div className="relative m-0 flex w-full flex-col items-center gap-8 overflow-hidden p-0 md:gap-12">
+      <div className="relative items-center p-0">
+        <HomeHeader />
         <MissionVision />
         <BannerImageCarousel items={bannerItems} displayMs={3000} />
         <WhatWeDo />

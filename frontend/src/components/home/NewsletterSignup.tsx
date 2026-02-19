@@ -50,8 +50,8 @@ export const NewsletterSignup = () => {
   }
 
   return (
-    <div className="relative flex w-full flex-col gap-20 py-12">
-      <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-8 px-8 md:px-12 lg:px-16 xl:px-20">
+    <div className="relative flex w-full max-w-screen-2xl flex-col gap-20 py-12">
+      <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-8">
         <div className="relative z-10 flex flex-col gap-6">
           <h2 className="font-montserrat text-center text-[32px] font-extrabold text-black md:text-[40px]">
             Stay Connected

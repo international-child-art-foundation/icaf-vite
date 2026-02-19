@@ -30,7 +30,7 @@ export const Team = () => {
         <TeamHeader scrollFunction={handleScrollToStaff} />
         <div
           ref={staffRef}
-          className="flex max-w-screen-2xl flex-col gap-16 px-8 md:px-12 lg:px-16 xl:px-20"
+          className="mx-auto flex max-w-screen-2xl flex-col gap-16"
         >
           <TeamStaff staffData={staffData} />
           <TeamExtendedStaff />

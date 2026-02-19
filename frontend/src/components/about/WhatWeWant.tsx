@@ -23,8 +23,8 @@ export default function WhatWeWant() {
     },
   ];
   return (
-    <section className="mt-28 overflow-visible lg:mt-32">
-      <div className="relative -mx-6 w-[calc(100%+3rem)] lg:-mx-10 lg:w-[calc(100%+5rem)] xl:-mx-20 xl:w-[calc(100%+10rem)]">
+    <section className="overflow-visible">
+      <div className="relative">
         <img
           src={waveUrl}
           alt=""
@@ -43,7 +43,7 @@ export default function WhatWeWant() {
           <div className="absolute left-0 top-0 z-[-10] translate-x-[-80%] translate-y-[40%] transform sm:translate-x-[-40%] md:translate-y-[80%] lg:translate-x-[10%] lg:translate-y-[50%] xl:translate-x-[10%] xl:translate-y-[20%]">
             <AboutGraphic2 className="h-56 w-56 lg:h-72 lg:w-72" />
           </div>
-          <div className="flex flex-col overflow-visible md:flex-row md:justify-center md:gap-8 lg:gap-20 lg:px-32 xl:px-48 2xl:gap-32 2xl:px-56">
+          <div className="flex flex-col overflow-visible md:flex-row md:justify-center md:gap-8 lg:gap-20 lg:px-32 2xl:gap-32">
             {cards.map((card) => (
               <div
                 key={card.titleTop}

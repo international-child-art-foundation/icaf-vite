@@ -3,7 +3,7 @@ import QuoteBannerImg from '@/assets/donate/QuoteBanner.png';
 
 const QuoteBanner: React.FC = () => {
   return (
-    <div className="w-full py-12">
+    <div className="mx-auto w-full max-w-screen-2xl py-12">
       <div className="overflow-hidden rounded-2xl bg-white">
         <div className="flex flex-col lg:flex-row">
           {/* Left Side - Image */}

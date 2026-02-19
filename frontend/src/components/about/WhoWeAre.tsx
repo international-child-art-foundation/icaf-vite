@@ -6,26 +6,38 @@ import { AboutGraphic1 } from '@/assets/shared/images/about/AboutGraphic1';
 
 export default function WhoWeAre() {
   return (
-    <section className="font-montserrat my-10 md:my-20">
-      <div className="relative">
-        <div className="absolute right-0 top-0 z-[-10] -translate-y-[60%] translate-x-1/2 transform md:-translate-y-1/2 md:translate-x-[20%] lg:translate-x-[35%] lg:translate-y-[0%] xl:translate-x-[45%] 2xl:translate-x-[30%]">
-          <AboutGraphic1
-            fill="#0050FA"
-            className="h-36 w-36 md:h-48 md:w-48 lg:h-60 lg:w-60"
-          />
-        </div>
+    <section className="font-montserrat w-breakout pad-sides relative mx-auto">
+      <div className="pointer-events-none absolute right-0 top-0 z-[-10] -translate-y-1/4">
+        <AboutGraphic1
+          fill="#0050FA"
+          className="h-36 w-36 md:h-48 md:w-48 lg:h-60 lg:w-60"
+        />
+      </div>
 
-        <h2 className="text-center text-3xl font-extrabold lg:mb-16 lg:text-[40px]">
+      <div className="pointer-events-none absolute left-0 top-[55%] z-[-10] -translate-y-1/2">
+        <AboutGraphic1
+          fill="#DA1E40"
+          className="h-28 w-28 md:h-36 md:w-36 lg:h-48 lg:w-48"
+        />
+      </div>
+
+      <div className="pointer-events-none absolute bottom-0 left-0 z-[-10] translate-y-1/4">
+        <AboutGraphic1 fill="#FFBC42" className="h-48 w-48 lg:h-64 lg:w-64" />
+      </div>
+
+      <div className="relative">
+        <h2 className="text-center text-3xl font-extrabold lg:text-[40px]">
           Who We Are
         </h2>
       </div>
-      {/*Section 1*/}
-      <article className="my-10 lg:flex">
+
+      {/* Section 1 */}
+      <article className="mx-auto my-10 max-w-screen-2xl lg:flex">
         <div className="lg:w-1/2">
           <h3 className="lg:text-x my-4 text-2xl font-semibold">
             International Child Art Foundation
           </h3>
-          <div className="lg:text-x border-tertiary-red my-4 rounded-full border-4"></div>
+          <div className="bg-tertiary-red my-4 h-1 rounded-full"></div>
           <p className="my-4 font-sans lg:text-xl">
             Founded in the District of Columbia in 1997 as a 501(c)(3) nonprofit
             with federal tax# 52-2032649, the International Child Art Foundation
@@ -49,19 +61,12 @@ export default function WhoWeAre() {
           </picture>
         </div>
       </article>
-      {/*Section 2*/}
-      <article className="my-20 md:my-24 lg:flex lg:flex-row-reverse">
+
+      {/* Section 2 */}
+      <article className="my-20 max-w-screen-2xl md:my-24 lg:flex lg:flex-row-reverse">
         <div className="lg:w-1/2">
-          <div className="relative">
-            <div className="absolute left-0 top-0 z-[-10] -translate-y-[90%] translate-x-[-20%] transform lg:hidden">
-              <AboutGraphic1
-                fill="#DA1E40"
-                className="h-28 w-28 md:h-36 md:w-36 lg:h-48 lg:w-48"
-              />
-            </div>
-          </div>
           <h3 className="my-4 text-2xl font-semibold">Our Programs</h3>
-          <div className="border-secondary-blue my-4 rounded-full border-4"></div>
+          <div className="bg-secondary-blue my-4 h-1 rounded-full"></div>
           <div className="font-sans">
             <h5 className="my-4 text-xl font-semibold">The Arts Olympiad</h5>
             <p className="my-4 lg:text-xl">
@@ -75,26 +80,18 @@ export default function WhoWeAre() {
               World Children's Festival
             </h4>
             <p className="lg:text-xl">
-              The “Olympics” of children’s imagination.
+              The "Olympics" of children's imagination.
             </p>
             <p className="lg:text-xl">
-              As the world’s largest exhibitor of children’s art and organizer
+              As the world's largest exhibitor of children's art and organizer
               of youth panels at major conferences, we give voice to children
               like no other. ICAF has won several awards and is independently
-              ranked as one of the 25 Top Children’s Charities in the United
+              ranked as one of the 25 Top Children's Charities in the United
               States.
             </p>
           </div>
         </div>
         <div className="my-4 h-[350px] w-full md:h-[475px] lg:h-96 lg:w-1/2 lg:pr-32 xl:h-[400px] 2xl:h-[455px] 2xl:pr-36">
-          <div className="relative">
-            <div className="absolute left-0 top-0 z-[-10] hidden -translate-y-[90%] translate-x-[-20%] transform lg:block lg:-translate-y-[30%] lg:translate-x-[-55%]">
-              <AboutGraphic1
-                fill="#DA1E40"
-                className="h-28 w-28 md:h-36 md:w-36 lg:h-48 lg:w-48"
-              />
-            </div>
-          </div>
           <picture className="h-full w-full">
             <img
               src={ourProgramsImage}
@@ -105,11 +102,12 @@ export default function WhoWeAre() {
           </picture>
         </div>
       </article>
-      {/*Section 3*/}
-      <article className="my-10 lg:my-20 lg:flex">
+
+      {/* Section 3 */}
+      <article className="my-10 max-w-screen-2xl lg:my-20 lg:flex">
         <div className="lg:w-1/2">
           <h3 className="my-4 text-2xl font-semibold">Writings and Research</h3>
-          <div className="border-secondary-yellow my-4 rounded-full border-4"></div>
+          <div className="bg-secondary-yellow my-4 h-1 rounded-full"></div>
           <div className="font-sans">
             <p className="my-4 lg:text-xl">
               Our writings and research have appeared in leading journals and
@@ -121,11 +119,6 @@ export default function WhoWeAre() {
         </div>
         <div className="my-4 h-[350px] w-full md:h-[475px] lg:h-96 lg:w-1/2 lg:pl-32 xl:h-[400px] 2xl:h-[455px] 2xl:pl-36">
           <picture className="h-full w-full">
-            <div className="relative">
-              <div className="absolute left-0 top-0 z-[-10] hidden transform lg:block lg:translate-x-[-85%] lg:translate-y-[100%]">
-                <AboutGraphic1 fill="#FFBC42" className="h-64 w-64" />
-              </div>
-            </div>
             <img
               src={writingsResearchImage}
               loading="lazy"

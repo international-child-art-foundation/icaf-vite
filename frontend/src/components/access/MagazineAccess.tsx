@@ -11,7 +11,7 @@ export const MagazineAccess = () => {
   }, []);
 
   return (
-    <div className="my-12 flex max-w-screen-2xl flex-col gap-12 px-8 md:px-12 lg:px-16 xl:px-20">
+    <div className="my-12 flex max-w-screen-2xl flex-col gap-12">
       <div className="font-montserrat mx-auto text-center text-5xl font-semibold">
         <p>ChildArt Magazine</p>
       </div>

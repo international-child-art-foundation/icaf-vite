@@ -38,8 +38,8 @@ export const MoreCarousel = () => {
   const handleSelect = (index: number) => api?.scrollTo(index);
 
   return (
-    <section className="relative h-full overflow-visible bg-white py-6 md:py-20">
-      <div className="pointer-events-none absolute bottom-0 left-[40%] w-[150%] -translate-x-1/2 sm:bottom-[-10%] sm:left-[50%] md:bottom-0 2xl:bottom-[-12%]">
+    <section className="relative h-full overflow-visible bg-white">
+      <div className="pointer-events-none absolute bottom-0 left-[40%] w-[150%] -translate-x-1/2 sm:bottom-[-20%] sm:left-[50%] md:bottom-[-30%] 2xl:bottom-[-36%]">
         <img
           src={Graphic}
           className="pointer-events-none h-auto w-full object-cover"

@@ -5,7 +5,7 @@ import { VisibilityIcon } from '@/assets/shared/icons/VisibilityIcon';
 
 const MissionVision = () => {
   return (
-    <div className="relative grid h-[500px] w-full max-w-screen-2xl grid-cols-1 grid-rows-1">
+    <div className="breakout-w m-pad relative mx-auto grid h-[500px] w-full grid-cols-1 grid-rows-1">
       <picture className="col-start-1 row-start-1 mt-16">
         <source
           media="(min-width: 1024px)"
@@ -23,13 +23,13 @@ const MissionVision = () => {
         />
       </picture>
 
-      <div className="xl:px-18 lg:gap-18 col-start-1 row-start-1 flex flex-col gap-0 px-6 sm:gap-20 md:gap-6 md:px-10 lg:px-14 xl:gap-20">
+      <div className="content-w lg:gap-18 col-start-1 row-start-1 mx-auto flex flex-col gap-0 sm:gap-20 md:gap-6 xl:gap-20">
         <h2 className="font-montserrat text-center text-[32px] font-extrabold leading-[40px] text-black lg:text-[40px] lg:leading-[48px]">
           Our Purpose
         </h2>
         <div className="mx-auto my-auto flex flex-col items-start overflow-hidden lg:flex-row lg:items-center">
           <div className="flex flex-col gap-8 lg:grid lg:grid-cols-2 lg:grid-rows-1 lg:gap-10">
-            <div className="grid grid-cols-[36px_1fr] grid-rows-[36px_1fr] items-center gap-4 gap-y-2 rounded-lg bg-gradient-to-br from-white/60 via-white/50 to-white/60 p-6 transition-colors hover:bg-white/80 lg:grid lg:flex-row">
+            <div className="grid grid-cols-[36px_1fr] grid-rows-[36px_1fr] items-center gap-4 gap-y-2 rounded-lg bg-gradient-to-br from-white/60 via-white/50 to-white/60 py-6 transition-colors hover:bg-white/80 lg:grid lg:flex-row">
               <ClickIcon className="col-start-1 row-start-1 lg:col-start-1 lg:row-start-1" />
               <h1 className="font-montserrat text-tertiary-blue col-start-2 row-start-1 text-3xl font-semibold leading-6 md:text-4xl lg:col-start-2 lg:row-start-1">
                 Mission
@@ -43,7 +43,7 @@ const MissionVision = () => {
                 sustainable future.
               </p>
             </div>
-            <div className="grid grid-cols-[36px_1fr] grid-rows-[36px_1fr] items-center gap-4 gap-y-2 rounded-lg bg-gradient-to-br from-white/60 via-white/50 to-white/60 p-6 transition-colors hover:bg-white/80 lg:grid lg:flex-row">
+            <div className="grid grid-cols-[36px_1fr] grid-rows-[36px_1fr] items-center gap-4 gap-y-2 rounded-lg bg-gradient-to-br from-white/60 via-white/50 to-white/60 py-6 transition-colors hover:bg-white/80 lg:grid lg:flex-row">
               <VisibilityIcon className="lg:col-start-1 lg:row-start-1" />
               <h1 className="font-montserrat text-error text-3xl font-semibold leading-6 md:text-4xl lg:col-start-2 lg:row-start-1">
                 Vision

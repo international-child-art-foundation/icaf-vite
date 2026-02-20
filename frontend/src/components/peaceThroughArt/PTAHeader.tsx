@@ -24,7 +24,7 @@ export const PTAHeader = () => {
   }
 
   return (
-    <div>
+    <div className="site-w mx-auto">
       <div className="grid grid-cols-1 grid-rows-1">
         <div className="col-start-1 row-start-1">
           <CurvedImage
@@ -32,11 +32,11 @@ export const PTAHeader = () => {
             gradientDefinition={gradientDefinition}
           />
         </div>
-        <div className="font-montserrat z-10 col-start-1 row-start-1 mt-20 flex max-w-screen-2xl flex-col gap-10 p-6 text-3xl font-extrabold text-white sm:p-10 sm:px-8 md:px-12 md:text-4xl lg:mt-4 lg:max-w-[55%] lg:px-16 lg:text-6xl xl:mt-12 xl:px-20">
+        <div className="breakout-w m-pad font-montserrat z-10 col-start-1 row-start-1 mx-auto mt-20 flex flex-col gap-10 text-3xl font-extrabold text-white sm:py-10 md:text-4xl lg:mt-4 lg:text-6xl xl:mt-12">
           <div className="font-montserrat block text-4xl font-extrabold sm:text-[50px] sm:leading-[50px] md:text-[60px] md:leading-[70px]">
             <h1>Peace Through Art</h1>
           </div>
-          <div>
+          <div className="lg:max-w-[55%]">
             <p className="font-openSans text-xl font-bold text-white md:text-[30px] md:leading-[38px]">
               "If we are to reach real peace in this world… we shall have to
               begin with children."

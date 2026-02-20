@@ -22,7 +22,7 @@ export default function Home() {
   return (
     <>
       <Seo {...homeMetadata} />
-      <div className="relative items-center p-0">
+      <div className="content-gap relative">
         <HomeHeader />
         <MissionVision />
         <BannerImageCarousel items={bannerItems} displayMs={3000} />

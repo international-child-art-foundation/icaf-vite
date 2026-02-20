@@ -18,20 +18,14 @@ export const PeaceThroughArt = () => {
   return (
     <>
       <Seo {...peaceThroughArtMetadata} />
-      <div>
-        <div className="relative">
-          <PTAHeader />
-          <div className="flex max-w-screen-2xl flex-col gap-12">
-            <UrgencyOfPeace />
-          </div>{' '}
-          <FutureWithoutHate />
-          <PeacefulFutureCTA />
-          <div className="relative z-0">
-            <YoungArtistCarousel />
-          </div>
-          <div className="relative z-20">
-            <PTALearnMore />
-          </div>
+      <div className="content-gap relative">
+        <PTAHeader />
+        <UrgencyOfPeace />
+        <FutureWithoutHate />
+        <PeacefulFutureCTA />
+        <YoungArtistCarousel />
+        <div className="relative z-20">
+          <PTALearnMore />
         </div>
       </div>
     </>

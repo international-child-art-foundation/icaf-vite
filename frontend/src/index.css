@@ -100,20 +100,26 @@
   }
 }
 @layer utilities {
-  .w-site {
-    @apply max-w-site mx-auto w-full px-6;
+  /* These containers should have mx-auto; if you need to left-align something, use a subcontainer */
+  .site-w {
+    @apply max-w-site mx-auto w-full;
   }
-  .w-content {
+  .content-w {
     @apply max-w-content mx-auto w-full;
   }
-  .w-breakout {
+  .breakout-w {
     @apply max-w-breakout mx-auto w-full;
   }
   .content-gap {
-    @apply gap-[100px] md:gap-[120px] lg:gap-[130px] xl:gap-[140px] 2xl:gap-[150px];
+    @apply flex flex-col gap-[100px] md:gap-[120px] lg:gap-[130px] xl:gap-[140px] 2xl:gap-[150px];
   }
-  .mobile-maxw {
-    @apply;
+  /* m-pad and card-pad are the same for now but semantically different */
+  /* m-pad should be applied to all non-sitewidth content, only once */
+  .m-pad {
+    @apply mx-auto px-6;
+  }
+  .card-pad {
+    @apply mx-auto px-6;
   }
 }
 .footer-inverse {

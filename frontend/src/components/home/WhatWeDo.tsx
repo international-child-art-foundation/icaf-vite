@@ -4,18 +4,18 @@ import redBlueFirework from '@/assets/home/RedBlueFirework.svg';
 
 const WhatWeDo = () => {
   return (
-    <div className="relative">
+    <div className="breakout-w m-pad relative mx-auto">
       <img
         src={redBlueFirework}
-        className="absolute -top-32 hidden w-32 sm:left-8 sm:block md:left-12 md:w-48 lg:left-48 xl:-top-24 xl:left-[0px]"
+        className="absolute -top-32 hidden w-32 sm:left-8 sm:block md:left-12 md:w-48 lg:left-48 xl:-top-36 xl:left-64"
         alt=""
       />
-      <div className="z-10 flex flex-col items-center gap-6 p-6 pt-0 lg:p-10 lg:py-[50px]">
+      <div className="content-w z-10 flex flex-col items-center gap-6 py-6 pt-0 lg:px-10">
         <h2 className="font-montserrat text-[32px] font-extrabold text-black lg:text-[40px]">
           What We Do
         </h2>
         <div className="flex flex-col gap-6">
-          <p className="font-sans text-base font-normal text-black md:text-center lg:text-center xl:text-2xl">
+          <p className="font-sans text-xl font-normal text-black md:text-center lg:text-center xl:text-2xl">
             We focus on what’s critically important in formative years:{' '}
             <span className="font-semibold">how students view themselves.</span>
           </p>

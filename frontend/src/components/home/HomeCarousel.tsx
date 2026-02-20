@@ -81,9 +81,9 @@ export const HomeCarousel = () => {
   return (
     <div
       ref={containerRef}
-      className="mx-auto w-full py-8 lg:flex lg:items-start"
+      className="site-w mx-auto w-full py-8 lg:flex lg:items-start"
     >
-      <div className="w-full">
+      <div className="w-full overflow-hidden">
         <Carousel
           opts={{
             align: 'start',

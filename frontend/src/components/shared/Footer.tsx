@@ -94,7 +94,7 @@ function Footer() {
 
   return (
     <footer className="2xl:min:h-[310px] bg-primary relative z-20 mx-auto min-h-[670px] w-full font-sans lg:min-h-[480px] xl:min-h-[310px]">
-      <div className="mx-5% mx-auto flex flex-wrap justify-between gap-y-10 px-8 pb-10 pt-14 md:max-w-[750px] md:px-12 lg:max-w-screen-2xl lg:gap-y-16 lg:px-16 lg:py-10 xl:grid xl:auto-rows-min xl:grid-cols-12 xl:gap-x-8 xl:gap-y-16 xl:px-20">
+      <div className="mx-5% breakout-w m-pad mx-auto flex flex-wrap justify-between gap-y-10 pb-10 pt-14 lg:gap-y-16 lg:py-10 xl:grid xl:auto-rows-min xl:grid-cols-12 xl:gap-x-8 xl:gap-y-16">
         <div className="footer-inverse col-span-2 w-full space-y-4 text-base tracking-wide lg:order-1 lg:w-[42%] lg:space-y-6 lg:text-lg xl:col-span-5 xl:w-full 2xl:text-xl">
           <p className="block">Get our quarterly newsletter</p>
           <div className="flex flex-col gap-2">

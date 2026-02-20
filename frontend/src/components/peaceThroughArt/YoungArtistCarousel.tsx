@@ -26,7 +26,7 @@ export const YoungArtistCarousel = () => {
   const handleSelect = (index: number) => api?.scrollTo(index);
 
   return (
-    <div className="z-0 grid grid-cols-1 grid-rows-1">
+    <div className="site-w z-0 grid grid-cols-1 grid-rows-1">
       <div className="z-0 col-start-1 row-start-1 -mt-16 pt-16">
         <img
           src={colorfulBannerBackground}

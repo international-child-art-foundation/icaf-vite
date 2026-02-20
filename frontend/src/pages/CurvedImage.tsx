@@ -44,7 +44,7 @@ export const CurvedImage = ({
       `}</style>
 
       <div
-        className="max-w-screen-3xl relative mx-auto grid w-full select-none grid-cols-1 grid-rows-1"
+        className="site-w relative mx-auto grid w-full select-none grid-cols-1 grid-rows-1"
         style={{ height }}
       >
         <div

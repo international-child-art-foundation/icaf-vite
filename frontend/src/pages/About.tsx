@@ -37,10 +37,10 @@ export default function About() {
         <WhoWeAre />
         <WhatWeWant />
         <HowWeDoIt />
-        <ExploreOurProjects /> */}
-        {/* <MoreCarousel /> */}
-        {/* <TestimonialsCarousel /> */}
-        {/* <YourDonations />
+        <ExploreOurProjects />
+        <MoreCarousel />
+        <TestimonialsCarousel />
+        <YourDonations />
       </div>
     </>
   );

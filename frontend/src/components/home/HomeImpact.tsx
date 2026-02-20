@@ -6,7 +6,7 @@ import IcafHomeVideoThumb from '@/assets/home/icaf-overview-cropped-thumb.webp';
 
 export const HomeImpact = () => {
   return (
-    <div className="relative z-10 flex max-w-screen-2xl flex-col gap-8 px-8 md:px-12 lg:px-16 lg:pt-16 xl:px-20">
+    <div className="breakout-w m-pad relative z-10 flex flex-col gap-8">
       <img
         src={RedFirework}
         className="absolute -top-16 right-4 hidden h-auto w-16 md:block md:w-32 lg:w-48"

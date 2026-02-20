@@ -138,7 +138,7 @@ export const NewsletterSignup = () => {
         </div>
       </div>
 
-      <div className="bottom-0 top-32 hidden w-full origin-[10%_90%] rotate-[80deg] overflow-hidden sm:origin-[10%_100%] md:absolute md:block md:origin-[0%_0%] md:rotate-[0deg] lg:top-16 xl:top-8">
+      <div className="bottom-0 top-32 hidden origin-[10%_90%] rotate-[80deg] overflow-hidden sm:origin-[10%_100%] md:absolute md:block md:origin-[0%_0%] md:rotate-[0deg] lg:top-16 xl:top-8">
         <img
           className="pointer-events-none min-w-[900px] select-none opacity-60 md:opacity-100"
           src={Ribbons}

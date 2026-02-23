@@ -7,14 +7,12 @@ export const AidMap = () => {
   const isSmall = width < 640;
 
   return (
-    <div>
-      <div>
-        <img
-          src={isSmall ? WorldMapSmall : WorldMap}
-          className="w-full"
-          alt="World map showing various natural disasters which have associated ICAF programs"
-        />
-      </div>
+    <div className="breakout-w">
+      <img
+        src={isSmall ? WorldMapSmall : WorldMap}
+        className="w-full"
+        alt="World map showing various natural disasters which have associated ICAF programs"
+      />
     </div>
   );
 };

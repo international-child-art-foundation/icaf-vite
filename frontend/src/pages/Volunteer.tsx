@@ -17,7 +17,7 @@ export const Volunteer = () => {
   return (
     <>
       <Seo {...volunteerMetadata} />
-      <div>
+      <div className="content-gap">
         <VolunteerHeader />
         <WhyVolunteer />
         <ContactForm config={contactFormConfigs['volunteer']} />{' '}

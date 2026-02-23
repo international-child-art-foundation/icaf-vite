@@ -9,7 +9,7 @@ import { MuralCard } from './MuralCard';
 
 export const ClimateChangeInfo = () => {
   return (
-    <div className="flex flex-col gap-8">
+    <div className="content-w m-pad flex flex-col gap-8">
       <h2 className="font-montserrat text-3xl font-semibold">
         Why care about climate change?
       </h2>

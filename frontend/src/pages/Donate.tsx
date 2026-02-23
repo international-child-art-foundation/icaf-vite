@@ -39,18 +39,17 @@ export default function Donate() {
   return (
     <>
       <Seo {...donateMetadata} />
-      <div className="flex flex-col gap-[100px] overflow-hidden">
+      <div className="content-gap overflow-hidden">
         <DonationHeader />
-        <div className="mx-auto flex max-w-screen-2xl flex-col gap-[100px] md:gap-[120px] lg:gap-[130px] xl:gap-[140px] 2xl:gap-[150px]">
           {/* About ICAF */}
-          <div className="">
+          <div className="content-w m-pad">
             <h2 className="mx-auto mb-3 text-center text-3xl font-bold text-black md:text-4xl">
               About ICAF
             </h2>
             <IntroBanner />
           </div>
 
-          <div className="text-center">
+          <div className="content-w m-pad text-center">
             <h2 className="mb-4 text-3xl font-bold text-black md:text-4xl">
               Art by the children we serve
             </h2>
@@ -89,11 +88,11 @@ export default function Donate() {
           </div>
           <DonationUsageOrgCards />
 
-          <div className="mx-auto max-w-screen-2xl">
+          <div className="content-w m-pad">
             <QuoteBanner />
           </div>
 
-          <div className="mx-auto max-w-screen-2xl px-8 md:px-8 lg:px-20">
+          <div className="content-w m-pad">
             <div className="text-center">
               <h2 className="mb-12 text-3xl font-bold text-black md:text-4xl">
                 How we make it happen
@@ -113,11 +112,11 @@ export default function Donate() {
             </div>
           </div>
 
-          <div className="px-8 md:px-8 lg:px-20">
+          <div className="content-w m-pad">
             <DonationMethod />
           </div>
 
-          <div className="bg-white py-16">
+          <div className="content-w m-pad bg-white">
             <div className="mx-auto flex max-w-4xl flex-col gap-6 text-center">
               <h2 className="font-inter mx-4 text-xl text-black md:text-4xl">
                 Create a{' '}
@@ -149,7 +148,6 @@ export default function Donate() {
               </span>
             </div>
           </div>
-        </div>
 
         {showRedirectModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">

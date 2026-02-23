@@ -6,8 +6,7 @@ const rightImageClasses = 'h-full lg:max-h-[420px] w-full object-cover';
 
 export const WhyVolunteer = () => {
   return (
-    <div className="max-w-screen-2xl px-8 md:pl-12 lg:pl-16 xl:pl-20">
-      <div className="flex flex-col gap-8">
+    <div className="content-w m-pad flex flex-col gap-8">
         <h2 className={sectionTitleClasses}>Join the Team</h2>
 
         <div className="flex flex-col gap-8 lg:grid lg:grid-cols-2 lg:items-center">
@@ -54,7 +53,6 @@ export const WhyVolunteer = () => {
             />
           </div>
         </div>
-      </div>
     </div>
   );
 };

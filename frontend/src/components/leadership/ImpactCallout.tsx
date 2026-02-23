@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 export const ImpactCallout = () => {
   return (
-    <div className="h-[700px] overflow-hidden rounded-[40px] bg-[#FFECCB] lg:h-[300px] xl:h-[unset]">
+    <div className="breakout-w m-pad h-[700px] overflow-hidden rounded-[40px] bg-[#FFECCB] lg:h-[300px] xl:h-[unset]">
       <div className="grid h-full grid-cols-1 grid-rows-2 lg:grid-cols-2 lg:grid-rows-1">
         <div className="mx-auto my-auto flex flex-col gap-6 p-8">
           <div className="text-center md:text-start">

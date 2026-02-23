@@ -3,8 +3,7 @@ import { GoalCard } from './GoalCard';
 
 export const ProgramPhilosophy = () => {
   return (
-    <div>
-      <div className="flex flex-col gap-10">
+    <div className="content-w m-pad flex flex-col gap-10">
         <div className="flex flex-col gap-2 text-center">
           <h2 className="font-montserrat text-2xl font-extrabold md:text-[40px] md:leading-[50px]">
             Our Program Philosophy
@@ -20,7 +19,6 @@ export const ProgramPhilosophy = () => {
             <GoalCard key={card.id} {...card} />
           ))}
         </div>
-      </div>
     </div>
   );
 };

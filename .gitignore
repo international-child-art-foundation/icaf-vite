@@ -13,6 +13,8 @@ dist-ssr
 *.local
 .env
 .env.local
+.pnpm-store/*
+.pnpm-store
 
 # Large/external asset folders (symlinked for local dev)
 frontend/public/ChildArt

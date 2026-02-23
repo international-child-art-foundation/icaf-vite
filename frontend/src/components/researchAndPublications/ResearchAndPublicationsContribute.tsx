@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 
 export default function ResearchAndPublicationsContribute() {
   return (
-    <div className="overflow-x-hidden py-16">
-      <section className="mb-8">
+    <div className="content-w m-pad overflow-x-hidden">
         <div className="relative flex h-[332px] w-full flex-col justify-center overflow-visible rounded-2xl bg-[#FFECCB]/80 px-6 md:h-[300px] md:px-12 lg:h-[320px] lg:items-center xl:h-[280px]">
           <h2 className="font-montserrat text-2xl font-semibold leading-loose md:max-w-[85%] lg:text-3xl 2xl:max-w-[70%]">
             Interested in working alongside ICAF?
@@ -18,7 +17,6 @@ export default function ResearchAndPublicationsContribute() {
             </Link>
           </div>
         </div>
-      </section>
     </div>
   );
 }

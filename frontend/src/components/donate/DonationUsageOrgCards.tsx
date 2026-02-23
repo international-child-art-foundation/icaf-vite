@@ -7,7 +7,7 @@ import { CircleArrowRight } from 'lucide-react';
 
 const DonationUsageCards: React.FC = () => {
   return (
-    <div className="w-full py-12">
+    <div className="content-w m-pad">
       {/* Header Section */}
       <div className="mb-12 text-center">
         <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">

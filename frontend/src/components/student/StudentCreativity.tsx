@@ -3,7 +3,7 @@ import { ICreativityItem } from '@/types/StudentTypes';
 
 export const StudentCreativity = () => {
   return (
-    <div className="mt-20">
+    <div className="content-w m-pad">
       <div className="flex flex-col gap-6 md:gap-10">
         <h2 className="font-montserrat text-[40px] font-extrabold leading-[48px]">
           Why Is Creativity Important?

@@ -4,7 +4,7 @@ import { ResourceLink } from './ResourceLink';
 
 export const AchievementsAndResources = () => {
   return (
-    <div className="flex flex-col gap-10">
+    <div className="content-w m-pad flex flex-col gap-10">
       <div className="text-center">
         <h2 className="font-montserrat text-[40px] font-extrabold">
           What We've Achieved

@@ -20,7 +20,7 @@ export const HistoryHeader = () => {
   }
 
   return (
-    <div className="relative grid grid-cols-1 grid-rows-1">
+    <div className="site-w relative grid grid-cols-1 grid-rows-1">
       <div className="relative col-start-1 row-start-1">
         <CurvedImage
           src={headerImg}

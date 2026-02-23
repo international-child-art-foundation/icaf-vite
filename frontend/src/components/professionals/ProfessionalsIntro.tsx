@@ -1,7 +1,6 @@
 export const ProfessionalsIntro = () => {
   return (
-    <div>
-      <div className="mt-4 flex max-w-screen-2xl flex-col gap-8 px-8 md:px-12 lg:mt-12 lg:px-16 xl:px-20">
+    <div className="content-w m-pad flex flex-col gap-8">
         <h2 className="font-montserrat text-4xl font-semibold">
           Your Influence Can Democratize Creativity
         </h2>
@@ -20,7 +19,6 @@ export const ProfessionalsIntro = () => {
             foster creativity and infuse it with empathy.{' '}
           </p>
         </div>
-      </div>
     </div>
   );
 };

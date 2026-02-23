@@ -4,7 +4,7 @@ import redBlueFirework from '@/assets/home/RedBlueFirework.svg';
 
 const WhatWeDo = () => {
   return (
-    <div className="breakout-w m-pad relative mx-auto">
+    <div className="breakout-w m-pad relative">
       <img
         src={redBlueFirework}
         className="absolute -top-32 hidden w-32 sm:left-8 sm:block md:left-12 md:w-48 lg:left-48 xl:-top-36 xl:left-64"

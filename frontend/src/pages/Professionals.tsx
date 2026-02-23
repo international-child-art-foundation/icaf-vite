@@ -17,16 +17,13 @@ export const Professionals = () => {
   return (
     <>
       <Seo {...professionalsMetadata} />
-      <div>
+      <div className="content-gap">
         <ProfessionalsHeader />
-        <div className="flex flex-col gap-12">
-          <ProfessionalsIntro />
-          <ProfessionalsHowTo />
-          <ContactForm config={contactFormConfigs['professionals']} />{' '}
-          <div className="flex w-full justify-center overflow-hidden">
-            <img src={faceCollage} className="w-full min-w-[1000px]" alt="" />
-          </div>
-          <div className="h-8"></div>
+        <ProfessionalsIntro />
+        <ProfessionalsHowTo />
+        <ContactForm config={contactFormConfigs['professionals']} />
+        <div className="flex w-full justify-center overflow-hidden">
+          <img src={faceCollage} className="w-full min-w-[1000px]" alt="" />
         </div>
       </div>
     </>

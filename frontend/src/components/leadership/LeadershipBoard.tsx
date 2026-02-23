@@ -3,7 +3,7 @@ import { BoardMembers } from './BoardMembers';
 
 export const LeadershipBoard = () => {
   return (
-    <div className="flex flex-col items-center gap-10 text-center">
+    <div className="content-w m-pad flex flex-col items-center gap-10 text-center">
       <div className="flex flex-col items-center gap-2">
         <h2 className="font-montserrat text-3xl font-extrabold lg:text-[40px]">
           Board Members

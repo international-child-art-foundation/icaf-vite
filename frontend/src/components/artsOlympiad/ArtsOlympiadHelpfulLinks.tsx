@@ -32,7 +32,7 @@ export const ArtsOlympiadHelpfulLinks = () => {
   };
 
   return (
-    <section className="helpful-links w-full rounded-[9px] px-4 py-10 sm:px-6 md:px-8 lg:px-10 xl:px-12">
+    <section className="content-w m-pad helpful-links rounded-[9px]">
       <div className="mx-auto flex w-full flex-col items-center gap-12 xl:gap-10">
         <h2 className="hl-title font-montserrat text-primary text-center text-3xl font-bold sm:text-[2.25rem] sm:leading-[2.8rem]">
           Helpful Materials

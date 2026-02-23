@@ -28,7 +28,7 @@ export const SponsorBrandCarousel = () => {
   };
 
   return (
-    <div className="max-w-screen-2xl overflow-hidden">
+    <div className="content-w m-pad overflow-hidden">
       <p className="font-montserrat text-center text-[40px] font-bold">
         Trusted by Leading Brands
       </p>

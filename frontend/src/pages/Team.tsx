@@ -26,12 +26,9 @@ export const Team = () => {
   return (
     <>
       <Seo {...teamMetadata} />
-      <div ref={topRef} className="flex flex-col">
+      <div ref={topRef} className="content-gap">
         <TeamHeader scrollFunction={handleScrollToStaff} />
-        <div
-          ref={staffRef}
-          className="mx-auto flex max-w-screen-2xl flex-col gap-16"
-        >
+        <div ref={staffRef} className="content-gap">
           <TeamStaff staffData={staffData} />
           <TeamExtendedStaff />
           <Creativity />

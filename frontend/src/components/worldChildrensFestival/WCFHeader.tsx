@@ -38,8 +38,7 @@ export default function WCFHeader() {
   }
 
   return (
-    <div>
-      <figure className="relative">
+    <figure className="site-w relative">
         <CurvedImage
           src={heroImage}
           objectPosition="right "
@@ -84,7 +83,6 @@ export default function WCFHeader() {
             </Button>
           </a>
         </div>
-      </figure>
-    </div>
+    </figure>
   );
 }

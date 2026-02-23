@@ -7,8 +7,7 @@ const rightImageClasses = 'h-64 w-full object-cover sm:h-72 lg:h-80';
 
 export const HealthAndEnvironmentDay = () => {
   return (
-    <div>
-      <div className="flex flex-col gap-8">
+    <div className="content-w m-pad flex flex-col gap-8">
         <h2 className={sectionTitleClasses}>
           A Festival for Creativity, Empathy, and Unity
         </h2>
@@ -50,7 +49,6 @@ export const HealthAndEnvironmentDay = () => {
             />
           </div>
         </div>
-      </div>
     </div>
   );
 };

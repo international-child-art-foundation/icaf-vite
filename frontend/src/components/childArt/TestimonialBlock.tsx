@@ -7,7 +7,7 @@ import ThreeLinesMobile from '@/assets/shared/images/testimonial/three-lines-mob
 
 export default function TestimonialBlock() {
   return (
-    <section className="relative w-full overflow-hidden px-1 py-16 md:px-12 lg:px-20 xl:px-24 2xl:px-32">
+    <section className="content-w m-pad relative overflow-hidden">
       {/* Outer container with max width */}
       {/* <div className="relative mx-auto max-w-[1100px]"> */}
       <div className="relative mx-auto mb-20 w-full max-w-[500px] px-6 sm:max-w-[600px] sm:px-6 md:max-w-[1100px] md:px-0">

@@ -19,9 +19,9 @@ const Impact = () => {
   return (
     <>
       <Seo {...impactMetadata} />
-      <div className="relative w-full">
+      <div className="content-gap">
         {/* Header */}
-        <div className="grid h-[550px] grid-cols-1 grid-rows-1">
+        <div className="site-w grid h-[550px] grid-cols-1 grid-rows-1">
           <div className="col-start-1 row-start-1">
             <CurvedImage
               src={WorldMural}
@@ -34,10 +34,8 @@ const Impact = () => {
             Impact
           </p>
         </div>
-        {/* Body */}
-        <div className="relative mt-16 grid w-full gap-20">
-          {/* Better World with Creativity Section */}
-          <div className="grid max-w-screen-2xl gap-8">
+        {/* Better World with Creativity Section */}
+        <div className="content-w m-pad grid gap-8">
             <h2 className="font-montserrat text-center text-3xl font-extrabold">
               Building a Better World with Creativity
             </h2>
@@ -50,7 +48,7 @@ const Impact = () => {
             <AccordionDropdowns data={MissionDropdownData} />
           </div>
           {/* Making an Impact section */}
-          <div className="grid-col grid max-w-screen-2xl gap-20">
+          <div className="content-w m-pad grid gap-20">
             <div className="grid gap-8">
               <h2 className="font-montserrat text-center text-3xl font-extrabold">
                 Making an Impact
@@ -112,13 +110,12 @@ const Impact = () => {
             </div>
           </div>
           {/* Children's voices section */}
-          <div className="flex max-w-screen-2xl flex-col gap-8 overflow-hidden">
+          <div className="content-w m-pad flex flex-col gap-8 overflow-hidden">
             <h2 className="font-montserrat text-center text-3xl font-extrabold">
               Bringing Children's Voices to the World
             </h2>
             <ContentCarousel carouselData={ImpactContentCarouselData} />
           </div>
-        </div>
         {/* Donation section */}
         <YourDonations />
       </div>

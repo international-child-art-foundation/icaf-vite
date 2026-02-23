@@ -6,7 +6,7 @@ import { AboutGraphic1 } from '@/assets/shared/images/about/AboutGraphic1';
 
 export default function WhoWeAre() {
   return (
-    <section className="font-montserrat w-breakout pad-sides relative mx-auto">
+    <section className="font-montserrat breakout-w m-pad relative">
       <div className="pointer-events-none absolute right-0 top-0 z-[-10] -translate-y-1/4">
         <AboutGraphic1
           fill="#0050FA"
@@ -32,7 +32,7 @@ export default function WhoWeAre() {
       </div>
 
       {/* Section 1 */}
-      <article className="mx-auto my-10 max-w-screen-2xl lg:flex">
+      <article className="my-10 lg:flex">
         <div className="lg:w-1/2">
           <h3 className="lg:text-x my-4 text-2xl font-semibold">
             International Child Art Foundation
@@ -63,7 +63,7 @@ export default function WhoWeAre() {
       </article>
 
       {/* Section 2 */}
-      <article className="my-20 max-w-screen-2xl md:my-24 lg:flex lg:flex-row-reverse">
+      <article className="my-20 md:my-24 lg:flex lg:flex-row-reverse">
         <div className="lg:w-1/2">
           <h3 className="my-4 text-2xl font-semibold">Our Programs</h3>
           <div className="bg-secondary-blue my-4 h-1 rounded-full"></div>
@@ -104,7 +104,7 @@ export default function WhoWeAre() {
       </article>
 
       {/* Section 3 */}
-      <article className="my-10 max-w-screen-2xl lg:my-20 lg:flex">
+      <article className="my-10 lg:my-20 lg:flex">
         <div className="lg:w-1/2">
           <h3 className="my-4 text-2xl font-semibold">Writings and Research</h3>
           <div className="bg-secondary-yellow my-4 h-1 rounded-full"></div>

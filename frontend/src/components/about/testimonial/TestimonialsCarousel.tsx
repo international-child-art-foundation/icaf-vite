@@ -33,7 +33,7 @@ export const TestimonialsCarousel = () => {
   const handleSelect = (index: number) => api?.scrollTo(index);
 
   return (
-    <section className="relative mx-auto max-w-screen-2xl select-none bg-white">
+    <section className="content-w m-pad relative select-none bg-white">
       <h2 className="mb-10 text-center font-sans text-3xl font-bold lg:text-[40px]">
         Testimonials
       </h2>

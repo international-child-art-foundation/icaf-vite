@@ -16,15 +16,14 @@ export const ArtsOlympiad = () => {
   return (
     <>
       <Seo {...artsOlympiadMetadata} />
-      <div className="flex w-full justify-center">
-        <main className="mt-10 flex w-full max-w-screen-2xl flex-col gap-10 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
-          <header className="flex flex-col gap-2">
+      <main className="content-gap">
+          <header className="content-w m-pad flex flex-col gap-2">
             <h1 className="font-montserrat text-primary text-3xl font-extrabold md:text-4xl lg:text-5xl">
               The Arts Olympiad
             </h1>
           </header>
 
-          <section className="flex flex-col gap-4 lg:items-center">
+          <section className="content-w m-pad flex flex-col gap-4 lg:items-center">
             <div className="flex flex-col gap-6">
               <p className="font-openSans text-lg font-semibold leading-relaxed text-slate-800 md:text-xl">
                 ICAF's Arts Olympiad is the largest in-school and after-school
@@ -48,7 +47,7 @@ export const ArtsOlympiad = () => {
             </p>
           </section>
 
-          <section className="relative">
+          <section className="content-w m-pad relative">
             <div className="relative grid gap-8 rounded-3xl bg-sky-50 px-6 py-8 md:grid-cols-[minmax(0,0.4fr)_minmax(0,1fr)] md:px-10 md:py-10">
               <div className="flex items-start justify-center md:justify-start">
                 <img
@@ -82,7 +81,7 @@ export const ArtsOlympiad = () => {
             </div>
           </section>
 
-          <section className="grid gap-8 rounded-3xl bg-white px-6 py-8 shadow-sm md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:px-10 md:py-10">
+          <section className="content-w m-pad grid gap-8 rounded-3xl bg-white px-6 py-8 shadow-sm md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:px-10 md:py-10">
             <div className="flex flex-col gap-5">
               <h2 className="font-montserrat text-primary text-2xl font-extrabold md:text-3xl">
                 📚 How It Works
@@ -124,7 +123,7 @@ export const ArtsOlympiad = () => {
             </div>
           </section>
 
-          <section className="grid gap-8 rounded-3xl bg-white px-6 py-8 shadow-sm md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:px-10 md:py-10">
+          <section className="content-w m-pad grid gap-8 rounded-3xl bg-white px-6 py-8 shadow-sm md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:px-10 md:py-10">
             <div className="flex items-center justify-center">
               <div className="relative h-72 w-full max-w-md overflow-hidden rounded-2xl shadow-md sm:h-80 md:h-96">
                 <img
@@ -162,7 +161,7 @@ export const ArtsOlympiad = () => {
             </div>
           </section>
 
-          <section className="relative">
+          <section className="content-w m-pad relative">
             <div className="relative grid gap-8 rounded-3xl bg-sky-50 px-6 py-8 md:grid-cols-[minmax(0,0.4fr)_minmax(0,1fr)] md:px-10 md:py-10">
               <div className="flex items-start justify-center md:justify-start">
                 <img
@@ -208,7 +207,6 @@ export const ArtsOlympiad = () => {
 
           <ArtsOlympiadHelpfulLinks />
         </main>
-      </div>
     </>
   );
 };

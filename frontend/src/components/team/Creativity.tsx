@@ -3,7 +3,7 @@ import Hand from '@/assets/team/Hand.webp';
 
 export const Creativity = () => {
   return (
-    <div className="grid-col grid gap-8">
+    <div className="breakout-w m-pad grid-col grid gap-8">
       <h2 className="font-montserrat text-center text-[40px] font-extrabold leading-[48px]">
         Committed to Creativity
       </h2>

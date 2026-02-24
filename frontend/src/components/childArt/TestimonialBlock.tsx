@@ -7,15 +7,15 @@ import ThreeLinesMobile from '@/assets/shared/images/testimonial/three-lines-mob
 
 export default function TestimonialBlock() {
   return (
-    <section className="content-w m-pad relative overflow-hidden">
+    <section className="breakout-w m-pad relative overflow-hidden">
       {/* Outer container with max width */}
       {/* <div className="relative mx-auto max-w-[1100px]"> */}
-      <div className="relative mx-auto mb-20 w-full max-w-[500px] px-6 sm:max-w-[600px] sm:px-6 md:max-w-[1100px] md:px-0">
+      <div className="relative mx-auto mb-20 w-full max-w-[500px] px-6 sm:max-w-[600px] sm:px-6 md:max-w-[1200px] md:px-0">
         {/* Red block positioned relative to the card */}
         <img
           src={RedBlockSVG}
           alt=""
-          className="absolute left-[-60px] top-[-50px] z-0 w-[360px]"
+          className="absolute left-[-60px] top-[-50px] z-0 w-[360px] lg:top-[-20px]"
         />
 
         {/* Yellow block positioned relative to the card */}

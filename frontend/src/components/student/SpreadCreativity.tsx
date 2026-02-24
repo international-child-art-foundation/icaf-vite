@@ -10,7 +10,7 @@ import {
 export const SpreadCreativity = () => {
   const size = useWindowSize();
   return (
-    <div className="content-w m-pad flex flex-col gap-32">
+    <div className="breakout-w m-pad flex flex-col gap-32">
       <div className="grid grid-cols-1 grid-rows-1 pr-4">
         <div className="col-start-1 row-start-1">
           {size.width > 768 ? (
@@ -27,7 +27,7 @@ export const SpreadCreativity = () => {
         <h2 className="font-montserrat text-center text-[40px] font-extrabold leading-[48px]">
           Ready to Get Creative?
         </h2>
-        <p className="max-w-[800px] text-xl">
+        <p className="max-w-[1000px] text-center text-xl">
           Join us and start your journey with ICAF. Whether you're drawing,
           painting, building, or imagining, your creativity has the power to
           change the world!

@@ -85,7 +85,7 @@ export const HistoryMomentsCarousel = () => {
             );
           })}
         </CarouselContent>
-        <div className="pt-4">
+        <div className="">
           <CarouselArrowsDots
             items={carouselImages}
             onPrevious={handlePrevious}

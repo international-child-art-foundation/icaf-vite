@@ -13,7 +13,7 @@ export default function BackIssueGrid() {
   }, []);
 
   return (
-    <section className="content-w m-pad">
+    <section className="breakout-w m-pad">
       <h2 className="mb-4 text-center text-2xl font-bold md:text-3xl">
         Back issues of <span className="italic">ChildArt</span>
       </h2>

@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom';
 
 export default function ExploreOurProjects() {
   return (
-    <section className="content-w m-pad">
+    <section className="breakout-w m-pad">
       <div className="mb-10">
         <h2 className="text-center text-3xl font-extrabold lg:mb-16 lg:text-[40px]">
           Explore our projects
@@ -22,7 +22,7 @@ export default function ExploreOurProjects() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-        <div className="xl:col-span-1 xl:row-start-1">
+        <div className="my-auto xl:col-span-1 xl:row-start-1">
           <Card className="border-secondary-red bg-secondary-red/10 flex h-72 flex-col items-center justify-center rounded-2xl border-4 md:h-[400px] xl:h-[300px] 2xl:h-[325px]">
             <CardContent>
               <FavoriteSportLogo />
@@ -39,7 +39,7 @@ export default function ExploreOurProjects() {
             </CardFooter>
           </Card>
         </div>
-        <div className="xl:col-span-1 xl:row-start-2">
+        <div className="my-auto xl:col-span-1 xl:row-start-2">
           <Card className="border-tertiary-blue bg-tertiary-blue/10 flex h-72 flex-col items-center justify-center rounded-2xl border-4 md:h-[400px] xl:h-[300px] 2xl:h-[325px]">
             <CardContent>
               <VRHeaven />

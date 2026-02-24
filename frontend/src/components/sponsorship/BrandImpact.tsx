@@ -5,7 +5,7 @@ import { BrandImpactCarousel } from './BrandImpactCarousel';
 
 export const BrandImpact = () => {
   return (
-    <div className="content-w m-pad flex flex-col gap-10">
+    <div className="breakout-w m-pad flex flex-col gap-10">
       <p className="font-montserrat text-center text-[32px] font-bold">
         Brand Impact Examples
       </p>

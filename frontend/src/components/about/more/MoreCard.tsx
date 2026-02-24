@@ -22,12 +22,12 @@ import { Link } from 'react-router-dom';
 
 export const MoreCard = ({ item }: { item: MoreOnOurSite }) => {
   return (
-    <Card className="mx-auto flex h-[500px] w-[320px] flex-col rounded-[40px] bg-[#FFECCB] py-0 transition-all duration-300 sm:w-[380px] md:h-[360px] md:w-full md:flex-row-reverse lg:h-[320px]">
+    <Card className="mx-auto flex h-[500px] w-[320px] flex-col rounded-[40px] bg-[#FFECCB] py-0 transition-all duration-300 sm:w-[380px] md:h-[360px] md:w-full md:flex-row-reverse lg:h-[400px]">
       <div className="h-48 w-full overflow-hidden rounded-t-[40px] md:h-auto md:w-1/2 md:rounded-r-[40px] md:rounded-t-none">
         <img
           src={item.image}
           alt={item.title}
-          className="h-full w-full scale-105 object-cover md:scale-100"
+          className="h-full w-full scale-105 rounded-tr-[40px] object-cover md:scale-100"
         />
       </div>
       {/* Card Content  */}

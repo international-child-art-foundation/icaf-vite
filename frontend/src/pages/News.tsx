@@ -13,7 +13,7 @@ export const News = () => {
   return (
     <>
       <Seo {...newsMetadata} />
-      <div className="content-gap">
+      <div className="content-gap mt-12">
         <div className="content-w m-pad space-between grid grid-cols-2 grid-rows-1">
           <div>
             <h1 className="text-primary font-montserrat mt-12 text-4xl font-bold">

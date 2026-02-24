@@ -6,7 +6,7 @@ import { Button } from '../ui/button';
 
 export const JoinTheFun = () => {
   return (
-    <div className="content-w m-pad">
+    <div className="breakout-w m-pad">
       <div className="flex flex-col gap-10">
         <h2 className="font-montserrat text-center text-[40px] font-extrabold leading-[48px]">
           Join the Fun with ICAF!

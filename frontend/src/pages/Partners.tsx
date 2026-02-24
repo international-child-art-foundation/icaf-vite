@@ -181,35 +181,33 @@ export default function Partners() {
   return (
     <>
       <Seo {...partnersMetadata} />
-      <div>
+      <div className="content-gap">
         <NavigationBar />
-        <div className="content-gap">
-          {/* First Section */}
-          <div className="site-w grid grid-cols-1 grid-rows-1">
-            <div className="col-start-1 row-start-1">
-              <CurvedImage
-                src={partnersBackgroundImage}
-                darkened={true}
-                gradientDefinition={gradientDefinition}
-              />
-            </div>
-            <div className="relative z-10 col-start-1 row-start-1">
-              <div className="container mx-auto flex h-full items-start px-8 pt-20 md:items-center md:px-12 md:pt-0 lg:px-16 xl:px-20">
-                <div className="max-w-3xl">
-                  <h1 className="font-montserrat mb-3 text-4xl font-bold text-white md:mb-4 md:text-5xl lg:mb-6 lg:text-6xl xl:text-7xl">
-                    Partners
-                  </h1>
-                  <h2 className="font-montserrat mb-3 text-xl font-light text-white md:mb-4 md:text-2xl lg:mb-6 lg:text-3xl xl:text-4xl">
-                    Inspiring the Next Generation Through Art
-                  </h2>
-                  <p className="mb-4 max-w-2xl font-sans text-base leading-relaxed text-white md:mb-6 md:text-lg lg:mb-10 lg:text-xl">
-                    ICAF partners with organizations worldwide to nurture
-                    creativity and empathy in children. Our collaborations bring
-                    the power of art to young minds, making a global impact.
-                  </p>
-                  <div className="mb-6 flex justify-start sm:mb-8 lg:mb-16">
-                    <DonateButton text="Donate to our Campaign" />
-                  </div>
+        {/* First Section */}
+        <div className="site-w grid grid-cols-1 grid-rows-1">
+          <div className="col-start-1 row-start-1">
+            <CurvedImage
+              src={partnersBackgroundImage}
+              darkened={true}
+              gradientDefinition={gradientDefinition}
+            />
+          </div>
+          <div className="relative z-10 col-start-1 row-start-1">
+            <div className="container mx-auto flex h-full items-start px-8 pt-20 md:items-center md:px-12 md:pt-0 lg:px-16 xl:px-20">
+              <div className="max-w-3xl">
+                <h1 className="font-montserrat mb-3 text-4xl font-bold text-white md:mb-4 md:text-5xl lg:mb-6 lg:text-6xl xl:text-7xl">
+                  Partners
+                </h1>
+                <h2 className="font-montserrat mb-3 text-xl font-light text-white md:mb-4 md:text-2xl lg:mb-6 lg:text-3xl xl:text-4xl">
+                  Inspiring the Next Generation Through Art
+                </h2>
+                <p className="mb-4 max-w-2xl font-sans text-base leading-relaxed text-white md:mb-6 md:text-lg lg:mb-10 lg:text-xl">
+                  ICAF partners with organizations worldwide to nurture
+                  creativity and empathy in children. Our collaborations bring
+                  the power of art to young minds, making a global impact.
+                </p>
+                <div className="mb-6 flex justify-start sm:mb-8 lg:mb-16">
+                  <DonateButton text="Donate to our Campaign" />
                 </div>
               </div>
             </div>

@@ -40,7 +40,7 @@ export default function MagazineCarousel() {
   }, [api]);
 
   return (
-    <div className="content-w m-pad lg:flex lg:items-start">
+    <div className="breakout-w m-pad lg:flex lg:items-start">
       {/* left - description */}
       <div className="flex w-full flex-col gap-4 pb-16 lg:w-1/3 lg:pb-0">
         <h2 className="text-2xl font-bold">Latest Issues</h2>

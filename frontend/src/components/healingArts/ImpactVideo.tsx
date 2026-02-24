@@ -17,7 +17,7 @@ export const ImpactVideo = () => {
 
 export const ImpactVideoThreeRows = () => {
   return (
-    <div className="content-w m-pad">
+    <div className="breakout-w m-pad">
       <div className="relative flex w-full flex-col gap-8 overflow-hidden rounded-xl 2xl:flex-row">
         <div className="relative h-full w-full overflow-hidden rounded-xl 2xl:basis-[70%]">
           <VideoWrapper src={healingArtsVideo} thumbnail={healingArtsThumb} />

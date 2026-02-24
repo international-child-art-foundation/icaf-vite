@@ -68,18 +68,17 @@ export default function ChildArtPage() {
             </div>
           </div>
         </div>
+
+        {/* === Carousel Section === */}
+        <MagazineCarousel />
+
+        <BackIssueGrid />
+
+        <TestimonialBlock />
+
+        {/* Donation CTA Section */}
+        <YourDonations />
       </div>
-
-      {/* === Carousel Section === */}
-      <MagazineCarousel />
-
-      <BackIssueGrid />
-
-      <TestimonialBlock />
-
-      {/* Donation CTA Section */}
-      <YourDonations />
-      {/* </div> */}
     </>
   );
 }

@@ -9,7 +9,7 @@ module.exports = {
       },
       maxWidth: {
         content: '1536px',
-        breakout: '1696px',
+        breakout: '1584px',
         site: '1920px',
       },
       screens: { '3xl': '1920px' },

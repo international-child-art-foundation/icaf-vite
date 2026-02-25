@@ -96,4 +96,13 @@ export const routes: RouteAliasGroup[] = [
     main: '/get-involved/professionals',
     aliases: ['/professionals', '/profesionals'],
   },
+  {
+    main: '/programs/world-childrens-award',
+    aliases: [
+      '/world-childrens-award',
+      '/wca',
+      '/world-children-award',
+      '/programs/world-children-award',
+    ],
+  },
 ];

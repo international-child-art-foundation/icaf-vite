@@ -121,6 +121,12 @@ export const navItems: NavItem[] = [
         imageSrc: healing,
         hoverDescription: '',
       },
+      {
+        label: "World Children's Award",
+        href: '/programs/world-childrens-award',
+        imageSrc: world, // TODO: Replace with WCA nav image
+        hoverDescription: '',
+      },
     ],
   },
   {

@@ -83,6 +83,11 @@ const Volunteer = lazy(() =>
 const Professionals = lazy(() =>
   import('./pages/Professionals').then((m) => ({ default: m.Professionals })),
 );
+const WorldChildrensAward = lazy(() =>
+  import('./pages/WorldChildrensAward').then((m) => ({
+    default: m.WorldChildrensAward,
+  })),
+);
 
 export default function App() {
   useEffect(() => {
@@ -153,6 +158,10 @@ export default function App() {
               <Route
                 path="/get-involved/professionals"
                 element={<Professionals />}
+              />
+              <Route
+                path="/programs/world-childrens-award"
+                element={<WorldChildrensAward />}
               />
 
               {routes.map(({ main, aliases }) =>

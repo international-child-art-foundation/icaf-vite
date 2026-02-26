@@ -14,6 +14,7 @@ import volunteer from '../assets/shared/images/navigation/getInvolved/volunteer.
 import latest from '../assets/shared/images/navigation/news/latestNews_small.webp';
 import upcoming from '../assets/shared/images/navigation/news/upcomingEvents.webp';
 import board from '@/assets/shared/images/icafGroupPhoto.webp';
+import wca from '@/assets/shared/images/navigation/programs/worldChildrensAward.webp';
 import researchAndPublications from '@/assets/shared/images/about/UnitedStatesSLKorth.webp';
 
 export interface NavChild {
@@ -124,7 +125,7 @@ export const navItems: NavItem[] = [
       {
         label: "World Children's Award",
         href: '/programs/world-childrens-award',
-        imageSrc: world, // TODO: Replace with WCA nav image
+        imageSrc: wca,
         hoverDescription: '',
       },
     ],

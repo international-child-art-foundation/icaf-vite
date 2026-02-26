@@ -30,8 +30,8 @@ export const WCAHeader = () => {
             objectPosition={'50% 15%'}
           />
         </div>
-        <div className="font-montserrat z-10 col-start-1 row-start-1 mt-32 flex max-w-screen-2xl flex-col gap-4 p-6 font-extrabold text-white sm:p-10 sm:px-8 md:px-12 lg:mt-4 lg:max-w-[55%] lg:px-16 xl:mt-20 xl:px-20">
-          <div className="font-montserrat block text-4xl font-extrabold sm:text-[50px] sm:leading-[50px] md:text-[60px] md:leading-[70px]">
+        <div className="font-montserrat z-10 col-start-1 row-start-1 mt-32 flex max-w-screen-2xl flex-col gap-4 p-6 font-extrabold text-white sm:p-10 sm:px-8 md:mt-24 md:px-12 lg:mt-24 lg:max-w-[75%] lg:px-16 xl:mt-20 xl:px-20">
+          <div className="font-montserrat block text-4xl font-extrabold leading-[30px] sm:text-[50px] sm:leading-[50px] md:text-[60px] md:leading-[70px]">
             <h1 className="flex flex-col gap-4 sm:gap-0">
               {' '}
               <p className="text-[#FBB22E]">World Children's</p>

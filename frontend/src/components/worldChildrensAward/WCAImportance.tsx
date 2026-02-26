@@ -4,7 +4,7 @@ import { ColoredBox } from './ColoredBox';
 export const WCAImportance = () => {
   return (
     <div className="breakout-w m-pad">
-      <div className="content-w flex flex-col gap-10">
+      <div className="flex flex-col gap-10">
         <h2 className="font-montserrat mx-auto text-[40px] font-extrabold">
           Why the World Children’s Award Matters
         </h2>

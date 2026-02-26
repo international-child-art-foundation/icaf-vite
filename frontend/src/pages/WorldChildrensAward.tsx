@@ -9,7 +9,7 @@ import { Seo } from '@/components/shared/Seo';
 const worldChildrensAwardMetadata = {
   title: "World Children's Award | ICAF",
   description:
-    "ICAF's World Children's Award recognizes outstanding contributions to children's rights and well-being around the world.",
+    "ICAF's World Children's Award allows young people to honor their favorite businesses, philanthropies, and cultural and educational leaders.",
   path: '/programs/world-childrens-award',
 };
 

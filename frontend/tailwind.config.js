@@ -8,8 +8,9 @@ module.exports = {
         8: '0.08',
       },
       maxWidth: {
-        content: '1536px',
-        breakout: '1584px',
+        // Subject to change; overhaul in progress
+        content: '1400px',
+        breakout: '1500px',
         site: '1920px',
       },
       screens: { '3xl': '1920px' },

@@ -13,13 +13,13 @@ export const ImgShowcase = ({
 }: ImgShowcaseProps) => {
   return (
     <div className="flex flex-col gap-6 md:grid md:grid-cols-2 md:gap-10">
-      <div className={`${textLeft === true ? 'order-1' : 'order-2'}`}>
+      <div className={`${textLeft === true ? 'md:order-1' : 'md:order-2'}`}>
         {text}
       </div>
       <div
-        className={`${FlairColorMap[color].border} ${textLeft === true ? 'order-2' : 'order-1'} overflow-hidden rounded-xl border-2`}
+        className={`${FlairColorMap[color].border} ${textLeft === true ? 'md:order-2' : 'md:order-1'} overflow-hidden rounded-xl border-2`}
       >
-        <img src={img} className="w-full object-cover" />
+        <img src={img} className="h-full w-full object-cover" />
       </div>
     </div>
   );

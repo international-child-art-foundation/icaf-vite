@@ -3,7 +3,7 @@ import firework from '@/assets/worldChildrensAward/firework-small.svg';
 
 export const WCAIntro = () => {
   return (
-    <div className="w-breakout m-pad overflow-hidden">
+    <div className="breakout-w m-pad">
       <div className="flex flex-col gap-4 md:grid md:grid-cols-[1fr_331px] md:gap-10">
         <div className="flex flex-col gap-10">
           <h2 className="font-montserrat text-[40px] font-extrabold">

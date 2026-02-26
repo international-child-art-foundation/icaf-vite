@@ -25,6 +25,7 @@ const preloaders: Preloader[] = [
   () => import('./pages/ClimateChange'),
   () => import('./pages/Volunteer'),
   () => import('./pages/Professionals'),
+  () => import('./pages/WorldChildrensAward'),
 ];
 
 function runPreloadersSlowly() {

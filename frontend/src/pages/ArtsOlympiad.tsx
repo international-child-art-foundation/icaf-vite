@@ -195,7 +195,7 @@ export const ArtsOlympiad = () => {
                 </div>
                 <div>
                   <a
-                    href="/documents/7th Arts Olympiad Lesson Plan January 2026.pdf"
+                    href="/documents/7th Arts Olympiad Lesson Plan.pdf"
                     download
                     className="bg-primary inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold tracking-[0.14em] text-[#FFD743]"
                   >

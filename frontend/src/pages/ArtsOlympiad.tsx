@@ -66,7 +66,7 @@ export const ArtsOlympiad = () => {
                   <span className="font-semibold">aged 8–12</span> that blends
                   creativity with physical activity. Schools, studios, and
                   homeschoolers can participate before{' '}
-                  <span className="font-semibold">March 20, 2026</span>. Winning
+                  <span className="font-semibold">April 20, 2026</span>. Winning
                   artists will be invited to the 7th World Children’s Festival
                   in{' '}
                   <span className="font-semibold">

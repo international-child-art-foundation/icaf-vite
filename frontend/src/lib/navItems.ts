@@ -189,26 +189,11 @@ export const navItems: NavItem[] = [
     href: '/sponsorship',
     children: [],
   },
-  // {
-  //   key: 'gallery',
-  //   label: 'Gallery',
-  //   navLabel: 'Gallery',
-  //   href: '/gallery',
-  //   children: [
-  //     {
-  //       label: 'Recent',
-  //       href: '/gallery/recent',
-  //       imageSrc: gallery,
-  //       alt: 'Recent art',
-  //       hoverDescription: '',
-  //     },
-  //     {
-  //       label: 'Annual Reports',
-  //       href: '/gallery/all',
-  //       imageSrc: annual,
-  //       alt: 'All submissions',
-  //       hoverDescription: '',
-  //     },
-  //   ],
-  // },
+  {
+    key: 'gallery',
+    label: 'Gallery',
+    navLabel: 'Gallery',
+    href: '/gallery',
+    children: [],
+  },
 ];

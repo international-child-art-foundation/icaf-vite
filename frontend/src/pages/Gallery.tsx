@@ -1,4 +1,4 @@
-import galleryHeader from '@/assets/gallery/gallery-header.png';
+import galleryHeader from '@/assets/gallery/gallery-header.webp';
 import { CurvedImage } from './CurvedImage';
 import { GalleryCore } from '@/components/gallery/GalleryCore';
 import { Seo } from '@/components/shared/Seo';

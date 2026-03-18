@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { Flip } from 'gsap/all';
 import { Tag } from './Tag';
@@ -7,45 +7,35 @@ gsap.registerPlugin(Flip);
 
 interface TagListProps {
   paramsObj: Record<string, string[]>;
-  updateFilterOption: (
-    optionName: string,
-    updates: Partial<{ number: number; active: boolean }>,
-  ) => void;
+  removeFilterTag: (categoryId: string, value: string) => void;
   clearAllFilters: () => void;
   dropdownActive: boolean;
 }
 
 export const TagList = (props: TagListProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const flipStateRef = useRef<ReturnType<typeof Flip.getState> | null>(null);
+  const prevDropdownActive = useRef(props.dropdownActive);
 
-  useEffect(() => {
-    if (containerRef.current) {
-      const state = Flip.getState(containerRef.current);
+  // Capture position before this render's layout change takes effect
+  if (
+    prevDropdownActive.current !== props.dropdownActive &&
+    containerRef.current
+  ) {
+    flipStateRef.current = Flip.getState(containerRef.current);
+    prevDropdownActive.current = props.dropdownActive;
+  }
 
-      if (props.dropdownActive) {
-        containerRef.current.classList.add(
-          'col-start-7',
-          'xl:col-span-15',
-          'xl:col-start-6',
-        );
-      } else {
-        containerRef.current.classList.add('col-start-1', 'col-span-20');
-        containerRef.current.classList.remove(
-          'col-start-7',
-          'xl:col-span-15',
-          'xl:col-start-6',
-        );
-      }
-
-      Flip.from(state, {
-        duration: 0.3,
-        ease: 'power1.inOut',
-      });
+  // Animate from captured state after DOM has updated
+  useLayoutEffect(() => {
+    if (flipStateRef.current) {
+      Flip.from(flipStateRef.current, { duration: 0.3, ease: 'power1.inOut' });
+      flipStateRef.current = null;
     }
   }, [props.dropdownActive]);
 
-  const removeTag = (filterValue: string) => {
-    props.updateFilterOption(filterValue, { active: false });
+  const removeTag = (categoryId: string, value: string) => {
+    props.removeFilterTag(categoryId, value);
   };
 
   const filteredKeys = Object.keys(props.paramsObj).filter(
@@ -60,11 +50,13 @@ export const TagList = (props: TagListProps) => {
     <div
       ref={containerRef}
       className="relative row-start-1 flex flex-wrap gap-2"
+      style={{ gridColumn: props.dropdownActive ? '6 / -1' : '1 / -1' }}
     >
       {hasMultipleActiveFilters && (
         <button
+          type="button"
           onClick={props.clearAllFilters}
-          className="h-[40px] cursor-pointer select-none px-5 py-2 font-semibold text-black"
+          className="cursor-pointer select-none px-5 py-2 font-semibold text-black"
         >
           Clear filters
         </button>
@@ -75,7 +67,7 @@ export const TagList = (props: TagListProps) => {
             key={value}
             label={value}
             filterType={key}
-            onRemove={() => removeTag(value)}
+            onRemove={() => removeTag(key, value)}
           />
         )),
       )}

@@ -88,6 +88,9 @@ const WorldChildrensAward = lazy(() =>
     default: m.WorldChildrensAward,
   })),
 );
+const Gallery = lazy(() =>
+  import('./pages/Gallery').then((m) => ({ default: m.Gallery })),
+);
 
 export default function App() {
   useEffect(() => {
@@ -163,6 +166,7 @@ export default function App() {
                 path="/programs/world-childrens-award"
                 element={<WorldChildrensAward />}
               />
+              <Route path="/gallery" element={<Gallery />} />
 
               {routes.map(({ main, aliases }) =>
                 aliases.map((alias) => (

@@ -17,6 +17,7 @@
     "build:shared": "pnpm --filter @icaf/shared build"
   },
   "devDependencies": {
+    "sharp": "^0.33.5",
     "typescript": "~5.7.2"
   }
 }

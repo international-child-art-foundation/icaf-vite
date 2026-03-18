@@ -19,10 +19,7 @@ interface CheckboxProps {
     updates: Partial<{ number: number; active: boolean }>,
   ) => void;
   updateSortValue: (sortOption: SortValue) => void;
-  alterFiltersByCategory: (
-    categoryId: string,
-    activeStatus: boolean,
-  ) => void;
+  alterFiltersByCategory: (categoryId: string, activeStatus: boolean) => void;
 }
 
 interface CheckboxAndRadioItemProps
@@ -43,7 +40,7 @@ function CheckboxAndRadioItem({
       <div>
         <label
           data-category={category}
-          className={`my-1 grid cursor-pointer select-none items-center gap-4 py-2 ${props.checked ? 'font-bold' : 'font-normal'}`}
+          className={`my-1 grid cursor-pointer select-none items-center gap-4 py-2 ${props.checked ? 'font-semibold' : 'font-normal'}`}
           style={{ gridTemplateColumns: '1.5rem auto' }}
         >
           <input
@@ -52,9 +49,9 @@ function CheckboxAndRadioItem({
             className="h-6 w-6 cursor-pointer py-2"
             {...props}
           />
-          {label}
-          <span className={number === 0 ? 'hidden' : 'visible'}>
-            (<span>{number}</span>)
+          <span>
+            {label}
+            {number > 0 && <span className="ml-1 font-normal">({number})</span>}
           </span>
         </label>
       </div>
@@ -65,6 +62,15 @@ function CheckboxAndRadioItem({
 const Checkbox = (props: CheckboxProps) => {
   const [selectAllChecked, setSelectAllChecked] = useState(false);
   const { filterableOptions, sortValue } = useFilters();
+  const categoryData = filterableOptions.find(
+    (cat) => cat.id === props.category,
+  );
+  const selectAllLabel =
+    categoryData?.categoryType === 'country'
+      ? 'Whole continent'
+      : categoryData?.categoryType === 'event'
+        ? 'All events'
+        : 'Select All';
   const [visibilityState, setVisibilityState] =
     useState<VisibilityState>('Hidden');
   const componentRootRef = useRef<HTMLElement>(null);
@@ -87,7 +93,7 @@ const Checkbox = (props: CheckboxProps) => {
       }
 
       Flip.from(stateBeforeAnimation, {
-        duration: 0.4,
+        duration: 0.3,
         ease: 'power2.inOut',
         absolute: false,
         scale: false,
@@ -116,14 +122,19 @@ const Checkbox = (props: CheckboxProps) => {
   }, [visibilityState, props.category, startFlipAnimation]);
 
   useEffect(() => {
-    const allChecked = props.options.every((option) => {
-      const category = filterableOptions.find(
-        (cat) => cat.id === props.category,
-      );
-      const opt = category?.options.find((o) => o.name === option.name);
-      return opt?.active;
-    });
-    setSelectAllChecked(allChecked);
+    const category = filterableOptions.find((cat) => cat.id === props.category);
+    if (
+      category?.categoryType === 'country' ||
+      category?.categoryType === 'event'
+    ) {
+      setSelectAllChecked(category.regionActive ?? false);
+    } else {
+      const allChecked = props.options.every((option) => {
+        const opt = category?.options.find((o) => o.name === option.name);
+        return opt?.active;
+      });
+      setSelectAllChecked(allChecked);
+    }
   }, [filterableOptions, props.options, props.category]);
 
   const handleSelectAllChange = (isChecked: boolean, category: string) => {
@@ -132,10 +143,7 @@ const Checkbox = (props: CheckboxProps) => {
   };
 
   const toggleVisibility = (id: string) => {
-    if (
-      visibilityState === 'Hidden' ||
-      visibilityState === 'TransitionOut'
-    ) {
+    if (visibilityState === 'Hidden' || visibilityState === 'TransitionOut') {
       startFlipAnimation('Shown', id);
     } else {
       startFlipAnimation('Hidden', id);
@@ -171,6 +179,7 @@ const Checkbox = (props: CheckboxProps) => {
       ref={componentRootRef}
     >
       <button
+        type="button"
         onClick={() => toggleVisibility(props.category)}
         className="inline-flex h-fit w-full py-3 text-base font-medium"
       >
@@ -190,27 +199,33 @@ const Checkbox = (props: CheckboxProps) => {
             type="checkbox"
             category={props.category}
             number={0}
-            label="Select All"
+            label={selectAllLabel}
             onChange={(e) =>
               handleSelectAllChange(e.target.checked, props.category)
             }
             checked={selectAllChecked}
           />
         )}
-        {props.options.map((option) => (
-          <CheckboxAndRadioItem
-            key={option.name}
-            type={props.type}
-            category={props.category}
-            number={option.number}
-            label={option.name}
-            onChange={(e) =>
-              handleValueChange(option.name, e.target.checked)
-            }
-            checked={isOptionChecked(props.category, option.name) ?? false}
-          />
-        ))}
+        {props.options
+          .filter((option) =>
+            props.type === 'radio'
+              ? true
+              : option.number > 0 ||
+                isOptionChecked(props.category, option.name),
+          )
+          .map((option) => (
+            <CheckboxAndRadioItem
+              key={option.name}
+              type={props.type}
+              category={props.category}
+              number={option.number}
+              label={option.name}
+              onChange={(e) => handleValueChange(option.name, e.target.checked)}
+              checked={isOptionChecked(props.category, option.name) ?? false}
+            />
+          ))}
         <button
+          type="button"
           className={`m-auto cursor-pointer pt-4 font-semibold text-black ${props.type === 'radio' ? 'hidden' : 'visible'}`}
           onClick={() => {
             toggleVisibility(props.category);

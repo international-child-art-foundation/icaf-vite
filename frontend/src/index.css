@@ -179,6 +179,14 @@
   animation: dropOut 0.25s ease-in forwards;
 }
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .clipped-image-top {
   clip-path: url(#wave-clip-top);
 }

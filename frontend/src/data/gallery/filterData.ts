@@ -142,6 +142,7 @@ export const filterableOptions = [
     title: 'Event',
     options: events,
     filterType: 'checkbox',
+    regionActive: false,
   },
   {
     id: 'africa',
@@ -149,6 +150,7 @@ export const filterableOptions = [
     title: 'Africa',
     options: Africa,
     filterType: 'checkbox',
+    regionActive: false,
   },
   {
     id: 'australia',
@@ -156,6 +158,7 @@ export const filterableOptions = [
     title: 'Australia / Oceania',
     options: Australia,
     filterType: 'checkbox',
+    regionActive: false,
   },
   {
     id: 'asia',
@@ -163,6 +166,7 @@ export const filterableOptions = [
     title: 'Asia',
     options: Asia,
     filterType: 'checkbox',
+    regionActive: false,
   },
   {
     id: 'europe',
@@ -170,6 +174,7 @@ export const filterableOptions = [
     title: 'Europe',
     options: Europe,
     filterType: 'checkbox',
+    regionActive: false,
   },
   {
     id: 'northamerica',
@@ -177,6 +182,7 @@ export const filterableOptions = [
     title: 'North America',
     options: NorthAmerica,
     filterType: 'checkbox',
+    regionActive: false,
   },
   {
     id: 'southamerica',
@@ -184,5 +190,6 @@ export const filterableOptions = [
     title: 'South America',
     options: SouthAmerica,
     filterType: 'checkbox',
+    regionActive: false,
   },
 ];

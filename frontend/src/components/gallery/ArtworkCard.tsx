@@ -7,7 +7,8 @@ type ArtworkCardProps = {
 };
 
 const ArtworkCard = ({ artwork, openModal }: ArtworkCardProps) => {
-  const { id, artists, age, country, locationDetail, event, thumbUrl } = artwork;
+  const { id, artists, age, country, locationDetail, event, thumbUrl } =
+    artwork;
   const artistText = artists.join(' & ');
 
   const manageEnter = (e: React.MouseEvent<HTMLImageElement>) => {
@@ -32,8 +33,8 @@ const ArtworkCard = ({ artwork, openModal }: ArtworkCardProps) => {
 
   return (
     <div id={id} className="relative h-full w-full rounded-lg">
-      <div className="rounded-lg shadow-md shadow-gray-600">
-        <section className="relative h-32 w-full select-none overflow-hidden rounded-t-lg md:h-60 xl:h-52">
+      <div className="rounded-lg shadow-md shadow-gray-400">
+        <section className="relative h-32 w-full select-none overflow-hidden rounded-t-lg sm:h-52 md:h-60 xl:h-52">
           <img
             src={thumbUrl}
             alt={artistText || 'Artwork'}
@@ -42,7 +43,7 @@ const ArtworkCard = ({ artwork, openModal }: ArtworkCardProps) => {
             onClick={() => openModal(id)}
             className="absolute inset-0 h-full w-full cursor-pointer object-cover object-center"
           />
-          {locationText && (
+          {/* {locationText && (
             <div
               className="absolute bottom-0 right-0 w-fit max-w-full rounded-tl-lg bg-[#ffffff80]"
               style={{ backdropFilter: 'blur(13px)' }}
@@ -51,25 +52,28 @@ const ArtworkCard = ({ artwork, openModal }: ArtworkCardProps) => {
                 {locationText}
               </p>
             </div>
-          )}
+          )} */}
         </section>
 
-        <section className="relative h-36 w-full overflow-hidden rounded-b-lg xl:h-44">
-          {artistText && (
-            <p className="truncate p-4 text-base font-semibold xl:text-xl">
-              {artistText}
+        <section className="relative flex w-full flex-col gap-4 rounded-b-lg p-4 py-6">
+          <div>
+            {artistText && (
+              <p className="truncate text-base font-semibold xl:text-xl">
+                {artistText}
+              </p>
+            )}
+            <p className="truncate text-sm text-gray-500">
+              {[age != null ? `Age ${age}` : null, locationText].filter(Boolean).join(' · ') || '\u00A0'}
             </p>
-          )}
-          {age != null && (
-            <p className="truncate px-4 pb-4 text-sm font-normal xl:text-base">
-              {age} years old
+            <p className="truncate text-sm text-gray-400">
+              {event || '\u00A0'}
             </p>
-          )}
-          <p className="truncate px-4 pb-2 text-sm text-gray-600">{event}</p>
-          <div className="-mt-1 flex xl:mt-4">
+          </div>
+          <div className="flex">
             <button
+              type="button"
               onClick={() => openModal(id)}
-              className="mx-4 w-full cursor-pointer rounded bg-primary py-3 text-center text-sm tracking-wide text-text-inverse"
+              className="bg-primary text-text-inverse w-full cursor-pointer rounded py-3 text-center text-sm tracking-wide"
             >
               View
             </button>

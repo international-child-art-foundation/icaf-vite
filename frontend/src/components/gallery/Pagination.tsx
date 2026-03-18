@@ -33,7 +33,7 @@ const Pagination = ({
   };
 
   return (
-    <div className="mb-4 mt-10 flex items-center justify-center gap-2">
+    <div className="flex items-center justify-center gap-2">
       <button
         onClick={() => updatePageNumber(currentPage, currentPage - 1)}
         disabled={currentPage === 1}

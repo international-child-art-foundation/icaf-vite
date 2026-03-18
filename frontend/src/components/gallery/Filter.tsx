@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Checkbox from './Checkbox';
-import { filterableOptions } from '@/data/gallery/filterData';
+import { useFilters } from './FilterContext';
 import type { SortValue } from '@/data/gallery/sortData';
 
 interface FilterProps {
@@ -17,6 +17,7 @@ interface FilterProps {
 }
 
 export const Filter = (props: FilterProps) => {
+  const { filterableOptions } = useFilters();
   const [isVisible, setIsVisible] = useState(props.isFilterOpen);
 
   useEffect(() => {
@@ -29,10 +30,14 @@ export const Filter = (props: FilterProps) => {
     return () => clearTimeout(timeoutId);
   }, [props.isFilterOpen]);
 
+  const visibleCategories = filterableOptions.filter(
+    (cat) => cat.options.some((o) => o.number > 0 || o.active),
+  );
+
   return (
     <div className="relative w-full">
       <section>
-        {filterableOptions.map(({ id, title, options, filterType }) => (
+        {visibleCategories.map(({ id, title, options, filterType }) => (
           <React.Fragment key={id + title}>
             <section
               className={`transition-all duration-300 ${isVisible ? 'mb-4 opacity-100' : 'mb-0 opacity-0'}`}

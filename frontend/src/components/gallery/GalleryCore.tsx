@@ -38,6 +38,7 @@ const GalleryCoreInner: React.FC = () => {
   const [artworksLoading, setArtworksLoading] = useState(true);
   const [artworksError, setArtworksError] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  const didInitialLoad = useRef(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const {
@@ -45,6 +46,8 @@ const GalleryCoreInner: React.FC = () => {
     setFilterOption,
     bulkAlterCategoryOptions,
     resetAllFilters,
+    updateOptionCounts,
+    setRegionActive,
     pageNumber,
     setPageNumber,
     sortValue,
@@ -61,13 +64,22 @@ const GalleryCoreInner: React.FC = () => {
 
   useEffect(() => {
     getArtworks()
-      .then(setArtworks)
+      .then((data) => {
+        setArtworks(data);
+        const counts: Record<string, number> = {};
+        data.forEach((a) => {
+          if (a.event) counts[a.event] = (counts[a.event] ?? 0) + 1;
+          if (a.country) counts[a.country] = (counts[a.country] ?? 0) + 1;
+        });
+        updateOptionCounts(counts);
+      })
       .catch((e: unknown) =>
         setArtworksError(
           e instanceof Error ? e.message : 'Failed to load artworks',
         ),
       )
       .finally(() => setArtworksLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -77,8 +89,19 @@ const GalleryCoreInner: React.FC = () => {
         { opacity: 0 },
         { opacity: 1, duration: 0.5, ease: 'power1.out' },
       );
+      didInitialLoad.current = true;
     }
   }, [artworksLoading]);
+
+  useEffect(() => {
+    if (didInitialLoad.current && gridRef.current) {
+      gsap.fromTo(
+        gridRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.3, ease: 'power1.out' },
+      );
+    }
+  }, [pageNumber]);
 
   const artworksPerPage = 20;
   const startIndex = (pageNumber - 1) * artworksPerPage;
@@ -89,12 +112,15 @@ const GalleryCoreInner: React.FC = () => {
   ): ParamsObjType {
     const obj: ParamsObjType = {};
     opts.forEach((option) => {
-      const activeOptions = option.options
+      const entries: string[] = [];
+      if (option.regionActive)
+        entries.push(
+          option.categoryType === 'event' ? 'All Events' : option.title,
+        );
+      option.options
         .filter((item) => item.active)
-        .map((item) => item.name);
-      if (activeOptions.length > 0) {
-        obj[option.id] = activeOptions;
-      }
+        .forEach((item) => entries.push(item.name));
+      if (entries.length > 0) obj[option.id] = entries;
     });
     return obj;
   }
@@ -107,10 +133,15 @@ const GalleryCoreInner: React.FC = () => {
     const currentParams = new URLSearchParams();
 
     filterableOptions.forEach((category) => {
-      const active = category.options
+      const entries: string[] = [];
+      if (category.regionActive)
+        entries.push(
+          category.categoryType === 'event' ? 'All Events' : category.title,
+        );
+      category.options
         .filter((o) => o.active)
-        .map((o) => o.name);
-      if (active.length > 0) currentParams.set(category.id, active.join(','));
+        .forEach((o) => entries.push(o.name));
+      if (entries.length > 0) currentParams.set(category.id, entries.join(','));
     });
 
     if (pageNumber > 1) currentParams.set('page', pageNumber.toString());
@@ -182,22 +213,45 @@ const GalleryCoreInner: React.FC = () => {
 
   const clearAllFilters = () => resetAllFilters();
 
-  // Collect all selected countries from all country-category filters
+  const removeFilterTag = (categoryId: string, value: string) => {
+    const category = filterableOptions.find((c) => c.id === categoryId);
+    const regionLabel =
+      category?.categoryType === 'event' ? 'All Events' : category?.title;
+    if (category && value === regionLabel) {
+      setRegionActive(categoryId, false);
+    } else {
+      updateFilterOption(value, { active: false });
+    }
+  };
+
+  // Collect individually selected countries
   const selectedCountries = filterableOptions
     .filter((cat) => cat.categoryType === 'country')
     .flatMap((cat) => cat.options.filter((o) => o.active).map((o) => o.name));
 
-  const selectedEvents =
+  // Collect all country names belonging to active regions
+  const activeRegionCountries = new Set(
     filterableOptions
-      .find((cat) => cat.id === 'event')
-      ?.options.filter((o) => o.active)
-      .map((o) => o.name) ?? [];
+      .filter((cat) => cat.categoryType === 'country' && cat.regionActive)
+      .flatMap((cat) => cat.options.map((o) => o.name)),
+  );
+
+  const eventCategory = filterableOptions.find((cat) => cat.id === 'event');
+  const eventRegionActive = eventCategory?.regionActive ?? false;
+  const selectedEvents = eventRegionActive
+    ? []
+    : (eventCategory?.options.filter((o) => o.active).map((o) => o.name) ?? []);
+
+  const hasCountryFilter =
+    selectedCountries.length > 0 || activeRegionCountries.size > 0;
 
   let filteredArts = artworks.filter((artwork) => {
-    const countryMatch = isValueInFilter(
-      artwork.country,
-      selectedCountries.length > 0 ? selectedCountries : undefined,
-    );
+    const countryMatch =
+      !hasCountryFilter ||
+      (artwork.country
+        ? selectedCountries.includes(artwork.country) ||
+          activeRegionCountries.has(artwork.country)
+        : false);
     const eventMatch = isValueInFilter(
       artwork.event,
       selectedEvents.length > 0 ? selectedEvents : undefined,
@@ -243,10 +297,11 @@ const GalleryCoreInner: React.FC = () => {
           resetAllFilters={resetAllFilters}
         />
       )}
-      <div className="relative z-0 m-auto w-screen max-w-screen-2xl px-8 md:px-12 lg:px-16 xl:px-20">
+      <div className="relative z-0 m-auto mb-8 w-full max-w-screen-2xl px-8 md:px-12 lg:px-16 xl:px-20">
         {/* Filter toggle + sort */}
         <div className="relative z-[100] flex justify-between">
           <button
+            type="button"
             onClick={() => setIsFilterOpen(!isFilterOpen)}
             className="inline-flex h-[50px] w-[200px] max-w-[40%] items-center justify-between rounded-md border border-gray-600 px-5 py-2 text-base font-medium"
           >
@@ -256,7 +311,34 @@ const GalleryCoreInner: React.FC = () => {
             </span>
           </button>
           {!isMobile && (
-            <div className="absolute right-0 w-[200px] max-w-[40%] rounded-lg bg-[#f9faf6]">
+            <div className="absolute left-1/2 -translate-x-1/2">
+              <Pagination
+                totalItems={filteredArts.length}
+                currentPage={pageNumber}
+                itemsPerPage={artworksPerPage}
+                updatePageNumber={(_current, next) => {
+                  const target = document.getElementById('gallery-section');
+                  if (target) {
+                    const top =
+                      target.getBoundingClientRect().top + window.scrollY - 8;
+                    window.scrollTo({ top, behavior: 'smooth' });
+                  }
+                  if (gridRef.current) {
+                    gsap.to(gridRef.current, {
+                      opacity: 0,
+                      duration: 0.2,
+                      ease: 'power1.in',
+                      onComplete: () => setPageNumber(next),
+                    });
+                  } else {
+                    setPageNumber(next);
+                  }
+                }}
+              />
+            </div>
+          )}
+          {!isMobile && (
+            <div className="absolute right-0 w-[200px] max-w-[40%] rounded-lg bg-white">
               <Checkbox
                 category="sort"
                 title="Sort"
@@ -271,7 +353,7 @@ const GalleryCoreInner: React.FC = () => {
         </div>
 
         <div
-          className="relative z-[60] mt-4 grid"
+          className="relative z-[60] mt-10 grid"
           style={{
             gridTemplateRows: 'auto 1fr',
             gridTemplateColumns: 'repeat(20, 1fr)',
@@ -297,7 +379,7 @@ const GalleryCoreInner: React.FC = () => {
             ) : (
               <div
                 ref={gridRef}
-                className="grid grid-cols-2 gap-x-2 gap-y-6 xl:grid-cols-4 xl:gap-x-6 xl:gap-y-10"
+                className="grid grid-cols-2 gap-x-2 gap-y-6 lg:grid-cols-3 lg:gap-x-4 lg:gap-y-8 xl:grid-cols-4 xl:gap-x-6 xl:gap-y-10"
               >
                 {pageData.map((artwork) => (
                   <div className="flex h-full" key={artwork.id}>
@@ -306,20 +388,39 @@ const GalleryCoreInner: React.FC = () => {
                 ))}
               </div>
             )}
-            <Pagination
-              totalItems={filteredArts.length}
-              currentPage={pageNumber}
-              itemsPerPage={artworksPerPage}
-              updatePageNumber={(_current, next) => setPageNumber(next)}
-            />
+            <div className="mb-4 mt-10">
+              <Pagination
+                totalItems={filteredArts.length}
+                currentPage={pageNumber}
+                itemsPerPage={artworksPerPage}
+                updatePageNumber={(_current, next) => {
+                  const target = document.getElementById('gallery-section');
+                  if (target) {
+                    const top =
+                      target.getBoundingClientRect().top + window.scrollY - 12;
+                    window.scrollTo({ top, behavior: 'smooth' });
+                  }
+                  if (gridRef.current) {
+                    gsap.to(gridRef.current, {
+                      opacity: 0,
+                      duration: 0.2,
+                      ease: 'power1.in',
+                      onComplete: () => setPageNumber(next),
+                    });
+                  } else {
+                    setPageNumber(next);
+                  }
+                }}
+              />
+            </div>
           </section>
 
           {/* Filter panel */}
           <section
             className={`relative z-50 col-start-1 row-span-2 row-start-1 lg:col-span-5 lg:col-start-1 xl:col-span-4 xl:col-start-1 ${
               isFilterOpen
-                ? 'pointer-events-auto visible duration-500 ease-in-out'
-                : 'pointer-events-none invisible select-none duration-500 ease-in-out'
+                ? 'pointer-events-auto visible duration-300 ease-in-out'
+                : 'pointer-events-none invisible select-none duration-300 ease-in-out'
             }`}
           >
             <div className="relative z-50 w-full flex-wrap">
@@ -339,9 +440,9 @@ const GalleryCoreInner: React.FC = () => {
           {/* Active filter tags */}
           <TagList
             paramsObj={paramsObj}
-            updateFilterOption={updateFilterOption}
+            removeFilterTag={removeFilterTag}
             clearAllFilters={clearAllFilters}
-            dropdownActive={isFilterOpen}
+            dropdownActive={isFilterOpen && !isMobile}
           />
         </div>
       </div>

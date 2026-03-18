@@ -7,7 +7,7 @@
  * galleryData.json to the data folder.
  *
  * Thumbnails are written to a thumbs/ subfolder inside each event folder:
- *   gallery/7th-Arts-Olympiad/thumbs/n-Anwita_a-10_c-USA.webp
+ *   gallery-arts/7th-Arts-Olympiad/thumbs/n-Anwita_a-10_c-USA.webp
  *
  * Usage:
  *   node scripts/generateGalleryData.js <galleryDir> <dataDir>
@@ -76,9 +76,9 @@ function parseFilename(filename, eventFolder) {
 
   const webpFilename = base + '.webp';
   const id = `${eventFolder}/${filename}`;
-  const url = `/gallery/${eventFolder}/${filename}`;
-  const thumbUrl = `/gallery/${eventFolder}/thumbs/${webpFilename}`;
-  const displayUrl = `/gallery/${eventFolder}/display/${webpFilename}`;
+  const url = `/gallery-arts/${eventFolder}/${filename}`;
+  const thumbUrl = `/gallery-arts/${eventFolder}/thumbs/${webpFilename}`;
+  const displayUrl = `/gallery-arts/${eventFolder}/display/${webpFilename}`;
   const alt = artists.join(' & ') || country || 'Artwork';
 
   const artwork = {

@@ -20,11 +20,11 @@ dist-ssr
 frontend/public/ChildArt
 frontend/public/data
 frontend/public/documents
-frontend/public/gallery
+frontend/public/gallery-arts
 frontend/public/ChildArt/*
 frontend/public/data/*
 frontend/public/documents/*
-frontend/public/gallery/*
+frontend/public/gallery-arts/*
 
 # Editor directories and files
 .vscode/*

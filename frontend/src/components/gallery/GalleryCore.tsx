@@ -206,12 +206,20 @@ const GalleryCoreInner: React.FC = () => {
   const updateFilterOption = (
     optionName: string,
     updates: Partial<{ number: number; active: boolean }>,
-  ) => setFilterOption(optionName, updates);
+  ) => {
+    setFilterOption(optionName, updates);
+    setPageNumber(1);
+  };
 
-  const alterFiltersByCategory = (categoryId: string, activeStatus: boolean) =>
+  const alterFiltersByCategory = (categoryId: string, activeStatus: boolean) => {
     bulkAlterCategoryOptions(categoryId, activeStatus);
+    setPageNumber(1);
+  };
 
-  const clearAllFilters = () => resetAllFilters();
+  const clearAllFilters = () => {
+    resetAllFilters();
+    setPageNumber(1);
+  };
 
   const removeFilterTag = (categoryId: string, value: string) => {
     const category = filterableOptions.find((c) => c.id === categoryId);
@@ -222,6 +230,7 @@ const GalleryCoreInner: React.FC = () => {
     } else {
       updateFilterOption(value, { active: false });
     }
+    setPageNumber(1);
   };
 
   // Collect individually selected countries

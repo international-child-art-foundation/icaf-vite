@@ -35,7 +35,7 @@
  *   c-Japan.jpg                                   → anonymous, country only
  *
  * Event folder names: 7th-Arts-Olympiad, 6th-Arts-Olympiad, etc.
- * URL pattern: /gallery/{event-folder}/{filename}
+ * URL pattern: /gallery-arts/{event-folder}/{filename}
  */
 
 export type Artwork = {

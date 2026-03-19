@@ -5,6 +5,7 @@ import { WCAGlobalLeaders } from '@/components/worldChildrensAward/WCAGlobalLead
 import { WCANominations } from '@/components/worldChildrensAward/WCANominations';
 import { WCACTA } from '@/components/worldChildrensAward/WCACTA';
 import { Seo } from '@/components/shared/Seo';
+import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 
 const worldChildrensAwardMetadata = {
   title: "World Children's Award | ICAF",
@@ -26,6 +27,7 @@ export const WorldChildrensAward = () => {
           <WCANominations />
           <WCACTA />
         </div>
+        <PageBottomSpacer />
       </div>
     </>
   );

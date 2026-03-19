@@ -309,7 +309,7 @@ const GalleryCoreInner: React.FC = () => {
           resetAllFilters={resetAllFilters}
         />
       )}
-      <div className="breakout-w m-pad relative z-0 m-auto md:px-12 lg:px-16 xl:px-20">
+      <div className="breakout-w m-pad relative z-0 m-auto">
         {/* Filter toggle + sort */}
         <div className="relative z-[100] flex justify-between">
           <button

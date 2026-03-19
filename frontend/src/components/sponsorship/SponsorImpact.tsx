@@ -4,7 +4,7 @@ import { FireworkSnowflake } from '@/assets/shared/icons/FireworkSnowflake';
 
 export const SponsorImpact = () => {
   return (
-    <div className="relative flex max-w-screen-2xl flex-col gap-10">
+    <div className="content-w m-pad relative flex flex-col gap-10">
       {SponsorImpactData.map((dataPoint, idx) => (
         <div key={dataPoint.key} className="w-full">
           <SponsorNumberedText

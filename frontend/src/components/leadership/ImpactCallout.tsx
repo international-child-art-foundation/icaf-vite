@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 
 export const ImpactCallout = () => {
   return (
-    <div className="h-[700px] overflow-hidden rounded-[40px] bg-[#FFECCB] lg:h-[300px] xl:h-[unset]">
-      <div className="grid h-full grid-cols-1 grid-rows-2 lg:grid-cols-2 lg:grid-rows-1">
+    <div className="breakout-w m-pad h-[700px] overflow-hidden rounded-[40px] lg:h-[300px] xl:h-[unset]">
+      <div className="grid h-full grid-cols-1 grid-rows-2 rounded-[40px] bg-[#FFECCB] lg:grid-cols-2 lg:grid-rows-1">
         <div className="mx-auto my-auto flex flex-col gap-6 p-8">
           <div className="text-center md:text-start">
             <h4 className="font-montserrat text-2xl font-extrabold">
@@ -21,7 +21,7 @@ export const ImpactCallout = () => {
         </div>
         <div className="">
           <img
-            className="ml-auto mr-0 mt-auto min-h-full min-w-full object-cover lg:h-full lg:w-[unset]"
+            className="ml-auto mr-0 mt-auto min-h-full min-w-full rounded-br-[40px] rounded-tr-[40px] object-cover lg:h-full lg:w-[unset]"
             src={worldMural}
           />
         </div>

@@ -17,17 +17,13 @@ export const HealingArts = () => {
   return (
     <>
       <Seo {...healingArtsMetadata} />
-      <div className="">
+      <div className="content-gap">
         <HealingArtsHeader />
-        <div className="flex max-w-screen-2xl flex-col gap-12">
-          <ProgramPhilosophy />
-          <AidMap />
-          <ImpactVideo />
-          <AchievementsAndResources />
-        </div>
-        <div className="mt-12">
-          <YourDonations />
-        </div>
+        <ProgramPhilosophy />
+        <AidMap />
+        <ImpactVideo />
+        <AchievementsAndResources />
+        <YourDonations />
       </div>
     </>
   );

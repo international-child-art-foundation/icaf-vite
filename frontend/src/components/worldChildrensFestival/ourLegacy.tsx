@@ -9,12 +9,12 @@ import OurLegacyDecorative from './ourLegacyDecorative';
  */
 export default function OurLegacy() {
   return (
-    <section>
+    <section className="site-w">
       {/* Decoratitive elements */}
       <OurLegacyDecorative />
 
       {/* Content Section */}
-      <div className="relative z-40 px-6 pt-16 md:px-12 lg:px-16 lg:pt-36 xl:px-20">
+      <div className="breakout-w m-pad relative z-40 pt-16 lg:pt-36">
         {/* Heading */}
         <h2 className="my-8 text-center text-3xl font-extrabold lg:mb-16 lg:text-[40px]">
           Our Legacy

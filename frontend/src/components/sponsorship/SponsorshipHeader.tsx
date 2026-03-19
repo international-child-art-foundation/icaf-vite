@@ -24,7 +24,7 @@ export const SponsorshipHeader = () => {
     gradientDefinition = gradientSM;
   }
   return (
-    <div className="grid grid-cols-1 grid-rows-1">
+    <div className="site-w grid grid-cols-1 grid-rows-1">
       <div className="col-start-1 row-start-1">
         <CurvedImage
           src={SponsorshipHeaderImg}

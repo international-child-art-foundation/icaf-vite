@@ -5,7 +5,7 @@ import { VisibilityIcon } from '@/assets/shared/icons/VisibilityIcon';
 
 const MissionVision = () => {
   return (
-    <div className="breakout-w m-pad relative mx-auto grid h-[500px] w-full grid-cols-1 grid-rows-1">
+    <div className="breakout-w m-pad relative grid h-[500px] w-full grid-cols-1 grid-rows-1">
       <picture className="col-start-1 row-start-1 mt-16">
         <source
           media="(min-width: 1024px)"
@@ -23,7 +23,7 @@ const MissionVision = () => {
         />
       </picture>
 
-      <div className="content-w lg:gap-18 col-start-1 row-start-1 mx-auto flex flex-col gap-0 sm:gap-20 md:gap-6 xl:gap-20">
+      <div className="lg:gap-18 col-start-1 row-start-1 mx-auto flex flex-col gap-0 sm:gap-20 md:gap-6 xl:gap-20">
         <h2 className="font-montserrat text-center text-[32px] font-extrabold leading-[40px] text-black lg:text-[40px] lg:leading-[48px]">
           Our Purpose
         </h2>

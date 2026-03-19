@@ -61,7 +61,7 @@ export const HistoryMomentsCarousel = () => {
   const handleSelect = (index: number) => api?.scrollTo(index);
 
   return (
-    <section className="relative bg-white py-6">
+    <section className="content-w m-pad relative bg-white">
       <Carousel
         setApi={setApi}
         opts={{
@@ -85,7 +85,7 @@ export const HistoryMomentsCarousel = () => {
             );
           })}
         </CarouselContent>
-        <div className="pt-4">
+        <div className="">
           <CarouselArrowsDots
             items={carouselImages}
             onPrevious={handlePrevious}

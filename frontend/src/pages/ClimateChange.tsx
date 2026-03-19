@@ -15,15 +15,11 @@ export const ClimateChange = () => {
   return (
     <>
       <Seo {...climateChangeMetadata} />
-      <div>
-        <div className="flex flex-col gap-8">
-          <ClimateChangeHeader />
-          <div className="flex max-w-screen-2xl flex-col gap-24">
-            <ClimateChangeInfo />
-            <HealthAndEnvironmentDay />
-            <ClimateChangeVideos />
-          </div>
-        </div>
+      <div className="content-gap">
+        <ClimateChangeHeader />
+        <ClimateChangeInfo />
+        <HealthAndEnvironmentDay />
+        <ClimateChangeVideos />
       </div>
     </>
   );

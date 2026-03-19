@@ -81,7 +81,7 @@ export const HomeCarousel = () => {
   return (
     <div
       ref={containerRef}
-      className="site-w mx-auto w-full py-8 lg:flex lg:items-start"
+      className="site-w lg:flex lg:items-start"
     >
       <div className="w-full overflow-hidden">
         <Carousel

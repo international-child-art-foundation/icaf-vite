@@ -3,7 +3,7 @@ import { TeamCardData } from '@/data/team/extendedStaffData';
 
 export const TeamExtendedStaff = () => {
   return (
-    <div className="flex flex-col gap-10">
+    <div className="breakout-w m-pad flex flex-col gap-10">
       <h2 className="font-montserrat text-center text-[40px] font-extrabold leading-[48px]">
         ICAF Team
       </h2>

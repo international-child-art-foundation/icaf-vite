@@ -19,28 +19,18 @@ export const Team = () => {
   const HEADER_OFFSET = 110;
 
   const topRef = useRef<HTMLDivElement | null>(null);
-  const staffRef = useRef<HTMLDivElement | null>(null);
 
-  const handleScrollToStaff = () => scrollToSection(staffRef, HEADER_OFFSET);
+  const handleScrollToStaff = () => scrollToSection(topRef, HEADER_OFFSET);
 
   return (
     <>
       <Seo {...teamMetadata} />
-      <div ref={topRef} className="flex flex-col">
+      <div ref={topRef} className="content-gap">
         <TeamHeader scrollFunction={handleScrollToStaff} />
-        <div
-          ref={staffRef}
-          className="mx-auto flex max-w-screen-2xl flex-col gap-16"
-        >
-          <TeamStaff staffData={staffData} />
-          <TeamExtendedStaff />
-          <Creativity />
-          <ScrollToTop
-            targetRef={topRef}
-            flairColor={'primaryBlue'}
-            offset={0}
-          />
-        </div>
+        <TeamStaff staffData={staffData} />
+        <TeamExtendedStaff />
+        <Creativity />
+        <ScrollToTop targetRef={topRef} flairColor={'primaryBlue'} offset={0} />
       </div>
     </>
   );

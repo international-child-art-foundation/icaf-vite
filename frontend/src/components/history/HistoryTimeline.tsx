@@ -15,7 +15,7 @@ interface HistoryTimelineProps {
 export const HistoryTimeline = ({ mode }: HistoryTimelineProps) => {
   const TIMELINE_WIDTH = 500;
   return (
-    <div className="relative grid grid-cols-1 grid-rows-1 pb-40 lg:pb-80 xl:pb-96">
+    <div className="breakout-w relative grid grid-cols-1 grid-rows-1 pb-40 lg:pb-80 xl:pb-96">
       <div className="z-10 col-start-1 row-start-1 flex flex-col gap-20">
         <h2 className="font-montserrat text-center text-[40px] font-extrabold leading-[48px]">
           ICAF Timeline
@@ -42,7 +42,7 @@ export const HistoryTimeline = ({ mode }: HistoryTimelineProps) => {
             </div>
           </div>
         ) : (
-          <div className={`flex max-w-screen-2xl flex-col`}>
+          <div className={`flex flex-col`}>
             <div className="bg-tertiary-red -ml-3 h-7 w-7 rounded-full"></div>
             <div className="bg-tertiary-red h-24 w-1"></div>
             <div className="gris-cols-1 -mt-10 grid grid-rows-1">

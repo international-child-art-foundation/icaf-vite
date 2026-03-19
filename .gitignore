@@ -20,9 +20,11 @@ dist-ssr
 frontend/public/ChildArt
 frontend/public/data
 frontend/public/documents
+frontend/public/gallery-arts
 frontend/public/ChildArt/*
 frontend/public/data/*
 frontend/public/documents/*
+frontend/public/gallery-arts/*
 
 # Editor directories and files
 .vscode/*
@@ -36,5 +38,7 @@ frontend/public/documents/*
 *.sw?
 *.tsbuildinfo
 
-# Dev container
+# Dev container / claude code experiments
 .devcontainer/
+.claude/
+CLAUDE.md

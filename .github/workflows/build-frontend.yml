@@ -130,14 +130,17 @@ jobs:
           RewriteBase /
           Options -MultiViews
           RewriteRule ^ - [E=RELEASE:${{ needs.build_frontend.outputs.release_id }}]
+          # ── PDF short URLs (add/remove alongside the FilesMatch block below) ───
+          RewriteRule ^2026WCF$ /documents/2026WCF.pdf [END]
+          # ───────────────────────────────────────────────────────────────────────────
           RewriteRule ^php-api/(.*)$ /releases/%{ENV:RELEASE}/php-api/$1 [PT,L,NC]
-          RewriteRule ^(?:releases|ChildArt|documents|data|config)/ - [L,NC]
+          RewriteRule ^(?:releases|ChildArt|documents|data|config|gallery-arts)/ - [L,NC]
           RewriteCond %{ENV:APP_REWRITTEN} !=1
-          RewriteCond %{REQUEST_URI} !^/(?:releases|ChildArt|documents|data)/ [NC]
+          RewriteCond %{REQUEST_URI} !^/(?:releases|ChildArt|documents|data|gallery-arts)/ [NC]
           RewriteCond %{REQUEST_URI} \.(?:css|js|mjs|map|png|jpe?g|gif|svg|webp|avif|ico|json|txt|xml|webmanifest|woff2?|ttf|eot|mp4|webm|ogv|wasm)$ [NC]
           RewriteRule ^ /releases/%{ENV:RELEASE}%{REQUEST_URI} [E=APP_REWRITTEN:1,PT,L]
           RewriteCond %{ENV:APP_REWRITTEN} !=1
-          RewriteCond %{REQUEST_URI} !^/(?:releases|ChildArt|documents|data)/ [NC]
+          RewriteCond %{REQUEST_URI} !^/(?:releases|ChildArt|documents|data|gallery-arts)/ [NC]
           RewriteRule ^ /releases/%{ENV:RELEASE}/index.html [E=APP_REWRITTEN:1,PT,L]
           <IfModule mod_headers.c>
             <FilesMatch "\.(js|mjs|css|svg|png|jpg|jpeg|webp|avif|gif|ico|json|woff2?|ttf|eot|mp4|webm|ogv|wasm)$">
@@ -146,6 +149,11 @@ jobs:
             <FilesMatch "\.html$">
               Header set Cache-Control "no-cache, no-store, must-revalidate"
             </FilesMatch>
+            # ── PDF short URL filename hints (one FilesMatch block per PDF) ────────────
+            <FilesMatch "^2026WCF\.pdf$">
+              Header set Content-Disposition "inline; filename=\"2026WCF.pdf\""
+            </FilesMatch>
+            # ─────────────────────────────────────────────────────────────────────────
           </IfModule>
           <IfModule mod_deflate.c>
             AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json image/svg+xml

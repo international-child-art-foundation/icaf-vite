@@ -3,6 +3,7 @@ import ArtsOlympiadTorch from '@/assets/shared/images/arts-olympiad-7-transparen
 import ArtsOlympiadColoring from '@/assets/artsOlympiad/arts-olympiad-coloring.webp';
 import ArtsOlympiadPainting from '@/assets/artsOlympiad/arts-olympiad-painting.webp';
 import { ArtsOlympiadHelpfulLinks } from '@/components/artsOlympiad/ArtsOlympiadHelpfulLinks';
+import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 import { Seo } from '@/components/shared/Seo';
 
 const artsOlympiadMetadata = {
@@ -66,7 +67,7 @@ export const ArtsOlympiad = () => {
                 creativity with physical activity. Schools, studios, and
                 homeschoolers can participate before{' '}
                 <span className="font-semibold">March 20, 2026</span>. Winning
-                artists will be invited to the 7th World Children’s Festival in{' '}
+                artists will be invited to the 7th World Children's Festival in{' '}
                 <span className="font-semibold">
                   July 25-27, 2026 on the National Mall
                 </span>{' '}
@@ -204,6 +205,7 @@ export const ArtsOlympiad = () => {
 
         <ArtsOlympiadHelpfulLinks />
       </main>
+      <PageBottomSpacer />
     </>
   );
 };

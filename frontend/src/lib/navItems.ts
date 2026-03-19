@@ -14,6 +14,7 @@ import volunteer from '../assets/shared/images/navigation/getInvolved/volunteer.
 import latest from '../assets/shared/images/navigation/news/latestNews_small.webp';
 import upcoming from '../assets/shared/images/navigation/news/upcomingEvents.webp';
 import board from '@/assets/shared/images/icafGroupPhoto.webp';
+import wca from '@/assets/shared/images/navigation/programs/worldChildrensAward.webp';
 import researchAndPublications from '@/assets/shared/images/about/UnitedStatesSLKorth.webp';
 
 export interface NavChild {
@@ -121,6 +122,12 @@ export const navItems: NavItem[] = [
         imageSrc: healing,
         hoverDescription: '',
       },
+      {
+        label: "World Children's Award",
+        href: '/programs/world-childrens-award',
+        imageSrc: wca,
+        hoverDescription: '',
+      },
     ],
   },
   {
@@ -182,26 +189,11 @@ export const navItems: NavItem[] = [
     href: '/sponsorship',
     children: [],
   },
-  // {
-  //   key: 'gallery',
-  //   label: 'Gallery',
-  //   navLabel: 'Gallery',
-  //   href: '/gallery',
-  //   children: [
-  //     {
-  //       label: 'Recent',
-  //       href: '/gallery/recent',
-  //       imageSrc: gallery,
-  //       alt: 'Recent art',
-  //       hoverDescription: '',
-  //     },
-  //     {
-  //       label: 'Annual Reports',
-  //       href: '/gallery/all',
-  //       imageSrc: annual,
-  //       alt: 'All submissions',
-  //       hoverDescription: '',
-  //     },
-  //   ],
-  // },
+  {
+    key: 'gallery',
+    label: 'Gallery',
+    navLabel: 'Gallery',
+    href: '/gallery',
+    children: [],
+  },
 ];

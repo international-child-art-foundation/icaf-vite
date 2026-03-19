@@ -1,4 +1,3 @@
-// TODO: replace site URL on publish
 export const SITE_URL = 'https://icaf.org';
 
 export const sharedOpenGraph = {

@@ -358,7 +358,7 @@ export const ContactForm = ({ config }: ContactFormProps) => {
         <div className="flex w-full grid-cols-1 grid-rows-2 flex-col rounded-xl lg:grid lg:grid-cols-[1fr_1fr] lg:grid-rows-[1fr_0.5fr] lg:bg-inherit">
           <div className="row-span-2 row-start-1 rounded-xl bg-slate-200/70 lg:col-span-2 lg:col-start-1 lg:row-span-1 lg:row-start-1" />
 
-          <div className="col-span-1 col-start-1 row-span-2 row-start-1 m-6 rounded-2xl bg-white p-6 shadow-xl md:p-8">
+          <div className="col-span-1 col-start-1 row-span-2 row-start-1 rounded-2xl bg-white p-6 shadow-xl md:m-6 md:p-8">
             {baseForm}
           </div>
 

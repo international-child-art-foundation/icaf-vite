@@ -1,3 +1,4 @@
+import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 import { CurvedImage } from './CurvedImage';
 import WorldMural from '@/assets/impact/WorldMural.webp';
 import AccordionDropdowns from '@/components/shared/AccordionDropdowns';
@@ -112,6 +113,7 @@ const Impact = () => {
         {/* Donation section */}
         <YourDonations />
       </div>
+      <PageBottomSpacer />
     </>
   );
 };

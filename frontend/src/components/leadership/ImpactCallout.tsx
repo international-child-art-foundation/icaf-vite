@@ -19,9 +19,9 @@ export const ImpactCallout = () => {
             </Button>
           </Link>
         </div>
-        <div className="">
+        <div className="rounded-bl-[40px] rounded-br-[40px] lg:rounded-bl-[0px] lg:rounded-tr-[40px]">
           <img
-            className="ml-auto mr-0 mt-auto min-h-full min-w-full rounded-br-[40px] rounded-tr-[40px] object-cover lg:h-full lg:w-[unset]"
+            className="ml-auto mr-0 mt-auto min-h-full min-w-full rounded-bl-[40px] rounded-br-[40px] object-cover lg:h-full lg:w-[unset] lg:rounded-bl-[0px] lg:rounded-tr-[40px]"
             src={worldMural}
           />
         </div>

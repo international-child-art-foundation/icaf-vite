@@ -1,3 +1,4 @@
+import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 import { FutureWithoutHate } from '@/components/peaceThroughArt/FutureWithoutHate';
 import { PTAHeader } from '@/components/peaceThroughArt/PTAHeader';
 import { UrgencyOfPeace } from '@/components/peaceThroughArt/UrgencyOfPeace';
@@ -28,6 +29,7 @@ export const PeaceThroughArt = () => {
           <PTALearnMore />
         </div>
       </div>
+      <PageBottomSpacer />
     </>
   );
 };

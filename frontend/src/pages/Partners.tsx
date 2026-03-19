@@ -1,3 +1,4 @@
+import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 import NavigationBar from '@/components/shared/NavigationBar';
 import DonateButton from '@/components/ui/donateButton';
 import { CurvedImage } from '@/pages/CurvedImage';
@@ -192,8 +193,7 @@ export default function Partners() {
               gradientDefinition={gradientDefinition}
             />
           </div>
-          <div className="relative z-10 col-start-1 row-start-1">
-            <div className="container mx-auto flex h-full items-start px-8 pt-20 md:items-center md:px-12 md:pt-0 lg:px-16 xl:px-20">
+          <div className="hero-w relative z-10 col-start-1 row-start-1 flex h-full items-start pt-20 md:items-center md:pt-0">
               <div className="max-w-3xl">
                 <h1 className="font-montserrat mb-3 text-4xl font-bold text-white md:mb-4 md:text-5xl lg:mb-6 lg:text-6xl xl:text-7xl">
                   Partners
@@ -210,7 +210,6 @@ export default function Partners() {
                   <DonateButton text="Donate to our Campaign" />
                 </div>
               </div>
-            </div>
           </div>
         </div>
 
@@ -260,6 +259,7 @@ export default function Partners() {
         {/* Donation CTA Section */}
         <YourDonations />
       </div>
+      <PageBottomSpacer />
     </>
   );
 }

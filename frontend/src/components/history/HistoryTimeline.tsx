@@ -15,7 +15,7 @@ interface HistoryTimelineProps {
 export const HistoryTimeline = ({ mode }: HistoryTimelineProps) => {
   const TIMELINE_WIDTH = 500;
   return (
-    <div className="breakout-w relative grid grid-cols-1 grid-rows-1 pb-40 lg:pb-80 xl:pb-96">
+    <div className="breakout-w m-pad relative grid grid-cols-1 grid-rows-1 pb-40 lg:pb-80 xl:pb-96">
       <div className="z-10 col-start-1 row-start-1 flex flex-col gap-20">
         <h2 className="font-montserrat text-center text-[40px] font-extrabold leading-[48px]">
           ICAF Timeline
@@ -76,7 +76,7 @@ export const HistoryTimeline = ({ mode }: HistoryTimelineProps) => {
         />
         <img
           src={redBlueFirework}
-          className="absolute -right-12 top-24 opacity-[5%] lg:-left-12 lg:object-cover lg:opacity-[20%]"
+          className="absolute -right-12 top-12 opacity-[5%] lg:-left-12 lg:object-cover lg:opacity-[20%]"
           alt=""
         />
         <img

@@ -27,7 +27,7 @@ const HomeHeader = () => {
 
   return (
     <div className="site-w grid grid-cols-1 grid-rows-1">
-      <div className="breakout-w m-pad font-montserrat z-10 col-start-1 row-start-1 mt-8 flex flex-col gap-4 p-10 text-3xl font-extrabold text-white md:mt-20 md:text-4xl lg:mt-28 lg:text-6xl">
+      <div className="hero-w font-montserrat z-10 col-start-1 row-start-1 mt-8 flex flex-col gap-4 pt-10 text-3xl font-extrabold text-white md:mt-20 md:text-4xl lg:mt-28 lg:text-6xl">
         <div className="block">
           <h2>Welcome to ICAF</h2>
           <h2 className="text-tertiary-yellow [text-shadow:1px_1px_5px_rgba(0,0,0,0.5)]">

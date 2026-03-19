@@ -28,7 +28,7 @@ export default function WhatWeWant() {
         <img
           src={waveUrl}
           alt=""
-          className="h-[775px] w-full object-cover sm:h-[805px] md:h-[830px] lg:h-[900px] 2xl:h-[950px]"
+          className="h-[775px] w-full object-cover sm:h-[805px] md:h-[830px] lg:h-[900px] 2xl:h-[1300px]"
         />
 
         <div className="absolute inset-0 z-10 flex h-full flex-col justify-center text-center">

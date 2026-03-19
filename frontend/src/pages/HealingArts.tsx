@@ -1,3 +1,4 @@
+import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 import { HealingArtsHeader } from '@/components/healingArts/HealingArtsHeader';
 import { ProgramPhilosophy } from '@/components/healingArts/ProgramPhilosophy';
 import { AidMap } from '@/components/healingArts/AidMap';
@@ -25,6 +26,7 @@ export const HealingArts = () => {
         <AchievementsAndResources />
         <YourDonations />
       </div>
+      <PageBottomSpacer />
     </>
   );
 };

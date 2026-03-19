@@ -1,3 +1,4 @@
+import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 import YourDonations from '@/components/shared/YourDonations';
 import { StudentHeader } from '@/components/student/StudentHeader';
 import { StudentCreativity } from '@/components/student/StudentCreativity';
@@ -24,6 +25,7 @@ export const Student = () => {
         <SpreadCreativity />
         <YourDonations />
       </div>
+      <PageBottomSpacer />
     </>
   );
 };

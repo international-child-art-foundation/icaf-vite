@@ -1,3 +1,4 @@
+import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 import { CurvedImage } from './CurvedImage';
 import MagazineCarousel from '../components/childArt/MagazineCarousel';
 import magazineCoverLarge from '@/assets/shared/images/navigation/programs/childArtMagazine.webp';
@@ -47,10 +48,8 @@ export default function ChildArtPage() {
           </div>
 
           {/* Foreground Text */}
-          <div className="relative z-10 col-start-1 row-start-1">
-            <div className="container mx-auto flex h-full items-start px-8 pt-20 md:items-center md:px-12 md:pt-0 lg:px-16 xl:px-20">
-              {/* <div className="container mx-auto flex h-full items-start px-6 pt-10 md:px-10 lg:px-12 xl:px-16"> */}
-              <div className="text-white">
+          <div className="hero-w relative z-10 col-start-1 row-start-1 flex h-full items-start pt-20 md:items-center md:pt-0">
+            <div className="text-white">
                 <h1 className="font-montserrat mb-3 text-4xl font-bold md:mb-4 md:text-5xl lg:mb-6 lg:text-6xl xl:text-7xl">
                   <span className="italic">ChildArt</span> Magazine
                 </h1>
@@ -64,7 +63,6 @@ export default function ChildArtPage() {
                 <div className="flex justify-start">
                   <DonateButton text="Donate to our Campaign" />
                 </div>
-              </div>
             </div>
           </div>
         </div>
@@ -79,6 +77,7 @@ export default function ChildArtPage() {
         {/* Donation CTA Section */}
         <YourDonations />
       </div>
+      <PageBottomSpacer />
     </>
   );
 }

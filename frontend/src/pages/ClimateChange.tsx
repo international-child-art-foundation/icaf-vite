@@ -1,3 +1,4 @@
+import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 import { ClimateChangeHeader } from '@/components/climateChange/ClimateChangeHeader';
 import { ClimateChangeVideos } from '@/components/climateChange/ClimateChangeVideos';
 import { ClimateChangeInfo } from '@/components/climateChange/ClimateChangeInfo';
@@ -21,6 +22,7 @@ export const ClimateChange = () => {
         <HealthAndEnvironmentDay />
         <ClimateChangeVideos />
       </div>
+      <PageBottomSpacer />
     </>
   );
 };

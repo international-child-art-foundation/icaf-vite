@@ -8,6 +8,7 @@ import { MoreCarousel } from '@/components/about/more/MoreCarousel';
 import ExploreOurProjects from '@/components/about/ExploreOurProjects';
 import HowWeDoIt from '@/components/about/HowWeDoIt';
 import { Seo } from '@/components/shared/Seo';
+import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 
 const aboutMetadata = {
   title: 'About | ICAF',
@@ -26,7 +27,7 @@ export default function About() {
           <figure className="relative">
             <CurvedImage
               src={heroImage}
-              gradientDefinition="bg-[linear-gradient(to_bottom,rgba(0,0,0,0.7)_1%,rgba(255,255,255,0)_30%)]"
+              gradientDefinition="bg-[linear-gradient(to_bottom,rgba(0,0,0,0.7)_1%,rgba(255,255,255,0)_55%)]"
             />
             <figcaption className="sr-only">About Us hero image</figcaption>
             <div className="absolute inset-0 top-1/3 flex justify-center text-[40px] font-extrabold text-white lg:text-[60px]">
@@ -42,6 +43,7 @@ export default function About() {
         <TestimonialsCarousel />
         <YourDonations />
       </div>
+      <PageBottomSpacer />
     </>
   );
 }

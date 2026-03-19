@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 export default function YourDonations() {
   return (
-    <div className="breakout-w m-pad overflow-hidden">
+    <div className="breakout-w m-pad">
       <div className="relative flex h-[332px] w-full flex-col justify-center overflow-visible rounded-2xl bg-[#E0E8F8] px-6 md:h-[300px] md:px-12 lg:h-[320px] xl:h-[340px] 2xl:h-[400px]">
         {/* Graphic wrapper to prevent scroll pushing */}
         <div className="pointer-events-none absolute inset-0 overflow-visible">

@@ -96,7 +96,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground overflow-x-hidden;
   }
 }
 @layer utilities {
@@ -111,12 +111,18 @@
     @apply max-w-breakout mx-auto w-full;
   }
   .content-gap {
-    @apply mb-[100px] flex flex-col gap-[100px] md:mb-[120px] md:gap-[120px] lg:mb-[130px] lg:gap-[130px] xl:mb-[140px] xl:gap-[140px] 2xl:mb-[150px] 2xl:gap-[150px];
+    @apply flex flex-col gap-[100px] md:gap-[120px] lg:gap-[130px] xl:gap-[140px] 2xl:gap-[150px];
   }
   /* m-pad and card-pad are the same for now but semantically different */
   /* m-pad should be applied to all non-sitewidth content, only once */
   .m-pad {
     @apply mx-auto px-6;
+  }
+  /* hero-w is for CurvedImage hero title overlays only.
+     Applies breakout-w + m-pad, then nudges titles right on xl screens
+     to avoid them sitting too close to the edge before breakout centering kicks in. */
+  .hero-w {
+    @apply breakout-w m-pad xl:px-14;
   }
   .card-pad {
     @apply mx-auto px-6;

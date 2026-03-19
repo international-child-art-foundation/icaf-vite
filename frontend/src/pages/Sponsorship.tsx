@@ -1,3 +1,4 @@
+import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 import { SponsorshipHeader } from '@/components/sponsorship/SponsorshipHeader';
 import { WhyPartner } from '@/components/sponsorship/WhyPartner';
 import { SponsorImpact } from '@/components/sponsorship/SponsorImpact';
@@ -29,6 +30,7 @@ export const Sponsorship = () => {
         <PartnerTestimonialCarousel />
         <YourDonations />
       </div>
+      <PageBottomSpacer />
     </>
   );
 };

@@ -32,7 +32,7 @@ export const PTAHeader = () => {
             gradientDefinition={gradientDefinition}
           />
         </div>
-        <div className="breakout-w m-pad font-montserrat z-10 col-start-1 row-start-1 mx-auto mt-20 flex flex-col gap-10 text-3xl font-extrabold text-white sm:py-10 md:text-4xl lg:mt-4 lg:text-6xl xl:mt-12">
+        <div className="hero-w font-montserrat z-10 col-start-1 row-start-1 mx-auto mt-20 flex flex-col gap-10 text-3xl font-extrabold text-white sm:py-10 md:text-4xl lg:mt-4 lg:text-6xl xl:mt-12">
           <div className="font-montserrat block text-4xl font-extrabold sm:text-[50px] sm:leading-[50px] md:text-[60px] md:leading-[70px]">
             <h1>Peace Through Art</h1>
           </div>

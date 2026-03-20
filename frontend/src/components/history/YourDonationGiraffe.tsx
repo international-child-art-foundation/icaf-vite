@@ -5,9 +5,8 @@ import { Link } from 'react-router-dom';
 
 export const YourDonationGiraffe = () => {
   return (
-    <div className="overflow-x-hidden py-16">
-      <section className="mb-24 max-w-screen-2xl px-8 md:px-12 lg:px-16 xl:px-20">
-        <div className="relative flex h-[332px] w-full flex-col justify-center overflow-visible rounded-2xl bg-[#E0E8F8] px-6 text-center md:h-[300px] md:px-12 md:text-left lg:h-[320px] xl:h-[340px] 2xl:h-[400px]">
+    <div className="content-w m-pad  ">
+      <div className="relative flex h-[332px] w-full flex-col justify-center overflow-visible rounded-2xl bg-[#E0E8F8] px-6 text-center md:h-[300px] md:px-12 md:text-left lg:h-[320px] xl:h-[340px] 2xl:h-[400px] mb-32 overflow-hidden">
           {/* Graphic wrapper to prevent scroll pushing */}
           <div className="pointer-events-none absolute inset-0 overflow-visible">
             <div className="absolute right-0 top-0 z-[10] translate-x-[-10%] translate-y-[10%]">
@@ -31,7 +30,6 @@ export const YourDonationGiraffe = () => {
             </Link>
           </div>
         </div>
-      </section>
-    </div>
+      </div>
   );
 };

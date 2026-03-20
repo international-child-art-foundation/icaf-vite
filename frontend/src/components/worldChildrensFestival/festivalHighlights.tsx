@@ -53,7 +53,7 @@ const VerticalTimelineData: TimeLineItem[] = [
 
 export default function FestivalHighlights() {
   return (
-    <section>
+    <section className="content-w m-pad">
       <h2 className="text-center text-3xl font-extrabold lg:mb-16 lg:text-[40px]">
         Festival Highlights
       </h2>

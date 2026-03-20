@@ -1,3 +1,4 @@
+import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 import { SponsorshipHeader } from '@/components/sponsorship/SponsorshipHeader';
 import { WhyPartner } from '@/components/sponsorship/WhyPartner';
 import { SponsorImpact } from '@/components/sponsorship/SponsorImpact';
@@ -19,18 +20,17 @@ export const Sponsorship = () => {
   return (
     <>
       <Seo {...sponsorshipMetadata} />
-      <div>
+      <div className="content-gap">
         <SponsorshipHeader />
-        <div className="flex flex-col gap-16">
-          <WhyPartner />
-          <SponsorImpact />
-          <SponsorBrandCarousel />
-          <BrandImpact />
-          <SponsorshipCTA />
-          <PartnerTestimonialCarousel />
-          <YourDonations />
-        </div>
+        <WhyPartner />
+        <SponsorImpact />
+        <SponsorBrandCarousel />
+        <BrandImpact />
+        <SponsorshipCTA />
+        <PartnerTestimonialCarousel />
+        <YourDonations />
       </div>
+      <PageBottomSpacer />
     </>
   );
 };

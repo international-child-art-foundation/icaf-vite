@@ -166,7 +166,7 @@ const DesktopNav: React.FC = () => {
   return (
     <div
       ref={headerRef}
-      className="relative mx-auto h-full w-full max-w-screen-2xl items-center justify-between px-8 md:px-12 lg:px-16 xl:flex xl:px-20"
+      className="max-w-screen-3xl relative mx-auto h-full w-full items-center justify-between px-8 md:px-12 lg:px-16 xl:flex xl:px-20"
     >
       {navItems.map((item: NavItem) => {
         const state = dropdownState[item.label];

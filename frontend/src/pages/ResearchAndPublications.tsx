@@ -1,17 +1,17 @@
 import { ResearchAndPublicationsHeader } from '@/components/researchAndPublications/ResearchAndPublicationsHeader';
 import { ResearchAndPublicationsDisplay } from '@/components/researchAndPublications/ResearchAndPublicationsDisplay';
 import ResearchAndPublicationsContribute from '@/components/researchAndPublications/ResearchAndPublicationsContribute';
+import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 
 export const ResearchAndPublications = () => {
   return (
-    <div>
-      <div>
+    <>
+      <div className="content-gap">
         <ResearchAndPublicationsHeader />
-        <div className="max-w-screen-2xl px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20">
-          <ResearchAndPublicationsDisplay />
-          <ResearchAndPublicationsContribute />
-        </div>
+        <ResearchAndPublicationsDisplay />
+        <ResearchAndPublicationsContribute />
       </div>
-    </div>
+      <PageBottomSpacer />
+    </>
   );
 };

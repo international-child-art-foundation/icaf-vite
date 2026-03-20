@@ -58,7 +58,7 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
       aria-hidden={progress === 0}
       className="overflow-hidden"
     >
-      <div className="mx-auto w-full 2xl:max-w-screen-2xl">
+      <div className="2xl:max-w-screen-3xl mx-auto w-full">
         <div
           className="grid h-64"
           style={{

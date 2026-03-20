@@ -51,7 +51,7 @@ export function BannerImageCarousel({
 
   return (
     <div
-      className={`relative overflow-hidden ${className}`}
+      className={`breakout-w relative overflow-hidden ${className}`}
       style={{ height: carousel_height }}
     >
       {items.map((item, i) => (

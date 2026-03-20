@@ -10,9 +10,9 @@ const contactMetadata = {
 
 export const Contact = () => {
   return (
-    <>
+    <div>
       <Seo {...contactMetadata} />
       <ContactForm config={contactFormConfigs['contact-us']} />
-    </>
+    </div>
   );
 };

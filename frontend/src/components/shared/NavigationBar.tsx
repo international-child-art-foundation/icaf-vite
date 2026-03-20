@@ -7,8 +7,8 @@ const NavigationBar = () => {
   return (
     <header className="fixed left-0 right-0 top-0 z-50 h-[98px] bg-white shadow-md">
       {size.width < 1280 ? (
-        <div className="relative mx-auto h-full max-w-screen-2xl px-8 md:px-12 lg:px-16 xl:px-20">
-          <nav className="relative flex h-full items-center justify-between xl:hidden">
+        <div className="relative mx-auto h-full max-w-screen-2xl">
+          <nav className="m-pad relative flex h-full items-center justify-between xl:hidden">
             <MobileNav />
           </nav>
         </div>

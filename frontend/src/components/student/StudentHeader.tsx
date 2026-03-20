@@ -19,16 +19,15 @@ export const StudentHeader = () => {
   }
 
   return (
-    <div>
-      <div className="grid grid-cols-1 grid-rows-1">
-        <div className="col-start-1 row-start-1">
-          <CurvedImage
-            src={studentHeaderImg}
-            gradientDefinition={gradientDefinition}
-            height="700px"
-          />
-        </div>
-        <div className="font-montserrat z-10 col-start-1 row-start-1 mt-8 flex max-w-screen-2xl flex-col gap-6 p-6 text-3xl font-extrabold text-white sm:gap-6 sm:p-10 sm:px-8 md:px-12 md:text-4xl lg:px-16 lg:text-6xl xl:px-20">
+    <div className="site-w grid grid-cols-1 grid-rows-1">
+      <div className="col-start-1 row-start-1">
+        <CurvedImage
+          src={studentHeaderImg}
+          gradientDefinition={gradientDefinition}
+          height="700px"
+        />
+      </div>
+      <div className="hero-w font-montserrat z-10 col-start-1 row-start-1 mt-8 flex flex-col gap-6 pt-6 text-3xl font-extrabold text-white sm:gap-6 sm:pt-10 md:text-4xl lg:text-6xl">
           <div className="font-montserrat block pt-12 text-[32px] font-extrabold leading-[40px] sm:text-[40px] sm:leading-[48px] md:max-w-[80%] lg:text-[60px] lg:leading-[68px] xl:max-w-[70%]">
             <h1>Explore Your Creativity with ICAF!</h1>
           </div>
@@ -42,7 +41,6 @@ export const StudentHeader = () => {
             is the key to solving problems, inventing new things, and making the
             world a better place.
           </p>
-        </div>
       </div>
     </div>
   );

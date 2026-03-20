@@ -1,5 +1,3 @@
-// import Portrait1 from '@/assets/donate/Portrait1.svg';
-// import Portrait2 from '@/assets/donate/Portrait2.svg';
 import { ArrowUp, X } from 'lucide-react';
 import { childArtExhibition } from '@/data/donate/childArtExhibitionData';
 import DonationUsageOrgCards from '@/components/donate/DonationUsageOrgCards';
@@ -41,107 +39,59 @@ export default function Donate() {
   return (
     <>
       <Seo {...donateMetadata} />
-      <div className="overflow-hidden">
+      <div className="content-gap overflow-hidden">
         <DonationHeader />
-
         {/* About ICAF */}
-        <div className="px-8 pb-12 pt-10 text-center md:px-8 lg:px-20">
-          <div className="mb-6">
-            <h2 className="mb-3 text-3xl font-bold text-black md:text-4xl">
-              About ICAF
-            </h2>
-            {/* <div className="flex items-center justify-center gap-2">
-            <img src={Award} alt="Award" className="h-5 w-5" />
-            <p className="text-base text-black">
-            We have been consistently ranked among the{' '}
-            <a
-            href="#"
-            className="text-secondary-blue font-bold hover:underline"
-            >
-            Top 25 Children's Charities in the United States.
-            </a>
-            </p>
-            </div> */}
-          </div>
-
-          <div>
-            <IntroBanner />
-          </div>
-
-          <div className="mb-6">
-            <div className="mt-16">
-              <div className="mb-8 text-center">
-                <h2 className="mb-4 text-3xl font-bold text-black md:text-4xl">
-                  Art by the children we serve
-                </h2>
-                <p className="mb-6 text-base text-black">
-                  Every piece of art here tells a story of hope and resilience.
-                  Here's a glimpse of the talent you're supporting.
-                </p>
-                {/* <div className="mb-8 flex items-center justify-center gap-2">
-                <div className="relative flex -space-x-2">
-                <img
-                src={Portrait1}
-                alt="Portrait 1"
-                className="h-8 w-8 rounded-full border-2 border-white object-cover"
-                />
-                <img
-                src={Portrait2}
-                alt="Portrait 2"
-                className="relative z-10 h-8 w-8 rounded-full border-2 border-white object-cover"
-                />
-                <img
-                src={Portrait1}
-                alt="Portrait 1"
-                className="h-8 w-8 rounded-full border-2 border-white object-cover"
-                />
-                </div>
-                <p className="text-sm text-black">
-                Join 254 others who donated this month!
-                </p>
-                </div> */}
-              </div>
-
-              <div className="flex flex-row items-start justify-center gap-8 md:flex-col">
-                {Array.from({ length: 2 }).map((_, rowIdx) => (
-                  <div
-                    // eslint-disable-next-line react-x/no-array-index-key
-                    key={rowIdx}
-                    className="flex w-full flex-col justify-center gap-8 md:flex-row"
-                  >
-                    {childArtExhibition
-                      .slice(rowIdx * 3, rowIdx * 3 + 3)
-                      .map((artwork) => (
-                        <div key={artwork.id} className="text-center">
-                          <div className="mb-4">
-                            <img
-                              src={artwork.image}
-                              alt={artwork.alt}
-                              className="rounded-lg"
-                            />
-                          </div>
-                          <p className="text-sm font-medium text-black">
-                            {artwork.artistName}, {artwork.age},{' '}
-                            {artwork.location}
-                          </p>
-                        </div>
-                      ))}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <DonationUsageOrgCards />
-          </div>
+        <div className="breakout-w m-pad flex flex-col gap-10">
+          <h2 className="mx-auto mb-3 text-center text-3xl font-bold text-black md:text-4xl">
+            About ICAF
+          </h2>
+          <IntroBanner />
         </div>
 
-        <div className="mb-12 px-8 md:px-8 lg:px-20">
+        <div className="breakout-w m-pad text-center">
+          <h2 className="mb-4 text-3xl font-bold text-black md:text-4xl">
+            Art by the children we serve
+          </h2>
+          <p className="mb-6 text-base text-black">
+            Every piece of art here tells a story of hope and resilience. Here's
+            a glimpse of the talent you're supporting.
+          </p>
+
+          <div className="flex flex-row items-start justify-center gap-8 md:flex-col">
+            {Array.from({ length: 2 }).map((_, rowIdx) => (
+              <div
+                // eslint-disable-next-line react-x/no-array-index-key
+                key={rowIdx}
+                className="flex w-full flex-col justify-center gap-8 md:flex-row"
+              >
+                {childArtExhibition
+                  .slice(rowIdx * 3, rowIdx * 3 + 3)
+                  .map((artwork) => (
+                    <div key={artwork.id} className="text-center">
+                      <div className="mb-4">
+                        <img
+                          src={artwork.image}
+                          alt={artwork.alt}
+                          className="rounded-lg"
+                        />
+                      </div>
+                      <p className="text-sm font-medium text-black">
+                        {artwork.artistName}, {artwork.age}, {artwork.location}
+                      </p>
+                    </div>
+                  ))}
+              </div>
+            ))}
+          </div>
+        </div>
+        <DonationUsageOrgCards />
+
+        <div className="breakout-w m-pad">
           <QuoteBanner />
         </div>
 
-        <div className="px-8 md:px-8 lg:px-20">
+        <div className="breakout-w m-pad">
           <div className="text-center">
             <h2 className="mb-12 text-3xl font-bold text-black md:text-4xl">
               How we make it happen
@@ -161,11 +111,11 @@ export default function Donate() {
           </div>
         </div>
 
-        <div className="px-8 md:px-8 lg:px-20">
+        <div className="breakout-w m-pad">
           <DonationMethod />
         </div>
 
-        <div className="bg-white py-16">
+        <div className="content-w m-pad bg-white">
           <div className="mx-auto flex max-w-4xl flex-col gap-6 text-center">
             <h2 className="font-inter mx-4 text-xl text-black md:text-4xl">
               Create a{' '}

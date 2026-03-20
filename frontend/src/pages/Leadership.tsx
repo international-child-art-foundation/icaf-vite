@@ -10,12 +10,10 @@ export const Leadership = () => {
 
   return (
     <div ref={topRef}>
-      <div>
+      <div className="content-gap">
         <LeadershipHeader />
-        <div className="flex max-w-screen-2xl flex-col gap-20 px-8 md:px-12 lg:px-16 xl:px-20">
-          <LeadershipBoard />
-          <ImpactCallout />
-        </div>
+        <LeadershipBoard />
+        <ImpactCallout />
         <YourDonations />
         <ScrollToTop targetRef={topRef} flairColor="primaryBlue" offset={100} />
       </div>

@@ -1,3 +1,4 @@
+import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 import YourDonations from '@/components/shared/YourDonations';
 import { StudentHeader } from '@/components/student/StudentHeader';
 import { StudentCreativity } from '@/components/student/StudentCreativity';
@@ -16,16 +17,15 @@ export const Student = () => {
   return (
     <>
       <Seo {...studentMetadata} />
-      <div>
+      <div className="content-gap">
         <StudentHeader />
-        <div className="flex max-w-screen-2xl flex-col gap-12 px-8 md:px-12 lg:px-16 xl:px-20">
-          <StudentCreativity />
-          <StudentEmpathyTeamwork />
-        </div>
+        <StudentCreativity />
+        <StudentEmpathyTeamwork />
         <JoinTheFun />
         <SpreadCreativity />
         <YourDonations />
       </div>
+      <PageBottomSpacer />
     </>
   );
 };

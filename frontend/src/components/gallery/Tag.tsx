@@ -11,9 +11,10 @@ export const Tag = ({ label, onRemove }: TagProps) => (
     type="button"
     variant={'secondary'}
     onClick={onRemove}
-    className="my-auto flex h-[34px] items-center gap-1 rounded-full border border-gray-600 bg-white px-3 py-1 text-sm hover:bg-gray-100"
+    className="my-auto flex items-center gap-1 rounded-full border border-gray-600 bg-white px-5 py-1 text-sm hover:bg-gray-100"
   >
-    {label}
-    <span className="ml-1 text-base leading-none">&times;</span>
+    <p className="text-md flex items-center">
+      {label} <span className="ml-2 text-base leading-none">&times;</span>
+    </p>
   </Button>
 );

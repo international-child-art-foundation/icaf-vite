@@ -211,7 +211,10 @@ const GalleryCoreInner: React.FC = () => {
     setPageNumber(1);
   };
 
-  const alterFiltersByCategory = (categoryId: string, activeStatus: boolean) => {
+  const alterFiltersByCategory = (
+    categoryId: string,
+    activeStatus: boolean,
+  ) => {
     bulkAlterCategoryOptions(categoryId, activeStatus);
     setPageNumber(1);
   };
@@ -306,7 +309,7 @@ const GalleryCoreInner: React.FC = () => {
           resetAllFilters={resetAllFilters}
         />
       )}
-      <div className="relative z-0 m-auto mb-8 w-full max-w-screen-2xl px-8 md:px-12 lg:px-16 xl:px-20">
+      <div className="breakout-w m-pad relative z-0 m-auto">
         {/* Filter toggle + sort */}
         <div className="relative z-[100] flex justify-between">
           <button

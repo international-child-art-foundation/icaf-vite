@@ -112,13 +112,13 @@ export const ProfessionalsContact = () => {
   };
 
   return (
-    <div className="relative max-w-screen-2xl px-8 py-12 md:px-12 lg:px-16 xl:px-20">
+    <div className="content-w m-pad relative">
       <img
         src={redBlueFirework}
         className="absolute right-4 top-12 z-[5] hidden h-64 w-64 opacity-50 lg:block"
       />
 
-      <div className="mb-10">
+      <div className="content-w mb-10">
         <h1 className="font-montserrat text-4xl font-semibold">
           Professionals & Partners
         </h1>

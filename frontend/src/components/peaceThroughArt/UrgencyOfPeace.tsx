@@ -3,8 +3,8 @@ import blueFirework from '@/assets/peaceThroughArt/blueFirework.svg';
 
 export const UrgencyOfPeace = () => {
   return (
-    <div className="flex flex-col xl:px-24">
-      <div className="z-20 flex flex-col items-center gap-10 text-center">
+    <div className="breakout-w m-pad mx-auto flex flex-col">
+      <div className="content-w z-20 mx-auto flex flex-col items-center gap-10 text-center">
         <h2 className="text-[40px] font-extrabold leading-[48px]">
           The Urgency of Peace
         </h2>
@@ -17,7 +17,7 @@ export const UrgencyOfPeace = () => {
           future.
         </p>
       </div>
-      <div className="grid grid-cols-1 grid-rows-1 sm:grid sm:grid-cols-2 sm:grid-rows-1">
+      <div className="breakout-w grid grid-cols-1 grid-rows-1 sm:grid sm:grid-cols-2 sm:grid-rows-1">
         <div className="mt-8 hidden h-full w-full items-end justify-start sm:flex">
           <img
             src={blueFirework}
@@ -29,19 +29,19 @@ export const UrgencyOfPeace = () => {
           <img src={usImg} className="-mt-16" alt="" />
         </div>
       </div>
-      <div className="flex flex-col items-center gap-10 text-center">
+      <div className="content-w flex flex-col items-center gap-10 text-center">
         <h2 className="mt-12 text-[40px] font-extrabold leading-[48px]">
           The Power of Art to Heal
         </h2>
         <p>
           In response to the 9/11 terrorist attacks, ICAF developed a{' '}
           <span className="font-bold">Peace Through Art Program </span>
-          that deploys participants’ creativity to inspire mutual empathy and
+          that deploys participants' creativity to inspire mutual empathy and
           break the cycles of trauma and hatred. ICAF conducted its first
           program for Cyprus, which involved ten Greek-Cypriots and ten
           Turkish-Cypriots coming to Washington, D.C. for a three-week training
           in June 2002. Since then, ICAF has employed its peace methodology at
-          its <span className="font-bold">World Children’s Festivals</span>,
+          its <span className="font-bold">World Children's Festivals</span>,
           enabling young people to help transform our wounded world into a
           wondrous one.
         </p>

@@ -10,7 +10,7 @@ export const DonationHeader = () => {
   const size = useWindowSize();
 
   return (
-    <div className="relative grid grid-cols-1 grid-rows-1">
+    <div className="site-w grid grid-cols-1 grid-rows-1">
       <div className="z-20 col-start-1 row-start-1 mt-6 grid p-4 md:flex md:flex-col md:p-12 lg:col-start-1 lg:row-start-1 lg:grid lg:h-auto lg:grid-cols-2 lg:grid-rows-1 lg:p-16">
         <div className="col-start-1 row-start-1">
           <DonationHeaderContent />

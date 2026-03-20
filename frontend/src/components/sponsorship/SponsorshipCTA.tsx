@@ -2,7 +2,7 @@ import DonateButton from '@/components/ui/donateButton';
 
 export const SponsorshipCTA = () => {
   return (
-    <div>
+    <div className="content-w m-pad">
       <div className="flex flex-col items-center gap-8">
         <p className="font-montserrat text-[32px] font-extrabold">
           Let's work together

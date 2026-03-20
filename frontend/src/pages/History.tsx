@@ -18,18 +18,15 @@ export const History = () => {
   return (
     <>
       <Seo {...historyMetadata} />
-      <div>
-        <div className="overflow-hidden">
-          <HistoryHeader />
-
-          {size.width >= 1024 ? (
-            <HistoryTimeline mode={'desktop'} />
-          ) : (
-            <HistoryTimeline mode={'mobile'} />
-          )}
-          <HistoryMomentsCarousel />
-          <YourDonationGiraffe />
-        </div>
+      <div className="content-gap overflow-hidden">
+        <HistoryHeader />
+        {size.width >= 1024 ? (
+          <HistoryTimeline mode={'desktop'} />
+        ) : (
+          <HistoryTimeline mode={'mobile'} />
+        )}
+        <HistoryMomentsCarousel />
+        <YourDonationGiraffe />
       </div>
     </>
   );

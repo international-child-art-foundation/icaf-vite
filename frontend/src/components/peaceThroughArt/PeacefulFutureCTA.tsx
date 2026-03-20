@@ -3,8 +3,8 @@ import DonateButton from '../ui/donateButton';
 
 export const PeacefulFutureCTA = () => {
   return (
-    <div>
-      <div className="z-20 flex flex-col gap-4 text-center">
+    <div className="site-w m-pad">
+      <div className="content-w z-20 mx-auto flex flex-col gap-4 text-center">
         <img src={globeImg} className="mx-auto" />
         <h2 className="font-montserrat text-[40px] font-extrabold leading-[48px]">
           Help Us Shape a Peaceful Future

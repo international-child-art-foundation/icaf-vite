@@ -3,7 +3,7 @@ import { researchAndPublicationsData } from '@/data/researchAndPublications/rese
 
 export const ResearchAndPublicationsDisplay = () => {
   return (
-    <div className="flex flex-col gap-12">
+    <div className="breakout-w m-pad flex flex-col gap-12">
       <h2 className="font-montserrat text-center text-3xl font-bold">
         Books and articles by the ICAF Board of Directors
       </h2>

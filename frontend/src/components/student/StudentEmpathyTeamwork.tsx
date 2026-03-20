@@ -2,7 +2,7 @@ import yellowFirework from '@/assets/shared/images/yellowFirework.webp';
 
 export const StudentEmpathyTeamwork = () => {
   return (
-    <div className="relative pt-12 xl:flex xl:flex-row xl:gap-12">
+    <div className="breakout-w m-pad relative xl:flex xl:flex-row xl:gap-12">
       <img
         src={yellowFirework}
         className="absolute -left-10 -top-8 opacity-20 lg:left-0 lg:top-0 lg:opacity-60 xl:relative xl:h-[290px] xl:w-[290px]"

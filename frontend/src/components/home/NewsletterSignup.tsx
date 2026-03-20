@@ -51,9 +51,9 @@ export const NewsletterSignup = () => {
   }
 
   return (
-    <div className="relative flex w-full flex-col gap-20 py-12">
-      <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-8 px-8 md:px-12 lg:px-16 xl:px-20">
-        <div className="relative z-10 flex flex-col gap-6">
+    <div className="breakout-w relative flex w-full flex-col gap-20">
+      <div className="mx-auto flex w-full flex-col gap-8">
+        <div className="m-pad relative z-10 flex flex-col gap-6">
           <h2 className="font-montserrat text-center text-[32px] font-extrabold text-black md:text-[40px]">
             Stay Connected
           </h2>
@@ -64,7 +64,7 @@ export const NewsletterSignup = () => {
           </p>
         </div>
 
-        <div className="relative z-10">
+        <div className="breakout-w m-pad relative z-10">
           <div className="relative mx-auto max-w-5xl overflow-clip">
             <div className="relative z-10 rounded-2xl bg-[#dfe7f8] p-8 shadow-sm md:p-12 lg:p-16">
               <form
@@ -139,7 +139,7 @@ export const NewsletterSignup = () => {
         </div>
       </div>
 
-      <div className="bottom-0 top-32 hidden w-full origin-[10%_90%] rotate-[80deg] overflow-hidden sm:origin-[10%_100%] md:absolute md:block md:origin-[0%_0%] md:rotate-[0deg] lg:top-16 xl:top-8">
+      <div className="bottom-0 top-32 hidden origin-[10%_90%] rotate-[80deg] sm:origin-[10%_100%] md:absolute md:block md:origin-[0%_0%] md:rotate-[0deg] lg:top-16 xl:top-8">
         <img
           className="pointer-events-none min-w-[900px] select-none opacity-60 md:opacity-100"
           src={Ribbons}

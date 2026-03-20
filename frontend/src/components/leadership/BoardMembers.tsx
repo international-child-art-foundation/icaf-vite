@@ -44,7 +44,7 @@ export const BoardMembers = ({ memberData }: IBoardMembersProps) => {
         return (
           <div
             key={member.name}
-            className="mx-auto flex w-full max-w-[400px] flex-row gap-4 text-left md:mx-0 md:w-[calc(50%-20px)] md:max-w-[400px] lg:w-[calc(33.33%-20px)] lg:max-w-[350px]"
+            className="mx-auto flex w-full max-w-[500px] flex-row gap-4 text-left md:mx-0 md:w-[calc(50%-20px)] md:max-w-[400px] lg:w-[calc(33.33%-20px)] lg:max-w-[400px]"
           >
             <div
               className={`h-full w-[10px] shrink-0 ${colorClass}`}

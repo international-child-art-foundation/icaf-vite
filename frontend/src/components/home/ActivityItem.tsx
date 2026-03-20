@@ -16,7 +16,7 @@ export const ActivityItem = ({ item, expanded, toggle }: ActivityItemProps) => {
 
   const content = (
     <>
-      <div className="relative z-10 col-start-1 row-start-1 my-auto h-full p-4 text-white">
+      <div className="card-pad relative z-10 col-start-1 row-start-1 my-auto h-full p-4 text-white xl:py-9">
         <div className="grid-col grid h-full place-content-center place-items-center items-center gap-4">
           <p className="font-montserrat text-center text-2xl font-semibold">
             {item.title}

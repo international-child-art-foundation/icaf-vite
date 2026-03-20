@@ -131,7 +131,7 @@ jobs:
           Options -MultiViews
           RewriteRule ^ - [E=RELEASE:${{ needs.build_frontend.outputs.release_id }}]
           # ── PDF short URLs (add/remove alongside the FilesMatch block below) ───
-          RewriteRule ^2026WCF$ /documents/2026WCF.pdf [END]
+          RewriteRule ^2026WCF$ /documents/2026WCF.pdf [END,NC]
           # ───────────────────────────────────────────────────────────────────────────
           RewriteRule ^php-api/(.*)$ /releases/%{ENV:RELEASE}/php-api/$1 [PT,L,NC]
           RewriteRule ^(?:releases|ChildArt|documents|data|config|gallery-arts)/ - [L,NC]

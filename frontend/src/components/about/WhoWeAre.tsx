@@ -1,5 +1,9 @@
 import DonateButton from '@/components/ui/donateButton';
-import { icaf1, ourPrograms, writingsResearch } from '@/assets/shared/images/about';
+import {
+  icaf1,
+  ourPrograms,
+  writingsResearch,
+} from '@/assets/shared/images/about';
 import { Picture } from '@/components/shared/Picture';
 import { AboutGraphic1 } from '@/assets/shared/images/about/AboutGraphic1';
 

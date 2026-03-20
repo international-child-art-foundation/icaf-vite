@@ -1,4 +1,8 @@
-import { artsOlympiadHero, artsOlympiadColoring, artsOlympiadPainting } from '@/assets/artsOlympiad';
+import {
+  artsOlympiadHero,
+  artsOlympiadColoring,
+  artsOlympiadPainting,
+} from '@/assets/artsOlympiad';
 import ArtsOlympiadTorch from '@/assets/shared/images/arts-olympiad-7-transparent.svg';
 import { Picture } from '@/components/shared/Picture';
 import { ArtsOlympiadHelpfulLinks } from '@/components/artsOlympiad/ArtsOlympiadHelpfulLinks';

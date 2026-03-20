@@ -50,19 +50,19 @@ export default function ChildArtPage() {
           {/* Foreground Text */}
           <div className="hero-w relative z-10 col-start-1 row-start-1 flex h-full items-start pt-20 md:items-center md:pt-0">
             <div className="text-white">
-                <h1 className="font-montserrat mb-3 text-4xl font-bold md:mb-4 md:text-5xl lg:mb-6 lg:text-6xl xl:text-7xl">
-                  <span className="italic">ChildArt</span> Magazine
-                </h1>
-                <p className="mb-6 max-w-2xl font-sans text-base leading-relaxed md:text-lg lg:text-xl">
-                  The American Academy of Arts & Sciences 2021 Report provides
-                  “evidence of the attributes, values, and skills that come from
-                  arts education, including social and emotional development,
-                  improvements in school engagement, as well as vital civic and
-                  social participation.”
-                </p>
-                <div className="flex justify-start">
-                  <DonateButton text="Donate to our Campaign" />
-                </div>
+              <h1 className="font-montserrat mb-3 text-4xl font-bold md:mb-4 md:text-5xl lg:mb-6 lg:text-6xl xl:text-7xl">
+                <span className="italic">ChildArt</span> Magazine
+              </h1>
+              <p className="mb-6 max-w-2xl font-sans text-base leading-relaxed md:text-lg lg:text-xl">
+                The American Academy of Arts & Sciences 2021 Report provides
+                “evidence of the attributes, values, and skills that come from
+                arts education, including social and emotional development,
+                improvements in school engagement, as well as vital civic and
+                social participation.”
+              </p>
+              <div className="flex justify-start">
+                <DonateButton text="Donate to our Campaign" />
+              </div>
             </div>
           </div>
         </div>

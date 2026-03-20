@@ -19,7 +19,7 @@ export const ScrollToTop = ({
   };
 
   return (
-    <div className="group mx-auto mb-10 flex text-center">
+    <div className="group mx-auto flex text-center">
       <div
         className="mx-auto flex cursor-pointer flex-col gap-2"
         onClick={handleScroll}

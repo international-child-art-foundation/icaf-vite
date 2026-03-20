@@ -40,7 +40,6 @@ export const NewsletterSignup = () => {
             event_label: 'homepage_newsletter',
             method: 'newsletter_form',
           });
-          window.gtag('event', 'conversion_event_signup');
         }
       } else {
         setStatus('err');

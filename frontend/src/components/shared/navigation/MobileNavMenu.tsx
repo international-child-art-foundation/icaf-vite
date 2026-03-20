@@ -93,6 +93,11 @@ const MobileNavMenu = ({ onCloseMenu }: MobileNavMenuProps) => {
                     </Link>
                   );
                 })}
+                {visitable && item.href && (
+                  <Link to={item.href} className="block" onClick={onCloseMenu}>
+                    {item.label} Overview
+                  </Link>
+                )}
               </AccordionContent>
             </AccordionItem>
           );

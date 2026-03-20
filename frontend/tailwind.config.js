@@ -94,8 +94,6 @@ module.exports = {
       fontFamily: {
         sans: ['Open Sans Variable', 'sans-serif'],
         montserrat: ['Montserrat Variable', 'sans-serif'],
-        inter: ['Inter Variable', 'sans-serif'],
-        nunito: ['Nunito Variable', 'sans-serif'],
       },
       keyframes: {
         'heart-pulse': {

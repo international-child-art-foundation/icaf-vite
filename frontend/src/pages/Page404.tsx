@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
-import image404 from '@/assets/page404/404Image.webp';
+import { image404 } from '@/assets/page404';
+import { Picture } from '@/components/shared/Picture';
 import { Button } from '@/components/ui/button';
 import { Seo } from '@/components/shared/Seo';
 
@@ -27,7 +28,7 @@ export const Page404 = () => {
       <div className="relative flex h-full w-full flex-1 flex-col items-center">
         <div className="grid-cols-auto relative mx-auto my-auto grid w-full max-w-screen-2xl grid-rows-[1fr_1fr] items-center gap-12 overflow-hidden px-8 py-12 md:grid-cols-[1fr_0.75fr] md:grid-rows-[1fr] md:px-12 lg:px-16 xl:px-20">
           <div className="relative h-full w-full overflow-hidden rounded-xl">
-            <img src={image404} className="h-full object-cover object-right" />
+            <Picture src={image404} className="h-full object-cover object-right" />
           </div>
           <div className="space-between flex h-full flex-col flex-wrap justify-between gap-8">
             <div className="flex flex-col gap-4">

@@ -2,7 +2,7 @@ import RedFirework from '@/assets/home/RedFirework.svg';
 import { TitleDescriptionCard } from './TitleDescriptionCard';
 import { VideoWrapper } from '../shared/VideoWrapper';
 import IcafHomeVideo from '@/assets/shared/media/icaf-overview-cropped.mp4';
-import IcafHomeVideoThumb from '@/assets/home/icaf-overview-cropped-thumb.webp';
+import { icafOverviewThumb } from '@/assets/home';
 
 export const HomeImpact = () => {
   return (
@@ -44,7 +44,7 @@ export const HomeImpact = () => {
         <div className="lg:col-span-7 lg:col-start-4 lg:row-span-4 lg:row-start-1">
           <VideoWrapper
             lazyMode="idle"
-            thumbnail={IcafHomeVideoThumb}
+            thumbnail={icafOverviewThumb}
             curved={true}
             src={IcafHomeVideo}
           />

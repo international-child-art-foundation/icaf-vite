@@ -1,6 +1,6 @@
 import { CurvedImage } from '@/pages/CurvedImage';
 import { OpinionatedGradients } from '@/data/gradientDefinition';
-import professionalsHeaderImg from '@/assets/professionals/professionals.webp';
+import { professionalsHeader } from '@/assets/professionals';
 
 import { useWindowSize } from 'usehooks-ts';
 
@@ -33,7 +33,7 @@ export const ProfessionalsHeader = () => {
       <div className="col-start-1 row-start-1">
         <CurvedImage
           gradientDefinition={gradientDefinition}
-          src={professionalsHeaderImg}
+          src={professionalsHeader}
           height={'600px'}
           objectFit="cover"
           objectPosition="center right"

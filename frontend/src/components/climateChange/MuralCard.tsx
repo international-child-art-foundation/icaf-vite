@@ -1,5 +1,7 @@
+import { Picture, type PictureSrc } from '@/components/shared/Picture';
+
 type MuralCardProps = {
-  src: string;
+  src: PictureSrc;
   name: string;
   age: number;
   className?: string;
@@ -15,7 +17,7 @@ const muralTagClasses =
 export const MuralCard = ({ src, name, age, className }: MuralCardProps) => {
   return (
     <div className={`${muralCardBaseClasses} ${className ?? ''}`}>
-      <img src={src} className={muralImageClasses} alt="" />
+      <Picture src={src} className={muralImageClasses} alt="" />
       <div className={muralOverlayWrapperClasses}>
         <p className={muralTagClasses}>
           {name}

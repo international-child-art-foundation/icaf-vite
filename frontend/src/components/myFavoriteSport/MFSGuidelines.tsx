@@ -1,8 +1,5 @@
 import { useState } from 'react';
-import img1 from '@/assets/arts-olympiad/submission-1.webp';
-import img2 from '@/assets/arts-olympiad/submission-2.webp';
-import img3 from '@/assets/arts-olympiad/_MG_8137.webp';
-import img4 from '@/assets/arts-olympiad/submission-4.webp';
+import { submission1, submission2, mg8137, submission4 } from '@/assets/arts-olympiad';
 
 import { GuidelineCard } from '@/components/myFavoriteSport/MFSGuidelineCard';
 import { gsap } from 'gsap';
@@ -11,7 +8,7 @@ import { Flip } from 'gsap/all';
 gsap.registerPlugin(Flip);
 const cardData = [
   {
-    imgUrl: img1,
+    imgUrl: submission1,
     className: 'border-[#F5AB35]',
     heading: 'Fee and Awards',
     description: [
@@ -21,7 +18,7 @@ const cardData = [
     gradientStrength: 0.4,
   },
   {
-    imgUrl: img2,
+    imgUrl: submission2,
     className: 'border-[#0286C3]',
     heading: 'How to Upload',
     description: [
@@ -31,7 +28,7 @@ const cardData = [
     gradientStrength: 0.4,
   },
   {
-    imgUrl: img3,
+    imgUrl: mg8137,
     className: 'border-[#168C39]',
     heading: 'Accepted Formats',
     description: [
@@ -41,7 +38,7 @@ const cardData = [
     gradientStrength: 0.4,
   },
   {
-    imgUrl: img4,
+    imgUrl: submission4,
     className: 'border-[#EE2F4D]',
     heading: 'Share your Masterpiece',
     description: [

@@ -1,10 +1,11 @@
 // import { Link } from 'react-router-dom';
 // import { Button } from '../ui/button';
 import { VideoWrapper } from '../shared/VideoWrapper';
-import healingArtsImg from '@/assets/shared/images/navigation/programs/healingArtsProgram_smaller.webp';
+import { healingArtsProgram } from '@/assets/shared/images/navigation/programs';
+import { healingArtsThumb } from '@/assets/healingArts';
+import { Picture } from '@/components/shared/Picture';
 import { useWindowSize } from 'usehooks-ts';
 import healingArtsVideo from '@/assets/healingArts/healing-arts.mp4';
-import healingArtsThumb from '@/assets/healingArts/healing-arts-thumb.webp';
 
 export const ImpactVideo = () => {
   const size = useWindowSize();
@@ -32,8 +33,8 @@ export const ImpactVideoThreeRows = () => {
             </div>
           </div>
           <div className="relative overflow-hidden rounded-xl">
-            <img
-              src={healingArtsImg}
+            <Picture
+              src={healingArtsProgram}
               className="mx-auto rounded-[16px] object-contain"
             />
           </div>
@@ -70,8 +71,8 @@ export const ImpactVideoTwoRows = () => {
             </Button> */}
           </div>
           <div className="relative ml-auto mr-0 overflow-hidden rounded-xl">
-            <img
-              src={healingArtsImg}
+            <Picture
+              src={healingArtsProgram}
               className="ml-auto mr-0 max-h-full rounded-[16px] object-contain"
             />
           </div>

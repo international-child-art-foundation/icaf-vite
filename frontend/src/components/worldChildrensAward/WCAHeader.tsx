@@ -1,5 +1,5 @@
 import { CurvedImage } from '@/pages/CurvedImage';
-import headerImg from '@/assets/worldChildrensAward/wca-header.webp';
+import { wcaHeader } from '@/assets/worldChildrensAward';
 import { useWindowSize } from 'usehooks-ts';
 
 export const WCAHeader = () => {
@@ -24,7 +24,7 @@ export const WCAHeader = () => {
     <div className="site-w grid grid-cols-1 grid-rows-1">
       <div className="col-start-1 row-start-1">
         <CurvedImage
-          src={headerImg}
+          src={wcaHeader}
           gradientDefinition={gradientDefinition}
           objectPosition={'50% 15%'}
         />

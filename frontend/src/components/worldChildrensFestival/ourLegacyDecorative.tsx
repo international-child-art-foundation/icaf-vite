@@ -4,7 +4,8 @@ import { BlueBanner } from '@/assets/worldChildrensFestival/blueBanner';
 import Graphic from '@/assets/shared/images/about/more/Group 514888.svg';
 import { AboutGraphic2 } from '@/assets/shared/images/about/AboutGraphic2';
 import { WhiteBanner } from '@/assets/worldChildrensFestival/whiteBanner';
-import congress from '@/assets/worldChildrensFestival/congress.webp';
+import { congress } from '@/assets/worldChildrensFestival';
+import { Picture } from '@/components/shared/Picture';
 import { AboutGraphic1 } from '@/assets/shared/images/about/AboutGraphic1';
 import YellowConfetti from '@/assets/worldChildrensFestival/yellowConfetti.svg';
 
@@ -31,7 +32,7 @@ export default function OurLegacyDecorative() {
         <WhiteBanner className="absolute left-0 top-4 z-20 hidden h-[700px] w-full lg:block lg:h-[1000px] xl:h-[1000px] 2xl:h-[1000px]" />
 
         {/*Capitol Building Image*/}
-        <img
+        <Picture
           src={congress}
           loading="lazy"
           alt="Capitol building"

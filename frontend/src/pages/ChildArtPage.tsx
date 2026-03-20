@@ -1,7 +1,7 @@
 import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 import { CurvedImage } from './CurvedImage';
 import MagazineCarousel from '../components/childArt/MagazineCarousel';
-import magazineCoverLarge from '@/assets/shared/images/navigation/programs/childArtMagazine.webp';
+import { childArtMagazine } from '@/assets/shared/images/navigation/programs';
 import BackIssueGrid from '@/components/childArt/BackIssueGrid';
 import TestimonialBlock from '@/components/childArt/TestimonialBlock';
 import YourDonations from '@/components/shared/YourDonations';
@@ -41,7 +41,7 @@ export default function ChildArtPage() {
         <div className="site-w grid grid-cols-1 grid-rows-1">
           <div className="col-start-1 row-start-1">
             <CurvedImage
-              src={magazineCoverLarge}
+              src={childArtMagazine}
               curveStyle="Ellipse"
               gradientDefinition={gradientDefinition}
             />

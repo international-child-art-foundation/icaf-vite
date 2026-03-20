@@ -1,5 +1,5 @@
-import soccer from '@/assets/shared/images/home/circle-images/soccer.webp';
-import globeKids from '@/assets/shared/images/home/circle-images/globe-kids.webp';
+import { soccer, globeKids } from '@/assets/shared/images/home/circle-images';
+import { Picture } from '@/components/shared/Picture';
 import redBlueFirework from '@/assets/home/RedBlueFirework.svg';
 
 const WhatWeDo = () => {
@@ -27,7 +27,7 @@ const WhatWeDo = () => {
         </div>
         <div className="flex max-w-[402px] flex-col items-center gap-8 lg:max-w-[800px] lg:flex-row lg:gap-[60px]">
           <div className="flex flex-1 flex-col items-center gap-4 lg:gap-6">
-            <img
+            <Picture
               src={soccer}
               className="h-[204px] lg:h-[204px]"
               alt=""
@@ -44,7 +44,7 @@ const WhatWeDo = () => {
           </div>
 
           <div className="flex flex-1 flex-col items-center gap-4 lg:gap-6">
-            <img src={globeKids} className="h-[204px]" alt="" loading="lazy" />
+            <Picture src={globeKids} className="h-[204px]" alt="" loading="lazy" />
             <div className="flex flex-row gap-7 lg:flex-col lg:items-center lg:gap-2">
               <h1 className="font-montserrat text-2xl font-semibold text-black">
                 02

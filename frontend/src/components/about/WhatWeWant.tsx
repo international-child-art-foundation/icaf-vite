@@ -1,22 +1,20 @@
 import waveUrl from '@/assets/shared/images/about/Group 515076.svg';
-import www1 from '@/assets/shared/images/about/rectangleHeart.webp';
-import www2 from '@/assets/shared/images/about/rectangleGlobe.webp';
-import www1Large from '@/assets/shared/images/about/rectangleHeartLarge.webp';
-import www2Large from '@/assets/shared/images/about/rectangleGlobeLarge.webp';
+import { rectangleHeart, rectangleGlobe, rectangleHeartLarge, rectangleGlobeLarge } from '@/assets/shared/images/about';
+import { Picture } from '@/components/shared/Picture';
 import { AboutGraphic2 } from '@/assets/shared/images/about/AboutGraphic2';
 
 export default function WhatWeWant() {
   const cards = [
     {
-      mobileSrc: www1,
-      desktopSrc: www1Large,
+      mobileSrc: rectangleHeart,
+      desktopSrc: rectangleHeartLarge,
       titleTop: 'A Better World',
       titleBottom: 'Brighter Future',
       alt: 'Heart Shaped Globe',
     },
     {
-      mobileSrc: www2,
-      desktopSrc: www2Large,
+      mobileSrc: rectangleGlobe,
+      desktopSrc: rectangleGlobeLarge,
       titleTop: 'Creativity',
       titleBottom: 'Art',
       alt: 'Children Holding Hands Around Globe',
@@ -50,8 +48,8 @@ export default function WhatWeWant() {
                 className="relative flex items-center justify-center"
               >
                 <picture>
-                  <source srcSet={card.desktopSrc} media="(min-width: 768px)" />
-                  <img
+                  <source srcSet={typeof card.desktopSrc === 'string' ? card.desktopSrc : card.desktopSrc.webp} media="(min-width: 768px)" />
+                  <Picture
                     src={card.mobileSrc}
                     alt={card.alt}
                     loading="lazy"

@@ -1,9 +1,9 @@
 import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 import { CurvedImage } from './CurvedImage';
-import WorldMural from '@/assets/impact/WorldMural.webp';
+import { worldMural, dancing } from '@/assets/impact';
 import AccordionDropdowns from '@/components/shared/AccordionDropdowns';
 import MissionDropdownData from '@/data/impact/impactMissionDropdownData';
-import DancingImg from '@/assets/impact/Dancing.webp';
+import { Picture } from '@/components/shared/Picture';
 import { ContentCarousel } from '@/components/impact/ContentCarousel';
 import { ImpactContentCarouselData } from '@/data/impact/impactContentCarouselData';
 import { Seo } from '@/components/shared/Seo';
@@ -25,7 +25,7 @@ const Impact = () => {
         <div className="site-w grid h-[550px] grid-cols-1 grid-rows-1">
           <div className="col-start-1 row-start-1">
             <CurvedImage
-              src={WorldMural}
+              src={worldMural}
               curveStyle={'Ellipse'}
               darkened={true}
               gradientDefinition={'bg-gradient-to-b from-black/50 to-black/30'}
@@ -98,7 +98,7 @@ const Impact = () => {
             </div>
             <div className="relative order-1 content-center lg:order-2">
               <div className="relative h-full self-center overflow-hidden rounded-[30px]">
-                <img src={DancingImg} className="h-full w-auto object-cover" />
+                <Picture src={dancing} className="h-full w-auto object-cover" />
               </div>
             </div>
           </div>

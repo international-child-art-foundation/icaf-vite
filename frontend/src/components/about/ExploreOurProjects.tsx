@@ -1,6 +1,6 @@
 import { Card, CardContent, CardFooter } from '../ui/card';
 import ICAFVideo from '@/assets/shared/media/icaf-overview-cropped.mp4';
-import Poster from '@/assets/shared/images/about/map-video-cover.webp';
+import { mapVideoCover } from '@/assets/shared/images/about';
 import { FavoriteSportLogo } from '@/assets/shared/images/about/FavoriteSportLogo';
 import { ChevronRight } from 'lucide-react';
 import { VRHeaven } from '@/assets/shared/images/about/VRHeaven';
@@ -54,7 +54,7 @@ export default function ExploreOurProjects() {
         <div className="md:col-span-2 xl:col-span-2 xl:col-start-2 xl:row-span-2 xl:row-start-1">
           <VideoWrapper
             src={ICAFVideo}
-            thumbnail={Poster}
+            thumbnail={mapVideoCover}
             className="w-full rounded-2xl object-cover md:h-[600px] xl:h-full"
           />
         </div>

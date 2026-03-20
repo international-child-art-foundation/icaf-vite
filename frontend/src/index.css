@@ -1,7 +1,5 @@
 @import '@fontsource-variable/montserrat';
 @import '@fontsource-variable/open-sans';
-@import '@fontsource-variable/nunito';
-@import '@fontsource-variable/inter';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -1,4 +1,5 @@
 import { TMomentsCarouselData } from '@/types/History';
+import { Picture } from '@/components/shared/Picture';
 
 interface HistoryMomentCardProps {
   cardData: TMomentsCarouselData;
@@ -16,7 +17,7 @@ export const HistoryMomentCard = ({
       <div className="relative flex h-full flex-col overflow-hidden rounded-xl pb-4 shadow-md">
         {cardData.src ? (
           <div className="flex h-full max-w-full flex-col gap-2 text-center">
-            <img className="grow" src={cardData.src} />
+            <Picture className="grow" src={cardData.src} />
             <div className="m-4">
               <p className="font-montserrat text-2xl font-semibold text-black">
                 {cardData.title}

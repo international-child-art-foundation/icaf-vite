@@ -1,5 +1,7 @@
 import { CurvedImage } from '@/pages/CurvedImage';
-import SponsorshipHeaderImg from '@/assets/sponsorship/SponsorshipHeader.webp';
+import sponsorshipHeaderWebp from '@/assets/sponsorship/SponsorshipHeader.webp';
+import sponsorshipHeaderAvif from '@/assets/sponsorship/SponsorshipHeader.webp?format=avif';
+const sponsorshipHeader = { webp: sponsorshipHeaderWebp, avif: sponsorshipHeaderAvif };
 import { useWindowSize } from 'usehooks-ts';
 
 export const SponsorshipHeader = () => {
@@ -27,7 +29,7 @@ export const SponsorshipHeader = () => {
     <div className="site-w grid grid-cols-1 grid-rows-1">
       <div className="col-start-1 row-start-1">
         <CurvedImage
-          src={SponsorshipHeaderImg}
+          src={sponsorshipHeader}
           gradientDefinition={gradientDefinition}
         />
       </div>

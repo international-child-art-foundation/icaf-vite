@@ -1,5 +1,6 @@
 import { Button } from '../ui/button';
-import Girl from '@/assets/worldChildrensFestival/girlPaintHands.webp';
+import { girlPaintHands } from '@/assets/worldChildrensFestival';
+import { Picture } from '@/components/shared/Picture';
 
 export default function WCFCTA() {
   return (
@@ -32,8 +33,8 @@ export default function WCFCTA() {
         </div>
         {/*Girl Image*/}
         <div className="absolute -right-32 hidden md:block">
-          <img
-            src={Girl}
+          <Picture
+            src={girlPaintHands}
             loading="lazy"
             className="h-[650px] w-[550px] xl:h-[740px] xl:w-[630px] 2xl:h-[830px] 2xl:w-[700px]"
           />

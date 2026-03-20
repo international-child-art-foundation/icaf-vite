@@ -1,5 +1,4 @@
-import missionVisionBackgroundLarge from '@/assets/home/MissionVisionLarge.webp';
-import missionVisionBackgroundSmall from '@/assets/home/MissionVisionSmall.webp';
+import { missionVisionLarge, missionVisionSmall } from '@/assets/home';
 import { ClickIcon } from '@/assets/shared/icons/ClickIcon';
 import { VisibilityIcon } from '@/assets/shared/icons/VisibilityIcon';
 
@@ -7,16 +6,12 @@ const MissionVision = () => {
   return (
     <div className="breakout-w m-pad relative grid h-[500px] w-full grid-cols-1 grid-rows-1">
       <picture className="col-start-1 row-start-1 mt-16">
-        <source
-          media="(min-width: 1024px)"
-          srcSet={missionVisionBackgroundLarge}
-        />
-        <source
-          media="(max-width: 1023px)"
-          srcSet={missionVisionBackgroundSmall}
-        />
+        <source type="image/avif" media="(min-width: 1024px)" srcSet={missionVisionLarge.avif} />
+        <source type="image/avif" media="(max-width: 1023px)" srcSet={missionVisionSmall.avif} />
+        <source media="(min-width: 1024px)" srcSet={missionVisionLarge.webp} />
+        <source media="(max-width: 1023px)" srcSet={missionVisionSmall.webp} />
         <img
-          src={missionVisionBackgroundLarge}
+          src={missionVisionLarge.webp}
           alt="Map Background"
           className="m-auto object-cover object-center"
           loading="lazy"

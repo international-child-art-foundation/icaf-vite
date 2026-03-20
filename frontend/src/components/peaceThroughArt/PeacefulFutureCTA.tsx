@@ -1,11 +1,12 @@
-import globeImg from '@/assets/shared/images/New-York-_Michael-Wong_---11.webp';
+import { newYorkMichaelWong } from '@/assets/shared/images';
+import { Picture } from '@/components/shared/Picture';
 import DonateButton from '../ui/donateButton';
 
 export const PeacefulFutureCTA = () => {
   return (
     <div className="site-w m-pad">
       <div className="content-w z-20 mx-auto flex flex-col gap-4 text-center">
-        <img src={globeImg} className="mx-auto" />
+        <Picture src={newYorkMichaelWong} className="mx-auto" />
         <h2 className="font-montserrat text-[40px] font-extrabold leading-[48px]">
           Help Us Shape a Peaceful Future
         </h2>

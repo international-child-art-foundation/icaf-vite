@@ -1,6 +1,6 @@
 import { CurvedImage } from '@/pages/CurvedImage';
 import { OpinionatedGradients } from '@/data/gradientDefinition';
-import volunteerHeaderImg from '@/assets/volunteer/volunteerHeader.webp';
+import { volunteerHeader } from '@/assets/volunteer';
 
 import { useWindowSize } from 'usehooks-ts';
 
@@ -37,7 +37,7 @@ export const VolunteerHeader = () => {
       <div className="col-start-1 row-start-1">
         <CurvedImage
           gradientDefinition={gradientDefinition}
-          src={volunteerHeaderImg}
+          src={volunteerHeader}
           height={'600px'}
           objectFit="cover"
           objectPosition="center right"

@@ -1,4 +1,5 @@
-import worldMural from '@/assets/leadership/worldMural.webp';
+import { leadershipWorldMural } from '@/assets/leadership';
+import { Picture } from '@/components/shared/Picture';
 import { Button } from '../ui/button';
 import { Link } from 'react-router-dom';
 
@@ -20,9 +21,9 @@ export const ImpactCallout = () => {
           </Link>
         </div>
         <div className="rounded-bl-[40px] rounded-br-[40px] lg:rounded-bl-[0px] lg:rounded-tr-[40px]">
-          <img
+          <Picture
             className="ml-auto mr-0 mt-auto min-h-full min-w-full rounded-bl-[40px] rounded-br-[40px] object-cover lg:h-full lg:w-[unset] lg:rounded-bl-[0px] lg:rounded-tr-[40px]"
-            src={worldMural}
+            src={leadershipWorldMural}
           />
         </div>
       </div>

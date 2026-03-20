@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Play } from 'lucide-react';
+import { Picture, type PictureSrc } from '@/components/shared/Picture';
 
 export type VideoHandle = {
   play: () => void;
@@ -9,7 +10,7 @@ export type VideoHandle = {
 
 interface VideoWrapperProps {
   src: string;
-  thumbnail: string;
+  thumbnail: PictureSrc;
   curved?: boolean;
   className?: string;
   lazyMode?: 'idle' | 'viewport' | 'off';
@@ -131,7 +132,7 @@ export const VideoWrapper = ({
           tabIndex={0}
           onClick={startPlayback}
         >
-          <img
+          <Picture
             src={thumbnail}
             alt=""
             className="h-full w-full object-cover"

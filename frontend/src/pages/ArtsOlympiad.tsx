@@ -1,7 +1,6 @@
-import ArtsOlympiadHero from '@/assets/artsOlympiad/arts-olympiad-hero.webp';
+import { artsOlympiadHero, artsOlympiadColoring, artsOlympiadPainting } from '@/assets/artsOlympiad';
 import ArtsOlympiadTorch from '@/assets/shared/images/arts-olympiad-7-transparent.svg';
-import ArtsOlympiadColoring from '@/assets/artsOlympiad/arts-olympiad-coloring.webp';
-import ArtsOlympiadPainting from '@/assets/artsOlympiad/arts-olympiad-painting.webp';
+import { Picture } from '@/components/shared/Picture';
 import { ArtsOlympiadHelpfulLinks } from '@/components/artsOlympiad/ArtsOlympiadHelpfulLinks';
 import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 import { Seo } from '@/components/shared/Seo';
@@ -34,8 +33,8 @@ export const ArtsOlympiad = () => {
             </p>
           </div>
           <div className="relative h-72 w-full overflow-hidden rounded-2xl shadow-md sm:h-80 md:h-[500px]">
-            <img
-              src={ArtsOlympiadHero}
+            <Picture
+              src={artsOlympiadHero}
               alt="Children participating in the Arts Olympiad"
               className="h-full w-full object-cover"
             />
@@ -114,8 +113,8 @@ export const ArtsOlympiad = () => {
           </div>
           <div className="flex items-center justify-center">
             <div className="relative h-72 w-full max-w-md overflow-hidden rounded-2xl shadow-md sm:h-80 md:h-96">
-              <img
-                src={ArtsOlympiadColoring}
+              <Picture
+                src={artsOlympiadColoring}
                 alt="Child coloring during an Arts Olympiad activity"
                 className="h-full w-full object-cover"
               />
@@ -126,8 +125,8 @@ export const ArtsOlympiad = () => {
         <section className="content-w m-pad grid gap-8 rounded-3xl bg-white px-6 py-8 shadow-sm md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:px-10 md:py-10">
           <div className="flex items-center justify-center">
             <div className="relative h-72 w-full max-w-md overflow-hidden rounded-2xl shadow-md sm:h-80 md:h-96">
-              <img
-                src={ArtsOlympiadPainting}
+              <Picture
+                src={artsOlympiadPainting}
                 alt="Student painting at the Arts Olympiad"
                 className="h-full w-full object-cover"
               />

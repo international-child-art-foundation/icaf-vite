@@ -1,6 +1,6 @@
 import { CurvedImage } from '@/pages/CurvedImage';
 import { useWindowSize } from 'usehooks-ts';
-import artShowcaseHeader from '@/assets/home/ArtShowcaseHeader.webp';
+import { artShowcaseHeader } from '@/assets/home/index';
 import DonateButton from '../ui/donateButton';
 
 const HomeHeader = () => {

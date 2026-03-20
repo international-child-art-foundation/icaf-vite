@@ -1,7 +1,6 @@
 import DonateButton from '@/components/ui/donateButton';
-import ICAFAboutImage from '@/assets/shared/images/about/ICAF1.webp';
-import ourProgramsImage from '@/assets/shared/images/about/ourPrograms.webp';
-import writingsResearchImage from '@/assets/shared/images/about/writingsResearch.webp';
+import { icaf1, ourPrograms, writingsResearch } from '@/assets/shared/images/about';
+import { Picture } from '@/components/shared/Picture';
 import { AboutGraphic1 } from '@/assets/shared/images/about/AboutGraphic1';
 
 export default function WhoWeAre() {
@@ -51,14 +50,12 @@ export default function WhoWeAre() {
           </div>
         </div>
         <div className="my-4 h-[350px] w-full md:h-[475px] lg:h-96 lg:w-1/2 lg:pl-32 xl:h-[400px] 2xl:h-[455px] 2xl:pl-36">
-          <picture className="h-full w-full">
-            <img
-              src={ICAFAboutImage}
-              loading="lazy"
-              alt="children showing artwork"
-              className="border-tertiary-red h-full w-full rounded-[42px] border-4 object-cover"
-            />
-          </picture>
+          <Picture
+            src={icaf1}
+            loading="lazy"
+            alt="children showing artwork"
+            className="border-tertiary-red h-full w-full rounded-[42px] border-4 object-cover"
+          />
         </div>
       </article>
 
@@ -92,14 +89,12 @@ export default function WhoWeAre() {
           </div>
         </div>
         <div className="my-4 h-[350px] w-full md:h-[475px] lg:h-96 lg:w-1/2 lg:pr-32 xl:h-[400px] 2xl:h-[455px] 2xl:pr-36">
-          <picture className="h-full w-full">
-            <img
-              src={ourProgramsImage}
-              loading="lazy"
-              alt="children showing artwork"
-              className="border-secondary-blue h-full w-full rounded-[42px] border-4 object-cover"
-            />
-          </picture>
+          <Picture
+            src={ourPrograms}
+            loading="lazy"
+            alt="children showing artwork"
+            className="border-secondary-blue h-full w-full rounded-[42px] border-4 object-cover"
+          />
         </div>
       </article>
 
@@ -118,14 +113,12 @@ export default function WhoWeAre() {
           </div>
         </div>
         <div className="my-4 h-[350px] w-full md:h-[475px] lg:h-96 lg:w-1/2 lg:pl-32 xl:h-[400px] 2xl:h-[455px] 2xl:pl-36">
-          <picture className="h-full w-full">
-            <img
-              src={writingsResearchImage}
-              loading="lazy"
-              alt="children showing artwork"
-              className="border-secondary-yellow h-full w-full rounded-[42px] border-4 object-cover"
-            />
-          </picture>
+          <Picture
+            src={writingsResearch}
+            loading="lazy"
+            alt="children showing artwork"
+            className="border-secondary-yellow h-full w-full rounded-[42px] border-4 object-cover"
+          />
         </div>
       </article>
     </section>

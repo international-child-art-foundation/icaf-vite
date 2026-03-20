@@ -1,5 +1,5 @@
 import { CurvedImage } from '@/pages/CurvedImage';
-import leadershipHeaderImg from '@/assets/shared/images/icafGroupPhoto.webp';
+import { icafGroupPhoto } from '@/assets/shared/images';
 
 import { useWindowSize } from 'usehooks-ts';
 
@@ -33,7 +33,7 @@ export const LeadershipHeader = () => {
       <div className="col-start-1 row-start-1">
         <CurvedImage
           gradientDefinition={gradientDefinition}
-          src={leadershipHeaderImg}
+          src={icafGroupPhoto}
           height={'600px'}
           objectFit="cover"
           objectPosition="top right"

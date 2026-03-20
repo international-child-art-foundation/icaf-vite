@@ -1,9 +1,11 @@
 import { ribbonPaths } from '@/types/RibbonTypes';
 import { RibbonStyleTypes } from '@/types/RibbonTypes';
 import { useId, useState } from 'react';
+import { Picture } from '@/components/shared/Picture';
+import type { PictureSrc } from '@/components/shared/Picture';
 
 interface CurvedImageProps {
-  src: string;
+  src: PictureSrc;
   curveStyle?: RibbonStyleTypes;
   darkened?: boolean;
   gradientDefinition?: string;
@@ -58,7 +60,7 @@ export const CurvedImage = ({
           className={`${clipPathClass} relative col-start-1 row-start-1 w-full overflow-hidden`}
           style={{ height }}
         >
-          <img
+          <Picture
             src={src}
             className={
               'col-start-1 row-start-1 h-full w-full transition-opacity duration-500 ' +
@@ -72,6 +74,7 @@ export const CurvedImage = ({
             }}
             alt=""
             loading="eager"
+            fetchPriority="high"
             onLoad={() => setIsLoaded(true)}
           />
         </div>

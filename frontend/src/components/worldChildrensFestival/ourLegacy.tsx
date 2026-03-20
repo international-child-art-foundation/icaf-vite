@@ -1,4 +1,5 @@
-import ourLegacyImage from '@/assets/worldChildrensFestival/ourLegacy.webp';
+import { ourLegacy } from '@/assets/worldChildrensFestival';
+import { Picture } from '@/components/shared/Picture';
 import { CircleArrowRight } from 'lucide-react';
 import OurLegacyDecorative from './ourLegacyDecorative';
 
@@ -22,8 +23,8 @@ export default function OurLegacy() {
 
         {/* Content Grid */}
         <div className="grid max-h-[750px] lg:grid-cols-2">
-          <img
-            src={ourLegacyImage}
+          <Picture
+            src={ourLegacy}
             loading="lazy"
             alt="Festival scene"
             className="max-h-[330px] w-full rounded-t-2xl object-cover shadow-md lg:order-2 lg:h-full lg:max-h-[540px] lg:rounded-tl-none lg:rounded-tr-2xl xl:max-h-[470px]"

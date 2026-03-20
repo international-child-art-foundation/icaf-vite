@@ -1,10 +1,6 @@
 import { linkClasses } from '@/data/linkClasses';
 
-import muralOne from '@/assets/climateChange/AO2 Bahrain. Islam Hasan (10 Bahrain).webp';
-import muralTwo from '@/assets/climateChange/AO4 Nigeria. Judith Yahaya 12.webp';
-import muralThree from '@/assets/climateChange/AO5 USA. Alina Ponomarenko 11. “The Camping Site”.webp';
-import muralFour from '@/assets/climateChange/Peru (Carla Guadalupe Gonzalez De La Cruz, 8).webp';
-import muralFive from '@/assets/climateChange/Austria (Samara Claudia Bittermann, 10).webp';
+import { muralBahrain, muralNigeria, muralUSA, muralPeru, muralAustria } from '@/assets/climateChange';
 import { MuralCard } from './MuralCard';
 
 export const ClimateChangeInfo = () => {
@@ -52,20 +48,20 @@ export const ClimateChangeInfo = () => {
         </div>
 
         <div className="grid gap-4 lg:hidden">
-          <MuralCard src={muralOne} name="Islam Hasan" age={10} />
-          <MuralCard src={muralTwo} name="Judith Yahaya" age={12} />
+          <MuralCard src={muralBahrain} name="Islam Hasan" age={10} />
+          <MuralCard src={muralNigeria} name="Judith Yahaya" age={12} />
         </div>
 
         <div className="hidden gap-4 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <div className="grid grid-cols-2 grid-rows-2 gap-4">
-            <MuralCard src={muralOne} name="Islam Hasan" age={10} />
-            <MuralCard src={muralTwo} name="Judith Yahaya" age={12} />
-            <MuralCard src={muralThree} name="Alina Ponomarenko" age={11} />
-            <MuralCard src={muralFour} name="Carla Guadalupe" age={8} />
+            <MuralCard src={muralBahrain} name="Islam Hasan" age={10} />
+            <MuralCard src={muralNigeria} name="Judith Yahaya" age={12} />
+            <MuralCard src={muralUSA} name="Alina Ponomarenko" age={11} />
+            <MuralCard src={muralPeru} name="Carla Guadalupe" age={8} />
           </div>
 
           <MuralCard
-            src={muralFive}
+            src={muralAustria}
             name="Samara Claudia Bittermann"
             age={10}
             className="h-full"

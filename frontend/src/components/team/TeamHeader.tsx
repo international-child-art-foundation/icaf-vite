@@ -1,5 +1,5 @@
 import { CurvedImage } from '@/pages/CurvedImage';
-import TeamHeaderImg from '@/assets/shared/images/teamHeader.webp';
+import { teamHeader } from '@/assets/shared/images';
 import { ArrowDown } from 'lucide-react';
 import { useWindowSize } from 'usehooks-ts';
 
@@ -47,7 +47,7 @@ const TeamHeader = ({ scrollFunction }: TeamHeaderProps) => {
       <div className="col-start-1 row-start-1">
         <CurvedImage
           gradientDefinition={gradientDefinition}
-          src={TeamHeaderImg}
+          src={teamHeader}
           height={'700px'}
           objectFit="cover"
           objectPosition="center top"

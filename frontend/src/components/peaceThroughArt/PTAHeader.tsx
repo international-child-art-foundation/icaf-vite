@@ -1,5 +1,5 @@
 import { CurvedImage } from '@/pages/CurvedImage';
-import peopleImg from '@/assets/peaceThroughArt/group-of-people.webp';
+import { groupOfPeople } from '@/assets/peaceThroughArt';
 import { useWindowSize } from 'usehooks-ts';
 
 export const PTAHeader = () => {
@@ -28,7 +28,7 @@ export const PTAHeader = () => {
       <div className="grid grid-cols-1 grid-rows-1">
         <div className="col-start-1 row-start-1">
           <CurvedImage
-            src={peopleImg}
+            src={groupOfPeople}
             gradientDefinition={gradientDefinition}
           />
         </div>

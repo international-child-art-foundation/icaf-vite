@@ -1,4 +1,5 @@
-import ClimateFestivalImg from '@/assets/volunteer/volunteerGroup.webp';
+import { volunteerGroup } from '@/assets/volunteer';
+import { Picture } from '@/components/shared/Picture';
 
 const sectionTitleClasses = 'font-montserrat text-4xl font-semibold mx-auto';
 const rightImageWrapperClasses = 'overflow-hidden rounded-xl';
@@ -46,8 +47,8 @@ export const WhyVolunteer = () => {
           </div>
 
           <div className={rightImageWrapperClasses}>
-            <img
-              src={ClimateFestivalImg}
+            <Picture
+              src={volunteerGroup}
               className={rightImageClasses}
               alt=""
             />

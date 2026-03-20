@@ -1,4 +1,5 @@
-import ClimateFestivalImg from '@/assets/climateChange/0051424-R6-049-23.webp';
+import { healthEnvironmentDay } from '@/assets/climateChange';
+import { Picture } from '@/components/shared/Picture';
 import { Button } from '../ui/button';
 
 const sectionTitleClasses = 'font-montserrat text-3xl font-semibold';
@@ -42,8 +43,8 @@ export const HealthAndEnvironmentDay = () => {
           </div>
 
           <div className={rightImageWrapperClasses}>
-            <img
-              src={ClimateFestivalImg}
+            <Picture
+              src={healthEnvironmentDay}
               className={rightImageClasses}
               alt="Children collaborating on a mural at the World Children's Festival"
             />

@@ -1,5 +1,5 @@
 import { CurvedImage } from '@/pages/CurvedImage';
-import researchAndPublicationsHeader from '@/assets/shared/images/about/UnitedStatesSLKorth.webp';
+import { unitedStatesSLKorth } from '@/assets/shared/images/about';
 
 import { useWindowSize } from 'usehooks-ts';
 
@@ -33,7 +33,7 @@ export const ResearchAndPublicationsHeader = () => {
       <div className="col-start-1 row-start-1">
         <CurvedImage
           gradientDefinition={gradientDefinition}
-          src={researchAndPublicationsHeader}
+          src={unitedStatesSLKorth}
           height={'600px'}
           objectFit="cover"
           objectPosition="center right"

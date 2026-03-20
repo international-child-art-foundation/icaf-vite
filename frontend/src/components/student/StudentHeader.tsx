@@ -1,5 +1,5 @@
 import { CurvedImage } from '@/pages/CurvedImage';
-import studentHeaderImg from '@/assets/student/studentHeader.webp';
+import { studentHeader } from '@/assets/student';
 import { OpinionatedGradients } from '@/data/gradientDefinition';
 import { useWindowSize } from 'usehooks-ts';
 
@@ -22,7 +22,7 @@ export const StudentHeader = () => {
     <div className="site-w grid grid-cols-1 grid-rows-1">
       <div className="col-start-1 row-start-1">
         <CurvedImage
-          src={studentHeaderImg}
+          src={studentHeader}
           gradientDefinition={gradientDefinition}
           height="700px"
           objectPosition="50% 90%"

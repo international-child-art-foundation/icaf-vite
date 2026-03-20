@@ -1,5 +1,7 @@
+import { Picture, type PictureSrc } from '@/components/shared/Picture';
+
 interface IProps extends React.HTMLProps<HTMLDivElement> {
-  imgUrl: string;
+  imgUrl: PictureSrc;
   alt?: string;
   heading: string;
   description: string[];
@@ -43,7 +45,7 @@ export const GuidelineCard = ({
       style={{ boxShadow: '5px 6px 25px 4px rgba(0, 0, 0, 0.18)' }}
       {...restProps}
     >
-      <img
+      <Picture
         className="border-b-1 -z-20 h-full w-full rounded-b-none border-black object-cover"
         src={imgUrl}
         alt={alt || ''}

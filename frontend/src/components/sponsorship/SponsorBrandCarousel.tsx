@@ -7,6 +7,7 @@ import type { EmblaPluginType } from 'embla-carousel';
 import AutoplayLib from 'embla-carousel-autoplay';
 import type { AutoplayOptionsType } from 'embla-carousel-autoplay';
 import { sponsorCarouselImages } from '@/data/sponsorship/sponsorCarouselImages';
+import { Picture } from '@/components/shared/Picture';
 
 const Autoplay = (opts: AutoplayOptionsType): EmblaPluginType => {
   const factory = AutoplayLib as unknown as (
@@ -48,7 +49,7 @@ export const SponsorBrandCarousel = () => {
                 {sponsorCarouselImages.map((logo) => (
                   <CarouselItem key={logo.id} className="basis-1/8 my-auto">
                     <div className="w-full overflow-hidden rounded-md px-6">
-                      <img src={logo.image} className="w-full object-cover" />
+                      <Picture src={logo.image} className="w-full object-cover" loading="lazy" />
                     </div>
                   </CarouselItem>
                 ))}

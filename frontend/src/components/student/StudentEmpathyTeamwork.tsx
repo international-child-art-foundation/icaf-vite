@@ -1,9 +1,10 @@
-import yellowFirework from '@/assets/shared/images/yellowFirework.webp';
+import { yellowFirework } from '@/assets/shared/images';
+import { Picture } from '@/components/shared/Picture';
 
 export const StudentEmpathyTeamwork = () => {
   return (
     <div className="breakout-w m-pad relative xl:flex xl:flex-row xl:gap-12">
-      <img
+      <Picture
         src={yellowFirework}
         className="absolute -left-10 -top-8 opacity-20 lg:left-0 lg:top-0 lg:opacity-60 xl:relative xl:h-[290px] xl:w-[290px]"
       />

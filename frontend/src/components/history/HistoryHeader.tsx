@@ -1,5 +1,5 @@
 import { CurvedImage } from '@/pages/CurvedImage';
-import headerImg from '@/assets/history/HistoryHeader.webp';
+import { historyHeader } from '@/assets/history';
 import { OpinionatedGradients } from '@/data/gradientDefinition';
 import { useWindowSize } from 'usehooks-ts';
 import DonateButton from '../ui/donateButton';
@@ -24,7 +24,7 @@ export const HistoryHeader = () => {
     <div className="site-w relative grid grid-cols-1 grid-rows-1">
       <div className="relative col-start-1 row-start-1">
         <CurvedImage
-          src={headerImg}
+          src={historyHeader}
           gradientDefinition={gradientDefinition}
           height={'700px'}
           objectPosition={'70% 25%'}

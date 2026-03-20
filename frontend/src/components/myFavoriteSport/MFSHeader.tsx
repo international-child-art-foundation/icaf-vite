@@ -1,6 +1,6 @@
 import { CurvedImage } from '@/pages/CurvedImage';
 import { OpinionatedGradients } from '@/data/gradientDefinition';
-import ArtsOlympiadHeaderImg from '@/assets/arts-olympiad/Arjaa Raghu (age 11) Illinois, USA 6.webp';
+import { mfsHeader } from '@/assets/arts-olympiad';
 
 import { useWindowSize } from 'usehooks-ts';
 
@@ -37,7 +37,7 @@ export const MFSHeader = () => {
       <div className="col-start-1 row-start-1">
         <CurvedImage
           gradientDefinition={gradientDefinition}
-          src={ArtsOlympiadHeaderImg}
+          src={mfsHeader}
           height={'600px'}
           objectFit="cover"
           objectPosition="center center"

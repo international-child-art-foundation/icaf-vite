@@ -1,6 +1,7 @@
 import { Button } from '../ui/button';
 import DonateButtonPure from '../ui/donateButtonPure';
-import giraffeGroup from '@/assets/history/GiraffeGroup.webp';
+import { giraffeGroup } from '@/assets/history';
+import { Picture } from '@/components/shared/Picture';
 import { Link } from 'react-router-dom';
 
 export const YourDonationGiraffe = () => {
@@ -10,7 +11,7 @@ export const YourDonationGiraffe = () => {
           {/* Graphic wrapper to prevent scroll pushing */}
           <div className="pointer-events-none absolute inset-0 overflow-visible">
             <div className="absolute right-0 top-0 z-[10] translate-x-[-10%] translate-y-[10%]">
-              <img
+              <Picture
                 src={giraffeGroup}
                 className="hidden w-[300px] md:block xl:w-[450px]"
               />

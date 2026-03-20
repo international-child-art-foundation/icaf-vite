@@ -1,4 +1,5 @@
-import congress from '@/assets/worldChildrensAward/congress-img.webp';
+import { congressImg } from '@/assets/worldChildrensAward';
+import { Picture } from '@/components/shared/Picture';
 import firework from '@/assets/worldChildrensAward/firework-small.svg';
 
 export const WCAIntro = () => {
@@ -36,7 +37,7 @@ export const WCAIntro = () => {
             src={firework}
             className="absolute -left-24 top-32 md:left-0 md:top-28"
           />
-          <img src={congress} />
+          <Picture src={congressImg} />
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { CurvedImage } from '@/pages/CurvedImage';
 import { useWindowSize } from 'usehooks-ts';
-import healingArtsHeader from '@/assets/healingArts/healing-arts-header.webp';
+import { healingArtsHeader } from '@/assets/healingArts';
 import { OpinionatedGradients } from '@/data/gradientDefinition';
 
 export const HealingArtsHeader = () => {

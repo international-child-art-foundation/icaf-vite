@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { linkClasses } from '@/data/linkClasses';
 import { Button } from '../ui/button';
-import nominationImg from '@/assets/worldChildrensAward/wca-content-img1.webp';
+import { wcaContentImg1 } from '@/assets/worldChildrensAward';
+import { Picture } from '@/components/shared/Picture';
 
 export const WCANominations = () => {
   return (
@@ -41,9 +42,9 @@ export const WCANominations = () => {
           </div>
         </div>
         <div className="">
-          <img
+          <Picture
             className="h-full w-full object-cover object-[20%]"
-            src={nominationImg}
+            src={wcaContentImg1}
           />
         </div>
       </div>

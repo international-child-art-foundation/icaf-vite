@@ -1,6 +1,6 @@
 import { CurvedImage } from '@/pages/CurvedImage';
 import { OpinionatedGradients } from '@/data/gradientDefinition';
-import ClimateChangeHeaderImg from '@/assets/climateChange/climateChangeHeader.webp';
+import { climateChangeHeader } from '@/assets/climateChange';
 
 import { useWindowSize } from 'usehooks-ts';
 
@@ -38,7 +38,7 @@ export const ClimateChangeHeader = () => {
       <div className="col-start-1 row-start-1">
         <CurvedImage
           gradientDefinition={gradientDefinition}
-          src={ClimateChangeHeaderImg}
+          src={climateChangeHeader}
           height={'700px'}
           objectFit="cover"
           scale={1}

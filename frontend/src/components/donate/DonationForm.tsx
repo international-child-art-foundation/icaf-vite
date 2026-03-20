@@ -82,7 +82,7 @@ Washington, D.C. 20037`;
     ? 'border-1 text-gray-800 border-gray-800'
     : 'border-1 border-white text-white md:text-gray-800 lg:text-white ';
   const donationOptionCoreStyles =
-    'text-xl font-nunito rounded border px-3 py-2 transition-all duration-200';
+    'text-xl rounded border px-3 py-2 transition-all duration-200';
   return (
     <>
       <div className="font-montserrat mx-auto md:block">
@@ -118,8 +118,8 @@ Washington, D.C. 20037`;
             </div>
 
             <div className="relative">
-              <div className="font-nunito relative text-xl">
-                <span className="font-nunito absolute left-3 top-1/2 z-10 -translate-y-1/2 transform text-lg text-white text-white/70 md:text-gray-800 lg:text-white">
+              <div className="font-sans relative text-xl">
+                <span className="font-sans absolute left-3 top-1/2 z-10 -translate-y-1/2 transform text-lg text-white text-white/70 md:text-gray-800 lg:text-white">
                   $
                 </span>
                 <input
@@ -141,7 +141,7 @@ Washington, D.C. 20037`;
                     onChange={(e) =>
                       setFrequency(e.target.value as donationFrequencies)
                     }
-                    className={`font-nunito border-none bg-transparent px-3 py-2 text-lg ${whiteBackdrop ? 'border-gray-800 text-gray-800' : 'text-white'} appearance-none pr-14 focus:outline-none focus:ring-0 [&>option]:bg-white [&>option]:text-black`}
+                    className={`font-sans border-none bg-transparent px-3 py-2 text-lg ${whiteBackdrop ? 'border-gray-800 text-gray-800' : 'text-white'} appearance-none pr-14 focus:outline-none focus:ring-0 [&>option]:bg-white [&>option]:text-black`}
                   >
                     <option>One-time</option>
                     <option>Monthly</option>

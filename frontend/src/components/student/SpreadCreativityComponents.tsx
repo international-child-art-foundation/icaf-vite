@@ -1,4 +1,5 @@
-import creativityImg from '@/assets/student/spreadCreativity.webp';
+import { spreadCreativity } from '@/assets/student';
+import { Picture } from '@/components/shared/Picture';
 import DonateButton from '../ui/donateButton';
 
 const Title = () => {
@@ -25,8 +26,8 @@ const Description = () => {
 const SideImg = () => {
   return (
     <div className="w-unset m-auto min-h-[130px] max-w-[200px] shrink-0 content-center rounded-[21px] md:h-full md:w-[30%] md:max-w-none lg:w-[40%] xl:h-[444px] xl:w-[444px] xl:content-start xl:py-12">
-      <img
-        src={creativityImg}
+      <Picture
+        src={spreadCreativity}
         className="xl:h-unset h-full rounded-[21px] object-cover xl:w-full"
       />
     </div>

@@ -2,6 +2,7 @@ import { useId, useRef, useState, useMemo, useLayoutEffect } from 'react';
 import { BannerItem } from '@/types/BannerItem';
 import { ribbonPaths } from '@/types/RibbonTypes';
 import { useWindowSize } from 'usehooks-ts';
+import { Picture } from '@/components/shared/Picture';
 
 interface RibbonScrollTuning {
   repeats: number;
@@ -305,7 +306,7 @@ export const BannerImage = ({
               className="overflow-hidden"
               style={{ height: effectiveHeight }}
             >
-              <img
+              <Picture
                 src={data.src}
                 className={imageClassName}
                 alt="Banner image"

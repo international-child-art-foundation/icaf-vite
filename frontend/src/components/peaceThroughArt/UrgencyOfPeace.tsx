@@ -1,4 +1,5 @@
-import usImg from '@/assets/peaceThroughArt/united-states-congress-background-flat-style 1.webp';
+import { usCongressBackground } from '@/assets/peaceThroughArt';
+import { Picture } from '@/components/shared/Picture';
 import blueFirework from '@/assets/peaceThroughArt/blueFirework.svg';
 
 export const UrgencyOfPeace = () => {
@@ -26,7 +27,7 @@ export const UrgencyOfPeace = () => {
           />
         </div>
         <div className="flex h-full w-full items-end justify-center md:justify-end">
-          <img src={usImg} className="-mt-16" alt="" />
+          <Picture src={usCongressBackground} className="-mt-16" alt="" />
         </div>
       </div>
       <div className="content-w flex flex-col items-center gap-10 text-center">

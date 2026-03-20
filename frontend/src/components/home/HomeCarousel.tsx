@@ -5,6 +5,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
+import { Picture } from '@/components/shared/Picture';
 import { useEffect, useRef, useState } from 'react';
 import type { CarouselApi } from '@/components/ui/carousel';
 import type { EmblaPluginType } from 'embla-carousel';
@@ -102,10 +103,10 @@ export const HomeCarousel = () => {
                   className="basis-full pl-4 sm:basis-1/2 lg:basis-1/3 xl:basis-[25%]"
                 >
                   <div className="w-full overflow-hidden rounded-md shadow-md">
-                    <img
+                    <Picture
                       src={cover.image}
                       className="w-full object-cover"
-                      alt=""
+                      loading="lazy"
                     />
                   </div>
                 </CarouselItem>

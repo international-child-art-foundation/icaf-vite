@@ -6,23 +6,21 @@ import {
 } from '@/components/ui/carousel';
 import { useState, useEffect } from 'react';
 import CarouselArrowsDots from '../shared/CarouselArrowsDots';
-import foundingImg from '@/assets/history/ICAFFounding.webp';
-import MagazineCover from '@/assets/history/MagazineCover.webp';
-import DCMayorImg from '@/assets/history/DCMayor.webp';
+import { icafFounding, magazineCover, dcMayor } from '@/assets/history';
 import { HistoryMomentCard } from './HistoryMomentCard';
 import { TMomentsCarouselData } from '@/types/History';
 
 export const HistoryMomentsCarousel = () => {
   const carouselImages: TMomentsCarouselData[] = [
     {
-      src: foundingImg,
+      src: icafFounding,
       title: 'The Founding of ICAF',
       description:
         "ICAF was founded in 1997 to promote children's creativity worldwide.",
       id: 'icaffounding',
     },
     {
-      src: MagazineCover,
+      src: magazineCover,
       title: 'The Power of Words',
       description: (
         <div>
@@ -34,7 +32,7 @@ export const HistoryMomentsCarousel = () => {
       id: 'magazine',
     },
     {
-      src: DCMayorImg,
+      src: dcMayor,
       title: "Children's Peace Day",
       description: `September 11 was designated as "Children's Peace Day" by the Mayor of Washington, D.C. in 2003.`,
       id: 'dcmayor',

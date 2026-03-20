@@ -1,4 +1,4 @@
-import heroImage from '@/assets/worldChildrensFestival/dancingGirl.webp';
+import { dancingGirl } from '@/assets/worldChildrensFestival';
 import { CurvedImage } from '@/pages/CurvedImage';
 import { useWindowSize } from 'usehooks-ts';
 import { Button } from '../ui/button';
@@ -44,7 +44,7 @@ export default function WCFHeader() {
       </figcaption>
       <div className="col-start-1 row-start-1">
         <CurvedImage
-          src={heroImage}
+          src={dancingGirl}
           objectPosition="right"
           gradientDefinition={gradientDefinition}
           height={height}

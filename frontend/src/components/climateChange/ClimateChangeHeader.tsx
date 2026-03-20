@@ -15,7 +15,7 @@ export const ClimateChangeHeader = () => {
   } else if (size.width >= 640) {
     gradientDefinition = OpinionatedGradients.sm;
   } else {
-    gradientDefinition = OpinionatedGradients.sm;
+    gradientDefinition = 'bg-black/[75%]';
   }
 
   return (
@@ -42,7 +42,7 @@ export const ClimateChangeHeader = () => {
           height={'700px'}
           objectFit="cover"
           scale={1}
-          objectPosition="top right"
+          objectPosition="100% 20%"
         />
       </div>
     </div>

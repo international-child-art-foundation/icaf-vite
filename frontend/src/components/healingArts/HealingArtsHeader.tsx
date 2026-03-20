@@ -8,11 +8,14 @@ export const HealingArtsHeader = () => {
 
   let gradientDefinition;
   if (size.width >= 1280) {
-    gradientDefinition = OpinionatedGradients.xl;
+    gradientDefinition =
+      'bg-[linear-gradient(to_right,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.6)_40%,rgba(0,0,0,0.4)_60%,rgba(255,255,255,0.2)_100%)]';
   } else if (size.width >= 1024) {
-    gradientDefinition = OpinionatedGradients.lg;
+    gradientDefinition =
+      'bg-[linear-gradient(to_right,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.6)_40%,rgba(0,0,0,0.4)_60%,rgba(255,255,255,0.2)_100%)]';
   } else if (size.width >= 640) {
-    gradientDefinition = OpinionatedGradients.md;
+    gradientDefinition =
+      'bg-[linear-gradient(to_right,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.6)_40%,rgba(0,0,0,0.4)_80%,rgba(255,255,255,0.0)_100%)]';
   } else {
     gradientDefinition = OpinionatedGradients.sm;
   }
@@ -36,10 +39,10 @@ export const HealingArtsHeader = () => {
           gradientDefinition={gradientDefinition}
           src={healingArtsHeader}
           height={`${
-            size.width >= 1024 ? '700px' : size.width >= 768 ? '640px' : '500px'
+            size.width >= 1024 ? '700px' : size.width >= 768 ? '640px' : '550px'
           }`}
           objectFit="cover"
-          objectPosition="center bottom"
+          objectPosition="100% 60%"
         />
       </div>
     </div>

@@ -16,10 +16,10 @@ export default function WCFHeader() {
     'bg-[linear-gradient(to_right,rgba(0,0,0,0.75)_0%,rgba(0,0,0,0.5)_50%,rgba(0,0,0,0.15)_70%,rgba(255,255,255,0.15)_100%)]';
   const gradientMD =
     'bg-gradient-to-r from-black/80 from-0% via-black/40 via-[70%] to-black/20 to-100%';
-  const gradientSM = 'bg-black/65';
+  const gradientSM = 'bg-black/70';
 
   const heightMD = '750px';
-  const heightSM = '800px';
+  const heightSM = '700px';
 
   let gradientDefinition;
   let height;

@@ -65,7 +65,7 @@ export const routes: RouteAliasGroup[] = [
     aliases: ['/climate-change', '/climate'],
   },
   {
-    main: '/get-involved/student',
+    main: '/get-involved/students',
     aliases: ['/student', '/students'],
   },
   {

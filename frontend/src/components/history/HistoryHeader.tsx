@@ -27,6 +27,7 @@ export const HistoryHeader = () => {
           src={headerImg}
           gradientDefinition={gradientDefinition}
           height={'700px'}
+          objectPosition={'70% 25%'}
         />
       </div>
       <div className="hero-w lg:mt-18 relative z-10 col-start-1 row-start-1 mt-8 pt-10 md:mt-16">

@@ -5,7 +5,7 @@ import nominationImg from '@/assets/worldChildrensAward/wca-content-img1.webp';
 
 export const WCANominations = () => {
   return (
-    <div className="m-pad flex flex-col gap-10">
+    <div className="m-pad breakout-w flex flex-col gap-10">
       <h2 className="font-montserrat mx-auto text-center text-[40px] font-extrabold">
         Nominations
       </h2>

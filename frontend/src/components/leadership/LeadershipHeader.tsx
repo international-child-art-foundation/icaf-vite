@@ -25,7 +25,9 @@ export const LeadershipHeader = () => {
       <div className="hero-w font-montserrat sm:mt-none z-10 col-start-1 row-start-1 mt-32 flex flex-col gap-2 pt-6 text-3xl font-extrabold text-white sm:gap-4 sm:pt-10 md:mt-8 md:text-4xl lg:mt-28 lg:text-6xl">
         <div className="font-montserrat block text-[30px] leading-[40px] sm:text-[40px] sm:leading-[50px] md:text-[60px] md:leading-[70px]">
           <h1 className="text-tertiary-yellow">Global Leaders</h1>
-          <h1 className="lg:text-[48px] lg:leading-[58px]">Guiding Our Mission</h1>
+          <h1 className="lg:text-[48px] lg:leading-[58px]">
+            Guiding Our Mission
+          </h1>
         </div>
       </div>
       <div className="col-start-1 row-start-1">
@@ -34,7 +36,7 @@ export const LeadershipHeader = () => {
           src={leadershipHeaderImg}
           height={'600px'}
           objectFit="cover"
-          objectPosition="center right"
+          objectPosition="top right"
         />
       </div>
     </div>

@@ -4,8 +4,8 @@ import { linkClasses } from '@/data/linkClasses';
 
 export const WCACTA = () => {
   return (
-    <div className="m-pad">
-      <div className="breakout-w rounded-[40px] bg-[#E0E8F8] p-10">
+    <div className="m-pad breakout-w">
+      <div className="rounded-[40px] bg-[#E0E8F8] p-10">
         <p className="text-md font-semibold leading-[24px]">
           If you are between the ages of 14 and 20, you have the opportunity to
           nominate a business, philanthropic organization, educator, or cultural

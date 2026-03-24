@@ -5,7 +5,7 @@ import smallBlueFirework from '@/assets/home/SmallBlueFirework.svg';
 export const SpecialProjects = () => {
   return (
     <div className="breakout-w m-pad relative flex flex-col gap-28">
-      <div className="relative z-10 flex flex-col gap-10">
+      <div className="relative z-10 flex flex-col gap-10 overflow-hidden">
         <div className="absolute inset-x-0 -top-8 flex justify-center gap-[500px] md:gap-[600px]">
           <img className="" src={smallBlueFirework} alt="" />
 

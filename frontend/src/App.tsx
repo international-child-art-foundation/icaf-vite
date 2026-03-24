@@ -111,7 +111,7 @@ export default function App() {
       <GoogleAnalytics
         GA_MEASUREMENT_ID={import.meta.env.VITE_GA_MEASUREMENT_ID}
       />
-      <div className="relative mx-auto box-border flex min-h-screen w-full flex-col px-0">
+      <div className="relative mx-auto box-border flex min-h-screen w-full flex-col overflow-x-hidden px-0">
         <NavigationBar />
         <main className="relative mt-[98px] flex flex-1 flex-col">
           <Suspense fallback={null}>

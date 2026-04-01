@@ -34,7 +34,7 @@ export const Gallery = () => {
           <div className="hero-w z-10 col-start-1 row-start-1 flex flex-col items-start gap-4 pt-24">
             <p className="font-montserrat max-w-3xl text-4xl font-semibold text-white sm:text-5xl md:text-6xl lg:text-6xl">
               Explore the{' '}
-              <span className="font-normal font-semibold italic text-[#FFBC42]">
+              <span className="font-semibold italic text-[#FFBC42]">
                 {' '}
                 Imagination{' '}
               </span>
@@ -55,7 +55,7 @@ export const Gallery = () => {
           </div>
         </div>
 
-        <div id="gallery-section" className="flex flex-col gap-8">
+        <div id="gallery-section" className="flex flex-col gap-8 md:gap-4">
           <div className="text-center">
             <p className="font-montserrat text-5xl font-bold">Gallery</p>
             <p className="m-pad mt-4 text-lg text-gray-600">

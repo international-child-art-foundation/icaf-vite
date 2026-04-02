@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'lucide-react';
+import { Check, Link } from 'lucide-react';
 
 interface Props {
   shareUrl: string;
@@ -68,7 +68,7 @@ export const GallerySlideshowShare: React.FC<Props> = ({ shareUrl }) => {
         }}
         aria-label="Copy link"
       >
-        <Link size={20} />
+        {copied ? <Check size={20} /> : <Link size={20} />}
       </button>
       <button
         type="button"
@@ -116,11 +116,6 @@ export const GallerySlideshowShare: React.FC<Props> = ({ shareUrl }) => {
       >
         <LinkedInGlyph />
       </button>
-      {copied && (
-        <div className="absolute -top-8 left-0 rounded bg-black/70 px-2 py-1 text-xs text-white">
-          Copied!
-        </div>
-      )}
     </div>
   );
 };

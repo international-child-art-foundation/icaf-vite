@@ -1,5 +1,6 @@
 import { gsap } from 'gsap';
 import type { Artwork } from '@/data/gallery/artworks';
+import { formatArtistName } from '@/data/gallery/artworks';
 
 type ArtworkCardProps = {
   artwork: Artwork;
@@ -7,9 +8,9 @@ type ArtworkCardProps = {
 };
 
 const ArtworkCard = ({ artwork, openModal }: ArtworkCardProps) => {
-  const { id, artists, age, country, locationDetail, event, thumbUrl } =
+  const { id, artists, lastInitial, age, country, locationDetail, event, thumbUrl } =
     artwork;
-  const artistText = artists.join(' & ');
+  const artistText = formatArtistName(artists, lastInitial);
 
   const manageEnter = (e: React.MouseEvent<HTMLImageElement>) => {
     gsap.to(e.target, {

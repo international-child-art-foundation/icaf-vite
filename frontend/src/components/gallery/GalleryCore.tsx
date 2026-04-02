@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { useSearchParams } from 'react-router-dom';
-import type { Artwork } from '@/data/gallery/artworks';
+import type { TResolvedArtwork } from '@/types/Gallery';
 import { getArtworks } from '@/server_asset_handlers/gallery';
 import { sortBy } from '@/data/gallery/sortData';
 import type { SortValue } from '@/data/gallery/sortData';
@@ -37,7 +37,7 @@ function isValueInFilter(
 }
 
 const GalleryCoreInner = () => {
-  const [artworks, setArtworks] = useState<Artwork[]>([]);
+  const [artworks, setArtworks] = useState<TResolvedArtwork[]>([]);
   const [artworksLoading, setArtworksLoading] = useState(true);
   const [artworksError, setArtworksError] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -309,6 +309,8 @@ const GalleryCoreInner = () => {
       <ArtworkModal
         id={activeEntryId}
         artworks={artworks}
+        navigationList={filteredArts}
+        onNavigate={setActiveEntryId}
         closeModal={closeSlideshow}
         isHorizontal={isHorizontal}
         modalState={isModalOpen}
@@ -329,7 +331,7 @@ const GalleryCoreInner = () => {
         <button
           type="button"
           onClick={() => openSlideshow()}
-          className="pointer-events-none mx-auto hidden h-[50px] items-center gap-2 rounded-md border border-gray-600 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 md:pointer-events-auto md:inline-flex"
+          className="pointer-events-none mx-auto hidden h-[50px] items-center gap-2 rounded-md border border-gray-600 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 lg:pointer-events-auto lg:inline-flex"
         >
           <Play size={16} />
           <span className="">Play Slideshow</span>
@@ -339,7 +341,7 @@ const GalleryCoreInner = () => {
           <button
             type="button"
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="inline-flex h-[50px] w-[200px] max-w-[40%] items-center justify-between rounded-md border border-gray-600 px-5 py-2 text-base font-medium md:max-w-[40%]"
+            className="inline-flex h-[50px] w-[200px] max-w-[40%] items-center justify-between rounded-md border border-gray-600 px-5 py-2 text-base font-medium lg:max-w-[40%]"
           >
             {isFilterOpen ? 'Hide Filter' : 'Filter'}
             <span className="ml-6">
@@ -349,7 +351,7 @@ const GalleryCoreInner = () => {
           <button
             type="button"
             onClick={() => openSlideshow()}
-            className="mx-auto ml-auto inline-flex h-[50px] items-center gap-2 rounded-md border border-gray-600 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 md:pointer-events-none md:hidden"
+            className="ml-auto inline-flex h-[50px] items-center gap-2 rounded-md border border-gray-600 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 lg:pointer-events-none lg:mx-auto lg:hidden"
           >
             <Play size={16} />
             <span className="">Play Slideshow</span>
@@ -397,13 +399,13 @@ const GalleryCoreInner = () => {
         </div>
 
         <div
-          className="relative z-[60] mt-10 grid"
+          className="relative z-[60] grid"
           style={{
             gridTemplateRows: 'auto 1fr',
             gridTemplateColumns: 'repeat(20, 1fr)',
           }}
         >
-          {/* Artwork grid */}
+          {/* TResolvedArtwork grid */}
           <section
             className={`background-area pointer-events-auto relative row-start-2 justify-center transition-all duration-300 ease-in-out ${isFilterOpen ? 'pointer-events-none select-none opacity-40 blur-lg' : ''}`}
             onClick={handleGridClick}

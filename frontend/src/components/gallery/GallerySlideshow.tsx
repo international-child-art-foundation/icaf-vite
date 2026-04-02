@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { GallerySlideshowShare } from './GallerySlideshowShare';
 import { IGalleryContext } from '@/types/Gallery';
+import { formatArtistName } from '@/data/gallery/artworks';
 
 const TRANSITION_MS = 700;
 const INTERVALS_S = [5, 8, 12, 20, 30];
@@ -80,7 +81,8 @@ export const GallerySlideshow = () => {
   const intervalIdx = DEFAULT_INTERVAL_IDX;
   const [uiState, setUiState] = useState<'full' | 'dim' | 'hidden'>('full');
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const { artworks } = useOutletContext<IGalleryContext>();
+  const { artworks: rawArtworks } = useOutletContext<IGalleryContext>();
+  const [artworks] = useState(() => [...rawArtworks].sort(() => Math.random() - 0.5));
   const navigate = useNavigate();
 
   const dimTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
@@ -213,7 +215,7 @@ export const GallerySlideshow = () => {
   const currentArtwork = artworks[currentIdx];
   const displayName =
     currentArtwork.artists.length > 0
-      ? currentArtwork.artists.join(' & ')
+      ? formatArtistName(currentArtwork.artists, currentArtwork.lastInitial)
       : null;
   const displayLocation = [
     currentArtwork.locationDetail,
@@ -292,6 +294,14 @@ export const GallerySlideshow = () => {
                   style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
                 >
                   {displayName}
+                </p>
+              )}
+              {currentArtwork.title && (
+                <p
+                  className="mt-0.5 text-base font-medium italic opacity-90"
+                  style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+                >
+                  &ldquo;{currentArtwork.title}&rdquo;
                 </p>
               )}
               {currentArtwork.age !== undefined && (

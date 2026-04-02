@@ -61,35 +61,35 @@ export const SocialShare = ({ shareUrl, center = false }: SocialShareProps) => {
   };
 
   return (
-    <div
-      className={`relative mt-4 flex space-x-2 ${center ? 'justify-center' : ''}`}
-    >
-      <button
-        type="button"
-        onClick={() => {
-          void copyToClipboard();
-        }}
-        aria-label="Copy link"
-        className="rounded-full active:scale-95 active:opacity-70"
-      >
-        <ShareIcon />
-      </button>
-      {platforms.map(({ name, url, Icon }) => (
+    <div className={`mt-4 ${center ? 'text-center' : ''}`}>
+      <div className={`flex space-x-2 ${center ? 'justify-center' : ''}`}>
         <button
-          key={name}
           type="button"
-          onClick={() => openPopup(url)}
-          aria-label={`Share on ${name}`}
-          className="h-8 w-8 rounded-full active:scale-95 active:opacity-70"
+          onClick={() => {
+            void copyToClipboard();
+          }}
+          aria-label="Copy link"
+          className="rounded-full active:scale-95 active:opacity-70"
         >
-          <Icon />
+          <ShareIcon />
         </button>
-      ))}
-      <div
-        className={`absolute -top-10 left-0 z-10 rounded border bg-white p-2 px-4 transition-all ${showCopiedPopup ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
-      >
-        <p className="text-sm">Link copied!</p>
+        {platforms.map(({ name, url, Icon }) => (
+          <button
+            key={name}
+            type="button"
+            onClick={() => openPopup(url)}
+            aria-label={`Share on ${name}`}
+            className="h-8 w-8 rounded-full active:scale-95 active:opacity-70"
+          >
+            <Icon />
+          </button>
+        ))}
       </div>
+      <p
+        className={`mt-1 text-sm transition-opacity ${showCopiedPopup ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+      >
+        Link copied!
+      </p>
     </div>
   );
 };

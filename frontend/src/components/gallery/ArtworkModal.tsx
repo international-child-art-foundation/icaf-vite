@@ -1,11 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
-import type { Artwork } from '@/data/gallery/artworks';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import type { TResolvedArtwork } from '@/types/Gallery';
+import { formatArtistName } from '@/utils/galleryProcessing';
 import { SocialShare } from './SocialShare';
 
 type ArtworkModalProps = {
   id: string;
-  artworks: Artwork[];
+  artworks: TResolvedArtwork[];
+  navigationList: TResolvedArtwork[];
+  onNavigate: (id: string) => void;
   modalState: boolean;
   isHorizontal: boolean;
   closeModal: () => void;
@@ -15,24 +19,52 @@ type ArtworkModalProps = {
 const ArtworkModal: React.FC<ArtworkModalProps> = ({
   id,
   artworks,
+  navigationList,
+  onNavigate,
   modalState,
   isHorizontal,
   closeModal,
   getShareUrl,
 }) => {
-  const [artworkData, setArtworkData] = useState<Artwork | undefined>(
+  const [artworkData, setArtworkData] = useState<TResolvedArtwork | undefined>(
     undefined,
   );
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null);
+  const isFirstOpenRef = useRef(true);
+
+  const currentNavIdx = navigationList.findIndex((a) => a.id === id);
+  const prevId =
+    currentNavIdx > 0 ? navigationList[currentNavIdx - 1].id : null;
+  const nextId =
+    currentNavIdx < navigationList.length - 1
+      ? navigationList[currentNavIdx + 1].id
+      : null;
+
+  useEffect(() => {
+    if (!modalState) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' && prevId) onNavigate(prevId);
+      else if (e.key === 'ArrowRight' && nextId) onNavigate(nextId);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [modalState, prevId, nextId, onNavigate]);
 
   useEffect(() => {
     const data = artworks.find((a) => a.id === id);
-    setArtworkData(data);
 
-    if (modalState && data) {
-      const timeline = gsap.timeline();
-      timeline
+    if (!modalState) {
+      setArtworkData(data);
+      isFirstOpenRef.current = true;
+      return;
+    }
+
+    if (isFirstOpenRef.current) {
+      isFirstOpenRef.current = false;
+      setArtworkData(data);
+      gsap
+        .timeline()
         .set(modalContentRef.current, { opacity: 0 })
         .to(gridContainerRef.current, {
           gridTemplateRows: '1fr',
@@ -44,13 +76,25 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
           { opacity: 1, duration: 0.2, ease: 'power4.out' },
           '-=0.1',
         );
+      return;
     }
+
+    const content = modalContentRef.current;
+    gsap.set(content, { opacity: 0 });
+    setArtworkData(data);
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        gsap.to(content, { opacity: 1, duration: 0.2, ease: 'power2.out' });
+      }),
+    );
   }, [id, modalState, artworks]);
 
   if (!modalState) return null;
 
-  const artistText = artworkData?.artists.join(' & ') ?? '';
-  const locationText = [artworkData?.locationDetail, artworkData?.country]
+  const artistText = artworkData
+    ? formatArtistName(artworkData.artists ?? [], artworkData.lastInitial)
+    : '';
+  const locationText = [artworkData?.region, artworkData?.country]
     .filter(Boolean)
     .join(', ');
 
@@ -76,15 +120,30 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
     return (
       <div className="mx-auto grid max-h-full grid-cols-2 gap-5 overflow-hidden px-6 md:gap-10">
         <div className="flex flex-col overflow-auto">
-          {artistText && (
-            <p className="mt-5 text-xl font-bold">{artistText}</p>
+          {artistText && <p className="mt-5 text-xl font-bold">{artistText}</p>}
+          {artworkData.title && (
+            <p className="mt-0.5 text-lg font-medium italic text-gray-700">
+              &ldquo;{artworkData.title}&rdquo;
+            </p>
           )}
           <div className="mt-1 space-y-0.5 text-gray-500">
             {(artworkData.age != null || locationText) && (
-              <p>{[artworkData.age != null ? `Age ${artworkData.age}` : null, locationText].filter(Boolean).join(' · ')}</p>
+              <p>
+                {[
+                  artworkData.age != null ? `Age ${artworkData.age}` : null,
+                  locationText,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </p>
             )}
             {artworkData.event && <p>{artworkData.event}</p>}
           </div>
+          {artworkData.description && (
+            <p className="mt-3 text-base text-gray-600">
+              {artworkData.description}
+            </p>
+          )}
           <div className="mt-auto pt-6">
             <p className="text-xl font-semibold">Share this post</p>
             <SocialShare shareUrl={getShareUrl()} />
@@ -132,15 +191,30 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
             className="absolute inset-0 z-10 h-full w-full rounded-xl object-cover opacity-50 blur-3xl"
           />
         </div>
-        {artistText && (
-          <p className="mt-5 text-xl font-bold">{artistText}</p>
+        {artistText && <p className="mt-5 text-xl font-bold">{artistText}</p>}
+        {artworkData.title && (
+          <p className="mt-0.5 text-lg font-medium italic text-gray-700">
+            &ldquo;{artworkData.title}&rdquo;
+          </p>
         )}
         <div className="mt-1 space-y-0.5 text-gray-500">
           {(artworkData.age != null || locationText) && (
-            <p>{[artworkData.age != null ? `Age ${artworkData.age}` : null, locationText].filter(Boolean).join(' · ')}</p>
+            <p>
+              {[
+                artworkData.age != null ? `Age ${artworkData.age}` : null,
+                locationText,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </p>
           )}
           {artworkData.event && <p>{artworkData.event}</p>}
         </div>
+        {artworkData.description && (
+          <p className="mt-3 text-sm text-gray-600">
+            {artworkData.description}
+          </p>
+        )}
         <div className="mt-4">
           <p className="text-xl font-semibold">Share this post</p>
           <SocialShare shareUrl={getShareUrl()} />
@@ -161,11 +235,26 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
     if (e.target === e.currentTarget) closeModal();
   };
 
+  const navBtnClass =
+    'hidden lg:flex items-center justify-center w-12 h-12 flex-shrink-0 rounded-full bg-black/70 hover:bg-black/30 text-white transition-colors mx-4';
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.5)]"
       onClick={handleBackdropClick}
     >
+      <button
+        type="button"
+        className={navBtnClass}
+        style={{ visibility: prevId ? 'visible' : 'hidden' }}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (prevId) onNavigate(prevId);
+        }}
+        aria-label="Previous artwork"
+      >
+        <ChevronLeft size={24} />
+      </button>
       <div
         className={`relative flex flex-col overflow-hidden rounded-3xl bg-white ${isHorizontal ? 'w-[88%] max-w-[1100px] lg:w-[80%]' : 'w-[92%] max-w-[700px]'} max-h-[93%]`}
       >
@@ -190,6 +279,18 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
           </div>
         </div>
       </div>
+      <button
+        type="button"
+        className={navBtnClass}
+        style={{ visibility: nextId ? 'visible' : 'hidden' }}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (nextId) onNavigate(nextId);
+        }}
+        aria-label="Next artwork"
+      >
+        <ChevronRight size={24} />
+      </button>
     </div>
   );
 };

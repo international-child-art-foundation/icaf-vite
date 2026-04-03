@@ -1,5 +1,5 @@
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { IPartners, IPartnerPartial } from 'types/partners';
+import { IPartners, IPartnerPartial } from '@/types/partners';
 
 interface ICarouselSharedContent {
   partners: IPartners;

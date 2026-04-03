@@ -26,7 +26,7 @@ import {
   CarouselItem,
 } from '@/components/ui/carousel';
 import { type CarouselApi } from '@/components/ui/carousel';
-import { IPartners } from 'types/partners';
+import { IPartners } from '@/types/partners';
 import { PartnerItem } from '@/components/partners/PartnerItem';
 import { useState, useEffect } from 'react';
 import { CarouselSharedContent } from '@/components/partners/CarouselSharedContent';

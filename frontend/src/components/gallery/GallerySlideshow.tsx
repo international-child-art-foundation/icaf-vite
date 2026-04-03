@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import {
   ChevronLeft,
@@ -13,14 +12,14 @@ import {
   X,
 } from 'lucide-react';
 import { GallerySlideshowShare } from './GallerySlideshowShare';
-import { IGalleryContext } from '@/types/Gallery';
+import { IGalleryContext, TResolvedArtwork } from '@/types/Gallery';
 import { formatArtistName } from '@/utils/galleryProcessing';
 
 const TRANSITION_MS = 700;
 const INTERVALS_S = [5, 8, 12, 20, 30];
 const DEFAULT_INTERVAL_IDX = 3;
-const DIM_MS = 3000;
-const HIDE_MS = 7000;
+const DIM_MS = 2000;
+const HIDE_MS = 5000;
 
 const KB_ANIMS = [
   'kb-zoom-in',
@@ -32,9 +31,11 @@ type KbAnim = (typeof KB_ANIMS)[number];
 
 type SlotState = { artworkIdx: number; animKey: number; kbAnim: KbAnim };
 
-const SCROLL_BASE_PX_S = 6;
-const SCROLL_START_DELAY_S = 2.5; // pause before scroll begins
-const SCROLL_END_BUFFER_S = 0.6; // headroom before transition fires
+const SCROLL_BASE_PX_S = 12;
+const SCROLL_START_DELAY_S = 4;
+const DESC_OUTER_H = 96;
+const SCROLLBAR_W = 4;
+const SCROLLBAR_GAP = 5;
 
 const KB_STYLES = `
   @keyframes fade-in {
@@ -44,6 +45,14 @@ const KB_STYLES = `
   @keyframes fade-out {
     from { opacity: 1; }
     to {opacity: 0; }
+  }
+  @keyframes desc-scroll {
+    from { transform: translateY(0); }
+    to   { transform: translateY(var(--desc-dist)); }
+  }
+  @keyframes thumb-scroll {
+    from { transform: translateY(0); }
+    to   { transform: translateY(var(--thumb-dist)); }
   }
   @keyframes kb-zoom-in {
     from { transform: scale(1.0) translate(0%, 0%); }
@@ -63,6 +72,145 @@ const KB_STYLES = `
   }
 `;
 
+const DescriptionScroll = ({ description }: { description: string }) => {
+  const pRef = useRef<HTMLParagraphElement>(null);
+  const [scrollDist, setScrollDist] = useState(0);
+  const [paused, setPaused] = useState(false);
+  // null = CSS animation in control; number = user has taken over via scroll wheel
+  const [manualOffset, setManualOffset] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!pRef.current) return;
+    setManualOffset(null);
+    const el = pRef.current;
+    const measure = () => {
+      const dist = Math.max(0, el.scrollHeight - DESC_OUTER_H);
+      setScrollDist(dist);
+      setManualOffset((prev) => (prev !== null ? Math.min(prev, dist) : null));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [description]);
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (scrollDist === 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    let current: number;
+    if (manualOffset !== null) {
+      current = manualOffset;
+    } else if (pRef.current) {
+      const t = getComputedStyle(pRef.current).transform;
+      current = t === 'none' ? 0 : -new DOMMatrix(t).m42;
+    } else {
+      current = 0;
+    }
+    setManualOffset(
+      Math.max(0, Math.min(scrollDist, current + e.deltaY * 0.5)),
+    );
+  };
+
+  const inManual = manualOffset !== null;
+  const duration = scrollDist > 0 ? scrollDist / SCROLL_BASE_PX_S : 0;
+  const totalTextH = DESC_OUTER_H + scrollDist;
+  const thumbH =
+    scrollDist > 0
+      ? Math.max(12, (DESC_OUTER_H / totalTextH) * DESC_OUTER_H)
+      : 0;
+  const thumbDist = DESC_OUTER_H - thumbH;
+  const manualThumbY =
+    manualOffset !== null && scrollDist > 0
+      ? (manualOffset / scrollDist) * thumbDist
+      : 0;
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        gap: scrollDist > 0 ? SCROLLBAR_GAP : 0,
+        height: DESC_OUTER_H,
+        marginTop: 6,
+      }}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onWheel={handleWheel}
+    >
+      <div style={{ flex: 1, overflow: 'hidden', height: DESC_OUTER_H }}>
+        <p
+          ref={pRef}
+          style={
+            {
+              fontSize: 14,
+              lineHeight: '20px',
+              color: 'rgba(255,255,255,0.7)',
+              fontFamily: "'Open Sans Variable', 'Open Sans', sans-serif",
+              userSelect: 'text',
+              cursor: 'text',
+              willChange: scrollDist > 0 ? 'transform' : 'auto',
+              ...(scrollDist > 0
+                ? inManual
+                  ? { transform: `translateY(-${manualOffset}px)` }
+                  : {
+                      '--desc-dist': `-${scrollDist}px`,
+                      animationName: 'desc-scroll',
+                      animationDuration: `${duration}s`,
+                      animationTimingFunction: 'linear',
+                      animationDelay: `${SCROLL_START_DELAY_S}s`,
+                      animationFillMode: 'forwards',
+                      animationPlayState: paused ? 'paused' : 'running',
+                    }
+                : {}),
+            } as React.CSSProperties
+          }
+        >
+          {description}
+        </p>
+      </div>
+      {scrollDist > 0 && (
+        <div
+          style={{ width: SCROLLBAR_W, flexShrink: 0, position: 'relative' }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(255,255,255,0.15)',
+              borderRadius: SCROLLBAR_W / 2,
+            }}
+          />
+          <div
+            style={
+              {
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: thumbH,
+                background: 'rgba(255,255,255,0.5)',
+                borderRadius: SCROLLBAR_W / 2,
+                willChange: 'transform',
+                ...(inManual
+                  ? { transform: `translateY(${manualThumbY}px)` }
+                  : {
+                      '--thumb-dist': `${thumbDist}px`,
+                      animationName: 'thumb-scroll',
+                      animationDuration: `${duration}s`,
+                      animationTimingFunction: 'linear',
+                      animationDelay: `${SCROLL_START_DELAY_S}s`,
+                      animationFillMode: 'forwards',
+                      animationPlayState: paused ? 'paused' : 'running',
+                    }),
+              } as React.CSSProperties
+            }
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const GallerySlideshow = () => {
   const [slotA, setSlotA] = useState<SlotState>({
     artworkIdx: 0,
@@ -78,11 +226,11 @@ export const GallerySlideshow = () => {
   const topSlotRef = useRef<'a' | 'b'>('a');
   const advanceCountRef = useRef(0);
   const currentIdxRef = useRef(0);
+  const [deferredIdx, setDeferredIdx] = useState(0);
 
   const [currentIdx, setCurrentIdx] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [namePinned, setNamePinned] = useState(true);
-  // const [intervalIdx, setIntervalIdx] = useState(DEFAULT_INTERVAL_IDX);
   const intervalIdx = DEFAULT_INTERVAL_IDX;
   const [uiState, setUiState] = useState<'full' | 'dim' | 'hidden'>('full');
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -95,9 +243,6 @@ export const GallerySlideshow = () => {
   const dimTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const autoTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
-  const descScrollRef = useRef<HTMLDivElement>(null);
-  const descInnerRef = useRef<HTMLParagraphElement>(null);
-  const descTweenRef = useRef<gsap.core.Tween | null>(null);
 
   const intervalMs = INTERVALS_S[intervalIdx] * 1000;
 
@@ -152,30 +297,6 @@ export const GallerySlideshow = () => {
     }
   }, [currentIdx, artworks]);
 
-  useEffect(() => {
-    const outer = descScrollRef.current;
-    const inner = descInnerRef.current;
-    descTweenRef.current?.kill();
-    descTweenRef.current = null;
-    if (!outer || !inner) return;
-    gsap.set(inner, { y: 0 });
-    const dist = inner.offsetHeight - outer.clientHeight;
-    if (dist <= 0) return;
-    const naturalDuration = dist / SCROLL_BASE_PX_S;
-    const available =
-      intervalMs / 1000 - SCROLL_START_DELAY_S - SCROLL_END_BUFFER_S;
-    const duration = Math.min(naturalDuration, Math.max(available, 0.3));
-    descTweenRef.current = gsap.to(inner, {
-      y: -dist,
-      duration,
-      ease: 'none',
-      delay: SCROLL_START_DELAY_S,
-    });
-    return () => {
-      descTweenRef.current?.kill();
-    };
-  }, [currentIdx, intervalMs]);
-
   const resetUiTimer = useCallback(() => {
     setUiState('full');
     if (dimTimerRef.current) clearTimeout(dimTimerRef.current);
@@ -211,7 +332,6 @@ export const GallerySlideshow = () => {
     return () => window.removeEventListener('keydown', handler);
   }, [onClose, advance, resetUiTimer]);
 
-  // Fullscreen tracking
   useEffect(() => {
     const handler = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', handler);
@@ -227,6 +347,22 @@ export const GallerySlideshow = () => {
       }
     };
   }, []);
+
+  const [shareVisible, setShareVisible] = useState(true);
+  const shareBarVisibleRef = useRef(false);
+
+  useEffect(() => {
+    if (!shareBarVisibleRef.current) {
+      setShareVisible(true);
+      setDeferredIdx(currentIdx);
+    }
+    setShareVisible(false);
+    const t = setTimeout(() => {
+      setShareVisible(true);
+      setDeferredIdx(currentIdx);
+    }, 150);
+    return () => clearTimeout(t);
+  }, [currentIdx]);
 
   if (artworks.length === 0) return null;
 
@@ -244,22 +380,84 @@ export const GallerySlideshow = () => {
   const nametagOpacity = namePinned ? 1 : uiOpacity;
   const shareBarOpacity = namePinned && uiState !== 'full' ? 0 : uiOpacity;
   const shareBarVisible = shareBarOpacity > 0;
+  shareBarVisibleRef.current = shareBarVisible;
   const shareBarPointerEvents = !shareBarVisible ? 'none' : ('auto' as const);
 
   const currentArtwork = artworks[currentIdx];
-  const displayName =
-    (currentArtwork.artists?.length ?? 0) > 0
-      ? formatArtistName(
-          currentArtwork.artists ?? [],
-          currentArtwork.lastInitial,
-        )
-      : null;
-  const displayLocation = [currentArtwork.region, currentArtwork.country]
-    .filter(Boolean)
-    .join(', ');
-  const eventLabel = currentArtwork.event;
-
   const artworkShareUrl = `${window.location.protocol}//${window.location.host}/gallery?id=${currentArtwork.id}`;
+
+  const renderNametag = (artwork: TResolvedArtwork) => {
+    const name =
+      (artwork.artists?.length ?? 0) > 0
+        ? formatArtistName(artwork.artists ?? [], artwork.lastInitial)
+        : null;
+    const location = [artwork.region, artwork.country]
+      .filter(Boolean)
+      .join(', ');
+
+    return (
+      <div
+        className="rounded-xl bg-black/65 px-4 py-3 text-white"
+        style={{
+          boxShadow: '0 6px 12px rgba(0,0,0,0.2), 0 2px 6px rgba(0,0,0,0.3)',
+        }}
+      >
+        {name && (
+          <p
+            className="pr-6 text-lg font-semibold leading-snug"
+            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+          >
+            {name}
+          </p>
+        )}
+        {artwork.title && (
+          <p
+            className="mt-0.5 text-base font-medium italic opacity-90"
+            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+          >
+            &ldquo;{artwork.title}&rdquo;
+          </p>
+        )}
+        {artwork.age !== undefined && (
+          <p
+            className="mt-0.5 text-sm opacity-80"
+            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+          >
+            Age {artwork.age}
+            {location && (
+              <span
+                className="text-sm opacity-75"
+                style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+              >
+                {' '}
+                · {location}
+              </span>
+            )}
+          </p>
+        )}
+        {artwork.event && (
+          <p
+            className="mt-1 text-xs capitalize opacity-60"
+            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+          >
+            {artwork.event}
+          </p>
+        )}
+        {artwork.description && (
+          <>
+            <p className="mt-2 text-sm opacity-90">
+              {artwork.artists && artwork.artists[0] && artwork.artists[0]}{' '}
+              says:
+            </p>
+            <DescriptionScroll
+              key={`desc-${artwork.id}`}
+              description={artwork.description}
+            />
+          </>
+        )}
+      </div>
+    );
+  };
 
   const renderSlot = (slot: SlotState, isTop: boolean) => {
     const artwork = artworks[slot.artworkIdx];
@@ -307,76 +505,64 @@ export const GallerySlideshow = () => {
           style={{ zIndex: 3 }}
         >
           <div
-            className="absolute left-2 top-2 max-w-xs sm:left-8 sm:top-8 md:bottom-8"
+            className="absolute left-2 top-2 sm:left-8 sm:top-8 md:bottom-8"
             style={{
-              filter:
-                'drop-shadow(0 6px 12px rgba(0,0,0,0.2)) drop-shadow(0 2px 6px rgba(0,0,0,0.3))',
+              width: 300,
               pointerEvents: nametagOpacity > 0 ? 'auto' : 'none',
             }}
           >
-            {/* Nametag pill */}
+            {/* Nametag crossfade — same A/B double-buffer as the image slots.
+                Outer wrapper: UI hide/show opacity (0.12s).
+                Sizer ghost (visibility:hidden, in-flow): always currentArtwork,
+                  drives container height immediately on each advance so share
+                  icons never lag behind a shrinking nametag.
+                Two absolutely-overlaid slots crossfade at TRANSITION_MS. */}
             <div
-              className="rounded-xl bg-black/65 px-4 py-3 text-white"
               style={{
                 opacity: nametagOpacity,
                 transition: 'opacity 0.12s ease-out',
+                position: 'relative',
+                overflow: 'hidden',
               }}
             >
-              {displayName && (
-                <p
-                  className="pr-6 text-lg font-semibold leading-snug"
-                  style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
-                >
-                  {displayName}
-                </p>
-              )}
-              {currentArtwork.title && (
-                <p
-                  className="mt-0.5 text-base font-medium italic opacity-90"
-                  style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
-                >
-                  &ldquo;{currentArtwork.title}&rdquo;
-                </p>
-              )}
-              {currentArtwork.age !== undefined && (
-                <p
-                  className="mt-0.5 text-sm opacity-80"
-                  style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
-                >
-                  Age {currentArtwork.age}{' '}
-                  {displayLocation && (
-                    <span
-                      className="text-sm opacity-75"
-                      style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
-                    >
-                      · {displayLocation}
-                    </span>
-                  )}
-                </p>
-              )}
-              {eventLabel && (
-                <p
-                  className="mt-1 text-xs capitalize opacity-60"
-                  style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
-                >
-                  {eventLabel}
-                </p>
-              )}
-              {currentArtwork.description && (
-                <div
-                  ref={descScrollRef}
-                  className="mt-1.5 max-h-[96px] max-w-[240px] overflow-hidden"
-                >
-                  <p
-                    ref={descInnerRef}
-                    className="text-sm opacity-70"
-                    style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
-                  >
-                    {currentArtwork.description}
-                  </p>
-                </div>
-              )}
+              <div
+                aria-hidden="true"
+                style={{ visibility: 'hidden', pointerEvents: 'none' }}
+              >
+                {renderNametag(artworks[deferredIdx])}{' '}
+              </div>
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  opacity: topSlot === 'a' ? 1 : 0,
+                  transition:
+                    topSlot === 'a'
+                      ? 'opacity 300ms ease-in 150ms'
+                      : 'opacity 0ms',
+                }}
+              >
+                {renderNametag(artworks[slotA.artworkIdx])}
+              </div>
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  opacity: topSlot === 'b' ? 1 : 0,
+                  transition:
+                    topSlot === 'b'
+                      ? 'opacity 300ms ease-in 150ms'
+                      : 'opacity 0ms',
+                }}
+              >
+                {renderNametag(artworks[slotB.artworkIdx])}
+              </div>
             </div>
+
             <button
               type="button"
               onClick={(e) => {
@@ -399,24 +585,25 @@ export const GallerySlideshow = () => {
               style={{
                 maxHeight: shareBarVisible ? '52px' : '0px',
                 paddingTop: shareBarVisible ? '6px' : '0px',
-                transition: shareBarVisible
-                  ? 'max-height 0.38s cubic-bezier(0.25,1,0.5,1), padding-top 0.38s cubic-bezier(0.25,1,0.5,1)'
-                  : 'max-height 0.28s ease-in, padding-top 0.28s ease-in',
                 pointerEvents: shareBarPointerEvents,
               }}
             >
               <div
                 style={{
                   opacity: shareBarOpacity,
-                  transform: shareBarVisible
-                    ? 'translateY(0)'
-                    : 'translateY(40%)',
-                  transition: shareBarVisible
-                    ? 'transform 0.38s cubic-bezier(0.25,1,0.5,1), opacity 0.25s ease-out'
-                    : 'transform 0.25s ease-in, opacity 0.15s ease-in',
+                  transition: 'opacity 0.12s ease-out',
                 }}
               >
-                <GallerySlideshowShare shareUrl={artworkShareUrl} />
+                <div
+                  style={{
+                    opacity: shareVisible ? 1 : 0,
+                    transition: shareVisible
+                      ? 'opacity 300ms ease-in 0ms'
+                      : 'opacity 0ms',
+                  }}
+                >
+                  <GallerySlideshowShare shareUrl={artworkShareUrl} />
+                </div>
               </div>
             </div>
           </div>
@@ -464,14 +651,6 @@ export const GallerySlideshow = () => {
               >
                 {isPaused ? <Play size={22} /> : <Pause size={22} />}
               </button>
-              {/* Counter 
-              <span
-                className="select-none px-3 text-base font-semibold tabular-nums"
-                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}
-              >
-                {currentIdx + 1}&thinsp;/&thinsp;{artworks.length}
-              </span>
-              */}
               <button
                 type="button"
                 onClick={(e) => {
@@ -492,13 +671,6 @@ export const GallerySlideshow = () => {
             className="absolute bottom-8 right-8"
             style={{ pointerEvents: uiPointerEvents }}
           >
-            {/* Speed picker
-            <div className="flex items-center gap-1 rounded-lg bg-black/10 px-3 py-2">
-              <button type="button" onClick={(e) => { e.stopPropagation(); setIntervalIdx((i) => Math.max(0, i - 1)); }} className="w-5 text-center text-base text-gray-600 opacity-70 hover:opacity-100" aria-label="Faster">−</button>
-              <span className="w-8 text-center text-xs tabular-nums text-gray-500">{INTERVALS_S[intervalIdx]}s</span>
-              <button type="button" onClick={(e) => { e.stopPropagation(); setIntervalIdx((i) => Math.min(INTERVALS_S.length - 1, i + 1)); }} className="w-5 text-center text-base text-gray-600 opacity-70 hover:opacity-100" aria-label="Slower">+</button>
-            </div>
-            */}
             <button
               type="button"
               onClick={(e) => {

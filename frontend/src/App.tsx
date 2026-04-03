@@ -12,6 +12,7 @@ import './index.css';
 import { GlobalContextProvider } from './components/shared/GlobalContext';
 import GoogleAnalytics from './components/shared/GoogleAnalytics';
 import CookieBanner from './components/shared/CookieBanner';
+import { GallerySlideshow } from './components/gallery/GallerySlideshow';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -166,7 +167,12 @@ export default function App() {
                 path="/programs/world-childrens-award"
                 element={<WorldChildrensAward />}
               />
-              <Route path="/gallery" element={<Gallery />} />
+              <Route path="/gallery" element={<Gallery />}>
+                <Route
+                  path="/gallery/slideshow"
+                  element={<GallerySlideshow />}
+                />
+              </Route>
 
               {routes.map(({ main, aliases }) =>
                 aliases.map((alias) => (

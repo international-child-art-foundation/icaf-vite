@@ -1,15 +1,16 @@
 import { gsap } from 'gsap';
-import type { Artwork } from '@/data/gallery/artworks';
+import type { TResolvedArtwork } from '@/types/Gallery';
+import { formatArtistName } from '@/utils/galleryProcessing';
 
 type ArtworkCardProps = {
-  artwork: Artwork;
+  artwork: TResolvedArtwork;
   openModal: (id: string) => void;
 };
 
 const ArtworkCard = ({ artwork, openModal }: ArtworkCardProps) => {
-  const { id, artists, age, country, locationDetail, event, thumbUrl } =
+  const { id, artists, lastInitial, age, country, region, event, thumbUrl } =
     artwork;
-  const artistText = artists.join(' & ');
+  const artistText = formatArtistName(artists ?? [], lastInitial);
 
   const manageEnter = (e: React.MouseEvent<HTMLImageElement>) => {
     gsap.to(e.target, {
@@ -29,7 +30,7 @@ const ArtworkCard = ({ artwork, openModal }: ArtworkCardProps) => {
     });
   };
 
-  const locationText = [locationDetail, country].filter(Boolean).join(', ');
+  const locationText = [region, country].filter(Boolean).join(', ');
 
   return (
     <div id={id} className="relative h-full w-full rounded-lg">

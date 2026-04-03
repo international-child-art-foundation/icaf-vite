@@ -1,4 +1,4 @@
-import { IPartner } from 'types/partners';
+import { IPartner } from '@/types/partners';
 
 interface IPartnerItem {
   partner: IPartner;

@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { useSearchParams } from 'react-router-dom';
-import type { Artwork } from '@/data/gallery/artworks';
+import type { TResolvedArtwork } from '@/types/Gallery';
 import { getArtworks } from '@/server_asset_handlers/gallery';
 import { sortBy } from '@/data/gallery/sortData';
 import type { SortValue } from '@/data/gallery/sortData';
@@ -15,7 +15,10 @@ import ArtworkModal from './ArtworkModal';
 import { FilterProvider, useFilters } from './FilterContext';
 import MobileFilter from './MobileFilter';
 import { useWindowSize } from 'usehooks-ts';
-import { Menu } from 'lucide-react';
+import { Menu, Play } from 'lucide-react';
+import { Outlet } from 'react-router-dom';
+import { IGalleryContext } from '@/types/Gallery';
+import { useNavigate } from 'react-router-dom';
 
 type ParamsObjType = Record<string, string[]>;
 
@@ -33,8 +36,8 @@ function isValueInFilter(
   return filterValues.includes(value);
 }
 
-const GalleryCoreInner: React.FC = () => {
-  const [artworks, setArtworks] = useState<Artwork[]>([]);
+const GalleryCoreInner = () => {
+  const [artworks, setArtworks] = useState<TResolvedArtwork[]>([]);
   const [artworksLoading, setArtworksLoading] = useState(true);
   const [artworksError, setArtworksError] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -55,6 +58,7 @@ const GalleryCoreInner: React.FC = () => {
     activeEntryId,
     setActiveEntryId,
   } = useFilters();
+  const navigate = useNavigate();
 
   const [paramsObj, setParamsObj] = useState<ParamsObjType>({});
   const { width = 0, height = 0 } = useWindowSize();
@@ -102,6 +106,16 @@ const GalleryCoreInner: React.FC = () => {
       );
     }
   }, [pageNumber]);
+
+  const openSlideshow = () => {
+    void navigate('/gallery/slideshow');
+    setModalOpen(false);
+  };
+
+  const closeSlideshow = () => {
+    void navigate('/gallery');
+    setModalOpen(false);
+  };
 
   const artworksPerPage = 20;
   const startIndex = (pageNumber - 1) * artworksPerPage;
@@ -179,8 +193,6 @@ const GalleryCoreInner: React.FC = () => {
     return url.toString();
   };
 
-  const closeModal = useCallback(() => setModalOpen(false), []);
-
   const openModal = (id: string) => {
     if (!isFilterOpen) {
       setModalOpen(true);
@@ -197,11 +209,11 @@ const GalleryCoreInner: React.FC = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeModal();
+      if (e.key === 'Escape') closeSlideshow();
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [closeModal]);
+  }, [closeSlideshow]);
 
   const updateFilterOption = (
     optionName: string,
@@ -277,7 +289,7 @@ const GalleryCoreInner: React.FC = () => {
     if (aOrder !== bOrder) {
       return sortValue === 'Newest Event' ? bOrder - aOrder : aOrder - bOrder;
     }
-    return (a.artists[0] ?? '').localeCompare(b.artists[0] ?? '');
+    return (a.artists?.[0] ?? '').localeCompare(b.artists?.[0] ?? '');
   });
 
   const handleGridClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -291,10 +303,15 @@ const GalleryCoreInner: React.FC = () => {
 
   return (
     <div className="transition-all duration-300">
+      {filteredArts.length > 0 && (
+        <Outlet context={{ artworks } satisfies IGalleryContext} />
+      )}
       <ArtworkModal
         id={activeEntryId}
         artworks={artworks}
-        closeModal={closeModal}
+        navigationList={filteredArts}
+        onNavigate={setActiveEntryId}
+        closeModal={closeSlideshow}
         isHorizontal={isHorizontal}
         modalState={isModalOpen}
         getShareUrl={getShareUrl}
@@ -309,18 +326,35 @@ const GalleryCoreInner: React.FC = () => {
           resetAllFilters={resetAllFilters}
         />
       )}
-      <div className="breakout-w m-pad relative z-0 m-auto">
+      <div className="breakout-w m-pad relative z-0 m-auto flex flex-col gap-8">
         {/* Filter toggle + sort */}
-        <div className="relative z-[100] flex justify-between">
+        <button
+          type="button"
+          onClick={() => openSlideshow()}
+          className="pointer-events-none mx-auto hidden h-[50px] items-center gap-2 rounded-md border border-gray-600 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 lg:pointer-events-auto lg:inline-flex"
+        >
+          <Play size={16} />
+          <span className="">Play Slideshow</span>
+        </button>
+
+        <div className="relative z-[100] flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="inline-flex h-[50px] w-[200px] max-w-[40%] items-center justify-between rounded-md border border-gray-600 px-5 py-2 text-base font-medium"
+            className="inline-flex h-[50px] w-[200px] max-w-[40%] items-center justify-between rounded-md border border-gray-600 px-5 py-2 text-base font-medium lg:max-w-[40%]"
           >
             {isFilterOpen ? 'Hide Filter' : 'Filter'}
             <span className="ml-6">
               <Menu size={18} />
             </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => openSlideshow()}
+            className="ml-auto inline-flex h-[50px] items-center gap-2 rounded-md border border-gray-600 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 lg:pointer-events-none lg:mx-auto lg:hidden"
+          >
+            <Play size={16} />
+            <span className="">Play Slideshow</span>
           </button>
           {!isMobile && (
             <div className="absolute left-1/2 -translate-x-1/2">
@@ -365,13 +399,13 @@ const GalleryCoreInner: React.FC = () => {
         </div>
 
         <div
-          className="relative z-[60] mt-10 grid"
+          className="relative z-[60] grid"
           style={{
             gridTemplateRows: 'auto 1fr',
             gridTemplateColumns: 'repeat(20, 1fr)',
           }}
         >
-          {/* Artwork grid */}
+          {/* TResolvedArtwork grid */}
           <section
             className={`background-area pointer-events-auto relative row-start-2 justify-center transition-all duration-300 ease-in-out ${isFilterOpen ? 'pointer-events-none select-none opacity-40 blur-lg' : ''}`}
             onClick={handleGridClick}
@@ -462,7 +496,7 @@ const GalleryCoreInner: React.FC = () => {
   );
 };
 
-export const GalleryCore: React.FC = () => (
+export const GalleryCore = () => (
   <FilterProvider>
     <GalleryCoreInner />
   </FilterProvider>

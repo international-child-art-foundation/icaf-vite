@@ -1,4 +1,4 @@
-import TransparencyLogo from '@/assets/donate/TransparencyLogo.png';
+import TransparencyLogo from '@/assets/donate/TransparencyLogo2026.svg';
 
 export const DonationHeaderContent = () => {
   return (
@@ -19,7 +19,7 @@ export const DonationHeaderContent = () => {
       </p>
       <div className="flex w-full">
         <a
-          href="https://www.guidestar.org/profile/52-2032649"
+          href="https://app.candid.org/profile/7779165/international-child-art-foundation-52-2032649/?pkId=6100e054-2ae2-4088-94dc-06006fb713a9"
           target="_blank"
           rel="noopener noreferrer"
           className="cursor-pointer opacity-95 transition-opacity hover:opacity-100"

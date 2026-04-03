@@ -289,7 +289,7 @@ const GalleryCoreInner = () => {
     if (aOrder !== bOrder) {
       return sortValue === 'Newest Event' ? bOrder - aOrder : aOrder - bOrder;
     }
-    return (a.artists[0] ?? '').localeCompare(b.artists[0] ?? '');
+    return (a.artists?.[0] ?? '').localeCompare(b.artists?.[0] ?? '');
   });
 
   const handleGridClick = (e: React.MouseEvent<HTMLDivElement>) => {

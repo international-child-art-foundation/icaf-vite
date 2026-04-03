@@ -49,18 +49,22 @@ export type TArtwork = {
 
 /** Artwork with all URL fields resolved. Returned by the gallery loader. */
 export type TResolvedArtwork = TArtwork & {
-  /** Unique id: "{event}/{file}" */
+  /** Unique id: "{eventSlug}/{file}" */
   id: string;
-  /** Full-size original: /gallery-arts/{event}/{file} */
+  /** Folder-safe slug derived from event: spaces → hyphens, e.g. "7th-Arts-Olympiad" */
+  eventSlug: string;
+  /** Full-size original: /gallery-arts/{eventSlug}/{file} */
   url: string;
-  /** 350px-wide thumbnail: /gallery-arts/{event}/thumbs/{base}.webp */
+  /** 350px-wide thumbnail: /gallery-arts/{eventSlug}/thumbs/{base}.webp */
   thumbUrl: string;
-  /** 800px-max display image: /gallery-arts/{event}/display/{base}.webp */
+  /** 800px-max display image: /gallery-arts/{eventSlug}/display/{base}.webp */
   displayUrl: string;
+  /** 1920px-max high-res image: /gallery-arts/{eventSlug}/feature/{base}.webp */
+  featureUrl: string;
   /** Alt text for accessibility */
   alt: string;
 };
 
 export interface IGalleryContext {
-  artworks: TArtwork[];
+  artworks: TResolvedArtwork[];
 }

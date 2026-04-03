@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { gsap } from 'gsap';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import {
   ChevronLeft,
@@ -13,7 +14,7 @@ import {
 } from 'lucide-react';
 import { GallerySlideshowShare } from './GallerySlideshowShare';
 import { IGalleryContext } from '@/types/Gallery';
-import { formatArtistName } from '@/data/gallery/artworks';
+import { formatArtistName } from '@/utils/galleryProcessing';
 
 const TRANSITION_MS = 700;
 const INTERVALS_S = [5, 8, 12, 20, 30];
@@ -30,6 +31,10 @@ const KB_ANIMS = [
 type KbAnim = (typeof KB_ANIMS)[number];
 
 type SlotState = { artworkIdx: number; animKey: number; kbAnim: KbAnim };
+
+const SCROLL_BASE_PX_S = 6;
+const SCROLL_START_DELAY_S = 2.5; // pause before scroll begins
+const SCROLL_END_BUFFER_S = 0.6; // headroom before transition fires
 
 const KB_STYLES = `
   @keyframes fade-in {
@@ -82,12 +87,17 @@ export const GallerySlideshow = () => {
   const [uiState, setUiState] = useState<'full' | 'dim' | 'hidden'>('full');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { artworks: rawArtworks } = useOutletContext<IGalleryContext>();
-  const [artworks] = useState(() => [...rawArtworks].sort(() => Math.random() - 0.5));
+  const [artworks] = useState(() =>
+    [...rawArtworks].sort(() => Math.random() - 0.5),
+  );
   const navigate = useNavigate();
 
   const dimTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const autoTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const descScrollRef = useRef<HTMLDivElement>(null);
+  const descInnerRef = useRef<HTMLParagraphElement>(null);
+  const descTweenRef = useRef<gsap.core.Tween | null>(null);
 
   const intervalMs = INTERVALS_S[intervalIdx] * 1000;
 
@@ -138,9 +148,33 @@ export const GallerySlideshow = () => {
   useEffect(() => {
     if (artworks.length > 1) {
       const preload = new window.Image();
-      preload.src = artworks[(currentIdx + 1) % artworks.length].displayUrl;
+      preload.src = artworks[(currentIdx + 1) % artworks.length].featureUrl;
     }
   }, [currentIdx, artworks]);
+
+  useEffect(() => {
+    const outer = descScrollRef.current;
+    const inner = descInnerRef.current;
+    descTweenRef.current?.kill();
+    descTweenRef.current = null;
+    if (!outer || !inner) return;
+    gsap.set(inner, { y: 0 });
+    const dist = inner.offsetHeight - outer.clientHeight;
+    if (dist <= 0) return;
+    const naturalDuration = dist / SCROLL_BASE_PX_S;
+    const available =
+      intervalMs / 1000 - SCROLL_START_DELAY_S - SCROLL_END_BUFFER_S;
+    const duration = Math.min(naturalDuration, Math.max(available, 0.3));
+    descTweenRef.current = gsap.to(inner, {
+      y: -dist,
+      duration,
+      ease: 'none',
+      delay: SCROLL_START_DELAY_S,
+    });
+    return () => {
+      descTweenRef.current?.kill();
+    };
+  }, [currentIdx, intervalMs]);
 
   const resetUiTimer = useCallback(() => {
     setUiState('full');
@@ -214,16 +248,16 @@ export const GallerySlideshow = () => {
 
   const currentArtwork = artworks[currentIdx];
   const displayName =
-    currentArtwork.artists.length > 0
-      ? formatArtistName(currentArtwork.artists, currentArtwork.lastInitial)
+    (currentArtwork.artists?.length ?? 0) > 0
+      ? formatArtistName(
+          currentArtwork.artists ?? [],
+          currentArtwork.lastInitial,
+        )
       : null;
-  const displayLocation = [
-    currentArtwork.locationDetail,
-    currentArtwork.country,
-  ]
+  const displayLocation = [currentArtwork.region, currentArtwork.country]
     .filter(Boolean)
     .join(', ');
-  const eventLabel = currentArtwork.event?.replace(/-/g, ' ');
+  const eventLabel = currentArtwork.event;
 
   const artworkShareUrl = `${window.location.protocol}//${window.location.host}/gallery?id=${currentArtwork.id}`;
 
@@ -241,7 +275,7 @@ export const GallerySlideshow = () => {
       >
         <img
           key={slot.animKey}
-          src={artwork.displayUrl}
+          src={artwork.featureUrl}
           alt={artwork.alt}
           className="h-full w-full object-contain"
           style={{
@@ -327,6 +361,20 @@ export const GallerySlideshow = () => {
                 >
                   {eventLabel}
                 </p>
+              )}
+              {currentArtwork.description && (
+                <div
+                  ref={descScrollRef}
+                  className="mt-1.5 max-h-[96px] max-w-[240px] overflow-hidden"
+                >
+                  <p
+                    ref={descInnerRef}
+                    className="text-sm opacity-70"
+                    style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+                  >
+                    {currentArtwork.description}
+                  </p>
+                </div>
               )}
             </div>
             <button

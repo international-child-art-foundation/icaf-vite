@@ -30,7 +30,7 @@ const LinkedInGlyph = () => (
 );
 
 const BTN =
-  'flex h-9 w-9 items-center justify-center rounded-lg bg-black/30 text-white transition-colors hover:bg-black/45 active:scale-95';
+  'flex h-9 w-9 items-center justify-center rounded-lg text-white transition-colors hover:bg-black/25 active:scale-95';
 
 export const GallerySlideshowShare: React.FC<Props> = ({ shareUrl }) => {
   const [copied, setCopied] = useState(false);
@@ -58,7 +58,7 @@ export const GallerySlideshowShare: React.FC<Props> = ({ shareUrl }) => {
   const enc = encodeURIComponent(shareUrl);
 
   return (
-    <div className="relative flex items-center gap-1.5">
+    <div className="flex w-full items-center justify-evenly gap-0.5 rounded-xl bg-black/30 p-1">
       <button
         type="button"
         className={BTN}
@@ -116,6 +116,11 @@ export const GallerySlideshowShare: React.FC<Props> = ({ shareUrl }) => {
       >
         <LinkedInGlyph />
       </button>
+      {copied && (
+        <span className="absolute rounded-xl bg-black/80 p-2 text-xs text-white/80">
+          Copied!
+        </span>
+      )}
     </div>
   );
 };

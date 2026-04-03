@@ -1,13 +1,22 @@
 import { TArtwork, TResolvedArtwork } from '@/types/Gallery';
+
+/** Derives the folder slug from a human-readable event name: spaces → hyphens. */
+export function eventToSlug(event: string): string {
+  return event.replace(/\s+/g, '-');
+}
+
 /** Resolve computed fields from a raw Artwork entry. */
 export function resolveArtwork(a: TArtwork): TResolvedArtwork {
   const base = a.file.replace(/\.[^.]+$/, '');
+  const eventSlug = eventToSlug(a.event);
   return {
     ...a,
-    id: `${a.event}/${a.file}`,
-    url: `/gallery-arts/${a.event}/${a.file}`,
-    thumbUrl: `/gallery-arts/${a.event}/thumbs/${base}.webp`,
-    displayUrl: `/gallery-arts/${a.event}/display/${base}.webp`,
+    id: `${eventSlug}/${a.file}`,
+    eventSlug,
+    url: `/gallery-arts/${eventSlug}/${a.file}`,
+    thumbUrl: `/gallery-arts/${eventSlug}/thumbs/${base}.webp`,
+    displayUrl: `/gallery-arts/${eventSlug}/display/${base}.webp`,
+    featureUrl: `/gallery-arts/${eventSlug}/feature/${base}.webp`,
     alt:
       formatArtistName(a.artists ?? [], a.lastInitial) ||
       a.country ||

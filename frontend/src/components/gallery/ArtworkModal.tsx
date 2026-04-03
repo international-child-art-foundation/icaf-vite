@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { Artwork } from '@/data/gallery/artworks';
-import { formatArtistName } from '@/data/gallery/artworks';
+import type { TResolvedArtwork } from '@/types/Gallery';
+import { formatArtistName } from '@/utils/galleryProcessing';
 import { SocialShare } from './SocialShare';
 
 type ArtworkModalProps = {
   id: string;
-  artworks: Artwork[];
-  navigationList: Artwork[];
+  artworks: TResolvedArtwork[];
+  navigationList: TResolvedArtwork[];
   onNavigate: (id: string) => void;
   modalState: boolean;
   isHorizontal: boolean;
@@ -26,11 +26,12 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
   closeModal,
   getShareUrl,
 }) => {
-  const [artworkData, setArtworkData] = useState<Artwork | undefined>(
+  const [artworkData, setArtworkData] = useState<TResolvedArtwork | undefined>(
     undefined,
   );
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null);
+  const isFirstOpenRef = useRef(true);
 
   const currentNavIdx = navigationList.findIndex((a) => a.id === id);
   const prevId =
@@ -52,11 +53,18 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
 
   useEffect(() => {
     const data = artworks.find((a) => a.id === id);
-    setArtworkData(data);
 
-    if (modalState && data) {
-      const timeline = gsap.timeline();
-      timeline
+    if (!modalState) {
+      setArtworkData(data);
+      isFirstOpenRef.current = true;
+      return;
+    }
+
+    if (isFirstOpenRef.current) {
+      isFirstOpenRef.current = false;
+      setArtworkData(data);
+      gsap
+        .timeline()
         .set(modalContentRef.current, { opacity: 0 })
         .to(gridContainerRef.current, {
           gridTemplateRows: '1fr',
@@ -68,15 +76,25 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
           { opacity: 1, duration: 0.2, ease: 'power4.out' },
           '-=0.1',
         );
+      return;
     }
+
+    const content = modalContentRef.current;
+    gsap.set(content, { opacity: 0 });
+    setArtworkData(data);
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        gsap.to(content, { opacity: 1, duration: 0.2, ease: 'power2.out' });
+      }),
+    );
   }, [id, modalState, artworks]);
 
   if (!modalState) return null;
 
   const artistText = artworkData
-    ? formatArtistName(artworkData.artists, artworkData.lastInitial)
+    ? formatArtistName(artworkData.artists ?? [], artworkData.lastInitial)
     : '';
-  const locationText = [artworkData?.locationDetail, artworkData?.country]
+  const locationText = [artworkData?.region, artworkData?.country]
     .filter(Boolean)
     .join(', ');
 
@@ -121,6 +139,11 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
             )}
             {artworkData.event && <p>{artworkData.event}</p>}
           </div>
+          {artworkData.description && (
+            <p className="mt-3 text-base text-gray-600">
+              {artworkData.description}
+            </p>
+          )}
           <div className="mt-auto pt-6">
             <p className="text-xl font-semibold">Share this post</p>
             <SocialShare shareUrl={getShareUrl()} />
@@ -187,6 +210,11 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
           )}
           {artworkData.event && <p>{artworkData.event}</p>}
         </div>
+        {artworkData.description && (
+          <p className="mt-3 text-sm text-gray-600">
+            {artworkData.description}
+          </p>
+        )}
         <div className="mt-4">
           <p className="text-xl font-semibold">Share this post</p>
           <SocialShare shareUrl={getShareUrl()} />

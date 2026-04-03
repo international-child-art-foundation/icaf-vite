@@ -13,10 +13,11 @@
  *   gallery-arts/7th-Arts-Olympiad/display/anwita-k.webp
  *
  * Usage:
- *   node scripts/generateGalleryImages.js <galleryDir> <dataDir>
+ *   node scripts/generateGalleryImages.js [galleryDir] [dataDir]
  *
- * Example:
- *   node scripts/generateGalleryImages.js ./gallery-arts ./data
+ * Defaults (relative to repo root):
+ *   galleryDir = ./frontend/public/gallery-arts
+ *   dataDir    = ./frontend/public/data
  *
  * Requires: sharp
  */
@@ -26,10 +27,17 @@ const path = require('path');
 const sharp = require('sharp');
 
 const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif']);
+
+/** Mirrors eventToSlug() in galleryProcessing.tsx — keep in sync. */
+function eventToSlug(event) {
+  return event.replace(/\s+/g, '-');
+}
 const THUMB_WIDTH = 350;
 const THUMB_QUALITY = 60;
 const DISPLAY_MAX = 800;
 const DISPLAY_QUALITY = 82;
+const FEATURE_MAX = 1920;
+const FEATURE_QUALITY = 82;
 
 async function generateImage(srcPath, destPath, opts) {
   if (fs.existsSync(destPath)) return false; // already exists
@@ -41,12 +49,9 @@ async function generateImage(srcPath, destPath, opts) {
 }
 
 async function run() {
-  const [,, galleryDir, dataDir] = process.argv;
-
-  if (!galleryDir || !dataDir) {
-    console.error('Usage: node scripts/generateGalleryImages.js <galleryDir> <dataDir>');
-    process.exit(1);
-  }
+  const [,, galleryDirArg, dataDirArg] = process.argv;
+  const galleryDir = galleryDirArg ?? './frontend/public/gallery-arts';
+  const dataDir = dataDirArg ?? './frontend/public/data';
 
   const jsonPath = path.join(dataDir, 'galleryData.json');
   if (!fs.existsSync(jsonPath)) {
@@ -65,6 +70,8 @@ async function run() {
   let thumbsSkipped = 0;
   let displayGenerated = 0;
   let displaySkipped = 0;
+  let featureGenerated = 0;
+  let featureSkipped = 0;
   const errors = [];
 
   // Track which files the JSON references, per event folder
@@ -77,11 +84,13 @@ async function run() {
       continue;
     }
 
-    // Track for orphan detection
-    if (!referencedFiles.has(event)) referencedFiles.set(event, new Set());
-    referencedFiles.get(event).add(file);
+    const eventSlug = eventToSlug(event);
 
-    const srcPath = path.join(galleryDir, event, file);
+    // Track for orphan detection (keyed by slug, which is the actual folder name)
+    if (!referencedFiles.has(eventSlug)) referencedFiles.set(eventSlug, new Set());
+    referencedFiles.get(eventSlug).add(file);
+
+    const srcPath = path.join(galleryDir, eventSlug, file);
     if (!fs.existsSync(srcPath)) {
       errors.push(`Image not found: ${srcPath}`);
       continue;
@@ -91,10 +100,12 @@ async function run() {
     const webpFilename = base + '.webp';
 
     // Ensure output dirs
-    const thumbDir = path.join(galleryDir, event, 'thumbs');
-    const displayDir = path.join(galleryDir, event, 'display');
+    const thumbDir = path.join(galleryDir, eventSlug, 'thumbs');
+    const displayDir = path.join(galleryDir, eventSlug, 'display');
+    const featureDir = path.join(galleryDir, eventSlug, 'feature');
     if (!fs.existsSync(thumbDir)) fs.mkdirSync(thumbDir, { recursive: true });
     if (!fs.existsSync(displayDir)) fs.mkdirSync(displayDir, { recursive: true });
+    if (!fs.existsSync(featureDir)) fs.mkdirSync(featureDir, { recursive: true });
 
     // Thumbnail
     const thumbDest = path.join(thumbDir, webpFilename);
@@ -121,12 +132,24 @@ async function run() {
     } else {
       displaySkipped++;
     }
+
+    const featureDest = path.join(featureDir, webpFilename);
+    const featureCreated = await generateImage(srcPath, featureDest, {
+      resize: { width: FEATURE_MAX, height: FEATURE_MAX, fit: 'inside', withoutEnlargement: true },
+      quality: FEATURE_QUALITY,
+    });
+    if (featureCreated) {
+      featureGenerated++;
+      process.stdout.write(`  feature: ${event}/feature/${webpFilename}\n`);
+    } else {
+      featureSkipped++;
+    }
   }
 
   // --- Orphan detection: images on disk not referenced in JSON ---
   const eventFolders = fs.readdirSync(galleryDir).filter((name) => {
     const full = path.join(galleryDir, name);
-    return fs.statSync(full).isDirectory() && name !== 'thumbs' && name !== 'display';
+    return fs.statSync(full).isDirectory() && name !== 'thumbs' && name !== 'display' && name !== 'feature';
   });
 
   const orphans = [];
@@ -150,6 +173,7 @@ async function run() {
   console.log(`  ${artworks.length} artworks in JSON`);
   console.log(`  thumbnails: ${thumbsGenerated} generated, ${thumbsSkipped} skipped`);
   console.log(`  display:    ${displayGenerated} generated, ${displaySkipped} skipped`);
+  console.log(`  feature:    ${featureGenerated} generated, ${featureSkipped} skipped`);
 
   if (orphans.length > 0) {
     console.log(`\n  WARNING: ${orphans.length} image(s) on disk not in galleryData.json:`);

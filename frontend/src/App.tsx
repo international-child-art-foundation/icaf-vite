@@ -12,7 +12,7 @@ import './index.css';
 import { GlobalContextProvider } from './components/shared/GlobalContext';
 import GoogleAnalytics from './components/shared/GoogleAnalytics';
 import CookieBanner from './components/shared/CookieBanner';
-import { GallerySlideshow } from './components/gallery/GallerySlideshow';
+import { GallerySlideshowEntry } from './components/gallery/GallerySlideshowEntry';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -170,7 +170,7 @@ export default function App() {
               <Route path="/gallery" element={<Gallery />}>
                 <Route
                   path="/gallery/slideshow"
-                  element={<GallerySlideshow />}
+                  element={<GallerySlideshowEntry />}
                 />
               </Route>
 

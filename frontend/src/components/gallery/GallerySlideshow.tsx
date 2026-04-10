@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useOutletContext, useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -12,14 +11,14 @@ import {
   X,
 } from 'lucide-react';
 import { GallerySlideshowShare } from './GallerySlideshowShare';
-import { IGalleryContext, TResolvedArtwork } from '@/types/Gallery';
+import { useGallerySlideshowState } from './useGallerySlideshowState';
+import type { SlotState } from './useGallerySlideshowState';
+import { TResolvedArtwork } from '@/types/Gallery';
 import { formatArtistName } from '@/utils/galleryProcessing';
 
 const TRANSITION_MS = 700;
 const INTERVALS_S = [5, 8, 12, 20, 30];
 const DEFAULT_INTERVAL_IDX = 3;
-const DIM_MS = 2000;
-const HIDE_MS = 5000;
 
 const KB_ANIMS = [
   'kb-zoom-in',
@@ -27,9 +26,6 @@ const KB_ANIMS = [
   'kb-zoom-in-pan',
   'kb-zoom-out-pan',
 ] as const;
-type KbAnim = (typeof KB_ANIMS)[number];
-
-type SlotState = { artworkIdx: number; animKey: number; kbAnim: KbAnim };
 
 const SCROLL_BASE_PX_S = 12;
 const SCROLL_START_DELAY_S = 4;
@@ -41,10 +37,6 @@ const KB_STYLES = `
   @keyframes fade-in {
     from { opacity: 0; }
     to { opacity: 1; }
-  }
-  @keyframes fade-out {
-    from { opacity: 1; }
-    to {opacity: 0; }
   }
   @keyframes desc-scroll {
     from { transform: translateY(0); }
@@ -76,7 +68,6 @@ const DescriptionScroll = ({ description }: { description: string }) => {
   const pRef = useRef<HTMLParagraphElement>(null);
   const [scrollDist, setScrollDist] = useState(0);
   const [paused, setPaused] = useState(false);
-  // null = CSS animation in control; number = user has taken over via scroll wheel
   const [manualOffset, setManualOffset] = useState<number | null>(null);
 
   useEffect(() => {
@@ -212,84 +203,35 @@ const DescriptionScroll = ({ description }: { description: string }) => {
 };
 
 export const GallerySlideshow = () => {
-  const [slotA, setSlotA] = useState<SlotState>({
-    artworkIdx: 0,
-    animKey: 0,
-    kbAnim: KB_ANIMS[0],
-  });
-  const [slotB, setSlotB] = useState<SlotState>({
-    artworkIdx: 0,
-    animKey: 0,
-    kbAnim: KB_ANIMS[1],
-  });
-  const [topSlot, setTopSlot] = useState<'a' | 'b'>('a');
-  const topSlotRef = useRef<'a' | 'b'>('a');
-  const advanceCountRef = useRef(0);
-  const currentIdxRef = useRef(0);
-  const [deferredIdx, setDeferredIdx] = useState(0);
+  const {
+    artworks,
+    currentIdx,
+    slotA,
+    slotB,
+    topSlot,
+    advance,
+    advanceTo,
+    currentIdxRef,
+    isPaused,
+    setIsPaused,
+    uiState,
+    resetUiTimer,
+    artworkShareUrl,
+    onClose,
+  } = useGallerySlideshowState();
 
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [namePinned, setNamePinned] = useState(true);
   const intervalIdx = DEFAULT_INTERVAL_IDX;
-  const [uiState, setUiState] = useState<'full' | 'dim' | 'hidden'>('full');
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const { artworks: rawArtworks } = useOutletContext<IGalleryContext>();
-  const [artworks] = useState(() =>
-    [...rawArtworks].sort(() => Math.random() - 0.5),
-  );
-  const navigate = useNavigate();
-
-  const dimTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
-  const hideTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
-  const autoTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
-
   const intervalMs = INTERVALS_S[intervalIdx] * 1000;
 
-  const onClose = () => {
-    void navigate('/gallery');
-  };
+  const [namePinned, setNamePinned] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const advanceTo = useCallback((nextIdx: number) => {
-    advanceCountRef.current++;
-    const kbAnim = KB_ANIMS[advanceCountRef.current % KB_ANIMS.length];
-    const newTop = topSlotRef.current === 'a' ? 'b' : 'a';
-    const animKey = advanceCountRef.current;
+  // Share crossfade state (desktop-specific: accounts for share bar visibility)
+  const [shareVisible, setShareVisible] = useState(true);
+  const [deferredIdx, setDeferredIdx] = useState(0);
+  const shareBarVisibleRef = useRef(false);
 
-    if (newTop === 'a') {
-      setSlotA({ artworkIdx: nextIdx, animKey, kbAnim });
-    } else {
-      setSlotB({ artworkIdx: nextIdx, animKey, kbAnim });
-    }
-
-    topSlotRef.current = newTop;
-    setTopSlot(newTop);
-    setCurrentIdx(nextIdx);
-    currentIdxRef.current = nextIdx;
-  }, []);
-
-  const advance = useCallback(
-    (dir: 1 | -1 = 1) => {
-      if (artworks.length <= 1) return;
-      const nextIdx =
-        (currentIdxRef.current + dir + artworks.length) % artworks.length;
-      advanceTo(nextIdx);
-      if (autoTimerRef.current) clearTimeout(autoTimerRef.current);
-    },
-    [artworks.length, advanceTo],
-  );
-
-  useEffect(() => {
-    if (artworks.length <= 1 || isPaused) return;
-    autoTimerRef.current = setTimeout(() => {
-      const nextIdx = (currentIdxRef.current + 1) % artworks.length;
-      advanceTo(nextIdx);
-    }, intervalMs);
-    return () => {
-      if (autoTimerRef.current) clearTimeout(autoTimerRef.current);
-    };
-  }, [currentIdx, intervalMs, artworks.length, advanceTo, isPaused]);
-
+  // Preload next featureUrl (desktop shows full-res images)
   useEffect(() => {
     if (artworks.length > 1) {
       const preload = new window.Image();
@@ -297,22 +239,23 @@ export const GallerySlideshow = () => {
     }
   }, [currentIdx, artworks]);
 
-  const resetUiTimer = useCallback(() => {
-    setUiState('full');
-    if (dimTimerRef.current) clearTimeout(dimTimerRef.current);
-    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    dimTimerRef.current = setTimeout(() => setUiState('dim'), DIM_MS);
-    hideTimerRef.current = setTimeout(() => setUiState('hidden'), HIDE_MS);
-  }, []);
-
+  // Auto-advance timer (desktop only — mobile uses manual swipe)
   useEffect(() => {
-    resetUiTimer();
-    return () => {
-      if (dimTimerRef.current) clearTimeout(dimTimerRef.current);
-      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    };
-  }, [resetUiTimer]);
+    if (artworks.length <= 1 || isPaused) return;
+    const t = setTimeout(() => {
+      advanceTo((currentIdxRef.current + 1) % artworks.length);
+    }, intervalMs);
+    return () => clearTimeout(t);
+  }, [
+    currentIdx,
+    intervalMs,
+    artworks.length,
+    advanceTo,
+    isPaused,
+    currentIdxRef,
+  ]);
 
+  // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -330,7 +273,7 @@ export const GallerySlideshow = () => {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [onClose, advance, resetUiTimer]);
+  }, [onClose, advance, resetUiTimer, setIsPaused]);
 
   useEffect(() => {
     const handler = () => setIsFullscreen(!!document.fullscreenElement);
@@ -339,18 +282,14 @@ export const GallerySlideshow = () => {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = '';
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});
       }
     };
   }, []);
 
-  const [shareVisible, setShareVisible] = useState(true);
-  const shareBarVisibleRef = useRef(false);
-
+  // Share crossfade: fade out on advance, fade back in after 150ms with new artwork
   useEffect(() => {
     if (!shareBarVisibleRef.current) {
       setShareVisible(true);
@@ -382,9 +321,6 @@ export const GallerySlideshow = () => {
   const shareBarVisible = shareBarOpacity > 0;
   shareBarVisibleRef.current = shareBarVisible;
   const shareBarPointerEvents = !shareBarVisible ? 'none' : ('auto' as const);
-
-  const currentArtwork = artworks[currentIdx];
-  const artworkShareUrl = `${window.location.protocol}//${window.location.host}/gallery?id=${currentArtwork.id}`;
 
   const renderNametag = (artwork: TResolvedArtwork) => {
     const name =
@@ -462,6 +398,7 @@ export const GallerySlideshow = () => {
   const renderSlot = (slot: SlotState, isTop: boolean) => {
     const artwork = artworks[slot.artworkIdx];
     if (!artwork) return null;
+    const kbAnim = KB_ANIMS[slot.animKey % KB_ANIMS.length];
     return (
       <div
         className="absolute inset-0 overflow-hidden"
@@ -477,7 +414,7 @@ export const GallerySlideshow = () => {
           alt={artwork.alt}
           className="h-full w-full object-contain"
           style={{
-            animationName: slot.kbAnim,
+            animationName: kbAnim,
             animationDuration: `${intervalMs + TRANSITION_MS * 2}ms`,
             animationTimingFunction: 'ease-in-out',
             animationFillMode: 'both',
@@ -511,12 +448,6 @@ export const GallerySlideshow = () => {
               pointerEvents: nametagOpacity > 0 ? 'auto' : 'none',
             }}
           >
-            {/* Nametag crossfade — same A/B double-buffer as the image slots.
-                Outer wrapper: UI hide/show opacity (0.12s).
-                Sizer ghost (visibility:hidden, in-flow): always currentArtwork,
-                  drives container height immediately on each advance so share
-                  icons never lag behind a shrinking nametag.
-                Two absolutely-overlaid slots crossfade at TRANSITION_MS. */}
             <div
               style={{
                 opacity: nametagOpacity,

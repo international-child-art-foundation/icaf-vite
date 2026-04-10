@@ -83,7 +83,6 @@ const GalleryCoreInner = () => {
         ),
       )
       .finally(() => setArtworksLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -183,7 +182,6 @@ const GalleryCoreInner = () => {
       setActiveEntryId(idFromUrl);
       setModalOpen(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getShareUrl = () => {
@@ -344,7 +342,7 @@ const GalleryCoreInner = () => {
             className="inline-flex h-[50px] w-[200px] max-w-[40%] items-center justify-between rounded-md border border-gray-600 px-5 py-2 text-base font-medium lg:max-w-[40%]"
           >
             {isFilterOpen ? 'Hide Filter' : 'Filter'}
-            <span className="ml-6">
+            <span className="ml-2 sm:ml-6">
               <Menu size={18} />
             </span>
           </button>

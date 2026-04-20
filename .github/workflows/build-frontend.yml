@@ -132,6 +132,10 @@ jobs:
           RewriteRule ^ - [E=RELEASE:${{ needs.build_frontend.outputs.release_id }}]
           # ── PDF short URLs (add/remove alongside the FilesMatch block below) ───
           RewriteRule ^2026WCF$ /documents/2026WCF.pdf [END,NC]
+          # ── Daily magazine: rotate one ChildArt issue per day at /daily-magazine ──
+          # Served by /php-api/daily-magazine.php, which reads data/childArtMagazineData.json
+          RewriteRule ^daily-magazine/?$ /php-api/daily-magazine.php [PT,L]
+          RewriteRule ^daily-magazine/(.+)$ /php-api/daily-magazine.php?path=$1 [PT,L,QSA]
           # ───────────────────────────────────────────────────────────────────────────
           RewriteRule ^php-api/(.*)$ /releases/%{ENV:RELEASE}/php-api/$1 [PT,L,NC]
           RewriteRule ^(?:releases|ChildArt|documents|data|config|gallery-arts|analytics)/ - [L,NC]

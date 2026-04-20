@@ -134,7 +134,8 @@ jobs:
           RewriteRule ^2026WCF$ /documents/2026WCF.pdf [END,NC]
           # ── Daily magazine: rotate one ChildArt issue per day at /daily-magazine ──
           # Served by /php-api/daily-magazine.php, which reads data/childArtMagazineData.json
-          RewriteRule ^daily-magazine/?$ /php-api/daily-magazine.php [PT,L]
+          RewriteRule ^daily-magazine$ /daily-magazine/ [R=301,L]
+          RewriteRule ^daily-magazine/$ /php-api/daily-magazine.php [PT,L]
           RewriteRule ^daily-magazine/(.+)$ /php-api/daily-magazine.php?path=$1 [PT,L,QSA]
           # ───────────────────────────────────────────────────────────────────────────
           RewriteRule ^php-api/(.*)$ /releases/%{ENV:RELEASE}/php-api/$1 [PT,L,NC]

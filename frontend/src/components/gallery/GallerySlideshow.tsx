@@ -16,7 +16,7 @@ import { renderSlot } from './RenderSlot';
 import { galleryNametag } from './GalleryNametag';
 
 const INTERVALS_S = [5, 8, 12, 20, 30];
-const DEFAULT_INTERVAL_IDX = 3;
+const DEFAULT_INTERVAL_IDX = 4;
 
 const KB_STYLES = `
   @keyframes fade-in {

@@ -12,26 +12,11 @@ import {
 } from 'lucide-react';
 import { GallerySlideshowShare } from './GallerySlideshowShare';
 import { useGallerySlideshowState } from './useGallerySlideshowState';
-import type { SlotState } from './useGallerySlideshowState';
-import { TResolvedArtwork } from '@/types/Gallery';
-import { formatArtistName } from '@/utils/galleryProcessing';
+import { renderSlot } from './RenderSlot';
+import { galleryNametag } from './GalleryNametag';
 
-const TRANSITION_MS = 700;
 const INTERVALS_S = [5, 8, 12, 20, 30];
 const DEFAULT_INTERVAL_IDX = 3;
-
-const KB_ANIMS = [
-  'kb-zoom-in',
-  'kb-zoom-out',
-  'kb-zoom-in-pan',
-  'kb-zoom-out-pan',
-] as const;
-
-const SCROLL_BASE_PX_S = 12;
-const SCROLL_START_DELAY_S = 4;
-const DESC_OUTER_H = 96;
-const SCROLLBAR_W = 4;
-const SCROLLBAR_GAP = 5;
 
 const KB_STYLES = `
   @keyframes fade-in {
@@ -63,144 +48,6 @@ const KB_STYLES = `
     to   { transform: scale(1.0)  translate(-0.5%, 0.5%); }
   }
 `;
-
-const DescriptionScroll = ({ description }: { description: string }) => {
-  const pRef = useRef<HTMLParagraphElement>(null);
-  const [scrollDist, setScrollDist] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [manualOffset, setManualOffset] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (!pRef.current) return;
-    setManualOffset(null);
-    const el = pRef.current;
-    const measure = () => {
-      const dist = Math.max(0, el.scrollHeight - DESC_OUTER_H);
-      setScrollDist(dist);
-      setManualOffset((prev) => (prev !== null ? Math.min(prev, dist) : null));
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [description]);
-
-  const handleWheel = (e: React.WheelEvent) => {
-    if (scrollDist === 0) return;
-    e.preventDefault();
-    e.stopPropagation();
-    let current: number;
-    if (manualOffset !== null) {
-      current = manualOffset;
-    } else if (pRef.current) {
-      const t = getComputedStyle(pRef.current).transform;
-      current = t === 'none' ? 0 : -new DOMMatrix(t).m42;
-    } else {
-      current = 0;
-    }
-    setManualOffset(
-      Math.max(0, Math.min(scrollDist, current + e.deltaY * 0.5)),
-    );
-  };
-
-  const inManual = manualOffset !== null;
-  const duration = scrollDist > 0 ? scrollDist / SCROLL_BASE_PX_S : 0;
-  const totalTextH = DESC_OUTER_H + scrollDist;
-  const thumbH =
-    scrollDist > 0
-      ? Math.max(12, (DESC_OUTER_H / totalTextH) * DESC_OUTER_H)
-      : 0;
-  const thumbDist = DESC_OUTER_H - thumbH;
-  const manualThumbY =
-    manualOffset !== null && scrollDist > 0
-      ? (manualOffset / scrollDist) * thumbDist
-      : 0;
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-        gap: scrollDist > 0 ? SCROLLBAR_GAP : 0,
-        height: DESC_OUTER_H,
-        marginTop: 6,
-      }}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onWheel={handleWheel}
-    >
-      <div style={{ flex: 1, overflow: 'hidden', height: DESC_OUTER_H }}>
-        <p
-          ref={pRef}
-          style={
-            {
-              fontSize: 14,
-              lineHeight: '20px',
-              color: 'rgba(255,255,255,0.7)',
-              fontFamily: "'Open Sans Variable', 'Open Sans', sans-serif",
-              userSelect: 'text',
-              cursor: 'text',
-              willChange: scrollDist > 0 ? 'transform' : 'auto',
-              ...(scrollDist > 0
-                ? inManual
-                  ? { transform: `translateY(-${manualOffset}px)` }
-                  : {
-                      '--desc-dist': `-${scrollDist}px`,
-                      animationName: 'desc-scroll',
-                      animationDuration: `${duration}s`,
-                      animationTimingFunction: 'linear',
-                      animationDelay: `${SCROLL_START_DELAY_S}s`,
-                      animationFillMode: 'forwards',
-                      animationPlayState: paused ? 'paused' : 'running',
-                    }
-                : {}),
-            } as React.CSSProperties
-          }
-        >
-          {description}
-        </p>
-      </div>
-      {scrollDist > 0 && (
-        <div
-          style={{ width: SCROLLBAR_W, flexShrink: 0, position: 'relative' }}
-        >
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'rgba(255,255,255,0.15)',
-              borderRadius: SCROLLBAR_W / 2,
-            }}
-          />
-          <div
-            style={
-              {
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: thumbH,
-                background: 'rgba(255,255,255,0.5)',
-                borderRadius: SCROLLBAR_W / 2,
-                willChange: 'transform',
-                ...(inManual
-                  ? { transform: `translateY(${manualThumbY}px)` }
-                  : {
-                      '--thumb-dist': `${thumbDist}px`,
-                      animationName: 'thumb-scroll',
-                      animationDuration: `${duration}s`,
-                      animationTimingFunction: 'linear',
-                      animationDelay: `${SCROLL_START_DELAY_S}s`,
-                      animationFillMode: 'forwards',
-                      animationPlayState: paused ? 'paused' : 'running',
-                    }),
-              } as React.CSSProperties
-            }
-          />
-        </div>
-      )}
-    </div>
-  );
-};
 
 export const GallerySlideshow = () => {
   const {
@@ -322,109 +169,6 @@ export const GallerySlideshow = () => {
   shareBarVisibleRef.current = shareBarVisible;
   const shareBarPointerEvents = !shareBarVisible ? 'none' : ('auto' as const);
 
-  const renderNametag = (artwork: TResolvedArtwork) => {
-    const name =
-      (artwork.artists?.length ?? 0) > 0
-        ? formatArtistName(artwork.artists ?? [], artwork.lastInitial)
-        : null;
-    const location = [artwork.region, artwork.country]
-      .filter(Boolean)
-      .join(', ');
-
-    return (
-      <div
-        className="rounded-xl bg-black/65 px-4 py-3 text-white"
-        style={{
-          boxShadow: '0 6px 12px rgba(0,0,0,0.2), 0 2px 6px rgba(0,0,0,0.3)',
-        }}
-      >
-        {name && (
-          <p
-            className="pr-6 text-lg font-semibold leading-snug"
-            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
-          >
-            {name}
-          </p>
-        )}
-        {artwork.title && (
-          <p
-            className="mt-0.5 text-base font-medium italic opacity-90"
-            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
-          >
-            &ldquo;{artwork.title}&rdquo;
-          </p>
-        )}
-        {artwork.age !== undefined && (
-          <p
-            className="mt-0.5 text-sm opacity-80"
-            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
-          >
-            Age {artwork.age}
-            {location && (
-              <span
-                className="text-sm opacity-75"
-                style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
-              >
-                {' '}
-                · {location}
-              </span>
-            )}
-          </p>
-        )}
-        {artwork.event && (
-          <p
-            className="mt-1 text-xs capitalize opacity-60"
-            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
-          >
-            {artwork.event}
-          </p>
-        )}
-        {artwork.description && (
-          <>
-            <p className="mt-2 text-sm opacity-90">
-              {artwork.artists && artwork.artists[0] && artwork.artists[0]}{' '}
-              says:
-            </p>
-            <DescriptionScroll
-              key={`desc-${artwork.id}`}
-              description={artwork.description}
-            />
-          </>
-        )}
-      </div>
-    );
-  };
-
-  const renderSlot = (slot: SlotState, isTop: boolean) => {
-    const artwork = artworks[slot.artworkIdx];
-    if (!artwork) return null;
-    const kbAnim = KB_ANIMS[slot.animKey % KB_ANIMS.length];
-    return (
-      <div
-        className="absolute inset-0 overflow-hidden"
-        style={{
-          opacity: isTop ? 1 : 0,
-          transition: `opacity ${TRANSITION_MS}ms ease-in-out`,
-          zIndex: isTop ? 1 : 0,
-        }}
-      >
-        <img
-          key={slot.animKey}
-          src={artwork.featureUrl}
-          alt={artwork.alt}
-          className="h-full w-full object-contain"
-          style={{
-            animationName: kbAnim,
-            animationDuration: `${intervalMs + TRANSITION_MS * 2}ms`,
-            animationTimingFunction: 'ease-in-out',
-            animationFillMode: 'both',
-            animationPlayState: isPaused ? 'paused' : 'running',
-          }}
-        />
-      </div>
-    );
-  };
-
   return (
     <>
       <style>{KB_STYLES}</style>
@@ -434,8 +178,8 @@ export const GallerySlideshow = () => {
         onMouseMove={resetUiTimer}
         onClick={resetUiTimer}
       >
-        {renderSlot(slotA, topSlot === 'a')}
-        {renderSlot(slotB, topSlot === 'b')}
+        {renderSlot(artworks, slotA, topSlot === 'a', isPaused, intervalMs)}
+        {renderSlot(artworks, slotB, topSlot === 'b', isPaused, intervalMs)}
 
         <div
           className="pointer-events-none absolute inset-0"
@@ -449,6 +193,7 @@ export const GallerySlideshow = () => {
             }}
           >
             <div
+              className="rounded-xl shadow-md"
               style={{
                 opacity: nametagOpacity,
                 transition: 'opacity 0.12s ease-out',
@@ -460,7 +205,7 @@ export const GallerySlideshow = () => {
                 aria-hidden="true"
                 style={{ visibility: 'hidden', pointerEvents: 'none' }}
               >
-                {renderNametag(artworks[deferredIdx])}{' '}
+                {galleryNametag(artworks[deferredIdx])}{' '}
               </div>
               <div
                 style={{
@@ -475,7 +220,7 @@ export const GallerySlideshow = () => {
                       : 'opacity 0ms',
                 }}
               >
-                {renderNametag(artworks[slotA.artworkIdx])}
+                {galleryNametag(artworks[slotA.artworkIdx])}
               </div>
               <div
                 style={{
@@ -490,7 +235,7 @@ export const GallerySlideshow = () => {
                       : 'opacity 0ms',
                 }}
               >
-                {renderNametag(artworks[slotB.artworkIdx])}
+                {galleryNametag(artworks[slotB.artworkIdx])}
               </div>
             </div>
 
@@ -500,7 +245,7 @@ export const GallerySlideshow = () => {
                 e.stopPropagation();
                 setNamePinned((p) => !p);
               }}
-              className="absolute right-2.5 top-2.5 rounded p-0.5 text-white/60 transition-colors hover:text-white"
+              className="absolute right-2.5 top-2.5 rounded p-0.5 text-black/60 transition-colors hover:text-black/80"
               aria-label={namePinned ? 'Unpin nametag' : 'Pin nametag'}
               title={namePinned ? 'Unpin' : 'Keep visible when UI hides'}
               style={{
@@ -512,10 +257,9 @@ export const GallerySlideshow = () => {
               {namePinned ? <PinOff size={13} /> : <Pin size={13} />}
             </button>
             <div
-              className="overflow-hidden"
               style={{
                 maxHeight: shareBarVisible ? '52px' : '0px',
-                paddingTop: shareBarVisible ? '6px' : '0px',
+                paddingTop: '6px',
                 pointerEvents: shareBarPointerEvents,
               }}
             >
@@ -552,10 +296,7 @@ export const GallerySlideshow = () => {
             className="absolute bottom-8 left-1/2 -translate-x-1/2"
             style={{ pointerEvents: uiPointerEvents }}
           >
-            <div
-              className="flex items-center gap-0.5 rounded-2xl bg-black/55 p-1.5 text-white backdrop-blur-sm"
-              style={{ filter: 'drop-shadow(0 4px 14px rgba(0,0,0,0.4))' }}
-            >
+            <div className="flex items-center gap-0.5 rounded-2xl bg-white p-1.5 text-white shadow-md backdrop-blur-sm">
               <button
                 type="button"
                 onClick={(e) => {
@@ -563,11 +304,10 @@ export const GallerySlideshow = () => {
                   advance(-1);
                   resetUiTimer();
                 }}
-                className="rounded-xl p-2.5 transition-colors hover:bg-white/15"
+                className="rounded-xl p-2.5 transition-colors hover:bg-black/5"
                 aria-label="Previous artwork"
-                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}
               >
-                <ChevronLeft size={22} />
+                <ChevronLeft size={22} className="text-neutral-700" />
               </button>
               <button
                 type="button"
@@ -576,11 +316,14 @@ export const GallerySlideshow = () => {
                   setIsPaused((p) => !p);
                   resetUiTimer();
                 }}
-                className="rounded-xl p-2.5 transition-colors hover:bg-white/15"
+                className="rounded-xl p-2.5 transition-colors hover:bg-black/5"
                 aria-label={isPaused ? 'Resume slideshow' : 'Pause slideshow'}
-                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}
               >
-                {isPaused ? <Play size={22} /> : <Pause size={22} />}
+                {isPaused ? (
+                  <Play size={22} className="text-neutral-700" />
+                ) : (
+                  <Pause size={22} className="text-neutral-700" />
+                )}
               </button>
               <button
                 type="button"
@@ -589,11 +332,10 @@ export const GallerySlideshow = () => {
                   advance(1);
                   resetUiTimer();
                 }}
-                className="rounded-xl p-2.5 transition-colors hover:bg-white/15"
+                className="rounded-xl p-2.5 transition-colors hover:bg-black/5"
                 aria-label="Next artwork"
-                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}
               >
-                <ChevronRight size={22} />
+                <ChevronRight size={22} className="text-neutral-700" />
               </button>
             </div>
           </div>
@@ -608,7 +350,7 @@ export const GallerySlideshow = () => {
                 e.stopPropagation();
                 toggleFullscreen();
               }}
-              className="pointer-events-none hidden rounded-full bg-black/10 p-2.5 text-gray-800 transition-colors hover:bg-black/20 md:pointer-events-auto md:block"
+              className="pointer-events-none hidden rounded-full bg-white p-2.5 shadow-md transition-colors hover:bg-black/5 md:pointer-events-auto md:block"
               aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
               title={
                 isFullscreen
@@ -616,7 +358,11 @@ export const GallerySlideshow = () => {
                   : 'Enter fullscreen (or press F11)'
               }
             >
-              {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+              {isFullscreen ? (
+                <Minimize2 size={18} className="text-neutral-700" />
+              ) : (
+                <Maximize2 size={18} className="text-neutral-700" />
+              )}
             </button>
           </div>
 
@@ -630,7 +376,7 @@ export const GallerySlideshow = () => {
                 e.stopPropagation();
                 onClose();
               }}
-              className="rounded-full bg-black/10 p-2.5 text-gray-800 transition-colors hover:bg-black/20"
+              className="rounded-full bg-white p-2.5 text-gray-800 shadow-md transition-colors hover:bg-black/5"
               aria-label="Close slideshow"
             >
               <X size={20} />

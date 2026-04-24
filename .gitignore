@@ -38,6 +38,8 @@ frontend/public/gallery-arts/*
 *.sw?
 *.tsbuildinfo
 
+# LocalStack
+.localstack
 # Dev container / claude code experiments
 .devcontainer/
 .claude/

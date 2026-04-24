@@ -7,6 +7,12 @@ module.exports = {
       backgroundOpacity: {
         8: '0.08',
       },
+      maxWidth: {
+        content: '1536px',
+        breakout: '1584px',
+        site: '1920px',
+      },
+      screens: { '3xl': '1920px' },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
@@ -15,7 +21,6 @@ module.exports = {
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
-
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
@@ -25,7 +30,7 @@ module.exports = {
           foreground: 'hsl(var(--popover-foreground))',
         },
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
+          DEFAULT: 'hsl(var(--primary) / <alpha-value>)',
           alt: 'hsl(var(--primary-alt))',
           muted: 'hsl(var(--primary-muted))',
           soft: 'hsl(var(--primary-soft))',
@@ -74,13 +79,10 @@ module.exports = {
           600: 'hsl(var(--gray-600))',
           900: 'hsl(var(--gray-900))',
         },
-
         black: 'hsl(var(--black))',
-
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
-
         chart: {
           1: 'hsl(var(--chart-1))',
           2: 'hsl(var(--chart-2))',
@@ -96,26 +98,14 @@ module.exports = {
         nunito: ['Nunito Variable', 'sans-serif'],
       },
       keyframes: {
-        'accordion-down': {
-          from: {
-            height: '0',
-          },
-          to: {
-            height: 'var(--radix-accordion-content-height)',
-          },
-        },
-        'accordion-up': {
-          from: {
-            height: 'var(--radix-accordion-content-height)',
-          },
-          to: {
-            height: '0',
-          },
+        'heart-pulse': {
+          '0%': { fill: '##fb857c' },
+          '50%': { fill: '#f45c57' },
+          '100%': { fill: '##fb857c' },
         },
       },
       animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
+        'heart-pulse': 'heart-pulse 3s ease-in-out infinite',
       },
     },
   },

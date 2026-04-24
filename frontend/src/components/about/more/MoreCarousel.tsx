@@ -38,16 +38,15 @@ export const MoreCarousel = () => {
   const handleSelect = (index: number) => api?.scrollTo(index);
 
   return (
-    <section className="relative h-full overflow-visible bg-white py-6 md:py-20">
-      {/*Decoration */}
-      <div className="pointer-events-none absolute bottom-0 left-[40%] w-[150%] -translate-x-1/2 sm:bottom-[-10%] sm:left-[50%] md:bottom-0 2xl:bottom-[-12%]">
+    <section className="breakout-w m-pad relative overflow-visible bg-white">
+      <div className="pointer-events-none absolute bottom-0 left-[40%] w-[150%] -translate-x-1/2 sm:bottom-[-20%] sm:left-[50%] md:bottom-[-30%] 2xl:bottom-[-36%]">
         <img
           src={Graphic}
-          className="pointer-events-none h-auto w-full object-cover"
+          className="site-w pointer-events-none h-auto object-cover"
         />
       </div>
 
-      <h2 className="mb-10 text-center font-sans text-3xl font-bold lg:text-[40px]">
+      <h2 className="z-10 mb-10 text-center font-sans text-3xl font-bold lg:text-[40px]">
         More On Our Site
       </h2>
 
@@ -67,7 +66,7 @@ export const MoreCarousel = () => {
             );
           })}
         </CarouselContent>
-        <div className="md:py-4">
+        <div className="py-4">
           <CarouselArrowsDots
             items={moreOnOurSiteData}
             onPrevious={handlePrevious}

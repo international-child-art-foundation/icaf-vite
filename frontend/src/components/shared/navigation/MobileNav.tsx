@@ -1,12 +1,17 @@
 import { ICAFlogo } from '@/assets/shared/logos/ICAFLogo';
 import { Menu, X } from 'lucide-react';
 import { Button } from '../../ui/button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import MobileNavMenu from './MobileNavMenu';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const MobileNav: React.FC = () => {
   const [open, setOpen] = useState(false);
+  const location = useLocation();
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
+
   return (
     <>
       <Link to={'/'} className="my-2 cursor-pointer">
@@ -23,8 +28,8 @@ const MobileNav: React.FC = () => {
       </Button>
 
       {open && (
-        <nav className="fixed inset-x-0 top-[98px] bg-primary p-6">
-          {<MobileNavMenu />}
+        <nav className="bg-primary fixed inset-x-0 top-[98px] p-6">
+          <MobileNavMenu onCloseMenu={() => setOpen(false)} />{' '}
         </nav>
       )}
     </>

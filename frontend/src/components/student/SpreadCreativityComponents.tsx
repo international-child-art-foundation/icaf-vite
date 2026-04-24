@@ -1,13 +1,11 @@
 import creativityImg from '@/assets/student/spreadCreativity.webp';
-import { Link } from 'react-router-dom';
-import { Button } from '../ui/button';
-import { HeartIcon } from '@/assets/shared/icons/HeartIcon';
+import DonateButton from '../ui/donateButton';
 
 const Title = () => {
   return (
-    <p className="font-montserrat text-[36px] font-extrabold">
+    <h2 className="font-montserrat text-[36px] font-extrabold">
       Help Us Spread Creativity!
-    </p>
+    </h2>
   );
 };
 
@@ -21,23 +19,6 @@ const Description = () => {
       publish ChildArt magazine. Together, we can inspire creativity in kids
       everywhere!
     </p>
-  );
-};
-
-const DonateButton = () => {
-  return (
-    <Link to="/donate" className="mr-0 mt-8 text-right md:mt-0">
-      <Button
-        variant="secondary"
-        className="h-14 self-start rounded-full px-6 text-base tracking-wide"
-      >
-        <HeartIcon
-          strokeWidth={2}
-          className="!h-5 !w-5 stroke-black lg:mr-0 lg:!h-5 lg:!w-5"
-        />
-        Donate to our campaign
-      </Button>
-    </Link>
   );
 };
 
@@ -59,7 +40,7 @@ export const CardContentXl = () => {
       <div className="flex flex-col gap-8 p-4">
         <Title />
         <Description />
-        <DonateButton />
+        <DonateButton text="Donate to our Campaign" className="max-w-[300px]" />
       </div>
     </div>
   );
@@ -72,7 +53,7 @@ export const CardContentMdLg = () => {
         <SideImg />
         <Description />
       </div>
-      <DonateButton />
+      <DonateButton text="Donate to our Campaign" className="px-6" />
     </div>
   );
 };
@@ -82,7 +63,7 @@ export const CardContentSm = () => {
       <SideImg />
       <Title />
       <Description />
-      <DonateButton />
+      <DonateButton text="Donate to our Campaign" />
     </div>
   );
 };

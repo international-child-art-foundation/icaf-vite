@@ -1,17 +1,13 @@
 import React from 'react';
 import { donationUsageData } from '../../data/donate/donationUsageOrgData';
 import { FlairColorMap } from '../shared/FlairColorMap';
+import { Link } from 'react-router-dom';
 
 import { CircleArrowRight } from 'lucide-react';
 
 const DonationUsageCards: React.FC = () => {
-  // TODO: Replace with href once pages are linkable
-  const handleCardClick = (redirectTo: string) => {
-    console.log(`Redirecting to: ${redirectTo}`);
-  };
-
   return (
-    <div className="w-full py-12">
+    <div className="breakout-w m-pad">
       {/* Header Section */}
       <div className="mb-12 text-center">
         <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
@@ -25,11 +21,10 @@ const DonationUsageCards: React.FC = () => {
       {/* Cards Grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
         {donationUsageData.map((card) => (
-          <button
-            type="button"
+          <Link
             key={card.id}
+            to={card.redirectTo}
             className={`group w-full cursor-pointer rounded-2xl border-2 border-white ${FlairColorMap[card.color].borderHover} bg-opacity-8 p-6 text-left shadow-[2px_4px_4px_rgba(54,53,53,0.1)] transition-all duration-300 hover:shadow-xl lg:p-8`}
-            onClick={() => handleCardClick(card.redirectTo)}
             aria-label={`Learn more about ${card.title}`}
           >
             {/* Icon Section */}
@@ -58,7 +53,7 @@ const DonationUsageCards: React.FC = () => {
                 <CircleArrowRight />
               </div>
             </div>
-          </button>
+          </Link>
         ))}
       </div>
     </div>

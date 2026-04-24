@@ -1,30 +1,55 @@
+import { PageBottomSpacer } from '@/components/shared/PageBottomSpacer';
 import { CurvedImage } from './CurvedImage';
 import MagazineCarousel from '../components/childArt/MagazineCarousel';
-
 import magazineCoverLarge from '@/assets/shared/images/navigation/programs/childArtMagazine.webp';
+import BackIssueGrid from '@/components/childArt/BackIssueGrid';
+import TestimonialBlock from '@/components/childArt/TestimonialBlock';
+import YourDonations from '@/components/shared/YourDonations';
+import { useWindowSize } from 'usehooks-ts';
+import DonateButton from '@/components/ui/donateButton';
+import { Seo } from '@/components/shared/Seo';
 
-import DonateButtonPartnersPage from '@/components/ui/donateButtonPartnersPage';
+const childArtMetadata = {
+  title: 'ChildArt Magazine | ICAF',
+  description:
+    'ChildArt Magazine is a quarterly magazine dedicated to the impact of child art on the world.',
+  path: '/programs/childart-magazine',
+};
 
 export default function ChildArtPage() {
+  const size = useWindowSize();
+
+  let gradientDefinition;
+  if (size.width >= 1280) {
+    gradientDefinition =
+      'bg-[linear-gradient(to_right,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.7)_50%,rgba(0,0,0,0.4)_75%,rgba(255,255,255,0.15)_100%)]';
+  } else if (size.width >= 1024) {
+    gradientDefinition =
+      'bg-[linear-gradient(to_right,rgba(0,0,0,0.75)_0%,rgba(0,0,0,0.65)_55%,rgba(0,0,0,0.45)_80%,rgba(255,255,255,0.1)_100%)]';
+  } else if (size.width >= 640) {
+    gradientDefinition =
+      'bg-gradient-to-r from-black/90 from-0% via-black/60 via-[65%] to-black/50 to-100%';
+  } else {
+    gradientDefinition = 'bg-black/75';
+  }
+
   return (
-    <div className="flex flex-col items-center">
-      {/* === Hero Section with Curved Image === */}
-      <div className="relative w-full">
-        {/* Background image */}
-        <div className="grid grid-cols-1 grid-rows-1">
+    <>
+      <Seo {...childArtMetadata} />
+      <div className="content-gap items-center">
+        {/* === Hero Section with Curved Image === */}
+        <div className="site-w grid grid-cols-1 grid-rows-1">
           <div className="col-start-1 row-start-1">
             <CurvedImage
               src={magazineCoverLarge}
               curveStyle="Ellipse"
-              darkened={true}
+              gradientDefinition={gradientDefinition}
             />
           </div>
 
           {/* Foreground Text */}
-          <div className="relative z-10 col-start-1 row-start-1">
-            <div className="container mx-auto flex h-full items-start px-8 pt-20 md:items-center md:px-12 md:pt-0 lg:px-16 xl:px-20">
-              {/* <div className="container mx-auto flex h-full items-start px-6 pt-10 md:px-10 lg:px-12 xl:px-16"> */}
-              <div className="text-white">
+          <div className="hero-w relative z-10 col-start-1 row-start-1 flex h-full items-start pt-20 md:items-center md:pt-0">
+            <div className="text-white">
                 <h1 className="font-montserrat mb-3 text-4xl font-bold md:mb-4 md:text-5xl lg:mb-6 lg:text-6xl xl:text-7xl">
                   <span className="italic">ChildArt</span> Magazine
                 </h1>
@@ -36,18 +61,23 @@ export default function ChildArtPage() {
                   social participation.”
                 </p>
                 <div className="flex justify-start">
-                  <DonateButtonPartnersPage className="!w-auto border-0 !px-8 text-gray-900 shadow-lg hover:shadow-xl" />
+                  <DonateButton text="Donate to our Campaign" />
                 </div>
-              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* === Carousel Section === */}
-      <div className="mt-0 w-full">
+        {/* === Carousel Section === */}
         <MagazineCarousel />
+
+        <BackIssueGrid />
+
+        <TestimonialBlock />
+
+        {/* Donation CTA Section */}
+        <YourDonations />
       </div>
-    </div>
+      <PageBottomSpacer />
+    </>
   );
 }

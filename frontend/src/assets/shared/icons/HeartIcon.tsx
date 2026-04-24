@@ -8,6 +8,8 @@ export const HeartIcon = (props: SVGProps<SVGSVGElement>) => (
     strokeWidth="1.5"
     stroke="#134380"
     className="group-hover:fill-main-red group-hover:stroke-main-red inline-block h-5 w-5"
+    aria-hidden="true"
+    focusable="false"
     {...props}
   >
     <path

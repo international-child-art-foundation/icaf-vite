@@ -15,13 +15,13 @@ const AccordionCard = ({ data }: MissionDropdownProps) => {
   return (
     <div
       key={data.id}
-      className={`mx-auto w-full rounded-3xl border-4 ${open && data.backgroundColor && FlairColorMap[data.color]?.background} bg-opacity-8 transition-colors duration-500 ${FlairColorMap[data.color]?.border} cursor-pointer p-12`}
+      className={`mx-auto w-full rounded-3xl border-4 ${open && FlairColorMap[data.color]?.background} bg-opacity-8 transition-colors duration-500 ${FlairColorMap[data.color]?.border} cursor-pointer p-12`}
       onClick={() => setOpen((prev) => !prev)}
     >
       <div className="grid-col grid h-full flex-col justify-items-center gap-2">
         <data.Icon colorClass={iconColor} />
         <div className="min-h-[50px] content-center">
-          <p className="text-center text-xl font-semibold">{data.title}</p>
+          <h4 className="text-center text-xl font-semibold">{data.title}</h4>
         </div>
         <div
           className={`grid transition-all duration-500 ${open ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'}`}

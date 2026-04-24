@@ -1,39 +1,46 @@
-import BoardOfDirectorsImage from '@/assets/shared/images/about/more/Board.webp';
-import FinancialsImage from '@/assets/shared/images/about/more/Financials.webp';
-import TeamImage from '@/assets/shared/images/about/more/Team.webp';
+import TeamImage from '@/assets/shared/images/teamHeader.webp';
 import EthicsImage from '@/assets/shared/images/about/more/Ethics.webp';
 import PartnersImage from '@/assets/shared/images/about/more/Partners.webp';
 import ImpactImage from '@/assets/shared/images/about/more/Impact.webp';
+import BoardImage from '@/assets/shared/images/icafGroupPhoto.webp';
 
 //images converted to webp, but may need check resizing later
 export interface MoreOnOurSite {
   id: number;
   title: string;
   description: string;
+  link?: string;
+  buttonText: string;
+  external?: boolean;
   image?: string;
 }
 
 export const moreOnOurSiteData: MoreOnOurSite[] = [
   {
     id: 1,
-    title: 'Board of Directors',
+    title: 'Leadership',
     description:
       "Meet the dedicated leaders who oversee ICAF's strategic direction and ensure the fulfillment of its mission. Their expertise drives the organization’s long-term success and impact.",
-    image: BoardOfDirectorsImage,
+    image: BoardImage,
+    buttonText: 'Meet Our Leaders',
+    link: '/about/leadership',
   },
-  {
-    id: 2,
-    title: 'Financials',
-    description:
-      "Explore ICAF's financial transparency through detailed reports on funding and expenditures. This section demonstrates ICAF’s commitment to accountability and responsible stewardship of resources.",
-    image: FinancialsImage,
-  },
+  // TODO: Financials page and link
+  // {
+  //   id: 2,
+  //   title: 'Financials',
+  //   description:
+  //     "Explore ICAF's financial transparency through detailed reports on funding and expenditures. This section demonstrates ICAF’s commitment to accountability and responsible stewardship of resources.",
+  //   image: FinancialsImage,
+  // },
   {
     id: 3,
     title: 'Team Members',
     description:
       'Learn more about the passionate individuals working behind the scenes at ICAF. Their commitment ensures that ICAF continues to serve and inspire children globally.',
     image: TeamImage,
+    buttonText: 'Meet Our Team',
+    link: '/about/team',
   },
   {
     id: 4,
@@ -41,6 +48,9 @@ export const moreOnOurSiteData: MoreOnOurSite[] = [
     description:
       "Review ICAF's comprehensive ethical guidelines, which govern its operations and partnerships. These principles ensure integrity and fairness in all that the organization does.",
     image: EthicsImage,
+    buttonText: 'Code of Ethics (PDF)',
+    external: true,
+    link: '/documents/code-of-ethics-icaf.pdf',
   },
   {
     id: 5,
@@ -48,6 +58,8 @@ export const moreOnOurSiteData: MoreOnOurSite[] = [
     description:
       'Discover the organizations that collaborate with ICAF to expand its reach and amplify its impact. Together, they help create opportunities for children to thrive through art and creativity.',
     image: PartnersImage,
+    buttonText: 'See Our Partners',
+    link: '/about/partners',
   },
   {
     id: 6,
@@ -55,5 +67,7 @@ export const moreOnOurSiteData: MoreOnOurSite[] = [
     description:
       "See the measurable difference ICAF is making in the lives of children across the globe. This section highlights key achievements and the lasting influence of ICAF's programs.",
     image: ImpactImage,
+    buttonText: 'Review our Impact',
+    link: '/about/impact',
   },
 ];

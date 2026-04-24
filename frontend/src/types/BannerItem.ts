@@ -1,7 +1,7 @@
 export interface BannerItem {
   id: string;
   src: string;
-  bannerText: string;
+  bannerText?: string;
   bannerColor: string;
   darkened?: boolean;
   gradientDefinition?: string;

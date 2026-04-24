@@ -4,7 +4,6 @@ import { useWindowSize } from 'usehooks-ts';
 
 export const SponsorshipHeader = () => {
   const size = useWindowSize();
-  // TODO: Remove if duplicate
   const gradientXL =
     'bg-[linear-gradient(to_bottom,rgba(0,0,0,0.50)_10%,rgba(0,0,0,0.05)_70%,rgba(255,255,255,0.05)_100%)]';
   const gradientLG =
@@ -25,7 +24,7 @@ export const SponsorshipHeader = () => {
     gradientDefinition = gradientSM;
   }
   return (
-    <div className="grid grid-cols-1 grid-rows-1">
+    <div className="site-w grid grid-cols-1 grid-rows-1">
       <div className="col-start-1 row-start-1">
         <CurvedImage
           src={SponsorshipHeaderImg}
@@ -33,9 +32,9 @@ export const SponsorshipHeader = () => {
         />
       </div>
       <div className="z-10 col-start-1 row-start-1 mb-20 flex items-center justify-self-center">
-        <p className="text-center text-[40px] font-extrabold text-white sm:text-[60px]">
+        <h1 className="text-center text-[40px] font-extrabold text-white sm:text-[60px]">
           Sponsorship
-        </p>
+        </h1>
       </div>
     </div>
   );

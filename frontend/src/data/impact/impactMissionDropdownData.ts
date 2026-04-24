@@ -45,7 +45,7 @@ const MissionDropdownData: IAccordionCard[] = [
     Icon: GenderEqualityIcon,
     color: 'green',
     extendedDescription:
-      'We promote equal participation of boys and girls in its programs, ensuring that all children, regardless of gender, have equal opportunities to develop their artistic talents and express their creativity.',
+      'We promote equal participation of boys and girls in ICAF programs, ensuring that all children, regardless of gender, have equal opportunities to develop their artistic talents and express their creativity.',
   },
   {
     id: 'building-peace',

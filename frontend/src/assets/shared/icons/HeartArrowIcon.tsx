@@ -7,6 +7,8 @@ export const HeartArrowIcon = (props: SVGProps<SVGSVGElement>) => (
     height="34"
     viewBox="0 0 74 34"
     fill="none"
+    aria-hidden="true"
+    focusable="false"
     {...props}
   >
     {/* White outline */}

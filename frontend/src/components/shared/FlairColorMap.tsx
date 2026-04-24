@@ -62,6 +62,13 @@ export const FlairColorMap = {
     backgroundHover: 'hover:bg-tertiary-purple/10',
     icon: 'text-tertiary-purple',
   },
+  primaryBlue: {
+    borderHover: 'hover:border-primary',
+    border: 'border-primary',
+    background: 'bg-primary',
+    backgroundHover: 'hover:bg-primary/10',
+    icon: 'text-primary',
+  },
 } as const;
 
 export type ColorKey = keyof typeof FlairColorMap;

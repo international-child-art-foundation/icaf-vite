@@ -15,6 +15,9 @@ import carouselImg12 from '@/assets/home/carousel/CarouselImage12.webp';
 import carouselImg13 from '@/assets/home/carousel/CarouselImage13.webp';
 import carouselImg14 from '@/assets/home/carousel/CarouselImage14.webp';
 import carouselImg15 from '@/assets/home/carousel/CarouselImage15.webp';
+import carouselImg16 from '@/assets/home/carousel/CarouselImage16.webp';
+import carouselImg17 from '@/assets/home/carousel/CarouselImage17.webp';
+import carouselImg18 from '@/assets/home/carousel/CarouselImage18.webp';
 
 export const carouselImages: TCarouselImages = [
   { id: 1, image: carouselImg1 },
@@ -32,4 +35,7 @@ export const carouselImages: TCarouselImages = [
   { id: 13, image: carouselImg13 },
   { id: 14, image: carouselImg14 },
   { id: 15, image: carouselImg15 },
+  { id: 16, image: carouselImg16 },
+  { id: 17, image: carouselImg17 },
+  { id: 18, image: carouselImg18 },
 ];

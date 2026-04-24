@@ -20,17 +20,17 @@ export function BannerImageCarousel({
 
   let carousel_height;
   switch (true) {
-    case size.width > 1024:
+    case size.width >= 1024:
       carousel_height = 800;
       break;
-    case size.width > 768:
+    case size.width >= 768:
       carousel_height = 600;
       break;
-    case size.width > 640:
+    case size.width >= 640:
       carousel_height = 500;
       break;
     default:
-      carousel_height = 400;
+      carousel_height = 500;
       break;
   }
 
@@ -51,7 +51,7 @@ export function BannerImageCarousel({
 
   return (
     <div
-      className={`relative overflow-hidden ${className}`}
+      className={`breakout-w relative overflow-hidden ${className}`}
       style={{ height: carousel_height }}
     >
       {items.map((item, i) => (
@@ -68,7 +68,7 @@ export function BannerImageCarousel({
         </div>
       ))}
 
-      <span className="sr-only" aria-live="polite">
+      <span className="sr-only">
         Slide {index + 1} of {items.length}
       </span>
     </div>

@@ -7,26 +7,26 @@ export const specialProjectData: TSpecialProjectGroup = [
   {
     id: 1,
     image: Wcf,
-    title: 'World Children’s Festival 2025',
+    title: '7th World Children’s Festival ',
     description:
-      'A three-day celebration of American values of creativity, diversity, and unity',
+      "A three-day celebration of children's creativity and America's 250th anniversary on the National Mall",
     href: 'https://worldchildrensfestival.org/',
     color: 'red',
   },
   {
     id: 2,
     image: Swimmer,
-    title: 'My Favorite Sport 2024',
-    description: 'A global art contest to celebrate the Paris Games',
+    title: 'My Favorite Sport',
+    description:
+      "An online art contest for young people's interactive engagement with the sports that inspire them",
     href: 'https://myfavoritesport.org/',
     color: 'blue',
   },
   {
     id: 3,
     image: Phoenix,
-    title: 'VR Heaven 2025/2026',
+    title: 'VR Heaven 2026',
     description: 'Virtual Reality that brings Heaven to Earth',
-    href: 'https://worldchildrensfestival.org/',
     color: 'yellow',
   },
 ];

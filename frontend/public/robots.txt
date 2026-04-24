@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /php-api/
+Allow: /
+
+Sitemap: https://icaf.org/sitemap.xml

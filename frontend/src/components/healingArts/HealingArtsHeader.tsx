@@ -8,21 +8,24 @@ export const HealingArtsHeader = () => {
 
   let gradientDefinition;
   if (size.width >= 1280) {
-    gradientDefinition = OpinionatedGradients.xl;
+    gradientDefinition =
+      'bg-[linear-gradient(to_right,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.6)_40%,rgba(0,0,0,0.4)_60%,rgba(255,255,255,0.2)_100%)]';
   } else if (size.width >= 1024) {
-    gradientDefinition = OpinionatedGradients.lg;
+    gradientDefinition =
+      'bg-[linear-gradient(to_right,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.6)_40%,rgba(0,0,0,0.4)_60%,rgba(255,255,255,0.2)_100%)]';
   } else if (size.width >= 640) {
-    gradientDefinition = OpinionatedGradients.md;
+    gradientDefinition =
+      'bg-[linear-gradient(to_right,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.6)_40%,rgba(0,0,0,0.4)_80%,rgba(255,255,255,0.0)_100%)]';
   } else {
     gradientDefinition = OpinionatedGradients.sm;
   }
 
   return (
-    <div className="grid w-full grid-cols-1 grid-rows-1">
-      <div className="font-montserrat z-10 col-start-1 row-start-1 flex max-w-screen-2xl flex-col gap-2 p-6 text-3xl font-extrabold text-white sm:gap-4 sm:p-10 sm:px-8 md:mt-8 md:px-12 md:text-4xl lg:mt-28 lg:px-16 lg:text-6xl xl:px-20">
+    <div className="site-w grid grid-cols-1 grid-rows-1">
+      <div className="hero-w font-montserrat z-10 col-start-1 row-start-1 flex flex-col gap-2 pt-6 text-3xl font-extrabold text-white sm:gap-4 sm:pt-10 md:mt-8 md:text-4xl lg:mt-28 lg:text-6xl">
         <div className="font-montserrat block text-[30px] font-extrabold leading-[40px] sm:text-[40px] sm:leading-[50px] md:text-[60px] md:leading-[70px]">
-          <p>Healing Arts Programs:</p>
-          <p className="text-tertiary-yellow">Empowering Child Survivors</p>
+          <h1>Healing Arts Programs:</h1>
+          <h2 className="text-tertiary-yellow">Empowering Child Survivors</h2>
         </div>
         <p className="font-openSans text-lg font-normal text-white lg:max-w-[50%]">
           When natural disasters strike, children often suffer in silence. Our
@@ -36,10 +39,10 @@ export const HealingArtsHeader = () => {
           gradientDefinition={gradientDefinition}
           src={healingArtsHeader}
           height={`${
-            size.width >= 1024 ? '700px' : size.width >= 768 ? '640px' : '500px'
+            size.width >= 1024 ? '700px' : size.width >= 768 ? '640px' : '550px'
           }`}
           objectFit="cover"
-          objectPosition="center bottom"
+          objectPosition="100% 60%"
         />
       </div>
     </div>

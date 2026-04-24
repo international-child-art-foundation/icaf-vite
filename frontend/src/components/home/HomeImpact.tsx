@@ -6,23 +6,23 @@ import IcafHomeVideoThumb from '@/assets/home/icaf-overview-cropped-thumb.webp';
 
 export const HomeImpact = () => {
   return (
-    <div className="relative flex flex-col gap-8 px-8 md:px-12 lg:px-16 lg:pt-16 xl:px-20">
+    <div className="breakout-w m-pad relative z-10 flex flex-col gap-8">
       <img
         src={RedFirework}
         className="absolute -top-16 right-4 hidden h-auto w-16 md:block md:w-32 lg:w-48"
+        alt=""
       />
-      <div className="flex flex-col gap-7">
-        <p className="font-montserrat text-center text-[2rem] font-extrabold xl:text-[40px]">
+      <div className="flex flex-col gap-6">
+        <h2 className="font-montserrat text-center text-[2rem] font-extrabold xl:text-[40px]">
           Educational & Cultural Impact
-        </p>
+        </h2>
         <p className="font-sans text-base md:text-center xl:text-2xl">
-          ICAF serves American children as their national art and creativity
-          organization and the world’s children as their global art and
-          creativity organization.
+          ICAF serves both American children and children across the globe as an
+          international art and creativity organization.
         </p>
       </div>
 
-      <div className="grid-rows-auto relative grid max-w-screen-2xl grid-cols-1 gap-10 lg:grid-cols-10 lg:grid-rows-5">
+      <div className="grid-rows-auto relative grid grid-cols-1 gap-6 lg:grid-cols-10 lg:grid-rows-5">
         <div className="h-full lg:col-span-3 lg:col-start-1 lg:row-span-2 lg:row-start-1">
           <TitleDescriptionCard
             title={'Pedagogy'}
@@ -36,7 +36,7 @@ export const HomeImpact = () => {
           <TitleDescriptionCard
             title={'Advocacy'}
             description={
-              'ICAF is the largest child art exhibitor and organizer of youth panels at conferences.'
+              'ICAF promotes children’s art as the most honest and pure form of human creative expression.'
             }
             color={'blue'}
           />
@@ -53,7 +53,7 @@ export const HomeImpact = () => {
           <TitleDescriptionCard
             title={'5M'}
             description={
-              'Over the past 26 years, about five million students worldwide have produced art under ICAF programs.'
+              'Over the past 29 years, more than five million students have produced original works under ICAF programs, and nearly two million people have attended ICAF’s festivals, exhibitions, and events.'
             }
             color={'yellow'}
           />

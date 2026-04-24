@@ -10,6 +10,8 @@ export const HealthIcon = ({ colorClass }: HealthIconProps) => {
       viewBox="0 0 80 80"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      focusable="false"
       className={colorClass}
     >
       <g clip-path="url(#clip0_1_42227)">

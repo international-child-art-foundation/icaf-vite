@@ -1,0 +1,56 @@
+import { CurvedImage } from '@/pages/CurvedImage';
+import headerImg from '@/assets/history/HistoryHeader.webp';
+import { OpinionatedGradients } from '@/data/gradientDefinition';
+import { useWindowSize } from 'usehooks-ts';
+import DonateButton from '../ui/donateButton';
+
+export const HistoryHeader = () => {
+  const size = useWindowSize();
+
+  let gradientDefinition;
+  if (size.width >= 1280) {
+    gradientDefinition = OpinionatedGradients.xl;
+  } else if (size.width >= 1024) {
+    gradientDefinition =
+      'bg-[linear-gradient(to_right,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.6)_40%,rgba(0,0,0,0.4)_60%,rgba(255,255,255,0.2)_100%)]';
+  } else if (size.width >= 640) {
+    gradientDefinition =
+      'bg-[linear-gradient(to_right,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.7)_40%,rgba(0,0,0,0.5)_80%,rgba(0,0,0,0.2)_100%)]';
+  } else {
+    gradientDefinition = OpinionatedGradients.sm;
+  }
+
+  return (
+    <div className="site-w relative grid grid-cols-1 grid-rows-1">
+      <div className="relative col-start-1 row-start-1">
+        <CurvedImage
+          src={headerImg}
+          gradientDefinition={gradientDefinition}
+          height={'700px'}
+          objectPosition={'70% 25%'}
+        />
+      </div>
+      <div className="hero-w lg:mt-18 relative z-10 col-start-1 row-start-1 mt-8 pt-10 md:mt-16">
+        <div className="text-white">
+          <h1 className="font-montserrat mb-3 text-4xl font-bold md:mb-4 md:text-5xl lg:mb-6 lg:text-6xl xl:text-7xl">
+            Our History
+          </h1>
+          <p className="mb-6 max-w-2xl font-sans text-base leading-relaxed md:text-lg lg:text-xl">
+            Since its founding in 1997, the International Child Art Foundation
+            (ICAF) has championed children’s creative and empathic development
+            worldwide.
+          </p>
+          <p className="mb-6 max-w-2xl font-sans text-base leading-relaxed md:text-lg lg:text-xl">
+            From pioneering national art festivals to launching global programs
+            that unite young artists from over 100 countries, each milestone
+            reflects our mission: to nurture imagination, foster understanding,
+            and inspire innovation.{' '}
+          </p>
+          <div className="flex">
+            <DonateButton text="Donate to our Campaign" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

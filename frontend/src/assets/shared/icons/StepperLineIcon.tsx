@@ -8,6 +8,8 @@ const StepperLineIcon = (props: SVGProps<SVGSVGElement>) => {
       viewBox="0 0 32 364"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      focusable="false"
       {...props}
     >
       <path

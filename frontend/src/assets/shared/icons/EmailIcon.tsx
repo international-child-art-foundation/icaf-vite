@@ -8,6 +8,8 @@ export const EmailIcon = (props: SVGProps<SVGSVGElement>) => (
     strokeWidth="1.5"
     stroke="currentColor"
     className="pointer-events-none absolute ml-3 mt-2.5 h-5 w-5"
+    aria-hidden="true"
+    focusable="false"
     {...props}
   >
     <path

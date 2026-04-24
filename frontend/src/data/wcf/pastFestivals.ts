@@ -21,6 +21,7 @@ export interface PastFestivalsData {
   videoSrc: string;
   thumbSrc: string;
   magazineCover: string;
+  magazineLink?: string;
 }
 
 export const pastFestivalsData: PastFestivalsData[] = [
@@ -33,6 +34,7 @@ export const pastFestivalsData: PastFestivalsData[] = [
     videoSrc: openingAddressVideo,
     thumbSrc: openingAddressThumb,
     magazineCover: pastFestival_1,
+    magazineLink: 'https://icaf.org/ChildArt/2021WCF/',
   },
   {
     id: 2,
@@ -43,6 +45,7 @@ export const pastFestivalsData: PastFestivalsData[] = [
     videoSrc: watchVideo,
     thumbSrc: watchThumb,
     magazineCover: pastFestival_2,
+    magazineLink: 'https://icaf.org/ChildArt/Creativity,DiversityandUnity/',
   },
   {
     id: 3,
@@ -53,5 +56,6 @@ export const pastFestivalsData: PastFestivalsData[] = [
     videoSrc: musicVideo,
     thumbSrc: musicThumb,
     magazineCover: pastFestival_3,
+    magazineLink: 'https://icaf.org/ChildArt/2011WCF/',
   },
 ];

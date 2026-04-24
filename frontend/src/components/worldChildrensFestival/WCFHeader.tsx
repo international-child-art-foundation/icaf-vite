@@ -15,11 +15,11 @@ export default function WCFHeader() {
   const gradientLG =
     'bg-[linear-gradient(to_right,rgba(0,0,0,0.75)_0%,rgba(0,0,0,0.5)_50%,rgba(0,0,0,0.15)_70%,rgba(255,255,255,0.15)_100%)]';
   const gradientMD =
-    'bg-gradient-to-r from-black/80 from-0% via-black/40 via-[60%] to-white/20 to-100%';
-  const gradientSM = 'bg-black/50';
+    'bg-gradient-to-r from-black/80 from-0% via-black/40 via-[70%] to-black/20 to-100%';
+  const gradientSM = 'bg-black/70';
 
   const heightMD = '750px';
-  const heightSM = '800px';
+  const heightSM = '700px';
 
   let gradientDefinition;
   let height;
@@ -38,21 +38,23 @@ export default function WCFHeader() {
   }
 
   return (
-    <div>
-      <figure className="relative">
+    <div className="site-w grid grid-cols-1 grid-rows-1">
+      <figcaption className="sr-only">
+        World Children's Festival hero image
+      </figcaption>
+      <div className="col-start-1 row-start-1">
         <CurvedImage
           src={heroImage}
-          objectPosition="right "
+          objectPosition="right"
           gradientDefinition={gradientDefinition}
           height={height}
         />
-        <figcaption className="sr-only">
-          World Children's Festival hero image
-        </figcaption>
-        <div className="absolute inset-0 top-8 w-[85%] px-6 text-white sm:w-[70%] md:top-10 md:px-12 lg:top-16 lg:w-[65%] lg:px-16 xl:w-[75%] xl:px-20">
-          <h1 className="font-montserrat text-3xl font-extrabold lg:text-[40px] xl:text-6xl">
-            World Children's Festival
-          </h1>
+      </div>
+      <div className="hero-w font-montserrat z-10 col-start-1 row-start-1 mt-8 flex flex-col text-white md:mt-10 lg:mt-16">
+        <h1 className="font-montserrat text-3xl font-extrabold lg:text-[40px] xl:text-6xl">
+          World Children's Festival
+        </h1>
+        <div className="lg:max-w-[65%] xl:max-w-[75%]">
           <h3 className="my-2 font-bold md:my-4 lg:text-2xl xl:my-0 xl:mb-6 xl:mt-10">
             The "Olympics" of Children's Imagination
           </h3>
@@ -61,7 +63,7 @@ export default function WCFHeader() {
             National Mall across from the U.S Capitol into a global stage for a
             three-day celebration of creativity, empathy, and unity. More than a
             festival, it's a movement—empowering children through art,
-            education, and collaboration
+            education, and collaboration.
           </p>
           <p className="mb-2 text-base font-normal md:mb-4 md:text-xl xl:mb-6">
             At WCF, kids don't just create—they lead. They become
@@ -69,7 +71,7 @@ export default function WCFHeader() {
             world.{' '}
           </p>
           <p className="mb-4 text-base font-normal md:mb-6 md:text-xl xl:mb-6">
-            The 7th WCF is coming in June 2026. Will you be there?
+            The 7th WCF is coming in July 2026. Will you be there?
           </p>
           <a
             href="https://worldchildrensfestival.org/"
@@ -84,7 +86,7 @@ export default function WCFHeader() {
             </Button>
           </a>
         </div>
-      </figure>
+      </div>
     </div>
   );
 }

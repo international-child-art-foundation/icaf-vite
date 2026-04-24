@@ -66,7 +66,6 @@ export const YoungArtistArtworks: IYoungArtistArtworks[] = [
 ];
 
 export const PTALearnMoreData: IPTALabeledLink[] = [
-  // TODO: Find links for all entries
   {
     source: 'The Lancet',
     title: 'Developing Children’s Creativity to Foster Peace',

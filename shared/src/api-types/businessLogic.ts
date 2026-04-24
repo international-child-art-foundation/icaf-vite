@@ -5,7 +5,7 @@
  * used across multiple API endpoints.
  */
 
-import { ArtworkEntity } from './artworkTypes';
+import { ArtworkEntity } from './artworkTypes.js';
 
 // Check if user can vote for artwork
 export function canUserVoteForArtwork(

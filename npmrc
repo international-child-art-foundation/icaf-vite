@@ -1,0 +1,6 @@
+# Reject packages published less than 7 days ago (supply-chain attack mitigation).
+# Value is in minutes. 60 * 24 * 7 = 10080.
+minimum-release-age=10080
+
+# Be strict about peer deps so surprises surface at install time, not runtime.
+strict-peer-dependencies=true

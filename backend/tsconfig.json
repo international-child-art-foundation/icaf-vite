@@ -4,14 +4,16 @@
     "composite": true,
     "rootDir": "src",
     "outDir": "dist",
-    "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "lib": [
-      "ES2020"
-    ]
+    "target": "ES2023",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2023"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": [
-    "src"
+  "include": ["src"],
+  "references": [
+    { "path": "../shared" }
   ]
 }

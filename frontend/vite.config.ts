@@ -11,7 +11,6 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
-        '@icaf/shared': path.resolve(__dirname, '../shared/src'),
       },
     },
     publicDir: env.VITE_PUBLIC_DIR || path.resolve(__dirname, 'public'),

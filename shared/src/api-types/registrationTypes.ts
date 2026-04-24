@@ -1,4 +1,4 @@
-import { Role } from './userTypes';
+import { Role } from './userTypes.js';
 
 export type RegistrationBody = {
     email: string;

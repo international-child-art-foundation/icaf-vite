@@ -5,7 +5,7 @@
  * used across all API endpoints.
  */
 
-import { COMMON_HEADERS, HTTP_STATUS } from './commonTypes';
+import { COMMON_HEADERS, HTTP_STATUS } from './commonTypes.js';
 
 // Base error response interface
 export interface ErrorResponse {

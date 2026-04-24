@@ -2,12 +2,20 @@
   "name": "@icaf/backend",
   "version": "0.0.1",
   "private": true,
-  "main": "index.ts",
-  "types": "index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "tsc -b --clean"
+  },
+  "dependencies": {
+    "@icaf/shared": "workspace:*"
+  },
   "devDependencies": {
+    "@aws-sdk/lib-dynamodb": "^3.1037.0",
     "aws-cdk": "2",
     "aws-cdk-lib": "^2.201.0",
     "constructs": "^10.4.2",
-    "esbuild": "^0.25.5"
+    "esbuild": "^0.25.5",
+    "prettier": "^3.8.3"
   }
 }

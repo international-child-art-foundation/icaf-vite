@@ -5,7 +5,7 @@
  * artwork collections with different sorting options.
  */
 
-import { ArtworkEntity } from './artworkTypes';
+import { ArtworkEntity } from './artworkTypes.js';
 
 // Supported sort types for gallery queries
 export type SortType = 'newest' | 'oldest' | 'highest-voted' | 'lowest-voted';

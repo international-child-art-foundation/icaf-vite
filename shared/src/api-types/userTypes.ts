@@ -1,289 +1,222 @@
 /**
- * User Types and Roles
- * 
- * Defines user types, roles, and related enums
- * for the ICAF application.
+ * User Types
+ *
+ * Types for USER entities and all user-management API shapes.
+ *
+ * DynamoDB USER entity key structure:
+ *   PK = USER#<user_id>
+ *   SK = 'PROFILE'
+ *
+ * GSI attributes written on creation:
+ *   EMAIL_PK = 'EMAIL#<email>'
+ *   EMAIL_SK = 'TYPE#USER'
+ *
+ * Virtual users: is_virtual=true means the USER entity exists in DynamoDB but
+ * no Cognito account has been created yet. This happens when:
+ *   - Someone submits artwork without an account (uses email only)
+ *   - Someone makes a donation (email-based only)
+ * When they click the verification link and create their account, is_virtual
+ * becomes false and verified_at is set.
  */
 
-// Valid roles in order of permissions (Admin > Contributor > Guardian > User)
 export const ROLES = ['admin', 'contributor', 'guardian', 'user'] as const;
 export type Role = typeof ROLES[number];
 
-// User types based on role and age
-export type UserType = 'admin' | 'contributor' | 'guardian' | 'user';
-
-// User profile information
-export interface UserProfile {
-    UUID: string;
-    email: string;
-    f_name: string;
-    l_name: string;
-    birthdate: string;
-    role: Role;
-    user_type: UserType;
-    can_submit_artwork: boolean;
-    max_constituents_per_season: number;
-    has_paid: boolean;
-    accolades: string[];
-    has_magazine_subscription: boolean;
-    has_newsletter_subscription: boolean;
-    created_at: string;
-    updated_at: string;
+export function isValidRole(role: string): role is Role {
+    return ROLES.includes(role as Role);
 }
 
-// User registration data
-export interface UserRegistrationData {
+// Full USER entity as stored in DynamoDB
+export interface UserEntity {
+    // ── Required ───────────────────────────────────────────────────────────
+    user_id: string;                    // UUID; mirror of PK
+    email: string;
+    is_virtual: boolean;                // true = no Cognito account yet
+    timestamp: number;                  // Unix timestamp (seconds) of record creation
+    banned: boolean;                    // false by default; banned users cannot submit
+    has_magazine_subscription: boolean;
+    has_newsletter_subscription: boolean;
+    type: 'USER';
+
+    // ── Optional ───────────────────────────────────────────────────────────
+    f_name?: string;                    // max 24 chars; absent for donation-only virtual users
+    l_name?: string;                    // max 24 chars
+    dob?: string;                       // YYYY-MM-DD; NOT exposed in API responses
+    role?: Role;                        // absent until account is verified
+    verify_token?: string;              // UUID slug sent in verification email; cleared after use
+    verify_token_expiration?: number;   // Unix timestamp; cleared after use
+    verified_at?: number;               // Unix timestamp of account verification
+}
+
+// Safe API response shape — never exposes dob or verification tokens
+export interface UserProfileResponse {
+    user_id: string;
+    email: string;
+    f_name?: string;
+    l_name?: string;
+    role: Role;
+    is_virtual: boolean;
+    banned: boolean;
+    has_magazine_subscription: boolean;
+    has_newsletter_subscription: boolean;
+    verified_at?: number;
+    timestamp: number;
+}
+
+// Registration request (Cognito sign-up via POST /auth/register)
+export interface RegisterRequest {
     email: string;
     password: string;
     f_name: string;
     l_name: string;
-    birthdate: string;
-    role?: Role;
+    dob: string;    // YYYY-MM-DD
 }
 
-// Delete account request data
+// Verify account request (POST /auth/verify)
+// Called when user clicks their verification link
+export interface VerifyAccountRequest {
+    user_id: string;    // from the link: icaf.org/create-account?id=<user_id>
+    password?: string;  // only required for virtual users creating their Cognito account
+}
+
+// Delete account request
 export interface DeleteAccountRequest {
-    password: string; // Confirmation password
+    password: string;
 }
 
-// User response for API calls
-export interface UserResponse {
-    UUID: string;
-    email: string;
-    f_name: string;
-    l_name: string;
-    role: Role;
-    has_cur_season_submission: boolean;
-    has_magazine_subscription: boolean;
-    has_newsletter_subscription: boolean;
-    birthdate: string;
+// ── Admin / Contributor request types ────────────────────────────────────────
+
+// PATCH /admin/users/{userId} — unified user update
+export interface UpdateUserRequest {
+    new_role?: Role;
+    banned?: boolean;
+    ban_reason?: string;    // required when banned=true
 }
 
-// Helper functions
-export function calculateUserAge(birthdate: string): number {
-    const birthDate = new Date(birthdate);
-    const today = new Date();
-    const age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    return monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate()) ? age - 1 : age;
-}
+export function validateUpdateUserRequest(data: any): string[] {
+    const errors: string[] = [];
 
-export function determineUserType(role: Role): UserType {
-    if (role === 'admin') return 'admin';
-    if (role === 'contributor') return 'contributor';
-    if (role === 'guardian') return 'guardian';
-    return 'user';
-}
-
-export function canSubmitArtwork(userType: UserType): boolean {
-    return ['admin', 'contributor', 'guardian', 'user'].includes(userType);
-}
-
-export function getMaxConstituentsPerSeason(userType: UserType): number {
-    switch (userType) {
-        case 'admin':
-        case 'contributor':
-            return -1; // Unlimited
-        case 'guardian':
-            return 50; // Limited to 50 constituents
-        case 'user':
-            return 0; // Cannot submit for others
-        default:
-            return 0;
+    if (data.new_role !== undefined && !isValidRole(data.new_role)) {
+        errors.push(`new_role must be one of: ${ROLES.join(', ')}`);
     }
+
+    if (data.banned !== undefined && typeof data.banned !== 'boolean') {
+        errors.push('banned must be a boolean');
+    }
+
+    if (data.banned === true && !data.ban_reason?.trim()) {
+        errors.push('ban_reason is required when banning a user');
+    }
+
+    if (data.new_role === undefined && data.banned === undefined) {
+        errors.push('at least one of new_role or banned must be provided');
+    }
+
+    return errors;
 }
 
-// Request interface for altering user role (legacy - with user_id in body)
-export interface AlterUserRoleRequest {
+export interface UpdateUserResponse {
+    message: string;
     user_id: string;
+    role: Role;
+    banned: boolean;
+    admin_action_id?: string;
+    timestamp: number;
+    updated_fields: string[];
+}
+
+// Contributor role change (less permissive — cannot set 'admin')
+export interface UpdateUserRoleRequest {
+    new_role: Exclude<Role, 'admin'>;
+}
+
+export function validateUpdateUserRoleRequest(data: any): string[] {
+    const errors: string[] = [];
+    if (!data.new_role || !isValidRole(data.new_role)) {
+        errors.push(`new_role must be one of: ${ROLES.filter(r => r !== 'admin').join(', ')}`);
+    }
+    if (data.new_role === 'admin') {
+        errors.push('contributors cannot assign the admin role');
+    }
+    return errors;
+}
+
+// Admin alter role (can set 'admin')
+export interface AlterUserRoleRequest {
     new_role: Role;
 }
 
-// Request interface for altering user role (RESTful - user_id in path)
-export interface AlterUserRoleBodyRequest {
-    new_role: Role;
+export function validateAlterUserRoleRequest(data: any): string[] {
+    const errors: string[] = [];
+    if (!data.new_role || !isValidRole(data.new_role)) {
+        errors.push(`new_role must be one of: ${ROLES.join(', ')}`);
+    }
+    return errors;
 }
 
-// Response interface for altering user role
 export interface AlterUserRoleResponse {
     message: string;
     user_id: string;
     old_role: Role;
     new_role: Role;
-    max_constituents_per_season: number; // 0 if user, 50 if guardian, -1 if contributor/admin
     updated_fields: string[];
 }
 
-// Validation function for alter user role request (legacy)
-export function validateAlterUserRoleRequest(data: any): string[] {
-    const errors: string[] = [];
-    
-    if (!data.user_id || typeof data.user_id !== 'string') {
-        errors.push('user_id is required and must be a string');
-    }
-    
-    if (!data.new_role || typeof data.new_role !== 'string') {
-        errors.push('new_role is required and must be a string');
-    } else if (!ROLES.includes(data.new_role)) {
-        errors.push(`new_role must be one of: ${ROLES.join(', ')}`);
-    }
-    
-    return errors;
-}
-
-// Validation function for alter user role body request (RESTful)
-export function validateAlterUserRoleBodyRequest(data: any): string[] {
-    const errors: string[] = [];
-    
-    if (!data.new_role || typeof data.new_role !== 'string') {
-        errors.push('new_role is required and must be a string');
-    } else if (!ROLES.includes(data.new_role)) {
-        errors.push(`new_role must be one of: ${ROLES.join(', ')}`);
-    }
-    
-    return errors;
-}
-
-// Request interface for updating user (unified PATCH API)
-export interface UpdateUserRequest {
-    new_role?: Role;
-    can_submit?: boolean;
-    ban_reason?: string; // Required when can_submit is set to false
-}
-
-// Response interface for user update operations
-export interface UpdateUserResponse {
-    message: string;
-    user_id: string;
-    is_banned: boolean;
-    can_submit: boolean;
-    role: Role;
-    max_constituents_per_season: number;
-    admin_action_id?: string; // Only present if actions were taken
-    timestamp: string;
-    updated_fields: string[];
-}
-
-// Legacy interfaces (keep for backward compatibility)
+// Ban / Unban
 export interface BanUserRequest {
     reason: string;
 }
 
-export interface UnbanUserRequest {}
+export function validateBanUserRequest(data: any): string[] {
+    const errors: string[] = [];
+    if (!data.reason?.trim()) {
+        errors.push('reason is required and cannot be empty');
+    }
+    return errors;
+}
 
 export interface BanUnbanUserResponse {
     message: string;
     user_id: string;
-    is_banned: boolean;
-    can_submit: boolean;
+    banned: boolean;
     admin_action_id: string;
-    timestamp: string;
+    timestamp: number;
 }
 
-// Validation function for update user request
-export function validateUpdateUserRequest(data: any): string[] {
-    const errors: string[] = [];
-    
-    if (data.new_role !== undefined) {
-        if (typeof data.new_role !== 'string') {
-            errors.push('new_role must be a string');
-        } else if (!ROLES.includes(data.new_role)) {
-            errors.push(`new_role must be one of: ${ROLES.join(', ')}`);
-        }
-    }
-    
-    if (data.can_submit !== undefined && typeof data.can_submit !== 'boolean') {
-        errors.push('can_submit must be a boolean');
-    }
-    
-    if (data.can_submit === false && (!data.ban_reason || typeof data.ban_reason !== 'string' || data.ban_reason.trim().length === 0)) {
-        errors.push('ban_reason is required when banning a user');
-    }
-    
-    if (data.ban_reason !== undefined && data.can_submit !== false) {
-        errors.push('ban_reason can only be provided when can_submit is false');
-    }
-    
-    // At least one field must be provided
-    if (data.new_role === undefined && data.can_submit === undefined) {
-        errors.push('At least one field (new_role or can_submit) must be provided');
-    }
-    
-    return errors;
-}
-
-// Legacy validation function for ban user request
-export function validateBanUserRequest(data: any): string[] {
-    const errors: string[] = [];
-
-    if (!data.reason || typeof data.reason !== 'string') {
-        errors.push('reason is required and must be a string');
-    } else if (data.reason.trim().length === 0) {
-        errors.push('reason cannot be empty');
-    }
-
-    return errors;
-}
-
-// Request interface for removing all user artwork
+// Remove all artwork from a user (admin action)
 export interface RemoveAllUserArtworkRequest {
     reason: string;
 }
 
-// Response interface for removing all user artwork
+export function validateRemoveAllUserArtworkRequest(data: any): string[] {
+    if (!data.reason?.trim()) return ['reason is required and cannot be empty'];
+    return [];
+}
+
 export interface RemoveAllUserArtworkResponse {
     message: string;
     user_id: string;
     artworks_removed: number;
-    total_artworks: number;
-    deleted_artwork_ids: string[];
     failed_deletions: { art_id: string; reason: string }[];
     admin_action_id: string;
-    timestamp: string;
+    timestamp: number;
 }
 
-// Validation function for remove all user artwork request
-export function validateRemoveAllUserArtworkRequest(data: any): string[] {
-    const errors: string[] = [];
-
-    if (!data.reason || typeof data.reason !== 'string') {
-        errors.push('reason is required and must be a string');
-    } else if (data.reason.trim().length === 0) {
-        errors.push('reason cannot be empty');
-    }
-
-    return errors;
-}
-
-// Response interface for getting user Cognito information
-export interface GetUserCognitoInfoResponse {
-    user_id: string;
-    email: string;
-    email_verified: boolean;
-    username: string;
-    user_status: string;
-    enabled: boolean;
-    user_create_date?: string;
-    user_last_modified_date?: string;
-}
-
-// Response interface for getting artwork submitter email
-export interface GetArtworkSubmitterEmailResponse {
-    art_id: string;
-    artwork_title: string;
-    user_id: string;
-    email: string;
-    email_verified: boolean;
-    username: string;
-}
-
-// Request interface for admin deleting user account
+// Delete user account (admin action)
 export interface DeleteUserAccountRequest {
     reason: string;
     delete_from_cognito?: boolean;
 }
 
-// Response interface for admin deleting user account
+export function validateDeleteUserAccountRequest(data: any): string[] {
+    const errors: string[] = [];
+    if (!data.reason?.trim()) errors.push('reason is required and cannot be empty');
+    if (data.delete_from_cognito !== undefined && typeof data.delete_from_cognito !== 'boolean') {
+        errors.push('delete_from_cognito must be a boolean if provided');
+    }
+    return errors;
+}
+
 export interface DeleteUserAccountResponse {
     message: string;
     user_id: string;
@@ -291,22 +224,40 @@ export interface DeleteUserAccountResponse {
     entries_deleted: number;
     cognito_deleted: boolean;
     admin_action_id: string;
-    timestamp: string;
+    timestamp: number;
 }
 
-// Validation function for delete user account request
-export function validateDeleteUserAccountRequest(data: any): string[] {
+// Get Cognito info (admin)
+export interface GetUserCognitoInfoResponse {
+    user_id: string;
+    email: string;
+    email_verified: boolean;
+    cognito_username: string;
+    user_status: string;
+    enabled: boolean;
+    user_create_date?: string;
+    user_last_modified_date?: string;
+}
+
+// Get artwork submitter email (admin)
+export interface GetArtworkSubmitterEmailResponse {
+    art_id: string;
+    artwork_title: string;
+    user_id: string;
+    email: string;
+}
+
+// Contributor: set guardian submission limit
+export interface SetGuardianSubmissionLimitRequest {
+    max_constituents: number;
+    reason: string;
+}
+
+export function validateSetGuardianSubmissionLimitRequest(data: any): string[] {
     const errors: string[] = [];
-
-    if (!data.reason || typeof data.reason !== 'string') {
-        errors.push('reason is required and must be a string');
-    } else if (data.reason.trim().length === 0) {
-        errors.push('reason cannot be empty');
+    if (data.max_constituents === undefined || !Number.isInteger(data.max_constituents) || data.max_constituents < 0) {
+        errors.push('max_constituents must be a non-negative integer');
     }
-
-    if (data.delete_from_cognito !== undefined && typeof data.delete_from_cognito !== 'boolean') {
-        errors.push('delete_from_cognito must be a boolean if provided');
-    }
-
+    if (!data.reason?.trim()) errors.push('reason is required');
     return errors;
-} 
+}

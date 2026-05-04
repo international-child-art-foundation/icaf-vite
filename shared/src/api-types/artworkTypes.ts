@@ -1,138 +1,171 @@
 /**
- * Artwork Submission Types
- * 
- * Defines types for artwork submission API
- * and related data structures.
+ * Artwork Types
+ *
+ * Types for ART entities, submission requests, and gallery responses.
+ *
+ * DynamoDB ART entity key structure:
+ *   PK = ART#<art_id>
+ *   SK = '-'
+ *
+ * GSI attributes written on creation (always):
+ *   OWN_PK    = 'OWNER#<user_id>'
+ *   OWN_SK    = 'TYPE#ART#TS#<unix_ts>#ID#<art_id>'
+ *   REV_PK    = 'REVIEW'
+ *   REV_SK    = 'STATUS#pending_review#TYPE#ART#TS#<unix_ts>#ID#<art_id>'
+ *
+ * GSI attributes written on approval (sparse — remove when hiding/rejecting):
+ *   GALL_PK   = 'GALLERY'
+ *   FAM_PK    = 'FAMILY#<theme_family>'                        (if themed)
+ *   INST_PK   = 'FAMILY#<family>#INSTANCE#<instance>'         (if has instance)
+ *   ART_GSI_SK = 'TS#<unix_ts>#ART#<art_id>'                 (shared by all 3 gallery GSIs)
+ *
+ * Note: file_type is NOT stored on the entity. The processImage Lambda normalises
+ * all uploads to .avif or .png. file_type is only used during submission to
+ * generate a presigned S3 URL.
  */
 
-// Supported file types for artwork uploads
-export const SUPPORTED_FILE_TYPES = ['jpg', 'jpeg', 'png', 'gif', 'webp'] as const;
-export type FileType = typeof SUPPORTED_FILE_TYPES[number];
+export const UPLOAD_FILE_TYPES = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'] as const;
+export type UploadFileType = typeof UPLOAD_FILE_TYPES[number];
 
-// Submit artwork request data
-export interface SubmitArtworkRequest {
-    season: string;
-    title: string;
-    description?: string;
-    file_type: FileType;
-    is_ai_generated: boolean;
-    ai_model?: string; // Required if is_ai_generated is true
-    f_name: string;
-    age: number;
-    location: string;
-    is_virtual: boolean;
+// Possible artwork statuses.
+// deleted_by_user → sparse GSI attrs removed; entry stays in DB as a soft-delete record.
+export type ArtworkStatus =
+    | 'pending_review'
+    | 'approved'
+    | 'hidden'
+    | 'rejected'
+    | 'deleted_by_user';
+
+// How the artwork was submitted relative to the submitter's account
+export type SubmitterRelationship = 'self' | 'parent' | 'guardian' | 'teacher';
+
+// Full ART entity as stored in DynamoDB
+export interface ArtworkEntity {
+    // ── Required ───────────────────────────────────────────────────────────
+    art_id: string;
+    user_id: string;            // submitting user (guardian if is_virtual)
+    is_virtual: boolean;        // true = artist has no account (guardian-submitted)
+    status: ArtworkStatus;
+    kudos_count: number;
+    timestamp: number;          // Unix timestamp (seconds)
+    legal_release_hash: string; // SHA-256 hash of the legal release PDF text accepted at submission
+    type: 'ART';
+
+    // ── Optional ───────────────────────────────────────────────────────────
+    // Prediction: f_name/age/country/title feel submission-essential but the
+    // schema marks them optional — they may be absent for programmatic imports.
+    f_name?: string;
+    age?: number;
+    country?: string;
+    region?: string;
+    title?: string;
+    description?: string;       // max ~300 words
+    theme_family?: string;      // e.g. 'CHERRYBLOSSOM'
+    theme_instance?: string;    // zero-padded 4-digit string, e.g. '2025'
+    group_id?: string;          // GROUP#<gid> if part of a group submission
+    submitter_relationship?: SubmitterRelationship;
 }
 
-// Submit artwork response data
+// Supported upload formats (sent by client for presigned URL generation only)
+export function isValidUploadFileType(t: string): t is UploadFileType {
+    return UPLOAD_FILE_TYPES.includes(t as UploadFileType);
+}
+
+// Request body for submitting artwork (POST /user/artworks)
+// file_type is used only to generate the presigned S3 upload URL; not stored on entity
+export interface SubmitArtworkRequest {
+    file_type: UploadFileType;
+    title: string;
+    description?: string;
+    f_name: string;
+    age: number;
+    country: string;
+    region?: string;
+    is_virtual: boolean;
+    submitter_relationship?: SubmitterRelationship;
+    theme_family?: string;
+    theme_instance?: string;
+    group_id?: string;
+    legal_release_hash?: string;
+    is_ai_generated: boolean;   // informational, stored if needed by future fields
+}
+
 export interface SubmitArtworkResponse {
     success: boolean;
-    artwork_id: string;
+    art_id: string;
     presigned_url: string;
-    upload_expires_at: string;
+    upload_expires_at: number;  // Unix timestamp
     message: string;
-    timestamp: number;
 }
 
-// Artwork entity data structure
-export interface ArtworkEntity {
+// Shape used in list and gallery responses (subset of ArtworkEntity)
+export interface ArtworkListItem {
     art_id: string;
-    user_id: string;
-    season: string;
+    f_name: string;
+    age: number;
+    country: string;
+    region?: string;
     title: string;
     description?: string;
-    f_name: string;
-    age: number;
-    location: string;
+    theme_family?: string;
+    theme_instance?: string;
+    group_id?: string;
+    status: ArtworkStatus;
+    kudos_count: number;
+    timestamp: number;
     is_virtual: boolean;
-    is_ai_gen: boolean;
-    model?: string;
-    file_type: FileType;
-    is_approved: boolean;
-    votes: number;
-    timestamp: string;
-    type: 'ART';
 }
 
-// Art pointer entity data structure (for user → artwork relationship)
-export interface ArtPtrEntity {
-    artwork_id: string;
-    art_id: string;
-    season: string;
-    timestamp: string;
-    type: 'ART_PTR';
-}
-
-
-// List Constituent Artworks types
-export interface ListConstituentArtworksRequest {
-    season?: string;
-    limit?: number;
-    last_key?: string;
-}
-
-export interface ConstituentArtworkItem {
-    art_id: string;
-    season: string;
-    f_name: string;
-    age: number;
-    title: string;
-    location: string;
-    is_ai_gen: boolean;
-    model?: string;
-    is_approved: boolean;
-    votes: number;
-    file_type: FileType;
-    timestamp: string;
-}
-
-export interface ListConstituentArtworksResponse {
-    artworks: ConstituentArtworkItem[];
+export interface ListArtworkSubmissionsResponse {
+    artworks: ArtworkListItem[];
     has_more: boolean;
     last_key?: string;
 }
 
-// Validation helper functions
-export function isValidFileType(fileType: string): fileType is FileType {
-    return SUPPORTED_FILE_TYPES.includes(fileType as FileType);
+// Guardian view of constituent artworks
+export interface ListConstituentArtworksRequest {
+    limit?: number;
+    last_key?: string;
 }
 
+export interface ListConstituentArtworksResponse {
+    artworks: ArtworkListItem[];
+    has_more: boolean;
+    last_key?: string;
+}
+
+// Validation
 export function validateSubmissionData(data: SubmitArtworkRequest): string[] {
     const errors: string[] = [];
 
-    if (!data.season?.trim()) {
-        errors.push('Season is required');
-    }
-
     if (!data.title?.trim()) {
-        errors.push('Title is required');
+        errors.push('title is required');
+    } else if (data.title.length > 200) {
+        errors.push('title must be 200 characters or less');
     }
 
-    if (data.title && data.title.length > 100) {
-        errors.push('Title must be 100 characters or less');
-    }
-
-    if (!isValidFileType(data.file_type)) {
-        errors.push(`File type must be one of: ${SUPPORTED_FILE_TYPES.join(', ')}`);
-    }
-
-    if (data.is_ai_generated && !data.ai_model?.trim()) {
-        errors.push('AI model is required when artwork is AI-generated');
+    if (!isValidUploadFileType(data.file_type)) {
+        errors.push(`file_type must be one of: ${UPLOAD_FILE_TYPES.join(', ')}`);
     }
 
     if (!data.f_name?.trim()) {
-        errors.push('Artist first name is required');
+        errors.push('f_name (artist first name) is required');
     }
 
     if (!Number.isInteger(data.age) || data.age < 1 || data.age > 150) {
-        errors.push('Age must be a valid integer between 1 and 150');
+        errors.push('age must be a valid integer between 1 and 150');
     }
 
-    if (!data.location?.trim()) {
-        errors.push('Location is required');
+    if (!data.country?.trim()) {
+        errors.push('country is required');
     }
 
     if (typeof data.is_virtual !== 'boolean') {
         errors.push('is_virtual must be a boolean');
+    }
+
+    if (data.theme_instance && !data.theme_family) {
+        errors.push('theme_family is required when theme_instance is provided');
     }
 
     return errors;

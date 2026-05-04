@@ -1,84 +1,48 @@
 /**
- * Business Logic Validation
- * 
- * Contains shared business logic validation functions
- * used across multiple API endpoints.
+ * Business Logic
+ *
+ * Shared guard functions used across multiple Lambda handlers.
  */
 
 import { ArtworkEntity } from './artworkTypes.js';
+import { UserEntity } from './userTypes.js';
 
-// Check if user can vote for artwork
-export function canUserVoteForArtwork(
+// Check whether a user can give kudos to an artwork
+export function canUserGiveKudos(
     userId: string,
-    artwork: ArtworkEntity,
-    activeSeasons: Set<string>
-): { canVote: boolean; reason?: string } {
-    // User cannot vote for their own artwork
+    artwork: ArtworkEntity
+): { canKudo: boolean; reason?: string } {
     if (artwork.user_id === userId) {
-        return {
-            canVote: false,
-            reason: 'Cannot vote for your own artwork'
-        };
+        return { canKudo: false, reason: 'Cannot give kudos to your own artwork' };
     }
-
-    // Artwork must be approved
-    if (!artwork.is_approved) {
-        return {
-            canVote: false,
-            reason: 'Cannot vote for unapproved artwork'
-        };
+    if (artwork.status !== 'approved') {
+        return { canKudo: false, reason: 'Can only give kudos to approved artwork' };
     }
-
-    // Artwork must belong to current active season
-    if (!artwork.season || !activeSeasons.has(artwork.season)) {
-        return {
-            canVote: false,
-            reason: 'Voting not allowed for this season'
-        };
-    }
-
-    return { canVote: true };
+    return { canKudo: true };
 }
 
-// Check if user can submit artwork
+// Check whether a user is allowed to submit artwork
 export function canUserSubmitArtwork(
-    user: any,
-    season: any
+    user: UserEntity | undefined | null
 ): { canSubmit: boolean; reason?: string } {
-    // User must exist
     if (!user) {
-        return {
-            canSubmit: false,
-            reason: 'User profile not found'
-        };
+        return { canSubmit: false, reason: 'User profile not found' };
     }
-
-    // User must have submission permission
-    if (!user.can_submit) {
-        return {
-            canSubmit: false,
-            reason: 'User is not authorized to submit artwork'
-        };
+    if (user.banned) {
+        return { canSubmit: false, reason: 'Account is banned' };
     }
-
-    // Season must be active
-    if (!season || !season.is_active) {
-        return {
-            canSubmit: false,
-            reason: 'Requested season is not active'
-        };
-    }
-
     return { canSubmit: true };
 }
 
-// Validate season is active
-export function isSeasonActive(season: any): boolean {
-    return season && season.is_active === true;
-}
+// Role hierarchy check
+// Order (ascending): user < guardian < contributor < admin
+const ROLE_RANK: Record<string, number> = {
+    user: 0,
+    guardian: 1,
+    contributor: 2,
+    admin: 3,
+};
 
-// Extract season name from SK
-export function extractSeasonFromSK(sk: string): string {
-    const idx = sk.indexOf('#SEASON#');
-    return idx >= 0 ? sk.substring(idx + '#SEASON#'.length) : sk;
+export function hasMinimumRole(userRole: string | undefined, requiredRole: string): boolean {
+    return (ROLE_RANK[userRole ?? ''] ?? -1) >= (ROLE_RANK[requiredRole] ?? 999);
 }

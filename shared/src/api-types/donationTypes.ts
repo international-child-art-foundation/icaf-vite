@@ -1,110 +1,58 @@
 /**
- * Donation API Types
- * 
- * Defines types for donation-related API endpoints and
- * Every.org webhook integration.
+ * Donation / Payment Types
+ *
+ * Types for PAYMENT entities. Payments are processed externally (Stripe) and
+ * recorded here via webhook. The backend does not initiate charges.
+ *
+ * DynamoDB PAYMENT entity key structure:
+ *   PK = USER#<user_id>   (USER#ANON for anonymous/unlinked donations)
+ *   SK = PAYMENT#<payment_id>   (payment_id = Stripe charge/payment_intent ID)
+ *
+ * GSI attributes: none — addressable by user_id directly.
+ * To look up donations by email pre-account-linking, query EmailGSI then PAYMENT SK.
  */
 
-// Every.org webhook event structure
-export interface EveryOrgDonationEvent {
-    donation_id: string;
+// Full PAYMENT entity as stored in DynamoDB
+export interface PaymentEntity {
+    user_id: string;            // USER#<user_id> or USER#ANON
+    payment_id: string;         // Stripe ID (payment_intent or charge ID)
+    payment_service: 'stripe';
+    email?: string;             // stored to allow future account linking
+    amount_cents: number;
+    currency: string;           // e.g. 'USD', 'EUR'
+    timestamp: number;          // Unix timestamp (seconds)
+    type: 'PAYMENT';
+}
+
+// Admin-facing donation item in list responses
+export interface PaymentListItem {
+    user_id: string;
+    payment_id: string;
+    payment_service: 'stripe';
+    email?: string;
     amount_cents: number;
     currency: string;
-    status: 'completed' | 'pending' | 'failed' | 'cancelled';
-    donor_id?: string; // Optional - may not exist for anonymous donations
-    donor_email?: string;
-    message?: string;
-    anonymous: boolean;
-    timestamp: string;
-    campaign_id?: string;
-    transaction_id?: string;
+    timestamp: number;
 }
 
-// Donation entity structure for DynamoDB
-export interface DonationEntity {
-    donation_id: string;
+export interface ListPaymentsResponse {
+    payments: PaymentListItem[];
+    total_amount_cents: number;
+    count: number;
+    has_more: boolean;
+    last_key?: string;
+}
+
+// User-facing view of their own payments
+export interface UserPaymentItem {
+    payment_id: string;
     amount_cents: number;
     currency: string;
-    status: string;
-    donor_id?: string;
-    donor_email?: string;
-    message?: string;
-    anonymous: boolean;
-    timestamp: string;
-    campaign_id?: string;
-    transaction_id?: string;
-    type: 'DONATION';
+    timestamp: number;
 }
 
-// Donation API response structure
-export interface DonationResponse {
-    message: string;
-    donation_id: string;
-    amount_cents: number;
-    user_id: string;
-    anonymous: boolean;
-}
-
-// Donation processing result
-export interface DonationProcessingResult {
-    success: boolean;
-    donation_id: string;
-    user_id: string;
-    anonymous: boolean;
-    amount_cents: number;
-    has_paid_updated?: boolean;
-    total_donations_cents?: number;
-}
-
-// Validation helper for donation events
-export function isValidDonationEvent(event: any): event is EveryOrgDonationEvent {
-    return (
-        typeof event === 'object' &&
-        event !== null &&
-        typeof event.donation_id === 'string' &&
-        typeof event.amount_cents === 'number' &&
-        typeof event.status === 'string' &&
-        typeof event.anonymous === 'boolean' &&
-        typeof event.timestamp === 'string'
-    );
-}
-
-// Validation helper for donation status
-export function isValidDonationStatus(status: string): status is EveryOrgDonationEvent['status'] {
-    return ['completed', 'pending', 'failed', 'cancelled'].includes(status);
-}
-
-// Check if donation is completed and should be processed
-export function shouldProcessDonation(status: string): boolean {
-    return status === 'completed';
-}
-
-// Admin: Get all donations response
-export interface AdminDonationItem {
-    donation_id: string;
-    user_id: string;
-    amount_cents: number;
-    currency: string;
-    status: string;
-    timestamp: string;
-    stripe_id?: string;
-    message?: string;
-    anonymous: boolean;
-    donor_name?: string; // f_name + l_name (if not anonymous)
-}
-
-export interface AdminGetAllDonationsResponse {
-    donations: AdminDonationItem[];
-    summary: {
-        total_donations: number;
-        total_amount_cents: number;
-        succeeded_count: number;
-        succeeded_amount_cents: number;
-        pending_count: number;
-        failed_count: number;
-    };
-    pagination: {
-        has_more: boolean;
-        last_evaluated_key?: string;
-    };
+export interface ListUserPaymentsResponse {
+    payments: UserPaymentItem[];
+    has_more: boolean;
+    last_key?: string;
 }

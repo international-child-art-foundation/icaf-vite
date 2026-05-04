@@ -7,71 +7,145 @@ import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as sqs from "aws-cdk-lib/aws-sqs";
+import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 
 export class InfraStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    // 1️⃣  DynamoDB Table - Single Table Design
+    // ─── 1. DynamoDB Table — Single Table Design ──────────────────────────────
     const icafTable = new dynamodb.Table(this, "IcaFTable", {
       tableName: "icaf-main-table",
       partitionKey: { name: "PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "SK", type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: RemovalPolicy.DESTROY,
+      removalPolicy: RemovalPolicy.RETAIN, // Never auto-delete production data
     });
 
-    // Add GSIs for Gallery functionality - matching actual database structure
-    // GSI1 - Time Sorted (Season): for newest/oldest artwork queries
+    // ── Gallery GSIs (artworks) ──────────────────────────────────────────────
+    //
+    // All three gallery GSIs share the same SK attribute (ART_GSI_SK) since the
+    // SK format is identical: 'TS#<unix_ts>#ART#<art_id>'
+    // The PK attribute differs per GSI, allowing one ART entity to appear in all three.
+    // Sparse: these PK attributes are only written when status='approved'.
+    // On approval:   set GALL_PK, FAM_PK (if themed), INST_PK (if has instance), ART_GSI_SK
+    // On hide/reject: remove those PK attributes (DynamoDB sparse GSI auto-removes the item)
+
+    // All artworks (time-sorted). ART entity: GALL_PK='GALLERY'
     icafTable.addGlobalSecondaryIndex({
-      indexName: "GSI1",
-      partitionKey: { name: "GSI1PK", type: dynamodb.AttributeType.STRING }, // SEASON#<id>
-      sortKey: { name: "GSI1SK", type: dynamodb.AttributeType.STRING }, // TIMESTAMP#<timestamp>#ART#<art_id>
+      indexName: "GalleryGSI",
+      partitionKey: { name: "GALL_PK", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "ART_GSI_SK", type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
-    // GSI2 - Vote Sorted (Season): for highest/lowest voted artwork queries  
+    // Artworks filtered by theme family. ART entity: FAM_PK='FAMILY#<theme_family>'
     icafTable.addGlobalSecondaryIndex({
-      indexName: "GSI2",
-      partitionKey: { name: "GSI2PK", type: dynamodb.AttributeType.STRING }, // SEASON#<id>
-      sortKey: { name: "GSI2SK", type: dynamodb.AttributeType.STRING }, // VOTES#<votes>#TIMESTAMP#<timestamp>#ART#<art_id>
+      indexName: "FamilyGalleryGSI",
+      partitionKey: { name: "FAM_PK", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "ART_GSI_SK", type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
-    // S3 Bucket for artwork storage
+    // Artworks filtered by theme family+instance. ART entity: INST_PK='FAMILY#<family>#INSTANCE#<instance>'
+    icafTable.addGlobalSecondaryIndex({
+      indexName: "InstanceGalleryGSI",
+      partitionKey: { name: "INST_PK", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "ART_GSI_SK", type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    // ── Groups GSIs ──────────────────────────────────────────────────────────
+    //
+    // Same pattern as gallery GSIs. All three share GRP_GSI_SK = 'TS#<unix_ts>#ID#<group_id>'
+    // Sparse on status='approved'.
+
+    // All groups. GROUP entity: GRP_PK='GROUPS'
+    icafTable.addGlobalSecondaryIndex({
+      indexName: "GroupsGSI",
+      partitionKey: { name: "GRP_PK", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "GRP_GSI_SK", type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    // Groups by theme family. GROUP entity: FGRP_PK='GROUPS#FAMILY#<family>'
+    icafTable.addGlobalSecondaryIndex({
+      indexName: "FamilyGroupsGSI",
+      partitionKey: { name: "FGRP_PK", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "GRP_GSI_SK", type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    // Groups by theme family+instance. GROUP entity: IGRP_PK='GROUPS#FAMILY#<family>#INSTANCE#<instance>'
+    icafTable.addGlobalSecondaryIndex({
+      indexName: "InstanceGroupsGSI",
+      partitionKey: { name: "IGRP_PK", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "GRP_GSI_SK", type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    // Owner GSI — a user's artworks and groups
+    // ART:   OWN_PK='OWNER#<user_id>',  OWN_SK='TYPE#ART#TS#<unix_ts>#ID#<art_id>'
+    // GROUP: OWN_PK='OWNER#<user_id>',  OWN_SK='TYPE#GROUP#TS#<unix_ts>#ID#<group_id>'
+    // Sparse: only ART and GROUP entities (not USER, PAYMENT, etc.)
+    icafTable.addGlobalSecondaryIndex({
+      indexName: "OwnerGSI",
+      partitionKey: { name: "OWN_PK", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "OWN_SK", type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    // Email GSI — look up user account by email
+    // USER: EMAIL_PK='EMAIL#<email>', EMAIL_SK='TYPE#USER'
+    // Can extend to other entity types in future (TYPE#GUARDIAN, etc.)
+    icafTable.addGlobalSecondaryIndex({
+      indexName: "EmailGSI",
+      partitionKey: { name: "EMAIL_PK", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "EMAIL_SK", type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    // Review GSI — contributor review workflow
+    // ART:   REV_PK='REVIEW', REV_SK='STATUS#<status>#TYPE#ART#TS#<ts>#ID#<art_id>'
+    // GROUP: REV_PK='REVIEW', REV_SK='STATUS#<status>#TYPE#GROUP#TS#<ts>#ID#<group_id>'
+    // Sparse: only items with status != 'approved' (pending_review, rejected, hidden)
+    // Query pattern: begins_with(SK, 'STATUS#pending_review#TYPE#ART')
+    icafTable.addGlobalSecondaryIndex({
+      indexName: "ReviewGSI",
+      partitionKey: { name: "REV_PK", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "REV_SK", type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    // ─── 2. S3 Bucket — Artwork Storage ──────────────────────────────────────
     const artworkBucket = new s3.Bucket(this, "IcaFArtworkBucket", {
       bucketName: "icaf-artwork-bucket",
-      removalPolicy: RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
+      removalPolicy: RemovalPolicy.RETAIN,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      cors: [
+        {
+          allowedMethods: [s3.HttpMethods.PUT, s3.HttpMethods.GET],
+          allowedOrigins: ["https://icaf.org", "http://localhost:5173"],
+          allowedHeaders: ["*"],
+          maxAge: 3000,
+        },
+      ],
     });
 
-    // 2️⃣  Cognito User Pool for Authentication
+    // ─── 3. Cognito User Pool ─────────────────────────────────────────────────
     const userPool = new cognito.UserPool(this, "IcaFUserPool", {
       userPoolName: "icaf-user-pool",
       selfSignUpEnabled: true,
-      signInAliases: {
-        email: true,
-      },
+      signInAliases: { email: true },
       standardAttributes: {
-        email: {
-          required: true,
-          mutable: true,
-        },
-        givenName: {
-          required: true,
-          mutable: true,
-        },
-        familyName: {
-          required: true,
-          mutable: true,
-        },
-        birthdate: {
-          required: true,
-          mutable: true,
-        },
+        email: { required: true, mutable: true },
+        givenName: { required: true, mutable: true },
+        familyName: { required: true, mutable: true },
+        birthdate: { required: true, mutable: true },
       },
       customAttributes: {
-        guardianId: new cognito.StringAttribute({ mutable: true }),
+        // Role stored here for JWT claim availability; keep in sync with USER entity in DDB
         role: new cognito.StringAttribute({ mutable: true }),
       },
       passwordPolicy: {
@@ -82,323 +156,453 @@ export class InfraStack extends Stack {
         requireSymbols: true,
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
-      removalPolicy: RemovalPolicy.DESTROY,
+      removalPolicy: RemovalPolicy.RETAIN, // Never auto-delete user accounts
     });
 
-    // 3️⃣  Cognito User Pool Client
     const userPoolClient = new cognito.UserPoolClient(this, "IcaFUserPoolClient", {
       userPool,
-      userPoolClientName: "icaf-client",
+      userPoolClientName: "icaf-web-client",
       generateSecret: false,
       authFlows: {
         adminUserPassword: true,
         userPassword: true,
         userSrp: true,
       },
-      oAuth: {
-        flows: {
-          authorizationCodeGrant: true,
-        },
-        scopes: [cognito.OAuthScope.EMAIL, cognito.OAuthScope.OPENID, cognito.OAuthScope.PROFILE],
-        callbackUrls: ["http://localhost:3000/callback"],
+    });
+
+    // ─── 4. SQS — Background Cleanup Queue ───────────────────────────────────
+    const cleanupDLQ = new sqs.Queue(this, "IcaFCleanupDLQ", {
+      queueName: "icaf-cleanup-dlq",
+      retentionPeriod: Duration.days(14),
+    });
+
+    const cleanupQueue = new sqs.Queue(this, "IcaFCleanupQueue", {
+      queueName: "icaf-cleanup-queue",
+      visibilityTimeout: Duration.seconds(300),
+      retentionPeriod: Duration.days(14),
+      deadLetterQueue: {
+        queue: cleanupDLQ,
+        maxReceiveCount: 3,
       },
     });
 
-    // 4️⃣  Lambda functions
-    const helloFn = new NodejsFunction(this, "HelloFn", {
-      entry: "../functions/hello.ts",
-      handler: "handler",
+    // ─── 5. Common Lambda configuration ──────────────────────────────────────
+    const commonEnv = {
+      TABLE_NAME: icafTable.tableName,
+      USER_POOL_ID: userPool.userPoolId,
+      USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
+      S3_BUCKET_NAME: artworkBucket.bucketName,
+      CLEANUP_QUEUE_URL: cleanupQueue.queueUrl,
+    };
+
+    const baseFnProps = {
       runtime: Runtime.NODEJS_20_X,
-      timeout: Duration.seconds(5),
+      timeout: Duration.seconds(15),
       memorySize: 256,
-      environment: {
-        TABLE_NAME: icafTable.tableName,
-        USER_POOL_ID: userPool.userPoolId,
-        USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
-      },
-    });
+      environment: commonEnv,
+    };
 
-    const userFn = new NodejsFunction(this, "UserFn", {
-      entry: "../functions/user.ts",
-      handler: "handler",
-      runtime: Runtime.NODEJS_20_X,
-      timeout: Duration.seconds(10),
-      memorySize: 256,
-      environment: {
-        TABLE_NAME: icafTable.tableName,
-        USER_POOL_ID: userPool.userPoolId,
-        USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
-      },
-    });
-
-    const registerFn = new NodejsFunction(this, "RegisterFn", {
-      entry: "../functions/register.ts",
-      handler: "handler",
-      runtime: Runtime.NODEJS_20_X,
-      timeout: Duration.seconds(30),
-      memorySize: 512,
-      environment: {
-        TABLE_NAME: icafTable.tableName,
-        USER_POOL_ID: userPool.userPoolId,
-        USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
-      },
-    });
-
-    const deleteAccountFn = new NodejsFunction(this, "DeleteAccountFn", {
-      entry: "../functions/deleteAccount.ts",
-      handler: "handler",
-      runtime: Runtime.NODEJS_20_X,
-      timeout: Duration.seconds(30),
-      memorySize: 512,
-      environment: {
-        TABLE_NAME: icafTable.tableName,
-        USER_POOL_ID: userPool.userPoolId,
-        USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
-        S3_BUCKET_NAME: artworkBucket.bucketName,
-      },
-    });
-
-    const cleanupQueueProcessorFn = new NodejsFunction(this, "CleanupQueueProcessorFn", {
-      entry: "../functions/cleanupQueueProcessor.ts",
-      handler: "handler",
-      runtime: Runtime.NODEJS_20_X,
+    const heavyFnProps = {
+      ...baseFnProps,
       timeout: Duration.seconds(60),
       memorySize: 512,
-      environment: {
-        TABLE_NAME: icafTable.tableName,
-        USER_POOL_ID: userPool.userPoolId,
-        USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
-        S3_BUCKET_NAME: artworkBucket.bucketName,
-      },
-    });
+    };
 
-    const submitArtworkFn = new NodejsFunction(this, "SubmitArtworkFn", {
-      entry: "../functions/user/submitArtwork.ts",
-      handler: "handler",
-      runtime: Runtime.NODEJS_20_X,
-      timeout: Duration.seconds(30),
-      memorySize: 512,
-      environment: {
-        TABLE_NAME: icafTable.tableName,
-        USER_POOL_ID: userPool.userPoolId,
-        USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
-        S3_BUCKET_NAME: artworkBucket.bucketName,
-      },
-    });
+    // ─── 6. Lambda Functions ──────────────────────────────────────────────────
 
-    const listSeasonFn = new NodejsFunction(this, "ListSeasonFn", {
-      entry: "../functions/anyone/listSeason.ts",
-      handler: "handler",
-      runtime: Runtime.NODEJS_20_X,
-      timeout: Duration.seconds(10),
-      memorySize: 256,
-      environment: {
-        TABLE_NAME: icafTable.tableName,
-      },
+    // Public — no auth required
+    const getArtworkFn = new NodejsFunction(this, "GetArtworkFn", {
+      ...baseFnProps,
+      entry: "../functions/anyone/getArtwork.ts",
     });
 
     const galleryArtworksFn = new NodejsFunction(this, "GalleryArtworksFn", {
+      ...baseFnProps,
+      memorySize: 512,
       entry: "../functions/anyone/gallery/galleryArtworks.ts",
-      handler: "handler",
-      runtime: Runtime.NODEJS_20_X,
-      timeout: Duration.seconds(15),
-      memorySize: 512,
-      environment: {
-        TABLE_NAME: icafTable.tableName,
-      },
     });
 
-    const gallerySeasonsFn = new NodejsFunction(this, "GallerySeasonsFn", {
-      entry: "../functions/anyone/gallery/gallerySeasons.ts",
-      handler: "handler",
-      runtime: Runtime.NODEJS_20_X,
-      timeout: Duration.seconds(15),
-      memorySize: 512,
-      environment: {
-        TABLE_NAME: icafTable.tableName,
-      },
+    // Auth
+    const registerFn = new NodejsFunction(this, "RegisterFn", {
+      ...heavyFnProps,
+      entry: "../functions/user/register.ts",
     });
 
-    // Admin functions
-    const createSeasonFn = new NodejsFunction(this, "CreateSeasonFn", {
-      entry: "../functions/admin/createSeason.ts",
-      handler: "handler",
-      runtime: Runtime.NODEJS_20_X,
-      timeout: Duration.seconds(30),
-      memorySize: 512,
-      environment: {
-        TABLE_NAME: icafTable.tableName,
-        SEASON_MANAGER_FUNCTION_NAME: "SeasonManager",
-      },
+    const loginFn = new NodejsFunction(this, "LoginFn", {
+      ...baseFnProps,
+      entry: "../functions/user/login.ts",
     });
 
-    const modifySeasonFn = new NodejsFunction(this, "ModifySeasonFn", {
-      entry: "../functions/admin/modifySeason.ts",
-      handler: "handler",
-      runtime: Runtime.NODEJS_20_X,
-      timeout: Duration.seconds(30),
-      memorySize: 512,
-      environment: {
-        TABLE_NAME: icafTable.tableName,
-        SEASON_MANAGER_FUNCTION_NAME: "SeasonManager",
-      },
+    const logoutFn = new NodejsFunction(this, "LogoutFn", {
+      ...baseFnProps,
+      entry: "../functions/user/logout.ts",
     });
 
-    const getSeasonFn = new NodejsFunction(this, "GetSeasonFn", {
-      entry: "../functions/admin/getSeason.ts",
-      handler: "handler",
-      runtime: Runtime.NODEJS_20_X,
-      timeout: Duration.seconds(10),
-      memorySize: 256,
-      environment: {
-        TABLE_NAME: icafTable.tableName,
-      },
+    const verifyAccountFn = new NodejsFunction(this, "VerifyAccountFn", {
+      ...baseFnProps,
+      entry: "../functions/user/verifyAccount.ts",
+    });
+
+    const changePasswordFn = new NodejsFunction(this, "ChangePasswordFn", {
+      ...baseFnProps,
+      entry: "../functions/user/changePassword.ts",
+    });
+
+    const forgotPasswordFn = new NodejsFunction(this, "ForgotPasswordFn", {
+      ...baseFnProps,
+      entry: "../functions/user/forgotPassword.ts",
+    });
+
+    const confirmForgotPasswordFn = new NodejsFunction(this, "ConfirmForgotPasswordFn", {
+      ...baseFnProps,
+      entry: "../functions/user/confirmForgotPassword.ts",
+    });
+
+    const resendVerificationFn = new NodejsFunction(this, "ResendVerificationFn", {
+      ...baseFnProps,
+      entry: "../functions/user/resendVerificationEmail.ts",
+    });
+
+    const getAuthStatusFn = new NodejsFunction(this, "GetAuthStatusFn", {
+      ...baseFnProps,
+      entry: "../functions/user/getAuthStatus.ts",
+    });
+
+    // User (authenticated)
+    const getUserFn = new NodejsFunction(this, "GetUserFn", {
+      ...baseFnProps,
+      entry: "../functions/user/user.ts",
+    });
+
+    const deleteAccountFn = new NodejsFunction(this, "DeleteAccountFn", {
+      ...heavyFnProps,
+      entry: "../functions/user/deleteAccount.ts",
+    });
+
+    const submitArtworkFn = new NodejsFunction(this, "SubmitArtworkFn", {
+      ...heavyFnProps,
+      entry: "../functions/user/submitArtwork.ts",
+    });
+
+    const listArtworkSubmissionsFn = new NodejsFunction(this, "ListArtworkSubmissionsFn", {
+      ...baseFnProps,
+      entry: "../functions/user/listArtworkSubmissions.ts",
+    });
+
+    const listConstituentArtworksFn = new NodejsFunction(this, "ListConstituentArtworksFn", {
+      ...baseFnProps,
+      entry: "../functions/user/listConstituentArtworks.ts",
+    });
+
+    const voteArtworkFn = new NodejsFunction(this, "VoteArtworkFn", {
+      ...baseFnProps,
+      entry: "../functions/user/voteArtwork.ts",
+    });
+
+    const listVoteArtworkFn = new NodejsFunction(this, "ListVoteArtworkFn", {
+      ...baseFnProps,
+      entry: "../functions/user/listVoteArtwork.ts",
+    });
+
+    const listDonationsFn = new NodejsFunction(this, "ListDonationsFn", {
+      ...baseFnProps,
+      entry: "../functions/user/listDonations.ts",
+    });
+
+    const submitArtworkForConstituentFn = new NodejsFunction(this, "SubmitArtworkForConstituentFn", {
+      ...heavyFnProps,
+      entry: "../functions/user/submitArtworkForConstituent.ts",
+    });
+
+    // Contributor (auth + role check in handler)
+    const fetchUnapprovedArtworksFn = new NodejsFunction(this, "FetchUnapprovedArtworksFn", {
+      ...baseFnProps,
+      entry: "../functions/contributor/fetchUnapprovedArtworks.ts",
+    });
+
+    const approveArtworkFn = new NodejsFunction(this, "ApproveArtworkFn", {
+      ...baseFnProps,
+      entry: "../functions/contributor/approveArtwork.ts",
+    });
+
+    const rejectArtworkFn = new NodejsFunction(this, "RejectArtworkFn", {
+      ...baseFnProps,
+      entry: "../functions/contributor/rejectArtwork.ts",
+    });
+
+    const cleanupRejectedArtworkFn = new NodejsFunction(this, "CleanupRejectedArtworkFn", {
+      ...heavyFnProps,
+      entry: "../functions/contributor/cleanupRejectedArtwork.ts",
+    });
+
+    const updateUserRoleFn = new NodejsFunction(this, "UpdateUserRoleFn", {
+      ...baseFnProps,
+      entry: "../functions/contributor/updateUserRole.ts",
+    });
+
+    const setGuardianSubmissionLimitFn = new NodejsFunction(this, "SetGuardianSubmissionLimitFn", {
+      ...baseFnProps,
+      entry: "../functions/contributor/setGuardianSubmissionLimit.ts",
+    });
+
+    // Admin (auth + role check in handler)
+    const banUserFn = new NodejsFunction(this, "BanUserFn", {
+      ...baseFnProps,
+      entry: "../functions/admin/banUser.ts",
+    });
+
+    const unbanUserFn = new NodejsFunction(this, "UnbanUserFn", {
+      ...baseFnProps,
+      entry: "../functions/admin/unbanUser.ts",
     });
 
     const alterUserRoleFn = new NodejsFunction(this, "AlterUserRoleFn", {
+      ...baseFnProps,
       entry: "../functions/admin/alterUserRole.ts",
-      handler: "handler",
-      runtime: Runtime.NODEJS_20_X,
-      timeout: Duration.seconds(15),
-      memorySize: 512,
-      environment: {
-        TABLE_NAME: icafTable.tableName,
-      },
     });
 
-    // 5️⃣  Grant Lambda permissions to access DynamoDB and S3
-    icafTable.grantReadWriteData(helloFn);
-    icafTable.grantReadWriteData(userFn);
-    icafTable.grantReadWriteData(registerFn);
-    icafTable.grantReadWriteData(deleteAccountFn);
-    icafTable.grantReadWriteData(cleanupQueueProcessorFn);
-    icafTable.grantReadWriteData(submitArtworkFn);
-    icafTable.grantReadData(listSeasonFn); // Only read access needed for listing seasons
-    icafTable.grantReadData(galleryArtworksFn); // Only read access needed for gallery queries
-    icafTable.grantReadData(gallerySeasonsFn); // Only read access needed for gallery seasons queries
+    const updateUserFn = new NodejsFunction(this, "UpdateUserFn", {
+      ...baseFnProps,
+      entry: "../functions/admin/updateUser.ts",
+    });
 
-    // Admin functions permissions
-    icafTable.grantReadWriteData(createSeasonFn);
-    icafTable.grantReadWriteData(modifySeasonFn);
-    icafTable.grantReadData(getSeasonFn); // Only read access needed for getting season
-    icafTable.grantReadWriteData(alterUserRoleFn); // Read and write access for user role updates
+    const getUserCognitoInfoFn = new NodejsFunction(this, "GetUserCognitoInfoFn", {
+      ...baseFnProps,
+      entry: "../functions/admin/getUserCognitoInfo.ts",
+    });
 
-    // Grant S3 permissions to functions
-    artworkBucket.grantReadWrite(deleteAccountFn);
-    artworkBucket.grantReadWrite(cleanupQueueProcessorFn);
-    artworkBucket.grantReadWrite(submitArtworkFn);
+    const getArtworkSubmitterEmailFn = new NodejsFunction(this, "GetArtworkSubmitterEmailFn", {
+      ...baseFnProps,
+      entry: "../functions/admin/getArtworkSubmitterEmail.ts",
+    });
 
-    // Grant Lambda invoke permissions for admin functions
-    createSeasonFn.addToRolePolicy(new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: ["lambda:InvokeFunction"],
-      resources: ["arn:aws:lambda:*:*:function:SeasonManager"],
-    }));
+    const deleteUserAccountFn = new NodejsFunction(this, "DeleteUserAccountFn", {
+      ...heavyFnProps,
+      entry: "../functions/admin/deleteUserAccount.ts",
+    });
 
-    modifySeasonFn.addToRolePolicy(new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: ["lambda:InvokeFunction"],
-      resources: ["arn:aws:lambda:*:*:function:SeasonManager"],
-    }));
+    const removeAllUserArtworkFn = new NodejsFunction(this, "RemoveAllUserArtworkFn", {
+      ...heavyFnProps,
+      entry: "../functions/admin/removeAllUserArtwork.ts",
+    });
 
-    // Note: Lambda invoke permissions for processImage will be added when that function is implemented
+    const getAllDonationsFn = new NodejsFunction(this, "GetAllDonationsFn", {
+      ...baseFnProps,
+      entry: "../functions/admin/getAllDonations.ts",
+    });
 
-    // 6️⃣  REST API — private by default (no execute‑api wildcard policy)
-    const api = new apigw.RestApi(this, "InternalApi", {
-      endpointConfiguration: {
-        types: [apigw.EndpointType.REGIONAL],
-      },
-      deployOptions: { stageName: "dev" },
+    // Background processor — triggered by SQS
+    const cleanupQueueProcessorFn = new NodejsFunction(this, "CleanupQueueProcessorFn", {
+      ...heavyFnProps,
+      timeout: Duration.seconds(300),
+      entry: "../functions/cleanupQueueProcessor.ts",
+    });
+
+    cleanupQueueProcessorFn.addEventSource(
+      new SqsEventSource(cleanupQueue, { batchSize: 10 })
+    );
+
+    // ─── 7. IAM Permissions ───────────────────────────────────────────────────
+
+    // DynamoDB: full read/write for all Lambda functions
+    const allFunctions = [
+      getArtworkFn, galleryArtworksFn,
+      registerFn, loginFn, logoutFn, verifyAccountFn, changePasswordFn,
+      forgotPasswordFn, confirmForgotPasswordFn, resendVerificationFn, getAuthStatusFn,
+      getUserFn, deleteAccountFn, submitArtworkFn, listArtworkSubmissionsFn,
+      listConstituentArtworksFn, voteArtworkFn, listVoteArtworkFn, listDonationsFn,
+      submitArtworkForConstituentFn,
+      fetchUnapprovedArtworksFn, approveArtworkFn, rejectArtworkFn,
+      cleanupRejectedArtworkFn, updateUserRoleFn, setGuardianSubmissionLimitFn,
+      banUserFn, unbanUserFn, alterUserRoleFn, updateUserFn,
+      getUserCognitoInfoFn, getArtworkSubmitterEmailFn,
+      deleteUserAccountFn, removeAllUserArtworkFn, getAllDonationsFn,
+      cleanupQueueProcessorFn,
+    ];
+
+    for (const fn of allFunctions) {
+      icafTable.grantReadWriteData(fn);
+    }
+
+    // S3: only functions that read/write artwork files
+    const s3Functions = [
+      submitArtworkFn, submitArtworkForConstituentFn,
+      deleteAccountFn, deleteUserAccountFn,
+      removeAllUserArtworkFn, cleanupRejectedArtworkFn,
+      cleanupQueueProcessorFn,
+    ];
+
+    for (const fn of s3Functions) {
+      artworkBucket.grantReadWrite(fn);
+    }
+
+    // S3: presigned URL generation for artwork uploads
+    for (const fn of [submitArtworkFn, submitArtworkForConstituentFn]) {
+      fn.addToRolePolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["s3:PutObject"],
+        resources: [`${artworkBucket.bucketArn}/artworks/*`],
+      }));
+    }
+
+    // SQS
+    for (const fn of [deleteAccountFn, deleteUserAccountFn, removeAllUserArtworkFn]) {
+      cleanupQueue.grantSendMessages(fn);
+    }
+    cleanupQueue.grantConsumeMessages(cleanupQueueProcessorFn);
+
+    // Cognito admin operations — only functions that need to call Cognito APIs
+    const cognitoAdminActions = [
+      "cognito-idp:AdminInitiateAuth",
+      "cognito-idp:AdminGetUser",
+      "cognito-idp:AdminUpdateUserAttributes",
+      "cognito-idp:AdminDeleteUser",
+      "cognito-idp:AdminDisableUser",
+      "cognito-idp:AdminEnableUser",
+      "cognito-idp:AdminSetUserPassword",
+      "cognito-idp:AdminUserGlobalSignOut",
+    ];
+
+    const cognitoClientActions = [
+      "cognito-idp:InitiateAuth",
+      "cognito-idp:ForgotPassword",
+      "cognito-idp:ConfirmForgotPassword",
+      "cognito-idp:ChangePassword",
+      "cognito-idp:ResendConfirmationCode",
+      "cognito-idp:GetUser",
+      "cognito-idp:SignUp",
+      "cognito-idp:ConfirmSignUp",
+    ];
+
+    const cognitoAdminFunctions = [
+      loginFn, logoutFn, verifyAccountFn,
+      deleteAccountFn, getUserCognitoInfoFn, deleteUserAccountFn,
+      alterUserRoleFn, updateUserFn, banUserFn, unbanUserFn,
+      resendVerificationFn,
+    ];
+
+    for (const fn of cognitoAdminFunctions) {
+      fn.addToRolePolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [...cognitoAdminActions, ...cognitoClientActions],
+        resources: [userPool.userPoolArn],
+      }));
+    }
+
+    // Register and auth functions only need client-level Cognito access
+    for (const fn of [registerFn, changePasswordFn, forgotPasswordFn, confirmForgotPasswordFn, getAuthStatusFn]) {
+      fn.addToRolePolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: cognitoClientActions,
+        resources: [userPool.userPoolArn],
+      }));
+    }
+
+    // ─── 8. API Gateway ───────────────────────────────────────────────────────
+    const api = new apigw.RestApi(this, "IcaFApi", {
+      restApiName: "icaf-api",
+      endpointConfiguration: { types: [apigw.EndpointType.REGIONAL] },
+      deployOptions: { stageName: "v1" },
       defaultCorsPreflightOptions: {
-        allowOrigins: apigw.Cors.ALL_ORIGINS,
+        allowOrigins: ["https://icaf.org", "http://localhost:5173"],
         allowMethods: apigw.Cors.ALL_METHODS,
         allowHeaders: ["Content-Type", "Authorization"],
+        allowCredentials: true,
       },
     });
 
-    // 7️⃣  Cognito Authorizer
-    const cognitoAuthorizer = new apigw.CognitoUserPoolsAuthorizer(this, "IcaFCognitoAuthorizer", {
+    const cognitoAuthorizer = new apigw.CognitoUserPoolsAuthorizer(this, "IcaFAuthorizer", {
       cognitoUserPools: [userPool],
     });
 
-    // 8️⃣  API Resources and Methods
-    const hello = api.root.addResource("hello");
-    hello.addMethod("GET", new apigw.LambdaIntegration(helloFn));
-
-    // 9️⃣  Public endpoints (no authentication required)
-    const register = api.root.addResource("register");
-    register.addMethod("POST", new apigw.LambdaIntegration(registerFn));
-
-    // 🔟  Protected endpoints (require authentication)
-    const apiResource = api.root.addResource("api");
-    const usersResource = apiResource.addResource("users");
-    const profileResource = usersResource.addResource("profile");
-    profileResource.addMethod("GET", new apigw.LambdaIntegration(userFn), {
+    const authOpts = {
       authorizer: cognitoAuthorizer,
       authorizationType: apigw.AuthorizationType.COGNITO,
-    });
+    };
 
-    const accountResource = usersResource.addResource("account");
-    accountResource.addMethod("DELETE", new apigw.LambdaIntegration(deleteAccountFn), {
-      authorizer: cognitoAuthorizer,
-      authorizationType: apigw.AuthorizationType.COGNITO,
-    });
+    const li = (fn: NodejsFunction) => new apigw.LambdaIntegration(fn);
 
-    const artworkResource = usersResource.addResource("artwork");
-    artworkResource.addMethod("POST", new apigw.LambdaIntegration(submitArtworkFn), {
-      authorizer: cognitoAuthorizer,
-      authorizationType: apigw.AuthorizationType.COGNITO,
-    });
+    // ── Gallery (public) ─────────────────────────────────────────────────────
+    const gallery = api.root.addResource("gallery");
+    const galleryArtworksRes = gallery.addResource("artworks");
+    galleryArtworksRes.addMethod("GET", li(galleryArtworksFn)); // ?sortType=newest|oldest
+    galleryArtworksRes.addResource("{artId}").addMethod("GET", li(getArtworkFn));
 
-    // Public season endpoint (no authentication required)
-    const seasonListResource = apiResource.addResource("season");
-    seasonListResource.addMethod("GET", new apigw.LambdaIntegration(listSeasonFn));
+    // /gallery/artworks/family/{family} and /gallery/artworks/family/{family}/instance/{instance}
+    // both use same handler — handler reads path params to determine query type
+    const galleryByFamily = galleryArtworksRes.addResource("family").addResource("{family}");
+    galleryByFamily.addMethod("GET", li(galleryArtworksFn));
+    galleryByFamily
+      .addResource("instance")
+      .addResource("{instance}")
+      .addMethod("GET", li(galleryArtworksFn));
 
-    // Public gallery endpoints (no authentication required)
-    const galleryResource = apiResource.addResource("gallery");
-    const artworksResource = galleryResource.addResource("artworks");
-    const sortTypeResource = artworksResource.addResource("{sortType}");
-    sortTypeResource.addMethod("GET", new apigw.LambdaIntegration(galleryArtworksFn));
+    // ── Auth (public) ─────────────────────────────────────────────────────────
+    const authRes = api.root.addResource("auth");
+    authRes.addResource("register").addMethod("POST", li(registerFn));
+    authRes.addResource("login").addMethod("POST", li(loginFn));
+    authRes.addResource("logout").addMethod("POST", li(logoutFn));
+    authRes.addResource("verify").addMethod("POST", li(verifyAccountFn));
+    authRes.addResource("forgot-password").addMethod("POST", li(forgotPasswordFn));
+    authRes.addResource("confirm-forgot-password").addMethod("POST", li(confirmForgotPasswordFn));
+    authRes.addResource("resend-verification").addMethod("POST", li(resendVerificationFn));
+    authRes.addResource("status").addMethod("GET", li(getAuthStatusFn));
+    // Change password requires auth
+    authRes.addResource("change-password").addMethod("POST", li(changePasswordFn), authOpts);
 
-    // Public gallery seasons endpoints (no authentication required)
-    const gallerySeasonsResource = galleryResource.addResource("seasons");
-    const gallerySeasonResource = gallerySeasonsResource.addResource("{season}");
-    const seasonArtworksResource = gallerySeasonResource.addResource("artworks");
-    seasonArtworksResource.addMethod("GET", new apigw.LambdaIntegration(gallerySeasonsFn));
+    // ── User — authenticated ──────────────────────────────────────────────────
+    const userRes = api.root.addResource("user");
+    userRes.addResource("profile").addMethod("GET", li(getUserFn), authOpts);
+    userRes.addResource("account").addMethod("DELETE", li(deleteAccountFn), authOpts);
+    userRes.addResource("payments").addMethod("GET", li(listDonationsFn), authOpts);
+    userRes.addResource("voted-artworks").addMethod("GET", li(listVoteArtworkFn), authOpts);
 
-    // Admin endpoints (require authentication and admin role)
-    const adminResource = apiResource.addResource("admin");
-    const adminSeasonsResource = adminResource.addResource("seasons");
+    const userArtworksRes = userRes.addResource("artworks");
+    userArtworksRes.addMethod("GET", li(listArtworkSubmissionsFn), authOpts);
+    userArtworksRes.addMethod("POST", li(submitArtworkFn), authOpts);
 
-    // Create season endpoint
-    adminSeasonsResource.addMethod("POST", new apigw.LambdaIntegration(createSeasonFn), {
-      authorizer: cognitoAuthorizer,
-      authorizationType: apigw.AuthorizationType.COGNITO,
-    });
+    const userArtworkRes = userArtworksRes.addResource("{artId}");
+    userArtworkRes.addResource("kudos").addMethod("POST", li(voteArtworkFn), authOpts);
 
-    // Season-specific endpoints
-    const adminSeasonResource = adminSeasonsResource.addResource("{id}");
+    // Guardian — constituent artwork submissions
+    const userConstituentRes = userRes.addResource("constituents");
+    userConstituentRes.addResource("artworks").addMethod("GET", li(listConstituentArtworksFn), authOpts);
+    userConstituentRes.addResource("submit").addMethod("POST", li(submitArtworkForConstituentFn), authOpts);
 
-    // Get season endpoint
-    adminSeasonResource.addMethod("GET", new apigw.LambdaIntegration(getSeasonFn), {
-      authorizer: cognitoAuthorizer,
-      authorizationType: apigw.AuthorizationType.COGNITO,
-    });
+    // ── Contributor — auth + role enforcement in handler ──────────────────────
+    const contribRes = api.root.addResource("contributor");
 
-    // Modify season endpoint (PATCH for partial updates)
-    adminSeasonResource.addMethod("PATCH", new apigw.LambdaIntegration(modifySeasonFn), {
-      authorizer: cognitoAuthorizer,
-      authorizationType: apigw.AuthorizationType.COGNITO,
-    });
+    const contribArtworksRes = contribRes.addResource("artworks");
+    contribArtworksRes.addResource("pending").addMethod("GET", li(fetchUnapprovedArtworksFn), authOpts);
 
-    // Admin user management endpoints
-    const adminUsersResource = adminResource.addResource("users");
-    const adminUserResource = adminUsersResource.addResource("{id}");
+    const contribArtworkRes = contribArtworksRes.addResource("{artId}");
+    contribArtworkRes.addResource("approve").addMethod("POST", li(approveArtworkFn), authOpts);
+    contribArtworkRes.addResource("reject").addMethod("POST", li(rejectArtworkFn), authOpts);
 
-    // Alter user role endpoint (PATCH for partial updates)
-    adminUserResource.addMethod("PATCH", new apigw.LambdaIntegration(alterUserRoleFn), {
-      authorizer: cognitoAuthorizer,
-      authorizationType: apigw.AuthorizationType.COGNITO,
-    });
+    const contribUsersRes = contribRes.addResource("users");
+    const contribUserRes = contribUsersRes.addResource("{userId}");
+    contribUserRes.addResource("role").addMethod("PATCH", li(updateUserRoleFn), authOpts);
+    contribUserRes.addResource("submission-limit").addMethod("PATCH", li(setGuardianSubmissionLimitFn), authOpts);
+
+    // ── Admin — auth + role enforcement in handler ────────────────────────────
+    const adminRes = api.root.addResource("admin");
+
+    const adminUsersRes = adminRes.addResource("users");
+    const adminUserRes = adminUsersRes.addResource("{userId}");
+    adminUserRes.addMethod("PATCH", li(updateUserFn), authOpts);
+    adminUserRes.addResource("ban").addMethod("POST", li(banUserFn), authOpts);
+    adminUserRes.addResource("unban").addMethod("POST", li(unbanUserFn), authOpts);
+    adminUserRes.addResource("role").addMethod("PATCH", li(alterUserRoleFn), authOpts);
+    adminUserRes.addResource("cognito-info").addMethod("GET", li(getUserCognitoInfoFn), authOpts);
+    adminUserRes.addResource("account").addMethod("DELETE", li(deleteUserAccountFn), authOpts);
+    adminUserRes.addResource("artworks").addMethod("DELETE", li(removeAllUserArtworkFn), authOpts);
+
+    const adminArtworksRes = adminRes.addResource("artworks");
+    adminArtworksRes
+      .addResource("{artId}")
+      .addResource("submitter-email")
+      .addMethod("GET", li(getArtworkSubmitterEmailFn), authOpts);
+
+    adminRes.addResource("payments").addMethod("GET", li(getAllDonationsFn), authOpts);
   }
 }

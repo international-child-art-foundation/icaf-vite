@@ -1,37 +1,55 @@
 /**
- * Gallery API Types
- * 
- * Defines types for gallery-related API endpoints that display
- * artwork collections with different sorting options.
+ * Gallery Types
+ *
+ * Types for public gallery endpoints (artworks and groups).
+ * Gallery supports time-based sorting only (no kudos-based sort — no GSI for it).
+ *
+ * Gallery GSI query shapes:
+ *   All artworks:            PK='GALLERY',                              SK begins_with ''
+ *   Artworks by family:      PK='FAMILY#<family>',                      SK begins_with ''
+ *   Artworks by instance:    PK='FAMILY#<family>#INSTANCE#<instance>',  SK begins_with ''
+ *   All groups:              PK='GROUPS',                               SK begins_with ''
+ *   Groups by family:        PK='GROUPS#FAMILY#<family>',               SK begins_with ''
+ *   Groups by instance:      PK='GROUPS#FAMILY#<family>#INSTANCE#<i>',  SK begins_with ''
  */
 
-import { ArtworkEntity } from './artworkTypes.js';
+import { ArtworkListItem } from './artworkTypes.js';
+import { GroupListItem } from './groupTypes.js';
 
-// Supported sort types for gallery queries
-export type SortType = 'newest' | 'oldest' | 'highest-voted' | 'lowest-voted';
+// Gallery supports newest/oldest only — the SK encodes timestamp
+export type SortOrder = 'newest' | 'oldest';
 
-// Query parameters for gallery endpoints
+// Query parameters accepted by gallery endpoints
 export interface GalleryQueryParams {
-    season: string;
-    limit?: number;
-    lastEvaluatedKey?: string;
-    approved_only?: boolean;
+    sort?: SortOrder;           // default: 'newest'
+    limit?: number;             // default: 20, max: 100
+    last_key?: string;          // base64-encoded pagination cursor
+    theme_family?: string;      // filter by theme family (path param preferred)
+    theme_instance?: string;    // filter by theme instance (path param preferred)
 }
 
-// Gallery API response format
-export interface GalleryResponse {
-    artworks: ArtworkEntity[];
+// Artwork gallery response
+export interface GalleryArtworksResponse {
+    artworks: ArtworkListItem[];
     count: number;
-    hasMore: boolean;
-    season: string;
-    sortType: SortType;
-    pagination: {
-        has_more: boolean;
-        last_evaluated_key?: string;
-    };
+    sort: SortOrder;
+    theme_family?: string;
+    theme_instance?: string;
+    has_more: boolean;
+    last_key?: string;
 }
 
-// Validation helper for sort types
-export function isValidSortType(sortType: string): sortType is SortType {
-    return ['newest', 'oldest', 'highest-voted', 'lowest-voted'].includes(sortType);
+// Group gallery response
+export interface GalleryGroupsResponse {
+    groups: GroupListItem[];
+    count: number;
+    sort: SortOrder;
+    theme_family?: string;
+    theme_instance?: string;
+    has_more: boolean;
+    last_key?: string;
+}
+
+export function isValidSortOrder(sort: string): sort is SortOrder {
+    return sort === 'newest' || sort === 'oldest';
 }

@@ -10,7 +10,7 @@ jest.mock('../../config/aws-clients', () => ({
 
 import { handler } from '../../functions/admin/getAllDonations';
 import { PresetEvents } from '../shared/simple-preset-db';
-import { AdminGetAllDonationsResponse } from '../../../shared/src/api-types/donationTypes';
+import { AdminGetAllDonationsResponse } from '../../../shared/src/api-types/paymentTypes';
 
 describe('getAllDonations (Admin)', () => {
     beforeEach(() => {

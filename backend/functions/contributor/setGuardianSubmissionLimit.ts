@@ -167,7 +167,6 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
                             Item: {
                                 PK: `USER#${user_id}`,
                                 SK: `ADMIN_ACTION#${timestamp}`,
-                                target_user_id: user_id,
                                 done_by: contributorId,
                                 action: 'set_guardian_submission_limit',
                                 old_value: currentLimit,

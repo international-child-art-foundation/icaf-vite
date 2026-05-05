@@ -13,8 +13,8 @@
  *   Groups by instance:      PK='GROUPS#FAMILY#<family>#INSTANCE#<i>',  SK begins_with ''
  */
 
-import { ArtworkListItem } from './artworkTypes.js';
-import { GroupListItem } from './groupTypes.js';
+import { ArtworkListItem } from '../entities/art/types.js';
+import { GroupListItem } from '../entities/group/types.js';
 
 // Gallery supports newest/oldest only — the SK encodes timestamp
 export type SortOrder = 'newest' | 'oldest';

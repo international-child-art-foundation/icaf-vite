@@ -8,23 +8,20 @@
  *   SK = '-'
  *
  * GSI attributes written on creation (always):
- *   OWN_PK    = 'OWNER#<user_id>'
- *   OWN_SK    = 'TYPE#ART#TS#<unix_ts>#ID#<art_id>'
- *   REV_PK    = 'REVIEW'
- *   REV_SK    = 'STATUS#pending_review#TYPE#ART#TS#<unix_ts>#ID#<art_id>'
+ *   OWN_PK     = 'OWNER#<user_id>'
+ *   OWN_SK     = 'TYPE#ART#TS#<unix_ts>#ID#<art_id>'
+ *   REV_PK     = 'REVIEW'
+ *   REV_SK     = 'STATUS#pending_review#TYPE#ART#TS#<unix_ts>#ID#<art_id>'
  *
  * GSI attributes written on approval (sparse — remove when hiding/rejecting):
- *   GALL_PK   = 'GALLERY'
- *   FAM_PK    = 'FAMILY#<theme_family>'                        (if themed)
- *   INST_PK   = 'FAMILY#<family>#INSTANCE#<instance>'         (if has instance)
- *   ART_GSI_SK = 'TS#<unix_ts>#ART#<art_id>'                 (shared by all 3 gallery GSIs)
- *
- * Note: file_type is NOT stored on the entity. The processImage Lambda normalises
- * all uploads to .avif or .png. file_type is only used during submission to
- * generate a presigned S3 URL.
+ *   GALL_PK    = 'GALLERY'
+ *   FAM_PK     = 'FAMILY#<theme_family>'                        (if themed)
+ *   INST_PK    = 'FAMILY#<family>#INSTANCE#<instance>'         (if has instance)
+ *   ART_GSI_SK = 'TS#<unix_ts>#ART#<art_id>'                  (shared by all 3 gallery GSIs)
  */
 
-export const UPLOAD_FILE_TYPES = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'] as const;
+import { UPLOAD_FILE_TYPES } from './constants.js';
+
 export type UploadFileType = typeof UPLOAD_FILE_TYPES[number];
 
 // Possible artwork statuses.
@@ -52,8 +49,6 @@ export interface ArtworkEntity {
     type: 'ART';
 
     // ── Optional ───────────────────────────────────────────────────────────
-    // Prediction: f_name/age/country/title feel submission-essential but the
-    // schema marks them optional — they may be absent for programmatic imports.
     f_name?: string;
     age?: number;
     country?: string;
@@ -66,46 +61,38 @@ export interface ArtworkEntity {
     submitter_relationship?: SubmitterRelationship;
 }
 
-// Supported upload formats (sent by client for presigned URL generation only)
-export function isValidUploadFileType(t: string): t is UploadFileType {
-    return UPLOAD_FILE_TYPES.includes(t as UploadFileType);
-}
-
 // Request body for submitting artwork (POST /user/artworks)
 // file_type is used only to generate the presigned S3 upload URL; not stored on entity
 export interface SubmitArtworkRequest {
-    file_type: UploadFileType;
-    title: string;
+    title?: string;
     description?: string;
-    f_name: string;
-    age: number;
-    country: string;
+    f_name?: string;
+    age?: number;
+    country?: string;
     region?: string;
     is_virtual: boolean;
     submitter_relationship?: SubmitterRelationship;
     theme_family?: string;
     theme_instance?: string;
     group_id?: string;
-    legal_release_hash?: string;
-    is_ai_generated: boolean;   // informational, stored if needed by future fields
+    legal_release_hash: string;
 }
 
 export interface SubmitArtworkResponse {
     success: boolean;
     art_id: string;
     presigned_url: string;
-    upload_expires_at: number;  // Unix timestamp
     message: string;
 }
 
 // Shape used in list and gallery responses (subset of ArtworkEntity)
 export interface ArtworkListItem {
     art_id: string;
-    f_name: string;
-    age: number;
-    country: string;
+    f_name?: string;
+    age?: number;
+    country?: string;
     region?: string;
-    title: string;
+    title?: string;
     description?: string;
     theme_family?: string;
     theme_instance?: string;
@@ -122,7 +109,6 @@ export interface ListArtworkSubmissionsResponse {
     last_key?: string;
 }
 
-// Guardian view of constituent artworks
 export interface ListConstituentArtworksRequest {
     limit?: number;
     last_key?: string;
@@ -132,41 +118,4 @@ export interface ListConstituentArtworksResponse {
     artworks: ArtworkListItem[];
     has_more: boolean;
     last_key?: string;
-}
-
-// Validation
-export function validateSubmissionData(data: SubmitArtworkRequest): string[] {
-    const errors: string[] = [];
-
-    if (!data.title?.trim()) {
-        errors.push('title is required');
-    } else if (data.title.length > 200) {
-        errors.push('title must be 200 characters or less');
-    }
-
-    if (!isValidUploadFileType(data.file_type)) {
-        errors.push(`file_type must be one of: ${UPLOAD_FILE_TYPES.join(', ')}`);
-    }
-
-    if (!data.f_name?.trim()) {
-        errors.push('f_name (artist first name) is required');
-    }
-
-    if (!Number.isInteger(data.age) || data.age < 1 || data.age > 150) {
-        errors.push('age must be a valid integer between 1 and 150');
-    }
-
-    if (!data.country?.trim()) {
-        errors.push('country is required');
-    }
-
-    if (typeof data.is_virtual !== 'boolean') {
-        errors.push('is_virtual must be a boolean');
-    }
-
-    if (data.theme_instance && !data.theme_family) {
-        errors.push('theme_family is required when theme_instance is provided');
-    }
-
-    return errors;
 }

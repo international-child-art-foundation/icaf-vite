@@ -29,7 +29,7 @@ export interface AccountActionEntity {
     initiator_id?: string;          // blank if initiator === target user
     action: AccountActionType;
     reason?: string;                // required for some actions (contributor-only)
-    target_user_id?: string;        // for bulk actions targeting another user
+    target_user_id?: string;        // if a bulk action was taken, the affected user ID
     art_id?: string;                // include where applicable
     group_id?: string;              // include where applicable
     type: 'ACCOUNT_ACTION';

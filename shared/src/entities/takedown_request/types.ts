@@ -81,26 +81,3 @@ export interface ReviewTakedownRequest {
     action: 'cancel' | 'dispute';
     review_notes?: string;
 }
-
-// Validation
-export function validateInitiateTakedownRequest(data: any): string[] {
-    const errors: string[] = [];
-
-    if (!data.art_id && !data.group_id) {
-        errors.push('at least one of art_id or group_id is required');
-    }
-
-    if (!data.requester_email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.requester_email)) {
-        errors.push('requester_email must be a valid email address');
-    }
-
-    if (!data.requester_name?.trim()) {
-        errors.push('requester_name is required');
-    }
-
-    if (!data.reason?.trim()) {
-        errors.push('reason is required');
-    }
-
-    return errors;
-}

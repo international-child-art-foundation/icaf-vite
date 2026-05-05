@@ -4,8 +4,8 @@
  * Shared guard functions used across multiple Lambda handlers.
  */
 
-import { ArtworkEntity } from './artworkTypes.js';
-import { UserEntity } from './userTypes.js';
+import { ArtworkEntity } from '../entities/art/types.js';
+import { UserEntity } from '../entities/user/types.js';
 
 // Check whether a user can give kudos to an artwork
 export function canUserGiveKudos(

@@ -6,8 +6,8 @@
  */
 
 import { handler } from '../../functions/anyone/makeDonation';
-import { TestAssertions, PRESET_TEST_DATA } from '../shared/simple-preset-db';
-import { DonationResponse } from '../../../shared/src/api-types/donationTypes';
+import { TestAssertions, PRESET_TEST_DATA } from '../../backend-test/shared/simple-preset-db';
+import { DonationResponse } from '../../../shared/src/api-types/paymentTypes';
 
 describe('Make Donation API tests', () => {
     const testUserId = PRESET_TEST_DATA.users.ADULT_USER;

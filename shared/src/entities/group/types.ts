@@ -107,28 +107,3 @@ export interface UpdateGroupRequest {
     theme_instance?: string;
     cover_art_ids?: string[];
 }
-
-// Validation
-export function validateSubmitGroupRequest(data: SubmitGroupRequest): string[] {
-    const errors: string[] = [];
-
-    if (!data.title?.trim()) {
-        errors.push('title is required');
-    } else if (data.title.length > 200) {
-        errors.push('title must be 200 characters or less');
-    }
-
-    if (!data.group_type?.trim()) {
-        errors.push('group_type is required');
-    }
-
-    if (!data.country?.trim()) {
-        errors.push('country is required');
-    }
-
-    if (data.theme_instance && !data.theme_family) {
-        errors.push('theme_family is required when theme_instance is provided');
-    }
-
-    return errors;
-}

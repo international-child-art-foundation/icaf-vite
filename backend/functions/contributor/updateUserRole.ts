@@ -171,7 +171,6 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
                             Item: {
                                 PK: `USER#${user_id}`,
                                 SK: `ADMIN_ACTION#${timestamp}`,
-                                target_user_id: user_id,
                                 done_by: adminId,
                                 action: 'update_user_role',
                                 old_role: currentRole,

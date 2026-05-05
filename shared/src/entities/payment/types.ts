@@ -1,5 +1,5 @@
 /**
- * Donation / Payment Types
+ * Payment Types
  *
  * Types for PAYMENT entities. Payments are processed externally (Stripe) and
  * recorded here via webhook. The backend does not initiate charges.

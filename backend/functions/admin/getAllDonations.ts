@@ -2,7 +2,7 @@ import { ScanCommand, GetCommand, BatchGetCommand } from '@aws-sdk/lib-dynamodb'
 import { dynamodb, TABLE_NAME } from '../../config/aws-clients';
 import { ApiGatewayEvent, HTTP_STATUS } from '../../../shared/src/api-types/commonTypes';
 import { CommonErrors } from '../../../shared/src/api-types/errorTypes';
-import { AdminGetAllDonationsResponse, AdminDonationItem } from '../../../shared/src/api-types/donationTypes';
+import { AdminGetAllDonationsResponse, AdminDonationItem } from '../../../shared/src/api-types/paymentTypes';
 
 export const handler = async (event: ApiGatewayEvent) => {
     try {

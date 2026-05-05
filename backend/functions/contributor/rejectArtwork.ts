@@ -175,7 +175,6 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
                             Item: {
                                 PK: `USER#${userId}`,
                                 SK: `ADMIN_ACTION#${timestamp}`,
-                                target_user_id: userId,
                                 done_by: contributorId,
                                 action: 'reject',
                                 reason: reason,

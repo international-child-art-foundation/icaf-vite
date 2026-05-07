@@ -1,4 +1,3 @@
-import { ThemeEntity } from './types.js';
 
 const THEME_INSTANCE_RE = /^\d{4}$/;
 const THEME_FAMILY_RE = /^[A-Z0-9_]+$/;

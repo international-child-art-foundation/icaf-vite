@@ -15,7 +15,7 @@ export class InfraStack extends Stack {
     super(scope, id, props);
 
     // ─── 1. DynamoDB Table — Single Table Design ──────────────────────────────
-    const icafTable = new dynamodb.Table(this, "IcaFTable", {
+    const icafTable = new dynamodb.Table(this, "IcafTable", {
       tableName: "icaf-main-table",
       partitionKey: { name: "PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "SK", type: dynamodb.AttributeType.STRING },
@@ -119,7 +119,7 @@ export class InfraStack extends Stack {
     });
 
     // ─── 2. S3 Bucket — Artwork Storage ──────────────────────────────────────
-    const artworkBucket = new s3.Bucket(this, "IcaFArtworkBucket", {
+    const artworkBucket = new s3.Bucket(this, "IcafArtworkBucket", {
       bucketName: "icaf-artwork-bucket",
       removalPolicy: RemovalPolicy.RETAIN,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
@@ -134,7 +134,7 @@ export class InfraStack extends Stack {
     });
 
     // ─── 3. Cognito User Pool ─────────────────────────────────────────────────
-    const userPool = new cognito.UserPool(this, "IcaFUserPool", {
+    const userPool = new cognito.UserPool(this, "IcafUserPool", {
       userPoolName: "icaf-user-pool",
       selfSignUpEnabled: true,
       signInAliases: { email: true },
@@ -159,7 +159,7 @@ export class InfraStack extends Stack {
       removalPolicy: RemovalPolicy.RETAIN, // Never auto-delete user accounts
     });
 
-    const userPoolClient = new cognito.UserPoolClient(this, "IcaFUserPoolClient", {
+    const userPoolClient = new cognito.UserPoolClient(this, "IcafUserPoolClient", {
       userPool,
       userPoolClientName: "icaf-web-client",
       generateSecret: false,
@@ -171,12 +171,12 @@ export class InfraStack extends Stack {
     });
 
     // ─── 4. SQS — Background Cleanup Queue ───────────────────────────────────
-    const cleanupDLQ = new sqs.Queue(this, "IcaFCleanupDLQ", {
+    const cleanupDLQ = new sqs.Queue(this, "IcafCleanupDLQ", {
       queueName: "icaf-cleanup-dlq",
       retentionPeriod: Duration.days(14),
     });
 
-    const cleanupQueue = new sqs.Queue(this, "IcaFCleanupQueue", {
+    const cleanupQueue = new sqs.Queue(this, "IcafCleanupQueue", {
       queueName: "icaf-cleanup-queue",
       visibilityTimeout: Duration.seconds(300),
       retentionPeriod: Duration.days(14),
@@ -499,7 +499,7 @@ export class InfraStack extends Stack {
     }
 
     // ─── 8. API Gateway ───────────────────────────────────────────────────────
-    const api = new apigw.RestApi(this, "IcaFApi", {
+    const api = new apigw.RestApi(this, "IcafApi", {
       restApiName: "icaf-api",
       endpointConfiguration: { types: [apigw.EndpointType.REGIONAL] },
       deployOptions: { stageName: "v1" },
@@ -511,7 +511,7 @@ export class InfraStack extends Stack {
       },
     });
 
-    const cognitoAuthorizer = new apigw.CognitoUserPoolsAuthorizer(this, "IcaFAuthorizer", {
+    const cognitoAuthorizer = new apigw.CognitoUserPoolsAuthorizer(this, "IcafAuthorizer", {
       cognitoUserPools: [userPool],
     });
 

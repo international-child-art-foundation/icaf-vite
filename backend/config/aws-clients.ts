@@ -6,35 +6,20 @@ import { LambdaClient } from '@aws-sdk/client-lambda';
 import { SQSClient } from '@aws-sdk/client-sqs';
 import { SESClient } from '@aws-sdk/client-ses';
 
-// Common AWS client configuration
-const createAWSClientConfig = () => ({
-    region: process.env.AWS_REGION || 'us-east-1',
-    ...(process.env.NODE_ENV === 'test' && {
-        endpoint: 'http://localhost:4566', // LocalStack endpoint
-        credentials: {
-            accessKeyId: 'test',
-            secretAccessKey: 'test'
-        }
-    })
-});
+const region = process.env.AWS_REGION;
 
 // Create AWS clients
-export const cognitoClient = new CognitoIdentityProviderClient(createAWSClientConfig());
-export const dynamoClient = new DynamoDBClient(createAWSClientConfig());
+export const cognitoClient = new CognitoIdentityProviderClient({ region });
+export const dynamoClient = new DynamoDBClient({ region });
 export const dynamodb = DynamoDBDocumentClient.from(dynamoClient);
-export const s3Client = new S3Client({
-    ...createAWSClientConfig(),
-    ...(process.env.NODE_ENV === 'test' && {
-        forcePathStyle: true // Required for LocalStack S3
-    })
-});
-export const lambdaClient = new LambdaClient(createAWSClientConfig());
-export const sqsClient = new SQSClient(createAWSClientConfig());
-export const sesClient = new SESClient(createAWSClientConfig());
+export const s3Client = new S3Client({ region });
+export const lambdaClient = new LambdaClient({ region });
+export const sqsClient = new SQSClient({ region });
+export const sesClient = new SESClient({ region });
 
 // Environment variables
 export const USER_POOL_ID = process.env.USER_POOL_ID!;
 export const USER_POOL_CLIENT_ID = process.env.USER_POOL_CLIENT_ID!;
 export const TABLE_NAME = process.env.TABLE_NAME!;
 export const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME!;
-export const CLEANUP_QUEUE_URL = process.env.CLEANUP_QUEUE_URL!; 
+export const CLEANUP_QUEUE_URL = process.env.CLEANUP_QUEUE_URL!;

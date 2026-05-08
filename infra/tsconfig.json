@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.strict.json",
+  "extends": "../tsconfig.strict.json",
   "compilerOptions": {
     "composite": true,
     "target": "ES2022",
@@ -14,8 +14,9 @@
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
     "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noUnusedParameters": false,
+    "types": ["node"]
   },
-  "include": ["bin", "lib"],
+  "include": ["bin", "lib", "config"],
   "exclude": ["node_modules", "cdk.out", "dist", "**/*.js", "**/*.d.ts"]
 }

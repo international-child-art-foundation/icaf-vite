@@ -10,13 +10,6 @@
  * GSI attributes written on creation:
  *   EMAIL_PK = 'EMAIL#<email>'
  *   EMAIL_SK = 'TYPE#USER'
- *
- * Virtual users: is_virtual=true means the USER entity exists in DynamoDB but
- * no Cognito account has been created yet. This happens when:
- *   - Someone submits artwork without an account (uses email only)
- *   - Someone makes a donation (email-based only)
- * When they click the verification link and create their account, is_virtual
- * becomes false and verified_at is set.
  */
 
 export const ROLES = ['admin', 'contributor', 'guardian', 'user'] as const;

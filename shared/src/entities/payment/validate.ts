@@ -1,5 +1,3 @@
-import { PaymentEntity } from './types.js';
-
 const PAYMENT_SERVICES = ['stripe'] as const;
 export type PaymentService = typeof PAYMENT_SERVICES[number];
 

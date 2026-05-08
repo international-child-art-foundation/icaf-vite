@@ -3,7 +3,7 @@
   "references": [
     { "path": "./frontend" },
     { "path": "./backend" },
-    { "path": "./backend/infra" },
+    { "path": "./infra" },
     { "path": "./shared" }
   ]
 }

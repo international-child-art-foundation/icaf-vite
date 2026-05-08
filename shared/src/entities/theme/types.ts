@@ -6,17 +6,6 @@
  * DynamoDB THEME entity key structure:
  *   PK = 'THEME'
  *   SK = 'FAMILY#<theme_family>#INSTANCE#<theme_instance>'
- *
- * This allows:
- *   - Fetching ALL themes: PK='THEME'
- *   - Fetching all instances of a family: begins_with(SK, 'FAMILY#CHERRYBLOSSOM')
- *
- * theme_family: short uppercase identifier, e.g. 'CHERRYBLOSSOM', 'ARTSOLYMPIAD'
- * theme_instance: zero-padded 4-digit string; sometimes a year ('2025'), sometimes
- *   an arbitrary counter ('0007'). Never sorted — just for differentiation.
- *
- * Enforcement of valid theme_family/theme_instance values on submitted artwork is
- * primarily frontend-handled; backend does not enforce membership (would be cumbersome).
  */
 
 // Full THEME entity as stored in DynamoDB

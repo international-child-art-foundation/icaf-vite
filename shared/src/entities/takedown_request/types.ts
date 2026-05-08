@@ -7,11 +7,6 @@
  * DynamoDB TDR entity key structure:
  *   PK = 'TDR'
  *   SK = 'TS#<unix_ts>#TDR_ID#<tdr_id>'
- *
- * Auto-execution: requests with status='requesting' auto-execute at
- * scheduled_execution_at (tentatively 3 days after creation) via a daily
- * EventBridge-triggered Lambda, unless a contributor sets status='disputing'
- * (extends the window) or 'canceled'.
  */
 
 export type TakedownStatus =

@@ -9,7 +9,7 @@ import {
     getMaxConstituentsPerSeason,
     determineUserType,
     Role
-} from '../../../shared/src/api-types/userTypes';
+} from '@icaf/shared';
 
 export const handler = async (event: ApiGatewayEvent) => {
     try {

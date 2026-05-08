@@ -3,17 +3,13 @@
  * 
  * Handles GET requests to retrieve a single artwork by its ID:
  * - /api/artworks/{art_id}
- * 
- * DynamoDB Operation: GetCommand
- * - PK: ART#<art_id>
- * - SK: N/A
  */
 
 import { GetCommand } from '@aws-sdk/lib-dynamodb';
-import { dynamodb, TABLE_NAME } from '../../config/aws-clients';
+import { dynamodb, TABLE_NAME } from '../../src/config/aws-clients';
 import { ApiGatewayEvent, HTTP_STATUS } from '../../../shared/src/api-types/commonTypes';
 import { CommonErrors } from '../../../shared/src/api-types/errorTypes';
-import { ArtworkEntity } from '../../../shared/src/api-types/artworkTypes';
+
 
 export const handler = async (event: ApiGatewayEvent): Promise<{
     statusCode: number;

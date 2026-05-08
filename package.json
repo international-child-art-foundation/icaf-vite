@@ -5,7 +5,7 @@
   "workspaces": [
     "frontend",
     "backend",
-    "backend/infra",
+    "infra",
     "shared"
   ],
   "packageManager": "pnpm@10.16.1",

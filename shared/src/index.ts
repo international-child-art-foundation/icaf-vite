@@ -2,7 +2,6 @@
 export * from "./api-types/commonTypes";
 export * from "./api-types/errorTypes";
 export * from "./api-types/businessLogic";
-export * from "./api-types/internalTypes";
 export * from "./api-types/galleryTypes";
 
 // ── Entities ─────────────────────────────────────────────────────────────────

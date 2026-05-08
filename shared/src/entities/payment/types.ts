@@ -7,9 +7,6 @@
  * DynamoDB PAYMENT entity key structure:
  *   PK = USER#<user_id>   (USER#ANON for anonymous/unlinked donations)
  *   SK = PAYMENT#<payment_id>   (payment_id = Stripe charge/payment_intent ID)
- *
- * GSI attributes: none — addressable by user_id directly.
- * To look up donations by email pre-account-linking, query EmailGSI then PAYMENT SK.
  */
 
 // Full PAYMENT entity as stored in DynamoDB

@@ -1,4 +1,3 @@
-import { ColorKey } from '@/components/shared/FlairColorMap';
 import {
   ICreativityItem,
   IStudentParticipationItem,
@@ -47,7 +46,7 @@ export const studentParticipationItems: IStudentParticipationItem[] = [
       'You’ll draw, be creative, and learn how to keep your mind and body strong like a true artist-athlete.',
     bodyText2: 'Want to join? Talk to your teacher!',
     buttonText: 'Show me how',
-    color: 'red' as ColorKey,
+    color: 'red',
     link: '/programs/arts-olympiad',
     isExternal: false,
     imgSrc: artsOlympiadLogo,
@@ -60,7 +59,7 @@ export const studentParticipationItems: IStudentParticipationItem[] = [
       'Dive into colorful ideas, stories, and creations by young artists from around the world.',
     bodyText2: 'Want to read it? Ask your parents to subscribe!',
     buttonText: 'I want to read',
-    color: 'green' as ColorKey,
+    color: 'green',
     link: '/programs/childart-magazine',
     isExternal: false,
     imgSrc: childArtLogo,
@@ -73,7 +72,7 @@ export const studentParticipationItems: IStudentParticipationItem[] = [
       'Meet creative kids from everywhere and share your art in Washington, D.C., this summer.',
     bodyText2: 'Want to go? Visit the website to sign up!',
     buttonText: 'Register for free',
-    color: 'yellow' as ColorKey,
+    color: 'yellow',
     link: 'https://worldchildrensfestival.org',
     isExternal: true,
     imgSrc: ICAFLogo,

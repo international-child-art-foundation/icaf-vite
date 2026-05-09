@@ -18,9 +18,13 @@ export type AccountActionType =
     | 'delete_artwork'
     | 'change_password'
     | 'hide_artwork'
+    | 'unhide_artwork'
     | 'hide_artwork_bulk'
+    | 'unhide_artwork_bulk'
     | 'hide_group'
-    | 'hide_all';
+    | 'unhide_group'
+    | 'hide_all'
+    | 'unhide_all';
 
 // Full ACCOUNT_ACTION entity as stored in DynamoDB
 export interface AccountActionEntity {

@@ -1,6 +1,7 @@
 export const MAX_TITLE_LEN = 200;
 export const MAX_DESCRIPTION_LEN = 2000;
 export const MAX_STRING_LEN = 200;
+export const S3_MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
 export const UPLOAD_FILE_TYPES = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'] as const;
 export const SHA256_HEX = /^[a-f0-9]{64}$/i;
 export const THEME_INSTANCE_FORMAT = /^\d{4}$/;

@@ -75,19 +75,19 @@ export const CommonErrors = {
     ),
 
     paymentRequired: (message?: string) => createErrorResponse(
-        402, // Payment Required
+        402,
         message || 'Payment required'
     ),
 
     tooManyRequests: (message: string, currentCount?: number, maxAllowed?: number) => createErrorResponse(
-        429, // Too Many Requests
+        429,
         message,
         undefined,
         { current_count: currentCount, max_allowed: maxAllowed }
     ),
 
     conflict: (message: string) => createErrorResponse(
-        409, // Conflict
+        409,
         message
     )
 };

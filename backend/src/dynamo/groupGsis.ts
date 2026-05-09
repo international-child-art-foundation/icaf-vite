@@ -1,3 +1,4 @@
+import { GSI } from "./ddbSchemaConsts";
 
 export const groupPk = () => "GROUPS" as const;
 
@@ -44,3 +45,12 @@ export const GROUP_GSI_ATTRS_TO_REMOVE = [
   "GRP_GSI_SK",
 ] as const;
 
+export function queryGroups() {
+  return { IndexName: GSI.Groups, pkAttr: "GRP_PK" as const, pk: groupPk() };
+}
+export function queryFamilyGroups(family: string) {
+  return { IndexName: GSI.FamilyGroups, pkAttr: "FGRP_PK" as const, pk: familyGroupPk(family) };
+}
+export function queryInstanceGroups(family: string, instance: string) {
+  return { IndexName: GSI.InstanceGroups, pkAttr: "IGRP_PK" as const, pk: instanceGroupPk(family, instance) };
+}

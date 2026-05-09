@@ -32,7 +32,7 @@ export const HomeCarousel = () => {
 
   const getAutoplay = (): AutoplayPlugin | undefined => {
     const plugins = api?.plugins?.();
-    return (plugins?.autoplay as AutoplayPlugin | undefined) ?? undefined;
+    return plugins?.autoplay ?? undefined;
   };
 
   const autoplayOptions: AutoplayOptionsType = {
@@ -79,10 +79,7 @@ export const HomeCarousel = () => {
   }, [isInView, api]);
 
   return (
-    <div
-      ref={containerRef}
-      className="site-w lg:flex lg:items-start"
-    >
+    <div ref={containerRef} className="site-w lg:flex lg:items-start">
       <div className="w-full overflow-hidden">
         <Carousel
           opts={{

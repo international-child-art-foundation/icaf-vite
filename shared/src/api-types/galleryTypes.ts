@@ -19,13 +19,11 @@ import { GroupListItem } from '../entities/group/types.js';
 // Gallery supports newest/oldest only — the SK encodes timestamp
 export type SortOrder = 'newest' | 'oldest';
 
-// Query parameters accepted by gallery endpoints
+// Query parameters accepted by gallery endpoints (theme_family/instance are path params, not query params)
 export interface GalleryQueryParams {
-    sort?: SortOrder;           // default: 'newest'
-    limit?: number;             // default: 20, max: 100
-    last_key?: string;          // base64-encoded pagination cursor
-    theme_family?: string;      // filter by theme family (path param preferred)
-    theme_instance?: string;    // filter by theme instance (path param preferred)
+    sort?: SortOrder;       // default: 'newest'
+    limit?: number;         // default: 20, max: 100
+    last_key?: string;      // base64-encoded pagination cursor
 }
 
 // Artwork gallery response

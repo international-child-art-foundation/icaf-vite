@@ -23,3 +23,5 @@ export const USER_POOL_CLIENT_ID = process.env.USER_POOL_CLIENT_ID!;
 export const TABLE_NAME = process.env.TABLE_NAME!;
 export const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME!;
 export const CLEANUP_QUEUE_URL = process.env.CLEANUP_QUEUE_URL!;
+export const APP_URL = process.env.APP_URL!;
+export const SES_FROM_EMAIL = process.env.SES_FROM_EMAIL!;

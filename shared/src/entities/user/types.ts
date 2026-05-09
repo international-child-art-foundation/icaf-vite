@@ -62,10 +62,14 @@ export interface RegisterRequest {
 }
 
 // Verify account request (POST /auth/verify)
-// Called when user clicks their verification link
+// Called when user clicks their verification link.
+// Handles both flows:
+//   - Virtual user (created via artwork submission): is_virtual=true, password required
+//   - Standard Cognito user verifying after registration: is_virtual=false, no password needed
 export interface VerifyAccountRequest {
-    user_id: string;    // from the link: icaf.org/create-account?id=<user_id>
-    password?: string;  // only required for virtual users creating their Cognito account
+    user_id: string;        // from link: icaf.org/create-account?id=<user_id>
+    verify_token: string;   // slug from the verification email link
+    password?: string;      // required when is_virtual=true (creates Cognito account)
 }
 
 // Delete account request

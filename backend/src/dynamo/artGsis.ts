@@ -42,9 +42,11 @@ export const ARTWORK_GSI_ATTRS_TO_REMOVE = [
 ] as const;
 
 export function queryGallery() {
-  return { IndexName: GSI.Gallery, pk: galleryPk() };
+  return { IndexName: GSI.Gallery, pkAttr: "GALL_PK" as const, pk: galleryPk() };
 }
 export function queryFamilyGallery(family: string) {
-  return { IndexName: GSI.FamilyGallery, pk: familyGalleryPk(family) };
+  return { IndexName: GSI.FamilyGallery, pkAttr: "FAM_PK" as const, pk: familyGalleryPk(family) };
 }
-
+export function queryInstanceGallery(family: string, instance: string) {
+  return { IndexName: GSI.InstanceGallery, pkAttr: "INST_PK" as const, pk: instanceGalleryPk(family, instance) };
+}

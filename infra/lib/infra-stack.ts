@@ -8,7 +8,6 @@ import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as sqs from "aws-cdk-lib/aws-sqs";
-import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 
 export class InfraStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -20,11 +19,10 @@ export class InfraStack extends Stack {
       partitionKey: { name: "PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "SK", type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: RemovalPolicy.RETAIN, // Never auto-delete production data
+      removalPolicy: RemovalPolicy.RETAIN,
     });
 
     // ── Gallery GSIs (artworks) ──────────────────────────────────────────────
-    // All artworks (time-sorted). ART entity: GALL_PK='GALLERY'
     icafTable.addGlobalSecondaryIndex({
       indexName: "GalleryGSI",
       partitionKey: { name: "GALL_PK", type: dynamodb.AttributeType.STRING },
@@ -32,7 +30,6 @@ export class InfraStack extends Stack {
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
-    // Artworks filtered by theme family. ART entity: FAM_PK='FAMILY#<theme_family>'
     icafTable.addGlobalSecondaryIndex({
       indexName: "FamilyGalleryGSI",
       partitionKey: { name: "FAM_PK", type: dynamodb.AttributeType.STRING },
@@ -40,7 +37,6 @@ export class InfraStack extends Stack {
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
-    // Artworks filtered by theme family+instance. ART entity: INST_PK='FAMILY#<family>#INSTANCE#<instance>'
     icafTable.addGlobalSecondaryIndex({
       indexName: "InstanceGalleryGSI",
       partitionKey: { name: "INST_PK", type: dynamodb.AttributeType.STRING },
@@ -49,7 +45,6 @@ export class InfraStack extends Stack {
     });
 
     // ── Groups GSIs ──────────────────────────────────────────────────────────
-    // All groups. GROUP entity: GRP_PK='GROUPS'
     icafTable.addGlobalSecondaryIndex({
       indexName: "GroupsGSI",
       partitionKey: { name: "GRP_PK", type: dynamodb.AttributeType.STRING },
@@ -57,7 +52,6 @@ export class InfraStack extends Stack {
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
-    // Groups by theme family. GROUP entity: FGRP_PK='GROUPS#FAMILY#<family>'
     icafTable.addGlobalSecondaryIndex({
       indexName: "FamilyGroupsGSI",
       partitionKey: { name: "FGRP_PK", type: dynamodb.AttributeType.STRING },
@@ -65,7 +59,6 @@ export class InfraStack extends Stack {
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
-    // Groups by theme family+instance. GROUP entity: IGRP_PK='GROUPS#FAMILY#<family>#INSTANCE#<instance>'
     icafTable.addGlobalSecondaryIndex({
       indexName: "InstanceGroupsGSI",
       partitionKey: { name: "IGRP_PK", type: dynamodb.AttributeType.STRING },
@@ -73,9 +66,9 @@ export class InfraStack extends Stack {
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
-    // Owner GSI — a user's artworks and groups
+    // ByOwner GSI — a user's artworks and groups. Must match GSI.ByOwner = "ByOwnerGSI"
     icafTable.addGlobalSecondaryIndex({
-      indexName: "OwnerGSI",
+      indexName: "ByOwnerGSI",
       partitionKey: { name: "OWN_PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "OWN_SK", type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL,
@@ -124,7 +117,6 @@ export class InfraStack extends Stack {
         birthdate: { required: true, mutable: true },
       },
       customAttributes: {
-        // Role stored here for JWT claim availability; keep in sync with USER entity in DDB
         role: new cognito.StringAttribute({ mutable: true }),
       },
       passwordPolicy: {
@@ -135,7 +127,7 @@ export class InfraStack extends Stack {
         requireSymbols: true,
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
-      removalPolicy: RemovalPolicy.RETAIN, // Never auto-delete user accounts
+      removalPolicy: RemovalPolicy.RETAIN,
     });
 
     const userPoolClient = new cognito.UserPoolClient(this, "IcafUserPoolClient", {
@@ -149,7 +141,7 @@ export class InfraStack extends Stack {
       },
     });
 
-    // SQS — Background Cleanup Queue
+    // ─── 4. SQS — Background Cleanup Queue ───────────────────────────────────
     const cleanupDLQ = new sqs.Queue(this, "IcafCleanupDLQ", {
       queueName: "icaf-cleanup-dlq",
       retentionPeriod: Duration.days(14),
@@ -159,294 +151,158 @@ export class InfraStack extends Stack {
       queueName: "icaf-cleanup-queue",
       visibilityTimeout: Duration.seconds(300),
       retentionPeriod: Duration.days(14),
-      deadLetterQueue: {
-        queue: cleanupDLQ,
-        maxReceiveCount: 3,
-      },
+      deadLetterQueue: { queue: cleanupDLQ, maxReceiveCount: 3 },
     });
 
-    // Common Lambda configuration
+    // ─── 5. Lambda Functions ──────────────────────────────────────────────────
+    // TODO: Update APP_URL and SES_FROM_EMAIL before deployment, set in lambda env config
     const commonEnv = {
       TABLE_NAME: icafTable.tableName,
       USER_POOL_ID: userPool.userPoolId,
       USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
       S3_BUCKET_NAME: artworkBucket.bucketName,
       CLEANUP_QUEUE_URL: cleanupQueue.queueUrl,
+      APP_URL: "",          // https://revise.icaf.org
+      SES_FROM_EMAIL: "",   // verified SES sender address
     };
 
-    const baseFnProps = {
-      runtime: Runtime.NODEJS_20_X,
-      timeout: Duration.seconds(15),
-      memorySize: 256,
-      environment: commonEnv,
-    };
+    const fn = (id: string, entry: string, heavy = false): NodejsFunction =>
+      new NodejsFunction(this, id, {
+        runtime: Runtime.NODEJS_20_X,
+        timeout: Duration.seconds(heavy ? 60 : 15),
+        memorySize: heavy ? 512 : 256,
+        environment: commonEnv,
+        entry,
+      });
 
-    const heavyFnProps = {
-      ...baseFnProps,
-      timeout: Duration.seconds(60),
-      memorySize: 512,
-    };
+    const src = (path: string) => `../backend/src/functions/${path}`;
 
-    // Lambda Functions 
+    // ── Public — no auth ─────────────────────────────────────────────────────
+    const getArtworkFn              = fn("GetArtworkFn",              src("anyone/getArtwork.ts"));
+    const getGroupFn                = fn("GetGroupFn",                src("anyone/getGroup.ts"));
+    const galleryArtworksFn         = fn("GalleryArtworksFn",         src("anyone/gallery/galleryArtworks.ts"));
+    const galleryGroupsFn           = fn("GalleryGroupsFn",           src("anyone/gallery/galleryGroups.ts"));
+    const initiateTakedownFn        = fn("InitiateTakedownFn",        src("anyone/initiateTakedown.ts"));
+    const guestSubmitArtworkFn      = fn("GuestSubmitArtworkFn",      src("anyone/submitArtwork.ts"), true);
+    const verifyAccountFn           = fn("VerifyAccountFn",           src("anyone/verifyAccount.ts"));
+    const registerFn                = fn("RegisterFn",                src("anyone/register.ts"));
+    const loginFn                   = fn("LoginFn",                   src("anyone/login.ts"));
+    const logoutFn                  = fn("LogoutFn",                  src("anyone/logout.ts"));
+    const forgotPasswordFn          = fn("ForgotPasswordFn",          src("anyone/forgotPassword.ts"));
+    const confirmForgotPasswordFn   = fn("ConfirmForgotPasswordFn",   src("anyone/confirmForgotPassword.ts"));
+    const resendVerificationFn      = fn("ResendVerificationFn",      src("anyone/resendVerificationEmail.ts"));
+    const getAuthStatusFn           = fn("GetAuthStatusFn",           src("anyone/getAuthStatus.ts"));
+    const requestCreateAndVerifyFn  = fn("RequestCreateAndVerifyFn",  src("anyone/requestCreateAndVerify.ts"));
 
-    const testFn = new NodejsFunction(this, "TestFn", {
-      ...baseFnProps, 
-      entry: "../functions/test.ts"
-    });
+    // ── User — authenticated ──────────────────────────────────────────────────
+    const getUserFn                 = fn("GetUserFn",                 src("user/user.ts"));
+    const submitArtworkFn           = fn("SubmitArtworkFn",           src("user/submitArtwork.ts"), true);
+    const updateArtworkFn           = fn("UpdateArtworkFn",           src("user/updateArtwork.ts"));
+    const deleteArtworkFn           = fn("DeleteArtworkFn",           src("user/deleteArtwork.ts"));
+    const listArtworkSubmissionsFn  = fn("ListArtworkSubmissionsFn",  src("user/listArtworkSubmissions.ts"));
+    const voteArtworkFn             = fn("VoteArtworkFn",             src("user/voteArtwork.ts"));
+    const listDonationsFn           = fn("ListDonationsFn",           src("user/listDonations.ts"));
+    const changePasswordFn          = fn("ChangePasswordFn",          src("user/changePassword.ts"));
+    const deleteAccountFn           = fn("DeleteAccountFn",           src("user/deleteAccount.ts"), true);
 
-    // Public — no auth required
-    // const getArtworkFn = new NodejsFunction(this, "GetArtworkFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/anyone/getArtwork.ts",
-    // });
+    // ── Guardian — authenticated, guardian+ role ──────────────────────────────
+    const createGroupFn             = fn("CreateGroupFn",             src("guardian/createGroup.ts"));
+    const listGroupSubmissionsFn    = fn("ListGroupSubmissionsFn",    src("guardian/listGroupSubmissions.ts"));
+    const updateGroupFn             = fn("UpdateGroupFn",             src("guardian/updateGroup.ts"));
+    const deleteGroupFn             = fn("DeleteGroupFn",             src("guardian/deleteGroup.ts"), true);
+    const submitArtworkToGroupFn    = fn("SubmitArtworkToGroupFn",    src("guardian/submitArtworkToGroup.ts"), true);
+    const deleteArtworkFromGroupFn  = fn("DeleteArtworkFromGroupFn",  src("guardian/deleteArtworkFromGroup.ts"));
+    const updateConstituentArtworkFn = fn("UpdateConstituentArtworkFn", src("guardian/updateConstituentArtwork.ts"));
 
-    // const galleryArtworksFn = new NodejsFunction(this, "GalleryArtworksFn", {
-    //   ...baseFnProps,
-    //   memorySize: 512,
-    //   entry: "../functions/anyone/gallery/galleryArtworks.ts",
-    // });
+    // ── Contributor — authenticated, contributor+ role ────────────────────────
+    const fetchUnapprovedArtworksFn = fn("FetchUnapprovedArtworksFn", src("contributor/fetchUnapprovedArtworks.ts"));
+    const fetchHiddenArtworksFn     = fn("FetchHiddenArtworksFn",     src("contributor/fetchHiddenArtworks.ts"));
+    const fetchUnapprovedGroupsFn   = fn("FetchUnapprovedGroupsFn",   src("contributor/fetchUnapprovedGroups.ts"));
+    const fetchHiddenGroupsFn       = fn("FetchHiddenGroupsFn",       src("contributor/fetchHiddenGroups.ts"));
+    const changeArtworkStatusFn     = fn("ChangeArtworkStatusFn",     src("contributor/changeArtworkStatus.ts"));
+    const changeGroupStatusFn       = fn("ChangeGroupStatusFn",       src("contributor/changeGroupStatus.ts"));
+    const updateUserRoleFn          = fn("UpdateUserRoleFn",          src("contributor/updateUserRole.ts"));
 
-    // // Auth
-    // const registerFn = new NodejsFunction(this, "RegisterFn", {
-    //   ...heavyFnProps,
-    //   entry: "../functions/user/register.ts",
-    // });
+    // ── Admin — authenticated, admin role ─────────────────────────────────────
+    const banUserFn                 = fn("BanUserFn",                 src("admin/banUser.ts"));
+    const unbanUserFn               = fn("UnbanUserFn",               src("admin/unbanUser.ts"));
+    const alterUserRoleFn           = fn("AlterUserRoleFn",           src("admin/alterUserRole.ts"));
+    const getUserCognitoInfoFn      = fn("GetUserCognitoInfoFn",      src("admin/getUserCognitoInfo.ts"));
+    const getEmailByUserIdFn        = fn("GetEmailByUserIdFn",        src("admin/getEmailByUserId.ts"));
+    const deleteUserAccountFn       = fn("DeleteUserAccountFn",       src("admin/deleteUserAccount.ts"), true);
+    const removeAllUserArtworkFn    = fn("RemoveAllUserArtworkFn",    src("admin/removeAllUserArtwork.ts"), true);
+    const hideAllUserArtworkFn      = fn("HideAllUserArtworkFn",      src("admin/hideAllUserArtwork.ts"), true);
+    const unhideAllUserArtworkFn    = fn("UnhideAllUserArtworkFn",    src("admin/unhideAllUserArtwork.ts"), true);
+    const getArtworkSubmitterEmailFn = fn("GetArtworkSubmitterEmailFn", src("admin/getArtworkSubmitterEmail.ts"));
+    const getTakedownRequestsFn     = fn("GetTakedownRequestsFn",     src("admin/getTakedownRequests.ts"));
+    const cancelTakedownRequestFn   = fn("CancelTakedownRequestFn",   src("admin/cancelTakedownRequest.ts"));
 
-    // const loginFn = new NodejsFunction(this, "LoginFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/user/login.ts",
-    // });
+    // ─── 6. IAM Permissions ───────────────────────────────────────────────────
 
-    // const logoutFn = new NodejsFunction(this, "LogoutFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/user/logout.ts",
-    // });
-
-    // const verifyAccountFn = new NodejsFunction(this, "VerifyAccountFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/user/verifyAccount.ts",
-    // });
-
-    // const changePasswordFn = new NodejsFunction(this, "ChangePasswordFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/user/changePassword.ts",
-    // });
-
-    // const forgotPasswordFn = new NodejsFunction(this, "ForgotPasswordFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/user/forgotPassword.ts",
-    // });
-
-    // const confirmForgotPasswordFn = new NodejsFunction(this, "ConfirmForgotPasswordFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/user/confirmForgotPassword.ts",
-    // });
-
-    // const resendVerificationFn = new NodejsFunction(this, "ResendVerificationFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/user/resendVerificationEmail.ts",
-    // });
-
-    // const getAuthStatusFn = new NodejsFunction(this, "GetAuthStatusFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/user/getAuthStatus.ts",
-    // });
-
-    // // User (authenticated)
-    // const getUserFn = new NodejsFunction(this, "GetUserFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/user/user.ts",
-    // });
-
-    // const deleteAccountFn = new NodejsFunction(this, "DeleteAccountFn", {
-    //   ...heavyFnProps,
-    //   entry: "../functions/user/deleteAccount.ts",
-    // });
-
-    // const submitArtworkFn = new NodejsFunction(this, "SubmitArtworkFn", {
-    //   ...heavyFnProps,
-    //   entry: "../functions/user/submitArtwork.ts",
-    // });
-
-    // const listArtworkSubmissionsFn = new NodejsFunction(this, "ListArtworkSubmissionsFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/user/listArtworkSubmissions.ts",
-    // });
-
-    // const listConstituentArtworksFn = new NodejsFunction(this, "ListConstituentArtworksFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/user/listConstituentArtworks.ts",
-    // });
-
-    // const voteArtworkFn = new NodejsFunction(this, "VoteArtworkFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/user/voteArtwork.ts",
-    // });
-
-    // const listVoteArtworkFn = new NodejsFunction(this, "ListVoteArtworkFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/user/listVoteArtwork.ts",
-    // });
-
-    // const listDonationsFn = new NodejsFunction(this, "ListDonationsFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/user/listDonations.ts",
-    // });
-
-    // const submitArtworkForConstituentFn = new NodejsFunction(this, "SubmitArtworkForConstituentFn", {
-    //   ...heavyFnProps,
-    //   entry: "../functions/user/submitArtworkForConstituent.ts",
-    // });
-
-    // // Contributor (auth + role check in handler)
-    // const fetchUnapprovedArtworksFn = new NodejsFunction(this, "FetchUnapprovedArtworksFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/contributor/fetchUnapprovedArtworks.ts",
-    // });
-
-    // const approveArtworkFn = new NodejsFunction(this, "ApproveArtworkFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/contributor/approveArtwork.ts",
-    // });
-
-    // const rejectArtworkFn = new NodejsFunction(this, "RejectArtworkFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/contributor/rejectArtwork.ts",
-    // });
-
-    // const cleanupRejectedArtworkFn = new NodejsFunction(this, "CleanupRejectedArtworkFn", {
-    //   ...heavyFnProps,
-    //   entry: "../functions/contributor/cleanupRejectedArtwork.ts",
-    // });
-
-    // const updateUserRoleFn = new NodejsFunction(this, "UpdateUserRoleFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/contributor/updateUserRole.ts",
-    // });
-
-    // const setGuardianSubmissionLimitFn = new NodejsFunction(this, "SetGuardianSubmissionLimitFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/contributor/setGuardianSubmissionLimit.ts",
-    // });
-
-    // // Admin (auth + role check in handler)
-    // const banUserFn = new NodejsFunction(this, "BanUserFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/admin/banUser.ts",
-    // });
-
-    // const unbanUserFn = new NodejsFunction(this, "UnbanUserFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/admin/unbanUser.ts",
-    // });
-
-    // const alterUserRoleFn = new NodejsFunction(this, "AlterUserRoleFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/admin/alterUserRole.ts",
-    // });
-
-    // const updateUserFn = new NodejsFunction(this, "UpdateUserFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/admin/updateUser.ts",
-    // });
-
-    // const getUserCognitoInfoFn = new NodejsFunction(this, "GetUserCognitoInfoFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/admin/getUserCognitoInfo.ts",
-    // });
-
-    // const getArtworkSubmitterEmailFn = new NodejsFunction(this, "GetArtworkSubmitterEmailFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/admin/getArtworkSubmitterEmail.ts",
-    // });
-
-    // const deleteUserAccountFn = new NodejsFunction(this, "DeleteUserAccountFn", {
-    //   ...heavyFnProps,
-    //   entry: "../functions/admin/deleteUserAccount.ts",
-    // });
-
-    // const removeAllUserArtworkFn = new NodejsFunction(this, "RemoveAllUserArtworkFn", {
-    //   ...heavyFnProps,
-    //   entry: "../functions/admin/removeAllUserArtwork.ts",
-    // });
-
-    // const getAllDonationsFn = new NodejsFunction(this, "GetAllDonationsFn", {
-    //   ...baseFnProps,
-    //   entry: "../functions/admin/getAllDonations.ts",
-    // });
-
-    // // Background processor — triggered by SQS
-    // const cleanupQueueProcessorFn = new NodejsFunction(this, "CleanupQueueProcessorFn", {
-    //   ...heavyFnProps,
-    //   timeout: Duration.seconds(300),
-    //   entry: "../functions/cleanupQueueProcessor.ts",
-    // });
-
-    // cleanupQueueProcessorFn.addEventSource(
-    //   new SqsEventSource(cleanupQueue, { batchSize: 10 })
-    // );
-
-    // ─── 7. IAM Permissions ───────────────────────────────────────────────────
-
-    // DynamoDB: full read/write for all Lambda functions
-    // const allFunctions = [
-    //   getArtworkFn, galleryArtworksFn,
-    //   registerFn, loginFn, logoutFn, verifyAccountFn, changePasswordFn,
-    //   forgotPasswordFn, confirmForgotPasswordFn, resendVerificationFn, getAuthStatusFn,
-    //   getUserFn, deleteAccountFn, submitArtworkFn, listArtworkSubmissionsFn,
-    //   listConstituentArtworksFn, voteArtworkFn, listVoteArtworkFn, listDonationsFn,
-    //   submitArtworkForConstituentFn,
-    //   fetchUnapprovedArtworksFn, approveArtworkFn, rejectArtworkFn,
-    //   cleanupRejectedArtworkFn, updateUserRoleFn, setGuardianSubmissionLimitFn,
-    //   banUserFn, unbanUserFn, alterUserRoleFn, updateUserFn,
-    //   getUserCognitoInfoFn, getArtworkSubmitterEmailFn,
-    //   deleteUserAccountFn, removeAllUserArtworkFn, getAllDonationsFn,
-    //   cleanupQueueProcessorFn,
-    // ];
+    // DynamoDB — all functions need read/write access
     const allFunctions = [
-      testFn
-    ]
+      getArtworkFn, getGroupFn, galleryArtworksFn, galleryGroupsFn,
+      initiateTakedownFn, guestSubmitArtworkFn, verifyAccountFn,
+      registerFn, loginFn, logoutFn, forgotPasswordFn, confirmForgotPasswordFn,
+      resendVerificationFn, getAuthStatusFn, requestCreateAndVerifyFn,
+      getUserFn, submitArtworkFn, updateArtworkFn, deleteArtworkFn,
+      listArtworkSubmissionsFn, voteArtworkFn, listDonationsFn,
+      changePasswordFn, deleteAccountFn,
+      createGroupFn, listGroupSubmissionsFn, updateGroupFn, deleteGroupFn,
+      submitArtworkToGroupFn, deleteArtworkFromGroupFn, updateConstituentArtworkFn,
+      fetchUnapprovedArtworksFn, fetchHiddenArtworksFn,
+      fetchUnapprovedGroupsFn, fetchHiddenGroupsFn,
+      changeArtworkStatusFn, changeGroupStatusFn, updateUserRoleFn,
+      banUserFn, unbanUserFn, alterUserRoleFn, getUserCognitoInfoFn,
+      getEmailByUserIdFn, deleteUserAccountFn, removeAllUserArtworkFn,
+      hideAllUserArtworkFn, unhideAllUserArtworkFn,
+      getArtworkSubmitterEmailFn, getTakedownRequestsFn, cancelTakedownRequestFn,
+    ];
 
-    for (const fn of allFunctions) {
-      icafTable.grantReadWriteData(fn);
+    for (const f of allFunctions) {
+      icafTable.grantReadWriteData(f);
     }
 
-    // S3: only functions that read/write artwork files
-    // const s3Functions = [
-    //   submitArtworkFn, submitArtworkForConstituentFn,
-    //   deleteAccountFn, deleteUserAccountFn,
-    //   removeAllUserArtworkFn, cleanupRejectedArtworkFn,
-    //   cleanupQueueProcessorFn,
-    // ];
+    // S3 — functions that generate presigned PUT URLs or delete objects
+    const s3Functions = [
+      guestSubmitArtworkFn,   // presigned PUT + S3 cleanup (virtual submission)
+      submitArtworkFn,         // presigned PUT
+      submitArtworkToGroupFn,  // presigned PUT
+      deleteArtworkFn,         // S3 list + delete
+      deleteAccountFn,         // S3 list + delete (artwork cleanup)
+      deleteUserAccountFn,     // S3 list + delete (artwork cleanup)
+    ];
 
-    // for (const fn of s3Functions) {
-    //   artworkBucket.grantReadWrite(fn);
-    // }
+    for (const f of s3Functions) {
+      artworkBucket.grantReadWrite(f);
+    }
 
-    // S3: presigned URL generation for artwork uploads
-    // for (const fn of [submitArtworkFn, submitArtworkForConstituentFn]) {
-    //   fn.addToRolePolicy(new iam.PolicyStatement({
-    //     effect: iam.Effect.ALLOW,
-    //     actions: ["s3:PutObject"],
-    //     resources: [`${artworkBucket.bucketArn}/artworks/*`],
-    //   }));
-    // }
+    // SES — functions that send email via SES
+    const sesFunctions = [
+      guestSubmitArtworkFn,      // artwork submission email
+      requestCreateAndVerifyFn,  // CreateAndVerify email (user-requested)
+      changeArtworkStatusFn,     // approval notification
+      changeGroupStatusFn,       // approval notification
+    ];
 
-    // SQS
-    // for (const fn of [deleteAccountFn, deleteUserAccountFn, removeAllUserArtworkFn]) {
-    //   cleanupQueue.grantSendMessages(fn);
-    // }
-    // cleanupQueue.grantConsumeMessages(cleanupQueueProcessorFn);
+    for (const f of sesFunctions) {
+      f.addToRolePolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["ses:SendEmail", "ses:SendRawEmail"],
+        resources: ["*"],
+      }));
+    }
 
-    // Cognito admin operations — only functions that need to call Cognito APIs
+    // Cognito admin operations
     const cognitoAdminActions = [
       "cognito-idp:AdminInitiateAuth",
       "cognito-idp:AdminGetUser",
       "cognito-idp:AdminUpdateUserAttributes",
       "cognito-idp:AdminDeleteUser",
+      "cognito-idp:AdminCreateUser",
+      "cognito-idp:AdminSetUserPassword",
       "cognito-idp:AdminDisableUser",
       "cognito-idp:AdminEnableUser",
-      "cognito-idp:AdminSetUserPassword",
       "cognito-idp:AdminUserGlobalSignOut",
     ];
 
@@ -461,31 +317,39 @@ export class InfraStack extends Stack {
       "cognito-idp:ConfirmSignUp",
     ];
 
-    // const cognitoAdminFunctions = [
-    //   loginFn, logoutFn, verifyAccountFn,
-    //   deleteAccountFn, getUserCognitoInfoFn, deleteUserAccountFn,
-    //   alterUserRoleFn, updateUserFn, banUserFn, unbanUserFn,
-    //   resendVerificationFn,
-    // ];
+    // Functions that need Cognito admin actions (server-side user management)
+    const cognitoAdminFunctions = [
+      loginFn,            // AdminInitiateAuth (USER_PASSWORD_AUTH flow)
+      logoutFn,           // AdminUserGlobalSignOut
+      verifyAccountFn,    // AdminCreateUser + AdminSetUserPassword
+      deleteAccountFn,    // InitiateAuth (password verify) + AdminDeleteUser
+      deleteUserAccountFn, // AdminDeleteUser
+      getUserCognitoInfoFn, // AdminGetUser
+    ];
 
-    // for (const fn of cognitoAdminFunctions) {
-    //   fn.addToRolePolicy(new iam.PolicyStatement({
-    //     effect: iam.Effect.ALLOW,
-    //     actions: [...cognitoAdminActions, ...cognitoClientActions],
-    //     resources: [userPool.userPoolArn],
-    //   }));
-    // }
+    for (const f of cognitoAdminFunctions) {
+      f.addToRolePolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [...cognitoAdminActions, ...cognitoClientActions],
+        resources: [userPool.userPoolArn],
+      }));
+    }
 
-    // Register and auth functions only need client-level Cognito access
-    // for (const fn of [registerFn, changePasswordFn, forgotPasswordFn, confirmForgotPasswordFn, getAuthStatusFn]) {
-    //   fn.addToRolePolicy(new iam.PolicyStatement({
-    //     effect: iam.Effect.ALLOW,
-    //     actions: cognitoClientActions,
-    //     resources: [userPool.userPoolArn],
-    //   }));
-    // }
+    // Functions that only need client-level Cognito access
+    const cognitoClientFunctions = [
+      registerFn, forgotPasswordFn, confirmForgotPasswordFn,
+      resendVerificationFn, getAuthStatusFn, changePasswordFn,
+    ];
 
-    // ─── 8. API Gateway ───────────────────────────────────────────────────────
+    for (const f of cognitoClientFunctions) {
+      f.addToRolePolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: cognitoClientActions,
+        resources: [userPool.userPoolArn],
+      }));
+    }
+
+    // ─── 7. API Gateway ───────────────────────────────────────────────────────
     const api = new apigw.RestApi(this, "IcafApi", {
       restApiName: "icaf-api",
       endpointConfiguration: { types: [apigw.EndpointType.REGIONAL] },
@@ -507,91 +371,132 @@ export class InfraStack extends Stack {
       authorizationType: apigw.AuthorizationType.COGNITO,
     };
 
-    const li = (fn: NodejsFunction) => new apigw.LambdaIntegration(fn);
+    const li = (f: NodejsFunction) => new apigw.LambdaIntegration(f);
 
-    // ── Gallery (public) ─────────────────────────────────────────────────────
-    const test = api.root.addResource("test");
-    test.addMethod("GET", li(testFn));
-    // const gallery = api.root.addResource("gallery");
-    // const galleryArtworksRes = gallery.addResource("artworks");
-    // galleryArtworksRes.addMethod("GET", li(galleryArtworksFn)); // ?sortType=newest|oldest
-    // galleryArtworksRes.addResource("{artId}").addMethod("GET", li(getArtworkFn));
+    // ── Public — artworks + groups ────────────────────────────────────────────
+    const artworksRes = api.root.addResource("artworks");
+    artworksRes.addMethod("POST", li(guestSubmitArtworkFn));
+    artworksRes.addResource("{art_id}").addMethod("GET", li(getArtworkFn));
 
-    // // /gallery/artworks/family/{family} and /gallery/artworks/family/{family}/instance/{instance}
-    // // both use same handler — handler reads path params to determine query type
-    // const galleryByFamily = galleryArtworksRes.addResource("family").addResource("{family}");
-    // galleryByFamily.addMethod("GET", li(galleryArtworksFn));
-    // galleryByFamily
-    //   .addResource("instance")
-    //   .addResource("{instance}")
-    //   .addMethod("GET", li(galleryArtworksFn));
+    const groupsRes = api.root.addResource("groups");
+    groupsRes.addResource("{group_id}").addMethod("GET", li(getGroupFn));
 
-    // // ── Auth (public) ─────────────────────────────────────────────────────────
-    // const authRes = api.root.addResource("auth");
-    // authRes.addResource("register").addMethod("POST", li(registerFn));
-    // authRes.addResource("login").addMethod("POST", li(loginFn));
-    // authRes.addResource("logout").addMethod("POST", li(logoutFn));
-    // authRes.addResource("verify").addMethod("POST", li(verifyAccountFn));
-    // authRes.addResource("forgot-password").addMethod("POST", li(forgotPasswordFn));
-    // authRes.addResource("confirm-forgot-password").addMethod("POST", li(confirmForgotPasswordFn));
-    // authRes.addResource("resend-verification").addMethod("POST", li(resendVerificationFn));
-    // authRes.addResource("status").addMethod("GET", li(getAuthStatusFn));
-    // // Change password requires auth
-    // authRes.addResource("change-password").addMethod("POST", li(changePasswordFn), authOpts);
+    api.root.addResource("takedown").addMethod("POST", li(initiateTakedownFn));
 
-    // // ── User — authenticated ──────────────────────────────────────────────────
-    // const userRes = api.root.addResource("user");
-    // userRes.addResource("profile").addMethod("GET", li(getUserFn), authOpts);
-    // userRes.addResource("account").addMethod("DELETE", li(deleteAccountFn), authOpts);
-    // userRes.addResource("payments").addMethod("GET", li(listDonationsFn), authOpts);
-    // userRes.addResource("voted-artworks").addMethod("GET", li(listVoteArtworkFn), authOpts);
+    // ── Gallery (public) ──────────────────────────────────────────────────────
+    const gallery = api.root.addResource("gallery");
 
-    // const userArtworksRes = userRes.addResource("artworks");
-    // userArtworksRes.addMethod("GET", li(listArtworkSubmissionsFn), authOpts);
-    // userArtworksRes.addMethod("POST", li(submitArtworkFn), authOpts);
+    const galleryArtworksRes = gallery.addResource("artworks");
+    galleryArtworksRes.addMethod("GET", li(galleryArtworksFn));
+    const galleryArtByFamily = galleryArtworksRes
+      .addResource("family").addResource("{family}");
+    galleryArtByFamily.addMethod("GET", li(galleryArtworksFn));
+    galleryArtByFamily
+      .addResource("instance").addResource("{instance}")
+      .addMethod("GET", li(galleryArtworksFn));
 
-    // const userArtworkRes = userArtworksRes.addResource("{artId}");
-    // userArtworkRes.addResource("kudos").addMethod("POST", li(voteArtworkFn), authOpts);
+    const galleryGroupsRes = gallery.addResource("groups");
+    galleryGroupsRes.addMethod("GET", li(galleryGroupsFn));
+    const galleryGrpByFamily = galleryGroupsRes
+      .addResource("family").addResource("{family}");
+    galleryGrpByFamily.addMethod("GET", li(galleryGroupsFn));
+    galleryGrpByFamily
+      .addResource("instance").addResource("{instance}")
+      .addMethod("GET", li(galleryGroupsFn));
 
-    // // Guardian — constituent artwork submissions
-    // const userConstituentRes = userRes.addResource("constituents");
-    // userConstituentRes.addResource("artworks").addMethod("GET", li(listConstituentArtworksFn), authOpts);
-    // userConstituentRes.addResource("submit").addMethod("POST", li(submitArtworkForConstituentFn), authOpts);
+    // ── Auth (public, except change-password) ─────────────────────────────────
+    const authRes = api.root.addResource("auth");
+    authRes.addResource("register").addMethod("POST", li(registerFn));
+    authRes.addResource("login").addMethod("POST", li(loginFn));
+    authRes.addResource("logout").addMethod("POST", li(logoutFn));
+    authRes.addResource("verify").addMethod("POST", li(verifyAccountFn));
+    authRes.addResource("forgot-password").addMethod("POST", li(forgotPasswordFn));
+    authRes.addResource("confirm-forgot-password").addMethod("POST", li(confirmForgotPasswordFn));
+    authRes.addResource("resend-verification").addMethod("POST", li(resendVerificationFn));
+    authRes.addResource("status").addMethod("GET", li(getAuthStatusFn));
+    authRes.addResource("create-and-verify").addMethod("POST", li(requestCreateAndVerifyFn));
+    authRes.addResource("change-password").addMethod("POST", li(changePasswordFn), authOpts);
 
-    // // ── Contributor — auth + role enforcement in handler ──────────────────────
-    // const contribRes = api.root.addResource("contributor");
+    // ── User — authenticated ──────────────────────────────────────────────────
+    const userRes = api.root.addResource("user");
+    userRes.addResource("profile").addMethod("GET", li(getUserFn), authOpts);
+    userRes.addResource("account").addMethod("DELETE", li(deleteAccountFn), authOpts);
+    userRes.addResource("payments").addMethod("GET", li(listDonationsFn), authOpts);
 
-    // const contribArtworksRes = contribRes.addResource("artworks");
-    // contribArtworksRes.addResource("pending").addMethod("GET", li(fetchUnapprovedArtworksFn), authOpts);
+    const userArtworksRes = userRes.addResource("artworks");
+    userArtworksRes.addMethod("GET", li(listArtworkSubmissionsFn), authOpts);
+    userArtworksRes.addMethod("POST", li(submitArtworkFn), authOpts);
 
-    // const contribArtworkRes = contribArtworksRes.addResource("{artId}");
-    // contribArtworkRes.addResource("approve").addMethod("POST", li(approveArtworkFn), authOpts);
-    // contribArtworkRes.addResource("reject").addMethod("POST", li(rejectArtworkFn), authOpts);
+    const userArtworkRes = userArtworksRes.addResource("{art_id}");
+    userArtworkRes.addMethod("PATCH", li(updateArtworkFn), authOpts);
+    userArtworkRes.addMethod("DELETE", li(deleteArtworkFn), authOpts);
+    userArtworkRes.addResource("kudos").addMethod("POST", li(voteArtworkFn), authOpts);
 
-    // const contribUsersRes = contribRes.addResource("users");
-    // const contribUserRes = contribUsersRes.addResource("{userId}");
-    // contribUserRes.addResource("role").addMethod("PATCH", li(updateUserRoleFn), authOpts);
-    // contribUserRes.addResource("submission-limit").addMethod("PATCH", li(setGuardianSubmissionLimitFn), authOpts);
+    // ── Guardian — authenticated, role enforced in handler ────────────────────
+    const guardianRes = api.root.addResource("guardian");
 
-    // // ── Admin — auth + role enforcement in handler ────────────────────────────
-    // const adminRes = api.root.addResource("admin");
+    const guardianGroupsRes = guardianRes.addResource("groups");
+    guardianGroupsRes.addMethod("GET", li(listGroupSubmissionsFn), authOpts);
+    guardianGroupsRes.addMethod("POST", li(createGroupFn), authOpts);
 
-    // const adminUsersRes = adminRes.addResource("users");
-    // const adminUserRes = adminUsersRes.addResource("{userId}");
-    // adminUserRes.addMethod("PATCH", li(updateUserFn), authOpts);
-    // adminUserRes.addResource("ban").addMethod("POST", li(banUserFn), authOpts);
-    // adminUserRes.addResource("unban").addMethod("POST", li(unbanUserFn), authOpts);
-    // adminUserRes.addResource("role").addMethod("PATCH", li(alterUserRoleFn), authOpts);
-    // adminUserRes.addResource("cognito-info").addMethod("GET", li(getUserCognitoInfoFn), authOpts);
-    // adminUserRes.addResource("account").addMethod("DELETE", li(deleteUserAccountFn), authOpts);
-    // adminUserRes.addResource("artworks").addMethod("DELETE", li(removeAllUserArtworkFn), authOpts);
+    const guardianGroupRes = guardianGroupsRes.addResource("{group_id}");
+    guardianGroupRes.addMethod("PATCH", li(updateGroupFn), authOpts);
+    guardianGroupRes.addMethod("DELETE", li(deleteGroupFn), authOpts);
 
-    // const adminArtworksRes = adminRes.addResource("artworks");
-    // adminArtworksRes
-    //   .addResource("{artId}")
-    //   .addResource("submitter-email")
-    //   .addMethod("GET", li(getArtworkSubmitterEmailFn), authOpts);
+    const guardianGroupArtworksRes = guardianGroupRes.addResource("artworks");
+    guardianGroupArtworksRes.addMethod("POST", li(submitArtworkToGroupFn), authOpts);
+    guardianGroupArtworksRes
+      .addResource("{art_id}")
+      .addMethod("DELETE", li(deleteArtworkFromGroupFn), authOpts);
 
-    // adminRes.addResource("payments").addMethod("GET", li(getAllDonationsFn), authOpts);
+    guardianRes
+      .addResource("artworks").addResource("{art_id}")
+      .addMethod("PATCH", li(updateConstituentArtworkFn), authOpts);
+
+    // ── Contributor — authenticated, role enforced in handler ─────────────────
+    const contribRes = api.root.addResource("contributor");
+
+    const contribArtworksRes = contribRes.addResource("artworks");
+    contribArtworksRes.addResource("pending").addMethod("GET", li(fetchUnapprovedArtworksFn), authOpts);
+    contribArtworksRes.addResource("hidden").addMethod("GET", li(fetchHiddenArtworksFn), authOpts);
+    contribArtworksRes
+      .addResource("{art_id}").addResource("status")
+      .addMethod("PATCH", li(changeArtworkStatusFn), authOpts);
+
+    const contribGroupsRes = contribRes.addResource("groups");
+    contribGroupsRes.addResource("pending").addMethod("GET", li(fetchUnapprovedGroupsFn), authOpts);
+    contribGroupsRes.addResource("hidden").addMethod("GET", li(fetchHiddenGroupsFn), authOpts);
+    contribGroupsRes
+      .addResource("{group_id}").addResource("status")
+      .addMethod("PATCH", li(changeGroupStatusFn), authOpts);
+
+    contribRes
+      .addResource("users").addResource("{user_id}").addResource("role")
+      .addMethod("PATCH", li(updateUserRoleFn), authOpts);
+
+    // ── Admin — authenticated, role enforced in handler ───────────────────────
+    const adminRes = api.root.addResource("admin");
+
+    const adminUserRes = adminRes
+      .addResource("users").addResource("{user_id}");
+    adminUserRes.addResource("ban").addMethod("POST", li(banUserFn), authOpts);
+    adminUserRes.addResource("unban").addMethod("POST", li(unbanUserFn), authOpts);
+    adminUserRes.addResource("role").addMethod("PATCH", li(alterUserRoleFn), authOpts);
+    adminUserRes.addResource("cognito-info").addMethod("GET", li(getUserCognitoInfoFn), authOpts);
+    adminUserRes.addResource("email").addMethod("GET", li(getEmailByUserIdFn), authOpts);
+    adminUserRes.addResource("account").addMethod("DELETE", li(deleteUserAccountFn), authOpts);
+    adminUserRes.addResource("artworks").addMethod("DELETE", li(removeAllUserArtworkFn), authOpts);
+    adminUserRes.addResource("hide-all").addMethod("POST", li(hideAllUserArtworkFn), authOpts);
+    adminUserRes.addResource("unhide-all").addMethod("POST", li(unhideAllUserArtworkFn), authOpts);
+
+    adminRes
+      .addResource("artworks").addResource("{art_id}").addResource("submitter-email")
+      .addMethod("GET", li(getArtworkSubmitterEmailFn), authOpts);
+
+    const adminTakedownsRes = adminRes.addResource("takedowns");
+    adminTakedownsRes.addMethod("GET", li(getTakedownRequestsFn), authOpts);
+    adminTakedownsRes
+      .addResource("{tdr_sk}")
+      .addMethod("PATCH", li(cancelTakedownRequestFn), authOpts);
   }
 }

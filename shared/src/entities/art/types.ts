@@ -61,22 +61,35 @@ export interface ArtworkEntity {
     submitter_relationship?: SubmitterRelationship;
 }
 
-// Request body for submitting artwork (POST /user/artworks)
-// file_type is used only to generate the presigned S3 upload URL; not stored on entity
-export interface SubmitArtworkRequest {
+// Artwork fields common to all submission flows
+// file_type is used only to generate the presigned S3 upload URL; not stored on the entity
+interface ArtworkSubmissionFields {
+    file_type: UploadFileType;
+    legal_release_hash: string;
+    is_virtual: boolean;
     title?: string;
     description?: string;
     f_name?: string;
     age?: number;
     country?: string;
     region?: string;
-    is_virtual: boolean;
     submitter_relationship?: SubmitterRelationship;
     theme_family?: string;
     theme_instance?: string;
     group_id?: string;
-    legal_release_hash: string;
 }
+
+// Request body for authenticated artwork submission (POST /user/artworks)
+// Identity comes from the auth token — no email/user_id needed in the body
+export type SubmitArtworkRequest = ArtworkSubmissionFields;
+
+// Request body for guest artwork submission (POST /anyone/artworks)
+// Caller provides either email (new guest or email lookup) or user_id (returning guest
+// who already has a virtual account saved locally). Exactly one must be present.
+export type GuestSubmitArtworkRequest = ArtworkSubmissionFields & (
+    | { email: string; user_id?: never }
+    | { user_id: string; email?: never }
+);
 
 export interface SubmitArtworkResponse {
     success: boolean;
@@ -118,4 +131,18 @@ export interface ListConstituentArtworksResponse {
     artworks: ArtworkListItem[];
     has_more: boolean;
     last_key?: string;
+}
+
+// Request body for updating an owned artwork (PATCH /user/artworks/{art_id})
+// All fields optional — only provided fields are written. Always triggers re-review.
+export interface UpdateArtworkRequest {
+    title?: string;
+    description?: string;
+    f_name?: string;
+    age?: number;
+    country?: string;
+    region?: string;
+    submitter_relationship?: SubmitterRelationship;
+    theme_family?: string;
+    theme_instance?: string;
 }

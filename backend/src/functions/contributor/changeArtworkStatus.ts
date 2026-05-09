@@ -1,0 +1,129 @@
+import { GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
+import {
+  ApiGatewayEvent,
+  HTTP_STATUS,
+  COMMON_HEADERS,
+  CommonErrors,
+  ArtworkEntity,
+  ArtworkStatus,
+  UserEntity,
+} from "@icaf/shared";
+import { sendApprovalEmail } from "../../utils/emails/approvalNotification";
+import { buildApprovedArtworkGsiAttrs, ARTWORK_GSI_ATTRS_TO_REMOVE } from "../../dynamo/artGsis";
+import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
+import { EntityType } from "../../dynamo/ddbSchemaConsts";
+import { Status } from "../../dynamo/shared";
+
+const VALID_STATUSES: ArtworkStatus[] = ["approved", "hidden", "rejected"];
+
+export const handler = async (
+  event: ApiGatewayEvent,
+): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
+  try {
+    if (event.httpMethod !== "PATCH") {
+      return CommonErrors.methodNotAllowed();
+    }
+
+    const userId = event.requestContext?.authorizer?.claims?.sub;
+    if (!userId) {
+      return CommonErrors.unauthorized();
+    }
+
+    const artId = event.pathParameters?.art_id;
+    if (!artId) {
+      return CommonErrors.badRequest("art_id path parameter is required");
+    }
+
+    const body = JSON.parse(event.body ?? "{}") as { status?: string };
+    const newStatus = body.status as ArtworkStatus | undefined;
+
+    if (!newStatus || !VALID_STATUSES.includes(newStatus)) {
+      return CommonErrors.badRequest(`status must be one of: ${VALID_STATUSES.join(", ")}`);
+    }
+
+    // ── Read ART entity to get theme attrs for gallery GSI construction ────
+    const artResult = await dynamodb.send(
+      new GetCommand({
+        TableName: TABLE_NAME,
+        Key: { PK: `ART#${artId}`, SK: "-" },
+      }),
+    );
+
+    if (!artResult.Item) {
+      return CommonErrors.notFound("Artwork not found");
+    }
+
+    const art = artResult.Item as ArtworkEntity;
+    const nowMs = Date.now();
+
+    let updateExpr: string;
+    const exprValues: Record<string, unknown> = { ":status": newStatus };
+
+    if (newStatus === "approved") {
+      // Write gallery GSI attrs, remove review GSI attrs
+      const gsiAttrs = buildApprovedArtworkGsiAttrs({
+        timestampMs: art.timestamp * 1000,
+        artId,
+        family: art.theme_family,
+        instance: art.theme_instance,
+      });
+
+      const setAttrs = Object.entries(gsiAttrs)
+        .map(([k, v], i) => { exprValues[`:gsi${i}`] = v; return `${k} = :gsi${i}`; })
+        .join(", ");
+
+      updateExpr = `SET status = :status, ${setAttrs} REMOVE REV_PK, REV_SK`;
+    } else {
+      // Remove gallery GSI attrs, write/update review GSI attrs
+      const reviewSkStatus = newStatus === "hidden" ? Status.Hidden : Status.Rejected;
+      exprValues[":revPk"] = reviewPk();
+      exprValues[":revSk"] = reviewGsiSk(reviewSkStatus, EntityType.Art, nowMs, artId);
+
+      updateExpr = `SET status = :status, REV_PK = :revPk, REV_SK = :revSk REMOVE ${ARTWORK_GSI_ATTRS_TO_REMOVE.join(", ")}`;
+    }
+
+    await dynamodb.send(
+      new UpdateCommand({
+        TableName: TABLE_NAME,
+        Key: { PK: `ART#${artId}`, SK: "-" },
+        UpdateExpression: updateExpr,
+        ExpressionAttributeValues: exprValues,
+        ConditionExpression: "attribute_exists(PK)",
+      }),
+    );
+
+    // ── Send approval email (non-blocking) ────────────────────────────────
+    if (newStatus === "approved") {
+      dynamodb.send(
+        new GetCommand({
+          TableName: TABLE_NAME,
+          Key: { PK: `USER#${art.user_id}`, SK: "PROFILE" },
+        }),
+      ).then((userResult) => {
+        const user = userResult.Item as UserEntity | undefined;
+        if (user?.email) {
+          sendApprovalEmail({
+            toEmail: user.email,
+            type: "art",
+            id: artId,
+            title: art.title,
+          }).catch((err) => console.error("Approval email failed:", err));
+        }
+      }).catch((err) => console.error("User lookup for approval email failed:", err));
+    }
+
+    return {
+      statusCode: HTTP_STATUS.OK,
+      body: JSON.stringify({ success: true, art_id: artId, status: newStatus }),
+      headers: COMMON_HEADERS,
+    };
+  } catch (error: unknown) {
+    const ddbErr = error as { name?: string };
+    if (ddbErr.name === "ConditionalCheckFailedException") {
+      return CommonErrors.notFound("Artwork not found");
+    }
+    console.error("Error changing artwork status:", error);
+    return CommonErrors.internalServerError();
+  }
+};

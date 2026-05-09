@@ -1,4 +1,4 @@
-import { SubmitArtworkRequest, SubmitterRelationship, UploadFileType } from './types.js';
+import { SubmitArtworkRequest, UpdateArtworkRequest, SubmitterRelationship, UploadFileType } from './types.js';
 import {
     UPLOAD_FILE_TYPES,
     MAX_TITLE_LEN,
@@ -12,19 +12,22 @@ export function isValidUploadFileType(t: string): t is UploadFileType {
     return UPLOAD_FILE_TYPES.includes(t as UploadFileType);
 }
 
-export function validateSubmissionData(data: SubmitArtworkRequest): string[] {
+// Validates the optional artwork fields shared across submit, update, and group flows.
+// Pass any object that may contain these optional fields.
+export function validateOptionalArtworkFields(data: {
+    title?: string;
+    description?: string;
+    f_name?: string;
+    age?: number;
+    country?: string;
+    region?: string;
+    submitter_relationship?: SubmitterRelationship;
+    theme_family?: string;
+    theme_instance?: string;
+    group_id?: string;
+}): string[] {
     const errors: string[] = [];
 
-    // ── Required ────────────────────────────────────────────────────────
-    if (typeof data.is_virtual !== 'boolean') {
-        errors.push('is_virtual must be a boolean');
-    }
-
-    if (!data.legal_release_hash || !SHA256_HEX.test(data.legal_release_hash)) {
-        errors.push('legal_release_hash must be a valid SHA-256 hex string');
-    }
-
-    // ── Optional fields: validate only when present ──────────────────────
     if (data.title !== undefined) {
         if (typeof data.title !== 'string' || !data.title.trim()) {
             errors.push('title, if provided, must be a non-empty string');
@@ -69,14 +72,6 @@ export function validateSubmissionData(data: SubmitArtworkRequest): string[] {
         }
     }
 
-    if (data.group_id !== undefined) {
-        if (typeof data.group_id !== 'string' || !data.group_id.trim()) {
-            errors.push('group_id, if provided, must be a non-empty string');
-        } else if (data.group_id.length > MAX_STRING_LEN) {
-            errors.push(`group_id must be ${MAX_STRING_LEN} characters or less`);
-        }
-    }
-
     if (data.submitter_relationship !== undefined) {
         const valid: SubmitterRelationship[] = ['self', 'parent', 'guardian', 'teacher'];
         if (!valid.includes(data.submitter_relationship)) {
@@ -84,7 +79,6 @@ export function validateSubmissionData(data: SubmitArtworkRequest): string[] {
         }
     }
 
-    // ── Theme cross-field rule ───────────────────────────────────────────
     if (data.theme_family !== undefined) {
         if (typeof data.theme_family !== 'string' || !data.theme_family.trim()) {
             errors.push('theme_family, if provided, must be a non-empty string');
@@ -102,5 +96,35 @@ export function validateSubmissionData(data: SubmitArtworkRequest): string[] {
         }
     }
 
+    if (data.group_id !== undefined) {
+        if (typeof data.group_id !== 'string' || !data.group_id.trim()) {
+            errors.push('group_id, if provided, must be a non-empty string');
+        } else if (data.group_id.length > MAX_STRING_LEN) {
+            errors.push(`group_id must be ${MAX_STRING_LEN} characters or less`);
+        }
+    }
+
     return errors;
+}
+
+export function validateSubmissionData(data: SubmitArtworkRequest): string[] {
+    const errors: string[] = [];
+
+    if (!data.file_type || !isValidUploadFileType(data.file_type as string)) {
+        errors.push(`file_type must be one of: ${UPLOAD_FILE_TYPES.join(', ')}`);
+    }
+
+    if (typeof data.is_virtual !== 'boolean') {
+        errors.push('is_virtual must be a boolean');
+    }
+
+    if (!data.legal_release_hash || !SHA256_HEX.test(data.legal_release_hash)) {
+        errors.push('legal_release_hash must be a valid SHA-256 hex string');
+    }
+
+    return [...errors, ...validateOptionalArtworkFields(data)];
+}
+
+export function validateUpdateArtworkRequest(data: UpdateArtworkRequest): string[] {
+    return validateOptionalArtworkFields(data);
 }

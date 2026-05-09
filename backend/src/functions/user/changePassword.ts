@@ -1,96 +1,95 @@
-import { ChangePasswordCommand } from '@aws-sdk/client-cognito-identity-provider';
-import { cognitoClient } from '../../config/aws-clients';
-import { ApiGatewayEvent, HTTP_STATUS } from '../../../shared/src/api-types/commonTypes';
-import { CommonErrors } from '../../../shared/src/api-types/errorTypes';
+import { ChangePasswordCommand } from "@aws-sdk/client-cognito-identity-provider";
+import { PutCommand } from "@aws-sdk/lib-dynamodb";
+import { cognitoClient, dynamodb, TABLE_NAME } from "../../config/aws-clients";
+import { parseCookies } from "../../utils/cookies";
+import {
+  ApiGatewayEvent,
+  HTTP_STATUS,
+  COMMON_HEADERS,
+  CommonErrors,
+} from "@icaf/shared";
+import { randomUUID } from "crypto";
 
-/**
- * Change Password Handler
- *
- * This function allows authenticated users to change their password.
- * It uses Cognito's ChangePasswordCommand which requires:
- * - Valid access token (from user authentication)
- * - Previous password (for verification)
- * - New proposed password
- *
- * Workflow:
- * 1. Get access_token, old_password, new_password from request body
- * 2. Validate inputs
- * 3. Invoke Cognito ChangePasswordCommand
- * 4. Return success or error
- */
-
-export const handler = async (event: ApiGatewayEvent) => {
-    try {
-        const body = JSON.parse(event.body || '{}');
-
-        // 1) Validate required fields
-        const { access_token, old_password, new_password } = body;
-
-        if (!access_token) {
-            return CommonErrors.badRequest('Access token is required');
-        }
-
-        if (!old_password) {
-            return CommonErrors.badRequest('Current password is required');
-        }
-
-        if (!new_password) {
-            return CommonErrors.badRequest('New password is required');
-        }
-
-        // 2) Validate new password strength
-        if (new_password.length < 8) {
-            return CommonErrors.badRequest('New password must be at least 8 characters long');
-        }
-
-        // 3) Check that new password is different from old password
-        if (old_password === new_password) {
-            return CommonErrors.badRequest('New password must be different from current password');
-        }
-
-        // 4) Invoke Cognito ChangePassword
-        try {
-            await cognitoClient.send(new ChangePasswordCommand({
-                AccessToken: access_token,
-                PreviousPassword: old_password,
-                ProposedPassword: new_password
-            }));
-        } catch (error: any) {
-            console.error('Cognito ChangePassword error:', error);
-
-            // Handle specific Cognito errors
-            if (error.name === 'NotAuthorizedException') {
-                return CommonErrors.unauthorized();
-            }
-
-            if (error.name === 'InvalidPasswordException') {
-                return CommonErrors.badRequest('New password does not meet password policy requirements');
-            }
-
-            if (error.name === 'LimitExceededException') {
-                return CommonErrors.badRequest('Too many password change attempts. Please try again later.');
-            }
-
-            // Generic error
-            throw error;
-        }
-
-        // 5) Return success
-        return {
-            statusCode: HTTP_STATUS.OK,
-            body: JSON.stringify({
-                message: 'Password changed successfully'
-            }),
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-                'Access-Control-Allow-Methods': 'POST,OPTIONS'
-            }
-        };
-
-    } catch (error: any) {
-        console.error('Error changing password:', error);
-        return CommonErrors.internalServerError('Failed to change password');
+export const handler = async (
+  event: ApiGatewayEvent,
+): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
+  try {
+    if (event.httpMethod !== "POST") {
+      return CommonErrors.methodNotAllowed();
     }
+
+    const userId = event.requestContext?.authorizer?.claims?.sub;
+    if (!userId) {
+      return CommonErrors.unauthorized();
+    }
+
+    // Access token comes from the HTTPOnly cookie set at login
+    const cookies = parseCookies(event.headers?.Cookie ?? event.headers?.cookie);
+    const accessToken = cookies["accessToken"];
+    if (!accessToken) {
+      return CommonErrors.unauthorized();
+    }
+
+    const body = JSON.parse(event.body ?? "{}");
+    const { old_password, new_password } = body as {
+      old_password?: string;
+      new_password?: string;
+    };
+
+    if (!old_password) {
+      return CommonErrors.badRequest("old_password is required");
+    }
+    if (!new_password) {
+      return CommonErrors.badRequest("new_password is required");
+    }
+
+    // ── Invoke Cognito ChangePassword ──────────────────────────────────────
+    try {
+      await cognitoClient.send(
+        new ChangePasswordCommand({
+          AccessToken: accessToken,
+          PreviousPassword: old_password,
+          ProposedPassword: new_password,
+        }),
+      );
+    } catch (err: unknown) {
+      const cognitoErr = err as { name?: string };
+      if (cognitoErr.name === "NotAuthorizedException") {
+        return CommonErrors.unauthorized();
+      }
+      if (cognitoErr.name === "InvalidPasswordException") {
+        return CommonErrors.badRequest("New password does not meet requirements");
+      }
+      if (cognitoErr.name === "LimitExceededException") {
+        return CommonErrors.badRequest("Too many attempts. Please try again later.");
+      }
+      throw err;
+    }
+
+    // ── Write ACCOUNT_ACTION audit record ─────────────────────────────────
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    await dynamodb.send(
+      new PutCommand({
+        TableName: TABLE_NAME,
+        Item: {
+          PK: `USER#${userId}`,
+          SK: `AA#${nowSeconds}`,
+          user_id: userId,
+          timestamp: nowSeconds,
+          action: "change_password",
+          action_id: randomUUID(),
+          type: "ACCOUNT_ACTION",
+        },
+      }),
+    );
+
+    return {
+      statusCode: HTTP_STATUS.OK,
+      body: JSON.stringify({ message: "Password changed successfully" }),
+      headers: COMMON_HEADERS,
+    };
+  } catch (error) {
+    console.error("Error changing password:", error);
+    return CommonErrors.internalServerError();
+  }
 };

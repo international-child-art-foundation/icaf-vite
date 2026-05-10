@@ -8,8 +8,6 @@ import {
   COMMON_HEADERS,
   CommonErrors,
 } from "@icaf/shared";
-import { randomUUID } from "crypto";
-
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
@@ -77,7 +75,6 @@ export const handler = async (
           user_id: userId,
           timestamp: nowSeconds,
           action: "change_password",
-          action_id: randomUUID(),
           type: "ACCOUNT_ACTION",
         },
       }),

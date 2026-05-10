@@ -168,7 +168,6 @@ export const handler = async (
           initiator_id: adminId,
           action: "delete_account_admin",
           reason: body.reason.trim(),
-          action_id: actionId,
           type: "ACCOUNT_ACTION",
         },
       }),

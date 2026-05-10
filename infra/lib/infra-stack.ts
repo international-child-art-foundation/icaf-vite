@@ -2,12 +2,24 @@ import { Duration, Stack, StackProps, RemovalPolicy } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
+import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import * as sqs from "aws-cdk-lib/aws-sqs";
+import * as sns from "aws-cdk-lib/aws-sns";
+import * as snsSubscriptions from "aws-cdk-lib/aws-sns-subscriptions";
+import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
+import * as cloudwatchActions from "aws-cdk-lib/aws-cloudwatch-actions";
+import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
+import * as cloudfrontOrigins from "aws-cdk-lib/aws-cloudfront-origins";
+
+// Spend threshold (USD) that triggers emergencyShutdown
+const BILLING_ALARM_THRESHOLD_USD = 50;
 
 export class InfraStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -66,7 +78,7 @@ export class InfraStack extends Stack {
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
-    // ByOwner GSI — a user's artworks and groups. Must match GSI.ByOwner = "ByOwnerGSI"
+    // ByOwner GSI — a user's artworks and groups
     icafTable.addGlobalSecondaryIndex({
       indexName: "ByOwnerGSI",
       partitionKey: { name: "OWN_PK", type: dynamodb.AttributeType.STRING },
@@ -90,7 +102,9 @@ export class InfraStack extends Stack {
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
-    // ─── 2. S3 Bucket — Artwork Storage ──────────────────────────────────────
+    // ─── 2. S3 Buckets ────────────────────────────────────────────────────────
+
+    // Artwork bucket — private, CloudFront via existing setup
     const artworkBucket = new s3.Bucket(this, "IcafArtworkBucket", {
       bucketName: "icaf-artwork-bucket",
       removalPolicy: RemovalPolicy.RETAIN,
@@ -105,7 +119,78 @@ export class InfraStack extends Stack {
       ],
     });
 
-    // ─── 3. Cognito User Pool ─────────────────────────────────────────────────
+    // Magazines bucket — private, served via CloudFront at magazines.icaf.org
+    // Contains:
+    //   staging/<slug>.zip  — temporary upload landing zone (deleted after processing)
+    //   <slug>/             — extracted magazine HTML, assets, and thumbnail
+    const magazinesBucket = new s3.Bucket(this, "IcafMagazinesBucket", {
+      bucketName: "icaf-magazines-bucket",
+      removalPolicy: RemovalPolicy.RETAIN,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      cors: [
+        {
+          // Volunteers upload zips via presigned PUT URLs from the browser
+          allowedMethods: [s3.HttpMethods.PUT],
+          allowedOrigins: ["https://revise.icaf.org", "http://localhost:5173"],
+          allowedHeaders: ["*"],
+          maxAge: 3000,
+        },
+      ],
+    });
+
+    // ─── 3. CloudFront — Magazines (magazines.icaf.org) ───────────────────────
+    //
+    // Serves the extracted magazine HTML at https://magazines.icaf.org/<slug>/
+    // A CloudFront Function rewrites bare directory paths to index.html so that
+    // magazines.icaf.org/ArtAndHealth/ serves ArtAndHealth/index.html.
+    //
+    // TODO: To enable the magazines.icaf.org custom domain:
+    //   1. Create an ACM certificate in us-east-1 for magazines.icaf.org
+    //   2. Uncomment the `certificate` and `domainNames` lines below
+    //   3. Add a CNAME record in DNS pointing magazines.icaf.org to the
+    //      distribution domain name output by this stack
+
+    const indexRewriteFn = new cloudfront.Function(this, "MagazineIndexRewriteFn", {
+      functionName: "icaf-magazine-index-rewrite",
+      code: cloudfront.FunctionCode.fromInline(`
+        function handler(event) {
+          var uri = event.request.uri;
+          if (uri.endsWith('/')) {
+            event.request.uri += 'index.html';
+          } else if (!uri.includes('.')) {
+            event.request.uri += '/index.html';
+          }
+          return event.request;
+        }
+      `),
+    });
+
+    const magazinesOac = new cloudfront.S3OriginAccessControl(this, "MagazinesOAC", {
+      description: "OAC for ICAF Magazines bucket",
+    });
+
+    const magazinesDistribution = new cloudfront.Distribution(this, "MagazinesDistribution", {
+      comment: "ICAF Magazines — magazines.icaf.org",
+      defaultBehavior: {
+        origin: cloudfrontOrigins.S3BucketOrigin.withOriginAccessControl(
+          magazinesBucket,
+          { originAccessControl: magazinesOac },
+        ),
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+        functionAssociations: [
+          {
+            function: indexRewriteFn,
+            eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+          },
+        ],
+      },
+      // TODO: uncomment once ACM certificate is provisioned in us-east-1
+      // certificate: acm.Certificate.fromCertificateArn(this, 'MagazinesCert', 'arn:aws:acm:us-east-1:ACCOUNT:certificate/CERT_ID'),
+      // domainNames: ['magazines.icaf.org'],
+    });
+
+    // ─── 4. Cognito User Pool ─────────────────────────────────────────────────
     const userPool = new cognito.UserPool(this, "IcafUserPool", {
       userPoolName: "icaf-user-pool",
       selfSignUpEnabled: true,
@@ -141,7 +226,8 @@ export class InfraStack extends Stack {
       },
     });
 
-    // ─── 4. SQS — Background Cleanup Queue ───────────────────────────────────
+    // ─── 5. SQS — Background Queues ──────────────────────────────────────────
+
     const cleanupDLQ = new sqs.Queue(this, "IcafCleanupDLQ", {
       queueName: "icaf-cleanup-dlq",
       retentionPeriod: Duration.days(14),
@@ -154,16 +240,90 @@ export class InfraStack extends Stack {
       deadLetterQueue: { queue: cleanupDLQ, maxReceiveCount: 3 },
     });
 
-    // ─── 5. Lambda Functions ──────────────────────────────────────────────────
-    // TODO: Update APP_URL and SES_FROM_EMAIL before deployment, set in lambda env config
+    // processImage queue — fed by S3 ObjectCreated on artwork uploads
+    const processImageDLQ = new sqs.Queue(this, "IcafProcessImageDLQ", {
+      queueName: "icaf-process-image-dlq",
+      retentionPeriod: Duration.days(14),
+    });
+
+    const processImageQueue = new sqs.Queue(this, "IcafProcessImageQueue", {
+      queueName: "icaf-process-image-queue",
+      visibilityTimeout: Duration.seconds(300),
+      retentionPeriod: Duration.days(7),
+      deadLetterQueue: { queue: processImageDLQ, maxReceiveCount: 3 },
+    });
+
+    processImageQueue.addToResourcePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        principals: [new iam.ServicePrincipal("s3.amazonaws.com")],
+        actions: ["sqs:SendMessage"],
+        resources: [processImageQueue.queueArn],
+        conditions: {
+          ArnLike: { "aws:SourceArn": artworkBucket.bucketArn },
+        },
+      }),
+    );
+
+    // processZip queue — fed by S3 ObjectCreated on staging/<slug>.zip uploads
+    const processZipDLQ = new sqs.Queue(this, "IcafProcessZipDLQ", {
+      queueName: "icaf-process-zip-dlq",
+      retentionPeriod: Duration.days(14),
+    });
+
+    const processZipQueue = new sqs.Queue(this, "IcafProcessZipQueue", {
+      queueName: "icaf-process-zip-queue",
+      // Must be ≥ Lambda timeout — large zips may take a while to unpack + re-upload
+      visibilityTimeout: Duration.seconds(600),
+      retentionPeriod: Duration.days(7),
+      deadLetterQueue: { queue: processZipDLQ, maxReceiveCount: 3 },
+    });
+
+    processZipQueue.addToResourcePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        principals: [new iam.ServicePrincipal("s3.amazonaws.com")],
+        actions: ["sqs:SendMessage"],
+        resources: [processZipQueue.queueArn],
+        conditions: {
+          ArnLike: { "aws:SourceArn": magazinesBucket.bucketArn },
+        },
+      }),
+    );
+
+    // ─── 6. Sharp Lambda Layer ────────────────────────────────────────────────
+    const sharpLayer = new lambda.LayerVersion(this, "SharpLayer", {
+      code: lambda.Code.fromAsset("layers/sharp", {
+        bundling: {
+          image: lambda.Runtime.NODEJS_20_X.bundlingImage,
+          command: [
+            "bash",
+            "-c",
+            [
+              "npm install",
+              "mkdir -p /asset-output/nodejs",
+              "cp -r node_modules /asset-output/nodejs/",
+            ].join(" && "),
+          ],
+        },
+      }),
+      compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
+      compatibleArchitectures: [lambda.Architecture.X86_64],
+      description: "Sharp image processing with AVIF/heif support (Linux x86_64)",
+    });
+
+    // ─── 7. Lambda Functions ──────────────────────────────────────────────────
+    // TODO: Update APP_URL, SES_FROM_EMAIL, and MAGAZINES_CLOUDFRONT_DOMAIN before deployment
     const commonEnv = {
       TABLE_NAME: icafTable.tableName,
       USER_POOL_ID: userPool.userPoolId,
       USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
       S3_BUCKET_NAME: artworkBucket.bucketName,
+      MAGAZINES_BUCKET_NAME: magazinesBucket.bucketName,
       CLEANUP_QUEUE_URL: cleanupQueue.queueUrl,
-      APP_URL: "",          // https://revise.icaf.org
-      SES_FROM_EMAIL: "",   // verified SES sender address
+      APP_URL: "",                    // https://revise.icaf.org
+      SES_FROM_EMAIL: "",             // verified SES sender address
+      MAGAZINES_CLOUDFRONT_DOMAIN: "", // magazines.icaf.org (or the *.cloudfront.net domain until DNS is set up)
     };
 
     const fn = (id: string, entry: string, heavy = false): NodejsFunction =>
@@ -175,7 +335,7 @@ export class InfraStack extends Stack {
         entry,
       });
 
-    const src = (path: string) => `../backend/src/functions/${path}`;
+    const src = (p: string) => `../backend/src/functions/${p}`;
 
     // ── Public — no auth ─────────────────────────────────────────────────────
     const getArtworkFn              = fn("GetArtworkFn",              src("anyone/getArtwork.ts"));
@@ -193,12 +353,15 @@ export class InfraStack extends Stack {
     const resendVerificationFn      = fn("ResendVerificationFn",      src("anyone/resendVerificationEmail.ts"));
     const getAuthStatusFn           = fn("GetAuthStatusFn",           src("anyone/getAuthStatus.ts"));
     const requestCreateAndVerifyFn  = fn("RequestCreateAndVerifyFn",  src("anyone/requestCreateAndVerify.ts"));
+    const getMagazinesFn            = fn("GetMagazinesFn",            src("anyone/getMagazines.ts"));
+    const getNewsFn                 = fn("GetNewsFn",                 src("anyone/getNews.ts"));
 
     // ── User — authenticated ──────────────────────────────────────────────────
     const getUserFn                 = fn("GetUserFn",                 src("user/user.ts"));
     const submitArtworkFn           = fn("SubmitArtworkFn",           src("user/submitArtwork.ts"), true);
     const updateArtworkFn           = fn("UpdateArtworkFn",           src("user/updateArtwork.ts"));
     const deleteArtworkFn           = fn("DeleteArtworkFn",           src("user/deleteArtwork.ts"));
+    const deleteAllArtworksFn       = fn("DeleteAllArtworksFn",       src("user/deleteAllArtworks.ts"), true);
     const listArtworkSubmissionsFn  = fn("ListArtworkSubmissionsFn",  src("user/listArtworkSubmissions.ts"));
     const voteArtworkFn             = fn("VoteArtworkFn",             src("user/voteArtwork.ts"));
     const listDonationsFn           = fn("ListDonationsFn",           src("user/listDonations.ts"));
@@ -236,18 +399,74 @@ export class InfraStack extends Stack {
     const getArtworkSubmitterEmailFn = fn("GetArtworkSubmitterEmailFn", src("admin/getArtworkSubmitterEmail.ts"));
     const getTakedownRequestsFn     = fn("GetTakedownRequestsFn",     src("admin/getTakedownRequests.ts"));
     const cancelTakedownRequestFn   = fn("CancelTakedownRequestFn",   src("admin/cancelTakedownRequest.ts"));
+    const publishMagazineFn         = fn("PublishMagazineFn",         src("admin/publishMagazine.ts"), true);
+    const updateMagazineStatusFn    = fn("UpdateMagazineStatusFn",    src("admin/updateMagazineStatus.ts"));
+    const deleteMagazineFn          = fn("DeleteMagazineFn",          src("admin/deleteMagazine.ts"), true);
+    const createNewsFn              = fn("CreateNewsFn",              src("admin/createNews.ts"));
+    const updateNewsFn              = fn("UpdateNewsFn",              src("admin/updateNews.ts"));
+    const deleteNewsFn              = fn("DeleteNewsFn",              src("admin/deleteNews.ts"));
 
-    // ─── 6. IAM Permissions ───────────────────────────────────────────────────
+    // ── Internal — not HTTP-accessible ───────────────────────────────────────
 
-    // DynamoDB — all functions need read/write access
+    // ProcessImage: artwork image → AVIF variants
+    // Triggered via SQS ← S3 ObjectCreated on {art_id}/initial
+    const processImageFn = new NodejsFunction(this, "ProcessImageFn", {
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(300),
+      memorySize: 1024,
+      entry: src("processImage.ts"),
+      layers: [sharpLayer],
+      bundling: { externalModules: ["sharp"] },
+    });
+
+    processImageFn.addEventSource(
+      new SqsEventSource(processImageQueue, {
+        batchSize: 1,
+        reportBatchItemFailures: true,
+      }),
+    );
+
+    // ProcessZip: magazine zip → extracted files in magazines bucket
+    // Triggered via SQS ← S3 ObjectCreated on staging/<slug>.zip
+    const processZipFn = new NodejsFunction(this, "ProcessZipFn", {
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(600),
+      memorySize: 1024,           // Holds the full zip + extracted contents in memory
+      environment: {
+        TABLE_NAME: icafTable.tableName,
+        MAGAZINES_BUCKET_NAME: magazinesBucket.bucketName,
+      },
+      entry: src("processZip.ts"),
+    });
+
+    processZipFn.addEventSource(
+      new SqsEventSource(processZipQueue, {
+        batchSize: 1,
+        reportBatchItemFailures: true,
+      }),
+    );
+
+    // EmergencyShutdown: throttles API Gateway to 0 req/s
+    const emergencyShutdownFn = new NodejsFunction(this, "EmergencyShutdownFn", {
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(30),
+      memorySize: 128,
+      entry: src("emergencyShutdown.ts"),
+      environment: { API_STAGE: "v1" },
+    });
+
+    // ─── 8. IAM Permissions ───────────────────────────────────────────────────
+
+    // DynamoDB — all HTTP-facing functions need read/write access
     const allFunctions = [
       getArtworkFn, getGroupFn, galleryArtworksFn, galleryGroupsFn,
       initiateTakedownFn, guestSubmitArtworkFn, verifyAccountFn,
       registerFn, loginFn, logoutFn, forgotPasswordFn, confirmForgotPasswordFn,
       resendVerificationFn, getAuthStatusFn, requestCreateAndVerifyFn,
+      getMagazinesFn, getNewsFn,
       getUserFn, submitArtworkFn, updateArtworkFn, deleteArtworkFn,
-      listArtworkSubmissionsFn, voteArtworkFn, listDonationsFn,
-      changePasswordFn, deleteAccountFn,
+      deleteAllArtworksFn, listArtworkSubmissionsFn, voteArtworkFn,
+      listDonationsFn, changePasswordFn, deleteAccountFn,
       createGroupFn, listGroupSubmissionsFn, updateGroupFn, deleteGroupFn,
       submitArtworkToGroupFn, deleteArtworkFromGroupFn, updateConstituentArtworkFn,
       fetchUnapprovedArtworksFn, fetchHiddenArtworksFn,
@@ -257,32 +476,52 @@ export class InfraStack extends Stack {
       getEmailByUserIdFn, deleteUserAccountFn, removeAllUserArtworkFn,
       hideAllUserArtworkFn, unhideAllUserArtworkFn,
       getArtworkSubmitterEmailFn, getTakedownRequestsFn, cancelTakedownRequestFn,
+      publishMagazineFn, updateMagazineStatusFn, deleteMagazineFn,
+      createNewsFn, updateNewsFn, deleteNewsFn,
     ];
 
     for (const f of allFunctions) {
       icafTable.grantReadWriteData(f);
     }
 
-    // S3 — functions that generate presigned PUT URLs or delete objects
-    const s3Functions = [
-      guestSubmitArtworkFn,   // presigned PUT + S3 cleanup (virtual submission)
-      submitArtworkFn,         // presigned PUT
-      submitArtworkToGroupFn,  // presigned PUT
-      deleteArtworkFn,         // S3 list + delete
-      deleteAccountFn,         // S3 list + delete (artwork cleanup)
-      deleteUserAccountFn,     // S3 list + delete (artwork cleanup)
+    // processZip also needs DDB access to update the MAGAZINE record
+    icafTable.grantReadWriteData(processZipFn);
+
+    // S3 artwork bucket — presigned PUT or delete
+    const s3ArtworkFunctions = [
+      guestSubmitArtworkFn,
+      submitArtworkFn,
+      submitArtworkToGroupFn,
+      deleteArtworkFn,
+      deleteAllArtworksFn,
+      deleteAccountFn,
+      deleteUserAccountFn,
     ];
 
-    for (const f of s3Functions) {
+    for (const f of s3ArtworkFunctions) {
       artworkBucket.grantReadWrite(f);
     }
 
+    processImageFn.grantInvoke(processImageFn); // self — not needed, but harmless
+    artworkBucket.grantReadWrite(processImageFn);
+    artworkBucket.grantDelete(processImageFn);
+
+    // S3 magazines bucket
+    // publishMagazineFn generates presigned PUT URLs for staging/<slug>.zip
+    magazinesBucket.grantReadWrite(publishMagazineFn);
+    // deleteMagazineFn removes all objects under <slug>/
+    magazinesBucket.grantReadWrite(deleteMagazineFn);
+    magazinesBucket.grantDelete(deleteMagazineFn);
+    // processZipFn downloads from staging/, uploads to <slug>/, deletes the zip
+    magazinesBucket.grantReadWrite(processZipFn);
+    magazinesBucket.grantDelete(processZipFn);
+
     // SES — functions that send email via SES
     const sesFunctions = [
-      guestSubmitArtworkFn,      // artwork submission email
-      requestCreateAndVerifyFn,  // CreateAndVerify email (user-requested)
-      changeArtworkStatusFn,     // approval notification
-      changeGroupStatusFn,       // approval notification
+      guestSubmitArtworkFn,
+      requestCreateAndVerifyFn,
+      changeArtworkStatusFn,
+      changeGroupStatusFn,
     ];
 
     for (const f of sesFunctions) {
@@ -317,14 +556,9 @@ export class InfraStack extends Stack {
       "cognito-idp:ConfirmSignUp",
     ];
 
-    // Functions that need Cognito admin actions (server-side user management)
     const cognitoAdminFunctions = [
-      loginFn,            // AdminInitiateAuth (USER_PASSWORD_AUTH flow)
-      logoutFn,           // AdminUserGlobalSignOut
-      verifyAccountFn,    // AdminCreateUser + AdminSetUserPassword
-      deleteAccountFn,    // InitiateAuth (password verify) + AdminDeleteUser
-      deleteUserAccountFn, // AdminDeleteUser
-      getUserCognitoInfoFn, // AdminGetUser
+      loginFn, logoutFn, verifyAccountFn, deleteAccountFn,
+      deleteUserAccountFn, getUserCognitoInfoFn,
     ];
 
     for (const f of cognitoAdminFunctions) {
@@ -335,7 +569,6 @@ export class InfraStack extends Stack {
       }));
     }
 
-    // Functions that only need client-level Cognito access
     const cognitoClientFunctions = [
       registerFn, forgotPasswordFn, confirmForgotPasswordFn,
       resendVerificationFn, getAuthStatusFn, changePasswordFn,
@@ -349,7 +582,24 @@ export class InfraStack extends Stack {
       }));
     }
 
-    // ─── 7. API Gateway ───────────────────────────────────────────────────────
+    // ─── 9. S3 Event Notifications ────────────────────────────────────────────
+
+    // Artwork upload → processImage
+    artworkBucket.addEventNotification(
+      s3.EventType.OBJECT_CREATED,
+      new s3n.SqsDestination(processImageQueue),
+      { suffix: "/initial" },
+    );
+
+    // Magazine zip upload → processZip
+    // Only the staging/ prefix triggers — extracted files under <slug>/ never match
+    magazinesBucket.addEventNotification(
+      s3.EventType.OBJECT_CREATED,
+      new s3n.SqsDestination(processZipQueue),
+      { prefix: "staging/", suffix: ".zip" },
+    );
+
+    // ─── 10. API Gateway ───────────────────────────────────────────────────────
     const api = new apigw.RestApi(this, "IcafApi", {
       restApiName: "icaf-api",
       endpointConfiguration: { types: [apigw.EndpointType.REGIONAL] },
@@ -361,6 +611,15 @@ export class InfraStack extends Stack {
         allowCredentials: true,
       },
     });
+
+    emergencyShutdownFn.addEnvironment("API_ID", api.restApiId);
+    emergencyShutdownFn.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ["apigateway:PATCH"],
+      resources: [
+        `arn:aws:apigateway:${this.region}::/restapis/${api.restApiId}/stages/v1`,
+      ],
+    }));
 
     const cognitoAuthorizer = new apigw.CognitoUserPoolsAuthorizer(this, "IcafAuthorizer", {
       cognitoUserPools: [userPool],
@@ -382,6 +641,14 @@ export class InfraStack extends Stack {
     groupsRes.addResource("{group_id}").addMethod("GET", li(getGroupFn));
 
     api.root.addResource("takedown").addMethod("POST", li(initiateTakedownFn));
+
+    // ── Magazines (public read) ───────────────────────────────────────────────
+    const magazinesRes = api.root.addResource("magazines");
+    magazinesRes.addMethod("GET", li(getMagazinesFn));
+
+    // ── News (public read) ────────────────────────────────────────────────────
+    const newsRes = api.root.addResource("news");
+    newsRes.addMethod("GET", li(getNewsFn));
 
     // ── Gallery (public) ──────────────────────────────────────────────────────
     const gallery = api.root.addResource("gallery");
@@ -426,6 +693,7 @@ export class InfraStack extends Stack {
     const userArtworksRes = userRes.addResource("artworks");
     userArtworksRes.addMethod("GET", li(listArtworkSubmissionsFn), authOpts);
     userArtworksRes.addMethod("POST", li(submitArtworkFn), authOpts);
+    userArtworksRes.addMethod("DELETE", li(deleteAllArtworksFn), authOpts);
 
     const userArtworkRes = userArtworksRes.addResource("{art_id}");
     userArtworkRes.addMethod("PATCH", li(updateArtworkFn), authOpts);
@@ -498,5 +766,50 @@ export class InfraStack extends Stack {
     adminTakedownsRes
       .addResource("{tdr_sk}")
       .addMethod("PATCH", li(cancelTakedownRequestFn), authOpts);
+
+    // Admin — magazines
+    const adminMagazinesRes = adminRes.addResource("magazines");
+    adminMagazinesRes.addMethod("POST", li(publishMagazineFn), authOpts);
+    const adminMagazineRes = adminMagazinesRes.addResource("{slug}");
+    adminMagazineRes.addResource("status").addMethod("PATCH", li(updateMagazineStatusFn), authOpts);
+    adminMagazineRes.addMethod("DELETE", li(deleteMagazineFn), authOpts);
+
+    // Admin — news
+    const adminNewsRes = adminRes.addResource("news");
+    adminNewsRes.addMethod("POST", li(createNewsFn), authOpts);
+    const adminNewsItemRes = adminNewsRes.addResource("{news_id}");
+    adminNewsItemRes.addMethod("PATCH", li(updateNewsFn), authOpts);
+    adminNewsItemRes.addMethod("DELETE", li(deleteNewsFn), authOpts);
+
+    // ─── 11. Emergency Shutdown — Billing Alarm ───────────────────────────────
+    // NOTE: AWS billing metrics are only published to us-east-1.
+    // If this stack is deployed to a different region, create the alarm
+    // in a separate us-east-1 stack and point it at a cross-region SNS topic.
+    const shutdownTopic = new sns.Topic(this, "EmergencyShutdownTopic", {
+      topicName: "icaf-emergency-shutdown",
+      displayName: "ICAF Emergency Shutdown",
+    });
+
+    shutdownTopic.addSubscription(
+      new snsSubscriptions.LambdaSubscription(emergencyShutdownFn),
+    );
+
+    const billingAlarm = new cloudwatch.Alarm(this, "BillingAlarm", {
+      alarmName: "icaf-billing-alarm",
+      alarmDescription: `Triggers emergency API shutdown when estimated charges exceed $${BILLING_ALARM_THRESHOLD_USD}`,
+      metric: new cloudwatch.Metric({
+        namespace: "AWS/Billing",
+        metricName: "EstimatedCharges",
+        dimensionsMap: { Currency: "USD" },
+        statistic: "Maximum",
+        period: Duration.hours(6),
+      }),
+      threshold: BILLING_ALARM_THRESHOLD_USD,
+      evaluationPeriods: 1,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+    });
+
+    billingAlarm.addAlarmAction(new cloudwatchActions.SnsAction(shutdownTopic));
   }
 }

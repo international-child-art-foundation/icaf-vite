@@ -12,9 +12,9 @@ export function sanitizeSubmissionData(data: SubmitArtworkRequest): SubmitArtwor
         theme_family: cleanOptionalString(data.theme_family),
         theme_instance: cleanOptionalString(data.theme_instance),
         group_id: cleanOptionalString(data.group_id),
-        legal_release_hash:
-            typeof data.legal_release_hash === 'string'
-                ? data.legal_release_hash.trim().toLowerCase()
-                : data.legal_release_hash,
+        release_hash:
+            typeof data.release_hash === 'string'
+                ? data.release_hash.trim().toLowerCase()
+                : data.release_hash,
     };
 }

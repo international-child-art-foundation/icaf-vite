@@ -157,7 +157,7 @@ export const handler = async (
           status: "pending_review" as const,
           kudos_count: 0,
           timestamp: nowSeconds,
-          legal_release_hash: body.legal_release_hash.trim(),
+          release_hash: body.release_hash.trim(),
           type: "ART",
           // optional fields
           ...(body.title && { title: body.title }),
@@ -183,9 +183,9 @@ export const handler = async (
     );
 
     // ── Step 3: Generate presigned S3 upload URL ───────────────────────────
-    // ProcessImage Lambda is triggered by S3 event (via SQS) after the client uploads.
-    // It converts the original to avif and generates thumb/medium/large sizes.
-    const s3Key = `${artId}/original.${body.file_type}`;
+    // Key is always {art_id}/initial (no extension). ProcessImage is triggered
+    // by the S3 ObjectCreated event on this key and auto-detects the format via Sharp.
+    const s3Key = `${artId}/initial`;
     const presignedUrl = await getSignedUrl(
       s3Client,
       new PutObjectCommand({

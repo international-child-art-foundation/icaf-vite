@@ -1,7 +1,6 @@
 import { InitiateTakedownRequest, TakedownStatus } from './types.js';
 import { TDR_MAX_REASON_LEN, TDR_MAX_NAME_LEN, TDR_MAX_EMAIL_LEN, TDR_MAX_REVIEW_NOTES_LEN } from './constants.js';
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { isValidEmail } from '../../utils/string.js';
 
 export const TAKEDOWN_STATUSES: TakedownStatus[] = ['requesting', 'disputing', 'executed', 'canceled'];
 
@@ -16,7 +15,7 @@ export function validateInitiateTakedownRequest(data: InitiateTakedownRequest): 
         errors.push('at least one of art_id or group_id is required');
     }
 
-    if (!data.requester_email?.trim() || !EMAIL_RE.test(data.requester_email)) {
+    if (!data.requester_email?.trim() || !isValidEmail(data.requester_email)) {
         errors.push('requester_email must be a valid email address');
     } else if (data.requester_email.length > TDR_MAX_EMAIL_LEN) {
         errors.push(`requester_email must be ${TDR_MAX_EMAIL_LEN} characters or less`);

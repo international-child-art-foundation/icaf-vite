@@ -98,7 +98,6 @@ export const handler = async (
           timestamp: nowSeconds,
           initiator_id: adminId,
           action: "hide_all",
-          action_id: actionId,
           type: "ACCOUNT_ACTION",
         },
       }),

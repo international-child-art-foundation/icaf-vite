@@ -22,8 +22,5 @@ export function canUserGiveKudos(
     if (artwork.user_id === userId) {
         return { canKudo: false, reason: 'Cannot give kudos to your own artwork' };
     }
-    if (artwork.status !== 'approved') {
-        return { canKudo: false, reason: 'Can only give kudos to approved artwork' };
-    }
     return { canKudo: true };
 }

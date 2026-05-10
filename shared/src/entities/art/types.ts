@@ -45,7 +45,7 @@ export interface ArtworkEntity {
     status: ArtworkStatus;
     kudos_count: number;
     timestamp: number;          // Unix timestamp (seconds)
-    legal_release_hash: string; // SHA-256 hash of the legal release PDF text accepted at submission
+    release_hash: string;       // SHA-256 hash of the legal release PDF text accepted at submission
     type: 'ART';
 
     // ── Optional ───────────────────────────────────────────────────────────
@@ -65,7 +65,7 @@ export interface ArtworkEntity {
 // file_type is used only to generate the presigned S3 upload URL; not stored on the entity
 interface ArtworkSubmissionFields {
     file_type: UploadFileType;
-    legal_release_hash: string;
+    release_hash: string;
     is_virtual: boolean;
     title?: string;
     description?: string;

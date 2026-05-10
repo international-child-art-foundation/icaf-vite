@@ -25,3 +25,5 @@ export const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME!;
 export const CLEANUP_QUEUE_URL = process.env.CLEANUP_QUEUE_URL!;
 export const APP_URL = process.env.APP_URL!;
 export const SES_FROM_EMAIL = process.env.SES_FROM_EMAIL!;
+export const MAGAZINES_BUCKET_NAME = process.env.MAGAZINES_BUCKET_NAME!;
+export const MAGAZINES_CLOUDFRONT_DOMAIN = process.env.MAGAZINES_CLOUDFRONT_DOMAIN!;

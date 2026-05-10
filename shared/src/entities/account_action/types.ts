@@ -24,7 +24,8 @@ export type AccountActionType =
     | 'hide_group'
     | 'unhide_group'
     | 'hide_all'
-    | 'unhide_all';
+    | 'unhide_all'
+    | 'delete_account_admin';
 
 // Full ACCOUNT_ACTION entity as stored in DynamoDB
 export interface AccountActionEntity {

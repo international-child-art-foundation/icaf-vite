@@ -9,9 +9,13 @@ export const ACCOUNT_ACTION_TYPES: AccountActionType[] = [
     'delete_artwork',
     'change_password',
     'hide_artwork',
+    'unhide_artwork',
     'hide_artwork_bulk',
+    'unhide_artwork_bulk',
     'hide_group',
+    'unhide_group',
     'hide_all',
+    'unhide_all',
 ];
 
 export function isValidAccountActionType(action: string): action is AccountActionType {

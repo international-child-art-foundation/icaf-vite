@@ -12,6 +12,8 @@ export * from "./entities/theme/index";
 export * from "./entities/takedown_request/index";
 export * from "./entities/payment/index";
 export * from "./entities/account_action/index";
+export * from "./entities/magazine/index";
+export * from "./entities/news/index";
 
 // ── Utils ────────────────────────────────────────────────────────────────────
 export * from "./utils/string";

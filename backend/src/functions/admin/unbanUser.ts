@@ -60,7 +60,6 @@ export const handler = async (
           timestamp: nowSeconds,
           initiator_id: adminId,
           action: "unban",
-          action_id: actionId,
           type: "ACCOUNT_ACTION",
         },
       }),

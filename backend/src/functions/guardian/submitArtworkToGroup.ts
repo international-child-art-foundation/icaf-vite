@@ -34,7 +34,7 @@ const CONTENT_TYPES: Record<string, string> = {
 
 interface SubmitArtworkToGroupBody {
   file_type: string;
-  legal_release_hash: string;
+  release_hash: string;
   f_name?: string;
   age?: number;
   country?: string;
@@ -103,8 +103,8 @@ export const handler = async (
     if (!body.file_type || !(UPLOAD_FILE_TYPES as readonly string[]).includes(body.file_type)) {
       return CommonErrors.badRequest(`file_type must be one of: ${UPLOAD_FILE_TYPES.join(", ")}`);
     }
-    if (!body.legal_release_hash?.trim() || !SHA256_HEX.test(body.legal_release_hash)) {
-      return CommonErrors.badRequest("legal_release_hash must be a valid SHA-256 hex string");
+    if (!body.release_hash?.trim() || !SHA256_HEX.test(body.release_hash)) {
+      return CommonErrors.badRequest("release_hash must be a valid SHA-256 hex string");
     }
     const fieldErrors = validateOptionalArtworkFields(body);
     if (fieldErrors.length > 0) {
@@ -129,7 +129,7 @@ export const handler = async (
           status: "pending_review" as const,
           kudos_count: 0,
           timestamp: nowSeconds,
-          legal_release_hash: body.legal_release_hash.trim(),
+          release_hash: body.release_hash.trim(),
           type: "ART",
           // optional fields
           ...(body.f_name && { f_name: body.f_name }),
@@ -168,7 +168,8 @@ export const handler = async (
     );
 
     // ── Generate presigned S3 upload URL ──────────────────────────────────
-    const s3Key = `${artId}/original.${body.file_type}`;
+    // Key is always {art_id}/initial (no extension). ProcessImage auto-detects format.
+    const s3Key = `${artId}/initial`;
     const presignedUrl = await getSignedUrl(
       s3Client,
       new PutObjectCommand({

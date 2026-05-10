@@ -18,6 +18,8 @@ export const EntityType = {
   TakedownRequest: "TAKEDOWN_REQUEST",
   Payment: "PAYMENT",
   AccountAction: "ACCOUNT_ACTION",
+  Magazine: "MAGAZINE",
+  News: "NEWS",
 } as const;
 export type EntityType = (typeof EntityType)[keyof typeof EntityType];
 

@@ -5,6 +5,7 @@ import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import * as logs from "aws-cdk-lib/aws-logs";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as iam from "aws-cdk-lib/aws-iam";
@@ -248,7 +249,8 @@ export class InfraStack extends Stack {
 
     const processImageQueue = new sqs.Queue(this, "IcafProcessImageQueue", {
       queueName: "icaf-process-image-queue",
-      visibilityTimeout: Duration.seconds(300),
+      // Must be ≥ 6× Lambda timeout (AWS recommendation). Lambda timeout is 120s, so 720s.
+      visibilityTimeout: Duration.seconds(720),
       retentionPeriod: Duration.days(7),
       deadLetterQueue: { queue: processImageDLQ, maxReceiveCount: 3 },
     });
@@ -292,21 +294,9 @@ export class InfraStack extends Stack {
     );
 
     // ─── 6. Sharp Lambda Layer ────────────────────────────────────────────────
+    // TODO: build sharp layer before each deploy in CI.
     const sharpLayer = new lambda.LayerVersion(this, "SharpLayer", {
-      code: lambda.Code.fromAsset("layers/sharp", {
-        bundling: {
-          image: lambda.Runtime.NODEJS_20_X.bundlingImage,
-          command: [
-            "bash",
-            "-c",
-            [
-              "npm install",
-              "mkdir -p /asset-output/nodejs",
-              "cp -r node_modules /asset-output/nodejs/",
-            ].join(" && "),
-          ],
-        },
-      }),
+      code: lambda.Code.fromAsset("layers/sharp"),
       compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
       compatibleArchitectures: [lambda.Architecture.X86_64],
       description: "Sharp image processing with AVIF/heif support (Linux x86_64)",
@@ -326,6 +316,9 @@ export class InfraStack extends Stack {
       MAGAZINES_CLOUDFRONT_DOMAIN: "", // magazines.icaf.org (or the *.cloudfront.net domain until DNS is set up)
     };
 
+    // Default log retention for all NodejsFunctions in this stack.
+    const defaultLogRetention = logs.RetentionDays.ONE_MONTH;
+
     const fn = (id: string, entry: string, heavy = false): NodejsFunction =>
       new NodejsFunction(this, id, {
         runtime: Runtime.NODEJS_20_X,
@@ -333,6 +326,7 @@ export class InfraStack extends Stack {
         memorySize: heavy ? 512 : 256,
         environment: commonEnv,
         entry,
+        logRetention: defaultLogRetention,
       });
 
     const src = (p: string) => `../backend/src/functions/${p}`;
@@ -410,19 +404,28 @@ export class InfraStack extends Stack {
 
     // ProcessImage: artwork image → AVIF variants
     // Triggered via SQS ← S3 ObjectCreated on {art_id}/initial
-    const processImageFn = new NodejsFunction(this, "ProcessImageFn", {
+    // Uses the pre-built sharpLayer (no inline npm install).
+    const processImageFn = new NodejsFunction(this, "ProcessImage", {
       runtime: Runtime.NODEJS_20_X,
-      timeout: Duration.seconds(300),
-      memorySize: 1024,
-      entry: src("processImage.ts"),
+      architecture: lambda.Architecture.X86_64,
+      timeout: Duration.seconds(120),
+      memorySize: 2048,            // ~1 vCPU; AVIF encoding is CPU-bound
       layers: [sharpLayer],
-      bundling: { externalModules: ["sharp"] },
+      environment: {
+        TABLE_NAME: icafTable.tableName,
+        S3_BUCKET_NAME: artworkBucket.bucketName,
+      },
+      entry: src("processImage.ts"),
+      logRetention: defaultLogRetention,
+      bundling: {
+        // Sharp is provided by the layer — don't bundle it into the function.
+        externalModules: ["sharp", "@aws-sdk/*"],
+      },
     });
 
     processImageFn.addEventSource(
       new SqsEventSource(processImageQueue, {
         batchSize: 1,
-        reportBatchItemFailures: true,
       }),
     );
 
@@ -437,12 +440,12 @@ export class InfraStack extends Stack {
         MAGAZINES_BUCKET_NAME: magazinesBucket.bucketName,
       },
       entry: src("processZip.ts"),
+      logRetention: defaultLogRetention,
     });
 
     processZipFn.addEventSource(
       new SqsEventSource(processZipQueue, {
         batchSize: 1,
-        reportBatchItemFailures: true,
       }),
     );
 
@@ -453,6 +456,7 @@ export class InfraStack extends Stack {
       memorySize: 128,
       entry: src("emergencyShutdown.ts"),
       environment: { API_STAGE: "v1" },
+      logRetention: defaultLogRetention,
     });
 
     // ─── 8. IAM Permissions ───────────────────────────────────────────────────
@@ -484,7 +488,8 @@ export class InfraStack extends Stack {
       icafTable.grantReadWriteData(f);
     }
 
-    // processZip also needs DDB access to update the MAGAZINE record
+    // processImage and processZip also need DDB access
+    icafTable.grantReadWriteData(processImageFn);
     icafTable.grantReadWriteData(processZipFn);
 
     // S3 artwork bucket — presigned PUT or delete
@@ -502,19 +507,17 @@ export class InfraStack extends Stack {
       artworkBucket.grantReadWrite(f);
     }
 
-    processImageFn.grantInvoke(processImageFn); // self — not needed, but harmless
+    // processImageFn reads {art_id}/initial, writes the three AVIF variants,
+    // and deletes the initial. grantReadWrite already includes delete.
     artworkBucket.grantReadWrite(processImageFn);
-    artworkBucket.grantDelete(processImageFn);
 
     // S3 magazines bucket
     // publishMagazineFn generates presigned PUT URLs for staging/<slug>.zip
     magazinesBucket.grantReadWrite(publishMagazineFn);
     // deleteMagazineFn removes all objects under <slug>/
     magazinesBucket.grantReadWrite(deleteMagazineFn);
-    magazinesBucket.grantDelete(deleteMagazineFn);
     // processZipFn downloads from staging/, uploads to <slug>/, deletes the zip
     magazinesBucket.grantReadWrite(processZipFn);
-    magazinesBucket.grantDelete(processZipFn);
 
     // SES — functions that send email via SES
     const sesFunctions = [

@@ -311,9 +311,9 @@ export class InfraStack extends Stack {
       S3_BUCKET_NAME: artworkBucket.bucketName,
       MAGAZINES_BUCKET_NAME: magazinesBucket.bucketName,
       CLEANUP_QUEUE_URL: cleanupQueue.queueUrl,
-      APP_URL: "",                    // https://revise.icaf.org
-      SES_FROM_EMAIL: "",             // verified SES sender address
-      MAGAZINES_CLOUDFRONT_DOMAIN: "", // magazines.icaf.org (or the *.cloudfront.net domain until DNS is set up)
+      APP_URL: "https://revise.icaf.org",
+      SES_FROM_EMAIL: "",             // TODO: set to verified SES sender address before email features go live
+      MAGAZINES_CLOUDFRONT_DOMAIN: "", // TODO: set after first deploy (CloudFront domain not known until then)
     };
 
     // Default log retention for all NodejsFunctions in this stack.

@@ -9,7 +9,8 @@
   "scripts": {
     "build": "tsc -b",
     "watch": "tsc -b --watch",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "layer:build": "bash scripts/build-sharp-layer.sh"
   },
   "devDependencies": {
     "@types/node": "22.14.0",

@@ -43,6 +43,10 @@ jobs:
       - name: Install workspace dependencies
         run: pnpm install --frozen-lockfile
 
+      # ── Shared package ──────────────────────────────────────────────────────
+      - name: Build shared package
+        run: pnpm --filter @icaf/shared build
+
       # ── Sharp Lambda layer ──────────────────────────────────────────────────
       - name: Build Sharp Lambda layer (linux-x64-glibc)
         run: pnpm --dir infra layer:build

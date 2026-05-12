@@ -319,6 +319,12 @@ export class InfraStack extends Stack {
     // Default log retention for all NodejsFunctions in this stack.
     const defaultLogRetention = logs.RetentionDays.ONE_MONTH;
 
+    const lambdaLogGroup = (id: string): logs.LogGroup =>
+      new logs.LogGroup(this, `${id}LogGroup`, {
+        retention: defaultLogRetention,
+        removalPolicy: RemovalPolicy.DESTROY,
+      });
+
     const fn = (id: string, entry: string, heavy = false): NodejsFunction =>
       new NodejsFunction(this, id, {
         runtime: Runtime.NODEJS_20_X,
@@ -326,7 +332,7 @@ export class InfraStack extends Stack {
         memorySize: heavy ? 512 : 256,
         environment: commonEnv,
         entry,
-        logRetention: defaultLogRetention,
+        logGroup: lambdaLogGroup(id),
       });
 
     const src = (p: string) => `../backend/src/functions/${p}`;
@@ -416,7 +422,7 @@ export class InfraStack extends Stack {
         S3_BUCKET_NAME: artworkBucket.bucketName,
       },
       entry: src("processImage.ts"),
-      logRetention: defaultLogRetention,
+      logGroup: lambdaLogGroup("ProcessImage"),
       bundling: {
         // Sharp is provided by the layer — don't bundle it into the function.
         externalModules: ["sharp", "@aws-sdk/*"],
@@ -440,7 +446,7 @@ export class InfraStack extends Stack {
         MAGAZINES_BUCKET_NAME: magazinesBucket.bucketName,
       },
       entry: src("processZip.ts"),
-      logRetention: defaultLogRetention,
+      logGroup: lambdaLogGroup("ProcessZipFn"),
     });
 
     processZipFn.addEventSource(
@@ -456,7 +462,7 @@ export class InfraStack extends Stack {
       memorySize: 128,
       entry: src("emergencyShutdown.ts"),
       environment: { API_STAGE: "v1" },
-      logRetention: defaultLogRetention,
+      logGroup: lambdaLogGroup("EmergencyShutdownFn"),
     });
 
     // ─── 8. IAM Permissions ───────────────────────────────────────────────────

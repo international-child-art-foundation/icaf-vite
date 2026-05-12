@@ -1,7 +1,8 @@
 import { QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
 import { GSI, EntityType } from "../../dynamo/ddbSchemaConsts";
-import { ArtworkListItem, GroupListItem } from "@icaf/shared";
+import { ApiGatewayResponse, ArtworkListItem, GroupListItem } from "@icaf/shared";
+import { parseBase64JsonObject } from "../../utils/request";
 
 const DEFAULT_LIMIT = 20;
 
@@ -108,16 +109,24 @@ export async function fetchGroupReviewPage(
 }
 
 export function parseReviewParams(event: { queryStringParameters?: Record<string, string> | null }): {
+  ok: true;
   limit: number;
   lastKey: Record<string, unknown> | undefined;
+} | {
+  ok: false;
+  response: ApiGatewayResponse;
 } {
   const qp = event.queryStringParameters ?? {};
   const limit = Math.min(
     Math.max(parseInt(String(qp.limit ?? DEFAULT_LIMIT), 10) || DEFAULT_LIMIT, 1),
     100,
   );
-  const lastKey = qp.last_key
-    ? (JSON.parse(Buffer.from(qp.last_key, "base64").toString("utf-8")) as Record<string, unknown>)
+  const parsedLastKey = qp.last_key
+    ? parseBase64JsonObject(qp.last_key, "last_key is invalid")
     : undefined;
-  return { limit, lastKey };
+  if (parsedLastKey && !parsedLastKey.ok) {
+    return { ok: false, response: parsedLastKey.response };
+  }
+
+  return { ok: true, limit, lastKey: parsedLastKey?.value };
 }

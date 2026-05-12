@@ -18,15 +18,12 @@ import {
 import { GSI } from "../../dynamo/ddbSchemaConsts";
 import { byOwnerPk } from "../../dynamo/ownerGsi";
 import { randomUUID } from "crypto";
+import { parseJsonBody } from "../../utils/request";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "DELETE") {
-      return CommonErrors.methodNotAllowed();
-    }
-
     const adminId = event.requestContext?.authorizer?.claims?.sub;
     if (!adminId) {
       return CommonErrors.unauthorized();
@@ -37,7 +34,12 @@ export const handler = async (
       return CommonErrors.badRequest("user_id path parameter is required");
     }
 
-    const body: DeleteUserAccountRequest = JSON.parse(event.body ?? "{}");
+    const parsedBody = parseJsonBody<DeleteUserAccountRequest>(event);
+    if (!parsedBody.ok) {
+      return parsedBody.response;
+    }
+
+    const body = parsedBody.value;
     if (!body.reason?.trim()) {
       return CommonErrors.badRequest("reason is required");
     }

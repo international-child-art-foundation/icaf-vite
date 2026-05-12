@@ -154,9 +154,7 @@ function splitPath(path: string): string[] {
   return path.replace(/^\/+|\/+$/g, "").split("/").filter(Boolean);
 }
 
-function matchRoute(route: Route, method: string, path: string): Record<string, string> | null {
-  if (route.method !== method) return null;
-
+function matchRoutePath(route: Route, path: string): Record<string, string> | null {
   const routeParts = splitPath(route.path);
   const pathParts = splitPath(path);
   if (routeParts.length !== pathParts.length) return null;
@@ -182,6 +180,31 @@ function resolvePath(event: ApiEvent): string {
   return event.path ?? event.rawPath ?? `/${event.pathParameters?.proxy ?? ""}`;
 }
 
+function validateJsonBody(event: ApiEvent): ApiGatewayResponse | null {
+  if (!["POST", "PUT", "PATCH", "DELETE"].includes(event.httpMethod)) {
+    return null;
+  }
+
+  if (event.body === undefined || event.body === null) {
+    return null;
+  }
+
+  if (event.body.trim() === "") {
+    return CommonErrors.badRequest("Invalid JSON body");
+  }
+
+  try {
+    const value = JSON.parse(event.body) as unknown;
+    if (value === null || typeof value !== "object" || Array.isArray(value)) {
+      return CommonErrors.badRequest("JSON body must be an object");
+    }
+
+    return null;
+  } catch {
+    return CommonErrors.badRequest("Invalid JSON body");
+  }
+}
+
 export const handler = async (event: ApiEvent): Promise<ApiGatewayResponse> => {
   if (event.httpMethod === "OPTIONS") {
     return {
@@ -192,15 +215,35 @@ export const handler = async (event: ApiEvent): Promise<ApiGatewayResponse> => {
   }
 
   const path = resolvePath(event);
-  const route = routes
+  const pathMatches = routes
     .map((candidate) => ({
       route: candidate,
-      pathParameters: matchRoute(candidate, event.httpMethod, path),
+      pathParameters: matchRoutePath(candidate, path),
     }))
-    .find((candidate) => candidate.pathParameters !== null);
+    .filter((candidate) => candidate.pathParameters !== null);
+
+  if (pathMatches.length === 0) {
+    return CommonErrors.notFound("Route not found");
+  }
+
+  const route = pathMatches.find((candidate) => candidate.route.method === event.httpMethod);
 
   if (!route || !route.pathParameters) {
-    return CommonErrors.notFound("Route not found");
+    const allowedMethods = [...new Set(pathMatches.map((candidate) => candidate.route.method))].sort();
+    const response = CommonErrors.methodNotAllowed(allowedMethods);
+
+    return {
+      ...response,
+      headers: {
+        ...response.headers,
+        Allow: allowedMethods.join(", "),
+      },
+    };
+  }
+
+  const jsonError = validateJsonBody(event);
+  if (jsonError) {
+    return jsonError;
   }
 
   return route.route.handler({

@@ -9,6 +9,7 @@ import {
     NewsListItem,
     ListNewsResponse,
 } from "@icaf/shared";
+import { parseBase64JsonObject } from "../../utils/request";
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 100;
@@ -17,16 +18,14 @@ export const handler = async (
     event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
     try {
-        if (event.httpMethod !== "GET") {
-            return CommonErrors.methodNotAllowed();
-        }
-
         const rawLimit = event.queryStringParameters?.limit;
         const limit = rawLimit ? Math.min(parseInt(rawLimit, 10) || DEFAULT_LIMIT, MAX_LIMIT) : DEFAULT_LIMIT;
         const lastKey = event.queryStringParameters?.last_key;
-        const exclusiveStartKey = lastKey
-            ? JSON.parse(Buffer.from(lastKey, "base64").toString("utf8"))
-            : undefined;
+        const parsedLastKey = lastKey ? parseBase64JsonObject(lastKey, "last_key is invalid") : undefined;
+        if (parsedLastKey && !parsedLastKey.ok) {
+            return parsedLastKey.response;
+        }
+        const exclusiveStartKey = parsedLastKey?.value;
 
         const result = await dynamodb.send(
             new QueryCommand({
@@ -52,8 +51,11 @@ export const handler = async (
             ? Buffer.from(JSON.stringify(result.LastEvaluatedKey)).toString("base64")
             : undefined;
 
-        const response: ListNewsResponse = { news, has_more };
-        if (last_key_out) (response as any).last_key = last_key_out;
+        const response: ListNewsResponse = {
+            news,
+            has_more,
+            ...(last_key_out ? { last_key: last_key_out } : {}),
+        };
 
         return {
             statusCode: HTTP_STATUS.OK,

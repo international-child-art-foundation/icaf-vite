@@ -12,15 +12,12 @@ import {
 import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
 import { Status } from "../../dynamo/shared";
+import { parseJsonBody } from "../../utils/request";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "PATCH") {
-      return CommonErrors.methodNotAllowed();
-    }
-
     const userId = event.requestContext?.authorizer?.claims?.sub;
     if (!userId) {
       return CommonErrors.unauthorized();
@@ -48,7 +45,9 @@ export const handler = async (
       return CommonErrors.forbidden("Not authorized to update this artwork");
     }
 
-    const body: UpdateArtworkRequest = JSON.parse(event.body ?? "{}");
+    const parsedBody = parseJsonBody<UpdateArtworkRequest>(event);
+    if (!parsedBody.ok) return parsedBody.response;
+    const body = parsedBody.value;
     const fieldErrors = validateUpdateArtworkRequest(body);
     if (fieldErrors.length > 0) {
       return CommonErrors.badRequest(fieldErrors.join("; "));

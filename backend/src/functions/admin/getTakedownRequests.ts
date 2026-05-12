@@ -8,6 +8,7 @@ import {
   TakedownRequestListItem,
   ListTakedownRequestsResponse,
 } from "@icaf/shared";
+import { parseBase64JsonObject } from "../../utils/request";
 
 const DEFAULT_LIMIT = 20;
 
@@ -15,10 +16,6 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "GET") {
-      return CommonErrors.methodNotAllowed();
-    }
-
     const adminId = event.requestContext?.authorizer?.claims?.sub;
     if (!adminId) {
       return CommonErrors.unauthorized();
@@ -29,9 +26,13 @@ export const handler = async (
       Math.max(parseInt(String(qp.limit ?? DEFAULT_LIMIT), 10) || DEFAULT_LIMIT, 1),
       100,
     );
-    const lastKey = qp.last_key
-      ? JSON.parse(Buffer.from(qp.last_key, "base64").toString("utf-8"))
+    const parsedLastKey = qp.last_key
+      ? parseBase64JsonObject(qp.last_key, "last_key is invalid")
       : undefined;
+    if (parsedLastKey && !parsedLastKey.ok) {
+      return parsedLastKey.response;
+    }
+    const lastKey = parsedLastKey?.value;
 
     // Query TDR partition — all takedown requests
     const result = await dynamodb.send(

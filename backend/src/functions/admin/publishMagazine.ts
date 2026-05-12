@@ -19,6 +19,7 @@ import {
     Role,
 } from "@icaf/shared";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
+import { parseJsonBody } from "../../utils/request";
 
 // Presigned URL expires in 30 minutes — zip uploads can be large
 const PRESIGNED_URL_EXPIRES_SECONDS = 30 * 60;
@@ -27,10 +28,6 @@ export const handler = async (
     event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
     try {
-        if (event.httpMethod !== "POST") {
-            return CommonErrors.methodNotAllowed();
-        }
-
         // ── Auth check ─────────────────────────────────────────────────────
         const userId = event.requestContext?.authorizer?.claims?.sub;
         const userRole = event.requestContext?.authorizer?.claims?.["custom:role"] as Role | undefined;
@@ -39,7 +36,12 @@ export const handler = async (
         }
 
         // ── Validate request ───────────────────────────────────────────────
-        const body: InitiateMagazineUploadRequest = JSON.parse(event.body ?? "{}");
+        const parsedBody = parseJsonBody<InitiateMagazineUploadRequest>(event);
+        if (!parsedBody.ok) {
+            return parsedBody.response;
+        }
+
+        const body = parsedBody.value;
         const errors = validateInitiateMagazineUploadRequest(body);
         if (errors.length > 0) {
             return CommonErrors.badRequest(errors.join("; "));

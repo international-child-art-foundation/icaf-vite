@@ -9,6 +9,7 @@ import {
   UserPaymentItem,
   ListUserPaymentsResponse,
 } from "@icaf/shared";
+import { parseBase64JsonObject } from "../../utils/request";
 
 const DEFAULT_LIMIT = 20;
 
@@ -16,10 +17,6 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "GET") {
-      return CommonErrors.methodNotAllowed();
-    }
-
     const userId = event.requestContext?.authorizer?.claims?.sub;
     if (!userId) {
       return CommonErrors.unauthorized();
@@ -27,7 +24,13 @@ export const handler = async (
 
     const qp = event.queryStringParameters ?? {};
     const limit = Math.min(Math.max(parseInt(String(qp.limit ?? DEFAULT_LIMIT), 10) || DEFAULT_LIMIT, 1), 100);
-    const lastKey = qp.last_key ? JSON.parse(Buffer.from(qp.last_key, "base64").toString("utf-8")) : undefined;
+    const parsedLastKey = qp.last_key
+      ? parseBase64JsonObject(qp.last_key, "last_key is invalid")
+      : undefined;
+    if (parsedLastKey && !parsedLastKey.ok) {
+      return parsedLastKey.response;
+    }
+    const lastKey = parsedLastKey?.value;
 
     // Query PK=USER#<user_id>, begins_with(SK, "PAYMENT")
     const result = await dynamodb.send(

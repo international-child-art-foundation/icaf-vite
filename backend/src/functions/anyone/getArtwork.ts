@@ -12,10 +12,6 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "GET") {
-      return CommonErrors.methodNotAllowed();
-    }
-
     const artId = event.pathParameters?.art_id?.trim();
     if (!artId) {
       return CommonErrors.badRequest("Artwork ID is required");

@@ -15,15 +15,12 @@ import { byOwnerPk, byOwnerGsiSk } from "../../dynamo/ownerGsi";
 import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { Status } from "../../dynamo/shared";
 import { randomUUID } from "crypto";
+import { parseJsonBody } from "../../utils/request";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "POST") {
-      return CommonErrors.methodNotAllowed();
-    }
-
     const userId = event.requestContext?.authorizer?.claims?.sub;
     if (!userId) {
       return CommonErrors.unauthorized();
@@ -46,7 +43,12 @@ export const handler = async (
       return CommonErrors.forbidden("This account is banned");
     }
 
-    const body: SubmitGroupRequest = JSON.parse(event.body ?? "{}");
+    const parsedBody = parseJsonBody<SubmitGroupRequest>(event);
+    if (!parsedBody.ok) {
+      return parsedBody.response;
+    }
+
+    const body = parsedBody.value;
     const groupErrors = validateSubmitGroupRequest(body);
     if (groupErrors.length > 0) {
       return CommonErrors.badRequest(groupErrors.join("; "));

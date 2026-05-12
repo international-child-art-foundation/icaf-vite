@@ -6,16 +6,15 @@ import {
   COMMON_HEADERS,
   CommonErrors,
 } from "@icaf/shared";
+import { parseJsonBody } from "../../utils/request";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "POST") {
-      return CommonErrors.methodNotAllowed();
-    }
-
-    const body = JSON.parse(event.body ?? "{}");
+    const parsedBody = parseJsonBody<{ email?: string }>(event);
+    if (!parsedBody.ok) return parsedBody.response;
+    const body = parsedBody.value;
 
     if (!body.email?.trim()) {
       return CommonErrors.badRequest("email is required");

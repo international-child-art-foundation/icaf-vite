@@ -11,17 +11,16 @@ import {
   CommonErrors,
 } from "@icaf/shared";
 import { createCookie, decodeJwtPayload } from "../../utils/cookies";
+import { parseJsonBody } from "../../utils/request";
 
 const ACCESS_TOKEN_MAX_AGE = 60 * 60;           // 1 hour
 const REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
 export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayResponse> => {
   try {
-    if (event.httpMethod !== "POST") {
-      return CommonErrors.methodNotAllowed();
-    }
-
-    const body = JSON.parse(event.body ?? "{}");
+    const parsedBody = parseJsonBody<{ email?: string; password?: string }>(event);
+    if (!parsedBody.ok) return parsedBody.response;
+    const body = parsedBody.value;
 
     if (!body.email?.trim()) return CommonErrors.badRequest("email is required");
     if (!body.password) return CommonErrors.badRequest("password is required");

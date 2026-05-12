@@ -9,6 +9,7 @@ import {
   InitiateTakedownResponse,
   validateInitiateTakedownRequest,
 } from "@icaf/shared";
+import { parseJsonBody } from "../../utils/request";
 import { randomUUID } from "crypto";
 
 // Takedown requests auto-execute 5 days after submission
@@ -18,11 +19,9 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "POST") {
-      return CommonErrors.methodNotAllowed();
-    }
-
-    const body: InitiateTakedownRequest = JSON.parse(event.body ?? "{}");
+    const parsedBody = parseJsonBody<InitiateTakedownRequest>(event);
+    if (!parsedBody.ok) return parsedBody.response;
+    const body = parsedBody.value;
     const tdrErrors = validateInitiateTakedownRequest(body);
     if (tdrErrors.length > 0) {
       return CommonErrors.badRequest(tdrErrors.join("; "));

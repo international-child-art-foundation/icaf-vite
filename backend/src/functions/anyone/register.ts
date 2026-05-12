@@ -10,16 +10,15 @@ import {
   MAX_EMAIL_LEN,
   MAX_PASSWORD_LEN,
 } from "@icaf/shared";
+import { parseJsonBody } from "../../utils/request";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "POST") {
-      return CommonErrors.methodNotAllowed();
-    }
-
-    const body: RegisterRequest = JSON.parse(event.body ?? "{}");
+    const parsedBody = parseJsonBody<RegisterRequest>(event);
+    if (!parsedBody.ok) return parsedBody.response;
+    const body = parsedBody.value;
 
     if (!body.email?.trim()) return CommonErrors.badRequest("email is required");
     if (body.email.length > MAX_EMAIL_LEN) return CommonErrors.badRequest(`email must be ${MAX_EMAIL_LEN} characters or less`);

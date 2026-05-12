@@ -9,6 +9,7 @@ import {
     hasMinimumRole,
     Role,
 } from "@icaf/shared";
+import { parseJsonBody } from "../../utils/request";
 
 const VALID_STATUSES: MagazineStatus[] = ["published", "unpublished"];
 
@@ -16,10 +17,6 @@ export const handler = async (
     event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
     try {
-        if (event.httpMethod !== "PATCH") {
-            return CommonErrors.methodNotAllowed();
-        }
-
         const userId = event.requestContext?.authorizer?.claims?.sub;
         const userRole = event.requestContext?.authorizer?.claims?.["custom:role"] as Role | undefined;
         if (!userId || !hasMinimumRole(userRole, "admin")) {
@@ -31,7 +28,12 @@ export const handler = async (
             return CommonErrors.badRequest("Magazine slug is required");
         }
 
-        const body: { status?: MagazineStatus } = JSON.parse(event.body ?? "{}");
+        const parsedBody = parseJsonBody<{ status?: MagazineStatus }>(event);
+        if (!parsedBody.ok) {
+            return parsedBody.response;
+        }
+
+        const body = parsedBody.value;
         if (!body.status || !VALID_STATUSES.includes(body.status)) {
             return CommonErrors.badRequest(`status must be one of: ${VALID_STATUSES.join(", ")}`);
         }
@@ -48,11 +50,7 @@ export const handler = async (
             return CommonErrors.notFound("Magazine not found");
         }
         if (existing.Item.status === "processing") {
-            return {
-                statusCode: 409,
-                body: JSON.stringify({ message: "Magazine is still processing; wait for upload to complete" }),
-                headers: COMMON_HEADERS,
-            };
+            return CommonErrors.conflict("Magazine is still processing; wait for upload to complete");
         }
 
         await dynamodb.send(

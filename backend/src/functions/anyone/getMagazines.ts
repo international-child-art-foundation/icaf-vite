@@ -1,7 +1,6 @@
 import { QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamodb, TABLE_NAME, MAGAZINES_CLOUDFRONT_DOMAIN } from "../../config/aws-clients";
 import {
-    ApiGatewayEvent,
     HTTP_STATUS,
     COMMON_HEADERS,
     CommonErrors,
@@ -10,14 +9,8 @@ import {
     ListMagazinesResponse,
 } from "@icaf/shared";
 
-export const handler = async (
-    event: ApiGatewayEvent,
-): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
+export const handler = async (): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
     try {
-        if (event.httpMethod !== "GET") {
-            return CommonErrors.methodNotAllowed();
-        }
-
         const result = await dynamodb.send(
             new QueryCommand({
                 TableName: TABLE_NAME,

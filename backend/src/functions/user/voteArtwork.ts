@@ -11,10 +11,6 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "POST") {
-      return CommonErrors.methodNotAllowed();
-    }
-
     const userId = event.requestContext?.authorizer?.claims?.sub;
     if (!userId) {
       return CommonErrors.unauthorized();

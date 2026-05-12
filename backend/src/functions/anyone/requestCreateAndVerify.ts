@@ -10,6 +10,7 @@ import {
 import { GSI, EntityType } from "../../dynamo/ddbSchemaConsts";
 import { emailPk, emailGsiSk } from "../../dynamo/emailGsi";
 import { sendCreateAndVerifyEmail } from "../../utils/emails/createAndVerify";
+import { parseJsonBody } from "../../utils/request";
 import { randomUUID } from "crypto";
 
 const VERIFY_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 days
@@ -18,11 +19,9 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "POST") {
-      return CommonErrors.methodNotAllowed();
-    }
-
-    const body = JSON.parse(event.body ?? "{}") as { email?: string };
+    const parsedBody = parseJsonBody<{ email?: string }>(event);
+    if (!parsedBody.ok) return parsedBody.response;
+    const body = parsedBody.value;
     const email = body.email?.trim();
 
     if (!email) {

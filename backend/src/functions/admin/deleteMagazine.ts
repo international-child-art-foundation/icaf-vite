@@ -17,10 +17,6 @@ export const handler = async (
     event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
     try {
-        if (event.httpMethod !== "DELETE") {
-            return CommonErrors.methodNotAllowed();
-        }
-
         const userId = event.requestContext?.authorizer?.claims?.sub;
         const userRole = event.requestContext?.authorizer?.claims?.["custom:role"] as Role | undefined;
         if (!userId || !hasMinimumRole(userRole, "admin")) {

@@ -8,15 +8,12 @@ import {
   ReviewTakedownRequest,
   validateReviewTakedownRequest,
 } from "@icaf/shared";
+import { parseJsonBody } from "../../utils/request";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "PATCH") {
-      return CommonErrors.methodNotAllowed();
-    }
-
     const adminId = event.requestContext?.authorizer?.claims?.sub;
     if (!adminId) {
       return CommonErrors.unauthorized();
@@ -29,7 +26,12 @@ export const handler = async (
       return CommonErrors.badRequest("tdr_sk path parameter is required");
     }
 
-    const body: ReviewTakedownRequest = JSON.parse(event.body ?? "{}");
+    const parsedBody = parseJsonBody<ReviewTakedownRequest>(event);
+    if (!parsedBody.ok) {
+      return parsedBody.response;
+    }
+
+    const body = parsedBody.value;
     if (!body.action || !["cancel", "dispute"].includes(body.action)) {
       return CommonErrors.badRequest("action must be 'cancel' or 'dispute'");
     }

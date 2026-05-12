@@ -18,16 +18,15 @@ import {
   VerifyAccountRequest,
   UserEntity,
 } from "@icaf/shared";
+import { parseJsonBody } from "../../utils/request";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "POST") {
-      return CommonErrors.methodNotAllowed();
-    }
-
-    const body: VerifyAccountRequest = JSON.parse(event.body ?? "{}");
+    const parsedBody = parseJsonBody<VerifyAccountRequest>(event);
+    if (!parsedBody.ok) return parsedBody.response;
+    const body = parsedBody.value;
 
     if (!body.user_id?.trim()) return CommonErrors.badRequest("user_id is required");
     if (!body.verify_token?.trim()) return CommonErrors.badRequest("verify_token is required");

@@ -1,6 +1,7 @@
 import { QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamodb, TABLE_NAME } from "../../../config/aws-clients";
-import { SortOrder } from "@icaf/shared";
+import { ApiGatewayResponse, SortOrder } from "@icaf/shared";
+import { parseBase64JsonObject } from "../../../utils/request";
 
 export interface GsiConfig {
   IndexName: string;
@@ -18,7 +19,7 @@ export async function pagedGsiQuery<T>(
   config: GsiConfig,
   sort: SortOrder,
   limit: number,
-  lastKey: string | undefined,
+  lastKey: Record<string, unknown> | undefined,
   mapper: (item: Record<string, unknown>) => T,
 ): Promise<PagedResult<T>> {
   const params: any = {
@@ -32,13 +33,7 @@ export async function pagedGsiQuery<T>(
   };
 
   if (lastKey) {
-    try {
-      params.ExclusiveStartKey = JSON.parse(
-        Buffer.from(lastKey, "base64").toString("utf-8"),
-      );
-    } catch {
-      // invalid pagination key — start from beginning
-    }
+    params.ExclusiveStartKey = lastKey;
   }
 
   const result = await dynamodb.send(new QueryCommand(params));
@@ -56,12 +51,33 @@ export async function pagedGsiQuery<T>(
 
 export function parseGalleryParams(
   qs: Record<string, string> | null | undefined,
-): { sort: SortOrder; limit: number; last_key: string | undefined } {
+):
+  | {
+      ok: true;
+      value: {
+        sort: SortOrder;
+        limit: number;
+        last_key: Record<string, unknown> | undefined;
+      };
+    }
+  | { ok: false; response: ApiGatewayResponse } {
   const raw = qs ?? {};
   const sort: SortOrder = raw.sort === "oldest" ? "oldest" : "newest";
   const rawLimit = parseInt(raw.limit ?? "", 10);
   const limit = Number.isFinite(rawLimit)
     ? Math.min(Math.max(rawLimit, 1), 100)
     : 20;
-  return { sort, limit, last_key: raw.last_key };
+
+  const parsedLastKey = raw.last_key
+    ? parseBase64JsonObject(raw.last_key, "last_key is invalid")
+    : undefined;
+
+  if (parsedLastKey && !parsedLastKey.ok) {
+    return parsedLastKey;
+  }
+
+  return {
+    ok: true,
+    value: { sort, limit, last_key: parsedLastKey?.value },
+  };
 }

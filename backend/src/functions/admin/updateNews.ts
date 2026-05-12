@@ -10,6 +10,7 @@ import {
     hasMinimumRole,
     Role,
 } from "@icaf/shared";
+import { parseJsonBody } from "../../utils/request";
 
 const UPDATABLE_FIELDS: (keyof UpdateNewsRequest)[] = [
     "source", "body", "date", "timestamp", "kind", "place", "link", "src",
@@ -19,10 +20,6 @@ export const handler = async (
     event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
     try {
-        if (event.httpMethod !== "PATCH") {
-            return CommonErrors.methodNotAllowed();
-        }
-
         const userId = event.requestContext?.authorizer?.claims?.sub;
         const userRole = event.requestContext?.authorizer?.claims?.["custom:role"] as Role | undefined;
         if (!userId || !hasMinimumRole(userRole, "admin")) {
@@ -34,7 +31,12 @@ export const handler = async (
             return CommonErrors.badRequest("news_id is required");
         }
 
-        const body: UpdateNewsRequest = JSON.parse(event.body ?? "{}");
+        const parsedBody = parseJsonBody<UpdateNewsRequest>(event);
+        if (!parsedBody.ok) {
+            return parsedBody.response;
+        }
+
+        const body = parsedBody.value;
         const errors = validateUpdateNewsRequest(body);
         if (errors.length > 0) {
             return CommonErrors.badRequest(errors.join("; "));

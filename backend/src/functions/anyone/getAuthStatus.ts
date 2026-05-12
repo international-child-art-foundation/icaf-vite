@@ -11,10 +11,6 @@ import { parseCookies } from "../../utils/cookies";
 
 export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayResponse> => {
   try {
-    if (event.httpMethod !== "GET") {
-      return CommonErrors.methodNotAllowed();
-    }
-
     const cookies = parseCookies(
       event.headers?.["Cookie"] ?? event.headers?.["cookie"],
     );

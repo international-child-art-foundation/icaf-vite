@@ -7,15 +7,12 @@ import {
   CommonErrors,
   UpdateUserRoleRequest,
 } from "@icaf/shared";
+import { parseJsonBody } from "../../utils/request";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "PATCH") {
-      return CommonErrors.methodNotAllowed();
-    }
-
     const callerId = event.requestContext?.authorizer?.claims?.sub;
     if (!callerId) {
       return CommonErrors.unauthorized();
@@ -26,7 +23,12 @@ export const handler = async (
       return CommonErrors.badRequest("user_id path parameter is required");
     }
 
-    const body: UpdateUserRoleRequest = JSON.parse(event.body ?? "{}");
+    const parsedBody = parseJsonBody<UpdateUserRoleRequest>(event);
+    if (!parsedBody.ok) {
+      return parsedBody.response;
+    }
+
+    const body = parsedBody.value;
     if (!body.new_role) {
       return CommonErrors.badRequest("new_role is required");
     }

@@ -10,17 +10,17 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "GET") {
-      return CommonErrors.methodNotAllowed();
-    }
-
     const userId = event.requestContext?.authorizer?.claims?.sub;
     if (!userId) {
       return CommonErrors.unauthorized();
     }
 
-    const { limit, lastKey } = parseReviewParams(event);
-    const page = await fetchGroupReviewPage("hidden", limit, lastKey);
+    const params = parseReviewParams(event);
+    if (!params.ok) {
+      return params.response;
+    }
+
+    const page = await fetchGroupReviewPage("hidden", params.limit, params.lastKey);
 
     return {
       statusCode: HTTP_STATUS.OK,

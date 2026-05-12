@@ -9,6 +9,7 @@ import { COMMON_HEADERS, HTTP_STATUS } from './commonTypes.js';
 
 // Base error response interface
 export interface ErrorResponse {
+    code: string;
     message: string;
     errors?: string[];
     [key: string]: any;
@@ -26,6 +27,7 @@ export function createErrorResponse(
     headers: Record<string, string>;
 } {
     const response: ErrorResponse = {
+        code: additionalData?.code ?? 'ERROR',
         message,
         ...additionalData
     };
@@ -45,49 +47,67 @@ export function createErrorResponse(
 export const CommonErrors = {
     unauthorized: () => createErrorResponse(
         HTTP_STATUS.UNAUTHORIZED,
-        'Unauthorized'
+        'Unauthorized',
+        undefined,
+        { code: 'UNAUTHORIZED' }
     ),
 
     badRequest: (message: string, errors?: string[]) => createErrorResponse(
         HTTP_STATUS.BAD_REQUEST,
         message,
-        errors
+        errors,
+        { code: 'BAD_REQUEST' }
     ),
 
     forbidden: (message: string) => createErrorResponse(
         HTTP_STATUS.FORBIDDEN,
-        message
+        message,
+        undefined,
+        { code: 'FORBIDDEN' }
     ),
 
     notFound: (message: string) => createErrorResponse(
         HTTP_STATUS.NOT_FOUND,
-        message
+        message,
+        undefined,
+        { code: 'NOT_FOUND' }
     ),
 
-    methodNotAllowed: () => createErrorResponse(
+    methodNotAllowed: (allowedMethods?: string[]) => createErrorResponse(
         HTTP_STATUS.METHOD_NOT_ALLOWED,
-        'Method not allowed'
+        'Method not allowed',
+        undefined,
+        {
+            code: 'METHOD_NOT_ALLOWED',
+            ...(allowedMethods && allowedMethods.length > 0 ? { allowed_methods: allowedMethods } : {})
+        }
     ),
 
     internalServerError: (message?: string) => createErrorResponse(
         HTTP_STATUS.INTERNAL_SERVER_ERROR,
-        message || 'Internal server error'
+        message || 'Internal server error',
+        undefined,
+        { code: 'INTERNAL_SERVER_ERROR' }
     ),
 
     paymentRequired: (message?: string) => createErrorResponse(
         402,
-        message || 'Payment required'
+        message || 'Payment required',
+        undefined,
+        { code: 'PAYMENT_REQUIRED' }
     ),
 
     tooManyRequests: (message: string, currentCount?: number, maxAllowed?: number) => createErrorResponse(
         429,
         message,
         undefined,
-        { current_count: currentCount, max_allowed: maxAllowed }
+        { code: 'TOO_MANY_REQUESTS', current_count: currentCount, max_allowed: maxAllowed }
     ),
 
     conflict: (message: string) => createErrorResponse(
         409,
-        message
+        message,
+        undefined,
+        { code: 'CONFLICT' }
     )
 };

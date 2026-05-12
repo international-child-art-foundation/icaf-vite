@@ -42,5 +42,6 @@ frontend/public/gallery-arts/*
 .localstack
 # Dev container / claude code experiments
 .devcontainer/
-.claude/
+.ai/
+AGENTS.md
 CLAUDE.md

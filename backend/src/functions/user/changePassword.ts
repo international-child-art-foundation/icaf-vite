@@ -2,6 +2,7 @@ import { ChangePasswordCommand } from "@aws-sdk/client-cognito-identity-provider
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import { cognitoClient, dynamodb, TABLE_NAME } from "../../config/aws-clients";
 import { parseCookies } from "../../utils/cookies";
+import { parseJsonBody } from "../../utils/request";
 import {
   ApiGatewayEvent,
   HTTP_STATUS,
@@ -12,10 +13,6 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "POST") {
-      return CommonErrors.methodNotAllowed();
-    }
-
     const userId = event.requestContext?.authorizer?.claims?.sub;
     if (!userId) {
       return CommonErrors.unauthorized();
@@ -28,11 +25,12 @@ export const handler = async (
       return CommonErrors.unauthorized();
     }
 
-    const body = JSON.parse(event.body ?? "{}");
-    const { old_password, new_password } = body as {
+    const parsedBody = parseJsonBody<{
       old_password?: string;
       new_password?: string;
-    };
+    }>(event);
+    if (!parsedBody.ok) return parsedBody.response;
+    const { old_password, new_password } = parsedBody.value;
 
     if (!old_password) {
       return CommonErrors.badRequest("old_password is required");

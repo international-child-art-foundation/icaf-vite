@@ -37,13 +37,12 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "GET") {
-      return CommonErrors.methodNotAllowed();
-    }
-
-    const { sort, limit, last_key } = parseGalleryParams(
+    const parsedParams = parseGalleryParams(
       event.queryStringParameters,
     );
+    if (!parsedParams.ok) return parsedParams.response;
+
+    const { sort, limit, last_key } = parsedParams.value;
     const family = event.pathParameters?.family;
     const instance = event.pathParameters?.instance;
 

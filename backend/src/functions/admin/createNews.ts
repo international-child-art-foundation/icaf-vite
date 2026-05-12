@@ -13,22 +13,24 @@ import {
 } from "@icaf/shared";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
 import { randomUUID } from "crypto";
+import { parseJsonBody } from "../../utils/request";
 
 export const handler = async (
     event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
     try {
-        if (event.httpMethod !== "POST") {
-            return CommonErrors.methodNotAllowed();
-        }
-
         const userId = event.requestContext?.authorizer?.claims?.sub;
         const userRole = event.requestContext?.authorizer?.claims?.["custom:role"] as Role | undefined;
         if (!userId || !hasMinimumRole(userRole, "admin")) {
             return CommonErrors.forbidden("Admin access required");
         }
 
-        const body: CreateNewsRequest = JSON.parse(event.body ?? "{}");
+        const parsedBody = parseJsonBody<CreateNewsRequest>(event);
+        if (!parsedBody.ok) {
+            return parsedBody.response;
+        }
+
+        const body = parsedBody.value;
         const errors = validateCreateNewsRequest(body);
         if (errors.length > 0) {
             return CommonErrors.badRequest(errors.join("; "));

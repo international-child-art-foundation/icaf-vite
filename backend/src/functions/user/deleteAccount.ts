@@ -20,21 +20,20 @@ import {
 } from "@icaf/shared";
 import { GSI } from "../../dynamo/ddbSchemaConsts";
 import { byOwnerPk } from "../../dynamo/ownerGsi";
+import { parseJsonBody } from "../../utils/request";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "DELETE") {
-      return CommonErrors.methodNotAllowed();
-    }
-
     const userId = event.requestContext?.authorizer?.claims?.sub;
     if (!userId) {
       return CommonErrors.unauthorized();
     }
 
-    const body: DeleteAccountRequest = JSON.parse(event.body ?? "{}");
+    const parsedBody = parseJsonBody<DeleteAccountRequest>(event);
+    if (!parsedBody.ok) return parsedBody.response;
+    const body = parsedBody.value;
     if (!body.password) {
       return CommonErrors.badRequest("password is required");
     }

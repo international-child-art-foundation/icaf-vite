@@ -12,10 +12,6 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "GET") {
-      return CommonErrors.methodNotAllowed();
-    }
-
     const groupId = event.pathParameters?.group_id?.trim();
     if (!groupId) {
       return CommonErrors.badRequest("Group ID is required");

@@ -14,6 +14,7 @@ import { buildApprovedArtworkGsiAttrs, ARTWORK_GSI_ATTRS_TO_REMOVE } from "../..
 import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
 import { Status } from "../../dynamo/shared";
+import { parseJsonBody } from "../../utils/request";
 
 const VALID_STATUSES: ArtworkStatus[] = ["approved", "hidden", "rejected"];
 
@@ -21,10 +22,6 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "PATCH") {
-      return CommonErrors.methodNotAllowed();
-    }
-
     const userId = event.requestContext?.authorizer?.claims?.sub;
     if (!userId) {
       return CommonErrors.unauthorized();
@@ -35,7 +32,12 @@ export const handler = async (
       return CommonErrors.badRequest("art_id path parameter is required");
     }
 
-    const body = JSON.parse(event.body ?? "{}") as { status?: string };
+    const parsedBody = parseJsonBody<{ status?: string }>(event);
+    if (!parsedBody.ok) {
+      return parsedBody.response;
+    }
+
+    const body = parsedBody.value;
     const newStatus = body.status as ArtworkStatus | undefined;
 
     if (!newStatus || !VALID_STATUSES.includes(newStatus)) {

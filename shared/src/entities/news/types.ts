@@ -56,4 +56,6 @@ export type NewsListItem = Omit<NewsEntity, 'type'>;
 
 export interface ListNewsResponse {
     news: NewsListItem[];
+    has_more?: boolean;
+    last_key?: string;
 }

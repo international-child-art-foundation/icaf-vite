@@ -20,6 +20,7 @@ import { byOwnerPk, byOwnerGsiSk } from "../../dynamo/ownerGsi";
 import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { Status } from "../../dynamo/shared";
 import { randomUUID } from "crypto";
+import { parseJsonBody } from "../../utils/request";
 
 const PRESIGNED_URL_EXPIRES_SECONDS = 20 * 60; // 20 minutes
 
@@ -50,10 +51,6 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "POST") {
-      return CommonErrors.methodNotAllowed();
-    }
-
     const userId = event.requestContext?.authorizer?.claims?.sub;
     if (!userId) {
       return CommonErrors.unauthorized();
@@ -98,7 +95,12 @@ export const handler = async (
       return CommonErrors.forbidden("Not authorized to add to this group");
     }
 
-    const body: SubmitArtworkToGroupBody = JSON.parse(event.body ?? "{}");
+    const parsedBody = parseJsonBody<SubmitArtworkToGroupBody>(event);
+    if (!parsedBody.ok) {
+      return parsedBody.response;
+    }
+
+    const body = parsedBody.value;
 
     if (!body.file_type || !(UPLOAD_FILE_TYPES as readonly string[]).includes(body.file_type)) {
       return CommonErrors.badRequest(`file_type must be one of: ${UPLOAD_FILE_TYPES.join(", ")}`);

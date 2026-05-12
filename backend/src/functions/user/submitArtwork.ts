@@ -16,6 +16,7 @@ import { EntityType } from "../../dynamo/ddbSchemaConsts";
 import { byOwnerPk, byOwnerGsiSk } from "../../dynamo/ownerGsi";
 import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { Status } from "../../dynamo/shared";
+import { parseJsonBody } from "../../utils/request";
 import { randomUUID } from "crypto";
 
 const PRESIGNED_URL_EXPIRES_SECONDS = 20 * 60; // 20 minutes
@@ -33,16 +34,14 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    if (event.httpMethod !== "POST") {
-      return CommonErrors.methodNotAllowed();
-    }
-
     const userId = event.requestContext?.authorizer?.claims?.sub;
     if (!userId) {
       return CommonErrors.unauthorized();
     }
 
-    const body: SubmitArtworkRequest = JSON.parse(event.body ?? "{}");
+    const parsedBody = parseJsonBody<SubmitArtworkRequest>(event);
+    if (!parsedBody.ok) return parsedBody.response;
+    const body = parsedBody.value;
 
     // ── Validate artwork fields ────────────────────────────────────────────
     const artErrors = validateSubmissionData(body);

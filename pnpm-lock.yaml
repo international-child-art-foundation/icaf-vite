@@ -27,6 +27,9 @@ importers:
         specifier: ^0.33.5
         version: 0.33.5
     devDependencies:
+      esbuild:
+        specifier: ^0.25.12
+        version: 0.25.12
       typescript:
         specifier: ~5.7.2
         version: 5.7.3
@@ -262,8 +265,8 @@ importers:
         specifier: 22.14.0
         version: 22.14.0
       aws-cdk:
-        specifier: 2.1018.1
-        version: 2.1018.1
+        specifier: 2.1121.0
+        version: 2.1121.0
       esbuild:
         specifier: ^0.25.5
         version: 0.25.12
@@ -2133,6 +2136,11 @@ packages:
 
   aws-cdk@2.1018.1:
     resolution: {integrity: sha512-kFPRox5kSm+ktJ451o0ng9rD+60p5Kt1CZIWw8kXnvqbsxN2xv6qbmyWSXw7sGVXVwqrRKVj+71/JeDr+LMAZw==}
+    engines: {node: '>= 18.0.0'}
+    hasBin: true
+
+  aws-cdk@2.1121.0:
+    resolution: {integrity: sha512-cG7CHt/SytYTfwrK+BUNQpqmS1dwhjt8z6ExKL6GK4n+8/6ZCwFzxlZWA/jUd2+Y9xPc+Q8cLKfMqGmgxEXbkg==}
     engines: {node: '>= 18.0.0'}
     hasBin: true
 
@@ -5864,6 +5872,8 @@ snapshots:
   aws-cdk@2.1018.1:
     optionalDependencies:
       fsevents: 2.3.2
+
+  aws-cdk@2.1121.0: {}
 
   balanced-match@1.0.2: {}
 

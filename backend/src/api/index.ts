@@ -25,6 +25,7 @@ import { handler as unhideAllUserArtwork } from "../functions/admin/unhideAllUse
 import { handler as updateMagazineStatus } from "../functions/admin/updateMagazineStatus";
 import { handler as updateNews } from "../functions/admin/updateNews";
 import { handler as confirmForgotPassword } from "../functions/anyone/confirmForgotPassword";
+import { handler as confirmRegistration } from "../functions/anyone/confirmRegistration";
 import { handler as forgotPassword } from "../functions/anyone/forgotPassword";
 import { handler as galleryArtworks } from "../functions/anyone/gallery/galleryArtworks";
 import { handler as galleryGroups } from "../functions/anyone/gallery/galleryGroups";
@@ -94,6 +95,7 @@ const routes: Route[] = [
   { method: "GET", path: "/gallery/groups/family/{family}/instance/{instance}", handler: galleryGroups },
 
   { method: "POST", path: "/auth/register", handler: register },
+  { method: "POST", path: "/auth/confirm-registration", handler: confirmRegistration },
   { method: "POST", path: "/auth/login", handler: login },
   { method: "POST", path: "/auth/logout", handler: logout },
   { method: "POST", path: "/auth/verify", handler: verifyAccount },

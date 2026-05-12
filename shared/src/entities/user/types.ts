@@ -59,13 +59,19 @@ export interface RegisterRequest {
     f_name: string;
     l_name: string;
     dob: string;    // YYYY-MM-DD
+    role: Extract<Role, 'guardian' | 'user'>;
+}
+
+// Confirm default Cognito registration (POST /auth/confirm-registration)
+// Called with the code Cognito sends after POST /auth/register.
+export interface ConfirmRegistrationRequest {
+    email: string;
+    confirmation_code: string;
 }
 
 // Verify account request (POST /auth/verify)
-// Called when user clicks their verification link.
-// Handles both flows:
-//   - Virtual user (created via artwork submission): is_virtual=true, password required
-//   - Standard Cognito user verifying after registration: is_virtual=false, no password needed
+// Called when a virtual user clicks their create-account verification link.
+// This intentionally stays separate from Cognito's default registration email.
 export interface VerifyAccountRequest {
     user_id: string;        // from link: icaf.org/create-account?id=<user_id>
     verify_token: string;   // slug from the verification email link

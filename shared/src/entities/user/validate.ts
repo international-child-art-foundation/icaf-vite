@@ -35,6 +35,10 @@ export function validateRegisterRequest(data: RegisterRequest): string[] {
         errors.push('dob must be a date in YYYY-MM-DD format');
     }
 
+    if (data.role !== 'guardian' && data.role !== 'user') {
+        errors.push('role must be one of: guardian, user');
+    }
+
     return errors;
 }
 

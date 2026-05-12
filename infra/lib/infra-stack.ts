@@ -196,6 +196,12 @@ export class InfraStack extends Stack {
       userPoolName: "icaf-user-pool",
       selfSignUpEnabled: true,
       signInAliases: { email: true },
+      autoVerify: { email: true },
+      userVerification: {
+        emailSubject: "Verify your ICAF account",
+        emailBody: "Your ICAF verification code is {####}",
+        emailStyle: cognito.VerificationEmailStyle.CODE,
+      },
       standardAttributes: {
         email: { required: true, mutable: true },
         givenName: { required: true, mutable: true },

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "bin": {
-    "infra": "bin/infra.js"
+    "infra": "dist/bin/infra.js"
   },
   "scripts": {
     "build": "tsc -b",

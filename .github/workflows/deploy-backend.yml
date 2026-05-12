@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      id-token: write  # required for OIDC credential federation
+      id-token: write # required for OIDC credential federation
       contents: read
 
     steps:
@@ -45,7 +45,11 @@ jobs:
 
       # ── Sharp Lambda layer ──────────────────────────────────────────────────
       - name: Build Sharp Lambda layer (linux-x64-glibc)
-        run: bash infra/scripts/build-sharp-layer.sh
+        run: pnpm --dir infra layer:build
+
+      # ── Build CDK app ───────────────────────────────────────────────────────
+      - name: Build CDK app
+        run: pnpm --dir infra build
 
       # ── AWS credentials (OIDC) ──────────────────────────────────────────────
       - name: Configure AWS credentials
@@ -57,4 +61,4 @@ jobs:
       # ── CDK deploy ───────────────────────────────────────────────────────────
       - name: CDK deploy
         working-directory: infra
-        run: npx cdk deploy InfraStack --require-approval never
+        run: pnpm cdk deploy InfraStack --require-approval never

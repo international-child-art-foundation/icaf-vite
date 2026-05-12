@@ -66,4 +66,4 @@ jobs:
       # ── CDK deploy ───────────────────────────────────────────────────────────
       - name: CDK deploy
         working-directory: infra
-        run: pnpm cdk deploy InfraStack --require-approval never
+        run: pnpm exec cdk deploy InfraStack --require-approval never

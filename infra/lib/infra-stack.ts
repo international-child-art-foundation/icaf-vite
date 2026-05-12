@@ -337,74 +337,14 @@ export class InfraStack extends Stack {
 
     const src = (p: string) => `../backend/src/functions/${p}`;
 
-    // ── Public — no auth ─────────────────────────────────────────────────────
-    const getArtworkFn              = fn("GetArtworkFn",              src("anyone/getArtwork.ts"));
-    const getGroupFn                = fn("GetGroupFn",                src("anyone/getGroup.ts"));
-    const galleryArtworksFn         = fn("GalleryArtworksFn",         src("anyone/gallery/galleryArtworks.ts"));
-    const galleryGroupsFn           = fn("GalleryGroupsFn",           src("anyone/gallery/galleryGroups.ts"));
-    const initiateTakedownFn        = fn("InitiateTakedownFn",        src("anyone/initiateTakedown.ts"));
-    const guestSubmitArtworkFn      = fn("GuestSubmitArtworkFn",      src("anyone/submitArtwork.ts"), true);
-    const verifyAccountFn           = fn("VerifyAccountFn",           src("anyone/verifyAccount.ts"));
-    const registerFn                = fn("RegisterFn",                src("anyone/register.ts"));
-    const loginFn                   = fn("LoginFn",                   src("anyone/login.ts"));
-    const logoutFn                  = fn("LogoutFn",                  src("anyone/logout.ts"));
-    const forgotPasswordFn          = fn("ForgotPasswordFn",          src("anyone/forgotPassword.ts"));
-    const confirmForgotPasswordFn   = fn("ConfirmForgotPasswordFn",   src("anyone/confirmForgotPassword.ts"));
-    const resendVerificationFn      = fn("ResendVerificationFn",      src("anyone/resendVerificationEmail.ts"));
-    const getAuthStatusFn           = fn("GetAuthStatusFn",           src("anyone/getAuthStatus.ts"));
-    const requestCreateAndVerifyFn  = fn("RequestCreateAndVerifyFn",  src("anyone/requestCreateAndVerify.ts"));
-    const getMagazinesFn            = fn("GetMagazinesFn",            src("anyone/getMagazines.ts"));
-    const getNewsFn                 = fn("GetNewsFn",                 src("anyone/getNews.ts"));
-
-    // ── User — authenticated ──────────────────────────────────────────────────
-    const getUserFn                 = fn("GetUserFn",                 src("user/user.ts"));
-    const submitArtworkFn           = fn("SubmitArtworkFn",           src("user/submitArtwork.ts"), true);
-    const updateArtworkFn           = fn("UpdateArtworkFn",           src("user/updateArtwork.ts"));
-    const deleteArtworkFn           = fn("DeleteArtworkFn",           src("user/deleteArtwork.ts"));
-    const deleteAllArtworksFn       = fn("DeleteAllArtworksFn",       src("user/deleteAllArtworks.ts"), true);
-    const listArtworkSubmissionsFn  = fn("ListArtworkSubmissionsFn",  src("user/listArtworkSubmissions.ts"));
-    const voteArtworkFn             = fn("VoteArtworkFn",             src("user/voteArtwork.ts"));
-    const listDonationsFn           = fn("ListDonationsFn",           src("user/listDonations.ts"));
-    const changePasswordFn          = fn("ChangePasswordFn",          src("user/changePassword.ts"));
-    const deleteAccountFn           = fn("DeleteAccountFn",           src("user/deleteAccount.ts"), true);
-
-    // ── Guardian — authenticated, guardian+ role ──────────────────────────────
-    const createGroupFn             = fn("CreateGroupFn",             src("guardian/createGroup.ts"));
-    const listGroupSubmissionsFn    = fn("ListGroupSubmissionsFn",    src("guardian/listGroupSubmissions.ts"));
-    const updateGroupFn             = fn("UpdateGroupFn",             src("guardian/updateGroup.ts"));
-    const deleteGroupFn             = fn("DeleteGroupFn",             src("guardian/deleteGroup.ts"), true);
-    const submitArtworkToGroupFn    = fn("SubmitArtworkToGroupFn",    src("guardian/submitArtworkToGroup.ts"), true);
-    const deleteArtworkFromGroupFn  = fn("DeleteArtworkFromGroupFn",  src("guardian/deleteArtworkFromGroup.ts"));
-    const updateConstituentArtworkFn = fn("UpdateConstituentArtworkFn", src("guardian/updateConstituentArtwork.ts"));
-
-    // ── Contributor — authenticated, contributor+ role ────────────────────────
-    const fetchUnapprovedArtworksFn = fn("FetchUnapprovedArtworksFn", src("contributor/fetchUnapprovedArtworks.ts"));
-    const fetchHiddenArtworksFn     = fn("FetchHiddenArtworksFn",     src("contributor/fetchHiddenArtworks.ts"));
-    const fetchUnapprovedGroupsFn   = fn("FetchUnapprovedGroupsFn",   src("contributor/fetchUnapprovedGroups.ts"));
-    const fetchHiddenGroupsFn       = fn("FetchHiddenGroupsFn",       src("contributor/fetchHiddenGroups.ts"));
-    const changeArtworkStatusFn     = fn("ChangeArtworkStatusFn",     src("contributor/changeArtworkStatus.ts"));
-    const changeGroupStatusFn       = fn("ChangeGroupStatusFn",       src("contributor/changeGroupStatus.ts"));
-    const updateUserRoleFn          = fn("UpdateUserRoleFn",          src("contributor/updateUserRole.ts"));
-
-    // ── Admin — authenticated, admin role ─────────────────────────────────────
-    const banUserFn                 = fn("BanUserFn",                 src("admin/banUser.ts"));
-    const unbanUserFn               = fn("UnbanUserFn",               src("admin/unbanUser.ts"));
-    const alterUserRoleFn           = fn("AlterUserRoleFn",           src("admin/alterUserRole.ts"));
-    const getUserCognitoInfoFn      = fn("GetUserCognitoInfoFn",      src("admin/getUserCognitoInfo.ts"));
-    const getEmailByUserIdFn        = fn("GetEmailByUserIdFn",        src("admin/getEmailByUserId.ts"));
-    const deleteUserAccountFn       = fn("DeleteUserAccountFn",       src("admin/deleteUserAccount.ts"), true);
-    const removeAllUserArtworkFn    = fn("RemoveAllUserArtworkFn",    src("admin/removeAllUserArtwork.ts"), true);
-    const hideAllUserArtworkFn      = fn("HideAllUserArtworkFn",      src("admin/hideAllUserArtwork.ts"), true);
-    const unhideAllUserArtworkFn    = fn("UnhideAllUserArtworkFn",    src("admin/unhideAllUserArtwork.ts"), true);
-    const getArtworkSubmitterEmailFn = fn("GetArtworkSubmitterEmailFn", src("admin/getArtworkSubmitterEmail.ts"));
-    const getTakedownRequestsFn     = fn("GetTakedownRequestsFn",     src("admin/getTakedownRequests.ts"));
-    const cancelTakedownRequestFn   = fn("CancelTakedownRequestFn",   src("admin/cancelTakedownRequest.ts"));
-    const publishMagazineFn         = fn("PublishMagazineFn",         src("admin/publishMagazine.ts"), true);
-    const updateMagazineStatusFn    = fn("UpdateMagazineStatusFn",    src("admin/updateMagazineStatus.ts"));
-    const deleteMagazineFn          = fn("DeleteMagazineFn",          src("admin/deleteMagazine.ts"), true);
-    const createNewsFn              = fn("CreateNewsFn",              src("admin/createNews.ts"));
-    const updateNewsFn              = fn("UpdateNewsFn",              src("admin/updateNews.ts"));
-    const deleteNewsFn              = fn("DeleteNewsFn",              src("admin/deleteNews.ts"));
+    const apiFn = new NodejsFunction(this, "ApiFn", {
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(60),
+      memorySize: 512,
+      environment: commonEnv,
+      entry: "../backend/src/api/index.ts",
+      logGroup: lambdaLogGroup("ApiFn"),
+    });
 
     // ── Internal — not HTTP-accessible ───────────────────────────────────────
 
@@ -467,79 +407,32 @@ export class InfraStack extends Stack {
 
     // ─── 8. IAM Permissions ───────────────────────────────────────────────────
 
-    // DynamoDB — all HTTP-facing functions need read/write access
-    const allFunctions = [
-      getArtworkFn, getGroupFn, galleryArtworksFn, galleryGroupsFn,
-      initiateTakedownFn, guestSubmitArtworkFn, verifyAccountFn,
-      registerFn, loginFn, logoutFn, forgotPasswordFn, confirmForgotPasswordFn,
-      resendVerificationFn, getAuthStatusFn, requestCreateAndVerifyFn,
-      getMagazinesFn, getNewsFn,
-      getUserFn, submitArtworkFn, updateArtworkFn, deleteArtworkFn,
-      deleteAllArtworksFn, listArtworkSubmissionsFn, voteArtworkFn,
-      listDonationsFn, changePasswordFn, deleteAccountFn,
-      createGroupFn, listGroupSubmissionsFn, updateGroupFn, deleteGroupFn,
-      submitArtworkToGroupFn, deleteArtworkFromGroupFn, updateConstituentArtworkFn,
-      fetchUnapprovedArtworksFn, fetchHiddenArtworksFn,
-      fetchUnapprovedGroupsFn, fetchHiddenGroupsFn,
-      changeArtworkStatusFn, changeGroupStatusFn, updateUserRoleFn,
-      banUserFn, unbanUserFn, alterUserRoleFn, getUserCognitoInfoFn,
-      getEmailByUserIdFn, deleteUserAccountFn, removeAllUserArtworkFn,
-      hideAllUserArtworkFn, unhideAllUserArtworkFn,
-      getArtworkSubmitterEmailFn, getTakedownRequestsFn, cancelTakedownRequestFn,
-      publishMagazineFn, updateMagazineStatusFn, deleteMagazineFn,
-      createNewsFn, updateNewsFn, deleteNewsFn,
-    ];
-
-    for (const f of allFunctions) {
-      icafTable.grantReadWriteData(f);
-    }
+    // DynamoDB — HTTP handlers share one router Lambda.
+    icafTable.grantReadWriteData(apiFn);
 
     // processImage and processZip also need DDB access
     icafTable.grantReadWriteData(processImageFn);
     icafTable.grantReadWriteData(processZipFn);
 
     // S3 artwork bucket — presigned PUT or delete
-    const s3ArtworkFunctions = [
-      guestSubmitArtworkFn,
-      submitArtworkFn,
-      submitArtworkToGroupFn,
-      deleteArtworkFn,
-      deleteAllArtworksFn,
-      deleteAccountFn,
-      deleteUserAccountFn,
-    ];
-
-    for (const f of s3ArtworkFunctions) {
-      artworkBucket.grantReadWrite(f);
-    }
+    artworkBucket.grantReadWrite(apiFn);
 
     // processImageFn reads {art_id}/initial, writes the three AVIF variants,
     // and deletes the initial. grantReadWrite already includes delete.
     artworkBucket.grantReadWrite(processImageFn);
 
     // S3 magazines bucket
-    // publishMagazineFn generates presigned PUT URLs for staging/<slug>.zip
-    magazinesBucket.grantReadWrite(publishMagazineFn);
-    // deleteMagazineFn removes all objects under <slug>/
-    magazinesBucket.grantReadWrite(deleteMagazineFn);
+    // ApiFn generates magazine upload URLs and handles magazine deletion.
+    magazinesBucket.grantReadWrite(apiFn);
     // processZipFn downloads from staging/, uploads to <slug>/, deletes the zip
     magazinesBucket.grantReadWrite(processZipFn);
 
     // SES — functions that send email via SES
-    const sesFunctions = [
-      guestSubmitArtworkFn,
-      requestCreateAndVerifyFn,
-      changeArtworkStatusFn,
-      changeGroupStatusFn,
-    ];
-
-    for (const f of sesFunctions) {
-      f.addToRolePolicy(new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: ["ses:SendEmail", "ses:SendRawEmail"],
-        resources: ["*"],
-      }));
-    }
+    apiFn.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ["ses:SendEmail", "ses:SendRawEmail"],
+      resources: ["*"],
+    }));
 
     // Cognito admin operations
     const cognitoAdminActions = [
@@ -565,31 +458,11 @@ export class InfraStack extends Stack {
       "cognito-idp:ConfirmSignUp",
     ];
 
-    const cognitoAdminFunctions = [
-      loginFn, logoutFn, verifyAccountFn, deleteAccountFn,
-      deleteUserAccountFn, getUserCognitoInfoFn,
-    ];
-
-    for (const f of cognitoAdminFunctions) {
-      f.addToRolePolicy(new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: [...cognitoAdminActions, ...cognitoClientActions],
-        resources: [userPool.userPoolArn],
-      }));
-    }
-
-    const cognitoClientFunctions = [
-      registerFn, forgotPasswordFn, confirmForgotPasswordFn,
-      resendVerificationFn, getAuthStatusFn, changePasswordFn,
-    ];
-
-    for (const f of cognitoClientFunctions) {
-      f.addToRolePolicy(new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: cognitoClientActions,
-        resources: [userPool.userPoolArn],
-      }));
-    }
+    apiFn.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [...cognitoAdminActions, ...cognitoClientActions],
+      resources: [userPool.userPoolArn],
+    }));
 
     // ─── 9. S3 Event Notifications ────────────────────────────────────────────
 
@@ -639,156 +512,42 @@ export class InfraStack extends Stack {
       authorizationType: apigw.AuthorizationType.COGNITO,
     };
 
-    const li = (f: NodejsFunction) => new apigw.LambdaIntegration(f);
+    const apiIntegration = new apigw.LambdaIntegration(apiFn);
 
-    // ── Public — artworks + groups ────────────────────────────────────────────
-    const artworksRes = api.root.addResource("artworks");
-    artworksRes.addMethod("POST", li(guestSubmitArtworkFn));
-    artworksRes.addResource("{art_id}").addMethod("GET", li(getArtworkFn));
+    const addAnyProxy = (
+      parent: apigw.IResource,
+      methodOptions?: apigw.MethodOptions,
+    ) => {
+      parent.addMethod("ANY", apiIntegration, methodOptions);
+      parent.addProxy({
+        anyMethod: true,
+        defaultIntegration: apiIntegration,
+        defaultMethodOptions: methodOptions,
+      });
+    };
 
-    const groupsRes = api.root.addResource("groups");
-    groupsRes.addResource("{group_id}").addMethod("GET", li(getGroupFn));
+    // Public API prefixes route through ApiFn without requiring Cognito.
+    addAnyProxy(api.root.addResource("artworks"));
+    addAnyProxy(api.root.addResource("groups"));
+    addAnyProxy(api.root.addResource("takedown"));
+    addAnyProxy(api.root.addResource("magazines"));
+    addAnyProxy(api.root.addResource("news"));
+    addAnyProxy(api.root.addResource("gallery"));
 
-    api.root.addResource("takedown").addMethod("POST", li(initiateTakedownFn));
-
-    // ── Magazines (public read) ───────────────────────────────────────────────
-    const magazinesRes = api.root.addResource("magazines");
-    magazinesRes.addMethod("GET", li(getMagazinesFn));
-
-    // ── News (public read) ────────────────────────────────────────────────────
-    const newsRes = api.root.addResource("news");
-    newsRes.addMethod("GET", li(getNewsFn));
-
-    // ── Gallery (public) ──────────────────────────────────────────────────────
-    const gallery = api.root.addResource("gallery");
-
-    const galleryArtworksRes = gallery.addResource("artworks");
-    galleryArtworksRes.addMethod("GET", li(galleryArtworksFn));
-    const galleryArtByFamily = galleryArtworksRes
-      .addResource("family").addResource("{family}");
-    galleryArtByFamily.addMethod("GET", li(galleryArtworksFn));
-    galleryArtByFamily
-      .addResource("instance").addResource("{instance}")
-      .addMethod("GET", li(galleryArtworksFn));
-
-    const galleryGroupsRes = gallery.addResource("groups");
-    galleryGroupsRes.addMethod("GET", li(galleryGroupsFn));
-    const galleryGrpByFamily = galleryGroupsRes
-      .addResource("family").addResource("{family}");
-    galleryGrpByFamily.addMethod("GET", li(galleryGroupsFn));
-    galleryGrpByFamily
-      .addResource("instance").addResource("{instance}")
-      .addMethod("GET", li(galleryGroupsFn));
-
-    // ── Auth (public, except change-password) ─────────────────────────────────
+    // Auth is mostly public. Keep change-password behind API Gateway Cognito.
     const authRes = api.root.addResource("auth");
-    authRes.addResource("register").addMethod("POST", li(registerFn));
-    authRes.addResource("login").addMethod("POST", li(loginFn));
-    authRes.addResource("logout").addMethod("POST", li(logoutFn));
-    authRes.addResource("verify").addMethod("POST", li(verifyAccountFn));
-    authRes.addResource("forgot-password").addMethod("POST", li(forgotPasswordFn));
-    authRes.addResource("confirm-forgot-password").addMethod("POST", li(confirmForgotPasswordFn));
-    authRes.addResource("resend-verification").addMethod("POST", li(resendVerificationFn));
-    authRes.addResource("status").addMethod("GET", li(getAuthStatusFn));
-    authRes.addResource("create-and-verify").addMethod("POST", li(requestCreateAndVerifyFn));
-    authRes.addResource("change-password").addMethod("POST", li(changePasswordFn), authOpts);
+    authRes.addResource("change-password").addMethod("POST", apiIntegration, authOpts);
+    authRes.addProxy({
+      anyMethod: true,
+      defaultIntegration: apiIntegration,
+    });
 
-    // ── User — authenticated ──────────────────────────────────────────────────
-    const userRes = api.root.addResource("user");
-    userRes.addResource("profile").addMethod("GET", li(getUserFn), authOpts);
-    userRes.addResource("account").addMethod("DELETE", li(deleteAccountFn), authOpts);
-    userRes.addResource("payments").addMethod("GET", li(listDonationsFn), authOpts);
-
-    const userArtworksRes = userRes.addResource("artworks");
-    userArtworksRes.addMethod("GET", li(listArtworkSubmissionsFn), authOpts);
-    userArtworksRes.addMethod("POST", li(submitArtworkFn), authOpts);
-    userArtworksRes.addMethod("DELETE", li(deleteAllArtworksFn), authOpts);
-
-    const userArtworkRes = userArtworksRes.addResource("{art_id}");
-    userArtworkRes.addMethod("PATCH", li(updateArtworkFn), authOpts);
-    userArtworkRes.addMethod("DELETE", li(deleteArtworkFn), authOpts);
-    userArtworkRes.addResource("kudos").addMethod("POST", li(voteArtworkFn), authOpts);
-
-    // ── Guardian — authenticated, role enforced in handler ────────────────────
-    const guardianRes = api.root.addResource("guardian");
-
-    const guardianGroupsRes = guardianRes.addResource("groups");
-    guardianGroupsRes.addMethod("GET", li(listGroupSubmissionsFn), authOpts);
-    guardianGroupsRes.addMethod("POST", li(createGroupFn), authOpts);
-
-    const guardianGroupRes = guardianGroupsRes.addResource("{group_id}");
-    guardianGroupRes.addMethod("PATCH", li(updateGroupFn), authOpts);
-    guardianGroupRes.addMethod("DELETE", li(deleteGroupFn), authOpts);
-
-    const guardianGroupArtworksRes = guardianGroupRes.addResource("artworks");
-    guardianGroupArtworksRes.addMethod("POST", li(submitArtworkToGroupFn), authOpts);
-    guardianGroupArtworksRes
-      .addResource("{art_id}")
-      .addMethod("DELETE", li(deleteArtworkFromGroupFn), authOpts);
-
-    guardianRes
-      .addResource("artworks").addResource("{art_id}")
-      .addMethod("PATCH", li(updateConstituentArtworkFn), authOpts);
-
-    // ── Contributor — authenticated, role enforced in handler ─────────────────
-    const contribRes = api.root.addResource("contributor");
-
-    const contribArtworksRes = contribRes.addResource("artworks");
-    contribArtworksRes.addResource("pending").addMethod("GET", li(fetchUnapprovedArtworksFn), authOpts);
-    contribArtworksRes.addResource("hidden").addMethod("GET", li(fetchHiddenArtworksFn), authOpts);
-    contribArtworksRes
-      .addResource("{art_id}").addResource("status")
-      .addMethod("PATCH", li(changeArtworkStatusFn), authOpts);
-
-    const contribGroupsRes = contribRes.addResource("groups");
-    contribGroupsRes.addResource("pending").addMethod("GET", li(fetchUnapprovedGroupsFn), authOpts);
-    contribGroupsRes.addResource("hidden").addMethod("GET", li(fetchHiddenGroupsFn), authOpts);
-    contribGroupsRes
-      .addResource("{group_id}").addResource("status")
-      .addMethod("PATCH", li(changeGroupStatusFn), authOpts);
-
-    contribRes
-      .addResource("users").addResource("{user_id}").addResource("role")
-      .addMethod("PATCH", li(updateUserRoleFn), authOpts);
-
-    // ── Admin — authenticated, role enforced in handler ───────────────────────
-    const adminRes = api.root.addResource("admin");
-
-    const adminUserRes = adminRes
-      .addResource("users").addResource("{user_id}");
-    adminUserRes.addResource("ban").addMethod("POST", li(banUserFn), authOpts);
-    adminUserRes.addResource("unban").addMethod("POST", li(unbanUserFn), authOpts);
-    adminUserRes.addResource("role").addMethod("PATCH", li(alterUserRoleFn), authOpts);
-    adminUserRes.addResource("cognito-info").addMethod("GET", li(getUserCognitoInfoFn), authOpts);
-    adminUserRes.addResource("email").addMethod("GET", li(getEmailByUserIdFn), authOpts);
-    adminUserRes.addResource("account").addMethod("DELETE", li(deleteUserAccountFn), authOpts);
-    adminUserRes.addResource("artworks").addMethod("DELETE", li(removeAllUserArtworkFn), authOpts);
-    adminUserRes.addResource("hide-all").addMethod("POST", li(hideAllUserArtworkFn), authOpts);
-    adminUserRes.addResource("unhide-all").addMethod("POST", li(unhideAllUserArtworkFn), authOpts);
-
-    adminRes
-      .addResource("artworks").addResource("{art_id}").addResource("submitter-email")
-      .addMethod("GET", li(getArtworkSubmitterEmailFn), authOpts);
-
-    const adminTakedownsRes = adminRes.addResource("takedowns");
-    adminTakedownsRes.addMethod("GET", li(getTakedownRequestsFn), authOpts);
-    adminTakedownsRes
-      .addResource("{tdr_sk}")
-      .addMethod("PATCH", li(cancelTakedownRequestFn), authOpts);
-
-    // Admin — magazines
-    const adminMagazinesRes = adminRes.addResource("magazines");
-    adminMagazinesRes.addMethod("POST", li(publishMagazineFn), authOpts);
-    const adminMagazineRes = adminMagazinesRes.addResource("{slug}");
-    adminMagazineRes.addResource("status").addMethod("PATCH", li(updateMagazineStatusFn), authOpts);
-    adminMagazineRes.addMethod("DELETE", li(deleteMagazineFn), authOpts);
-
-    // Admin — news
-    const adminNewsRes = adminRes.addResource("news");
-    adminNewsRes.addMethod("POST", li(createNewsFn), authOpts);
-    const adminNewsItemRes = adminNewsRes.addResource("{news_id}");
-    adminNewsItemRes.addMethod("PATCH", li(updateNewsFn), authOpts);
-    adminNewsItemRes.addMethod("DELETE", li(deleteNewsFn), authOpts);
+    // Protected prefixes keep the existing Cognito authorizer and role checks
+    // remain inside the handler modules.
+    addAnyProxy(api.root.addResource("user"), authOpts);
+    addAnyProxy(api.root.addResource("guardian"), authOpts);
+    addAnyProxy(api.root.addResource("contributor"), authOpts);
+    addAnyProxy(api.root.addResource("admin"), authOpts);
 
     // ─── 11. Emergency Shutdown — Billing Alarm ───────────────────────────────
     // NOTE: AWS billing metrics are only published to us-east-1.

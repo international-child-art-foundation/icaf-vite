@@ -12,6 +12,7 @@ import {
 } from "@icaf/shared";
 import { createCookie, decodeJwtPayload } from "../../utils/cookies";
 import { parseJsonBody } from "../../utils/request";
+import { getUserByEmail } from "../../utils/auth";
 
 const ACCESS_TOKEN_MAX_AGE = 60 * 60;           // 1 hour
 const REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
@@ -47,14 +48,16 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
     if (!payload) {
       return CommonErrors.internalServerError("Failed to decode token");
     }
+    const email = String(payload["email"] ?? body.email.trim());
+    const user = await getUserByEmail(email);
 
     return {
       statusCode: HTTP_STATUS.OK,
       body: JSON.stringify({
         message: "Login successful",
-        user_id: payload["sub"],
-        email: payload["email"],
-        role: payload["custom:role"] ?? "user",
+        user_id: user?.user_id ?? payload["sub"],
+        email,
+        role: user?.role ?? payload["custom:role"] ?? "user",
       }),
       headers: {
         ...COMMON_HEADERS,

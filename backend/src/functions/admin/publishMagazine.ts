@@ -16,10 +16,10 @@ import {
     InitiateMagazineUploadResponse,
     validateInitiateMagazineUploadRequest,
     hasMinimumRole,
-    Role,
 } from "@icaf/shared";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
 import { parseJsonBody } from "../../utils/request";
+import { getCurrentUser } from "../../utils/auth";
 
 // Presigned URL expires in 30 minutes — zip uploads can be large
 const PRESIGNED_URL_EXPIRES_SECONDS = 30 * 60;
@@ -29,9 +29,9 @@ export const handler = async (
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
     try {
         // ── Auth check ─────────────────────────────────────────────────────
-        const userId = event.requestContext?.authorizer?.claims?.sub;
-        const userRole = event.requestContext?.authorizer?.claims?.["custom:role"] as Role | undefined;
-        if (!userId || !hasMinimumRole(userRole, "admin")) {
+        const currentUser = await getCurrentUser(event);
+        if (!currentUser.ok) return currentUser.response;
+        if (!hasMinimumRole(currentUser.user.role, "admin")) {
             return CommonErrors.forbidden("Admin access required");
         }
 
@@ -47,7 +47,7 @@ export const handler = async (
             return CommonErrors.badRequest(errors.join("; "));
         }
 
-        const { slug, name, period, volume } = body;
+        const { slug, name, period, volume, userId } = body;
         const now = Math.floor(Date.now() / 1000);
 
         // ── Write MAGAZINE record to DDB (status=processing) ───────────────

@@ -1,35 +1,19 @@
-import { GetCommand } from "@aws-sdk/lib-dynamodb";
-import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
 import {
   ApiGatewayEvent,
   HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
-  UserEntity,
   UserProfileResponse,
 } from "@icaf/shared";
+import { getCurrentUser } from "../../utils/auth";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const userId = event.requestContext?.authorizer?.claims?.sub;
-    if (!userId) {
-      return CommonErrors.unauthorized();
-    }
-
-    const result = await dynamodb.send(
-      new GetCommand({
-        TableName: TABLE_NAME,
-        Key: { PK: `USER#${userId}`, SK: "PROFILE" },
-      }),
-    );
-
-    if (!result.Item) {
-      return CommonErrors.notFound("User profile not found");
-    }
-
-    const user = result.Item as UserEntity;
+    const currentUser = await getCurrentUser(event);
+    if (!currentUser.ok) return currentUser.response;
+    const { user } = currentUser;
 
     const response: UserProfileResponse = {
       user_id: user.user_id,

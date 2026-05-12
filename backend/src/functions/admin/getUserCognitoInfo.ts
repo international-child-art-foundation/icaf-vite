@@ -1,5 +1,6 @@
 import { AdminGetUserCommand } from "@aws-sdk/client-cognito-identity-provider";
-import { cognitoClient, USER_POOL_ID } from "../../config/aws-clients";
+import { GetCommand } from "@aws-sdk/lib-dynamodb";
+import { cognitoClient, dynamodb, TABLE_NAME, USER_POOL_ID } from "../../config/aws-clients";
 import {
   ApiGatewayEvent,
   HTTP_STATUS,
@@ -7,25 +8,32 @@ import {
   CommonErrors,
   GetUserCognitoInfoResponse,
 } from "@icaf/shared";
+import { getCurrentUser } from "../../utils/auth";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const adminId = event.requestContext?.authorizer?.claims?.sub;
-    if (!adminId) {
-      return CommonErrors.unauthorized();
-    }
+    const currentUser = await getCurrentUser(event);
+    if (!currentUser.ok) return currentUser.response;
 
     const targetUserId = event.pathParameters?.user_id;
     if (!targetUserId) {
       return CommonErrors.badRequest("user_id path parameter is required");
     }
 
+    const userResult = await dynamodb.send(
+      new GetCommand({
+        TableName: TABLE_NAME,
+        Key: { PK: `USER#${targetUserId}`, SK: "PROFILE" },
+      }),
+    );
+    const targetEmail = userResult.Item?.email as string | undefined;
+
     let cognitoUser;
     try {
       cognitoUser = await cognitoClient.send(
-        new AdminGetUserCommand({ UserPoolId: USER_POOL_ID, Username: targetUserId }),
+        new AdminGetUserCommand({ UserPoolId: USER_POOL_ID, Username: targetEmail ?? targetUserId }),
       );
     } catch (err: unknown) {
       const cognitoErr = err as { name?: string };

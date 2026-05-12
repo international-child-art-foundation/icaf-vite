@@ -1,11 +1,10 @@
-import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
 import {
   ApiGatewayEvent,
   HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
-  UserEntity,
   SubmitGroupRequest,
   SubmitGroupResponse,
   validateSubmitGroupRequest,
@@ -16,29 +15,16 @@ import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { Status } from "../../dynamo/shared";
 import { randomUUID } from "crypto";
 import { parseJsonBody } from "../../utils/request";
+import { getCurrentUser } from "../../utils/auth";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const userId = event.requestContext?.authorizer?.claims?.sub;
-    if (!userId) {
-      return CommonErrors.unauthorized();
-    }
-
-    // ── Check guardian is not banned ───────────────────────────────────────
-    const userResult = await dynamodb.send(
-      new GetCommand({
-        TableName: TABLE_NAME,
-        Key: { PK: `USER#${userId}`, SK: "PROFILE" },
-      }),
-    );
-
-    if (!userResult.Item) {
-      return CommonErrors.notFound("User not found");
-    }
-
-    const guardian = userResult.Item as UserEntity;
+    const currentUser = await getCurrentUser(event);
+    if (!currentUser.ok) return currentUser.response;
+    const guardian = currentUser.user;
+    const userId = guardian.user_id;
     if (guardian.banned) {
       return CommonErrors.forbidden("This account is banned");
     }

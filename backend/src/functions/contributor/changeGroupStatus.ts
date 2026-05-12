@@ -15,6 +15,7 @@ import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
 import { Status } from "../../dynamo/shared";
 import { parseJsonBody } from "../../utils/request";
+import { getCurrentUser } from "../../utils/auth";
 
 const VALID_STATUSES: GroupStatus[] = ["approved", "hidden", "rejected"];
 
@@ -22,10 +23,8 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const userId = event.requestContext?.authorizer?.claims?.sub;
-    if (!userId) {
-      return CommonErrors.unauthorized();
-    }
+    const currentUser = await getCurrentUser(event);
+    if (!currentUser.ok) return currentUser.response;
 
     const groupId = event.pathParameters?.group_id;
     if (!groupId) {

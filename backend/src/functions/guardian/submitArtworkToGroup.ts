@@ -7,7 +7,6 @@ import {
   HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
-  UserEntity,
   GroupEntity,
   SubmitArtworkResponse,
   SubmitterRelationship,
@@ -21,6 +20,7 @@ import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { Status } from "../../dynamo/shared";
 import { randomUUID } from "crypto";
 import { parseJsonBody } from "../../utils/request";
+import { getCurrentUser } from "../../utils/auth";
 
 const PRESIGNED_URL_EXPIRES_SECONDS = 20 * 60; // 20 minutes
 
@@ -51,29 +51,16 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const userId = event.requestContext?.authorizer?.claims?.sub;
-    if (!userId) {
-      return CommonErrors.unauthorized();
-    }
+    const currentUser = await getCurrentUser(event);
+    if (!currentUser.ok) return currentUser.response;
+    const guardian = currentUser.user;
+    const userId = guardian.user_id;
 
     const groupId = event.pathParameters?.group_id;
     if (!groupId) {
       return CommonErrors.badRequest("group_id path parameter is required");
     }
 
-    // ── Check guardian is not banned ───────────────────────────────────────
-    const userResult = await dynamodb.send(
-      new GetCommand({
-        TableName: TABLE_NAME,
-        Key: { PK: `USER#${userId}`, SK: "PROFILE" },
-      }),
-    );
-
-    if (!userResult.Item) {
-      return CommonErrors.notFound("User not found");
-    }
-
-    const guardian = userResult.Item as UserEntity;
     if (guardian.banned) {
       return CommonErrors.forbidden("This account is banned");
     }

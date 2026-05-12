@@ -76,6 +76,10 @@ export interface VerifyAccountRequest {
     user_id: string;        // from link: icaf.org/create-account?id=<user_id>
     verify_token: string;   // slug from the verification email link
     password?: string;      // required when is_virtual=true (creates Cognito account)
+    f_name?: string;        // optional profile update during account creation
+    l_name?: string;        // optional profile update during account creation
+    dob?: string;           // optional profile update during account creation
+    role?: Extract<Role, 'guardian' | 'user'>;
 }
 
 // Delete account request

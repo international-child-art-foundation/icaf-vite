@@ -42,6 +42,7 @@ export interface InitiateMagazineUploadRequest {
     name: string;
     period: string;
     volume: string;
+    userId: string;
 }
 
 export interface InitiateMagazineUploadResponse {

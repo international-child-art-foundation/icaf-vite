@@ -13,15 +13,15 @@ import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
 import { Status } from "../../dynamo/shared";
 import { parseJsonBody } from "../../utils/request";
+import { getCurrentUser } from "../../utils/auth";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const userId = event.requestContext?.authorizer?.claims?.sub;
-    if (!userId) {
-      return CommonErrors.unauthorized();
-    }
+    const currentUser = await getCurrentUser(event);
+    if (!currentUser.ok) return currentUser.response;
+    const userId = currentUser.user.user_id;
 
     const artId = event.pathParameters?.art_id;
     if (!artId) {

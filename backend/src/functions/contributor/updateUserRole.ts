@@ -8,15 +8,14 @@ import {
   UpdateUserRoleRequest,
 } from "@icaf/shared";
 import { parseJsonBody } from "../../utils/request";
+import { getCurrentUser } from "../../utils/auth";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const callerId = event.requestContext?.authorizer?.claims?.sub;
-    if (!callerId) {
-      return CommonErrors.unauthorized();
-    }
+    const currentUser = await getCurrentUser(event);
+    if (!currentUser.ok) return currentUser.response;
 
     const targetUserId = event.pathParameters?.user_id;
     if (!targetUserId) {

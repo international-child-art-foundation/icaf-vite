@@ -204,9 +204,9 @@ export class InfraStack extends Stack {
       },
       standardAttributes: {
         email: { required: true, mutable: true },
-        givenName: { required: true, mutable: true },
-        familyName: { required: true, mutable: true },
-        birthdate: { required: true, mutable: true },
+        givenName: { required: false, mutable: true },
+        familyName: { required: false, mutable: true },
+        birthdate: { required: false, mutable: true },
       },
       customAttributes: {
         role: new cognito.StringAttribute({ mutable: true }),

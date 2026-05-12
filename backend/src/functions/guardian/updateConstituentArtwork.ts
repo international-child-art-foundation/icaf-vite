@@ -5,7 +5,6 @@ import {
   HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
-  UserEntity,
   ArtworkEntity,
   SubmitterRelationship,
   validateOptionalArtworkFields,
@@ -14,6 +13,7 @@ import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
 import { Status } from "../../dynamo/shared";
 import { parseJsonBody } from "../../utils/request";
+import { getCurrentUser } from "../../utils/auth";
 
 interface UpdateConstituentArtworkBody {
   f_name?: string;
@@ -31,29 +31,16 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const userId = event.requestContext?.authorizer?.claims?.sub;
-    if (!userId) {
-      return CommonErrors.unauthorized();
-    }
+    const currentUser = await getCurrentUser(event);
+    if (!currentUser.ok) return currentUser.response;
+    const guardian = currentUser.user;
+    const userId = guardian.user_id;
 
     const artId = event.pathParameters?.art_id;
     if (!artId) {
       return CommonErrors.badRequest("art_id path parameter is required");
     }
 
-    // ── Check guardian is not banned ───────────────────────────────────────
-    const userResult = await dynamodb.send(
-      new GetCommand({
-        TableName: TABLE_NAME,
-        Key: { PK: `USER#${userId}`, SK: "PROFILE" },
-      }),
-    );
-
-    if (!userResult.Item) {
-      return CommonErrors.notFound("User not found");
-    }
-
-    const guardian = userResult.Item as UserEntity;
     if (guardian.banned) {
       return CommonErrors.forbidden("This account is banned");
     }

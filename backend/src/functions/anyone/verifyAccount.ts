@@ -1,6 +1,7 @@
 import {
   AdminCreateUserCommand,
   AdminSetUserPasswordCommand,
+  AdminUpdateUserAttributesCommand,
   MessageActionType,
 } from "@aws-sdk/client-cognito-identity-provider";
 import { GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
@@ -17,8 +18,11 @@ import {
   CommonErrors,
   VerifyAccountRequest,
   UserEntity,
+  MAX_NAME_LEN,
 } from "@icaf/shared";
 import { parseJsonBody } from "../../utils/request";
+
+const DOB_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -30,6 +34,18 @@ export const handler = async (
 
     if (!body.user_id?.trim()) return CommonErrors.badRequest("user_id is required");
     if (!body.verify_token?.trim()) return CommonErrors.badRequest("verify_token is required");
+    if (body.f_name !== undefined && (!body.f_name.trim() || body.f_name.length > MAX_NAME_LEN)) {
+      return CommonErrors.badRequest(`f_name must be 1-${MAX_NAME_LEN} characters when provided`);
+    }
+    if (body.l_name !== undefined && (!body.l_name.trim() || body.l_name.length > MAX_NAME_LEN)) {
+      return CommonErrors.badRequest(`l_name must be 1-${MAX_NAME_LEN} characters when provided`);
+    }
+    if (body.dob !== undefined && !DOB_RE.test(body.dob)) {
+      return CommonErrors.badRequest("dob must be in YYYY-MM-DD format");
+    }
+    if (body.role !== undefined && body.role !== "guardian" && body.role !== "user") {
+      return CommonErrors.badRequest("role must be one of: guardian, user");
+    }
 
     // 1. Read USER entity
     const result = await dynamodb.send(
@@ -55,6 +71,11 @@ export const handler = async (
       return CommonErrors.badRequest("Verification token has expired");
     }
 
+    const fName = body.f_name?.trim() ?? user.f_name;
+    const lName = body.l_name?.trim() ?? user.l_name;
+    const dob = body.dob ?? user.dob;
+    const role = body.role ?? user.role ?? "user";
+
     // 3. If virtual user, create their Cognito account
     if (user.is_virtual) {
       if (!body.password) {
@@ -70,9 +91,10 @@ export const handler = async (
           UserAttributes: [
             { Name: "email", Value: user.email },
             { Name: "email_verified", Value: "true" },
-            ...(user.f_name ? [{ Name: "given_name", Value: user.f_name }] : []),
-            ...(user.l_name ? [{ Name: "family_name", Value: user.l_name }] : []),
-            ...(user.dob ? [{ Name: "birthdate", Value: user.dob }] : []),
+            { Name: "custom:role", Value: role },
+            ...(fName ? [{ Name: "given_name", Value: fName }] : []),
+            ...(lName ? [{ Name: "family_name", Value: lName }] : []),
+            ...(dob ? [{ Name: "birthdate", Value: dob }] : []),
           ],
         }),
       );
@@ -86,19 +108,53 @@ export const handler = async (
           Permanent: true,
         }),
       );
+    } else if (body.f_name !== undefined || body.l_name !== undefined || body.dob !== undefined || body.role !== undefined) {
+      await cognitoClient.send(
+        new AdminUpdateUserAttributesCommand({
+          UserPoolId: USER_POOL_ID,
+          Username: user.email,
+          UserAttributes: [
+            ...(body.f_name !== undefined && fName ? [{ Name: "given_name", Value: fName }] : []),
+            ...(body.l_name !== undefined && lName ? [{ Name: "family_name", Value: lName }] : []),
+            ...(body.dob !== undefined && dob ? [{ Name: "birthdate", Value: dob }] : []),
+            ...(body.role !== undefined ? [{ Name: "custom:role", Value: role }] : []),
+          ],
+        }),
+      );
     }
 
     // 4. Write verified_at, clear token, mark no longer virtual
+    const setExprParts = [
+      "verified_at = :now",
+      "is_virtual = :false",
+      "#role = :role",
+    ];
+    const exprValues: Record<string, unknown> = {
+      ":now": nowSeconds,
+      ":false": false,
+      ":role": role,
+    };
+    if (fName !== undefined) {
+      setExprParts.push("f_name = :fName");
+      exprValues[":fName"] = fName;
+    }
+    if (lName !== undefined) {
+      setExprParts.push("l_name = :lName");
+      exprValues[":lName"] = lName;
+    }
+    if (dob !== undefined) {
+      setExprParts.push("dob = :dob");
+      exprValues[":dob"] = dob;
+    }
+
     await dynamodb.send(
       new UpdateCommand({
         TableName: TABLE_NAME,
         Key: { PK: `USER#${body.user_id}`, SK: "PROFILE" },
         UpdateExpression:
-          "SET verified_at = :now, is_virtual = :false REMOVE verify_token, verify_token_expiration",
-        ExpressionAttributeValues: {
-          ":now": nowSeconds,
-          ":false": false,
-        },
+          `SET ${setExprParts.join(", ")} REMOVE verify_token, verify_token_expiration`,
+        ExpressionAttributeNames: { "#role": "role" },
+        ExpressionAttributeValues: exprValues,
       }),
     );
 

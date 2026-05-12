@@ -5,15 +5,14 @@ import {
   CommonErrors,
 } from "@icaf/shared";
 import { fetchGroupReviewPage, parseReviewParams } from "./reviewShared";
+import { getCurrentUser } from "../../utils/auth";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const userId = event.requestContext?.authorizer?.claims?.sub;
-    if (!userId) {
-      return CommonErrors.unauthorized();
-    }
+    const currentUser = await getCurrentUser(event);
+    if (!currentUser.ok) return currentUser.response;
 
     const params = parseReviewParams(event);
     if (!params.ok) {

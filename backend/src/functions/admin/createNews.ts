@@ -9,19 +9,19 @@ import {
     NewsEntity,
     validateCreateNewsRequest,
     hasMinimumRole,
-    Role,
 } from "@icaf/shared";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
 import { randomUUID } from "crypto";
 import { parseJsonBody } from "../../utils/request";
+import { getCurrentUser } from "../../utils/auth";
 
 export const handler = async (
     event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
     try {
-        const userId = event.requestContext?.authorizer?.claims?.sub;
-        const userRole = event.requestContext?.authorizer?.claims?.["custom:role"] as Role | undefined;
-        if (!userId || !hasMinimumRole(userRole, "admin")) {
+        const currentUser = await getCurrentUser(event);
+        if (!currentUser.ok) return currentUser.response;
+        if (!hasMinimumRole(currentUser.user.role, "admin")) {
             return CommonErrors.forbidden("Admin access required");
         }
 

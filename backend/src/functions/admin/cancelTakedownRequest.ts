@@ -9,15 +9,15 @@ import {
   validateReviewTakedownRequest,
 } from "@icaf/shared";
 import { parseJsonBody } from "../../utils/request";
+import { getCurrentUser } from "../../utils/auth";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const adminId = event.requestContext?.authorizer?.claims?.sub;
-    if (!adminId) {
-      return CommonErrors.unauthorized();
-    }
+    const currentUser = await getCurrentUser(event);
+    if (!currentUser.ok) return currentUser.response;
+    const adminId = currentUser.user.user_id;
 
     // TDR SK format: TS#<unix_ts>#TDR_ID#<tdr_id>
     // Both the timestamp and tdr_id must come from path params since the SK is compound

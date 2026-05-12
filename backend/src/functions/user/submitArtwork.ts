@@ -1,6 +1,6 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamodb, s3Client, TABLE_NAME, S3_BUCKET_NAME } from "../../config/aws-clients";
 import {
   ApiGatewayEvent,
@@ -9,7 +9,6 @@ import {
   CommonErrors,
   SubmitArtworkRequest,
   SubmitArtworkResponse,
-  UserEntity,
   validateSubmissionData,
 } from "@icaf/shared";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
@@ -17,6 +16,7 @@ import { byOwnerPk, byOwnerGsiSk } from "../../dynamo/ownerGsi";
 import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { Status } from "../../dynamo/shared";
 import { parseJsonBody } from "../../utils/request";
+import { getCurrentUser } from "../../utils/auth";
 import { randomUUID } from "crypto";
 
 const PRESIGNED_URL_EXPIRES_SECONDS = 20 * 60; // 20 minutes
@@ -34,10 +34,9 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const userId = event.requestContext?.authorizer?.claims?.sub;
-    if (!userId) {
-      return CommonErrors.unauthorized();
-    }
+    const currentUser = await getCurrentUser(event);
+    if (!currentUser.ok) return currentUser.response;
+    const userId = currentUser.user.user_id;
 
     const parsedBody = parseJsonBody<SubmitArtworkRequest>(event);
     if (!parsedBody.ok) return parsedBody.response;
@@ -50,18 +49,7 @@ export const handler = async (
     }
 
     // ── Check user is not banned ───────────────────────────────────────────
-    const userResult = await dynamodb.send(
-      new GetCommand({
-        TableName: TABLE_NAME,
-        Key: { PK: `USER#${userId}`, SK: "PROFILE" },
-      }),
-    );
-
-    if (!userResult.Item) {
-      return CommonErrors.notFound("User not found");
-    }
-
-    const user = userResult.Item as UserEntity;
+    const user = currentUser.user;
     if (user.banned) {
       return CommonErrors.forbidden("This account is banned");
     }

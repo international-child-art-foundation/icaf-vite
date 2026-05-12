@@ -8,6 +8,7 @@ import {
   CommonErrors,
 } from "@icaf/shared";
 import { parseCookies } from "../../utils/cookies";
+import { getUserByEmail } from "../../utils/auth";
 
 export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayResponse> => {
   try {
@@ -31,14 +32,16 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
 
       const getAttribute = (name: string) =>
         result.UserAttributes?.find((a) => a.Name === name)?.Value;
+      const email = getAttribute("email");
+      const user = email ? await getUserByEmail(email) : undefined;
 
       return {
         statusCode: HTTP_STATUS.OK,
         body: JSON.stringify({
           authenticated: true,
-          user_id: result.Username,
-          email: getAttribute("email"),
-          role: getAttribute("custom:role") ?? "user",
+          user_id: user?.user_id ?? result.Username,
+          email,
+          role: user?.role ?? getAttribute("custom:role") ?? "user",
         }),
         headers: { ...COMMON_HEADERS, "Access-Control-Allow-Credentials": "true" },
       };

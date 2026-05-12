@@ -15,21 +15,21 @@ import {
   HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
-  UserEntity,
   DeleteAccountRequest,
 } from "@icaf/shared";
 import { GSI } from "../../dynamo/ddbSchemaConsts";
 import { byOwnerPk } from "../../dynamo/ownerGsi";
 import { parseJsonBody } from "../../utils/request";
+import { getCurrentUser } from "../../utils/auth";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const userId = event.requestContext?.authorizer?.claims?.sub;
-    if (!userId) {
-      return CommonErrors.unauthorized();
-    }
+    const currentUser = await getCurrentUser(event);
+    if (!currentUser.ok) return currentUser.response;
+    const user = currentUser.user;
+    const userId = user.user_id;
 
     const parsedBody = parseJsonBody<DeleteAccountRequest>(event);
     if (!parsedBody.ok) return parsedBody.response;
@@ -37,25 +37,6 @@ export const handler = async (
     if (!body.password) {
       return CommonErrors.badRequest("password is required");
     }
-
-    // ── Read USER entity to get email for password verification ───────────
-    const userResult = await dynamodb.send(
-      new QueryCommand({
-        TableName: TABLE_NAME,
-        KeyConditionExpression: "PK = :pk AND SK = :sk",
-        ExpressionAttributeValues: {
-          ":pk": `USER#${userId}`,
-          ":sk": "PROFILE",
-        },
-        Limit: 1,
-      }),
-    );
-
-    if (!userResult.Items?.length) {
-      return CommonErrors.notFound("User not found");
-    }
-
-    const user = userResult.Items[0] as UserEntity;
 
     // ── Verify password via Cognito ────────────────────────────────────────
     try {
@@ -142,7 +123,7 @@ export const handler = async (
     await cognitoClient.send(
       new AdminDeleteUserCommand({
         UserPoolId: USER_POOL_ID,
-        Username: userId,
+        Username: user.email,
       }),
     );
 

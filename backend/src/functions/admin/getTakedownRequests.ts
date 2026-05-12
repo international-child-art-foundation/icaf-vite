@@ -9,6 +9,7 @@ import {
   ListTakedownRequestsResponse,
 } from "@icaf/shared";
 import { parseBase64JsonObject } from "../../utils/request";
+import { getCurrentUser } from "../../utils/auth";
 
 const DEFAULT_LIMIT = 20;
 
@@ -16,10 +17,8 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const adminId = event.requestContext?.authorizer?.claims?.sub;
-    if (!adminId) {
-      return CommonErrors.unauthorized();
-    }
+    const currentUser = await getCurrentUser(event);
+    if (!currentUser.ok) return currentUser.response;
 
     const qp = event.queryStringParameters ?? {};
     const limit = Math.min(

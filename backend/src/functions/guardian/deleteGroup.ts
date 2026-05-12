@@ -7,15 +7,15 @@ import {
   CommonErrors,
   GroupEntity,
 } from "@icaf/shared";
+import { getCurrentUser } from "../../utils/auth";
 
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const userId = event.requestContext?.authorizer?.claims?.sub;
-    if (!userId) {
-      return CommonErrors.unauthorized();
-    }
+    const currentUser = await getCurrentUser(event);
+    if (!currentUser.ok) return currentUser.response;
+    const userId = currentUser.user.user_id;
 
     const groupId = event.pathParameters?.group_id;
     if (!groupId) {

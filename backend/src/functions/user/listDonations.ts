@@ -10,6 +10,7 @@ import {
   ListUserPaymentsResponse,
 } from "@icaf/shared";
 import { parseBase64JsonObject } from "../../utils/request";
+import { getCurrentUser } from "../../utils/auth";
 
 const DEFAULT_LIMIT = 20;
 
@@ -17,10 +18,9 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const userId = event.requestContext?.authorizer?.claims?.sub;
-    if (!userId) {
-      return CommonErrors.unauthorized();
-    }
+    const currentUser = await getCurrentUser(event);
+    if (!currentUser.ok) return currentUser.response;
+    const userId = currentUser.user.user_id;
 
     const qp = event.queryStringParameters ?? {};
     const limit = Math.min(Math.max(parseInt(String(qp.limit ?? DEFAULT_LIMIT), 10) || DEFAULT_LIMIT, 1), 100);

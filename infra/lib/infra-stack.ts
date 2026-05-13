@@ -26,13 +26,39 @@ export class InfraStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
+    /**
+     * Stateful resources are retained by default so normal deploys/destroys do
+     * not delete user data, uploaded files, or auth state.
+     *
+     * To intentionally delete absolutely everything, run:
+     *
+     *   pnpm cdk destroy \
+     *     -c destroyEverything=true \
+     *     -c confirmDestroyEverything=YES_DELETE_STATEFUL_DATA
+     *
+     * Without both context values, DynamoDB, Cognito, and the S3 buckets are retained.
+     */
+    const destroyEverything =
+      this.node.tryGetContext("destroyEverything") === "true" &&
+      this.node.tryGetContext("confirmDestroyEverything") === "YES_DELETE_STATEFUL_DATA";
+
+    const statefulRemovalPolicy = destroyEverything
+      ? RemovalPolicy.DESTROY
+      : RemovalPolicy.RETAIN;
+
+    if (destroyEverything) {
+      console.warn(
+        "DESTROY EVERYTHING ENABLED: DynamoDB, Cognito, and S3 stateful resources will be deleted.",
+      );
+    }
+
     // ─── 1. DynamoDB Table — Single Table Design ──────────────────────────────
     const icafTable = new dynamodb.Table(this, "IcafTable", {
       tableName: "icaf-main-table",
       partitionKey: { name: "PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "SK", type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: RemovalPolicy.RETAIN,
+      removalPolicy: statefulRemovalPolicy,
     });
 
     // ── Gallery GSIs (artworks) ──────────────────────────────────────────────
@@ -108,7 +134,8 @@ export class InfraStack extends Stack {
     // Artwork bucket — private, CloudFront via existing setup
     const artworkBucket = new s3.Bucket(this, "IcafArtworkBucket", {
       bucketName: "icaf-artwork-bucket",
-      removalPolicy: RemovalPolicy.RETAIN,
+      removalPolicy: statefulRemovalPolicy,
+      autoDeleteObjects: destroyEverything,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       cors: [
         {
@@ -126,7 +153,8 @@ export class InfraStack extends Stack {
     //   <slug>/             — extracted magazine HTML, assets, and thumbnail
     const magazinesBucket = new s3.Bucket(this, "IcafMagazinesBucket", {
       bucketName: "icaf-magazines-bucket",
-      removalPolicy: RemovalPolicy.RETAIN,
+      removalPolicy: statefulRemovalPolicy,
+      autoDeleteObjects: destroyEverything,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       cors: [
         {
@@ -219,7 +247,7 @@ export class InfraStack extends Stack {
         requireSymbols: true,
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
-      removalPolicy: RemovalPolicy.RETAIN,
+      removalPolicy: statefulRemovalPolicy,
     });
 
     const userPoolClient = new cognito.UserPoolClient(this, "IcafUserPoolClient", {

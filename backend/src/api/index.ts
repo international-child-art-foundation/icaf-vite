@@ -80,6 +80,10 @@ type Route = {
   };
 };
 
+type MatchResult =
+  | { ok: true; pathParameters: Record<string, string> }
+  | { ok: false; response: ApiGatewayResponse };
+
 type ApiEvent = ApiGatewayEvent & {
   path?: string;
   rawPath?: string;
@@ -89,6 +93,13 @@ const allowedOrigins = new Set(["https://revise.icaf.org", "http://localhost:517
 const guardianRoles: Role[] = ["guardian", "contributor", "admin"];
 const contributorRoles: Role[] = ["contributor", "admin"];
 const adminRoles: Role[] = ["admin"];
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const pathParamValidators: Record<string, (value: string) => boolean> = {
+  art_id: (value) => UUID_PATTERN.test(value),
+  group_id: (value) => UUID_PATTERN.test(value),
+  news_id: (value) => UUID_PATTERN.test(value),
+  user_id: (value) => UUID_PATTERN.test(value),
+};
 
 function authenticated(route: Omit<Route, "auth">): Route {
   return { ...route, auth: {} };
@@ -171,10 +182,40 @@ const routes: Route[] = [
 ];
 
 function splitPath(path: string): string[] {
-  return path.replace(/^\/+|\/+$/g, "").split("/").filter(Boolean);
+  const trimmed = path.replace(/^\/+|\/+$/g, "");
+  return trimmed ? trimmed.split("/") : [];
 }
 
-function matchRoutePath(route: Route, path: string): Record<string, string> | null {
+function hasEmptyInternalPathSegment(path: string): boolean {
+  return splitPath(path).some((part) => part.length === 0);
+}
+
+function decodePathSegment(segment: string): string | null {
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return null;
+  }
+}
+
+function validatePathParameter(name: string, value: string): ApiGatewayResponse | null {
+  if (!value.trim()) {
+    return CommonErrors.badRequest(`Invalid ${name} path parameter`);
+  }
+
+  if (value.includes("/")) {
+    return CommonErrors.badRequest("Malformed path");
+  }
+
+  const validator = pathParamValidators[name];
+  if (validator && !validator(value)) {
+    return CommonErrors.badRequest(`Invalid ${name} path parameter`);
+  }
+
+  return null;
+}
+
+function matchRoutePath(route: Route, path: string): MatchResult | null {
   const routeParts = splitPath(route.path);
   const pathParts = splitPath(path);
   if (routeParts.length !== pathParts.length) return null;
@@ -183,17 +224,28 @@ function matchRoutePath(route: Route, path: string): Record<string, string> | nu
 
   for (let i = 0; i < routeParts.length; i += 1) {
     const routePart = routeParts[i];
-    const pathPart = decodeURIComponent(pathParts[i] ?? "");
+    const pathPart = decodePathSegment(pathParts[i] ?? "");
+
+    if (pathPart === null) {
+      return { ok: false, response: CommonErrors.badRequest("Malformed path") };
+    }
 
     if (routePart.startsWith("{") && routePart.endsWith("}")) {
-      pathParameters[routePart.slice(1, -1)] = pathPart;
+      const paramName = routePart.slice(1, -1);
+      const paramError = validatePathParameter(paramName, pathPart);
+
+      if (paramError) {
+        return { ok: false, response: paramError };
+      }
+
+      pathParameters[paramName] = pathPart;
       continue;
     }
 
     if (routePart !== pathPart) return null;
   }
 
-  return pathParameters;
+  return { ok: true, pathParameters };
 }
 
 function resolvePath(event: ApiEvent): string {
@@ -272,14 +324,28 @@ export const handler = async (event: ApiEvent): Promise<ApiGatewayResponse> => {
   }
 
   const path = resolvePath(event);
-  const pathMatches = routes
-    .map((candidate) => ({
-      route: candidate,
-      pathParameters: matchRoutePath(candidate, path),
-    }))
-    .filter((candidate) => candidate.pathParameters !== null);
+  if (hasEmptyInternalPathSegment(path)) {
+    return withCors(event, CommonErrors.badRequest("Malformed path"));
+  }
+
+  const pathMatches: { route: Route; pathParameters: Record<string, string> }[] = [];
+  const pathErrors: ApiGatewayResponse[] = [];
+
+  for (const candidate of routes) {
+    const match = matchRoutePath(candidate, path);
+
+    if (match?.ok) {
+      pathMatches.push({ route: candidate, pathParameters: match.pathParameters });
+    } else if (match) {
+      pathErrors.push(match.response);
+    }
+  }
 
   if (pathMatches.length === 0) {
+    if (pathErrors.length > 0) {
+      return withCors(event, pathErrors[0]);
+    }
+
     return withCors(event, CommonErrors.notFound("Route not found"));
   }
 

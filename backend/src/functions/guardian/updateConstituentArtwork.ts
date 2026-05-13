@@ -78,11 +78,12 @@ export const handler = async (
     const nowMs = Date.now();
 
     const setExprParts: string[] = [
-      "status = :status",
+      "#status = :status",
       "REV_PK = :revPk",
       "REV_SK = :revSk",
     ];
 
+    const exprNames: Record<string, string> = { "#status": "status" };
     const exprValues: Record<string, unknown> = {
       ":status": "pending_review",
       ":revPk": reviewPk(),
@@ -92,7 +93,7 @@ export const handler = async (
     if (body.f_name !== undefined) { setExprParts.push("f_name = :f_name"); exprValues[":f_name"] = body.f_name; }
     if (body.age !== undefined) { setExprParts.push("age = :age"); exprValues[":age"] = body.age; }
     if (body.country !== undefined) { setExprParts.push("country = :country"); exprValues[":country"] = body.country; }
-    if (body.region !== undefined) { setExprParts.push("region = :region"); exprValues[":region"] = body.region; }
+    if (body.region !== undefined) { setExprParts.push("#region = :region"); exprNames["#region"] = "region"; exprValues[":region"] = body.region; }
     if (body.title !== undefined) { setExprParts.push("title = :title"); exprValues[":title"] = body.title; }
     if (body.description !== undefined) { setExprParts.push("description = :desc"); exprValues[":desc"] = body.description; }
     if (body.submitter_relationship !== undefined) { setExprParts.push("submitter_relationship = :rel"); exprValues[":rel"] = body.submitter_relationship; }
@@ -108,6 +109,7 @@ export const handler = async (
         TableName: TABLE_NAME,
         Key: { PK: `ART#${artId}`, SK: "-" },
         UpdateExpression: updateExpr,
+        ExpressionAttributeNames: exprNames,
         ExpressionAttributeValues: exprValues,
         ConditionExpression: "attribute_exists(PK)",
       }),

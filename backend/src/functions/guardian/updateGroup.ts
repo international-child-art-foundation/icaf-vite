@@ -65,11 +65,12 @@ export const handler = async (
     const nowMs = Date.now();
 
     const setExprParts: string[] = [
-      "status = :status",
+      "#status = :status",
       "REV_PK = :revPk",
       "REV_SK = :revSk",
     ];
 
+    const exprNames: Record<string, string> = { "#status": "status" };
     const exprValues: Record<string, unknown> = {
       ":status": "pending_review",
       ":revPk": reviewPk(),
@@ -93,6 +94,7 @@ export const handler = async (
         TableName: TABLE_NAME,
         Key: { PK: `GROUP#${groupId}`, SK: "-" },
         UpdateExpression: updateExpr,
+        ExpressionAttributeNames: exprNames,
         ExpressionAttributeValues: exprValues,
         ConditionExpression: "attribute_exists(PK)",
       }),

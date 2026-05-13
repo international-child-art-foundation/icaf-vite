@@ -60,6 +60,7 @@ export const handler = async (
 
     let updateExpr: string;
     const exprValues: Record<string, unknown> = { ":status": newStatus };
+    const exprNames: Record<string, string> = { "#status": "status" };
 
     if (newStatus === "approved") {
       const gsiAttrs = buildApprovedGroupGsiAttrs({
@@ -73,13 +74,13 @@ export const handler = async (
         .map(([k, v], i) => { exprValues[`:gsi${i}`] = v; return `${k} = :gsi${i}`; })
         .join(", ");
 
-      updateExpr = `SET status = :status, ${setAttrs} REMOVE REV_PK, REV_SK`;
+      updateExpr = `SET #status = :status, ${setAttrs} REMOVE REV_PK, REV_SK`;
     } else {
       const reviewSkStatus = newStatus === "hidden" ? Status.Hidden : Status.Rejected;
       exprValues[":revPk"] = reviewPk();
       exprValues[":revSk"] = reviewGsiSk(reviewSkStatus, EntityType.Group, nowMs, groupId);
 
-      updateExpr = `SET status = :status, REV_PK = :revPk, REV_SK = :revSk REMOVE ${GROUP_GSI_ATTRS_TO_REMOVE.join(", ")}`;
+      updateExpr = `SET #status = :status, REV_PK = :revPk, REV_SK = :revSk REMOVE ${GROUP_GSI_ATTRS_TO_REMOVE.join(", ")}`;
     }
 
     await dynamodb.send(
@@ -87,6 +88,7 @@ export const handler = async (
         TableName: TABLE_NAME,
         Key: { PK: `GROUP#${groupId}`, SK: "-" },
         UpdateExpression: updateExpr,
+        ExpressionAttributeNames: exprNames,
         ExpressionAttributeValues: exprValues,
         ConditionExpression: "attribute_exists(PK)",
       }),

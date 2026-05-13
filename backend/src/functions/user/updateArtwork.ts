@@ -58,11 +58,12 @@ export const handler = async (
     // ── Build update expression ────────────────────────────────────────────
     // Always set status=pending_review and restore REV GSI; remove gallery attrs
     const setExprParts: string[] = [
-      "status = :status",
+      "#status = :status",
       "REV_PK = :revPk",
       "REV_SK = :revSk",
     ];
 
+    const exprNames: Record<string, string> = { "#status": "status" };
     const exprValues: Record<string, unknown> = {
       ":status": "pending_review",
       ":revPk": reviewPk(),
@@ -74,7 +75,7 @@ export const handler = async (
     if (body.f_name !== undefined) { setExprParts.push("f_name = :f_name"); exprValues[":f_name"] = body.f_name; }
     if (body.age !== undefined) { setExprParts.push("age = :age"); exprValues[":age"] = body.age; }
     if (body.country !== undefined) { setExprParts.push("country = :country"); exprValues[":country"] = body.country; }
-    if (body.region !== undefined) { setExprParts.push("region = :region"); exprValues[":region"] = body.region; }
+    if (body.region !== undefined) { setExprParts.push("#region = :region"); exprNames["#region"] = "region"; exprValues[":region"] = body.region; }
     if (body.submitter_relationship !== undefined) { setExprParts.push("submitter_relationship = :rel"); exprValues[":rel"] = body.submitter_relationship; }
     if (body.theme_family !== undefined) { setExprParts.push("theme_family = :tf"); exprValues[":tf"] = body.theme_family; }
     if (body.theme_instance !== undefined) { setExprParts.push("theme_instance = :ti"); exprValues[":ti"] = body.theme_instance; }
@@ -84,6 +85,7 @@ export const handler = async (
         TableName: TABLE_NAME,
         Key: { PK: `ART#${artId}`, SK: "-" },
         UpdateExpression: `SET ${setExprParts.join(", ")} REMOVE GALL_PK, FAM_PK, INST_PK, ART_GSI_SK`,
+        ExpressionAttributeNames: exprNames,
         ExpressionAttributeValues: exprValues,
         ConditionExpression: "attribute_exists(PK)",
       }),

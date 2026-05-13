@@ -28,17 +28,14 @@ export const handler = async (
       return CommonErrors.badRequest("email is required");
     }
 
-    // Always return the same response regardless of outcome — don't leak
-    // whether an email address exists in the system.
     const okResponse = {
       statusCode: HTTP_STATUS.OK,
       body: JSON.stringify({
-        message: "If an account exists for this email, a sign-up link has been sent.",
+        message: "If an account exists for this email, a create-and-verify link has been sent.",
       }),
       headers: COMMON_HEADERS,
     };
 
-    // ── Look up USER entity by email ──────────────────────────────────────
     const emailResult = await dynamodb.send(
       new QueryCommand({
         TableName: TABLE_NAME,
@@ -53,20 +50,15 @@ export const handler = async (
     );
 
     if (!emailResult.Items?.length) {
-      // No USER entity found — donor-only users won't appear here until a
-      // USER entity is created for them (e.g. by the Stripe webhook handler).
       return okResponse;
     }
 
     const user = emailResult.Items[0] as UserEntity;
 
-    // Only send CreateAndVerify email to virtual users (no Cognito account yet).
-    // Established users should use the standard login/forgot-password flow.
     if (!user.is_virtual) {
       return okResponse;
     }
 
-    // ── Generate/refresh verify token ─────────────────────────────────────
     const nowSeconds = Math.floor(Date.now() / 1000);
     const verifyToken = randomUUID();
     const verifyTokenExpiration = nowSeconds + VERIFY_TOKEN_TTL_SECONDS;
@@ -84,7 +76,6 @@ export const handler = async (
       }),
     );
 
-    // ── Send CreateAndVerify email ─────────────────────────────────────────
     await sendCreateAndVerifyEmail({
       toEmail: user.email,
       userId: user.user_id,
@@ -93,7 +84,7 @@ export const handler = async (
 
     return okResponse;
   } catch (error) {
-    console.error("Error sending CreateAndVerify email:", error);
+    console.error("Error requesting create-and-verify link:", error);
     return CommonErrors.internalServerError();
   }
 };

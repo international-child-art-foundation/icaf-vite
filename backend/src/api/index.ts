@@ -25,7 +25,8 @@ import { handler as unhideAllUserArtwork } from "../functions/admin/unhideAllUse
 import { handler as updateMagazineStatus } from "../functions/admin/updateMagazineStatus";
 import { handler as updateNews } from "../functions/admin/updateNews";
 import { handler as confirmForgotPassword } from "../functions/anyone/confirmForgotPassword";
-import { handler as confirmRegistration } from "../functions/anyone/confirmRegistration";
+import { handler as createAndVerify } from "../functions/anyone/createAndVerify";
+import { handler as confirmDefaultRegistration } from "../functions/anyone/confirmDefaultRegistration";
 import { handler as forgotPassword } from "../functions/anyone/forgotPassword";
 import { handler as galleryArtworks } from "../functions/anyone/gallery/galleryArtworks";
 import { handler as galleryGroups } from "../functions/anyone/gallery/galleryGroups";
@@ -37,11 +38,10 @@ import { handler as getNews } from "../functions/anyone/getNews";
 import { handler as initiateTakedown } from "../functions/anyone/initiateTakedown";
 import { handler as login } from "../functions/anyone/login";
 import { handler as logout } from "../functions/anyone/logout";
-import { handler as register } from "../functions/anyone/register";
+import { handler as defaultRegistration } from "../functions/anyone/defaultRegistration";
 import { handler as requestCreateAndVerify } from "../functions/anyone/requestCreateAndVerify";
 import { handler as resendVerification } from "../functions/anyone/resendVerificationEmail";
 import { handler as guestSubmitArtwork } from "../functions/anyone/submitArtwork";
-import { handler as verifyAccount } from "../functions/anyone/verifyAccount";
 import { handler as changeArtworkStatus } from "../functions/contributor/changeArtworkStatus";
 import { handler as changeGroupStatus } from "../functions/contributor/changeGroupStatus";
 import { handler as fetchHiddenArtworks } from "../functions/contributor/fetchHiddenArtworks";
@@ -94,16 +94,16 @@ const routes: Route[] = [
   { method: "GET", path: "/gallery/groups/family/{family}", handler: galleryGroups },
   { method: "GET", path: "/gallery/groups/family/{family}/instance/{instance}", handler: galleryGroups },
 
-  { method: "POST", path: "/auth/register", handler: register },
-  { method: "POST", path: "/auth/confirm-registration", handler: confirmRegistration },
+  { method: "POST", path: "/auth/default-registration", handler: defaultRegistration },
+  { method: "POST", path: "/auth/default-registration/confirm", handler: confirmDefaultRegistration },
   { method: "POST", path: "/auth/login", handler: login },
   { method: "POST", path: "/auth/logout", handler: logout },
-  { method: "POST", path: "/auth/verify", handler: verifyAccount },
+  { method: "POST", path: "/auth/create-and-verify", handler: createAndVerify },
   { method: "POST", path: "/auth/forgot-password", handler: forgotPassword },
   { method: "POST", path: "/auth/confirm-forgot-password", handler: confirmForgotPassword },
   { method: "POST", path: "/auth/resend-verification", handler: resendVerification },
   { method: "GET", path: "/auth/status", handler: getAuthStatus },
-  { method: "POST", path: "/auth/create-and-verify", handler: requestCreateAndVerify },
+  { method: "POST", path: "/auth/create-and-verify/request", handler: requestCreateAndVerify },
   { method: "POST", path: "/auth/change-password", handler: changePassword },
 
   { method: "GET", path: "/user/profile", handler: getUser },

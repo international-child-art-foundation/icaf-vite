@@ -1,10 +1,10 @@
-import { RegisterRequest, Role, ROLES } from './types.js';
+import { DefaultRegistrationRequest, Role, ROLES } from './types.js';
 import { MAX_NAME_LEN, MAX_EMAIL_LEN, MAX_PASSWORD_LEN, MAX_BAN_REASON_LEN } from './constants.js';
 import { isValidEmail } from '../../utils/string.js';
 
 const DOB_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-export function validateRegisterRequest(data: RegisterRequest): string[] {
+export function validateDefaultRegistrationRequest(data: DefaultRegistrationRequest): string[] {
     const errors: string[] = [];
 
     if (!data.email || !isValidEmail(data.email)) {

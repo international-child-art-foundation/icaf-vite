@@ -10,7 +10,7 @@ import {
   ApiGatewayEvent,
   COMMON_HEADERS,
   CommonErrors,
-  ConfirmRegistrationRequest,
+  ConfirmDefaultRegistrationRequest,
   HTTP_STATUS,
   MAX_EMAIL_LEN,
 } from "@icaf/shared";
@@ -22,7 +22,7 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const parsedBody = parseJsonBody<ConfirmRegistrationRequest>(event);
+    const parsedBody = parseJsonBody<ConfirmDefaultRegistrationRequest>(event);
     if (!parsedBody.ok) return parsedBody.response;
     const body = parsedBody.value;
 
@@ -81,7 +81,7 @@ export const handler = async (
       headers: COMMON_HEADERS,
     };
   } catch (error: any) {
-    console.error("ConfirmRegistration error:", error);
+    console.error("ConfirmDefaultRegistration error:", error);
     if (error.name === "CodeMismatchException") {
       return CommonErrors.badRequest("Invalid verification code");
     }

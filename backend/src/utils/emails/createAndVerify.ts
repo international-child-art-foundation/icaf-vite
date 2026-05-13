@@ -2,12 +2,8 @@ import { SendEmailCommand } from "@aws-sdk/client-ses";
 import { sesClient, SES_FROM_EMAIL, APP_URL } from "../../config/aws-clients";
 
 /**
- * Sent when a user manually requests account creation from the login page
- * by entering their email address. Used for guests who have previously
- * submitted artwork or made a donation and now want a full account.
- *
- * Distinguished from the artwork submission email by copy that acknowledges
- * this email was requested by the user, not triggered automatically.
+ * Sent when an existing app-side user requests a login account.
+ * The link lets them set a password and verify ownership of the email address.
  */
 export async function sendCreateAndVerifyEmail(args: {
   toEmail: string;

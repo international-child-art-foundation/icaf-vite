@@ -11,7 +11,7 @@ import {
   HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
-  RegisterRequest,
+  DefaultRegistrationRequest,
   MAX_NAME_LEN,
   MAX_EMAIL_LEN,
   MAX_PASSWORD_LEN,
@@ -24,7 +24,7 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const parsedBody = parseJsonBody<RegisterRequest>(event);
+    const parsedBody = parseJsonBody<DefaultRegistrationRequest>(event);
     if (!parsedBody.ok) return parsedBody.response;
     const body = parsedBody.value;
 
@@ -125,7 +125,7 @@ export const handler = async (
       headers: COMMON_HEADERS,
     };
   } catch (error: any) {
-    console.error("Registration error:", error);
+    console.error("DefaultRegistration error:", error);
     if (error.name === "UsernameExistsException") {
       return CommonErrors.conflict("An account with this email already exists");
     }

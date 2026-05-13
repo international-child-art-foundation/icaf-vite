@@ -52,8 +52,8 @@ export interface UserProfileResponse {
     timestamp: number;
 }
 
-// Registration request (Cognito sign-up via POST /auth/register)
-export interface RegisterRequest {
+// Default registration request. Cognito sign-up is the only verification step.
+export interface DefaultRegistrationRequest {
     email: string;
     password: string;
     f_name: string;
@@ -62,19 +62,18 @@ export interface RegisterRequest {
     role: Extract<Role, 'guardian' | 'user'>;
 }
 
-// Confirm default Cognito registration (POST /auth/confirm-registration)
-// Called with the code Cognito sends after POST /auth/register.
-export interface ConfirmRegistrationRequest {
+// Confirm default registration after POST /auth/default-registration.
+// The verification code is generated and emailed by Cognito.
+export interface ConfirmDefaultRegistrationRequest {
     email: string;
     confirmation_code: string;
 }
 
-// Verify account request (POST /auth/verify)
-// Called when a virtual user clicks their create-account verification link.
-// This intentionally stays separate from Cognito's default registration email.
-export interface VerifyAccountRequest {
+// Create a Cognito login and verify an existing app-side user in one step.
+// This flow uses an app-generated verification link, not Cognito's code email.
+export interface CreateAndVerifyRequest {
     user_id: string;        // from link: icaf.org/create-account?id=<user_id>
-    verify_token: string;   // slug from the verification email link
+    verify_token: string;   // app-generated slug from the verification email link
     password?: string;      // required when is_virtual=true (creates Cognito account)
     f_name?: string;        // optional profile update during account creation
     l_name?: string;        // optional profile update during account creation

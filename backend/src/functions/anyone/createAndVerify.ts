@@ -16,7 +16,7 @@ import {
   HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
-  VerifyAccountRequest,
+  CreateAndVerifyRequest,
   UserEntity,
   MAX_NAME_LEN,
 } from "@icaf/shared";
@@ -28,7 +28,7 @@ export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
-    const parsedBody = parseJsonBody<VerifyAccountRequest>(event);
+    const parsedBody = parseJsonBody<CreateAndVerifyRequest>(event);
     if (!parsedBody.ok) return parsedBody.response;
     const body = parsedBody.value;
 
@@ -47,7 +47,6 @@ export const handler = async (
       return CommonErrors.badRequest("role must be one of: guardian, user");
     }
 
-    // 1. Read USER entity
     const result = await dynamodb.send(
       new GetCommand({
         TableName: TABLE_NAME,
@@ -61,7 +60,6 @@ export const handler = async (
 
     const user = result.Item as UserEntity;
 
-    // 2. Validate token
     if (user.verify_token !== body.verify_token) {
       return CommonErrors.badRequest("Invalid verification token");
     }
@@ -76,13 +74,11 @@ export const handler = async (
     const dob = body.dob ?? user.dob;
     const role = body.role ?? user.role ?? "user";
 
-    // 3. If virtual user, create their Cognito account
     if (user.is_virtual) {
       if (!body.password) {
         return CommonErrors.badRequest("password is required to create your account");
       }
 
-      // Create user in Cognito (suppress the invitation email — we already sent our own)
       await cognitoClient.send(
         new AdminCreateUserCommand({
           UserPoolId: USER_POOL_ID,
@@ -99,7 +95,6 @@ export const handler = async (
         }),
       );
 
-      // Set permanent password (bypasses FORCE_CHANGE_PASSWORD)
       await cognitoClient.send(
         new AdminSetUserPasswordCommand({
           UserPoolId: USER_POOL_ID,
@@ -123,7 +118,6 @@ export const handler = async (
       );
     }
 
-    // 4. Write verified_at, clear token, mark no longer virtual
     const setExprParts = [
       "verified_at = :now",
       "is_virtual = :false",
@@ -164,7 +158,7 @@ export const handler = async (
       headers: COMMON_HEADERS,
     };
   } catch (error: any) {
-    console.error("VerifyAccount error:", error);
+    console.error("CreateAndVerify error:", error);
     if (error.name === "UsernameExistsException") {
       return CommonErrors.conflict("A Cognito account already exists for this email");
     }

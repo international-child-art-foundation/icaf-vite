@@ -1,8 +1,8 @@
-import { RegisterRequest } from './types.js';
+import { DefaultRegistrationRequest } from './types.js';
 import { MAX_NAME_LEN } from './constants.js';
 import { cleanOptionalString } from '../../utils/string.js';
 
-export function sanitizeRegisterRequest(data: RegisterRequest): RegisterRequest {
+export function sanitizeDefaultRegistrationRequest(data: DefaultRegistrationRequest): DefaultRegistrationRequest {
     return {
         ...data,
         email: data.email.normalize('NFC').trim().toLowerCase(),

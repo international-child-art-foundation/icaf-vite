@@ -4,6 +4,7 @@ import {
   COMMON_HEADERS,
   CommonErrors,
   HTTP_STATUS,
+  Role,
 } from "@icaf/shared";
 
 import { handler as alterUserRole } from "../functions/admin/alterUserRole";
@@ -66,6 +67,7 @@ import { handler as submitArtwork } from "../functions/user/submitArtwork";
 import { handler as updateArtwork } from "../functions/user/updateArtwork";
 import { handler as getUser } from "../functions/user/user";
 import { handler as voteArtwork } from "../functions/user/voteArtwork";
+import { isApiGatewayResponse, requireAuth, requireRole } from "../utils/auth";
 
 type Handler = (event: ApiGatewayEvent) => Promise<ApiGatewayResponse>;
 
@@ -73,12 +75,28 @@ type Route = {
   method: string;
   path: string;
   handler: Handler;
+  auth?: {
+    roles?: Role[];
+  };
 };
 
 type ApiEvent = ApiGatewayEvent & {
   path?: string;
   rawPath?: string;
 };
+
+const allowedOrigins = new Set(["https://revise.icaf.org", "http://localhost:5173"]);
+const guardianRoles: Role[] = ["guardian", "contributor", "admin"];
+const contributorRoles: Role[] = ["contributor", "admin"];
+const adminRoles: Role[] = ["admin"];
+
+function authenticated(route: Omit<Route, "auth">): Route {
+  return { ...route, auth: {} };
+}
+
+function roleProtected(route: Omit<Route, "auth">, roles: Role[]): Route {
+  return { ...route, auth: { roles } };
+}
 
 const routes: Route[] = [
   { method: "POST", path: "/artworks", handler: guestSubmitArtwork },
@@ -104,52 +122,52 @@ const routes: Route[] = [
   { method: "POST", path: "/auth/resend-verification", handler: resendVerification },
   { method: "GET", path: "/auth/status", handler: getAuthStatus },
   { method: "POST", path: "/auth/create-and-verify/request", handler: requestCreateAndVerify },
-  { method: "POST", path: "/auth/change-password", handler: changePassword },
+  authenticated({ method: "POST", path: "/auth/change-password", handler: changePassword }),
 
-  { method: "GET", path: "/user/profile", handler: getUser },
-  { method: "DELETE", path: "/user/account", handler: deleteAccount },
-  { method: "GET", path: "/user/payments", handler: listDonations },
-  { method: "GET", path: "/user/artworks", handler: listArtworkSubmissions },
-  { method: "POST", path: "/user/artworks", handler: submitArtwork },
-  { method: "DELETE", path: "/user/artworks", handler: deleteAllArtworks },
-  { method: "PATCH", path: "/user/artworks/{art_id}", handler: updateArtwork },
-  { method: "DELETE", path: "/user/artworks/{art_id}", handler: deleteArtwork },
-  { method: "POST", path: "/user/artworks/{art_id}/kudos", handler: voteArtwork },
+  authenticated({ method: "GET", path: "/user/profile", handler: getUser }),
+  authenticated({ method: "DELETE", path: "/user/account", handler: deleteAccount }),
+  authenticated({ method: "GET", path: "/user/payments", handler: listDonations }),
+  authenticated({ method: "GET", path: "/user/artworks", handler: listArtworkSubmissions }),
+  authenticated({ method: "POST", path: "/user/artworks", handler: submitArtwork }),
+  authenticated({ method: "DELETE", path: "/user/artworks", handler: deleteAllArtworks }),
+  authenticated({ method: "PATCH", path: "/user/artworks/{art_id}", handler: updateArtwork }),
+  authenticated({ method: "DELETE", path: "/user/artworks/{art_id}", handler: deleteArtwork }),
+  authenticated({ method: "POST", path: "/user/artworks/{art_id}/kudos", handler: voteArtwork }),
 
-  { method: "GET", path: "/guardian/groups", handler: listGroupSubmissions },
-  { method: "POST", path: "/guardian/groups", handler: createGroup },
-  { method: "PATCH", path: "/guardian/groups/{group_id}", handler: updateGroup },
-  { method: "DELETE", path: "/guardian/groups/{group_id}", handler: deleteGroup },
-  { method: "POST", path: "/guardian/groups/{group_id}/artworks", handler: submitArtworkToGroup },
-  { method: "DELETE", path: "/guardian/groups/{group_id}/artworks/{art_id}", handler: deleteArtworkFromGroup },
-  { method: "PATCH", path: "/guardian/artworks/{art_id}", handler: updateConstituentArtwork },
+  roleProtected({ method: "GET", path: "/guardian/groups", handler: listGroupSubmissions }, guardianRoles),
+  roleProtected({ method: "POST", path: "/guardian/groups", handler: createGroup }, guardianRoles),
+  roleProtected({ method: "PATCH", path: "/guardian/groups/{group_id}", handler: updateGroup }, guardianRoles),
+  roleProtected({ method: "DELETE", path: "/guardian/groups/{group_id}", handler: deleteGroup }, guardianRoles),
+  roleProtected({ method: "POST", path: "/guardian/groups/{group_id}/artworks", handler: submitArtworkToGroup }, guardianRoles),
+  roleProtected({ method: "DELETE", path: "/guardian/groups/{group_id}/artworks/{art_id}", handler: deleteArtworkFromGroup }, guardianRoles),
+  roleProtected({ method: "PATCH", path: "/guardian/artworks/{art_id}", handler: updateConstituentArtwork }, guardianRoles),
 
-  { method: "GET", path: "/contributor/artworks/pending", handler: fetchUnapprovedArtworks },
-  { method: "GET", path: "/contributor/artworks/hidden", handler: fetchHiddenArtworks },
-  { method: "PATCH", path: "/contributor/artworks/{art_id}/status", handler: changeArtworkStatus },
-  { method: "GET", path: "/contributor/groups/pending", handler: fetchUnapprovedGroups },
-  { method: "GET", path: "/contributor/groups/hidden", handler: fetchHiddenGroups },
-  { method: "PATCH", path: "/contributor/groups/{group_id}/status", handler: changeGroupStatus },
-  { method: "PATCH", path: "/contributor/users/{user_id}/role", handler: updateUserRole },
+  roleProtected({ method: "GET", path: "/contributor/artworks/pending", handler: fetchUnapprovedArtworks }, contributorRoles),
+  roleProtected({ method: "GET", path: "/contributor/artworks/hidden", handler: fetchHiddenArtworks }, contributorRoles),
+  roleProtected({ method: "PATCH", path: "/contributor/artworks/{art_id}/status", handler: changeArtworkStatus }, contributorRoles),
+  roleProtected({ method: "GET", path: "/contributor/groups/pending", handler: fetchUnapprovedGroups }, contributorRoles),
+  roleProtected({ method: "GET", path: "/contributor/groups/hidden", handler: fetchHiddenGroups }, contributorRoles),
+  roleProtected({ method: "PATCH", path: "/contributor/groups/{group_id}/status", handler: changeGroupStatus }, contributorRoles),
+  roleProtected({ method: "PATCH", path: "/contributor/users/{user_id}/role", handler: updateUserRole }, contributorRoles),
 
-  { method: "POST", path: "/admin/users/{user_id}/ban", handler: banUser },
-  { method: "POST", path: "/admin/users/{user_id}/unban", handler: unbanUser },
-  { method: "PATCH", path: "/admin/users/{user_id}/role", handler: alterUserRole },
-  { method: "GET", path: "/admin/users/{user_id}/cognito-info", handler: getUserCognitoInfo },
-  { method: "GET", path: "/admin/users/{user_id}/email", handler: getEmailByUserId },
-  { method: "DELETE", path: "/admin/users/{user_id}/account", handler: deleteUserAccount },
-  { method: "DELETE", path: "/admin/users/{user_id}/artworks", handler: removeAllUserArtwork },
-  { method: "POST", path: "/admin/users/{user_id}/hide-all", handler: hideAllUserArtwork },
-  { method: "POST", path: "/admin/users/{user_id}/unhide-all", handler: unhideAllUserArtwork },
-  { method: "GET", path: "/admin/artworks/{art_id}/submitter-email", handler: getArtworkSubmitterEmail },
-  { method: "GET", path: "/admin/takedowns", handler: getTakedownRequests },
-  { method: "PATCH", path: "/admin/takedowns/{tdr_sk}", handler: cancelTakedownRequest },
-  { method: "POST", path: "/admin/magazines", handler: publishMagazine },
-  { method: "PATCH", path: "/admin/magazines/{slug}/status", handler: updateMagazineStatus },
-  { method: "DELETE", path: "/admin/magazines/{slug}", handler: deleteMagazine },
-  { method: "POST", path: "/admin/news", handler: createNews },
-  { method: "PATCH", path: "/admin/news/{news_id}", handler: updateNews },
-  { method: "DELETE", path: "/admin/news/{news_id}", handler: deleteNews },
+  roleProtected({ method: "POST", path: "/admin/users/{user_id}/ban", handler: banUser }, adminRoles),
+  roleProtected({ method: "POST", path: "/admin/users/{user_id}/unban", handler: unbanUser }, adminRoles),
+  roleProtected({ method: "PATCH", path: "/admin/users/{user_id}/role", handler: alterUserRole }, adminRoles),
+  roleProtected({ method: "GET", path: "/admin/users/{user_id}/cognito-info", handler: getUserCognitoInfo }, adminRoles),
+  roleProtected({ method: "GET", path: "/admin/users/{user_id}/email", handler: getEmailByUserId }, adminRoles),
+  roleProtected({ method: "DELETE", path: "/admin/users/{user_id}/account", handler: deleteUserAccount }, adminRoles),
+  roleProtected({ method: "DELETE", path: "/admin/users/{user_id}/artworks", handler: removeAllUserArtwork }, adminRoles),
+  roleProtected({ method: "POST", path: "/admin/users/{user_id}/hide-all", handler: hideAllUserArtwork }, adminRoles),
+  roleProtected({ method: "POST", path: "/admin/users/{user_id}/unhide-all", handler: unhideAllUserArtwork }, adminRoles),
+  roleProtected({ method: "GET", path: "/admin/artworks/{art_id}/submitter-email", handler: getArtworkSubmitterEmail }, adminRoles),
+  roleProtected({ method: "GET", path: "/admin/takedowns", handler: getTakedownRequests }, adminRoles),
+  roleProtected({ method: "PATCH", path: "/admin/takedowns/{tdr_sk}", handler: cancelTakedownRequest }, adminRoles),
+  roleProtected({ method: "POST", path: "/admin/magazines", handler: publishMagazine }, adminRoles),
+  roleProtected({ method: "PATCH", path: "/admin/magazines/{slug}/status", handler: updateMagazineStatus }, adminRoles),
+  roleProtected({ method: "DELETE", path: "/admin/magazines/{slug}", handler: deleteMagazine }, adminRoles),
+  roleProtected({ method: "POST", path: "/admin/news", handler: createNews }, adminRoles),
+  roleProtected({ method: "PATCH", path: "/admin/news/{news_id}", handler: updateNews }, adminRoles),
+  roleProtected({ method: "DELETE", path: "/admin/news/{news_id}", handler: deleteNews }, adminRoles),
 ];
 
 function splitPath(path: string): string[] {
@@ -182,6 +200,30 @@ function resolvePath(event: ApiEvent): string {
   return event.path ?? event.rawPath ?? `/${event.pathParameters?.proxy ?? ""}`;
 }
 
+function getHeader(event: ApiGatewayEvent, name: string): string | undefined {
+  const headers = event.headers ?? {};
+  const lowerName = name.toLowerCase();
+  const entry = Object.entries(headers).find(([key]) => key.toLowerCase() === lowerName);
+  return entry?.[1];
+}
+
+function withCors(event: ApiGatewayEvent, response: ApiGatewayResponse): ApiGatewayResponse {
+  const origin = getHeader(event, "origin");
+  const allowOrigin = origin && allowedOrigins.has(origin)
+    ? origin
+    : response.headers["Access-Control-Allow-Origin"] ?? "*";
+
+  return {
+    ...response,
+    headers: {
+      ...response.headers,
+      "Access-Control-Allow-Origin": allowOrigin,
+      "Access-Control-Allow-Credentials": "true",
+      Vary: "Origin",
+    },
+  };
+}
+
 function validateJsonBody(event: ApiEvent): ApiGatewayResponse | null {
   if (!["POST", "PUT", "PATCH", "DELETE"].includes(event.httpMethod)) {
     return null;
@@ -207,13 +249,26 @@ function validateJsonBody(event: ApiEvent): ApiGatewayResponse | null {
   }
 }
 
+async function authorizeRoute(
+  event: ApiGatewayEvent,
+  route: Route,
+): Promise<ApiGatewayResponse | null> {
+  if (!route.auth) return null;
+
+  const auth = route.auth.roles
+    ? await requireRole(event, route.auth.roles)
+    : await requireAuth(event);
+
+  return isApiGatewayResponse(auth) ? auth : null;
+}
+
 export const handler = async (event: ApiEvent): Promise<ApiGatewayResponse> => {
   if (event.httpMethod === "OPTIONS") {
-    return {
+    return withCors(event, {
       statusCode: HTTP_STATUS.NO_CONTENT,
       body: "",
       headers: COMMON_HEADERS,
-    };
+    });
   }
 
   const path = resolvePath(event);
@@ -225,7 +280,7 @@ export const handler = async (event: ApiEvent): Promise<ApiGatewayResponse> => {
     .filter((candidate) => candidate.pathParameters !== null);
 
   if (pathMatches.length === 0) {
-    return CommonErrors.notFound("Route not found");
+    return withCors(event, CommonErrors.notFound("Route not found"));
   }
 
   const route = pathMatches.find((candidate) => candidate.route.method === event.httpMethod);
@@ -234,25 +289,32 @@ export const handler = async (event: ApiEvent): Promise<ApiGatewayResponse> => {
     const allowedMethods = [...new Set(pathMatches.map((candidate) => candidate.route.method))].sort();
     const response = CommonErrors.methodNotAllowed(allowedMethods);
 
-    return {
+    return withCors(event, {
       ...response,
       headers: {
         ...response.headers,
         Allow: allowedMethods.join(", "),
       },
-    };
+    });
   }
 
-  const jsonError = validateJsonBody(event);
-  if (jsonError) {
-    return jsonError;
-  }
-
-  return route.route.handler({
+  const routedEvent = {
     ...event,
     pathParameters: {
       ...(event.pathParameters ?? {}),
       ...route.pathParameters,
     },
-  });
+  };
+
+  const authError = await authorizeRoute(routedEvent, route.route);
+  if (authError) {
+    return withCors(routedEvent, authError);
+  }
+
+  const jsonError = validateJsonBody(routedEvent);
+  if (jsonError) {
+    return withCors(routedEvent, jsonError);
+  }
+
+  return withCors(routedEvent, await route.route.handler(routedEvent));
 };

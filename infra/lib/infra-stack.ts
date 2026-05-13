@@ -537,26 +537,15 @@ export class InfraStack extends Stack {
       ],
     }));
 
-    const cognitoAuthorizer = new apigw.CognitoUserPoolsAuthorizer(this, "IcafAuthorizer", {
-      cognitoUserPools: [userPool],
-    });
-
-    const authOpts = {
-      authorizer: cognitoAuthorizer,
-      authorizationType: apigw.AuthorizationType.COGNITO,
-    };
-
     const apiIntegration = new apigw.LambdaIntegration(apiFn);
 
     const addAnyProxy = (
       parent: apigw.IResource,
-      methodOptions?: apigw.MethodOptions,
     ) => {
-      parent.addMethod("ANY", apiIntegration, methodOptions);
+      parent.addMethod("ANY", apiIntegration);
       parent.addProxy({
         anyMethod: true,
         defaultIntegration: apiIntegration,
-        defaultMethodOptions: methodOptions,
       });
     };
 
@@ -568,20 +557,18 @@ export class InfraStack extends Stack {
     addAnyProxy(api.root.addResource("news"));
     addAnyProxy(api.root.addResource("gallery"));
 
-    // Auth is mostly public. Keep change-password behind API Gateway Cognito.
+    // ApiFn owns authentication and authorization for every API route.
     const authRes = api.root.addResource("auth");
-    authRes.addResource("change-password").addMethod("POST", apiIntegration, authOpts);
+    authRes.addResource("change-password").addMethod("POST", apiIntegration);
     authRes.addProxy({
       anyMethod: true,
       defaultIntegration: apiIntegration,
     });
 
-    // Protected prefixes keep the existing Cognito authorizer and role checks
-    // remain inside the handler modules.
-    addAnyProxy(api.root.addResource("user"), authOpts);
-    addAnyProxy(api.root.addResource("guardian"), authOpts);
-    addAnyProxy(api.root.addResource("contributor"), authOpts);
-    addAnyProxy(api.root.addResource("admin"), authOpts);
+    addAnyProxy(api.root.addResource("user"));
+    addAnyProxy(api.root.addResource("guardian"));
+    addAnyProxy(api.root.addResource("contributor"));
+    addAnyProxy(api.root.addResource("admin"));
 
     // ─── 11. Emergency Shutdown — Billing Alarm ───────────────────────────────
     // NOTE: AWS billing metrics are only published to us-east-1.

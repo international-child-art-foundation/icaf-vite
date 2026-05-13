@@ -21,6 +21,7 @@ import { Status } from "../../dynamo/shared";
 import { randomUUID } from "crypto";
 import { parseJsonBody } from "../../utils/request";
 import { getCurrentUser } from "../../utils/auth";
+import { ensureThemeEntity } from "../shared/themeUtils";
 
 const PRESIGNED_URL_EXPIRES_SECONDS = 20 * 60; // 20 minutes
 
@@ -103,6 +104,11 @@ export const handler = async (
     const nowMs = Date.now();
     const nowSeconds = Math.floor(nowMs / 1000);
     const artId = randomUUID();
+
+    await ensureThemeEntity({
+      family: body.theme_family,
+      instance: body.theme_instance,
+    });
 
     // ── Create ART entity ──────────────────────────────────────────────────
     await dynamodb.send(

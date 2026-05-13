@@ -19,6 +19,7 @@ import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { Status } from "../../dynamo/shared";
 import { sendArtworkSubmissionEmail } from "../../utils/emails/artworkSubmission";
 import { parseJsonBody } from "../../utils/request";
+import { ensureThemeEntity } from "../shared/themeUtils";
 import { randomUUID } from "crypto";
 
 const PRESIGNED_URL_EXPIRES_SECONDS = 15 * 60; // 15 minutes
@@ -143,6 +144,11 @@ export const handler = async (
 
     // ── Step 2: Create ART entity ──────────────────────────────────────────
     const artId = randomUUID();
+
+    await ensureThemeEntity({
+      family: body.theme_family,
+      instance: body.theme_instance,
+    });
 
     await dynamodb.send(
       new PutCommand({

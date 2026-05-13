@@ -38,9 +38,13 @@ frontend/public/gallery-arts/*
 *.sw?
 *.tsbuildinfo
 
+# AWS and Infra
+infra/cdk.out/*
+
 # LocalStack
 .localstack
 # Dev container / claude code experiments
 .devcontainer/
-.claude/
+.ai/
+AGENTS.md
 CLAUDE.md

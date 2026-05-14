@@ -1,6 +1,7 @@
 import soccer from '@/assets/shared/images/home/circle-images/soccer.webp';
 import globeKids from '@/assets/shared/images/home/circle-images/globe-kids.webp';
 import redBlueFirework from '@/assets/home/RedBlueFirework.svg';
+import DonateButton from '../ui/donateButton';
 
 const WhatWeDo = () => {
   return (
@@ -15,17 +16,17 @@ const WhatWeDo = () => {
           What We Do
         </h2>
         <div className="flex flex-col gap-6">
-          <p className="font-sans text-xl font-normal text-black md:text-center lg:text-center xl:text-2xl">
+          {/* <p className="font-sans text-xl font-normal text-black md:text-center lg:text-center xl:text-2xl">
             We focus on what’s critically important in formative years:{' '}
             <span className="font-semibold">how students view themselves.</span>
-          </p>
-          <p className="text-2xl font-semibold text-black lg:text-center">
-            We have created a{' '}
-            <span className="font-semibold">two-stage approach</span> for
-            holistic identity development.
+          </p> */}
+          <p className="max-w-[1300px] text-xl text-black lg:text-center">
+            Since 1997, ICAF has harnessed the transformative power of the arts
+            to ignite children's imaginations and foster their holistic identity
+            development through a two-stage approach.
           </p>
         </div>
-        <div className="flex max-w-[402px] flex-col items-center gap-8 lg:max-w-[800px] lg:flex-row lg:gap-[60px]">
+        <div className="flex max-w-[602px] flex-col items-center gap-8 lg:max-w-[1000px] lg:flex-row lg:gap-[60px]">
           <div className="flex flex-1 flex-col items-center gap-4 lg:gap-6">
             <img
               src={soccer}
@@ -38,7 +39,9 @@ const WhatWeDo = () => {
                 01
               </h1>
               <p className="font-sans text-xl text-black lg:text-center">
-                Consilience of art and sports to nurture “artist-athletes.”
+                Through free school art programs, we motivate students to
+                embrace the role of "artist-athletes," nurturing creative minds
+                and healthy bodies.
               </p>
             </div>
           </div>
@@ -50,12 +53,14 @@ const WhatWeDo = () => {
                 02
               </h1>
               <p className="font-sans text-xl text-black lg:text-center">
-                Consonance of creativity and empathy to inspire
-                “creative-empaths.”
+                Through festivals, interactive exhibitions, and ChildArt
+                magazine, we inspire students to become "creative-empaths,"
+                promoting self-improvement and social contribution.
               </p>
             </div>
           </div>
         </div>
+        <DonateButton text="Donate to our Campaign" />
       </div>
     </div>
   );

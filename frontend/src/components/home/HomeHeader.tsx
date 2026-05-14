@@ -1,7 +1,6 @@
 import { CurvedImage } from '@/pages/CurvedImage';
 import { useWindowSize } from 'usehooks-ts';
 import artShowcaseHeader from '@/assets/home/ArtShowcaseHeader.webp';
-import DonateButton from '../ui/donateButton';
 
 const HomeHeader = () => {
   const size = useWindowSize();
@@ -40,9 +39,6 @@ const HomeHeader = () => {
         <h3 className="font-openSans text-lg font-normal text-white md:max-w-[50%]">
           Empowering the next generation through the arts since 1997.
         </h3>
-        <div className="max-w-[300px]">
-          <DonateButton text="Donate to our Campaign" />
-        </div>
       </div>
       <div className="col-start-1 row-start-1">
         <CurvedImage

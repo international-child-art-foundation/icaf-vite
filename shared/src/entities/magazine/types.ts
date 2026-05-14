@@ -22,7 +22,7 @@
  */
 
 export type MagazineStatus = 'processing' | 'published' | 'unpublished';
-
+export type UpdateMagazineStatus = Exclude<MagazineStatus, 'processing'>;
 export interface MagazineEntity {
     slug: string;           // URL path segment and S3 prefix, e.g. 'ArtAndHealth' (also SK)
     name: string;           // Display name, e.g. 'Art & Health'
@@ -65,4 +65,19 @@ export interface MagazineListItem {
 
 export interface ListMagazinesResponse {
     magazines: MagazineListItem[];
+}
+
+export interface UpdateMagazineStatusRequest {
+  status: UpdateMagazineStatus;
+}
+
+export interface UpdateMagazineStatusResponse {
+    success: true;
+    slug: string;
+    status: UpdateMagazineStatus;
+}
+
+export interface DeleteMagazineResponse {
+    success: true;
+    slug: string;
 }

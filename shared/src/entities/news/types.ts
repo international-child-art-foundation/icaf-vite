@@ -59,3 +59,8 @@ export interface ListNewsResponse {
     has_more?: boolean;
     last_key?: string;
 }
+
+export interface NewsMutationResponse {
+    success: true;
+    news_id: string;
+}

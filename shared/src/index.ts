@@ -3,6 +3,7 @@ export * from "./api-types/commonTypes";
 export * from "./api-types/errorTypes";
 export * from "./api-types/businessLogic";
 export * from "./api-types/galleryTypes";
+export * from "./api-types/authTypes";
 
 // ── Entities ─────────────────────────────────────────────────────────────────
 export * from "./entities/user/index";

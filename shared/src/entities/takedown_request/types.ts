@@ -76,3 +76,9 @@ export interface ReviewTakedownRequest {
     action: 'cancel' | 'dispute';
     review_notes?: string;
 }
+
+export interface ReviewTakedownResponse {
+    success: true;
+    tdr_sk: string;
+    status: Extract<TakedownStatus, 'canceled' | 'disputing'>;
+}

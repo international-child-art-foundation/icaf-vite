@@ -98,6 +98,10 @@ export interface SubmitArtworkResponse {
     message: string;
 }
 
+export interface GetArtworkResponse {
+    artwork: ArtworkEntity;
+}
+
 // Shape used in list and gallery responses (subset of ArtworkEntity)
 export interface ArtworkListItem {
     art_id: string;
@@ -145,4 +149,53 @@ export interface UpdateArtworkRequest {
     submitter_relationship?: SubmitterRelationship;
     theme_family?: string;
     theme_instance?: string;
+}
+
+export interface SubmitArtworkToGroupRequest {
+    file_type: UploadFileType;
+    release_hash: string;
+    f_name?: string;
+    age?: number;
+    country?: string;
+    region?: string;
+    title?: string;
+    description?: string;
+    submitter_relationship?: SubmitterRelationship;
+    theme_family?: string;
+    theme_instance?: string;
+}
+
+export type UpdateConstituentArtworkRequest = UpdateArtworkRequest;
+
+export interface UpdateArtworkResponse {
+    success: true;
+    art_id: string;
+    status: 'pending_review';
+}
+
+export interface VoteArtworkResponse {
+    success: true;
+    art_id: string;
+}
+
+export interface DeleteAllArtworksResponse {
+    success: true;
+    artworks_deleted: number;
+    total_deleted: number;
+}
+
+export interface ReviewArtworkQueueResponse {
+    artworks: ArtworkListItem[];
+    has_more: boolean;
+    last_key?: string;
+}
+
+export interface ChangeArtworkStatusRequest {
+    status: Extract<ArtworkStatus, 'approved' | 'hidden' | 'rejected'>;
+}
+
+export interface ChangeArtworkStatusResponse {
+    success: true;
+    art_id: string;
+    status: Extract<ArtworkStatus, 'approved' | 'hidden' | 'rejected'>;
 }

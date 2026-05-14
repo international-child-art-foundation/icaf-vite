@@ -110,6 +110,12 @@ export interface UpdateUserRoleRequest {
     new_role: Exclude<Role, 'admin'>;
 }
 
+export interface UpdateUserRoleResponse {
+    success: true;
+    user_id: string;
+    new_role: Exclude<Role, 'admin'>;
+}
+
 // Admin alter role (can set 'admin')
 export interface AlterUserRoleRequest {
     new_role: Role;
@@ -184,6 +190,25 @@ export interface GetArtworkSubmitterEmailResponse {
     artwork_title: string;
     user_id: string;
     email: string;
+}
+
+export interface GetEmailByUserIdResponse {
+    user_id: string;
+    email: string;
+}
+
+export interface HideAllUserArtworkResponse {
+    success: true;
+    user_id: string;
+    items_hidden: number;
+    admin_action_id: string;
+}
+
+export interface UnhideAllUserArtworkResponse {
+    success: true;
+    user_id: string;
+    items_unhidden: number;
+    admin_action_id: string;
 }
 
 // Contributor: set guardian submission limit

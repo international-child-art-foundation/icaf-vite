@@ -74,6 +74,10 @@ export interface SubmitGroupResponse {
     timestamp: number;
 }
 
+export interface GetGroupResponse {
+    group: GroupEntity;
+}
+
 // Shape used in list and gallery responses
 export interface GroupListItem {
     group_id: string;
@@ -106,4 +110,26 @@ export interface UpdateGroupRequest {
     theme_family?: string;
     theme_instance?: string;
     cover_art_ids?: string[];
+}
+
+export interface UpdateGroupResponse {
+    success: true;
+    group_id: string;
+    status: 'pending_review';
+}
+
+export interface ReviewGroupQueueResponse {
+    groups: GroupListItem[];
+    has_more: boolean;
+    last_key?: string;
+}
+
+export interface ChangeGroupStatusRequest {
+    status: Extract<GroupStatus, 'approved' | 'hidden' | 'rejected'>;
+}
+
+export interface ChangeGroupStatusResponse {
+    success: true;
+    group_id: string;
+    status: Extract<GroupStatus, 'approved' | 'hidden' | 'rejected'>;
 }

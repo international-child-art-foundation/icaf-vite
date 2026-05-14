@@ -40,8 +40,9 @@ const MissionVision = () => {
                 <span className="font-semibold">creativity </span>
                 and growing mutual{' '}
                 <span className="font-semibold">empathy </span> for "
-                <span className="italic">a more perfect union</span>" and with
-                their peers worldwide for a peaceful future.
+                <span className="italic">a more perfect union</span>", and
+                helping them build bonds with their peers worldwide for a
+                peaceful future.
               </p>
             </div>
             <div className="grid grid-cols-[36px_1fr] grid-rows-[36px_1fr] items-center gap-4 gap-y-2 rounded-lg bg-gradient-to-br from-white/60 via-white/50 to-white/60 py-6 transition-colors hover:bg-white/80 lg:grid lg:flex-row">

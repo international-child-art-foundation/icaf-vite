@@ -16,14 +16,17 @@ const WhatWeDo = () => {
           What We Do
         </h2>
         <div className="flex flex-col gap-6">
+          <p className="font-sans text-2xl font-semibold md:text-center">
+            ICAF empowers children to be creators and peacemakers.
+          </p>
           {/* <p className="font-sans text-xl font-normal text-black md:text-center lg:text-center xl:text-2xl">
             We focus on what’s critically important in formative years:{' '}
             <span className="font-semibold">how students view themselves.</span>
           </p> */}
           <p className="max-w-[1300px] text-xl text-black lg:text-center">
-            Since 1997, ICAF has harnessed the transformative power of the arts
-            to ignite children's imaginations and foster their holistic identity
-            development through a two-stage approach.
+            Through the transformative power of the arts, we ignite children's
+            imaginations and foster their holistic identity development through
+            a two-stage approach.
           </p>
         </div>
         <div className="flex max-w-[602px] flex-col items-center gap-8 lg:max-w-[1000px] lg:flex-row lg:gap-[60px]">

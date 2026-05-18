@@ -1,0 +1,37 @@
+import { VolunteerHeader } from '@/modules/content/components/volunteer/VolunteerHeader';
+import { WhyVolunteer } from '@/modules/content/components/volunteer/WhyVolunteer';
+import artworkShowcase from '@/modules/content/assets/volunteer/icaf3.webp';
+import footerImg from '@/modules/content/assets/volunteer/Conneticut (Jazmine Anderson, 11).webp';
+import { ContactForm } from '@/modules/content/components/contact/ContactForm';
+import { contactFormConfigs } from '@/shared/data/contact';
+import { Seo } from '@/modules/content/components/shared/Seo';
+
+const volunteerMetadata = {
+  title: 'Volunteers | ICAF',
+  description:
+    'ICAF volunteers bring their time, skills, and heart to help children express their creativity and grow through the arts.',
+  path: '/get-involved/volunteers',
+};
+
+export const Volunteer = () => {
+  return (
+    <>
+      <Seo {...volunteerMetadata} />
+      <div className="content-gap">
+        <VolunteerHeader />
+        <WhyVolunteer />
+        <ContactForm config={contactFormConfigs['volunteer']} />{' '}
+        <div className="w-screen-2xl mx-8 mb-12 grid grid-cols-1 gap-8 rounded-xl md:mx-12 md:grid-cols-10 lg:mx-16 xl:mx-20">
+          <img
+            src={artworkShowcase}
+            className="hidden h-full w-full rounded-xl object-cover md:col-span-3 md:block"
+            alt='Artwork depicting the message: "I want to make the world a beautiful place."'
+          />
+          <div className="relative overflow-hidden rounded-xl md:col-span-7">
+            <img src={footerImg} className="object-bottom" />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};

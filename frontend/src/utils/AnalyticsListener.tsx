@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { recordHit } from '../lib/hit';
+import { recordHit } from './hit';
 
 export function AnalyticsListener() {
   const location = useLocation();

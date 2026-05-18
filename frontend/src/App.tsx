@@ -1,18 +1,18 @@
 import { Suspense, lazy, useEffect } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 
-import { sharedOpenGraph } from '@/data/shared-metadata';
-import NavigationBar from '@/components/shared/NavigationBar';
-import Footer from '@/components/shared/Footer';
-import { routes } from '@/data/routes';
+import { sharedOpenGraph } from '@/shared/data/shared-metadata';
+import NavigationBar from '@/modules/content/components/shared/NavigationBar';
+import Footer from '@/modules/content/components/shared/Footer';
+import { routes } from '@/shared/data/routes';
 import { preloadAllRoutesOnce } from './preloadRoutes';
 
-import Home from './pages/Home';
+import Home from './modules/content/pages/Home';
 import './index.css';
-import { GlobalContextProvider } from './components/shared/GlobalContext';
-import GoogleAnalytics from './components/shared/GoogleAnalytics';
-import CookieBanner from './components/shared/CookieBanner';
-import { GallerySlideshowEntry } from './components/gallery/GallerySlideshowEntry';
+import { GlobalContextProvider } from './modules/content/components/shared/GlobalContext';
+import GoogleAnalytics from './modules/content/components/shared/GoogleAnalytics';
+import CookieBanner from './modules/content/components/shared/CookieBanner';
+import { GallerySlideshowEntry } from './modules/content/components/gallery/GallerySlideshowEntry';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -22,75 +22,103 @@ export const metadata = {
   },
 };
 
-const Partners = lazy(() => import('./pages/Partners'));
-const About = lazy(() => import('./pages/About'));
-const ChildArtPage = lazy(() => import('./pages/ChildArtPage'));
-const Impact = lazy(() => import('./pages/Impact'));
-const Donate = lazy(() => import('./pages/Donate'));
+const Partners = lazy(() => import('./modules/content/pages/Partners'));
+const About = lazy(() => import('./modules/content/pages/About'));
+const ChildArtPage = lazy(() => import('./modules/content/pages/ChildArtPage'));
+const Impact = lazy(() => import('./modules/content/pages/Impact'));
+const Donate = lazy(() => import('./modules/content/pages/Donate'));
 const WorldChildrensFestival = lazy(
-  () => import('./pages/WorldChildrensFestivalPage'),
+  () => import('./modules/content/pages/WorldChildrensFestivalPage'),
 );
 const Team = lazy(() =>
-  import('./pages/Team').then((m) => ({ default: m.Team })),
+  import('./modules/content/pages/Team').then((m) => ({
+    default: m.Team,
+  })),
 );
 const Leadership = lazy(() =>
-  import('./pages/Leadership').then((m) => ({ default: m.Leadership })),
+  import('./modules/content/pages/Leadership').then((m) => ({
+    default: m.Leadership,
+  })),
 );
 const ResearchAndPublications = lazy(() =>
-  import('./pages/ResearchAndPublications').then((m) => ({
+  import('./modules/content/pages/ResearchAndPublications').then((m) => ({
     default: m.ResearchAndPublications,
   })),
 );
 const Sponsorship = lazy(() =>
-  import('./pages/Sponsorship').then((m) => ({ default: m.Sponsorship })),
+  import('./modules/content/pages/Sponsorship').then((m) => ({
+    default: m.Sponsorship,
+  })),
 );
 const HealingArts = lazy(() =>
-  import('./pages/HealingArts').then((m) => ({ default: m.HealingArts })),
+  import('./modules/content/pages/HealingArts').then((m) => ({
+    default: m.HealingArts,
+  })),
 );
 const PeaceThroughArt = lazy(() =>
-  import('./pages/PeaceThroughArt').then((m) => ({
+  import('./modules/content/pages/PeaceThroughArt').then((m) => ({
     default: m.PeaceThroughArt,
   })),
 );
 const Student = lazy(() =>
-  import('./pages/Student').then((m) => ({ default: m.Student })),
+  import('./modules/content/pages/Student').then((m) => ({
+    default: m.Student,
+  })),
 );
 const MagazineAccess = lazy(() =>
-  import('./components/access/MagazineAccess').then((m) => ({
+  import('./modules/content/components/access/MagazineAccess').then((m) => ({
     default: m.MagazineAccess,
   })),
 );
 const Page404 = lazy(() =>
-  import('./pages/Page404').then((m) => ({ default: m.Page404 })),
+  import('./modules/scaffolding/pages/Page404').then((m) => ({
+    default: m.Page404,
+  })),
 );
 const Contact = lazy(() =>
-  import('./pages/Contact').then((m) => ({ default: m.Contact })),
+  import('./modules/content/pages/Contact').then((m) => ({
+    default: m.Contact,
+  })),
 );
 const News = lazy(() =>
-  import('./pages/News').then((m) => ({ default: m.News })),
+  import('./modules/content/pages/News').then((m) => ({
+    default: m.News,
+  })),
 );
 const History = lazy(() =>
-  import('./pages/History').then((m) => ({ default: m.History })),
+  import('./modules/content/pages/History').then((m) => ({
+    default: m.History,
+  })),
 );
 const ArtsOlympiad = lazy(() =>
-  import('./pages/ArtsOlympiad').then((m) => ({ default: m.ArtsOlympiad })),
+  import('./modules/content/pages/ArtsOlympiad').then((m) => ({
+    default: m.ArtsOlympiad,
+  })),
 );
 const ClimateChange = lazy(() =>
-  import('./pages/ClimateChange').then((m) => ({ default: m.ClimateChange })),
+  import('./modules/content/pages/ClimateChange').then((m) => ({
+    default: m.ClimateChange,
+  })),
 );
 const Volunteer = lazy(() =>
-  import('./pages/Volunteer').then((m) => ({ default: m.Volunteer })),
+  import('./modules/content/pages/Volunteer').then((m) => ({
+    default: m.Volunteer,
+  })),
 );
 const Professionals = lazy(() =>
-  import('./pages/Professionals').then((m) => ({ default: m.Professionals })),
+  import('./modules/content/pages/Professionals').then((m) => ({
+    default: m.Professionals,
+  })),
 );
 const WorldChildrensAward = lazy(() =>
-  import('./pages/WorldChildrensAward').then((m) => ({
+  import('./modules/content/pages/WorldChildrensAward').then((m) => ({
     default: m.WorldChildrensAward,
   })),
 );
 const Gallery = lazy(() =>
-  import('./pages/Gallery').then((m) => ({ default: m.Gallery })),
+  import('./modules/content/pages/Gallery').then((m) => ({
+    default: m.Gallery,
+  })),
 );
 
 export default function App() {

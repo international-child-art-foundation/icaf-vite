@@ -1,4 +1,4 @@
-import { TArtwork, TResolvedArtwork } from '@/types/Gallery';
+import { TArtwork, TResolvedArtwork } from '@/modules/content/types/Gallery';
 
 /** Derives the folder slug from a human-readable event name: spaces → hyphens. */
 export function eventToSlug(event: string): string {

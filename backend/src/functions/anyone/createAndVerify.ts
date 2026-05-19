@@ -46,6 +46,12 @@ export const handler = async (
     if (body.role !== undefined && body.role !== "guardian" && body.role !== "user") {
       return CommonErrors.badRequest("role must be one of: guardian, user");
     }
+    if (
+      body.has_newsletter_subscription !== undefined &&
+      typeof body.has_newsletter_subscription !== "boolean"
+    ) {
+      return CommonErrors.badRequest("has_newsletter_subscription must be a boolean");
+    }
 
     const result = await dynamodb.send(
       new GetCommand({
@@ -122,11 +128,14 @@ export const handler = async (
       "verified_at = :now",
       "is_virtual = :false",
       "#role = :role",
+      "has_magazine_subscription = if_not_exists(has_magazine_subscription, :false)",
+      "has_newsletter_subscription = :newsletter",
     ];
     const exprValues: Record<string, unknown> = {
       ":now": nowSeconds,
       ":false": false,
       ":role": role,
+      ":newsletter": body.has_newsletter_subscription ?? user.has_newsletter_subscription ?? false,
     };
     if (fName !== undefined) {
       setExprParts.push("f_name = :fName");

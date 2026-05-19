@@ -47,6 +47,7 @@ export interface ArtworkEntity {
     timestamp: number;          // Unix timestamp (seconds)
     release_hash: string;       // SHA-256 hash of the legal release PDF text accepted at submission
     type: 'ART';
+    notifications?: boolean;    // true when submitter opted into submission notifications
 
     // ── Optional ───────────────────────────────────────────────────────────
     f_name?: string;
@@ -77,6 +78,7 @@ interface ArtworkSubmissionFields {
     theme_family?: string;
     theme_instance?: string;
     group_id?: string;
+    notifications?: boolean;
 }
 
 // Request body for authenticated artwork submission (POST /user/artworks)
@@ -118,6 +120,7 @@ export interface ArtworkListItem {
     kudos_count: number;
     timestamp: number;
     is_virtual: boolean;
+    notifications?: boolean;
 }
 
 export interface ListArtworkSubmissionsResponse {
@@ -149,6 +152,7 @@ export interface UpdateArtworkRequest {
     submitter_relationship?: SubmitterRelationship;
     theme_family?: string;
     theme_instance?: string;
+    notifications?: boolean;
 }
 
 export interface SubmitArtworkToGroupRequest {

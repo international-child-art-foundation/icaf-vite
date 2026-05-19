@@ -39,6 +39,10 @@ export function validateDefaultRegistrationRequest(data: DefaultRegistrationRequ
         errors.push('role must be one of: guardian, user');
     }
 
+    if (data.has_newsletter_subscription !== undefined && typeof data.has_newsletter_subscription !== 'boolean') {
+        errors.push('has_newsletter_subscription, if provided, must be a boolean');
+    }
+
     return errors;
 }
 
@@ -58,12 +62,25 @@ export function validateUpdateUserRequest(data: any): string[] {
         errors.push('banned must be a boolean');
     }
 
+    if (data.has_magazine_subscription !== undefined && typeof data.has_magazine_subscription !== 'boolean') {
+        errors.push('has_magazine_subscription must be a boolean');
+    }
+
+    if (data.has_newsletter_subscription !== undefined && typeof data.has_newsletter_subscription !== 'boolean') {
+        errors.push('has_newsletter_subscription must be a boolean');
+    }
+
     if (data.banned === true && !data.ban_reason?.trim()) {
         errors.push('ban_reason is required when banning a user');
     }
 
-    if (data.new_role === undefined && data.banned === undefined) {
-        errors.push('at least one of new_role or banned must be provided');
+    if (
+        data.new_role === undefined &&
+        data.banned === undefined &&
+        data.has_magazine_subscription === undefined &&
+        data.has_newsletter_subscription === undefined
+    ) {
+        errors.push('at least one update field must be provided');
     }
 
     return errors;

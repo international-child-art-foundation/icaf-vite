@@ -35,6 +35,10 @@ export interface UserEntity {
     verify_token?: string;              // UUID slug sent in verification email; cleared after use
     verify_token_expiration?: number;   // Unix timestamp; cleared after use
     verified_at?: number;               // Unix timestamp of account verification
+    emailed_signup_at?: number;           // Unix timestamp when a create-and-verify email was sent
+    unsub_token?: string;               // Permanent token for user-level email unsubscribe links
+    artwork_emails_off?: true;          // User opted out of artwork/group notification emails
+    email_blocked?: true;                   // Address should not be emailed after bounce/complaint
 }
 
 // Safe API response shape — never exposes dob or verification tokens
@@ -48,7 +52,9 @@ export interface UserProfileResponse {
     banned: boolean;
     has_magazine_subscription: boolean;
     has_newsletter_subscription: boolean;
+    artwork_emails_off: boolean;
     verified_at?: number;
+    emailed_signup_at?: number;
     timestamp: number;
 }
 
@@ -60,6 +66,7 @@ export interface DefaultRegistrationRequest {
     l_name: string;
     dob: string;    // YYYY-MM-DD
     role: Extract<Role, 'guardian' | 'user'>;
+    has_newsletter_subscription?: boolean;
 }
 
 // Confirm default registration after POST /auth/default-registration.
@@ -79,6 +86,7 @@ export interface CreateAndVerifyRequest {
     l_name?: string;        // optional profile update during account creation
     dob?: string;           // optional profile update during account creation
     role?: Extract<Role, 'guardian' | 'user'>;
+    has_newsletter_subscription?: boolean;
 }
 
 // Delete account request
@@ -93,6 +101,8 @@ export interface UpdateUserRequest {
     new_role?: Role;
     banned?: boolean;
     ban_reason?: string;    // required when banned=true
+    has_magazine_subscription?: boolean;
+    has_newsletter_subscription?: boolean;
 }
 
 export interface UpdateUserResponse {
@@ -100,6 +110,8 @@ export interface UpdateUserResponse {
     user_id: string;
     role: Role;
     banned: boolean;
+    has_magazine_subscription: boolean;
+    has_newsletter_subscription: boolean;
     admin_action_id?: string;
     timestamp: number;
     updated_fields: string[];

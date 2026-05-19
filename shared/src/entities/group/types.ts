@@ -42,6 +42,7 @@ export interface GroupEntity {
     cover_art_ids: string[];        // 3–4 art_ids for gallery card thumbnails; may be []
     timestamp: number;              // Unix timestamp (seconds)
     type: 'GROUP';
+    notifications?: boolean;        // true when owner opted into group submission notifications
 
     // ── Optional ───────────────────────────────────────────────────────────
     theme_family?: string;          // e.g. 'CHERRYBLOSSOM'
@@ -65,6 +66,7 @@ export interface SubmitGroupRequest {
     country: string;
     region?: string;
     description?: string;
+    notifications?: boolean;
 }
 
 export interface SubmitGroupResponse {
@@ -93,6 +95,7 @@ export interface GroupListItem {
     member_count: number;
     status: GroupStatus;
     timestamp: number;
+    notifications?: boolean;
 }
 
 export interface ListGroupSubmissionsResponse {
@@ -110,6 +113,7 @@ export interface UpdateGroupRequest {
     theme_family?: string;
     theme_instance?: string;
     cover_art_ids?: string[];
+    notifications?: boolean;
 }
 
 export interface UpdateGroupResponse {

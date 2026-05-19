@@ -70,6 +70,7 @@ export const handler = async (
       member_count: ((item.member_art_ids as string[]) ?? []).length,
       status: item.status as GroupListItem["status"],
       timestamp: item.timestamp as number,
+      notifications: item.notifications as boolean | undefined,
     }));
 
     const lastEvaluatedKey = has_more ? items[limit - 1] : result.LastEvaluatedKey;

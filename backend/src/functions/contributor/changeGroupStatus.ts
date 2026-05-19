@@ -9,7 +9,7 @@ import {
   GroupStatus,
   UserEntity,
 } from "@icaf/shared";
-import { sendApprovalEmail } from "../../utils/emails/approvalNotification";
+import { sendApprovalEmailToUser } from "../../utils/emails/artworkEmailControls";
 import { buildApprovedGroupGsiAttrs, GROUP_GSI_ATTRS_TO_REMOVE } from "../../dynamo/groupGsis";
 import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
@@ -95,7 +95,7 @@ export const handler = async (
     );
 
     // ── Send approval email (non-blocking) ────────────────────────────────
-    if (newStatus === "approved") {
+    if (newStatus === "approved" && group.notifications === true) {
       dynamodb.send(
         new GetCommand({
           TableName: TABLE_NAME,
@@ -103,9 +103,9 @@ export const handler = async (
         }),
       ).then((userResult) => {
         const user = userResult.Item as UserEntity | undefined;
-        if (user?.email) {
-          sendApprovalEmail({
-            toEmail: user.email,
+        if (user) {
+          sendApprovalEmailToUser({
+            user,
             type: "group",
             id: groupId,
             title: group.title,

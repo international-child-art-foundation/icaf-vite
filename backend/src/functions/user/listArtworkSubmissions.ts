@@ -68,6 +68,7 @@ export const handler = async (
       kudos_count: (item.kudos_count as number) ?? 0,
       timestamp: item.timestamp as number,
       is_virtual: item.is_virtual as boolean,
+      notifications: item.notifications as boolean | undefined,
     }));
 
     const lastEvaluatedKey = has_more ? items[limit - 1] : result.LastEvaluatedKey;

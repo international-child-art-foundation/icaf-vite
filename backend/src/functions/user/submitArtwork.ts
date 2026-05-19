@@ -80,6 +80,7 @@ export const handler = async (
           timestamp: nowSeconds,
           release_hash: body.release_hash.trim(),
           type: "ART",
+          notifications: body.group_id ? false : body.notifications ?? false,
           // optional fields
           ...(body.title && { title: body.title }),
           ...(body.description && { description: body.description }),

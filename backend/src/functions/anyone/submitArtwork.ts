@@ -10,7 +10,7 @@ import {
   GuestSubmitArtworkRequest,
   SubmitArtworkResponse,
   UserEntity,
-  validateSubmissionData,
+  validateGuestSubmitArtworkRequest,
 } from "@icaf/shared";
 import { GSI, EntityType } from "../../dynamo/ddbSchemaConsts";
 import { emailPk, emailGsiSk } from "../../dynamo/emailGsi";
@@ -54,7 +54,7 @@ export const handler = async (
     }
 
     // ── Validate artwork fields ────────────────────────────────────────────
-    const artErrors = validateSubmissionData(body);
+    const artErrors = validateGuestSubmitArtworkRequest(body);
     if (artErrors.length > 0) {
       return CommonErrors.badRequest(artErrors.join("; "));
     }
@@ -164,6 +164,7 @@ export const handler = async (
           timestamp: nowSeconds,
           release_hash: body.release_hash.trim(),
           type: "ART",
+          notifications: body.group_id ? false : body.notifications ?? false,
           // optional fields
           ...(body.title && { title: body.title }),
           ...(body.description && { description: body.description }),
@@ -201,36 +202,41 @@ export const handler = async (
       { expiresIn: PRESIGNED_URL_EXPIRES_SECONDS },
     );
 
-    // ── Step 4: Write verify token to USER entity ──────────────────────────
-    const verifyToken = randomUUID();
-    const verifyTokenExpiration = nowSeconds + VERIFY_TOKEN_TTL_SECONDS;
+    // ── Step 4: Send one-time create-and-verify email for virtual users ───
+    let sentSignupEmail = false;
+    if (!user.emailed_signup_at) {
+      const verifyToken = randomUUID();
+      const verifyTokenExpiration = nowSeconds + VERIFY_TOKEN_TTL_SECONDS;
 
-    await dynamodb.send(
-      new UpdateCommand({
-        TableName: TABLE_NAME,
-        Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
-        UpdateExpression:
-          "SET verify_token = :token, verify_token_expiration = :exp",
-        ExpressionAttributeValues: {
-          ":token": verifyToken,
-          ":exp": verifyTokenExpiration,
-        },
-      }),
-    );
+      await dynamodb.send(
+        new UpdateCommand({
+          TableName: TABLE_NAME,
+          Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
+          UpdateExpression:
+            "SET verify_token = :token, verify_token_expiration = :exp, emailed_signup_at = :emailSignupAt",
+          ExpressionAttributeValues: {
+            ":token": verifyToken,
+            ":exp": verifyTokenExpiration,
+            ":emailSignupAt": nowSeconds,
+          },
+        }),
+      );
 
-    // ── Step 5: Send artwork submission email ─────────────────────────────
-    await sendArtworkSubmissionEmail({
-      toEmail: user.email,
-      userId: user.user_id,
-      verifyToken,
-    });
+      await sendArtworkSubmissionEmail({
+        toEmail: user.email,
+        userId: user.user_id,
+        verifyToken,
+      });
+      sentSignupEmail = true;
+    }
 
     const response: SubmitArtworkResponse = {
       success: true,
       art_id: artId,
       presigned_url: presignedUrl,
-      message:
-        "Artwork submitted. Upload your image using the presigned URL. Check your email to verify your account.",
+      message: sentSignupEmail
+        ? "Artwork submitted. Upload your image using the presigned URL. Check your email to verify your account."
+        : "Artwork submitted. Upload your image using the presigned URL.",
     };
 
     return {

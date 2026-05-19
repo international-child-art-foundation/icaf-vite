@@ -9,7 +9,7 @@ import {
   ArtworkStatus,
   UserEntity,
 } from "@icaf/shared";
-import { sendApprovalEmail } from "../../utils/emails/approvalNotification";
+import { sendApprovalEmailToUser } from "../../utils/emails/artworkEmailControls";
 import { buildApprovedArtworkGsiAttrs, ARTWORK_GSI_ATTRS_TO_REMOVE } from "../../dynamo/artGsis";
 import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
@@ -96,7 +96,7 @@ export const handler = async (
     );
 
     // ── Send approval email (non-blocking) ────────────────────────────────
-    if (newStatus === "approved") {
+    if (newStatus === "approved" && !art.group_id && art.notifications === true) {
       dynamodb.send(
         new GetCommand({
           TableName: TABLE_NAME,
@@ -104,9 +104,9 @@ export const handler = async (
         }),
       ).then((userResult) => {
         const user = userResult.Item as UserEntity | undefined;
-        if (user?.email) {
-          sendApprovalEmail({
-            toEmail: user.email,
+        if (user) {
+          sendApprovalEmailToUser({
+            user,
             type: "art",
             id: artId,
             title: art.title,

@@ -23,9 +23,11 @@ export const handler = async (
       role: user.role ?? "user",
       is_virtual: user.is_virtual,
       banned: user.banned,
-      has_magazine_subscription: user.has_magazine_subscription,
-      has_newsletter_subscription: user.has_newsletter_subscription,
+      has_magazine_subscription: user.has_magazine_subscription ?? false,
+      has_newsletter_subscription: user.has_newsletter_subscription ?? false,
+      artwork_emails_off: user.artwork_emails_off === true,
       verified_at: user.verified_at,
+      emailed_signup_at: user.emailed_signup_at,
       timestamp: user.timestamp,
     };
 

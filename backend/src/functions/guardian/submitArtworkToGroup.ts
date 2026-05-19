@@ -46,6 +46,7 @@ interface SubmitArtworkToGroupBody {
   submitter_relationship?: SubmitterRelationship;
   theme_family?: string;
   theme_instance?: string;
+  notifications?: boolean;
 }
 
 export const handler = async (
@@ -126,6 +127,7 @@ export const handler = async (
           timestamp: nowSeconds,
           release_hash: body.release_hash.trim(),
           type: "ART",
+          notifications: false,
           // optional fields
           ...(body.f_name && { f_name: body.f_name }),
           ...(body.age !== undefined && { age: body.age }),

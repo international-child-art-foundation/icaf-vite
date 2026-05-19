@@ -63,6 +63,7 @@ export async function fetchArtworkReviewPage(
     kudos_count: (item.kudos_count as number) ?? 0,
     timestamp: item.timestamp as number,
     is_virtual: item.is_virtual as boolean,
+    notifications: item.notifications as boolean | undefined,
   }));
 
   const cursor = has_more ? items[limit - 1] : lastEvaluatedKey;
@@ -98,6 +99,7 @@ export async function fetchGroupReviewPage(
     member_count: ((item.member_art_ids as string[]) ?? []).length,
     status: item.status as GroupListItem["status"],
     timestamp: item.timestamp as number,
+    notifications: item.notifications as boolean | undefined,
   }));
 
   const cursor = has_more ? items[limit - 1] : lastEvaluatedKey;

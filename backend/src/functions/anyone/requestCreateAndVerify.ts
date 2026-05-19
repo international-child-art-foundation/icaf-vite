@@ -55,7 +55,7 @@ export const handler = async (
 
     const user = emailResult.Items[0] as UserEntity;
 
-    if (!user.is_virtual) {
+    if (!user.is_virtual || user.emailed_signup_at) {
       return okResponse;
     }
 
@@ -68,10 +68,11 @@ export const handler = async (
         TableName: TABLE_NAME,
         Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
         UpdateExpression:
-          "SET verify_token = :token, verify_token_expiration = :exp",
+          "SET verify_token = :token, verify_token_expiration = :exp, emailed_signup_at = :emailSignupAt",
         ExpressionAttributeValues: {
           ":token": verifyToken,
           ":exp": verifyTokenExpiration,
+          ":emailSignupAt": nowSeconds,
         },
       }),
     );

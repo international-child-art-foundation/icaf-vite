@@ -1,5 +1,6 @@
 import { SendEmailCommand } from "@aws-sdk/client-ses";
 import { sesClient, SES_FROM_EMAIL, APP_URL } from "../../config/aws-clients";
+import { emailTags } from "./tags";
 
 /**
  * Sent when an existing app-side user requests a login account.
@@ -16,6 +17,7 @@ export async function sendCreateAndVerifyEmail(args: {
     new SendEmailCommand({
       Source: SES_FROM_EMAIL,
       Destination: { ToAddresses: [args.toEmail] },
+      Tags: emailTags("create_and_verify"),
       Message: {
         Subject: { Data: "Create your ICAF account" },
         Body: {

@@ -84,6 +84,7 @@ export const handler = async (
     if (body.theme_family !== undefined) { setExprParts.push("theme_family = :tf"); exprValues[":tf"] = body.theme_family; }
     if (body.theme_instance !== undefined) { setExprParts.push("theme_instance = :ti"); exprValues[":ti"] = body.theme_instance; }
     if (body.cover_art_ids !== undefined) { setExprParts.push("cover_art_ids = :covers"); exprValues[":covers"] = body.cover_art_ids; }
+    if (body.notifications !== undefined) { setExprParts.push("notifications = :notifications"); exprValues[":notifications"] = body.notifications; }
 
     // Remove gallery GSI attrs (group is no longer approved)
     const updateExpr =

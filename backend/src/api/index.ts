@@ -43,6 +43,7 @@ import { handler as defaultRegistration } from "../functions/anyone/defaultRegis
 import { handler as requestCreateAndVerify } from "../functions/anyone/requestCreateAndVerify";
 import { handler as resendVerification } from "../functions/anyone/resendVerificationEmail";
 import { handler as guestSubmitArtwork } from "../functions/anyone/submitArtwork";
+import { handler as unsubscribeArtworkEmails } from "../functions/anyone/unsubscribeArtworkEmails";
 import { handler as changeArtworkStatus } from "../functions/contributor/changeArtworkStatus";
 import { handler as changeGroupStatus } from "../functions/contributor/changeGroupStatus";
 import { handler as fetchHiddenArtworks } from "../functions/contributor/fetchHiddenArtworks";
@@ -122,6 +123,7 @@ const routes: Route[] = [
   { method: "GET", path: "/gallery/groups", handler: galleryGroups },
   { method: "GET", path: "/gallery/groups/family/{family}", handler: galleryGroups },
   { method: "GET", path: "/gallery/groups/family/{family}/instance/{instance}", handler: galleryGroups },
+  { method: "GET", path: "/unsubscribe/artwork", handler: unsubscribeArtworkEmails },
 
   { method: "POST", path: "/auth/default-registration", handler: defaultRegistration },
   { method: "POST", path: "/auth/default-registration/confirm", handler: confirmDefaultRegistration },

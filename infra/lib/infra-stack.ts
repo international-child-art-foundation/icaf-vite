@@ -556,6 +556,7 @@ export class InfraStack extends Stack {
     addAnyProxy(api.root.addResource("magazines"));
     addAnyProxy(api.root.addResource("news"));
     addAnyProxy(api.root.addResource("gallery"));
+    addAnyProxy(api.root.addResource("unsubscribe"));
 
     // ApiFn owns authentication and authorization for every API route.
     const authRes = api.root.addResource("auth");

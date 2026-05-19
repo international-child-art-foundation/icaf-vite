@@ -58,6 +58,7 @@ export const handler = async (
           cover_art_ids: [],
           timestamp: nowSeconds,
           type: "GROUP",
+          notifications: body.notifications ?? false,
           // optional fields
           ...(body.theme_family !== undefined && { theme_family: body.theme_family }),
           ...(body.theme_instance !== undefined && { theme_instance: body.theme_instance }),

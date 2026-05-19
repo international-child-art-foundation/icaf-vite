@@ -79,6 +79,13 @@ export const handler = async (
     if (body.submitter_relationship !== undefined) { setExprParts.push("submitter_relationship = :rel"); exprValues[":rel"] = body.submitter_relationship; }
     if (body.theme_family !== undefined) { setExprParts.push("theme_family = :tf"); exprValues[":tf"] = body.theme_family; }
     if (body.theme_instance !== undefined) { setExprParts.push("theme_instance = :ti"); exprValues[":ti"] = body.theme_instance; }
+    if (art.group_id) {
+      setExprParts.push("notifications = :notifications");
+      exprValues[":notifications"] = false;
+    } else if (body.notifications !== undefined) {
+      setExprParts.push("notifications = :notifications");
+      exprValues[":notifications"] = body.notifications;
+    }
 
     await dynamodb.send(
       new UpdateCommand({

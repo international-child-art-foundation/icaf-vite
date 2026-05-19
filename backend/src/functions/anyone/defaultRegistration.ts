@@ -38,6 +38,12 @@ export const handler = async (
     if (body.role !== "guardian" && body.role !== "user") {
       return CommonErrors.badRequest("role must be one of: guardian, user");
     }
+    if (
+      body.has_newsletter_subscription !== undefined &&
+      typeof body.has_newsletter_subscription !== "boolean"
+    ) {
+      return CommonErrors.badRequest("has_newsletter_subscription must be a boolean");
+    }
 
     if (body.f_name.length > MAX_NAME_LEN || body.l_name.length > MAX_NAME_LEN) {
       return CommonErrors.badRequest(`f_name and l_name must be ${MAX_NAME_LEN} characters or fewer`);
@@ -51,6 +57,7 @@ export const handler = async (
     const fName = body.f_name.trim();
     const lName = body.l_name.trim();
     const role = body.role;
+    const hasNewsletterSubscription = body.has_newsletter_subscription ?? false;
     const nowSeconds = Math.floor(Date.now() / 1000);
 
     const existingUser = await dynamodb.send(
@@ -105,7 +112,7 @@ export const handler = async (
           timestamp: nowSeconds,
           banned: false,
           has_magazine_subscription: false,
-          has_newsletter_subscription: false,
+          has_newsletter_subscription: hasNewsletterSubscription,
           type: "USER",
           EMAIL_PK: emailPk(email),
           EMAIL_SK: emailGsiSk(EntityType.User),

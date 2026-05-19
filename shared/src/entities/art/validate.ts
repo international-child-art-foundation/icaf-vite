@@ -30,6 +30,7 @@ export function validateOptionalArtworkFields(data: {
     theme_family?: string;
     theme_instance?: string;
     group_id?: string;
+    notifications?: boolean;
 }): string[] {
     const errors: string[] = [];
 
@@ -117,6 +118,10 @@ export function validateOptionalArtworkFields(data: {
         } else if (data.group_id.length > MAX_STRING_LEN) {
             errors.push(`group_id must be ${MAX_STRING_LEN} characters or less`);
         }
+    }
+
+    if (data.notifications !== undefined && typeof data.notifications !== 'boolean') {
+        errors.push('notifications, if provided, must be a boolean');
     }
 
     return errors;

@@ -1,5 +1,6 @@
 import { SendEmailCommand } from "@aws-sdk/client-ses";
 import { sesClient, SES_FROM_EMAIL, APP_URL } from "../../config/aws-clients";
+import { emailTags } from "./tags";
 
 /**
  * Sent automatically after a guest user submits artwork.
@@ -16,6 +17,7 @@ export async function sendArtworkSubmissionEmail(args: {
     new SendEmailCommand({
       Source: SES_FROM_EMAIL,
       Destination: { ToAddresses: [args.toEmail] },
+      Tags: emailTags("artwork_submission"),
       Message: {
         Subject: { Data: "Thanks for your artwork submission to ICAF!" },
         Body: {

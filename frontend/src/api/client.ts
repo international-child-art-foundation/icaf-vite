@@ -15,15 +15,22 @@ export type ApiClientConfig = {
 const DEFAULT_API_BASE_URL = '/';
 
 function resolveApiBaseUrl(config?: ApiClientConfig): string {
+  // TODO: Before production, proxy the API to here and replace base url
   const configuredBaseUrl =
-    config?.baseUrl ?? import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL;
+    config?.baseUrl ??
+    import.meta.env.VITE_API_BASE_URL ??
+    DEFAULT_API_BASE_URL;
 
   return configuredBaseUrl.endsWith('/')
     ? configuredBaseUrl.slice(0, -1)
     : configuredBaseUrl;
 }
 
-function buildUrl(path: string, query?: ApiQueryParams, config?: ApiClientConfig): string {
+function buildUrl(
+  path: string,
+  query?: ApiQueryParams,
+  config?: ApiClientConfig,
+): string {
   const apiBaseUrl = resolveApiBaseUrl(config);
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   const url = new URL(`${apiBaseUrl}${normalizedPath}`, window.location.origin);
@@ -71,7 +78,11 @@ export class ApiError extends Error {
   }
 
   get code(): string | undefined {
-    if (typeof this.body === 'object' && this.body !== null && 'code' in this.body) {
+    if (
+      typeof this.body === 'object' &&
+      this.body !== null &&
+      'code' in this.body
+    ) {
       return String(this.body.code);
     }
 

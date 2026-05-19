@@ -219,7 +219,7 @@ export const ContactForm = ({ config }: ContactFormProps) => {
     }
   };
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!formRef.current) return;
     scrollToSection();

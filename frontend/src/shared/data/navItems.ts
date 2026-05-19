@@ -153,20 +153,6 @@ export const navItems: NavItem[] = [
         imageSrc: student,
         hoverDescription: 'Express your creativity through ICAF initiatives.',
       },
-      // {
-      //   label: 'Corporate Partnerships',
-      //   href: '/get-involved/corporation',
-      //   imageSrc: corporate,
-      //   alt: 'Make a donation',
-      //   hoverDescription: '',
-      // },
-    ],
-  },
-  {
-    key: 'news-events',
-    label: 'News & Events',
-    navLabel: 'News & Events',
-    children: [
       {
         label: 'Latest News',
         href: '/news-events/news',
@@ -180,6 +166,14 @@ export const navItems: NavItem[] = [
         imageSrc: upcoming,
         hoverDescription: 'See what ICAF has planned for the future.',
       },
+
+      // {
+      //   label: 'Corporate Partnerships',
+      //   href: '/get-involved/corporation',
+      //   imageSrc: corporate,
+      //   alt: 'Make a donation',
+      //   hoverDescription: '',
+      // },
     ],
   },
   {
@@ -194,6 +188,13 @@ export const navItems: NavItem[] = [
     label: 'Gallery',
     navLabel: 'Gallery',
     href: '/gallery',
+    children: [],
+  },
+  {
+    key: 'my-icaf',
+    label: 'My ICAF',
+    navLabel: 'My ICAF',
+    href: '/dashboard',
     children: [],
   },
 ];

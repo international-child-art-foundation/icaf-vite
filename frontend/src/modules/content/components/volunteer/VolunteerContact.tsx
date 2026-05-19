@@ -116,7 +116,7 @@ export const VolunteerContact = () => {
   );
   const formRef = useRef<HTMLFormElement | null>(null);
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!formRef.current) return;
     setStatus('sending');

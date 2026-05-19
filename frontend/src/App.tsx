@@ -120,6 +120,21 @@ const Gallery = lazy(() =>
     default: m.Gallery,
   })),
 );
+const Register = lazy(() =>
+  import('./modules/account/pages/Register').then((m) => ({
+    default: m.Register,
+  })),
+);
+const Login = lazy(() =>
+  import('./modules/account/pages/Login').then((m) => ({
+    default: m.Login,
+  })),
+);
+const SubmitArtworkGroup = lazy(() =>
+  import('./modules/submissions/pages/SubmitArtworkGroup').then((m) => ({
+    default: m.SubmitArtworkGroup,
+  })),
+);
 
 export default function App() {
   useEffect(() => {
@@ -201,6 +216,13 @@ export default function App() {
                   element={<GallerySlideshowEntry />}
                 />
               </Route>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/submit-artwork" element={<SubmitArtworkGroup />} />
+              <Route
+                path="/submit-artwork/artworks"
+                element={<SubmitArtworkGroup />}
+              />
 
               {routes.map(({ main, aliases }) =>
                 aliases.map((alias) => (

@@ -227,8 +227,8 @@ export class InfraStack extends Stack {
       autoVerify: { email: true },
       userVerification: {
         emailSubject: "Verify your ICAF account",
-        emailBody: "Your ICAF verification code is {####}",
-        emailStyle: cognito.VerificationEmailStyle.CODE,
+        emailBody: "Verify your ICAF account by clicking this link: {##Verify Email##}",
+        emailStyle: cognito.VerificationEmailStyle.LINK,
       },
       standardAttributes: {
         email: { required: true, mutable: true },

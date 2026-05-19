@@ -359,16 +359,6 @@ export class InfraStack extends Stack {
         removalPolicy: RemovalPolicy.DESTROY,
       });
 
-    const fn = (id: string, entry: string, heavy = false): NodejsFunction =>
-      new NodejsFunction(this, id, {
-        runtime: Runtime.NODEJS_20_X,
-        timeout: Duration.seconds(heavy ? 60 : 15),
-        memorySize: heavy ? 512 : 256,
-        environment: commonEnv,
-        entry,
-        logGroup: lambdaLogGroup(id),
-      });
-
     const src = (p: string) => `../backend/src/functions/${p}`;
 
     const apiFn = new NodejsFunction(this, "ApiFn", {
@@ -537,39 +527,14 @@ export class InfraStack extends Stack {
       ],
     }));
 
-    const apiIntegration = new apigw.LambdaIntegration(apiFn);
+    const apiIntegration = new apigw.LambdaIntegration(apiFn, {
+      allowTestInvoke: false,
+    });
 
-    const addAnyProxy = (
-      parent: apigw.IResource,
-    ) => {
-      parent.addMethod("ANY", apiIntegration);
-      parent.addProxy({
-        anyMethod: true,
-        defaultIntegration: apiIntegration,
-      });
-    };
-
-    // Public API prefixes route through ApiFn without requiring Cognito.
-    addAnyProxy(api.root.addResource("artworks"));
-    addAnyProxy(api.root.addResource("groups"));
-    addAnyProxy(api.root.addResource("takedown"));
-    addAnyProxy(api.root.addResource("magazines"));
-    addAnyProxy(api.root.addResource("news"));
-    addAnyProxy(api.root.addResource("gallery"));
-    addAnyProxy(api.root.addResource("unsubscribe"));
-
-    // ApiFn owns authentication and authorization for every API route.
-    const authRes = api.root.addResource("auth");
-    authRes.addResource("change-password").addMethod("POST", apiIntegration);
-    authRes.addProxy({
+    api.root.addProxy({
       anyMethod: true,
       defaultIntegration: apiIntegration,
     });
-
-    addAnyProxy(api.root.addResource("user"));
-    addAnyProxy(api.root.addResource("guardian"));
-    addAnyProxy(api.root.addResource("contributor"));
-    addAnyProxy(api.root.addResource("admin"));
 
     // ─── 11. Emergency Shutdown — Billing Alarm ───────────────────────────────
     // NOTE: AWS billing metrics are only published to us-east-1.

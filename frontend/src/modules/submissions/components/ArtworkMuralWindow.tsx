@@ -10,8 +10,13 @@ import {
 import type { ArtworkDraft } from '@/modules/submissions/types/artworkGroupSubmission';
 import { cn } from '@/utils/utils';
 
+type ArtworkWithPreview = ArtworkDraft & {
+  fileName?: string;
+  previewDataUrl?: string;
+};
+
 type ArtworkMuralWindowProps = {
-  artworks: ArtworkDraft[];
+  artworks: ArtworkWithPreview[];
   errors?: Record<string, Partial<Record<keyof ArtworkDraft | 'file', string>>>;
   isOpen: boolean;
   maxCount: number;
@@ -107,7 +112,7 @@ function ArtworkMural({
   onSelectArtwork,
   onUnselect,
 }: {
-  artworks: ArtworkDraft[];
+  artworks: ArtworkWithPreview[];
   className?: string;
   selectedIndex?: number | null;
   variant: 'compact' | 'workspace';
@@ -223,7 +228,7 @@ function ArtworkDetailsPane({
   onNext,
   onPrevious,
 }: {
-  activeArtwork: ArtworkDraft | undefined;
+  activeArtwork: ArtworkWithPreview | undefined;
   activeErrors?: Partial<Record<keyof ArtworkDraft | 'file', string>>;
   artworkCount: number;
   hasSelectedArtwork: boolean;

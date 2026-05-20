@@ -1,5 +1,5 @@
-import { useMemo, useState, useEffect } from 'react';
-import type { ChangeEvent, FormEvent } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { ChangeEvent, FormEvent, ReactNode } from 'react';
 import { Bell, BookOpen, Globe2, Send, UserRound } from 'lucide-react';
 import { createGroup, submitArtworkToGroup } from '@/api/guardian';
 import { uploadToPresignedUrl } from '@/api/uploads';
@@ -10,6 +10,7 @@ import type {
   ArtworkDraft,
   ArtworkGroupInfo,
   ArtworkGroupSubmissionErrors,
+  StoredArtworkGroupSubmissionDraft,
 } from '@/modules/submissions/types/artworkGroupSubmission';
 import {
   ARTWORK_GROUP_DRAFT_KEY,
@@ -23,53 +24,163 @@ import {
 } from '@/modules/submissions/utils/artworkGroupDraft';
 import { createImagePreview } from '@/modules/submissions/utils/imagePreview';
 import { Button } from '@/shared/components/ui/button';
-import { useLocalStorageDraft } from '@/shared/hooks/useLocalStorageDraft';
 import { GROUP_MAX_MEMBERS } from '@icaf/shared';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const groupFieldIcons = {
+type SubmissionStatus = 'idle' | 'submitting' | 'success';
+
+type GroupIconField = 'class_name' | 'country' | 'guardian_display_name';
+
+type StringArtworkGroupField = {
+  [Key in keyof ArtworkGroupInfo]: ArtworkGroupInfo[Key] extends string
+    ? Key
+    : never;
+}[keyof ArtworkGroupInfo];
+
+const textArtworkGroupFields = [
+  'class_name',
+  'country',
+  'guardian_display_name',
+  'region',
+  'title',
+] as const satisfies readonly StringArtworkGroupField[];
+
+type TextArtworkGroupField = (typeof textArtworkGroupFields)[number];
+
+const groupFieldIcons: Record<GroupIconField, ReactNode> = {
   class_name: <BookOpen aria-hidden="true" className="h-4 w-4" />,
   country: <Globe2 aria-hidden="true" className="h-4 w-4" />,
   guardian_display_name: <UserRound aria-hidden="true" className="h-4 w-4" />,
 };
 
-function getSubmitError(error: unknown) {
+const initialPersistedDraft: StoredArtworkGroupSubmissionDraft = {
+  certificationAccepted:
+    initialArtworkGroupSubmissionDraft.certificationAccepted,
+  group: initialArtworkGroupSubmissionDraft.group,
+};
+
+function getSubmitError(error: unknown): string {
   if (error instanceof Error) return error.message;
   return 'Artwork group submission failed. Please try again.';
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === 'object');
+}
+
+function isTextArtworkGroupField(
+  value: string,
+): value is TextArtworkGroupField {
+  return (textArtworkGroupFields as readonly string[]).includes(value);
+}
+
+function readString(value: unknown, fallback: string): string {
+  return typeof value === 'string' ? value : fallback;
+}
+
+function readStoredGroupType(value: unknown): ArtworkGroupInfo['group_type'] {
+  return typeof value === 'string'
+    ? value
+    : initialPersistedDraft.group.group_type;
+}
+
+function readStoredGroup(value: unknown): ArtworkGroupInfo {
+  const group = isRecord(value) ? value : {};
+
+  return {
+    class_name: readString(
+      group.class_name,
+      initialPersistedDraft.group.class_name,
+    ),
+    country: readString(group.country, initialPersistedDraft.group.country),
+    description: readString(
+      group.description,
+      initialPersistedDraft.group.description,
+    ),
+    group_type: readStoredGroupType(group.group_type),
+    guardian_display_name: readString(
+      group.guardian_display_name,
+      initialPersistedDraft.group.guardian_display_name,
+    ),
+    notifications:
+      typeof group.notifications === 'boolean'
+        ? group.notifications
+        : initialPersistedDraft.group.notifications,
+    region: readString(group.region, initialPersistedDraft.group.region),
+    title: readString(group.title, initialPersistedDraft.group.title),
+  };
+}
+
+function readPersistedDraft(): StoredArtworkGroupSubmissionDraft {
+  if (typeof window === 'undefined') return initialPersistedDraft;
+
+  try {
+    const storedValue = window.localStorage.getItem(ARTWORK_GROUP_DRAFT_KEY);
+    const parsedDraft: unknown = storedValue ? JSON.parse(storedValue) : {};
+    const storedDraft = isRecord(parsedDraft) ? parsedDraft : {};
+
+    return {
+      certificationAccepted:
+        typeof storedDraft.certificationAccepted === 'boolean'
+          ? storedDraft.certificationAccepted
+          : initialPersistedDraft.certificationAccepted,
+      group: readStoredGroup(storedDraft.group),
+    };
+  } catch {
+    return initialPersistedDraft;
+  }
 }
 
 export function SubmitArtworkGroup() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [draft, setDraft, clearDraft] = useLocalStorageDraft({
-    initialValue: initialArtworkGroupSubmissionDraft,
-    key: ARTWORK_GROUP_DRAFT_KEY,
-  });
+  const [draft, setDraft] = useState(readPersistedDraft);
+  const [artworks, setArtworks] = useState<ArtworkDraft[]>([
+    createArtworkDraft(),
+  ]);
   const [files, setFiles] = useState<Record<string, File | undefined>>({});
+  const [previewDataUrls, setPreviewDataUrls] = useState<
+    Record<string, string | undefined>
+  >({});
   const [errors, setErrors] = useState<ArtworkGroupSubmissionErrors>({});
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>(
-    'idle',
-  );
+  const [status, setStatus] = useState<SubmissionStatus>('idle');
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
 
   const isSubmitting = status === 'submitting';
   const artworkErrors = errors.artworks ?? {};
   const isArtworkWindowOpen = location.pathname === '/submit-artwork/artworks';
+  const submissionDraft = useMemo(
+    () => ({ ...draft, artworks }),
+    [artworks, draft],
+  );
+  const displayArtworks = useMemo(
+    () =>
+      artworks.map((artwork) => {
+        const liveFile = files[artwork.id];
+
+        return {
+          ...artwork,
+          fileName: liveFile?.name,
+          previewDataUrl: liveFile ? previewDataUrls[artwork.id] : undefined,
+        };
+      }),
+    [artworks, files, previewDataUrls],
+  );
 
   const viewerError = useMemo(() => {
     if (errors.root) return errors.root;
-    const firstArtworkError = draft.artworks
+    const firstArtworkError = artworks
       .map((artwork) => artworkErrors[artwork.id]?.file)
       .find(Boolean);
     return firstArtworkError;
-  }, [artworkErrors, draft.artworks, errors.root]);
+  }, [artworkErrors, artworks, errors.root]);
 
   function updateGroupField<Name extends keyof ArtworkGroupInfo>(
     name: Name,
     value: ArtworkGroupInfo[Name],
   ) {
     setDraft((current) => ({
-      ...current,
+      certificationAccepted: current.certificationAccepted,
       group: {
         ...current.group,
         [name]: value,
@@ -78,8 +189,9 @@ export function SubmitArtworkGroup() {
   }
 
   function handleGroupTextChange(event: ChangeEvent<HTMLInputElement>) {
-    const name = event.target.name as keyof ArtworkGroupInfo;
-    updateGroupField(name, event.target.value as ArtworkGroupInfo[typeof name]);
+    const { name, value } = event.target;
+    if (!isTextArtworkGroupField(name)) return;
+    updateGroupField(name, value);
   }
 
   function updateArtwork<Name extends keyof ArtworkDraft>(
@@ -87,33 +199,20 @@ export function SubmitArtworkGroup() {
     name: Name,
     value: ArtworkDraft[Name],
   ) {
-    setDraft((current) => ({
-      ...current,
-      artworks: current.artworks.map((artwork) =>
+    setArtworks((current) =>
+      current.map((artwork) =>
         artwork.id === artworkId ? { ...artwork, [name]: value } : artwork,
       ),
-    }));
+    );
   }
 
   async function attachFile(artworkId: string, file: File) {
     const previewDataUrl = await createImagePreview(file);
-    const fileType = getUploadFileType(file);
 
     setFiles((current) => ({ ...current, [artworkId]: file }));
-    setDraft((current) => ({
+    setPreviewDataUrls((current) => ({
       ...current,
-      artworks: current.artworks.map((artwork) =>
-        artwork.id === artworkId
-          ? {
-              ...artwork,
-              fileName: file.name,
-              fileSize: file.size,
-              fileType,
-              previewDataUrl,
-              restoredFromDraft: false,
-            }
-          : artwork,
-      ),
+      [artworkId]: previewDataUrl,
     }));
   }
 
@@ -131,56 +230,54 @@ export function SubmitArtworkGroup() {
       delete next[artworkId];
       return next;
     });
-    setDraft((current) => {
-      const remainingArtworks = current.artworks.filter(
+    setPreviewDataUrls((current) => {
+      const next = { ...current };
+      delete next[artworkId];
+      return next;
+    });
+    setArtworks((current) => {
+      const remainingArtworks = current.filter(
         (artwork) => artwork.id !== artworkId,
       );
 
-      return {
-        ...current,
-        artworks:
-          remainingArtworks.length > 0
-            ? remainingArtworks
-            : [createArtworkDraft()],
-      };
+      return remainingArtworks.length > 0
+        ? remainingArtworks
+        : [createArtworkDraft()];
     });
   }
 
   async function addFiles(filesToAdd: File[]) {
     if (filesToAdd.length === 0) return;
 
-    let nextDraft = draft;
+    let nextArtworks = artworks;
     const occupiedArtworkIds = new Set(
-      nextDraft.artworks
-        .filter((artwork) => files[artwork.id] || artwork.previewDataUrl)
+      nextArtworks
+        .filter((artwork) => files[artwork.id])
         .map((artwork) => artwork.id),
     );
     const assignments: Array<{ artworkId: string; file: File }> = [];
 
     filesToAdd.forEach((file) => {
-      const emptyArtwork = nextDraft.artworks.find(
+      const emptyArtwork = nextArtworks.find(
         (artwork) => !occupiedArtworkIds.has(artwork.id),
       );
       const targetArtwork =
         emptyArtwork ??
-        (nextDraft.artworks.length < GROUP_MAX_MEMBERS
+        (nextArtworks.length < GROUP_MAX_MEMBERS
           ? createArtworkDraft()
           : undefined);
 
       if (!targetArtwork) return;
 
       if (!emptyArtwork) {
-        nextDraft = {
-          ...nextDraft,
-          artworks: [...nextDraft.artworks, targetArtwork],
-        };
+        nextArtworks = [...nextArtworks, targetArtwork];
       }
 
       assignments.push({ artworkId: targetArtwork.id, file });
       occupiedArtworkIds.add(targetArtwork.id);
     });
 
-    if (nextDraft !== draft) setDraft(nextDraft);
+    if (nextArtworks !== artworks) setArtworks(nextArtworks);
     await Promise.all(
       assignments.map(({ artworkId, file }) => attachFile(artworkId, file)),
     );
@@ -190,7 +287,7 @@ export function SubmitArtworkGroup() {
     event.preventDefault();
     setSubmitMessage(null);
 
-    const nextErrors = validateArtworkGroupSubmission(draft, files);
+    const nextErrors = validateArtworkGroupSubmission(submissionDraft, files);
     setErrors(nextErrors);
 
     if (hasSubmissionErrors(nextErrors)) return;
@@ -206,7 +303,7 @@ export function SubmitArtworkGroup() {
         class_name: draft.group.class_name.trim() || undefined,
         country: draft.group.country.trim(),
         description: draft.group.description.trim() || undefined,
-        group_type: draft.group.group_type.trim() || 'classroom',
+        group_type: draft.group.group_type,
         notifications: draft.group.notifications,
         region: draft.group.region.trim() || undefined,
         guardian_display_name:
@@ -214,7 +311,7 @@ export function SubmitArtworkGroup() {
         title: draft.group.title.trim(),
       });
 
-      for (const artwork of draft.artworks) {
+      for (const artwork of artworks) {
         const file = files[artwork.id];
         if (!file) throw new Error('A selected image is missing.');
 
@@ -234,15 +331,25 @@ export function SubmitArtworkGroup() {
 
       setStatus('success');
       setSubmitMessage(
-        `Submitted ${draft.artworks.length} artwork${draft.artworks.length === 1 ? '' : 's'} for review.`,
+        `Submitted ${artworks.length} artwork${artworks.length === 1 ? '' : 's'} for review.`,
       );
       setFiles({});
-      clearDraft();
+      setPreviewDataUrls({});
+      setArtworks([createArtworkDraft()]);
+      setDraft(initialPersistedDraft);
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(ARTWORK_GROUP_DRAFT_KEY);
+      }
     } catch (error) {
       setStatus('idle');
       setSubmitMessage(getSubmitError(error));
     }
   }
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(ARTWORK_GROUP_DRAFT_KEY, JSON.stringify(draft));
+  }, [draft]);
 
   useEffect(() => {
     document.body.style.overflow = isArtworkWindowOpen ? 'hidden' : '';
@@ -292,7 +399,6 @@ export function SubmitArtworkGroup() {
                   label="Group title"
                   maxLength={200}
                   name="title"
-                  required
                   value={draft.group.title}
                   onChange={handleGroupTextChange}
                 />
@@ -321,7 +427,6 @@ export function SubmitArtworkGroup() {
                 leadingIcon={groupFieldIcons.country}
                 maxLength={200}
                 name="country"
-                required
                 value={draft.group.country}
                 onChange={handleGroupTextChange}
               />
@@ -358,7 +463,7 @@ export function SubmitArtworkGroup() {
                 </p>
               </div>
               <ArtworkMuralWindow
-                artworks={draft.artworks}
+                artworks={displayArtworks}
                 errors={artworkErrors}
                 isOpen={isArtworkWindowOpen}
                 maxCount={GROUP_MAX_MEMBERS}
@@ -383,8 +488,8 @@ export function SubmitArtworkGroup() {
                 type="checkbox"
                 onChange={(event) =>
                   setDraft((current) => ({
-                    ...current,
                     certificationAccepted: event.target.checked,
+                    group: current.group,
                   }))
                 }
               />

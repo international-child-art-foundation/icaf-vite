@@ -1,4 +1,4 @@
-import type { SubmitterRelationship, UploadFileType } from '@icaf/shared';
+import type { SubmitterRelationship } from '@icaf/shared';
 
 export type ArtworkGroupInfo = {
   class_name: string;
@@ -15,12 +15,7 @@ export type ArtworkDraft = {
   age: string;
   description: string;
   f_name: string;
-  fileName?: string;
-  fileSize?: number;
-  fileType?: UploadFileType;
   id: string;
-  previewDataUrl?: string;
-  restoredFromDraft?: boolean;
   submitter_relationship: SubmitterRelationship;
   title: string;
 };
@@ -30,6 +25,11 @@ export type ArtworkGroupSubmissionDraft = {
   certificationAccepted: boolean;
   group: ArtworkGroupInfo;
 };
+
+export type StoredArtworkGroupSubmissionDraft = Pick<
+  ArtworkGroupSubmissionDraft,
+  'certificationAccepted' | 'group'
+>;
 
 export type ArtworkGroupSubmissionErrors = {
   artworks?: Record<

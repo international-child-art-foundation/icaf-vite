@@ -133,9 +133,7 @@ export function validateArtworkGroupSubmission(
     const file = files[artwork.id];
 
     if (!file) {
-      itemErrors.file = artwork.previewDataUrl
-        ? 'Reattach this image before submitting.'
-        : 'Add an image.';
+      itemErrors.file = 'Add an image.';
     } else {
       const fileType = getUploadFileType(file);
       if (!fileType) {

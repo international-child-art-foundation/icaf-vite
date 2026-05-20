@@ -130,7 +130,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
             {(artworkData.age != null || locationText) && (
               <p>
                 {[
-                  artworkData.age != null ? `Age ${artworkData.age}` : null,
+                  artworkData.age != null ? `${artworkData.age}` : null,
                   locationText,
                 ]
                   .filter(Boolean)
@@ -201,7 +201,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
           {(artworkData.age != null || locationText) && (
             <p>
               {[
-                artworkData.age != null ? `Age ${artworkData.age}` : null,
+                artworkData.age != null ? `${artworkData.age}` : null,
                 locationText,
               ]
                 .filter(Boolean)

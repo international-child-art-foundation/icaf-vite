@@ -28,7 +28,7 @@ export const galleryNametag = (artwork: TResolvedArtwork) => {
         )}
         {artwork.age !== undefined && (
           <p className="mt-0.5 text-sm opacity-85">
-            Age {artwork.age}
+            {artwork.age}
             {location && (
               <span className="text-sm opacity-85"> · {location}</span>
             )}

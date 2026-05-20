@@ -64,7 +64,7 @@ const ArtworkCard = ({ artwork, openModal }: ArtworkCardProps) => {
               </p>
             )}
             <p className="truncate text-sm text-gray-500">
-              {[age != null ? `Age ${age}` : null, locationText]
+              {[age != null ? `${age}` : null, locationText]
                 .filter(Boolean)
                 .join(' · ') || '\u00A0'}
             </p>

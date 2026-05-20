@@ -3,6 +3,5 @@ ignoredBuiltDependencies:
 packages:
   - "frontend"
   - "backend"
-  - "backend/infra"
-  - "backend/backend-test"
+  - "infra"
   - "shared"

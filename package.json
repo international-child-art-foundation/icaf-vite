@@ -5,7 +5,7 @@
   "workspaces": [
     "frontend",
     "backend",
-    "backend/infra",
+    "infra",
     "shared"
   ],
   "packageManager": "pnpm@10.16.1",
@@ -20,6 +20,7 @@
     "dev:backend": "pnpm --filter @icaf/backend dev"
   },
   "devDependencies": {
+    "esbuild": "^0.25.12",
     "typescript": "~5.7.2"
   },
   "dependencies": {

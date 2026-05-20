@@ -1,0 +1,83 @@
+import {
+  ApiGatewayEvent,
+  HTTP_STATUS,
+  COMMON_HEADERS,
+  CommonErrors,
+  GalleryGroupsResponse,
+  GroupListItem,
+  GroupStatus,
+  GroupType,
+} from "@icaf/shared";
+import {
+  queryGroups,
+  queryFamilyGroups,
+  queryInstanceGroups,
+} from "../../../dynamo/groupGsis";
+import { pagedGsiQuery, parseGalleryParams } from "./galleryShared";
+
+function mapGroup(item: Record<string, unknown>): GroupListItem {
+  return {
+    group_id: item.group_id as string,
+    theme_family: item.theme_family as string | undefined,
+    theme_instance: item.theme_instance as string | undefined,
+    group_type: item.group_type as GroupType,
+    title: item.title as string,
+    class_name: item.class_name as string | undefined,
+    teacher_display_name: item.teacher_display_name as string | undefined,
+    country: item.country as string,
+    region: item.region as string | undefined,
+    cover_art_ids: (item.cover_art_ids as string[]) ?? [],
+    member_count: ((item.member_art_ids as string[]) ?? []).length,
+    status: item.status as GroupStatus,
+    timestamp: item.timestamp as number,
+  };
+}
+
+export const handler = async (
+  event: ApiGatewayEvent,
+): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
+  try {
+    const parsedParams = parseGalleryParams(
+      event.queryStringParameters,
+    );
+    if (!parsedParams.ok) return parsedParams.response;
+
+    const { sort, limit, last_key } = parsedParams.value;
+    const family = event.pathParameters?.family;
+    const instance = event.pathParameters?.instance;
+
+    const gsiConfig =
+      family && instance
+        ? queryInstanceGroups(family, instance)
+        : family
+          ? queryFamilyGroups(family)
+          : queryGroups();
+
+    const { items, has_more, last_key: nextKey } = await pagedGsiQuery(
+      gsiConfig,
+      sort,
+      limit,
+      last_key,
+      mapGroup,
+    );
+
+    const response: GalleryGroupsResponse = {
+      groups: items,
+      count: items.length,
+      sort,
+      theme_family: family,
+      theme_instance: instance,
+      has_more,
+      last_key: nextKey,
+    };
+
+    return {
+      statusCode: HTTP_STATUS.OK,
+      body: JSON.stringify(response),
+      headers: COMMON_HEADERS,
+    };
+  } catch (error) {
+    console.error("Error querying group gallery:", error);
+    return CommonErrors.internalServerError();
+  }
+};

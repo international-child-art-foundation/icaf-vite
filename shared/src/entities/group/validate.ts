@@ -50,6 +50,10 @@ export function validateSubmitGroupRequest(data: SubmitGroupRequest): string[] {
         errors.push('theme_family is required when theme_instance is provided');
     }
 
+    if (data.notifications !== undefined && typeof data.notifications !== 'boolean') {
+        errors.push('notifications, if provided, must be a boolean');
+    }
+
     return errors;
 }
 
@@ -82,6 +86,10 @@ export function validateUpdateGroupRequest(data: UpdateGroupRequest): string[] {
 
     if (data.theme_instance && !data.theme_family) {
         errors.push('theme_family is required when theme_instance is provided');
+    }
+
+    if (data.notifications !== undefined && typeof data.notifications !== 'boolean') {
+        errors.push('notifications, if provided, must be a boolean');
     }
 
     return errors;

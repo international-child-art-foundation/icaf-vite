@@ -26,7 +26,7 @@ _Note: Subject to change._
   - Tailwind v3 is required to support older browsers
   - ShadCN is locked to a Tailwind-compatible version
 - **State Management**: React Context
-- **Analytics**: Likely Google Analytics; possibly PostHog
+- **Analytics**: Google Analytics
 
 ### Backend
 
@@ -39,6 +39,8 @@ _Note: Subject to change._
 
 The /shared folder is for types and other functions which are shared between frontend and backend code (mainly for API call and response objects).
 `tsconfig.strict.json` is extended by each subproject and contains settings for all three TypeScript environments.
+The /infra folder contains the AWS IaC; definitions for each deployed service.
+The /backend folder contains functions and code deployed by AWS (things like full Lambda functions that power API endpoints). 
 
 ## Style Guide
 

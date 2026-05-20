@@ -1,0 +1,25 @@
+{
+  "name": "@icaf/infra",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "infra": "dist/bin/infra.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "watch": "tsc -b --watch",
+    "cdk": "cdk",
+    "layer:build": "bash scripts/build-sharp-layer.sh"
+  },
+  "devDependencies": {
+    "@types/node": "22.14.0",
+    "aws-cdk": "2.1121.0",
+    "esbuild": "^0.25.5",
+    "ts-node": "^10.9.2"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "2.230.0",
+    "constructs": "^10.0.0"
+  }
+}

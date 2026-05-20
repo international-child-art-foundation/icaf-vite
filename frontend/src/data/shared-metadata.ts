@@ -1,6 +1,0 @@
-export const SITE_URL = 'https://icaf.org';
-
-export const sharedOpenGraph = {
-  siteName: 'International Child Art Foundation',
-  defaultImage: `${SITE_URL}/og-image.png`,
-};

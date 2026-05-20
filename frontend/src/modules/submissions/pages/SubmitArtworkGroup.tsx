@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Bell, BookOpen, Globe2, Send, UserRound } from 'lucide-react';
 import { createGroup, submitArtworkToGroup } from '@/api/guardian';
@@ -30,7 +30,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 const groupFieldIcons = {
   class_name: <BookOpen aria-hidden="true" className="h-4 w-4" />,
   country: <Globe2 aria-hidden="true" className="h-4 w-4" />,
-  teacher_display_name: <UserRound aria-hidden="true" className="h-4 w-4" />,
+  guardian_display_name: <UserRound aria-hidden="true" className="h-4 w-4" />,
 };
 
 function getSubmitError(error: unknown) {
@@ -209,8 +209,8 @@ export function SubmitArtworkGroup() {
         group_type: draft.group.group_type.trim() || 'classroom',
         notifications: draft.group.notifications,
         region: draft.group.region.trim() || undefined,
-        teacher_display_name:
-          draft.group.teacher_display_name.trim() || undefined,
+        guardian_display_name:
+          draft.group.guardian_display_name.trim() || undefined,
         title: draft.group.title.trim(),
       });
 
@@ -244,6 +244,13 @@ export function SubmitArtworkGroup() {
     }
   }
 
+  useEffect(() => {
+    document.body.style.overflow = isArtworkWindowOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isArtworkWindowOpen]);
+
   return (
     <div className="my-auto h-full flex-grow bg-slate-50 py-8 sm:py-12">
       <div className="content-w m-pad my-auto">
@@ -262,7 +269,6 @@ export function SubmitArtworkGroup() {
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
                 Create one group with individually annotated artwork images.
-                Your draft saves on this device while you work.
               </p>
             </div>
 
@@ -301,12 +307,12 @@ export function SubmitArtworkGroup() {
                 onChange={handleGroupTextChange}
               />
               <AccountTextField
-                error={errors.group?.teacher_display_name}
-                label="Teacher display name"
-                leadingIcon={groupFieldIcons.teacher_display_name}
+                error={errors.group?.guardian_display_name}
+                label="Guardian display name"
+                leadingIcon={groupFieldIcons.guardian_display_name}
                 maxLength={200}
-                name="teacher_display_name"
-                value={draft.group.teacher_display_name}
+                name="guardian_display_name"
+                value={draft.group.guardian_display_name}
                 onChange={handleGroupTextChange}
               />
               <AccountTextField
@@ -341,7 +347,7 @@ export function SubmitArtworkGroup() {
               </div>
             </section>
 
-            <section className="mt-6 space-y-3">
+            <section className="mt-6 flex flex-col gap-3">
               <div>
                 <h2 className="font-montserrat text-xl font-semibold text-slate-950">
                   Artworks

@@ -539,7 +539,7 @@ export function ArtworkMuralWindow({
                 </div>
               </div>
             )}
-            <div className="min-h-0 flex-1 p-2 pb-20 pt-14">
+            <div className="min-h-0 flex-1 p-2 pb-20 pt-[60px]">
               {artworkSurface}
             </div>
             <div className="absolute bottom-0 left-0 right-0 grid grid-cols-2 gap-2 border-t border-slate-200 bg-white/95 p-3 shadow-[0_-8px_18px_rgba(15,23,42,0.08)]">

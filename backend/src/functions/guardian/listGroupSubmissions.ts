@@ -63,7 +63,7 @@ export const handler = async (
       group_type: item.group_type as GroupListItem["group_type"],
       title: item.title as string,
       class_name: item.class_name as string | undefined,
-      teacher_display_name: item.teacher_display_name as string | undefined,
+      guardian_display_name: item.guardian_display_name as string | undefined,
       country: item.country as string,
       region: item.region as string | undefined,
       cover_art_ids: (item.cover_art_ids as string[]) ?? [],

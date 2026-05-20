@@ -80,7 +80,7 @@ export const handler = async (
     if (body.title !== undefined) { setExprParts.push("title = :title"); exprValues[":title"] = body.title; }
     if (body.description !== undefined) { setExprParts.push("description = :desc"); exprValues[":desc"] = body.description; }
     if (body.class_name !== undefined) { setExprParts.push("class_name = :cn"); exprValues[":cn"] = body.class_name; }
-    if (body.teacher_display_name !== undefined) { setExprParts.push("teacher_display_name = :tdn"); exprValues[":tdn"] = body.teacher_display_name; }
+    if (body.guardian_display_name !== undefined) { setExprParts.push("guardian_display_name = :tdn"); exprValues[":tdn"] = body.guardian_display_name; }
     if (body.theme_family !== undefined) { setExprParts.push("theme_family = :tf"); exprValues[":tf"] = body.theme_family; }
     if (body.theme_instance !== undefined) { setExprParts.push("theme_instance = :ti"); exprValues[":ti"] = body.theme_instance; }
     if (body.cover_art_ids !== undefined) { setExprParts.push("cover_art_ids = :covers"); exprValues[":covers"] = body.cover_art_ids; }

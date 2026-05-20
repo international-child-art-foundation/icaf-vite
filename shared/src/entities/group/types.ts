@@ -49,7 +49,7 @@ export interface GroupEntity {
     theme_instance?: string;        // zero-padded 4-digit string, e.g. '2025'
     title?: string;
     class_name?: string;            // e.g. 'BIO 1017'
-    teacher_display_name?: string;  // may differ from owner's account name
+    guardian_display_name?: string;  // may differ from owner's account name
     country?: string;
     region?: string;
     description?: string;
@@ -62,7 +62,7 @@ export interface SubmitGroupRequest {
     group_type: GroupType;
     title: string;
     class_name?: string;
-    teacher_display_name?: string;
+    guardian_display_name?: string;
     country: string;
     region?: string;
     description?: string;
@@ -88,7 +88,7 @@ export interface GroupListItem {
     group_type: GroupType;
     title: string;
     class_name?: string;
-    teacher_display_name?: string;
+    guardian_display_name?: string;
     country: string;
     region?: string;
     cover_art_ids: string[];
@@ -109,7 +109,7 @@ export interface UpdateGroupRequest {
     title?: string;
     description?: string;
     class_name?: string;
-    teacher_display_name?: string;
+    guardian_display_name?: string;
     theme_family?: string;
     theme_instance?: string;
     cover_art_ids?: string[];

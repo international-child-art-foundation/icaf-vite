@@ -64,7 +64,7 @@ export const handler = async (
           ...(body.theme_instance !== undefined && { theme_instance: body.theme_instance }),
           ...(body.title !== undefined && { title: body.title }),
           ...(body.class_name !== undefined && { class_name: body.class_name }),
-          ...(body.teacher_display_name !== undefined && { teacher_display_name: body.teacher_display_name }),
+          ...(body.guardian_display_name !== undefined && { guardian_display_name: body.guardian_display_name }),
           ...(body.country !== undefined && { country: body.country }),
           ...(body.region !== undefined && { region: body.region }),
           ...(body.description !== undefined && { description: body.description }),

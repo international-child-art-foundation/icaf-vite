@@ -28,7 +28,7 @@ export const initialArtworkGroupInfo: ArtworkGroupInfo = {
   group_type: 'classroom',
   notifications: true,
   region: '',
-  teacher_display_name: '',
+  guardian_display_name: '',
   title: '',
 };
 
@@ -107,10 +107,10 @@ export function validateArtworkGroupSubmission(
   }
 
   if (
-    draft.group.teacher_display_name.trim() &&
-    draft.group.teacher_display_name.length > GROUP_MAX_STRING_LEN
+    draft.group.guardian_display_name.trim() &&
+    draft.group.guardian_display_name.length > GROUP_MAX_STRING_LEN
   ) {
-    groupErrors.teacher_display_name = `Use ${GROUP_MAX_STRING_LEN} characters or less.`;
+    groupErrors.guardian_display_name = `Use ${GROUP_MAX_STRING_LEN} characters or less.`;
   }
 
   if (
@@ -185,9 +185,9 @@ export function validateArtworkGroupSubmission(
 export function hasSubmissionErrors(errors: ArtworkGroupSubmissionErrors) {
   return Boolean(
     errors.root ||
-      errors.certificationAccepted ||
-      (errors.group && Object.keys(errors.group).length > 0) ||
-      (errors.artworks && Object.keys(errors.artworks).length > 0),
+    errors.certificationAccepted ||
+    (errors.group && Object.keys(errors.group).length > 0) ||
+    (errors.artworks && Object.keys(errors.artworks).length > 0),
   );
 }
 

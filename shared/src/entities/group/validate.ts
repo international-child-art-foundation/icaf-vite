@@ -38,8 +38,8 @@ export function validateSubmitGroupRequest(data: SubmitGroupRequest): string[] {
         errors.push(`class_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
     }
 
-    if (data.teacher_display_name !== undefined && typeof data.teacher_display_name === 'string' && data.teacher_display_name.length > GROUP_MAX_STRING_LEN) {
-        errors.push(`teacher_display_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
+    if (data.guardian_display_name !== undefined && typeof data.guardian_display_name === 'string' && data.guardian_display_name.length > GROUP_MAX_STRING_LEN) {
+        errors.push(`guardian_display_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
     }
 
     if (data.theme_family !== undefined && typeof data.theme_family === 'string' && data.theme_family.length > GROUP_MAX_STRING_LEN) {
@@ -76,8 +76,8 @@ export function validateUpdateGroupRequest(data: UpdateGroupRequest): string[] {
         errors.push(`class_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
     }
 
-    if (data.teacher_display_name !== undefined && typeof data.teacher_display_name === 'string' && data.teacher_display_name.length > GROUP_MAX_STRING_LEN) {
-        errors.push(`teacher_display_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
+    if (data.guardian_display_name !== undefined && typeof data.guardian_display_name === 'string' && data.guardian_display_name.length > GROUP_MAX_STRING_LEN) {
+        errors.push(`guardian_display_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
     }
 
     if (data.theme_family !== undefined && typeof data.theme_family === 'string' && data.theme_family.length > GROUP_MAX_STRING_LEN) {

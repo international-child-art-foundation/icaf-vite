@@ -7,7 +7,7 @@ export type ArtworkGroupInfo = {
   group_type: string;
   notifications: boolean;
   region: string;
-  teacher_display_name: string;
+  guardian_display_name: string;
   title: string;
 };
 
@@ -32,7 +32,10 @@ export type ArtworkGroupSubmissionDraft = {
 };
 
 export type ArtworkGroupSubmissionErrors = {
-  artworks?: Record<string, Partial<Record<keyof ArtworkDraft | 'file', string>>>;
+  artworks?: Record<
+    string,
+    Partial<Record<keyof ArtworkDraft | 'file', string>>
+  >;
   certificationAccepted?: string;
   group?: Partial<Record<keyof ArtworkGroupInfo, string>>;
   root?: string;

@@ -20,7 +20,7 @@ export const MuralCard = ({ src, name, age, className }: MuralCardProps) => {
         <p className={muralTagClasses}>
           {name}
           <br />
-          <span className="font-normal">Age {age}</span>
+          <span className="font-normal">{age}</span>
         </p>
       </div>
     </div>

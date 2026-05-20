@@ -287,7 +287,7 @@ const GalleryCoreInner = () => {
     if (aOrder !== bOrder) {
       return sortValue === 'Newest Event' ? bOrder - aOrder : aOrder - bOrder;
     }
-    return (a.artists?.[0] ?? '').localeCompare(b.artists?.[0] ?? '');
+    return -1;
   });
 
   const handleGridClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -382,7 +382,7 @@ const GalleryCoreInner = () => {
             </div>
           )}
           {!isMobile && (
-            <div className="absolute right-0 w-[200px] max-w-[40%] rounded-lg bg-white">
+            <div className="absolute right-0 w-[200px] max-w-[40%] rounded-lg border border-gray-600 bg-white">
               <Checkbox
                 category="sort"
                 title="Sort"
@@ -403,6 +403,13 @@ const GalleryCoreInner = () => {
             gridTemplateColumns: 'repeat(20, 1fr)',
           }}
         >
+          <button
+            type="button"
+            className={` ${isFilterOpen ? 'opacity-100' : 'opacity-0'} absolute left-1/2 top-[10%] z-[100] mx-auto h-[50px] w-[200px] max-w-[40%] -translate-x-1/2 -translate-y-1/2 items-center justify-between rounded-md border border-gray-600 bg-white/60 px-5 py-2 text-center text-lg text-xl font-medium transition-all hover:bg-white lg:max-w-[40%]`}
+            onClick={() => setIsFilterOpen(false)}
+          >
+            Show Artworks
+          </button>
           {/* TResolvedArtwork grid */}
           <section
             className={`background-area pointer-events-auto relative row-start-2 justify-center transition-all duration-300 ease-in-out ${isFilterOpen ? 'pointer-events-none select-none opacity-40 blur-lg' : ''}`}
@@ -426,7 +433,10 @@ const GalleryCoreInner = () => {
                 className="grid grid-cols-2 gap-x-2 gap-y-6 lg:grid-cols-3 lg:gap-x-4 lg:gap-y-8 xl:grid-cols-4 xl:gap-x-6 xl:gap-y-10"
               >
                 {pageData.map((artwork) => (
-                  <div className="flex h-full" key={artwork.id}>
+                  <div
+                    className={`${isFilterOpen ? 'pointer-events-none select-none' : ''} flex h-full`}
+                    key={artwork.id}
+                  >
                     <ArtworkCard artwork={artwork} openModal={openModal} />
                   </div>
                 ))}

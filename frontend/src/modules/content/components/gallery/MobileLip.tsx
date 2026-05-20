@@ -354,7 +354,7 @@ export const MobileLip = ({
                 : 'opacity 0.1s ease',
             }}
           >
-            Age {artwork.age}
+            {artwork.age}
             {location && <span style={{ color: '#888' }}> · {location}</span>}
           </p>
         )}

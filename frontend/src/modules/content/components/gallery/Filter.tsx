@@ -37,7 +37,7 @@ export const Filter = (props: FilterProps) => {
         {visibleCategories.map(({ id, title, options, filterType }) => (
           <React.Fragment key={id + title}>
             <section
-              className={`transition-all duration-300 ${isVisible ? 'mb-4 opacity-100' : 'mb-0 opacity-0'}`}
+              className={`overflow-hidden rounded-lg border border-gray-600 bg-white/50 transition-all duration-300 hover:bg-white/90 ${isVisible ? 'mb-4 opacity-100' : 'mb-0 opacity-0'}`}
             >
               <Checkbox
                 category={id}

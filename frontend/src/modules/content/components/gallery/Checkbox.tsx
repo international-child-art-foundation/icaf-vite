@@ -173,7 +173,7 @@ const Checkbox = (props: CheckboxProps) => {
   return (
     <section
       data-category={props.category}
-      className="grid h-fit overflow-hidden rounded-lg border border-gray-600 px-5 text-base font-medium"
+      className="grid h-fit overflow-hidden rounded-lg px-5 text-base font-medium"
       style={{ gridAutoRows: 'min-content 0px' }}
       ref={componentRootRef}
     >

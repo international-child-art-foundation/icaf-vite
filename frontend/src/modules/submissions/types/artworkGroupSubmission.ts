@@ -7,6 +7,8 @@ export type ArtworkGroupInfo = {
   group_type: string;
   notifications: boolean;
   region: string;
+  theme_family: string;
+  theme_instance: string;
   guardian_display_name: string;
   title: string;
 };

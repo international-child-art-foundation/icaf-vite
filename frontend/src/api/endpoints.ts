@@ -56,6 +56,7 @@ export const apiEndpoints = {
     artworksByFamily: (family: PathParam) => `/gallery/artworks/family/${encodePathParam(family)}`,
     artworksByInstance: (family: PathParam, instance: PathParam) =>
       `/gallery/artworks/family/${encodePathParam(family)}/instance/${encodePathParam(instance)}`,
+    themes: '/gallery/themes',
     groups: '/gallery/groups',
     groupsByFamily: (family: PathParam) => `/gallery/groups/family/${encodePathParam(family)}`,
     groupsByInstance: (family: PathParam, instance: PathParam) =>

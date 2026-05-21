@@ -1,21 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  ArrowLeft,
   ChevronLeft,
   ChevronRight,
   ImagePlus,
   Maximize2,
+  RotateCw,
+  Trash2,
   Upload,
   X,
 } from 'lucide-react';
 import type { ArtworkDraft } from '@/modules/submissions/types/artworkGroupSubmission';
 import { cn } from '@/utils/utils';
 
-type ArtworkWithPreview = ArtworkDraft & {
+export type ArtworkWithPreview = ArtworkDraft & {
   fileName?: string;
   previewDataUrl?: string;
 };
 
-type ArtworkMuralWindowProps = {
+export type ArtworkMuralWindowProps = {
   artworks: ArtworkWithPreview[];
   errors?: Record<string, Partial<Record<keyof ArtworkDraft | 'file', string>>>;
   isOpen: boolean;
@@ -29,6 +32,7 @@ type ArtworkMuralWindowProps = {
   onDeleteArtwork: (artworkId: string) => void;
   onFilesSelected: (files: File[]) => void;
   onOpen: () => void;
+  onRotateArtwork: (artworkId: string) => void;
 };
 
 type SeamlessInputProps = {
@@ -107,32 +111,89 @@ function ArtworkMural({
   artworks,
   className,
   selectedIndex,
+  touchStart,
   variant,
   onOpen,
+  onRotateArtwork,
   onSelectArtwork,
+  onSwipe,
+  onTouchStart,
   onUnselect,
 }: {
   artworks: ArtworkWithPreview[];
   className?: string;
   selectedIndex?: number | null;
+  touchStart?: { x: number; y: number } | null;
   variant: 'compact' | 'workspace';
   onOpen?: () => void;
+  onRotateArtwork?: (artworkId: string) => void;
   onSelectArtwork?: (index: number) => void;
+  onSwipe?: (direction: 1 | -1) => void;
+  onTouchStart?: (touch: { x: number; y: number } | null) => void;
   onUnselect?: () => void;
 }) {
-  const visibleArtworks = artworks.filter((artwork) => artwork.previewDataUrl);
+  const visibleArtworks = artworks
+    .map((artwork, index) => ({ artwork, index }))
+    .filter(({ artwork }) => artwork.previewDataUrl);
   const hasSelectedArtwork =
     selectedIndex !== null && selectedIndex !== undefined;
+  const selectedArtwork =
+    selectedIndex !== null && selectedIndex !== undefined
+      ? artworks[selectedIndex]
+      : undefined;
+  const selectVerb = variant === 'compact' ? 'Tap' : 'Click';
+  const fitColumns =
+    visibleArtworks.length <= 1
+      ? 1
+      : visibleArtworks.length <= 4
+        ? 2
+        : visibleArtworks.length <= 9
+          ? 3
+          : visibleArtworks.length <= 16
+            ? 4
+            : visibleArtworks.length <= 25
+              ? 5
+              : visibleArtworks.length <= 36
+                ? 6
+                : 8;
+  const fitRows = Math.max(1, Math.ceil(visibleArtworks.length / fitColumns));
+  const fitArtworkStyle = {
+    flexBasis: `calc(${100 / fitColumns}% - 0.5rem)`,
+    maxHeight: `calc(${100 / fitRows}% - 0.5rem)`,
+  };
+
+  function getArtworkMeta(artwork: ArtworkWithPreview) {
+    return (
+      artwork.title || artwork.f_name || artwork.description || artwork.age
+    );
+  }
 
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-lg bg-slate-50',
+        'relative min-w-0 overflow-hidden rounded-lg bg-slate-50',
         variant === 'compact' &&
           'aspect-square border border-slate-200 shadow-sm',
-        variant === 'workspace' && 'min-h-[260px] flex-1',
+        variant === 'workspace' && 'min-h-[260px] flex-1 touch-pan-y',
         className,
       )}
+      onTouchEnd={(event) => {
+        if (variant !== 'workspace' || !touchStart) return;
+        const touch = event.changedTouches[0];
+        const deltaX = (touch?.clientX ?? touchStart.x) - touchStart.x;
+        const deltaY = (touch?.clientY ?? touchStart.y) - touchStart.y;
+        if (
+          Math.abs(deltaX) > 60 &&
+          Math.abs(deltaX) > Math.abs(deltaY) * 1.5
+        ) {
+          onSwipe?.(deltaX < 0 ? 1 : -1);
+        }
+        onTouchStart?.(null);
+      }}
+      onTouchStart={(event) => {
+        const touch = event.changedTouches[0];
+        onTouchStart?.(touch ? { x: touch.clientX, y: touch.clientY } : null);
+      }}
       onClick={() => {
         if (variant === 'workspace' && hasSelectedArtwork) {
           onUnselect?.();
@@ -158,33 +219,34 @@ function ArtworkMural({
             Upload artwork
           </span>
           <span className="text-xs leading-5 text-slate-500">
-            Tap to choose images.
+            {selectVerb} to choose images.
           </span>
         </button>
       ) : (
         <div
           className={cn(
-            'grid h-full w-full gap-2 p-2',
-            visibleArtworks.length <= 2 && 'grid-cols-1',
-            visibleArtworks.length > 2 &&
-              visibleArtworks.length <= 6 &&
-              'grid-cols-2',
-            visibleArtworks.length > 6 && 'grid-cols-3',
-            variant === 'workspace' && 'auto-rows-fr',
+            'h-full w-full p-2',
+            hasSelectedArtwork
+              ? 'relative'
+              : 'flex flex-wrap content-center items-center justify-center gap-2 overflow-hidden',
           )}
         >
-          {visibleArtworks.map((artwork, index) => {
+          {visibleArtworks.map(({ artwork, index }, visibleIndex) => {
             const isSelected = selectedIndex === index;
+            const artworkMeta = getArtworkMeta(artwork);
 
             return (
               <button
                 key={artwork.id}
                 className={cn(
-                  'relative min-h-0 overflow-hidden rounded-md bg-white shadow-sm transition',
-                  hasSelectedArtwork && !isSelected && 'opacity-20',
+                  'relative min-h-0 min-w-0 overflow-hidden rounded-md transition',
+                  !hasSelectedArtwork &&
+                    'flex items-center justify-center hover:opacity-90',
+                  hasSelectedArtwork && !isSelected && 'hidden',
                   isSelected &&
-                    'ring-secondary-blue absolute inset-3 z-10 rounded-lg ring-4',
+                    'ring-secondary-blue absolute inset-3 z-10 m-0 flex items-center justify-center rounded-lg ring-4',
                 )}
+                style={!hasSelectedArtwork ? fitArtworkStyle : undefined}
                 type="button"
                 onClick={(event) => {
                   event.stopPropagation();
@@ -193,21 +255,60 @@ function ArtworkMural({
                     return;
                   }
 
+                  onSelectArtwork?.(index);
                   onOpen?.();
                 }}
               >
                 <img
-                  alt={artwork.title || `Artwork ${index + 1}`}
+                  alt={artwork.title || `Artwork ${visibleIndex + 1}`}
                   className={cn(
-                    'h-full w-full object-contain',
-                    isSelected && 'bg-white p-1',
+                    'block max-h-full max-w-full',
+                    isSelected ? 'h-full object-contain' : 'h-auto w-auto',
                   )}
                   draggable={false}
                   src={artwork.previewDataUrl}
                 />
+                {artworkMeta && selectedIndex == null && (
+                  <span className="absolute bottom-0 truncate rounded-t-lg bg-slate-50/95 px-2 py-1 text-left text-[12px] font-semibold text-slate-700 shadow-sm">
+                    {artworkMeta}
+                  </span>
+                )}
               </button>
             );
           })}
+        </div>
+      )}
+      {variant === 'workspace' && hasSelectedArtwork && (
+        <button
+          className="absolute left-4 top-4 z-20 hidden h-10 items-center gap-1.5 rounded-full bg-slate-100/90 px-3 text-xs font-bold text-slate-700 shadow-md transition-colors duration-300 hover:bg-white md:inline-flex"
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onUnselect?.();
+          }}
+        >
+          <ArrowLeft aria-hidden="true" className="h-4 w-4" />
+          Grid view
+        </button>
+      )}
+      {variant === 'workspace' && selectedArtwork?.previewDataUrl && (
+        <div
+          className="absolute bottom-4 right-4 z-20 flex cursor-pointer flex-row items-center justify-center gap-4 rounded-full bg-slate-100/90 p-4 text-slate-700 shadow-md transition-colors duration-300 hover:bg-white"
+          onClick={(event) => {
+            event.stopPropagation();
+            onRotateArtwork?.(selectedArtwork.id);
+          }}
+        >
+          <p className="shadow- select-none text-xs font-bold text-slate-700">
+            Rotate Artwork
+          </p>
+          <button
+            className="h-4 w-4"
+            aria-label="Rotate artwork 90 degrees"
+            type="button"
+          >
+            <RotateCw aria-hidden="true" className="h-4 w-4" />
+          </button>
         </div>
       )}
       {visibleArtworks.length > 0 && variant === 'compact' && (
@@ -240,27 +341,32 @@ function ArtworkDetailsPane({
   onNext: () => void;
   onPrevious: () => void;
 }) {
-  if (!activeArtwork) return null;
+  const canEdit = Boolean(activeArtwork && hasSelectedArtwork);
 
   return (
-    <div className="space-y-3 rounded-lg bg-white/55 p-3 shadow-inner backdrop-blur">
+    <div className="relative space-y-3 rounded-lg bg-white/55 p-3 shadow-inner backdrop-blur">
+      {!canEdit && (
+        <div className="absolute inset-0 z-10 grid place-items-center rounded-lg bg-slate-50/90 px-4 text-center backdrop-blur-[2px]">
+          <p className="text-sm font-bold text-slate-600">
+            Select an artwork to add details
+          </p>
+        </div>
+      )}
       <div className="flex items-center justify-between gap-2">
         <button
           aria-label="Previous artwork"
           className="flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-slate-700 shadow-sm disabled:opacity-40"
-          disabled={artworkCount < 2}
+          disabled={!canEdit || artworkCount < 2}
           type="button"
           onClick={onPrevious}
         >
           <ChevronLeft aria-hidden="true" className="h-4 w-4" />
         </button>
         <div className="min-w-0 text-center">
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
-            {hasSelectedArtwork
-              ? 'Selected artwork'
-              : 'Click an artwork to select it'}
+          <p className="select-none text-xs font-bold uppercase tracking-widest text-slate-500">
+            Artwork details
           </p>
-          {hasSelectedArtwork && activeArtwork.fileName && (
+          {hasSelectedArtwork && activeArtwork?.fileName && (
             <p className="mt-0.5 truncate text-xs text-slate-500">
               {activeArtwork.fileName}
             </p>
@@ -269,7 +375,7 @@ function ArtworkDetailsPane({
         <button
           aria-label="Next artwork"
           className="flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-slate-700 shadow-sm disabled:opacity-40"
-          disabled={artworkCount < 2}
+          disabled={!canEdit || artworkCount < 2}
           type="button"
           onClick={onNext}
         >
@@ -289,9 +395,9 @@ function ArtworkDetailsPane({
           label="Artwork title"
           maxLength={200}
           placeholder="Artwork title"
-          value={activeArtwork.title}
+          value={activeArtwork?.title ?? ''}
           onChange={(value) =>
-            onArtworkChange(activeArtwork.id, 'title', value)
+            activeArtwork && onArtworkChange(activeArtwork.id, 'title', value)
           }
         />
         <SeamlessInput
@@ -299,9 +405,9 @@ function ArtworkDetailsPane({
           label="Artist first name"
           maxLength={200}
           placeholder="Artist first name"
-          value={activeArtwork.f_name}
+          value={activeArtwork?.f_name ?? ''}
           onChange={(value) =>
-            onArtworkChange(activeArtwork.id, 'f_name', value)
+            activeArtwork && onArtworkChange(activeArtwork.id, 'f_name', value)
           }
         />
         <SeamlessInput
@@ -309,8 +415,10 @@ function ArtworkDetailsPane({
           inputMode="numeric"
           label="Artist age"
           placeholder="Age"
-          value={activeArtwork.age}
-          onChange={(value) => onArtworkChange(activeArtwork.id, 'age', value)}
+          value={activeArtwork?.age ?? ''}
+          onChange={(value) =>
+            activeArtwork && onArtworkChange(activeArtwork.id, 'age', value)
+          }
         />
       </div>
 
@@ -319,8 +427,9 @@ function ArtworkDetailsPane({
         label="Description"
         maxLength={2000}
         placeholder="Description"
-        value={activeArtwork.description}
+        value={activeArtwork?.description ?? ''}
         onChange={(value) =>
+          activeArtwork &&
           onArtworkChange(activeArtwork.id, 'description', value)
         }
       />
@@ -338,24 +447,31 @@ export function ArtworkMuralWindow({
   onDeleteArtwork,
   onFilesSelected,
   onOpen,
+  onRotateArtwork,
 }: ArtworkMuralWindowProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [isDeleteAllOpen, setIsDeleteAllOpen] = useState(false);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const activeArtwork = artworks[Math.min(activeIndex, artworks.length - 1)];
+  const [touchStart, setTouchStart] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const uploadedArtworkIndexes = artworks
+    .map((artwork, index) => (artwork.previewDataUrl ? index : -1))
+    .filter((index) => index >= 0);
+  const uploadedArtworkCount = uploadedArtworkIndexes.length;
+  const activeArtwork =
+    selectedIndex === null ? undefined : artworks[selectedIndex];
   const activeErrors =
     activeArtwork && errors ? errors[activeArtwork.id] : undefined;
-  const hasImages = artworks.some((artwork) => artwork.previewDataUrl);
+  const hasImages = uploadedArtworkCount > 0;
   const hasSelectedArtwork = selectedIndex !== null;
 
   useEffect(() => {
-    setActiveIndex((current) => Math.min(current, artworks.length - 1));
     setSelectedIndex((current) =>
-      current === null ? null : Math.min(current, artworks.length - 1),
+      current === null || !artworks[current]?.previewDataUrl ? null : current,
     );
-  }, [artworks.length]);
+  }, [artworks]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -384,61 +500,83 @@ export function ArtworkMuralWindow({
   }
 
   function step(direction: 1 | -1) {
-    if (artworks.length < 2) return;
-    setActiveIndex((current) => {
-      const next = (current + direction + artworks.length) % artworks.length;
-      setSelectedIndex((selected) => (selected === null ? selected : next));
-      return next;
-    });
+    if (selectedIndex === null || uploadedArtworkIndexes.length < 2) return;
+
+    const currentPosition = Math.max(
+      0,
+      uploadedArtworkIndexes.indexOf(selectedIndex),
+    );
+    const nextPosition =
+      (currentPosition + direction + uploadedArtworkIndexes.length) %
+      uploadedArtworkIndexes.length;
+    const nextIndex = uploadedArtworkIndexes[nextPosition] ?? selectedIndex;
+    setSelectedIndex(nextIndex);
   }
 
   const artworkSurface = (
-    <div
-      className="flex h-full flex-col gap-3 rounded-lg border border-slate-200 bg-slate-100/80 p-3 shadow-sm"
-      onTouchStart={(event) =>
-        setTouchStart(event.changedTouches[0]?.clientX ?? null)
-      }
-      onTouchEnd={(event) => {
-        if (touchStart === null) return;
-        const end = event.changedTouches[0]?.clientX ?? touchStart;
-        const delta = end - touchStart;
-        if (Math.abs(delta) > 45) step(delta < 0 ? 1 : -1);
-        setTouchStart(null);
-      }}
-    >
+    <div className="flex h-full min-w-0 flex-col gap-3 rounded-lg border border-slate-200 bg-slate-100/80 p-3 shadow-sm">
       <div className="hidden items-center justify-between gap-3 md:flex">
         <div>
           <p className="text-sm font-semibold text-slate-950">Artworks</p>
           <p className="text-xs leading-5 text-slate-500">
-            {artworks.length}/{maxCount}
+            {uploadedArtworkCount}/{maxCount}
           </p>
         </div>
-        <button
-          className="text-secondary-blue inline-flex items-center gap-1.5 rounded-full bg-white/75 px-3 py-2 text-sm font-bold shadow-sm"
-          disabled={artworks.length >= maxCount}
-          type="button"
-          onClick={chooseFiles}
-        >
-          <Upload aria-hidden="true" className="h-4 w-4" />
-          Upload
-        </button>
+        <div className="flex items-center gap-2">
+          {hasSelectedArtwork && activeArtwork && (
+            <button
+              className="text-tertiary-red inline-flex items-center gap-1.5 rounded-full bg-white/75 px-3 py-2 text-sm font-bold shadow-sm"
+              type="button"
+              onClick={() => {
+                onDeleteArtwork(activeArtwork.id);
+                setSelectedIndex(null);
+              }}
+            >
+              <Trash2 aria-hidden="true" className="h-4 w-4" />
+              Delete
+            </button>
+          )}
+          {hasImages && (
+            <button
+              className="text-tertiary-red inline-flex items-center gap-1.5 rounded-full bg-white/75 px-3 py-2 text-sm font-bold shadow-sm"
+              type="button"
+              onClick={() => setIsDeleteAllOpen(true)}
+            >
+              <Trash2 aria-hidden="true" className="h-4 w-4" />
+              Delete all
+            </button>
+          )}
+          <button
+            className="text-secondary-blue inline-flex items-center gap-1.5 rounded-full bg-white/75 px-3 py-2 text-sm font-bold shadow-sm disabled:opacity-40"
+            disabled={uploadedArtworkCount >= maxCount}
+            type="button"
+            onClick={chooseFiles}
+          >
+            <Upload aria-hidden="true" className="h-4 w-4" />
+            Upload
+          </button>
+        </div>
       </div>
 
       <ArtworkMural
         artworks={artworks}
         selectedIndex={selectedIndex}
+        touchStart={touchStart}
         variant="workspace"
+        onOpen={chooseFiles}
+        onRotateArtwork={onRotateArtwork}
         onSelectArtwork={(index) => {
-          setActiveIndex(index);
           setSelectedIndex(index);
         }}
+        onSwipe={(direction) => step(direction)}
+        onTouchStart={setTouchStart}
         onUnselect={() => setSelectedIndex(null)}
       />
 
       <ArtworkDetailsPane
         activeArtwork={activeArtwork}
         activeErrors={activeErrors}
-        artworkCount={artworks.length}
+        artworkCount={uploadedArtworkCount}
         hasSelectedArtwork={hasSelectedArtwork}
         onArtworkChange={onArtworkChange}
         onNext={() => step(1)}
@@ -453,6 +591,7 @@ export function ArtworkMuralWindow({
         <ArtworkMural
           artworks={artworks}
           variant="compact"
+          onSelectArtwork={(index) => setSelectedIndex(index)}
           onOpen={() => {
             onOpen();
             if (!hasImages) window.setTimeout(chooseFiles, 0);
@@ -460,7 +599,9 @@ export function ArtworkMuralWindow({
         />
       </div>
 
-      <div className="hidden md:block">{artworkSurface}</div>
+      <div className="hidden h-[clamp(520px,65vh,720px)] md:block">
+        {artworkSurface}
+      </div>
 
       <input
         ref={inputRef}
@@ -475,8 +616,8 @@ export function ArtworkMuralWindow({
       />
 
       {isOpen && (
-        <div className="fixed inset-0 z-[120] bg-white md:hidden">
-          <section className="relative flex h-full w-full flex-col overflow-hidden">
+        <div className="fixed inset-0 z-[120] w-screen overflow-x-hidden bg-white md:hidden">
+          <section className="relative flex h-full w-full min-w-0 flex-col overflow-hidden">
             <div className="pointer-events-none absolute left-0 right-0 top-2 z-10 flex h-12 items-center justify-center px-4">
               {hasSelectedArtwork && activeArtwork && (
                 <button
@@ -485,9 +626,6 @@ export function ArtworkMuralWindow({
                   onClick={() => {
                     onDeleteArtwork(activeArtwork.id);
                     setSelectedIndex(null);
-                    setActiveIndex((current) =>
-                      Math.max(0, Math.min(current, artworks.length - 2)),
-                    );
                   }}
                 >
                   Delete selected artwork
@@ -534,7 +672,6 @@ export function ArtworkMuralWindow({
                           onDeleteArtwork(artwork.id);
                         });
                         setSelectedIndex(null);
-                        setActiveIndex(0);
                         setIsDeleteAllOpen(false);
                       }}
                     >
@@ -544,20 +681,20 @@ export function ArtworkMuralWindow({
                 </div>
               </div>
             )}
-            <div className="min-h-0 flex-1 p-2 pb-20 pt-[60px]">
+            <div className="min-h-0 min-w-0 flex-1 p-2 pb-20 pt-[60px]">
               {artworkSurface}
             </div>
-            <div className="absolute bottom-0 left-0 right-0 grid grid-cols-2 gap-2 border-t border-slate-200 bg-white/95 p-3 shadow-[0_-8px_18px_rgba(15,23,42,0.08)]">
+            <div className="absolute bottom-0 left-0 right-0 grid min-w-0 grid-cols-2 gap-2 border-t border-slate-200 bg-white/95 p-3 shadow-[0_-8px_18px_rgba(15,23,42,0.08)]">
               <button
-                className="bg-secondary-blue h-12 rounded-full px-3 text-sm font-bold text-white shadow-sm"
-                disabled={artworks.length >= maxCount}
+                className="bg-secondary-blue h-12 min-w-0 rounded-full px-3 text-sm font-bold leading-tight text-white shadow-sm disabled:opacity-40"
+                disabled={uploadedArtworkCount >= maxCount}
                 type="button"
                 onClick={chooseFiles}
               >
                 Upload more artworks
               </button>
               <button
-                className="bg-secondary-green h-12 rounded-full px-3 text-sm font-bold text-white shadow-sm"
+                className="bg-secondary-green h-12 min-w-0 rounded-full px-3 text-sm font-bold leading-tight text-white shadow-sm"
                 type="button"
                 onClick={onClose}
               >
@@ -565,6 +702,37 @@ export function ArtworkMuralWindow({
               </button>
             </div>
           </section>
+        </div>
+      )}
+      {isDeleteAllOpen && !isOpen && (
+        <div className="fixed inset-0 z-[120] grid place-items-center bg-slate-950/45 px-4">
+          <div className="w-full max-w-sm rounded-lg bg-white p-5 shadow-xl">
+            <p className="text-base font-semibold text-slate-950">
+              Really delete all of your artworks on this page?
+            </p>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <button
+                className="h-11 rounded-full border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700"
+                type="button"
+                onClick={() => setIsDeleteAllOpen(false)}
+              >
+                Go back
+              </button>
+              <button
+                className="bg-tertiary-red h-11 rounded-full px-4 text-sm font-bold text-white"
+                type="button"
+                onClick={() => {
+                  artworks.forEach((artwork) => {
+                    onDeleteArtwork(artwork.id);
+                  });
+                  setSelectedIndex(null);
+                  setIsDeleteAllOpen(false);
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </>

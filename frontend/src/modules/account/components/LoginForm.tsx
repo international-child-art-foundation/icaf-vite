@@ -103,14 +103,13 @@ export const LoginForm = () => {
       <div className="rounded-lg border border-slate-200 bg-slate-50 p-5 shadow-xl sm:p-8">
         <div className="mb-8">
           <p className="text-secondary-blue mb-2 text-sm font-bold uppercase tracking-widest">
-            ICAF account
+            Have an account already?
           </p>
           <h1 className="font-montserrat text-3xl font-semibold text-slate-950 sm:text-4xl">
             Log into your account
           </h1>
           <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
-            Access your ICAF account to manage participation, submissions, and
-            account details.
+            Log in to manage participation, submissions, and account details.
           </p>
         </div>
 

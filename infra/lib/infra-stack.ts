@@ -1,4 +1,4 @@
-import { Duration, Stack, StackProps, RemovalPolicy } from "aws-cdk-lib";
+import { CfnOutput, Duration, Stack, StackProps, RemovalPolicy } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
@@ -217,6 +217,60 @@ export class InfraStack extends Stack {
       // TODO: uncomment once ACM certificate is provisioned in us-east-1
       // certificate: acm.Certificate.fromCertificateArn(this, 'MagazinesCert', 'arn:aws:acm:us-east-1:ACCOUNT:certificate/CERT_ID'),
       // domainNames: ['magazines.icaf.org'],
+    });
+
+    // Artwork image variants served from the private artwork bucket.
+    // Expected paths are /{art_id}/thumb.avif, /{art_id}/medium.avif, and
+    // /{art_id}/original.avif.
+    const artworkVariantGuardFn = new cloudfront.Function(this, "ArtworkVariantGuardFn", {
+      functionName: "icaf-artwork-variant-guard",
+      code: cloudfront.FunctionCode.fromInline(`
+        function handler(event) {
+          var request = event.request;
+          var uri = request.uri;
+          if (/^\\/[^/]+\\/(thumb|medium|original)\\.avif$/.test(uri)) {
+            return request;
+          }
+          return {
+            statusCode: 403,
+            statusDescription: 'Forbidden'
+          };
+        }
+      `),
+    });
+
+    const artworkOac = new cloudfront.S3OriginAccessControl(this, "ArtworkOAC", {
+      description: "OAC for ICAF Artwork bucket",
+    });
+
+    const artworkDistribution = new cloudfront.Distribution(this, "ArtworkDistribution", {
+      comment: "ICAF Artwork image variants",
+      defaultBehavior: {
+        origin: cloudfrontOrigins.S3BucketOrigin.withOriginAccessControl(
+          artworkBucket,
+          { originAccessControl: artworkOac },
+        ),
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+        allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+        cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD_OPTIONS,
+        functionAssociations: [
+          {
+            function: artworkVariantGuardFn,
+            eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+          },
+        ],
+      },
+    });
+
+    new CfnOutput(this, "ArtworkDistributionDomainName", {
+      value: artworkDistribution.distributionDomainName,
+      description: "CloudFront domain for artwork AVIF variants",
+    });
+
+    new CfnOutput(this, "MagazinesDistributionDomainName", {
+      value: magazinesDistribution.distributionDomainName,
+      description: "CloudFront domain for magazines",
     });
 
     // ─── 4. Cognito User Pool ─────────────────────────────────────────────────

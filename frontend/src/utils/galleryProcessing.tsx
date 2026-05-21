@@ -1,4 +1,8 @@
-import { TArtwork, TResolvedArtwork } from '@/modules/content/types/Gallery';
+import type { ArtworkListItem } from '@icaf/shared';
+import type {
+  TArtwork,
+  TResolvedArtwork,
+} from '@/modules/content/types/Gallery';
 
 /** Derives the folder slug from a human-readable event name: spaces → hyphens. */
 export function eventToSlug(event: string): string {
@@ -21,6 +25,48 @@ export function resolveArtwork(a: TArtwork): TResolvedArtwork {
       formatArtistName(a.artists ?? [], a.lastInitial) ||
       a.country ||
       'Artwork',
+  };
+}
+
+const remoteArtworkBaseUrl = (
+  (import.meta.env.VITE_ARTWORK_ASSET_BASE_URL as string) ?? ''
+).replace(/\/$/, '');
+
+function artworkAssetUrl(
+  artId: string,
+  variant: 'display' | 'feature' | 'thumb',
+) {
+  return remoteArtworkBaseUrl
+    ? `${remoteArtworkBaseUrl}/${artId}/${variant}.avif`
+    : `/${artId}/${variant}.avif`;
+}
+
+export function resolveApiArtwork(a: ArtworkListItem): TResolvedArtwork {
+  const artists = a.f_name?.trim() ? [a.f_name.trim()] : [];
+  const themeLabel = [a.theme_family, a.theme_instance]
+    .filter(Boolean)
+    .join(' ');
+
+  return {
+    art_id: a.art_id,
+    id: a.art_id,
+    file: `${a.art_id}.avif`,
+    event: themeLabel,
+    eventSlug: a.theme_family ?? 'gallery',
+    artists,
+    age: a.age,
+    country: a.country,
+    region: a.region,
+    title: a.title,
+    description: a.description,
+    theme_family: a.theme_family,
+    theme_instance: a.theme_instance,
+    kudos_count: a.kudos_count,
+    url: artworkAssetUrl(a.art_id, 'feature'),
+    thumbUrl: artworkAssetUrl(a.art_id, 'thumb'),
+    displayUrl: artworkAssetUrl(a.art_id, 'display'),
+    featureUrl: artworkAssetUrl(a.art_id, 'feature'),
+    alt: a.title || formatArtistName(artists) || a.country || 'Artwork',
   };
 }
 

@@ -31,6 +31,7 @@ import { handler as confirmDefaultRegistration } from "../functions/anyone/confi
 import { handler as forgotPassword } from "../functions/anyone/forgotPassword";
 import { handler as galleryArtworks } from "../functions/anyone/gallery/galleryArtworks";
 import { handler as galleryGroups } from "../functions/anyone/gallery/galleryGroups";
+import { handler as galleryThemes } from "../functions/anyone/gallery/galleryThemes";
 import { handler as getArtwork } from "../functions/anyone/getArtwork";
 import { handler as getAuthStatus } from "../functions/anyone/getAuthStatus";
 import { handler as getGroup } from "../functions/anyone/getGroup";
@@ -121,6 +122,7 @@ const routes: Route[] = [
   { method: "GET", path: "/gallery/artworks", handler: galleryArtworks },
   { method: "GET", path: "/gallery/artworks/family/{family}", handler: galleryArtworks },
   { method: "GET", path: "/gallery/artworks/family/{family}/instance/{instance}", handler: galleryArtworks },
+  { method: "GET", path: "/gallery/themes", handler: galleryThemes },
   { method: "GET", path: "/gallery/groups", handler: galleryGroups },
   { method: "GET", path: "/gallery/groups/family/{family}", handler: galleryGroups },
   { method: "GET", path: "/gallery/groups/family/{family}/instance/{instance}", handler: galleryGroups },

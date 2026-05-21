@@ -1,25 +1,5 @@
 /**
  * Artwork data for the ICAF gallery.
- *
- * All metadata lives in data/galleryData.json, hand-edited.
- * The build script (generateGalleryData.js) reads this file,
- * generates thumbnails + display-size images, and validates
- * that every referenced image file exists on disk.
- *
- * Image files live in gallery-arts/{event-folder}/:
- *   gallery-arts/
- *     7th-Arts-Olympiad/
- *       anwita-k.jpg
- *       nicolas.jpg
- *       thumbs/              ← generated
- *       display/             ← generated
- *
- * Filename convention (human-readable slug, not parsed for data):
- *   {artist-slug}.jpg          — e.g. anwita-k.jpg
- *   {artist-slug}-2.jpg        — duplicate from same artist
- *   anon-001.jpg               — anonymous work
- *
- * Event folder names use kebab-case: 7th-Arts-Olympiad, etc.
  */
 
 export type TArtwork = {
@@ -63,6 +43,14 @@ export type TResolvedArtwork = TArtwork & {
   featureUrl: string;
   /** Alt text for accessibility */
   alt: string;
+  /** API artwork id for remote artworks. */
+  art_id?: string;
+  /** Theme family used by remote gallery filtering. */
+  theme_family?: string;
+  /** Theme instance retained as display metadata. */
+  theme_instance?: string;
+  /** Number of kudos recorded for this artwork. */
+  kudos_count?: number;
 };
 
 export interface IGalleryContext {

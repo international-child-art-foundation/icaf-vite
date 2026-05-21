@@ -15,7 +15,20 @@ export interface ThemeEntity {
     theme_instance: string;     // zero-padded 4 digits, e.g. '2025' or '0007'
     display_name: string;       // human-readable, e.g. 'Cherry Blossom 2025'
     description?: string;       // prompt / description shown on the theme page
+    featured_on?: string[];     // surfaces where this theme is featured, e.g. ['gallery']
+    colors?: ThemeColors;       // presentation metadata for theme cards/pages
+    image_url?: string;         // presentation metadata for theme artwork/image
+    card_image_url?: string;    // optional card-specific image override
+    style?: string;             // presentation variant selected by frontend
     type: 'THEME';
+}
+
+export interface ThemeColors {
+    primary?: string;
+    secondary?: string;
+    accent?: string;
+    text?: string;
+    background?: string;
 }
 
 // API response shape for theme lists
@@ -24,6 +37,11 @@ export interface ThemeListItem {
     theme_instance: string;
     display_name: string;
     description?: string;
+    featured_on?: string[];
+    colors?: ThemeColors;
+    image_url?: string;
+    card_image_url?: string;
+    style?: string;
 }
 
 export interface ListThemesResponse {

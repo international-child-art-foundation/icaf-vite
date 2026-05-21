@@ -213,21 +213,35 @@ export const handler = async (
           TableName: TABLE_NAME,
           Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
           UpdateExpression:
-            "SET verify_token = :token, verify_token_expiration = :exp, emailed_signup_at = :emailSignupAt",
+            "SET verify_token = :token, verify_token_expiration = :exp",
           ExpressionAttributeValues: {
             ":token": verifyToken,
             ":exp": verifyTokenExpiration,
-            ":emailSignupAt": nowSeconds,
           },
         }),
       );
 
-      await sendArtworkSubmissionEmail({
-        toEmail: user.email,
-        userId: user.user_id,
-        verifyToken,
-      });
-      sentSignupEmail = true;
+      try {
+        await sendArtworkSubmissionEmail({
+          toEmail: user.email,
+          userId: user.user_id,
+          verifyToken,
+        });
+        sentSignupEmail = true;
+
+        await dynamodb.send(
+          new UpdateCommand({
+            TableName: TABLE_NAME,
+            Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
+            UpdateExpression: "SET emailed_signup_at = :emailSignupAt",
+            ExpressionAttributeValues: {
+              ":emailSignupAt": nowSeconds,
+            },
+          }),
+        );
+      } catch (error) {
+        console.error("Artwork submission signup email failed:", error);
+      }
     }
 
     const response: SubmitArtworkResponse = {

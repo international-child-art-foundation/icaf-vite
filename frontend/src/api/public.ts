@@ -9,6 +9,7 @@ import type {
   InitiateTakedownResponse,
   ListMagazinesResponse,
   ListNewsResponse,
+  ListThemesResponse,
   SubmitArtworkResponse,
   AuthenticatedCreateGroupRequest,
   CreateGroupRequest,
@@ -105,6 +106,10 @@ export function listGalleryArtworksByInstance(
     apiEndpoints.gallery.artworksByInstance(family, instance),
     { query },
   );
+}
+
+export function listGalleryThemes(): Promise<ListThemesResponse> {
+  return apiRequest<ListThemesResponse>(apiEndpoints.gallery.themes);
 }
 
 export function listGalleryGroups(query?: GalleryQueryParams): Promise<GalleryGroupsResponse> {

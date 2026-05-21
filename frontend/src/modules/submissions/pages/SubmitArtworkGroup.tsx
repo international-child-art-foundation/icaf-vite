@@ -22,7 +22,10 @@ import {
   toArtworkRequest,
   validateArtworkGroupSubmission,
 } from '@/modules/submissions/utils/artworkGroupDraft';
-import { createImagePreview } from '@/modules/submissions/utils/imagePreview';
+import {
+  createImagePreview,
+  createRotatedImageFile,
+} from '@/modules/submissions/utils/imagePreview';
 import { Button } from '@/shared/components/ui/button';
 import { GROUP_MAX_MEMBERS } from '@icaf/shared';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -30,6 +33,22 @@ import { useLocation, useNavigate } from 'react-router-dom';
 type SubmissionStatus = 'idle' | 'submitting' | 'success';
 
 type GroupIconField = 'class_name' | 'country' | 'guardian_display_name';
+
+export type SubmitArtworkGroupCopy = {
+  artworkHelpText: string;
+  description: string;
+  heading: string;
+  kicker: string;
+  submitLabel: string;
+};
+
+const defaultSubmitArtworkGroupCopy: SubmitArtworkGroupCopy = {
+  artworkHelpText: `Click or tap the box to upload, review, and annotate up to ${GROUP_MAX_MEMBERS} artworks.`,
+  description: 'Create one group with individually annotated artwork images.',
+  heading: 'Submit artwork for a group',
+  kicker: 'Artwork submission',
+  submitLabel: 'Submit artwork group',
+};
 
 type StringArtworkGroupField = {
   [Key in keyof ArtworkGroupInfo]: ArtworkGroupInfo[Key] extends string
@@ -108,8 +127,72 @@ function readStoredGroup(value: unknown): ArtworkGroupInfo {
         ? group.notifications
         : initialPersistedDraft.group.notifications,
     region: readString(group.region, initialPersistedDraft.group.region),
+    theme_family: readString(
+      group.theme_family,
+      initialPersistedDraft.group.theme_family,
+    ),
+    theme_instance: readString(
+      group.theme_instance,
+      initialPersistedDraft.group.theme_instance,
+    ),
     title: readString(group.title, initialPersistedDraft.group.title),
   };
+}
+
+function normalizeThemeFamily(value: string | null) {
+  return (
+    value
+      ?.trim()
+      .replace(/[^a-z0-9_]/gi, '')
+      .toUpperCase() ?? ''
+  );
+}
+
+function normalizeThemeInstance(value: string | null) {
+  const trimmedValue = value?.trim() ?? '';
+  return /^\d{1,4}$/.test(trimmedValue)
+    ? trimmedValue.padStart(4, '0')
+    : trimmedValue;
+}
+
+function formatThemeInstance(value: string) {
+  if (!/^\d+$/.test(value)) return value;
+  return String(Number(value));
+}
+
+function readThemeParams(search: string) {
+  const params = new URLSearchParams(search);
+  const themeFamily = normalizeThemeFamily(
+    params.get('theme_family') ??
+      params.get('themeFamily') ??
+      params.get('family') ??
+      params.get('theme'),
+  );
+  const themeInstance = normalizeThemeInstance(
+    params.get('theme_instance') ??
+      params.get('themeInstance') ??
+      params.get('instance') ??
+      params.get('id'),
+  );
+
+  return {
+    theme_family: themeFamily,
+    theme_instance: themeInstance,
+  };
+}
+
+async function createFileFingerprint(file: File) {
+  if (!globalThis.crypto?.subtle) {
+    return `${file.size}:${file.lastModified}`;
+  }
+
+  const digest = await globalThis.crypto.subtle.digest(
+    'SHA-256',
+    await file.arrayBuffer(),
+  );
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 function readPersistedDraft(): StoredArtworkGroupSubmissionDraft {
@@ -136,16 +219,27 @@ function readPersistedDraft(): StoredArtworkGroupSubmissionDraft {
   }
 }
 
-export function SubmitArtworkGroup() {
+export function SubmitArtworkGroup({
+  copy: copyOverrides,
+}: {
+  copy?: Partial<SubmitArtworkGroupCopy>;
+} = {}) {
   const location = useLocation();
   const navigate = useNavigate();
+  const copy = { ...defaultSubmitArtworkGroupCopy, ...copyOverrides };
   const [draft, setDraft] = useState(readPersistedDraft);
   const [artworks, setArtworks] = useState<ArtworkDraft[]>([
     createArtworkDraft(),
   ]);
   const [files, setFiles] = useState<Record<string, File | undefined>>({});
+  const [fileFingerprints, setFileFingerprints] = useState<
+    Record<string, string | undefined>
+  >({});
   const [previewDataUrls, setPreviewDataUrls] = useState<
     Record<string, string | undefined>
+  >({});
+  const [imageRotations, setImageRotations] = useState<
+    Record<string, number | undefined>
   >({});
   const [errors, setErrors] = useState<ArtworkGroupSubmissionErrors>({});
   const [status, setStatus] = useState<SubmissionStatus>('idle');
@@ -154,9 +248,27 @@ export function SubmitArtworkGroup() {
   const isSubmitting = status === 'submitting';
   const artworkErrors = errors.artworks ?? {};
   const isArtworkWindowOpen = location.pathname === '/submit-artwork/artworks';
+  const themeParams = useMemo(
+    () => readThemeParams(location.search),
+    [location.search],
+  );
+  const activeTheme = {
+    theme_family: themeParams.theme_family || draft.group.theme_family,
+    theme_instance: themeParams.theme_instance || draft.group.theme_instance,
+  };
+  const effectiveGroup = useMemo(
+    () => ({
+      ...draft.group,
+      theme_family: activeTheme.theme_family,
+      theme_instance: activeTheme.theme_family
+        ? activeTheme.theme_instance
+        : '',
+    }),
+    [activeTheme.theme_family, activeTheme.theme_instance, draft.group],
+  );
   const submissionDraft = useMemo(
-    () => ({ ...draft, artworks }),
-    [artworks, draft],
+    () => ({ ...draft, group: effectiveGroup, artworks }),
+    [artworks, draft, effectiveGroup],
   );
   const displayArtworks = useMemo(
     () =>
@@ -223,6 +335,24 @@ export function SubmitArtworkGroup() {
     const previewDataUrl = await createImagePreview(file);
 
     setFiles((current) => ({ ...current, [artworkId]: file }));
+    setImageRotations((current) => ({ ...current, [artworkId]: 0 }));
+    setPreviewDataUrls((current) => ({
+      ...current,
+      [artworkId]: previewDataUrl,
+    }));
+  }
+
+  async function rotateArtwork(artworkId: string) {
+    const file = files[artworkId];
+    if (!file) return;
+
+    const nextRotation = ((imageRotations[artworkId] ?? 0) + 90) % 360;
+    const previewDataUrl = await createImagePreview(file, nextRotation);
+
+    setImageRotations((current) => ({
+      ...current,
+      [artworkId]: nextRotation,
+    }));
     setPreviewDataUrls((current) => ({
       ...current,
       [artworkId]: previewDataUrl,
@@ -230,15 +360,26 @@ export function SubmitArtworkGroup() {
   }
 
   function openArtworkWindow() {
-    if (!isArtworkWindowOpen) void navigate('/submit-artwork/artworks');
+    if (!isArtworkWindowOpen)
+      void navigate(`/submit-artwork/artworks${location.search}`);
   }
 
   function closeArtworkWindow() {
-    void navigate('/submit-artwork');
+    void navigate(`/submit-artwork${location.search}`);
   }
 
   function deleteArtwork(artworkId: string) {
     setFiles((current) => {
+      const next = { ...current };
+      delete next[artworkId];
+      return next;
+    });
+    setFileFingerprints((current) => {
+      const next = { ...current };
+      delete next[artworkId];
+      return next;
+    });
+    setImageRotations((current) => {
       const next = { ...current };
       delete next[artworkId];
       return next;
@@ -263,6 +404,10 @@ export function SubmitArtworkGroup() {
     if (filesToAdd.length === 0) return;
 
     let nextArtworks = artworks;
+    const nextFingerprints = { ...fileFingerprints };
+    const existingFingerprints = new Set(
+      Object.values(nextFingerprints).filter(Boolean),
+    );
     const occupiedArtworkIds = new Set(
       nextArtworks
         .filter((artwork) => files[artwork.id])
@@ -270,7 +415,10 @@ export function SubmitArtworkGroup() {
     );
     const assignments: Array<{ artworkId: string; file: File }> = [];
 
-    filesToAdd.forEach((file) => {
+    for (const file of filesToAdd) {
+      const fingerprint = await createFileFingerprint(file);
+      if (existingFingerprints.has(fingerprint)) continue;
+
       const emptyArtwork = nextArtworks.find(
         (artwork) => !occupiedArtworkIds.has(artwork.id),
       );
@@ -280,7 +428,7 @@ export function SubmitArtworkGroup() {
           ? createArtworkDraft()
           : undefined);
 
-      if (!targetArtwork) return;
+      if (!targetArtwork) break;
 
       if (!emptyArtwork) {
         nextArtworks = [...nextArtworks, targetArtwork];
@@ -288,9 +436,12 @@ export function SubmitArtworkGroup() {
 
       assignments.push({ artworkId: targetArtwork.id, file });
       occupiedArtworkIds.add(targetArtwork.id);
-    });
+      existingFingerprints.add(fingerprint);
+      nextFingerprints[targetArtwork.id] = fingerprint;
+    }
 
     if (nextArtworks !== artworks) setArtworks(nextArtworks);
+    setFileFingerprints(nextFingerprints);
     await Promise.all(
       assignments.map(({ artworkId, file }) => attachFile(artworkId, file)),
     );
@@ -312,32 +463,44 @@ export function SubmitArtworkGroup() {
   async function handleAsyncSubmit() {
     try {
       const releaseHash = await createReleaseHash();
-      const artworkRequests = artworks.map((artwork) => {
-        const file = files[artwork.id];
+      const uploadFiles = await Promise.all(
+        artworks.map((artwork) => {
+          const file = files[artwork.id];
+          if (!file) throw new Error('A selected image is missing.');
+          return createRotatedImageFile(file, imageRotations[artwork.id] ?? 0);
+        }),
+      );
+      const artworkRequests = artworks.map((artwork, index) => {
+        const file = uploadFiles[index];
         if (!file) throw new Error('A selected image is missing.');
-        if (!getUploadFileType(file)) throw new Error(`${file.name} is not supported.`);
-        return toArtworkRequest(artwork, file, releaseHash, draft.group);
+        if (!getUploadFileType(file))
+          throw new Error(`${file.name} is not supported.`);
+        return toArtworkRequest(artwork, file, releaseHash, effectiveGroup);
       });
       const groupResponse = await createGuestGroup({
         email: draft.submitterEmail.trim(),
         artworks: artworkRequests,
-        class_name: draft.group.class_name.trim() || undefined,
-        country: draft.group.country.trim(),
-        description: draft.group.description.trim() || undefined,
-        group_type: draft.group.group_type,
-        notifications: draft.group.notifications,
-        region: draft.group.region.trim() || undefined,
+        class_name: effectiveGroup.class_name.trim() || undefined,
+        country: effectiveGroup.country.trim(),
+        description: effectiveGroup.description.trim() || undefined,
+        group_type: effectiveGroup.group_type,
+        notifications: effectiveGroup.notifications,
+        region: effectiveGroup.region.trim() || undefined,
         guardian_display_name:
-          draft.group.guardian_display_name.trim() || undefined,
-        title: draft.group.title.trim(),
+          effectiveGroup.guardian_display_name.trim() || undefined,
+        theme_family: effectiveGroup.theme_family.trim() || undefined,
+        theme_instance: effectiveGroup.theme_instance.trim() || undefined,
+        title: effectiveGroup.title.trim(),
       });
 
       if (groupResponse.art_uploads?.length !== artworks.length) {
-        throw new Error('The server did not return upload URLs for every artwork.');
+        throw new Error(
+          'The server did not return upload URLs for every artwork.',
+        );
       }
 
-      for (const [index, artwork] of artworks.entries()) {
-        const file = files[artwork.id];
+      for (const [index] of artworks.entries()) {
+        const file = uploadFiles[index];
         if (!file) throw new Error('A selected image is missing.');
 
         const fileType = getUploadFileType(file);
@@ -353,9 +516,11 @@ export function SubmitArtworkGroup() {
 
       setStatus('success');
       setSubmitMessage(
-        `Submitted ${artworks.length} artwork${artworks.length === 1 ? '' : 's'} for review.`,
+        `Thank you for submitting ${artworks.length} artwork${artworks.length === 1 ? '' : 's'} for review! Check your email to create an account and receive updates.`,
       );
       setFiles({});
+      setFileFingerprints({});
+      setImageRotations({});
       setPreviewDataUrls({});
       setArtworks([createArtworkDraft()]);
       setDraft(initialPersistedDraft);
@@ -391,13 +556,13 @@ export function SubmitArtworkGroup() {
           <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-xl sm:p-6">
             <div className="mb-5">
               <p className="text-secondary-blue mb-2 text-xs font-bold uppercase tracking-widest">
-                Artwork submission
+                {copy.kicker}
               </p>
               <h1 className="font-montserrat text-2xl font-semibold text-slate-950 sm:text-3xl">
-                Submit artwork for a group
+                {copy.heading}
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-                Create one group with individually annotated artwork images.
+                {copy.description}
               </p>
             </div>
 
@@ -478,9 +643,16 @@ export function SubmitArtworkGroup() {
                 <h2 className="font-montserrat text-xl font-semibold text-slate-950">
                   Artworks
                 </h2>
+                {activeTheme.theme_family && (
+                  <p className="mt-1 text-xs font-semibold text-slate-500">
+                    Theme: {activeTheme.theme_family}
+                    {activeTheme.theme_instance
+                      ? ` ${formatThemeInstance(activeTheme.theme_instance)}`
+                      : ''}
+                  </p>
+                )}
                 <p className="mt-0.5 text-xs leading-5 text-slate-500">
-                  Tap the box to upload, review, and annotate up to{' '}
-                  {GROUP_MAX_MEMBERS} artworks.
+                  {copy.artworkHelpText}
                 </p>
               </div>
               <ArtworkMuralWindow
@@ -493,9 +665,9 @@ export function SubmitArtworkGroup() {
                 onDeleteArtwork={deleteArtwork}
                 onFilesSelected={(newFiles) => void addFiles(newFiles)}
                 onOpen={openArtworkWindow}
+                onRotateArtwork={(artworkId) => void rotateArtwork(artworkId)}
               />
             </section>
-
             <label className="mt-5 flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
               <input
                 checked={draft.certificationAccepted}
@@ -511,8 +683,8 @@ export function SubmitArtworkGroup() {
                 }
               />
               <span>
-                I certify that I have the right to submit these artworks to
-                ICAF.
+                I certify that I have the right to submit these artworks to ICAF
+                on behalf of their creators.
                 {errors.certificationAccepted && (
                   <span className="text-tertiary-red mt-1 block text-xs font-semibold">
                     {errors.certificationAccepted}
@@ -546,7 +718,7 @@ export function SubmitArtworkGroup() {
               type="submit"
             >
               <Send aria-hidden="true" className="h-4 w-4" />
-              {isSubmitting ? 'Submitting...' : 'Submit artwork group'}
+              {isSubmitting ? 'Submitting...' : copy.submitLabel}
             </Button>
             {viewerError && (
               <p className="text-tertiary-red mt-2 text-xs font-semibold">
@@ -557,8 +729,8 @@ export function SubmitArtworkGroup() {
               <div
                 className={
                   status === 'success'
-                    ? 'text-secondary-green mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold'
-                    : 'text-tertiary-red mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold'
+                    ? 'text-secondary-green mb-5 mt-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold'
+                    : 'text-tertiary-red mb-5 mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold'
                 }
                 role={status === 'success' ? 'status' : 'alert'}
               >

@@ -1,56 +1,144 @@
-import React, { useEffect, useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
-import { useSearchParams } from 'react-router-dom';
-import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
-import { getArtworks } from '@/utils/server_asset_handlers/gallery';
-import { sortBy } from '@/modules/content/data/gallery/sortData';
+import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
+import { LoaderCircle, Play } from 'lucide-react';
+import { useWindowSize } from 'usehooks-ts';
+import type {
+  GalleryQueryParams,
+  SortOrder,
+  ThemeColors,
+  ThemeListItem,
+} from '@icaf/shared';
+import {
+  listGalleryArtworks,
+  listGalleryArtworksByFamily,
+  listGalleryThemes,
+} from '@/api/public';
+import type {
+  IGalleryContext,
+  TResolvedArtwork,
+} from '@/modules/content/types/Gallery';
 import type { SortValue } from '@/modules/content/data/gallery/sortData';
-import { filterableOptions as initialFilterableOptions } from '@/modules/content/data/gallery/filterData';
-import Checkbox from './Checkbox';
+import { resolveApiArtwork } from '@/utils/galleryProcessing';
 import ArtworkCard from './ArtworkCard';
-import Pagination from './Pagination';
-import Filter from './Filter';
-import { TagList } from './TagList';
 import ArtworkModal from './ArtworkModal';
 import { FilterProvider, useFilters } from './FilterContext';
-import MobileFilter from './MobileFilter';
-import { useWindowSize } from 'usehooks-ts';
-import { Menu, Play } from 'lucide-react';
-import { Outlet } from 'react-router-dom';
-import { IGalleryContext } from '@/modules/content/types/Gallery';
-import { useNavigate } from 'react-router-dom';
+import Pagination from './Pagination';
 
-type ParamsObjType = Record<string, string[]>;
+const ARTWORKS_PER_PAGE = 20;
+const API_PAGE_LIMIT = 100;
 
-function eventOrder(event: string): number {
-  const match = event.match(/^(\d+)/);
-  return match ? parseInt(match[1], 10) : 0;
+function toSortOrder(sortValue: string): SortOrder {
+  return sortValue === 'Oldest Event' ? 'oldest' : 'newest';
 }
 
-function isValueInFilter(
-  value: string | undefined,
-  filterValues: string[] | undefined,
-): boolean {
-  if (!filterValues || filterValues.length === 0) return true;
-  if (!value) return false;
-  return filterValues.includes(value);
+async function fetchAllGalleryArtworks(
+  themeFamily: string | null,
+  sort: SortOrder,
+): Promise<TResolvedArtwork[]> {
+  const artworks: TResolvedArtwork[] = [];
+  let lastKey: string | undefined;
+
+  do {
+    const query: GalleryQueryParams = {
+      sort,
+      limit: API_PAGE_LIMIT,
+      ...(lastKey ? { last_key: lastKey } : {}),
+    };
+    const response = themeFamily
+      ? await listGalleryArtworksByFamily(themeFamily, query)
+      : await listGalleryArtworks(query);
+
+    artworks.push(...response.artworks.map(resolveApiArtwork));
+    lastKey = response.last_key;
+  } while (lastKey);
+
+  return artworks;
+}
+
+function themeCardBackground(theme: ThemeListItem): string {
+  const color = theme.colors?.primary ?? theme.colors?.background ?? '#0286C3';
+  const secondary = theme.colors?.secondary ?? '#202020';
+  const imageUrl = theme.card_image_url ?? theme.image_url;
+  const image = imageUrl ? `url("${imageUrl}")` : '';
+  return image
+    ? `linear-gradient(135deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.42)), ${image}`
+    : `linear-gradient(135deg, ${color}, ${secondary})`;
+}
+
+function themeTextColor(colors: ThemeColors | undefined): string {
+  return colors?.text ?? '#ffffff';
+}
+
+function ThemeCard({
+  active,
+  onSelect,
+  theme,
+}: {
+  active: boolean;
+  onSelect: () => void;
+  theme: ThemeListItem;
+}) {
+  const accent = theme.colors?.accent ?? theme.colors?.secondary ?? '#ffffff';
+  const textColor = themeTextColor(theme.colors);
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`group relative h-[150px] w-[280px] flex-none overflow-hidden rounded-lg p-5 text-left shadow-md transition duration-200 sm:w-[320px] ${
+        active
+          ? 'scale-[1.02] ring-4 ring-black/20'
+          : 'hover:-translate-y-0.5 hover:shadow-lg'
+      }`}
+      style={{
+        backgroundImage: themeCardBackground(theme),
+        backgroundColor: theme.colors?.primary ?? theme.colors?.background,
+        backgroundPosition: 'center',
+        backgroundSize: 'cover',
+        color: textColor,
+      }}
+    >
+      <span className="absolute inset-0 bg-black/10 transition group-hover:bg-black/0" />
+      <span
+        className="absolute inset-x-0 bottom-0 h-1 opacity-90 transition"
+        style={{ backgroundColor: accent }}
+      />
+      <span className="relative z-10 flex h-full flex-col justify-between gap-6">
+        <span>
+          <span className="block font-montserrat text-2xl font-bold leading-tight">
+            {theme.display_name}
+          </span>
+          {theme.description && (
+            <span className="mt-2 block max-h-[2.6rem] overflow-hidden text-sm leading-relaxed opacity-90">
+              {theme.description}
+            </span>
+          )}
+        </span>
+        {theme.theme_instance && (
+          <span className="text-xs font-semibold uppercase tracking-wider opacity-80">
+            {theme.theme_instance}
+          </span>
+        )}
+      </span>
+    </button>
+  );
 }
 
 const GalleryCoreInner = () => {
+  const [themes, setThemes] = useState<ThemeListItem[]>([]);
+  const [themesLoading, setThemesLoading] = useState(true);
+  const [themesError, setThemesError] = useState<string | null>(null);
+  const [selectedThemeFamily, setSelectedThemeFamily] = useState<string | null>(
+    null,
+  );
   const [artworks, setArtworks] = useState<TResolvedArtwork[]>([]);
   const [artworksLoading, setArtworksLoading] = useState(true);
   const [artworksError, setArtworksError] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const didInitialLoad = useRef(false);
   const [isModalOpen, setModalOpen] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const {
-    filterableOptions,
-    setFilterOption,
-    bulkAlterCategoryOptions,
-    resetAllFilters,
-    updateOptionCounts,
-    setRegionActive,
     pageNumber,
     setPageNumber,
     sortValue,
@@ -59,31 +147,72 @@ const GalleryCoreInner = () => {
     setActiveEntryId,
   } = useFilters();
   const navigate = useNavigate();
-
-  const [paramsObj, setParamsObj] = useState<ParamsObjType>({});
   const { width = 0, height = 0 } = useWindowSize();
   const isMobile = width < 1024;
   const isHorizontal = width > height;
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
-    getArtworks()
-      .then((data) => {
-        setArtworks(data);
-        const counts: Record<string, number> = {};
-        data.forEach((a) => {
-          if (a.event) counts[a.event] = (counts[a.event] ?? 0) + 1;
-          if (a.country) counts[a.country] = (counts[a.country] ?? 0) + 1;
-        });
-        updateOptionCounts(counts);
+    let cancelled = false;
+    setThemesLoading(true);
+    setThemesError(null);
+
+    listGalleryThemes()
+      .then((response) => {
+        if (cancelled) return;
+        setThemes(response.themes);
+        setSelectedThemeFamily((current) =>
+          current ?? response.themes[0]?.theme_family ?? null,
+        );
       })
-      .catch((e: unknown) =>
-        setArtworksError(
-          e instanceof Error ? e.message : 'Failed to load artworks',
-        ),
-      )
-      .finally(() => setArtworksLoading(false));
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        setThemesError(
+          error instanceof Error ? error.message : 'Failed to load themes',
+        );
+      })
+      .finally(() => {
+        if (!cancelled) setThemesLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  useEffect(() => {
+    if (themesLoading) return;
+    if (!selectedThemeFamily) {
+      setArtworks([]);
+      setArtworksLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setArtworksLoading(true);
+    setArtworksError(null);
+
+    fetchAllGalleryArtworks(selectedThemeFamily, toSortOrder(sortValue))
+      .then((data) => {
+        if (cancelled) return;
+        setArtworks(data);
+        setPageNumber(1);
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        setArtworks([]);
+        setArtworksError(
+          error instanceof Error ? error.message : 'Failed to load artworks',
+        );
+      })
+      .finally(() => {
+        if (!cancelled) setArtworksLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedThemeFamily, setPageNumber, sortValue, themesLoading]);
 
   useEffect(() => {
     if (!artworksLoading && gridRef.current) {
@@ -106,97 +235,37 @@ const GalleryCoreInner = () => {
     }
   }, [pageNumber]);
 
-  const openSlideshow = () => {
-    void navigate('/gallery/slideshow');
-    setModalOpen(false);
-  };
-
-  const closeSlideshow = () => {
+  const closeSlideshow = useCallback(() => {
     void navigate('/gallery');
     setModalOpen(false);
-  };
-
-  const artworksPerPage = 20;
-  const startIndex = (pageNumber - 1) * artworksPerPage;
-  const endIndex = startIndex + artworksPerPage;
-
-  function createParamsObj(
-    opts: typeof initialFilterableOptions,
-  ): ParamsObjType {
-    const obj: ParamsObjType = {};
-    opts.forEach((option) => {
-      const entries: string[] = [];
-      if (option.regionActive)
-        entries.push(
-          option.categoryType === 'event' ? 'All Events' : option.title,
-        );
-      option.options
-        .filter((item) => item.active)
-        .forEach((item) => entries.push(item.name));
-      if (entries.length > 0) obj[option.id] = entries;
-    });
-    return obj;
-  }
+  }, [navigate]);
 
   useEffect(() => {
-    setParamsObj(createParamsObj(filterableOptions));
-  }, [filterableOptions]);
-
-  const updateURLFromState = useCallback(() => {
     const currentParams = new URLSearchParams();
-
-    filterableOptions.forEach((category) => {
-      const entries: string[] = [];
-      if (category.regionActive)
-        entries.push(
-          category.categoryType === 'event' ? 'All Events' : category.title,
-        );
-      category.options
-        .filter((o) => o.active)
-        .forEach((o) => entries.push(o.name));
-      if (entries.length > 0) currentParams.set(category.id, entries.join(','));
-    });
-
+    if (selectedThemeFamily) currentParams.set('theme', selectedThemeFamily);
     if (pageNumber > 1) currentParams.set('page', pageNumber.toString());
     if (sortValue !== 'Newest Event') currentParams.set('sort', sortValue);
     if (isModalOpen) currentParams.set('id', activeEntryId);
 
     setSearchParams(currentParams, { replace: true });
   }, [
-    filterableOptions,
-    pageNumber,
-    sortValue,
-    isModalOpen,
     activeEntryId,
+    isModalOpen,
+    pageNumber,
+    selectedThemeFamily,
     setSearchParams,
+    sortValue,
   ]);
 
   useEffect(() => {
-    updateURLFromState();
-  }, [updateURLFromState]);
-
-  // Open modal to artwork ID from URL on mount
-  useEffect(() => {
+    const themeFromUrl = searchParams.get('theme');
     const idFromUrl = searchParams.get('id');
+    if (themeFromUrl) setSelectedThemeFamily(themeFromUrl);
     if (idFromUrl) {
       setActiveEntryId(idFromUrl);
       setModalOpen(true);
     }
   }, []);
-
-  const getShareUrl = () => {
-    const base = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
-    const url = new URL(base);
-    url.searchParams.set('id', activeEntryId);
-    return url.toString();
-  };
-
-  const openModal = (id: string) => {
-    if (!isFilterOpen) {
-      setModalOpen(true);
-      setActiveEntryId(id);
-    }
-  };
 
   useEffect(() => {
     document.body.style.overflow = isModalOpen ? 'hidden' : '';
@@ -213,292 +282,164 @@ const GalleryCoreInner = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [closeSlideshow]);
 
-  const updateFilterOption = (
-    optionName: string,
-    updates: Partial<{ number: number; active: boolean }>,
-  ) => {
-    setFilterOption(optionName, updates);
-    setPageNumber(1);
+  const openSlideshow = () => {
+    void navigate('/gallery/slideshow');
+    setModalOpen(false);
   };
 
-  const alterFiltersByCategory = (
-    categoryId: string,
-    activeStatus: boolean,
-  ) => {
-    bulkAlterCategoryOptions(categoryId, activeStatus);
-    setPageNumber(1);
+  const openModal = (id: string) => {
+    setModalOpen(true);
+    setActiveEntryId(id);
   };
 
-  const clearAllFilters = () => {
-    resetAllFilters();
-    setPageNumber(1);
+  const getShareUrl = () => {
+    const base = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
+    const url = new URL(base);
+    if (selectedThemeFamily) url.searchParams.set('theme', selectedThemeFamily);
+    url.searchParams.set('id', activeEntryId);
+    return url.toString();
   };
 
-  const removeFilterTag = (categoryId: string, value: string) => {
-    const category = filterableOptions.find((c) => c.id === categoryId);
-    const regionLabel =
-      category?.categoryType === 'event' ? 'All Events' : category?.title;
-    if (category && value === regionLabel) {
-      setRegionActive(categoryId, false);
+  const updatePageNumber = (_current: number, next: number) => {
+    const target = document.getElementById('gallery-section');
+    if (target) {
+      const top = target.getBoundingClientRect().top + window.scrollY - 12;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+    if (gridRef.current) {
+      gsap.to(gridRef.current, {
+        opacity: 0,
+        duration: 0.2,
+        ease: 'power1.in',
+        onComplete: () => setPageNumber(next),
+      });
     } else {
-      updateFilterOption(value, { active: false });
-    }
-    setPageNumber(1);
-  };
-
-  // Collect individually selected countries
-  const selectedCountries = filterableOptions
-    .filter((cat) => cat.categoryType === 'country')
-    .flatMap((cat) => cat.options.filter((o) => o.active).map((o) => o.name));
-
-  // Collect all country names belonging to active regions
-  const activeRegionCountries = new Set(
-    filterableOptions
-      .filter((cat) => cat.categoryType === 'country' && cat.regionActive)
-      .flatMap((cat) => cat.options.map((o) => o.name)),
-  );
-
-  const eventCategory = filterableOptions.find((cat) => cat.id === 'event');
-  const eventRegionActive = eventCategory?.regionActive ?? false;
-  const selectedEvents = eventRegionActive
-    ? []
-    : (eventCategory?.options.filter((o) => o.active).map((o) => o.name) ?? []);
-
-  const hasCountryFilter =
-    selectedCountries.length > 0 || activeRegionCountries.size > 0;
-
-  let filteredArts = artworks.filter((artwork) => {
-    const countryMatch =
-      !hasCountryFilter ||
-      (artwork.country
-        ? selectedCountries.includes(artwork.country) ||
-          activeRegionCountries.has(artwork.country)
-        : false);
-    const eventMatch = isValueInFilter(
-      artwork.event,
-      selectedEvents.length > 0 ? selectedEvents : undefined,
-    );
-    return countryMatch && eventMatch;
-  });
-
-  filteredArts = [...filteredArts].sort((a, b) => {
-    const aOrder = eventOrder(a.event);
-    const bOrder = eventOrder(b.event);
-    if (aOrder !== bOrder) {
-      return sortValue === 'Newest Event' ? bOrder - aOrder : aOrder - bOrder;
-    }
-    return -1;
-  });
-
-  const handleGridClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLElement;
-    if (!target.classList.contains('background-area') && isFilterOpen) {
-      setIsFilterOpen(false);
+      setPageNumber(next);
     }
   };
 
-  const pageData = filteredArts.slice(startIndex, endIndex);
+  const startIndex = (pageNumber - 1) * ARTWORKS_PER_PAGE;
+  const pageData = artworks.slice(startIndex, startIndex + ARTWORKS_PER_PAGE);
+  const showInitialArtworkLoading = artworksLoading && artworks.length === 0;
+  const showArtworkLoadingOverlay = artworksLoading && artworks.length > 0;
 
   return (
     <div className="transition-all duration-300">
-      {filteredArts.length > 0 && (
+      {artworks.length > 0 && (
         <Outlet context={{ artworks } satisfies IGalleryContext} />
       )}
       <ArtworkModal
         id={activeEntryId}
         artworks={artworks}
-        navigationList={filteredArts}
+        navigationList={artworks}
         onNavigate={setActiveEntryId}
         closeModal={closeSlideshow}
         isHorizontal={isHorizontal}
         modalState={isModalOpen}
         getShareUrl={getShareUrl}
       />
-      {isMobile && (
-        <MobileFilter
-          isFilterOpen={isFilterOpen}
-          setIsFilterOpen={setIsFilterOpen}
-          updateFilterOption={updateFilterOption}
-          updateSortValue={(v: SortValue) => setSortValue(v)}
-          alterFiltersByCategory={alterFiltersByCategory}
-          resetAllFilters={resetAllFilters}
-        />
-      )}
+
       <div className="breakout-w m-pad relative z-0 m-auto flex flex-col gap-8">
-        {/* Filter toggle + sort */}
-        <button
-          type="button"
-          onClick={() => openSlideshow()}
-          className="pointer-events-none mx-auto hidden h-[50px] items-center gap-2 rounded-md border border-gray-600 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 lg:pointer-events-auto lg:inline-flex"
-        >
-          <Play size={16} />
-          <span className="">Play Slideshow</span>
-        </button>
+        <section className="-mx-4 overflow-x-auto px-4 pb-2">
+          {themesLoading ? (
+            <p className="py-8 text-center text-gray-600">
+              Loading themes...
+            </p>
+          ) : themesError ? (
+            <p className="py-8 text-center text-red-500">{themesError}</p>
+          ) : themes.length === 0 ? (
+            <p className="py-8 text-center text-gray-600">
+              No gallery themes are available yet.
+            </p>
+          ) : (
+            <div className="flex w-max gap-4">
+              {themes.map((theme) => (
+                <ThemeCard
+                  key={`${theme.theme_family}-${theme.theme_instance}`}
+                  theme={theme}
+                  active={theme.theme_family === selectedThemeFamily}
+                  onSelect={() => {
+                    if (theme.theme_family === selectedThemeFamily) return;
+                    setSelectedThemeFamily(theme.theme_family);
+                    setPageNumber(1);
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </section>
 
         <div className="relative z-[100] flex items-center justify-between gap-3">
           <button
             type="button"
-            onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="inline-flex h-[50px] w-[200px] max-w-[40%] items-center justify-between rounded-md border border-gray-600 px-5 py-2 text-base font-medium lg:max-w-[40%]"
-          >
-            {isFilterOpen ? 'Hide Filter' : 'Filter'}
-            <span className="ml-2 sm:ml-6">
-              <Menu size={18} />
-            </span>
-          </button>
-          <button
-            type="button"
             onClick={() => openSlideshow()}
-            className="ml-auto inline-flex h-[50px] items-center gap-2 rounded-md border border-gray-600 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 lg:pointer-events-none lg:mx-auto lg:hidden"
+            className="inline-flex h-[50px] items-center gap-2 rounded-md border border-gray-600 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100"
           >
             <Play size={16} />
-            <span className="">Play Slideshow</span>
+            <span>Play Slideshow</span>
           </button>
           {!isMobile && (
-            <div className="absolute left-1/2 -translate-x-1/2">
-              <Pagination
-                totalItems={filteredArts.length}
-                currentPage={pageNumber}
-                itemsPerPage={artworksPerPage}
-                updatePageNumber={(_current, next) => {
-                  const target = document.getElementById('gallery-section');
-                  if (target) {
-                    const top =
-                      target.getBoundingClientRect().top + window.scrollY - 8;
-                    window.scrollTo({ top, behavior: 'smooth' });
-                  }
-                  if (gridRef.current) {
-                    gsap.to(gridRef.current, {
-                      opacity: 0,
-                      duration: 0.2,
-                      ease: 'power1.in',
-                      onComplete: () => setPageNumber(next),
-                    });
-                  } else {
-                    setPageNumber(next);
-                  }
-                }}
-              />
-            </div>
+            <Pagination
+              totalItems={artworks.length}
+              currentPage={pageNumber}
+              itemsPerPage={ARTWORKS_PER_PAGE}
+              updatePageNumber={updatePageNumber}
+            />
           )}
-          {!isMobile && (
-            <div className="absolute right-0 w-[200px] max-w-[40%] rounded-lg border border-gray-600 bg-white">
-              <Checkbox
-                category="sort"
-                title="Sort"
-                options={sortBy}
-                type="radio"
-                updateFilterOption={updateFilterOption}
-                updateSortValue={(v: SortValue) => setSortValue(v)}
-                alterFiltersByCategory={alterFiltersByCategory}
-              />
-            </div>
-          )}
+          <select
+            value={sortValue}
+            onChange={(event) => setSortValue(event.target.value as SortValue)}
+            className="h-[50px] rounded-md border border-gray-600 bg-white px-4 text-sm font-medium"
+            aria-label="Sort artworks"
+          >
+            <option value="Newest Event">Newest</option>
+            <option value="Oldest Event">Oldest</option>
+          </select>
         </div>
 
-        <div
-          className="relative z-[60] grid"
-          style={{
-            gridTemplateRows: 'auto 1fr',
-            gridTemplateColumns: 'repeat(20, 1fr)',
-          }}
-        >
-          <button
-            type="button"
-            className={` ${isFilterOpen ? 'opacity-100' : 'opacity-0'} absolute left-1/2 top-[10%] z-[100] mx-auto h-[50px] w-[200px] max-w-[40%] -translate-x-1/2 -translate-y-1/2 items-center justify-between rounded-md border border-gray-600 bg-white/60 px-5 py-2 text-center text-lg text-xl font-medium transition-all hover:bg-white lg:max-w-[40%]`}
-            onClick={() => setIsFilterOpen(false)}
-          >
-            Show Artworks
-          </button>
-          {/* TResolvedArtwork grid */}
-          <section
-            className={`background-area pointer-events-auto relative row-start-2 justify-center transition-all duration-300 ease-in-out ${isFilterOpen ? 'pointer-events-none select-none opacity-40 blur-lg' : ''}`}
-            onClick={handleGridClick}
-            style={{ gridColumn: '1 / 21' }}
-          >
-            <hr className="my-10 w-full border-t border-black" />
-            {artworksLoading ? (
-              <p className="py-20 text-center text-gray-600">
-                Loading artworks…
-              </p>
-            ) : artworksError ? (
-              <p className="py-20 text-center text-red-500">{artworksError}</p>
-            ) : filteredArts.length === 0 ? (
-              <p className="py-20 text-center text-gray-600">
-                No artworks match your filters.
-              </p>
-            ) : (
-              <div
-                ref={gridRef}
-                className="grid grid-cols-2 gap-x-2 gap-y-6 lg:grid-cols-3 lg:gap-x-4 lg:gap-y-8 xl:grid-cols-4 xl:gap-x-6 xl:gap-y-10"
-              >
-                {pageData.map((artwork) => (
-                  <div
-                    className={`${isFilterOpen ? 'pointer-events-none select-none' : ''} flex h-full`}
-                    key={artwork.id}
-                  >
-                    <ArtworkCard artwork={artwork} openModal={openModal} />
-                  </div>
-                ))}
+        <section className="relative">
+          <hr className="my-10 w-full border-t border-black" />
+          {showInitialArtworkLoading ? (
+            <p className="py-20 text-center text-gray-600">
+              Loading artworks...
+            </p>
+          ) : artworksError ? (
+            <p className="py-20 text-center text-red-500">{artworksError}</p>
+          ) : artworks.length === 0 ? (
+            <p className="py-20 text-center text-gray-600">
+              No artworks are available for this theme yet.
+            </p>
+          ) : (
+            <div
+              ref={gridRef}
+              className={`grid grid-cols-2 gap-x-2 gap-y-6 transition-opacity duration-200 lg:grid-cols-3 lg:gap-x-4 lg:gap-y-8 xl:grid-cols-4 xl:gap-x-6 xl:gap-y-10 ${
+                showArtworkLoadingOverlay ? 'pointer-events-none opacity-55' : ''
+              }`}
+            >
+              {pageData.map((artwork) => (
+                <div className="flex h-full" key={artwork.id}>
+                  <ArtworkCard artwork={artwork} openModal={openModal} />
+                </div>
+              ))}
+            </div>
+          )}
+          {showArtworkLoadingOverlay && (
+            <div className="absolute inset-0 flex items-start justify-center pt-20">
+              <div className="inline-flex items-center gap-2 rounded-md bg-white/90 px-4 py-3 text-sm font-medium text-gray-700 shadow-md">
+                <LoaderCircle size={18} className="animate-spin" />
+                Loading theme artworks...
               </div>
-            )}
-            <div className="mb-4 mt-10">
-              <Pagination
-                totalItems={filteredArts.length}
-                currentPage={pageNumber}
-                itemsPerPage={artworksPerPage}
-                updatePageNumber={(_current, next) => {
-                  const target = document.getElementById('gallery-section');
-                  if (target) {
-                    const top =
-                      target.getBoundingClientRect().top + window.scrollY - 12;
-                    window.scrollTo({ top, behavior: 'smooth' });
-                  }
-                  if (gridRef.current) {
-                    gsap.to(gridRef.current, {
-                      opacity: 0,
-                      duration: 0.2,
-                      ease: 'power1.in',
-                      onComplete: () => setPageNumber(next),
-                    });
-                  } else {
-                    setPageNumber(next);
-                  }
-                }}
-              />
             </div>
-          </section>
-
-          {/* Filter panel */}
-          <section
-            className={`relative z-50 col-start-1 row-span-2 row-start-1 lg:col-span-5 lg:col-start-1 xl:col-span-4 xl:col-start-1 ${
-              isFilterOpen
-                ? 'pointer-events-auto visible duration-300 ease-in-out'
-                : 'pointer-events-none invisible select-none duration-300 ease-in-out'
-            }`}
-          >
-            <div className="relative z-50 w-full flex-wrap">
-              <section className="relative m-auto max-w-screen-2xl">
-                {!isMobile && (
-                  <Filter
-                    isFilterOpen={isFilterOpen}
-                    updateFilterOption={updateFilterOption}
-                    updateSortValue={(v: SortValue) => setSortValue(v)}
-                    alterFiltersByCategory={alterFiltersByCategory}
-                  />
-                )}
-              </section>
-            </div>
-          </section>
-
-          {/* Active filter tags */}
-          <TagList
-            paramsObj={paramsObj}
-            removeFilterTag={removeFilterTag}
-            clearAllFilters={clearAllFilters}
-            dropdownActive={isFilterOpen && !isMobile}
-          />
-        </div>
+          )}
+          <div className="mb-4 mt-10">
+            <Pagination
+              totalItems={artworks.length}
+              currentPage={pageNumber}
+              itemsPerPage={ARTWORKS_PER_PAGE}
+              updatePageNumber={updatePageNumber}
+            />
+          </div>
+        </section>
       </div>
     </div>
   );

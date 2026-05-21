@@ -21,5 +21,17 @@ export function validateThemeEntity(data: any): string[] {
         errors.push('display_name is required');
     }
 
+    if (
+        data.featured_on !== undefined &&
+        (!Array.isArray(data.featured_on) ||
+            data.featured_on.some((entry: unknown) => typeof entry !== 'string' || !entry.trim()))
+    ) {
+        errors.push('featured_on, if provided, must be an array of non-empty strings');
+    }
+
+    if (data.colors !== undefined && (typeof data.colors !== 'object' || data.colors === null || Array.isArray(data.colors))) {
+        errors.push('colors, if provided, must be an object');
+    }
+
     return errors;
 }

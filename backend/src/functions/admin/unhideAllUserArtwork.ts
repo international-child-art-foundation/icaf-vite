@@ -7,6 +7,7 @@ import {
   CommonErrors,
   ArtworkEntity,
   GroupEntity,
+  hasMinimumRole,
 } from "@icaf/shared";
 import { buildApprovedArtworkGsiAttrs } from "../../dynamo/artGsis";
 import { buildApprovedGroupGsiAttrs } from "../../dynamo/groupGsis";
@@ -15,17 +16,16 @@ import { byOwnerPk } from "../../dynamo/ownerGsi";
 import { randomUUID } from "crypto";
 import { getCurrentUser } from "../../utils/auth";
 
-// NOTE: The access patterns CSV says "Unhide all artwork/groups" but the Loop step
-// says "Delete them" — which appears to be a copy-paste error. This implementation
-// sets all items back to 'approved' and restores their gallery GSI attributes.
-// Flagged in todo for review.
-
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
+    if (!hasMinimumRole(currentUser.user.role, "admin")) {
+        return CommonErrors.forbidden("Admin access required");
+    }
+    
     const adminId = currentUser.user.user_id;
 
     const targetUserId = event.pathParameters?.user_id;

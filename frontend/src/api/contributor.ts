@@ -3,15 +3,20 @@ import type {
   ChangeArtworkStatusResponse,
   ChangeGroupStatusRequest,
   ChangeGroupStatusResponse,
+  PatchTheme,
   ReviewArtworkQueueResponse,
   ReviewGroupQueueResponse,
+  ThemeEntity,
   UpdateUserRoleRequest,
   UpdateUserRoleResponse,
+  createThemeResponse,
 } from '@icaf/shared';
 
 import { apiRequest } from './client';
 import { apiEndpoints } from './endpoints';
 import type { PaginationQuery } from './types';
+
+type CreateThemeRequest = Omit<ThemeEntity, 'type'>;
 
 export function fetchPendingArtworks(
   query?: PaginationQuery,
@@ -67,6 +72,23 @@ export function updateUserRole(
 ): Promise<UpdateUserRoleResponse> {
   return apiRequest<UpdateUserRoleResponse, UpdateUserRoleRequest>(
     apiEndpoints.contributor.updateUserRole(userId),
+    { body: request, method: 'PATCH' },
+  );
+}
+
+export function createTheme(request: CreateThemeRequest): Promise<createThemeResponse> {
+  return apiRequest<createThemeResponse, CreateThemeRequest>(
+    apiEndpoints.contributor.createTheme,
+    { body: request, method: 'POST' },
+  );
+}
+
+export function updateTheme(
+  themeSk: string,
+  request: PatchTheme,
+): Promise<createThemeResponse> {
+  return apiRequest<createThemeResponse, PatchTheme>(
+    apiEndpoints.contributor.updateTheme(themeSk),
     { body: request, method: 'PATCH' },
   );
 }

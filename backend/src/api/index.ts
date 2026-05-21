@@ -47,6 +47,8 @@ import { handler as guestSubmitArtwork } from "../functions/anyone/submitArtwork
 import { handler as unsubscribeArtworkEmails } from "../functions/anyone/unsubscribeArtworkEmails";
 import { handler as changeArtworkStatus } from "../functions/contributor/changeArtworkStatus";
 import { handler as changeGroupStatus } from "../functions/contributor/changeGroupStatus";
+import { handler as createTheme } from "../functions/contributor/createTheme";
+import { handler as updateTheme } from "../functions/contributor/updateTheme";
 import { handler as fetchHiddenArtworks } from "../functions/contributor/fetchHiddenArtworks";
 import { handler as fetchHiddenGroups } from "../functions/contributor/fetchHiddenGroups";
 import { handler as fetchUnapprovedArtworks } from "../functions/contributor/fetchUnapprovedArtworks";
@@ -164,6 +166,8 @@ const routes: Route[] = [
   roleProtected({ method: "GET", path: "/contributor/groups/hidden", handler: fetchHiddenGroups }, contributorRoles),
   roleProtected({ method: "PATCH", path: "/contributor/groups/{group_id}/status", handler: changeGroupStatus }, contributorRoles),
   roleProtected({ method: "PATCH", path: "/contributor/users/{user_id}/role", handler: updateUserRole }, contributorRoles),
+  roleProtected({ method: "POST", path: "/contributor/themes", handler: createTheme }, contributorRoles),
+  roleProtected({ method: "PATCH", path: "/contributor/themes/{theme_sk}", handler: updateTheme }, contributorRoles),
 
   roleProtected({ method: "POST", path: "/admin/users/{user_id}/ban", handler: banUser }, adminRoles),
   roleProtected({ method: "POST", path: "/admin/users/{user_id}/unban", handler: unbanUser }, adminRoles),

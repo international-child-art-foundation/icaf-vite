@@ -5,6 +5,7 @@ import {
   HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
+  hasMinimumRole,
 } from "@icaf/shared";
 import { ARTWORK_GSI_ATTRS_TO_REMOVE } from "../../dynamo/artGsis";
 import { GROUP_GSI_ATTRS_TO_REMOVE } from "../../dynamo/groupGsis";
@@ -21,6 +22,10 @@ export const handler = async (
   try {
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
+    if (!hasMinimumRole(currentUser.user.role, "admin")) {
+        return CommonErrors.forbidden("Admin access required");
+    }
+    
     const adminId = currentUser.user.user_id;
 
     const targetUserId = event.pathParameters?.user_id;

@@ -1,8 +1,9 @@
+import { PatchTheme, ThemeEntity } from "./types";
 
 const THEME_INSTANCE_RE = /^\d{4}$/;
 const THEME_FAMILY_RE = /^[A-Z0-9_]+$/;
 
-export function validateThemeEntity(data: any): string[] {
+export function validateThemeEntity(data: ThemeEntity): string[] {
     const errors: string[] = [];
 
     if (!data.theme_family?.trim()) {
@@ -20,6 +21,30 @@ export function validateThemeEntity(data: any): string[] {
     if (!data.display_name?.trim()) {
         errors.push('display_name is required');
     }
+    if (!data.featured_on) {
+        errors.push('featured_on is required (can be initialized to [""]');
+    }
+    if (!data.colors) {
+        errors.push('colors object is required (can be empty object)');
+    }
+
+    if (
+        data.featured_on !== undefined &&
+        (!Array.isArray(data.featured_on) ||
+            data.featured_on.some((entry: unknown) => typeof entry !== 'string' || !entry.trim()))
+    ) {
+        errors.push('featured_on, if provided, must be an array of non-empty strings');
+    }
+
+    if (data.colors !== undefined && (typeof data.colors !== 'object' || data.colors === null || Array.isArray(data.colors))) {
+        errors.push('colors, if provided, must be an object');
+    }
+
+    return errors;
+}
+
+export function validateThemePartial(data: PatchTheme): string[] {
+    const errors: string[] = [];
 
     if (
         data.featured_on !== undefined &&

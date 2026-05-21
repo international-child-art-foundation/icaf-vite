@@ -7,6 +7,7 @@ import {
   CommonErrors,
   ReviewTakedownRequest,
   validateReviewTakedownRequest,
+  hasMinimumRole,
 } from "@icaf/shared";
 import { parseJsonBody } from "../../utils/request";
 import { getCurrentUser } from "../../utils/auth";
@@ -17,6 +18,10 @@ export const handler = async (
   try {
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
+    if (!hasMinimumRole(currentUser.user.role, "admin")) {
+        return CommonErrors.forbidden("Admin access required");
+    }
+    
     const adminId = currentUser.user.user_id;
 
     // TDR SK format: TS#<unix_ts>#TDR_ID#<tdr_id>

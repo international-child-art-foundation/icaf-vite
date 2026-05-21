@@ -8,6 +8,7 @@ import {
   ArtworkEntity,
   UserEntity,
   GetArtworkSubmitterEmailResponse,
+  hasMinimumRole,
 } from "@icaf/shared";
 import { getCurrentUser } from "../../utils/auth";
 
@@ -17,6 +18,10 @@ export const handler = async (
   try {
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
+    if (!hasMinimumRole(currentUser.user.role, "admin")) {
+        return CommonErrors.forbidden("Admin access required");
+    }
+    
 
     const artId = event.pathParameters?.art_id;
     if (!artId) {

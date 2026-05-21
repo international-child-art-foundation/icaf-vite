@@ -11,7 +11,11 @@ const region = process.env.AWS_REGION;
 // Create AWS clients
 export const cognitoClient = new CognitoIdentityProviderClient({ region });
 export const dynamoClient = new DynamoDBClient({ region });
-export const dynamodb = DynamoDBDocumentClient.from(dynamoClient);
+export const dynamodb = DynamoDBDocumentClient.from(dynamoClient, {
+  marshallOptions: {
+    removeUndefinedValues: true,
+  }}
+)
 export const s3Client = new S3Client({ region });
 export const lambdaClient = new LambdaClient({ region });
 export const sqsClient = new SQSClient({ region });

@@ -6,6 +6,7 @@ import {
   COMMON_HEADERS,
   CommonErrors,
   BanUnbanUserResponse,
+  hasMinimumRole,
 } from "@icaf/shared";
 import { randomUUID } from "crypto";
 import { getCurrentUser } from "../../utils/auth";
@@ -16,6 +17,10 @@ export const handler = async (
   try {
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
+    if (!hasMinimumRole(currentUser.user.role, "admin")) {
+        return CommonErrors.forbidden("Admin access required");
+    }
+    
     const adminId = currentUser.user.user_id;
 
     const targetUserId = event.pathParameters?.user_id;

@@ -14,6 +14,7 @@ import {
   UserEntity,
   DeleteUserAccountRequest,
   DeleteUserAccountResponse,
+  hasMinimumRole,
 } from "@icaf/shared";
 import { GSI } from "../../dynamo/ddbSchemaConsts";
 import { byOwnerPk } from "../../dynamo/ownerGsi";
@@ -27,6 +28,10 @@ export const handler = async (
   try {
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
+    if (!hasMinimumRole(currentUser.user.role, "admin")) {
+        return CommonErrors.forbidden("Admin access required");
+    }
+    
     const adminId = currentUser.user.user_id;
 
     const targetUserId = event.pathParameters?.user_id;

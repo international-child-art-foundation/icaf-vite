@@ -8,6 +8,7 @@ import {
   GroupEntity,
   GroupStatus,
   UserEntity,
+  hasMinimumRole,
 } from "@icaf/shared";
 import { sendApprovalEmailToUser } from "../../utils/emails/artworkEmailControls";
 import { buildApprovedGroupGsiAttrs, GROUP_GSI_ATTRS_TO_REMOVE } from "../../dynamo/groupGsis";
@@ -25,6 +26,10 @@ export const handler = async (
   try {
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
+    if (!hasMinimumRole(currentUser.user.role, "contributor")) {
+        return CommonErrors.forbidden("Contributor access required");
+    }
+    
 
     const groupId = event.pathParameters?.group_id;
     if (!groupId) {

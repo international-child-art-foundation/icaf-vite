@@ -8,6 +8,7 @@ import {
   ArtworkEntity,
   ArtworkStatus,
   UserEntity,
+  hasMinimumRole,
 } from "@icaf/shared";
 import { sendApprovalEmailToUser } from "../../utils/emails/artworkEmailControls";
 import { buildApprovedArtworkGsiAttrs, ARTWORK_GSI_ATTRS_TO_REMOVE } from "../../dynamo/artGsis";
@@ -25,6 +26,9 @@ export const handler = async (
   try {
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
+    if (!hasMinimumRole(currentUser.user.role, "contributor")) {
+        return CommonErrors.forbidden("Contributor access required");
+    }
 
     const artId = event.pathParameters?.art_id;
     if (!artId) {

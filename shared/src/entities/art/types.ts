@@ -167,6 +167,7 @@ export interface SubmitArtworkToGroupRequest {
     submitter_relationship?: SubmitterRelationship;
     theme_family?: string;
     theme_instance?: string;
+    notifications?: boolean;
 }
 
 export type UpdateConstituentArtworkRequest = UpdateArtworkRequest;

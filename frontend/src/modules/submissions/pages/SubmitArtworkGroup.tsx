@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ChangeEvent, FormEvent, ReactNode } from 'react';
-import { Bell, BookOpen, Globe2, Send, UserRound } from 'lucide-react';
-import { createGroup, submitArtworkToGroup } from '@/api/guardian';
+import { Bell, BookOpen, Globe2, Mail, Send, UserRound } from 'lucide-react';
+import { createGuestGroup } from '@/api/public';
 import { uploadToPresignedUrl } from '@/api/uploads';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { ArtworkMuralWindow } from '@/modules/submissions/components/ArtworkMuralWindow';
@@ -57,6 +57,7 @@ const initialPersistedDraft: StoredArtworkGroupSubmissionDraft = {
   certificationAccepted:
     initialArtworkGroupSubmissionDraft.certificationAccepted,
   group: initialArtworkGroupSubmissionDraft.group,
+  submitterEmail: initialArtworkGroupSubmissionDraft.submitterEmail,
 };
 
 function getSubmitError(error: unknown): string {
@@ -125,6 +126,10 @@ function readPersistedDraft(): StoredArtworkGroupSubmissionDraft {
           ? storedDraft.certificationAccepted
           : initialPersistedDraft.certificationAccepted,
       group: readStoredGroup(storedDraft.group),
+      submitterEmail: readString(
+        storedDraft.submitterEmail,
+        initialPersistedDraft.submitterEmail,
+      ),
     };
   } catch {
     return initialPersistedDraft;
@@ -185,6 +190,14 @@ export function SubmitArtworkGroup() {
         ...current.group,
         [name]: value,
       },
+      submitterEmail: current.submitterEmail,
+    }));
+  }
+
+  function updateSubmitterEmail(value: string) {
+    setDraft((current) => ({
+      ...current,
+      submitterEmail: value,
     }));
   }
 
@@ -299,7 +312,15 @@ export function SubmitArtworkGroup() {
   async function handleAsyncSubmit() {
     try {
       const releaseHash = await createReleaseHash();
-      const groupResponse = await createGroup({
+      const artworkRequests = artworks.map((artwork) => {
+        const file = files[artwork.id];
+        if (!file) throw new Error('A selected image is missing.');
+        if (!getUploadFileType(file)) throw new Error(`${file.name} is not supported.`);
+        return toArtworkRequest(artwork, file, releaseHash, draft.group);
+      });
+      const groupResponse = await createGuestGroup({
+        email: draft.submitterEmail.trim(),
+        artworks: artworkRequests,
         class_name: draft.group.class_name.trim() || undefined,
         country: draft.group.country.trim(),
         description: draft.group.description.trim() || undefined,
@@ -311,17 +332,18 @@ export function SubmitArtworkGroup() {
         title: draft.group.title.trim(),
       });
 
-      for (const artwork of artworks) {
+      if (groupResponse.art_uploads?.length !== artworks.length) {
+        throw new Error('The server did not return upload URLs for every artwork.');
+      }
+
+      for (const [index, artwork] of artworks.entries()) {
         const file = files[artwork.id];
         if (!file) throw new Error('A selected image is missing.');
 
         const fileType = getUploadFileType(file);
         if (!fileType) throw new Error(`${file.name} is not supported.`);
 
-        const artworkResponse = await submitArtworkToGroup(
-          groupResponse.group_id,
-          toArtworkRequest(artwork, file, releaseHash, draft.group),
-        );
+        const artworkResponse = groupResponse.art_uploads[index];
         await uploadToPresignedUrl({
           file,
           fileType,
@@ -379,20 +401,19 @@ export function SubmitArtworkGroup() {
               </p>
             </div>
 
-            {submitMessage && (
-              <div
-                className={
-                  status === 'success'
-                    ? 'text-secondary-green mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold'
-                    : 'text-tertiary-red mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold'
-                }
-                role={status === 'success' ? 'status' : 'alert'}
-              >
-                {submitMessage}
-              </div>
-            )}
-
             <section className="grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <AccountTextField
+                  error={errors.submitterEmail}
+                  label="Submitter email"
+                  leadingIcon={<Mail aria-hidden="true" className="h-4 w-4" />}
+                  maxLength={254}
+                  name="submitterEmail"
+                  type="email"
+                  value={draft.submitterEmail}
+                  onChange={(event) => updateSubmitterEmail(event.target.value)}
+                />
+              </div>
               <div className="sm:col-span-2">
                 <AccountTextField
                   error={errors.group?.title}
@@ -473,11 +494,6 @@ export function SubmitArtworkGroup() {
                 onFilesSelected={(newFiles) => void addFiles(newFiles)}
                 onOpen={openArtworkWindow}
               />
-              {viewerError && (
-                <p className="text-tertiary-red text-xs font-semibold">
-                  {viewerError}
-                </p>
-              )}
             </section>
 
             <label className="mt-5 flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
@@ -490,6 +506,7 @@ export function SubmitArtworkGroup() {
                   setDraft((current) => ({
                     certificationAccepted: event.target.checked,
                     group: current.group,
+                    submitterEmail: current.submitterEmail,
                   }))
                 }
               />
@@ -531,6 +548,23 @@ export function SubmitArtworkGroup() {
               <Send aria-hidden="true" className="h-4 w-4" />
               {isSubmitting ? 'Submitting...' : 'Submit artwork group'}
             </Button>
+            {viewerError && (
+              <p className="text-tertiary-red mt-2 text-xs font-semibold">
+                {viewerError}
+              </p>
+            )}
+            {submitMessage && (
+              <div
+                className={
+                  status === 'success'
+                    ? 'text-secondary-green mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold'
+                    : 'text-tertiary-red mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold'
+                }
+                role={status === 'success' ? 'status' : 'alert'}
+              >
+                {submitMessage}
+              </div>
+            )}
           </div>
         </form>
       </div>

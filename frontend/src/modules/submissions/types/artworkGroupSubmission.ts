@@ -24,11 +24,12 @@ export type ArtworkGroupSubmissionDraft = {
   artworks: ArtworkDraft[];
   certificationAccepted: boolean;
   group: ArtworkGroupInfo;
+  submitterEmail: string;
 };
 
 export type StoredArtworkGroupSubmissionDraft = Pick<
   ArtworkGroupSubmissionDraft,
-  'certificationAccepted' | 'group'
+  'certificationAccepted' | 'group' | 'submitterEmail'
 >;
 
 export type ArtworkGroupSubmissionErrors = {
@@ -39,4 +40,5 @@ export type ArtworkGroupSubmissionErrors = {
   certificationAccepted?: string;
   group?: Partial<Record<keyof ArtworkGroupInfo, string>>;
   root?: string;
+  submitterEmail?: string;
 };

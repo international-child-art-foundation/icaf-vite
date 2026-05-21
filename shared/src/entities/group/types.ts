@@ -21,6 +21,8 @@
  *   GRP_GSI_SK = 'TS#<unix_ts>#ID#<group_id>'                     (shared by all 3 group GSIs)
  */
 
+import type { SubmitArtworkToGroupRequest } from '../art/types.js';
+
 export type GroupStatus =
     | 'pending_review'
     | 'approved'
@@ -63,7 +65,7 @@ export interface SubmitGroupRequest {
     title: string;
     class_name?: string;
     guardian_display_name?: string;
-    country: string;
+    country?: string;
     region?: string;
     description?: string;
     notifications?: boolean;
@@ -74,7 +76,28 @@ export interface SubmitGroupResponse {
     group_id: string;
     message: string;
     timestamp: number;
+    art_uploads?: {
+        art_id: string;
+        presigned_url: string;
+    }[];
 }
+
+export type CreateGroupArtworkRequest = SubmitArtworkToGroupRequest;
+
+export type CreateGroupBaseRequest = SubmitGroupRequest & {
+    artworks: CreateGroupArtworkRequest[];
+};
+
+export type GuestCreateGroupRequest = CreateGroupBaseRequest & {
+    email: string;
+};
+
+// Identity comes from auth cookies.
+export type AuthenticatedCreateGroupRequest = CreateGroupBaseRequest & {
+    email?: never;
+};
+
+export type CreateGroupRequest = GuestCreateGroupRequest | AuthenticatedCreateGroupRequest;
 
 export interface GetGroupResponse {
     group: GroupEntity;

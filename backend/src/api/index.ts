@@ -112,6 +112,7 @@ function roleProtected(route: Omit<Route, "auth">, roles: Role[]): Route {
 
 const routes: Route[] = [
   { method: "POST", path: "/artworks", handler: guestSubmitArtwork },
+  { method: "POST", path: "/groups", handler: createGroup },
   { method: "GET", path: "/artworks/{art_id}", handler: getArtwork },
   { method: "GET", path: "/groups/{group_id}", handler: getGroup },
   { method: "POST", path: "/takedown", handler: initiateTakedown },
@@ -148,7 +149,6 @@ const routes: Route[] = [
   authenticated({ method: "POST", path: "/user/artworks/{art_id}/kudos", handler: voteArtwork }),
 
   roleProtected({ method: "GET", path: "/guardian/groups", handler: listGroupSubmissions }, guardianRoles),
-  roleProtected({ method: "POST", path: "/guardian/groups", handler: createGroup }, guardianRoles),
   roleProtected({ method: "PATCH", path: "/guardian/groups/{group_id}", handler: updateGroup }, guardianRoles),
   roleProtected({ method: "DELETE", path: "/guardian/groups/{group_id}", handler: deleteGroup }, guardianRoles),
   roleProtected({ method: "POST", path: "/guardian/groups/{group_id}/artworks", handler: submitArtworkToGroup }, guardianRoles),

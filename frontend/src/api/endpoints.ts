@@ -73,6 +73,7 @@ export const apiEndpoints = {
     artwork: (artId: PathParam) => `/artworks/${encodePathParam(artId)}`,
     artworks: '/artworks',
     group: (groupId: PathParam) => `/groups/${encodePathParam(groupId)}`,
+    groups: '/groups',
     magazines: '/magazines',
     news: '/news',
     takedown: '/takedown',

@@ -17,6 +17,7 @@ vi.mock("../utils/auth", () => ({
     role: "user",
     banned: false,
   })),
+  getOptionalAuth: vi.fn(async () => null),
   requireRole: authMocks.requireRole,
 }));
 

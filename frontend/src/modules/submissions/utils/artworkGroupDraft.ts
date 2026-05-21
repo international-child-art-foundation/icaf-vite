@@ -20,6 +20,8 @@ import type {
 export const ARTWORK_GROUP_DRAFT_KEY = 'icaf.submitArtworkGroupDraft.v1';
 export const RELEASE_TEXT =
   'ICAF artwork group submission release accepted by the submitter.';
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_EMAIL_LEN = 254;
 
 export const initialArtworkGroupInfo: ArtworkGroupInfo = {
   class_name: '',
@@ -55,6 +57,7 @@ export const initialArtworkGroupSubmissionDraft: ArtworkGroupSubmissionDraft = {
   artworks: [createArtworkDraft()],
   certificationAccepted: false,
   group: initialArtworkGroupInfo,
+  submitterEmail: '',
 };
 
 const allowedFileTypes = new Set<string>(UPLOAD_FILE_TYPES);
@@ -79,6 +82,15 @@ export function validateArtworkGroupSubmission(
   const groupErrors: ArtworkGroupSubmissionErrors['group'] = {};
   const artworkErrors: NonNullable<ArtworkGroupSubmissionErrors['artworks']> =
     {};
+
+  const submitterEmail = draft.submitterEmail.trim();
+  if (!submitterEmail) {
+    errors.submitterEmail = 'Email is required.';
+  } else if (submitterEmail.length > MAX_EMAIL_LEN) {
+    errors.submitterEmail = `Use ${MAX_EMAIL_LEN} characters or less.`;
+  } else if (!EMAIL_PATTERN.test(submitterEmail)) {
+    errors.submitterEmail = 'Enter a valid email address.';
+  }
 
   if (!draft.group.title.trim()) {
     groupErrors.title = 'Group title is required.';
@@ -133,7 +145,7 @@ export function validateArtworkGroupSubmission(
     const file = files[artwork.id];
 
     if (!file) {
-      itemErrors.file = 'Add an image.';
+      itemErrors.file = 'Add an image to submit.';
     } else {
       const fileType = getUploadFileType(file);
       if (!fileType) {
@@ -183,16 +195,20 @@ export function validateArtworkGroupSubmission(
 export function hasSubmissionErrors(errors: ArtworkGroupSubmissionErrors) {
   return Boolean(
     errors.root ||
+    errors.submitterEmail ||
     errors.certificationAccepted ||
     (errors.group && Object.keys(errors.group).length > 0) ||
     (errors.artworks && Object.keys(errors.artworks).length > 0),
   );
 }
 
+// TODO: Replace with PDF parser when release form is created,
+// uncomment digest/encodedRelease (done for local testing)
 export async function createReleaseHash() {
-  const encodedRelease = new TextEncoder().encode(RELEASE_TEXT);
-  const digest = await crypto.subtle.digest('SHA-256', encodedRelease);
-  return Array.from(new Uint8Array(digest))
+  // const encodedRelease = new TextEncoder().encode(RELEASE_TEXT);
+  // const digest = await crypto.subtle.digest('SHA-256', encodedRelease);
+  await Promise.resolve();
+  return Array.from(new Uint8Array(32))
     .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('');
 }

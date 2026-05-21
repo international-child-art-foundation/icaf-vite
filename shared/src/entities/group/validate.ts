@@ -1,9 +1,15 @@
-import { SubmitGroupRequest, UpdateGroupRequest } from './types.js';
+import type { CreateGroupRequest, SubmitGroupRequest, UpdateGroupRequest } from './types.js';
 import {
     GROUP_MAX_TITLE_LEN,
     GROUP_MAX_STRING_LEN,
     GROUP_MAX_DESCRIPTION_LEN,
+    GROUP_MAX_MEMBERS,
 } from './constants.js';
+import { isValidEmail } from '../../utils/string.js';
+import { SHA256_HEX, UPLOAD_FILE_TYPES } from '../art/constants.js';
+import { validateOptionalArtworkFields } from '../art/validate.js';
+
+const MAX_EMAIL_LEN = 254;
 
 export function validateSubmitGroupRequest(data: SubmitGroupRequest): string[] {
     const errors: string[] = [];
@@ -53,6 +59,53 @@ export function validateSubmitGroupRequest(data: SubmitGroupRequest): string[] {
     if (data.notifications !== undefined && typeof data.notifications !== 'boolean') {
         errors.push('notifications, if provided, must be a boolean');
     }
+
+    return errors;
+}
+
+export function validateCreateGroupRequest(data: CreateGroupRequest, identityRequired: boolean): string[] {
+    const errors = validateSubmitGroupRequest(data);
+    const hasEmail = data.email !== undefined;
+
+    if (identityRequired) {
+        if (!hasEmail) {
+            errors.push('email is required');
+        }
+    }
+
+    if (hasEmail) {
+        if (!isValidEmail(data.email!)) {
+            errors.push('email must be a valid email address');
+        } else if (data.email!.length > MAX_EMAIL_LEN) {
+            errors.push(`email must be ${MAX_EMAIL_LEN} characters or less`);
+        }
+    }
+
+    if (!Array.isArray(data.artworks)) {
+        errors.push('artworks is required');
+        return errors;
+    }
+
+    if (data.artworks.length < 1) {
+        errors.push('artworks must include at least one artwork');
+    }
+
+    if (data.artworks.length > GROUP_MAX_MEMBERS) {
+        errors.push(`artworks must include ${GROUP_MAX_MEMBERS} artworks or fewer`);
+    }
+
+    data.artworks.forEach((artwork, index) => {
+        if (!artwork.file_type || !(UPLOAD_FILE_TYPES as readonly string[]).includes(artwork.file_type)) {
+            errors.push(`artworks[${index}].file_type must be one of: ${UPLOAD_FILE_TYPES.join(', ')}`);
+        }
+
+        if (!artwork.release_hash?.trim() || !SHA256_HEX.test(artwork.release_hash)) {
+            errors.push(`artworks[${index}].release_hash must be a valid SHA-256 hex string`);
+        }
+
+        const artworkErrors = validateOptionalArtworkFields(artwork);
+        errors.push(...artworkErrors.map((error) => `artworks[${index}].${error}`));
+    });
 
     return errors;
 }

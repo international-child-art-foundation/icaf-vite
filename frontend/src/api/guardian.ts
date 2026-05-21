@@ -2,8 +2,6 @@ import type {
   ListGroupSubmissionsResponse,
   SubmitArtworkResponse,
   SubmitArtworkRequest,
-  SubmitGroupRequest,
-  SubmitGroupResponse,
   UpdateArtworkRequest,
   UpdateArtworkResponse,
   UpdateGroupRequest,
@@ -22,13 +20,6 @@ export function listGroupSubmissions(
 ): Promise<ListGroupSubmissionsResponse> {
   return apiRequest<ListGroupSubmissionsResponse>(apiEndpoints.guardian.groups, {
     query,
-  });
-}
-
-export function createGroup(request: SubmitGroupRequest): Promise<SubmitGroupResponse> {
-  return apiRequest<SubmitGroupResponse, SubmitGroupRequest>(apiEndpoints.guardian.groups, {
-    body: request,
-    method: 'POST',
   });
 }
 

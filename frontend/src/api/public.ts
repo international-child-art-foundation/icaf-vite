@@ -10,6 +10,10 @@ import type {
   ListMagazinesResponse,
   ListNewsResponse,
   SubmitArtworkResponse,
+  AuthenticatedCreateGroupRequest,
+  CreateGroupRequest,
+  GuestCreateGroupRequest,
+  SubmitGroupResponse,
 } from '@icaf/shared';
 
 import { apiRequest } from './client';
@@ -23,6 +27,29 @@ export function submitGuestArtwork(
     apiEndpoints.public.artworks,
     { body: request, method: 'POST' },
   );
+}
+
+export function createGuestGroup(request: GuestCreateGroupRequest): Promise<SubmitGroupResponse> {
+  return apiRequest<SubmitGroupResponse, GuestCreateGroupRequest>(apiEndpoints.public.groups, {
+    body: request,
+    method: 'POST',
+  });
+}
+
+export function createAuthenticatedGroup(
+  request: AuthenticatedCreateGroupRequest,
+): Promise<SubmitGroupResponse> {
+  return apiRequest<SubmitGroupResponse, AuthenticatedCreateGroupRequest>(
+    apiEndpoints.public.groups,
+    { body: request, method: 'POST' },
+  );
+}
+
+export function createGroup(request: CreateGroupRequest): Promise<SubmitGroupResponse> {
+  return apiRequest<SubmitGroupResponse, CreateGroupRequest>(apiEndpoints.public.groups, {
+    body: request,
+    method: 'POST',
+  });
 }
 
 export function getArtwork(artId: string): Promise<GetArtworkResponse> {

@@ -4,6 +4,15 @@ import {
   COMMON_HEADERS,
   CommonErrors,
   HTTP_STATUS,
+  isValidArtId,
+  isValidGroupId,
+  isValidMagazineSlug,
+  isValidNewsId,
+  isValidTdrSk,
+  isValidThemeFamily,
+  isValidThemeInstance,
+  isValidThemeSk,
+  isValidUUID,
   Role,
 } from "@icaf/shared";
 
@@ -98,12 +107,16 @@ const allowedOrigins = new Set(["https://revise.icaf.org", "http://localhost:517
 const guardianRoles: Role[] = ["guardian", "contributor", "admin"];
 const contributorRoles: Role[] = ["contributor", "admin"];
 const adminRoles: Role[] = ["admin"];
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const pathParamValidators: Record<string, (value: string) => boolean> = {
-  art_id: (value) => UUID_PATTERN.test(value),
-  group_id: (value) => UUID_PATTERN.test(value),
-  news_id: (value) => UUID_PATTERN.test(value),
-  user_id: (value) => UUID_PATTERN.test(value),
+  art_id: isValidArtId,
+  family: isValidThemeFamily,
+  group_id: isValidGroupId,
+  instance: isValidThemeInstance,
+  news_id: isValidNewsId,
+  slug: isValidMagazineSlug,
+  tdr_sk: isValidTdrSk,
+  theme_sk: isValidThemeSk,
+  user_id: isValidUUID,
 };
 
 function authenticated(route: Omit<Route, "auth">): Route {

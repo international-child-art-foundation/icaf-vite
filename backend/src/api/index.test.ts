@@ -76,6 +76,50 @@ describe("api router", () => {
     expect(authMocks.requireRole).not.toHaveBeenCalled();
   });
 
+  it("rejects invalid compound takedown request keys before auth", async () => {
+    const response = await handler(event("PATCH", "/admin/takedowns/TS%231%23TDR_ID%23not-a-uuid", "{}"));
+
+    expect(response.statusCode).toBe(400);
+    expect(responseBody(response)).toMatchObject({
+      code: "BAD_REQUEST",
+      message: "Invalid tdr_sk path parameter",
+    });
+    expect(authMocks.requireRole).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid news ids before auth", async () => {
+    const response = await handler(event("DELETE", "/admin/news/not-a-uuid"));
+
+    expect(response.statusCode).toBe(400);
+    expect(responseBody(response)).toMatchObject({
+      code: "BAD_REQUEST",
+      message: "Invalid news_id path parameter",
+    });
+    expect(authMocks.requireRole).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid theme keys before auth", async () => {
+    const response = await handler(event("PATCH", "/contributor/themes/FAMILY%23bad%23INSTANCE%230001", "{}"));
+
+    expect(response.statusCode).toBe(400);
+    expect(responseBody(response)).toMatchObject({
+      code: "BAD_REQUEST",
+      message: "Invalid theme_sk path parameter",
+    });
+    expect(authMocks.requireRole).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid magazine slugs before auth", async () => {
+    const response = await handler(event("DELETE", "/admin/magazines/bad%20slug"));
+
+    expect(response.statusCode).toBe(400);
+    expect(responseBody(response)).toMatchObject({
+      code: "BAD_REQUEST",
+      message: "Invalid slug path parameter",
+    });
+    expect(authMocks.requireRole).not.toHaveBeenCalled();
+  });
+
   it("preserves method-not-allowed for valid paths with unsupported methods", async () => {
     const response = await handler(
       event("GET", "/guardian/groups/00000000-0000-4000-8000-000000000002/artworks"),

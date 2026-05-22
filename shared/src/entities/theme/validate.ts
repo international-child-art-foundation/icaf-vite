@@ -60,3 +60,27 @@ export function validateThemePartial(data: PatchTheme): string[] {
 
     return errors;
 }
+
+export function isValidThemeFamily(themeFamily: string): boolean {
+    return THEME_FAMILY_RE.test(themeFamily);
+}
+
+export function isValidThemeInstance(themeInstance: string): boolean {
+    return THEME_INSTANCE_RE.test(themeInstance);
+}
+
+export function isValidThemeSk(themeSk: string): boolean {
+  return /^FAMILY#[A-Z0-9_]+#INSTANCE#\d{4}$/.test(themeSk);
+}
+
+export function validateThemeSk(themeSk: string): string[] {
+    const errors: string[] = [];
+
+    if (typeof themeSk !== 'string' || !themeSk.trim()) {
+        errors.push('theme_sk path parameter is required');
+    } else if (!isValidThemeSk(themeSk)) {
+        errors.push('theme_sk is invalid');
+    }
+
+    return errors;
+}

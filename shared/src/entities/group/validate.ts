@@ -5,7 +5,7 @@ import {
     GROUP_MAX_DESCRIPTION_LEN,
     GROUP_MAX_MEMBERS,
 } from './constants.js';
-import { isValidEmail } from '../../utils/string.js';
+import { isValidEmail, isValidUUID } from '../../utils/string.js';
 import { SHA256_HEX, UPLOAD_FILE_TYPES } from '../art/constants.js';
 import { validateOptionalArtworkFields } from '../art/validate.js';
 
@@ -143,6 +143,22 @@ export function validateUpdateGroupRequest(data: UpdateGroupRequest): string[] {
 
     if (data.notifications !== undefined && typeof data.notifications !== 'boolean') {
         errors.push('notifications, if provided, must be a boolean');
+    }
+
+    return errors;
+}
+
+export function isValidGroupId(groupId: string): boolean {
+    return isValidUUID(groupId);
+}
+
+export function validateGroupId(groupId: string): string[] {
+    const errors: string[] = [];
+
+    if (typeof groupId !== 'string' || !groupId.trim()) {
+        errors.push('group_id path parameter is required');
+    } else if (!isValidGroupId(groupId)) {
+        errors.push('group_id is invalid');
     }
 
     return errors;

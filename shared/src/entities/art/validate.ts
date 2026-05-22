@@ -9,7 +9,7 @@ import {
     FORBIDDEN_CHARS_SINGLELINE,
     FORBIDDEN_CHARS_MULTILINE,
 } from './constants.js';
-import { isValidEmail } from '../../utils/string.js';
+import { isValidEmail, isValidUUID } from '../../utils/string.js';
 
 const MAX_EMAIL_LEN = 254;
 
@@ -115,8 +115,8 @@ export function validateOptionalArtworkFields(data: {
     if (data.group_id !== undefined) {
         if (typeof data.group_id !== 'string' || !data.group_id.trim()) {
             errors.push('group_id, if provided, must be a non-empty string');
-        } else if (data.group_id.length > MAX_STRING_LEN) {
-            errors.push(`group_id must be ${MAX_STRING_LEN} characters or less`);
+        } else if (!isValidUUID(data.group_id)) {
+            errors.push('group_id must be a valid UUID');
         }
     }
 
@@ -166,9 +166,29 @@ export function validateGuestSubmitArtworkRequest(data: GuestSubmitArtworkReques
         } else if (data.email!.length > MAX_EMAIL_LEN) {
             errors.push(`email must be ${MAX_EMAIL_LEN} characters or less`);
         }
-    } else if (hasUserId && !data.user_id!.trim()) {
-        errors.push('user_id, if provided, must be non-empty');
+    } else if (hasUserId) {
+        if (!data.user_id!.trim()) {
+            errors.push('user_id, if provided, must be non-empty');
+        } else if (!isValidUUID(data.user_id!)) {
+            errors.push('user_id must be a valid UUID');
+        }
     }
 
     return [...errors, ...validateSubmissionData(data)];
+}
+
+export function isValidArtId(artId: string): boolean {
+    return isValidUUID(artId);
+}
+
+export function validateArtId(artId: string): string[] {
+    const errors: string[] = [];
+
+    if (typeof artId !== 'string' || !artId.trim()) {
+        errors.push('art_id path parameter is required');
+    } else if (!isValidArtId(artId)) {
+        errors.push('art_id is invalid');
+    }
+
+    return errors;
 }

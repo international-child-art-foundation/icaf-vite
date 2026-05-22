@@ -1,3 +1,4 @@
+import { isValidUUID } from '../../utils/string.js';
 import { CreateNewsRequest, UpdateNewsRequest, NewsKind } from './types.js';
 
 const MAX_SOURCE_LEN = 200;
@@ -89,4 +90,18 @@ export function validateUpdateNewsRequest(data: UpdateNewsRequest): string[] {
         return ['at least one field must be provided'];
     }
     return validateNewsFields(data);
+}
+
+export function isValidNewsId(newsId: string): boolean {
+    return isValidUUID(newsId);
+}
+
+export function validateNewsId(newsId: string): string[] {
+    const errors: string[] = [];
+    if (typeof newsId !== 'string' || !newsId.trim()) {
+        errors.push('news_id path parameter is required');
+    } else if (!isValidNewsId(newsId)) {
+        errors.push('news_id is invalid');
+    }
+    return errors;
 }

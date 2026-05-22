@@ -37,3 +37,21 @@ export function validateInitiateMagazineUploadRequest(data: InitiateMagazineUplo
 
     return errors;
 }
+
+export function isValidMagazineSlug(slug: string): boolean {
+    return typeof slug === 'string' && slug.length > 0 && slug.length <= MAX_SLUG_LEN && SLUG_PATTERN.test(slug);
+}
+
+export function validateMagazineSlug(slug: string): string[] {
+    const errors: string[] = [];
+
+    if (typeof slug !== 'string' || !slug.trim()) {
+        errors.push('slug path parameter is required');
+    } else if (slug.length > MAX_SLUG_LEN) {
+        errors.push(`slug must be ${MAX_SLUG_LEN} characters or less`);
+    } else if (!isValidMagazineSlug(slug)) {
+        errors.push('slug may only contain letters, digits, &, +, -, _, .');
+    }
+
+    return errors;
+}

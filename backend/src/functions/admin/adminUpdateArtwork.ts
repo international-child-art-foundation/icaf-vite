@@ -9,9 +9,7 @@ import {
   UpdateArtworkRequest,
   validateUpdateArtworkRequest,
 } from "@icaf/shared";
-import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
-import { EntityType } from "../../dynamo/ddbSchemaConsts";
-import { Status } from "../../dynamo/shared";
+import { buildApprovedArtworkGsiAttrs } from "../../dynamo/artGsis";
 import { parseJsonBody } from "../../utils/request";
 import { getCurrentUser } from "../../utils/auth";
 import { hasMinimumRole } from "@icaf/shared";
@@ -52,23 +50,15 @@ export const handler = async (
     if (fieldErrors.length > 0) {
       return CommonErrors.badRequest(fieldErrors.join("; "));
     }
-
-    const nowMs = Date.now();
+    if (Object.keys(body).length === 0) {
+      return CommonErrors.badRequest("at least one field must be provided");
+    }
 
     // ── Build update expression ────────────────────────────────────────────
-    // Always set status=pending_review and restore REV GSI; remove gallery attrs
-    const setExprParts: string[] = [
-      "#status = :status",
-      "REV_PK = :revPk",
-      "REV_SK = :revSk",
-    ];
-
-    const exprNames: Record<string, string> = { "#status": "status" };
-    const exprValues: Record<string, unknown> = {
-      ":status": "pending_review",
-      ":revPk": reviewPk(),
-      ":revSk": reviewGsiSk(Status.Pending, EntityType.Art, nowMs, artId),
-    };
+    const setExprParts: string[] = [];
+    const removeExprParts: string[] = [];
+    const exprNames: Record<string, string> = {};
+    const exprValues: Record<string, unknown> = {};
 
     if (body.title !== undefined) { setExprParts.push("title = :title"); exprValues[":title"] = body.title; }
     if (body.description !== undefined) { setExprParts.push("description = :desc"); exprValues[":desc"] = body.description; }
@@ -86,13 +76,42 @@ export const handler = async (
       setExprParts.push("notifications = :notifications");
       exprValues[":notifications"] = body.notifications;
     }
+    if (art.status === "approved") {
+      const gsiAttrs = buildApprovedArtworkGsiAttrs({
+        timestampMs: art.timestamp * 1000,
+        artId,
+        family: body.theme_family ?? art.theme_family,
+        instance: body.theme_instance ?? art.theme_instance,
+      });
+
+      Object.entries(gsiAttrs).forEach(([key, value], index) => {
+        setExprParts.push(`${key} = :gsi${index}`);
+        exprValues[`:gsi${index}`] = value;
+      });
+
+      if (!gsiAttrs.FAM_PK) {
+        removeExprParts.push("FAM_PK");
+      }
+      if (!gsiAttrs.INST_PK) {
+        removeExprParts.push("INST_PK");
+      }
+    }
+
+    if (setExprParts.length === 0) {
+      return CommonErrors.badRequest("at least one field must be provided");
+    }
+
+    const updateExpression = [
+      `SET ${setExprParts.join(", ")}`,
+      removeExprParts.length > 0 ? `REMOVE ${removeExprParts.join(", ")}` : "",
+    ].filter(Boolean).join(" ");
 
     await dynamodb.send(
       new UpdateCommand({
         TableName: TABLE_NAME,
         Key: { PK: `ART#${artId}`, SK: "-" },
-        UpdateExpression: `SET ${setExprParts.join(", ")} REMOVE GALL_PK, FAM_PK, INST_PK, ART_GSI_SK`,
-        ExpressionAttributeNames: exprNames,
+        UpdateExpression: updateExpression,
+        ...(Object.keys(exprNames).length > 0 && { ExpressionAttributeNames: exprNames }),
         ExpressionAttributeValues: exprValues,
         ConditionExpression: "attribute_exists(PK)",
       }),
@@ -100,7 +119,7 @@ export const handler = async (
 
     return {
       statusCode: HTTP_STATUS.OK,
-      body: JSON.stringify({ success: true, art_id: artId, status: "pending_review" }),
+      body: JSON.stringify({ success: true, art_id: artId, status: art.status }),
       headers: COMMON_HEADERS,
     };
   } catch (error: unknown) {

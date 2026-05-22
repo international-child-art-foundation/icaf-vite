@@ -14,6 +14,19 @@ import { parseJsonBody } from "../../utils/request";
 import { getCurrentUser } from "../../utils/auth";
 import { hasMinimumRole } from "@icaf/shared";
 
+const ALLOWED_UPDATE_FIELDS = new Set([
+  "title",
+  "description",
+  "f_name",
+  "age",
+  "country",
+  "region",
+  "submitter_relationship",
+  "theme_family",
+  "theme_instance",
+  "notifications",
+]);
+
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
@@ -43,9 +56,14 @@ export const handler = async (
 
     const art = artResult.Item as ArtworkEntity;
 
-    const parsedBody = parseJsonBody<UpdateArtworkRequest>(event);
+    const parsedBody = parseJsonBody<Record<string, unknown>>(event);
     if (!parsedBody.ok) return parsedBody.response;
-    const body = parsedBody.value;
+    const unknownFields = Object.keys(parsedBody.value).filter((key) => !ALLOWED_UPDATE_FIELDS.has(key));
+    if (unknownFields.length > 0) {
+      return CommonErrors.badRequest(`Unsupported field(s): ${unknownFields.join(", ")}`);
+    }
+
+    const body = parsedBody.value as UpdateArtworkRequest;
     const fieldErrors = validateUpdateArtworkRequest(body);
     if (fieldErrors.length > 0) {
       return CommonErrors.badRequest(fieldErrors.join("; "));

@@ -35,11 +35,11 @@ export type TResolvedArtwork = TArtwork & {
   eventSlug: string;
   /** Full-size original: /gallery-arts/{eventSlug}/{file} */
   url: string;
-  /** 350px-wide thumbnail: /gallery-arts/{eventSlug}/thumbs/{base}.webp */
+  /** 350px-wide thumbnail: /gallery-arts/{eventSlug}/thumbs/{base}.avif */
   thumbUrl: string;
-  /** 800px-max display image: /gallery-arts/{eventSlug}/display/{base}.webp */
+  /** 800px-max display image: /gallery-arts/{eventSlug}/medium/{base}.avif */
   displayUrl: string;
-  /** 1920px-max high-res image: /gallery-arts/{eventSlug}/feature/{base}.webp */
+  /** 1920px-max high-res image: /gallery-arts/{eventSlug}/original/{base}.avif */
   featureUrl: string;
   /** Alt text for accessibility */
   alt: string;

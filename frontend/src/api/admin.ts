@@ -24,7 +24,7 @@ import type {
   CreateNewsRequest,
   UpdateNewsRequest,
   UpdateArtworkRequest,
-  UpdateArtworkResponse,
+  ArtworkStatus,
 } from '@icaf/shared';
 
 import { apiRequest } from './client';
@@ -209,10 +209,12 @@ export function deleteNews(newsId: string): Promise<NewsMutationResponse> {
 
 export function adminUpdateArtwork(
   art_id: string,
-): Promise<UpdateArtworkResponse> {
-  return apiRequest<UpdateArtworkResponse, UpdateArtworkRequest>(
+  request: UpdateArtworkRequest,
+): Promise<{ success: true; art_id: string; status: ArtworkStatus }> {
+  return apiRequest<{ success: true; art_id: string; status: ArtworkStatus }, UpdateArtworkRequest>(
     apiEndpoints.admin.adminUpdateArtwork(art_id),
     {
+      body: request,
       method: 'PATCH',
     },
   );

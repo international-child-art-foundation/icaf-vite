@@ -37,7 +37,7 @@ export const apiEndpoints = {
       `/admin/magazines/${encodePathParam(slug)}/status`,
     updateNews: (newsId: PathParam) => `/admin/news/${encodePathParam(newsId)}`,
     adminUpdateArtwork: (artId: PathParam) =>
-      `/user/artworks/${encodePathParam(artId)}`,
+      `/admin/artworks/${encodePathParam(artId)}`,
   },
   auth: {
     changePassword: '/auth/change-password',

@@ -28,17 +28,33 @@ export function resolveArtwork(a: TArtwork): TResolvedArtwork {
   };
 }
 
-const remoteArtworkBaseUrl = (
-  (import.meta.env.VITE_ARTWORK_ASSET_BASE_URL as string) ?? ''
-).replace(/\/$/, '');
+function cleanBaseUrl(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  return trimmed.endsWith('/') ? trimmed.slice(0, -1) : trimmed;
+}
+
+function getRemoteArtworkBaseUrl(): string | undefined {
+  const artworkAssetBaseUrl = cleanBaseUrl(
+    import.meta.env.VITE_ARTWORK_ASSET_BASE_URL,
+  );
+  if (artworkAssetBaseUrl) return artworkAssetBaseUrl;
+
+  return cleanBaseUrl(import.meta.env.VITE_API_BASE_URL);
+}
 
 function artworkAssetUrl(
   artId: string,
-  variant: 'display' | 'feature' | 'thumb',
-) {
-  return remoteArtworkBaseUrl
-    ? `${remoteArtworkBaseUrl}/${artId}/${variant}.avif`
-    : `/${artId}/${variant}.avif`;
+  variant: 'medium' | 'original' | 'thumb',
+): string {
+  const path = `/${artId}/${variant}.avif`;
+  const remoteArtworkBaseUrl = getRemoteArtworkBaseUrl();
+
+  if (remoteArtworkBaseUrl) {
+    return new URL(path, remoteArtworkBaseUrl).toString();
+  }
+
+  return new URL(path, window.location.origin).toString();
 }
 
 export function resolveApiArtwork(a: ArtworkListItem): TResolvedArtwork {
@@ -62,10 +78,10 @@ export function resolveApiArtwork(a: ArtworkListItem): TResolvedArtwork {
     theme_family: a.theme_family,
     theme_instance: a.theme_instance,
     kudos_count: a.kudos_count,
-    url: artworkAssetUrl(a.art_id, 'feature'),
+    url: artworkAssetUrl(a.art_id, 'original'),
     thumbUrl: artworkAssetUrl(a.art_id, 'thumb'),
-    displayUrl: artworkAssetUrl(a.art_id, 'display'),
-    featureUrl: artworkAssetUrl(a.art_id, 'feature'),
+    displayUrl: artworkAssetUrl(a.art_id, 'medium'),
+    featureUrl: artworkAssetUrl(a.art_id, 'original'),
     alt: a.title || formatArtistName(artists) || a.country || 'Artwork',
   };
 }

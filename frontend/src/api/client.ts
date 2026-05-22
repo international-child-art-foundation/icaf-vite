@@ -26,7 +26,7 @@ function resolveApiBaseUrl(config?: ApiClientConfig): string {
     : configuredBaseUrl;
 }
 
-function buildUrl(
+export function buildApiUrl(
   path: string,
   query?: ApiQueryParams,
   config?: ApiClientConfig,
@@ -101,7 +101,7 @@ export async function apiRequest<TResponse, TBody = never>(
     headers.set('Content-Type', 'application/json');
   }
 
-  const response = await fetch(buildUrl(path, options.query, config), {
+  const response = await fetch(buildApiUrl(path, options.query, config), {
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
     credentials: 'include',
     headers,

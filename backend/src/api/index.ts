@@ -8,6 +8,7 @@ import {
 } from "@icaf/shared";
 
 import { handler as alterUserRole } from "../functions/admin/alterUserRole";
+import { handler as adminUpdateArtwork } from "../functions/admin/adminUpdateArtwork";
 import { handler as banUser } from "../functions/admin/banUser";
 import { handler as cancelTakedownRequest } from "../functions/admin/cancelTakedownRequest";
 import { handler as createNews } from "../functions/admin/createNews";
@@ -172,6 +173,7 @@ const routes: Route[] = [
   roleProtected({ method: "POST", path: "/admin/users/{user_id}/ban", handler: banUser }, adminRoles),
   roleProtected({ method: "POST", path: "/admin/users/{user_id}/unban", handler: unbanUser }, adminRoles),
   roleProtected({ method: "PATCH", path: "/admin/users/{user_id}/role", handler: alterUserRole }, adminRoles),
+  roleProtected({ method: "PATCH", path: "/admin/artworks/{art_id}", handler: adminUpdateArtwork }, adminRoles),
   roleProtected({ method: "GET", path: "/admin/users/{user_id}/cognito-info", handler: getUserCognitoInfo }, adminRoles),
   roleProtected({ method: "GET", path: "/admin/users/{user_id}/email", handler: getEmailByUserId }, adminRoles),
   roleProtected({ method: "DELETE", path: "/admin/users/{user_id}/account", handler: deleteUserAccount }, adminRoles),

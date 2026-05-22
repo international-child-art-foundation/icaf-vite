@@ -23,6 +23,8 @@ import type {
   UpdateMagazineStatusResponse,
   CreateNewsRequest,
   UpdateNewsRequest,
+  UpdateArtworkRequest,
+  UpdateArtworkResponse,
 } from '@icaf/shared';
 
 import { apiRequest } from './client';
@@ -201,6 +203,17 @@ export function deleteNews(newsId: string): Promise<NewsMutationResponse> {
     apiEndpoints.admin.deleteNews(newsId),
     {
       method: 'DELETE',
+    },
+  );
+}
+
+export function adminUpdateArtwork(
+  art_id: string,
+): Promise<UpdateArtworkResponse> {
+  return apiRequest<UpdateArtworkResponse, UpdateArtworkRequest>(
+    apiEndpoints.admin.adminUpdateArtwork(art_id),
+    {
+      method: 'PATCH',
     },
   );
 }

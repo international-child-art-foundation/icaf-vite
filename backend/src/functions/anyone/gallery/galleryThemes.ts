@@ -31,7 +31,7 @@ function mapTheme(item: Record<string, unknown>): ThemeListItem {
     theme_instance: item.theme_instance as string,
     display_name: item.display_name as string,
     description: item.description as string | undefined,
-    featured_on: stringArray(item.featured_on),
+    featured_on: stringArray(item.featured_on)!,
     colors: themeColors(item.colors),
     image_url: item.image_url as string | undefined,
     card_image_url: item.card_image_url as string | undefined,

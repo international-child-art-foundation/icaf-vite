@@ -77,7 +77,7 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
         <button
           type="button"
           disabled={busy || selectedIds.length === 0}
-          onClick={() => mutateStatus(selectedIds, 'approved')}
+          onClick={() => void mutateStatus(selectedIds, 'approved')}
           className="rounded-md bg-green-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
         >
           Approve selected
@@ -85,7 +85,7 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
         <button
           type="button"
           disabled={busy || selectedIds.length === 0}
-          onClick={() => mutateStatus(selectedIds, 'hidden')}
+          onClick={() => void mutateStatus(selectedIds, 'hidden')}
           className="rounded-md border border-neutral-300 px-3 py-2 text-sm font-semibold disabled:opacity-40"
         >
           Hide selected
@@ -93,7 +93,7 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
         <button
           type="button"
           disabled={busy || selectedIds.length === 0}
-          onClick={() => mutateStatus(selectedIds, 'rejected')}
+          onClick={() => void mutateStatus(selectedIds, 'rejected')}
           className="rounded-md border border-red-300 px-3 py-2 text-sm font-semibold text-red-700 disabled:opacity-40"
         >
           Reject selected
@@ -144,7 +144,9 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
                     <button
                       type="button"
                       disabled={busy}
-                      onClick={() => mutateStatus([group.group_id], 'approved')}
+                      onClick={() =>
+                        void mutateStatus([group.group_id], 'approved')
+                      }
                       className="rounded bg-green-700 px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
                     >
                       Approve
@@ -152,7 +154,9 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
                     <button
                       type="button"
                       disabled={busy}
-                      onClick={() => mutateStatus([group.group_id], 'hidden')}
+                      onClick={() =>
+                        void mutateStatus([group.group_id], 'hidden')
+                      }
                       className="rounded border px-3 py-2 text-xs font-semibold disabled:opacity-40"
                     >
                       Hide
@@ -160,7 +164,9 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
                     <button
                       type="button"
                       disabled={busy}
-                      onClick={() => mutateStatus([group.group_id], 'rejected')}
+                      onClick={() =>
+                        void mutateStatus([group.group_id], 'rejected')
+                      }
                       className="rounded border border-red-300 px-3 py-2 text-xs font-semibold text-red-700 disabled:opacity-40"
                     >
                       Reject

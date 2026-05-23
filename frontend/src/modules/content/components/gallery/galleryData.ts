@@ -33,7 +33,7 @@ export async function fetchAllGalleryArtworks(
       ? await listGalleryArtworksByFamily(themeFamily, query)
       : await listGalleryArtworks(query);
 
-    artworks.push(...response.artworks.map(resolveApiArtwork));
+    artworks.push(...response.artworks.map((artwork) => resolveApiArtwork(artwork)));
     lastKey = response.last_key;
   } while (lastKey);
 

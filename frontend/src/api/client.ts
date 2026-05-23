@@ -12,10 +12,9 @@ export type ApiClientConfig = {
   baseUrl?: string;
 };
 
-const DEFAULT_API_BASE_URL = '/';
+const DEFAULT_API_BASE_URL = '/api';
 
 function resolveApiBaseUrl(config?: ApiClientConfig): string {
-  // TODO: Before production, proxy the API to here and replace base url
   const configuredBaseUrl =
     config?.baseUrl ??
     import.meta.env.VITE_API_BASE_URL ??

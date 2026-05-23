@@ -8,6 +8,15 @@ export const galleryNametag = (artwork: TResolvedArtwork) => {
       ? formatArtistName(artwork.artists ?? [], artwork.lastInitial)
       : null;
   const location = [artwork.region, artwork.country].filter(Boolean).join(', ');
+  const theme = [artwork.theme_family, artwork.theme_instance]
+    .filter(Boolean)
+    .join(' ');
+  const classroomSticker =
+    artwork.groupType === 'classroom' && artwork.groupOwnerName
+      ? `Part of ${artwork.groupOwnerName}'s classroom`
+      : artwork.groupTitle
+        ? `Part of ${artwork.groupTitle}`
+        : null;
 
   return (
     <div
@@ -18,6 +27,20 @@ export const galleryNametag = (artwork: TResolvedArtwork) => {
       }}
     >
       <div className="m-[3px] rounded-xl bg-white px-4 py-3 text-neutral-700">
+        {(classroomSticker || theme) && (
+          <div className="mb-2 flex flex-wrap gap-1.5 pr-6">
+            {classroomSticker && (
+              <span className="rounded-full bg-[#FBB22E]/25 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-[#775000]">
+                {classroomSticker}
+              </span>
+            )}
+            {theme && (
+              <span className="rounded-full bg-[#0286C3]/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-[#026997]">
+                {theme}
+              </span>
+            )}
+          </div>
+        )}
         {name && (
           <p className="pr-6 text-lg font-semibold leading-snug">{name}</p>
         )}

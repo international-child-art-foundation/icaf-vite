@@ -1,13 +1,15 @@
 import { gsap } from 'gsap';
+import type { ReactNode } from 'react';
 import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
 import { formatArtistName } from '@/utils/galleryProcessing';
 
 type ArtworkCardProps = {
   artwork: TResolvedArtwork;
   openModal: (id: string) => void;
+  actionSlot?: ReactNode;
 };
 
-const ArtworkCard = ({ artwork, openModal }: ArtworkCardProps) => {
+const ArtworkCard = ({ artwork, openModal, actionSlot }: ArtworkCardProps) => {
   const { id, artists, lastInitial, age, country, region, event, thumbUrl } =
     artwork;
   const artistText = formatArtistName(artists ?? [], lastInitial);
@@ -81,6 +83,7 @@ const ArtworkCard = ({ artwork, openModal }: ArtworkCardProps) => {
               View
             </button>
           </div>
+          {actionSlot && <div className="border-t pt-4">{actionSlot}</div>}
         </section>
       </div>
     </div>

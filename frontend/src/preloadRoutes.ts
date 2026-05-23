@@ -27,6 +27,7 @@ const preloaders: Preloader[] = [
   () => import('./modules/content/pages/Professionals'),
   () => import('./modules/content/pages/WorldChildrensAward'),
   () => import('./modules/submissions/pages/SubmitArtworkGroup'),
+  () => import('./modules/dashboard/pages/Dashboard'),
 ];
 
 function runPreloadersSlowly() {

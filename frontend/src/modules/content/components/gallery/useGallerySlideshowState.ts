@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { IGalleryContext } from '@/modules/content/types/Gallery';
+import type {
+  IGalleryContext,
+  TResolvedArtwork,
+} from '@/modules/content/types/Gallery';
 
 export type SlotState = { artworkIdx: number; animKey: number };
 
@@ -25,7 +28,7 @@ export const useGallerySlideshowState = () => {
   const [uiState, setUiState] = useState<'full' | 'dim' | 'hidden'>('full');
 
   const { artworks: rawArtworks } = useOutletContext<IGalleryContext>();
-  const [artworks] = useState(() =>
+  const [artworks, setArtworks] = useState<TResolvedArtwork[]>(() =>
     [...rawArtworks].sort(() => Math.random() - 0.5),
   );
   const navigate = useNavigate();
@@ -34,6 +37,18 @@ export const useGallerySlideshowState = () => {
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const onClose = useCallback(() => void navigate('/gallery'), [navigate]);
+
+  useEffect(() => {
+    const shuffled = [...rawArtworks].sort(() => Math.random() - 0.5);
+    setArtworks(shuffled);
+    setSlotA({ artworkIdx: 0, animKey: 0 });
+    setSlotB({ artworkIdx: 0, animKey: 0 });
+    topSlotRef.current = 'a';
+    setTopSlot('a');
+    advanceCountRef.current = 0;
+    currentIdxRef.current = 0;
+    setCurrentIdx(0);
+  }, [rawArtworks]);
 
   const advanceTo = useCallback((nextIdx: number) => {
     advanceCountRef.current++;

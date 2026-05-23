@@ -248,6 +248,15 @@ export const MobileLip = ({
       ? formatArtistName(artwork.artists ?? [], artwork.lastInitial)
       : null;
   const location = [artwork.region, artwork.country].filter(Boolean).join(', ');
+  const theme = [artwork.theme_family, artwork.theme_instance]
+    .filter(Boolean)
+    .join(' ');
+  const classroomSticker =
+    artwork.groupType === 'classroom' && artwork.groupOwnerName
+      ? `Part of ${artwork.groupOwnerName}'s classroom`
+      : artwork.groupTitle
+        ? `Part of ${artwork.groupTitle}`
+        : null;
 
   const t = maxLipY > 0 ? Math.min(lipY / maxLipY, 1) : 0;
 
@@ -339,6 +348,53 @@ export const MobileLip = ({
             marginBottom: 12,
           }}
         />
+
+        {(classroomSticker || theme) && (
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 6,
+              justifyContent: 'center',
+              marginBottom: 12,
+            }}
+          >
+            {classroomSticker && (
+              <span
+                style={{
+                  ...FONT,
+                  borderRadius: 999,
+                  background: 'rgba(251,178,46,0.22)',
+                  color: '#775000',
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: 0,
+                  padding: '4px 8px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {classroomSticker}
+              </span>
+            )}
+            {theme && (
+              <span
+                style={{
+                  ...FONT,
+                  borderRadius: 999,
+                  background: 'rgba(2,134,195,0.10)',
+                  color: '#026997',
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: 0,
+                  padding: '4px 8px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {theme}
+              </span>
+            )}
+          </div>
+        )}
 
         {artwork.age !== undefined && (
           <p

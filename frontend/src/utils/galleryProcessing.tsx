@@ -1,4 +1,4 @@
-import type { ArtworkListItem } from '@icaf/shared';
+import type { ArtworkEntity, ArtworkListItem } from '@icaf/shared';
 import type {
   TArtwork,
   TResolvedArtwork,
@@ -43,7 +43,7 @@ function getRemoteArtworkBaseUrl(): string | undefined {
   return cleanBaseUrl(import.meta.env.VITE_API_BASE_URL);
 }
 
-function artworkAssetUrl(
+export function artworkAssetUrl(
   artId: string,
   variant: 'medium' | 'original' | 'thumb',
 ): string {
@@ -57,7 +57,13 @@ function artworkAssetUrl(
   return new URL(path, window.location.origin).toString();
 }
 
-export function resolveApiArtwork(a: ArtworkListItem): TResolvedArtwork {
+export function resolveApiArtwork(
+  a: ArtworkListItem | ArtworkEntity,
+  groupMetadata?: Pick<
+    TResolvedArtwork,
+    'groupOwnerName' | 'groupTitle' | 'groupType'
+  >,
+): TResolvedArtwork {
   const artists = a.f_name?.trim() ? [a.f_name.trim()] : [];
   const themeLabel = [a.theme_family, a.theme_instance]
     .filter(Boolean)
@@ -77,6 +83,9 @@ export function resolveApiArtwork(a: ArtworkListItem): TResolvedArtwork {
     description: a.description,
     theme_family: a.theme_family,
     theme_instance: a.theme_instance,
+    groupTitle: groupMetadata?.groupTitle,
+    groupOwnerName: groupMetadata?.groupOwnerName,
+    groupType: groupMetadata?.groupType,
     kudos_count: a.kudos_count,
     url: artworkAssetUrl(a.art_id, 'original'),
     thumbUrl: artworkAssetUrl(a.art_id, 'thumb'),

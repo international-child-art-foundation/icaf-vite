@@ -42,7 +42,7 @@ describe("api router", () => {
   });
 
   it("rejects empty internal path segments instead of collapsing them", async () => {
-    const response = await handler(event("POST", "/guardian/groups//artworks", "{}"));
+    const response = await handler(event("POST", "/api/guardian/groups//artworks", "{}"));
 
     expect(response.statusCode).toBe(400);
     expect(responseBody(response)).toMatchObject({
@@ -54,7 +54,7 @@ describe("api router", () => {
 
   it("routes valid guardian group artwork submissions", async () => {
     const response = await handler(
-      event("POST", "/guardian/groups/00000000-0000-4000-8000-000000000002/artworks", "{"),
+      event("POST", "/api/guardian/groups/00000000-0000-4000-8000-000000000002/artworks", "{"),
     );
 
     expect(response.statusCode).toBe(400);
@@ -66,7 +66,7 @@ describe("api router", () => {
   });
 
   it("does not treat the literal artworks segment as a group id", async () => {
-    const response = await handler(event("POST", "/guardian/groups/artworks", "{}"));
+    const response = await handler(event("POST", "/api/guardian/groups/artworks", "{}"));
 
     expect(response.statusCode).toBe(400);
     expect(responseBody(response)).toMatchObject({
@@ -77,7 +77,7 @@ describe("api router", () => {
   });
 
   it("rejects invalid compound takedown request keys before auth", async () => {
-    const response = await handler(event("PATCH", "/admin/takedowns/TS%231%23TDR_ID%23not-a-uuid", "{}"));
+    const response = await handler(event("PATCH", "/api/admin/takedowns/TS%231%23TDR_ID%23not-a-uuid", "{}"));
 
     expect(response.statusCode).toBe(400);
     expect(responseBody(response)).toMatchObject({
@@ -88,7 +88,7 @@ describe("api router", () => {
   });
 
   it("rejects invalid news ids before auth", async () => {
-    const response = await handler(event("DELETE", "/admin/news/not-a-uuid"));
+    const response = await handler(event("DELETE", "/api/admin/news/not-a-uuid"));
 
     expect(response.statusCode).toBe(400);
     expect(responseBody(response)).toMatchObject({
@@ -99,7 +99,7 @@ describe("api router", () => {
   });
 
   it("rejects invalid theme keys before auth", async () => {
-    const response = await handler(event("PATCH", "/contributor/themes/FAMILY%23bad%23INSTANCE%230001", "{}"));
+    const response = await handler(event("PATCH", "/api/contributor/themes/FAMILY%23bad%23INSTANCE%230001", "{}"));
 
     expect(response.statusCode).toBe(400);
     expect(responseBody(response)).toMatchObject({
@@ -110,7 +110,7 @@ describe("api router", () => {
   });
 
   it("rejects invalid magazine slugs before auth", async () => {
-    const response = await handler(event("DELETE", "/admin/magazines/bad%20slug"));
+    const response = await handler(event("DELETE", "/api/admin/magazines/bad%20slug"));
 
     expect(response.statusCode).toBe(400);
     expect(responseBody(response)).toMatchObject({
@@ -122,7 +122,7 @@ describe("api router", () => {
 
   it("preserves method-not-allowed for valid paths with unsupported methods", async () => {
     const response = await handler(
-      event("GET", "/guardian/groups/00000000-0000-4000-8000-000000000002/artworks"),
+      event("GET", "/api/guardian/groups/00000000-0000-4000-8000-000000000002/artworks"),
     );
 
     expect(response.statusCode).toBe(405);

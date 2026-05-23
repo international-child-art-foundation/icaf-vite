@@ -49,6 +49,12 @@ export type TResolvedArtwork = TArtwork & {
   theme_family?: string;
   /** Theme instance retained as display metadata. */
   theme_instance?: string;
+  /** Display name of the classroom/group this artwork belongs to. */
+  groupTitle?: string;
+  /** Display name for the guardian/teacher/group submitter. */
+  groupOwnerName?: string;
+  /** Group type label, e.g. classroom. */
+  groupType?: string;
   /** Number of kudos recorded for this artwork. */
   kudos_count?: number;
 };

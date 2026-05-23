@@ -137,6 +137,7 @@ function ArtworkMural({
     .filter(({ artwork }) => artwork.previewDataUrl);
   const hasSelectedArtwork =
     selectedIndex !== null && selectedIndex !== undefined;
+  const canUnselect = Boolean(onUnselect);
   const selectedArtwork =
     selectedIndex !== null && selectedIndex !== undefined
       ? artworks[selectedIndex]
@@ -195,10 +196,12 @@ function ArtworkMural({
         onTouchStart?.(touch ? { x: touch.clientX, y: touch.clientY } : null);
       }}
       onClick={() => {
-        if (variant === 'workspace' && hasSelectedArtwork) {
+        if (variant === 'workspace' && hasSelectedArtwork && canUnselect) {
           onUnselect?.();
           return;
         }
+
+        if (variant === 'workspace' && hasSelectedArtwork) return;
 
         onOpen?.();
       }}
@@ -278,7 +281,7 @@ function ArtworkMural({
           })}
         </div>
       )}
-      {variant === 'workspace' && hasSelectedArtwork && (
+      {variant === 'workspace' && hasSelectedArtwork && canUnselect && (
         <button
           className="absolute left-4 top-4 z-20 hidden h-10 items-center gap-1.5 rounded-full bg-slate-100/90 px-3 text-xs font-bold text-slate-700 shadow-md transition-colors duration-300 hover:bg-white md:inline-flex"
           type="button"
@@ -449,8 +452,11 @@ export function ArtworkMuralWindow({
   onOpen,
   onRotateArtwork,
 }: ArtworkMuralWindowProps) {
+  const isSingleArtwork = maxCount === 1;
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(() =>
+    isSingleArtwork ? 0 : null,
+  );
   const [isDeleteAllOpen, setIsDeleteAllOpen] = useState(false);
   const [touchStart, setTouchStart] = useState<{
     x: number;
@@ -468,10 +474,15 @@ export function ArtworkMuralWindow({
   const hasSelectedArtwork = selectedIndex !== null;
 
   useEffect(() => {
+    if (isSingleArtwork) {
+      setSelectedIndex(artworks[0] ? 0 : null);
+      return;
+    }
+
     setSelectedIndex((current) =>
       current === null || !artworks[current]?.previewDataUrl ? null : current,
     );
-  }, [artworks]);
+  }, [artworks, isSingleArtwork]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -480,6 +491,7 @@ export function ArtworkMuralWindow({
       } else if (event.key === 'ArrowRight') {
         step(1);
       } else if (event.key === 'Escape') {
+        if (isSingleArtwork) return;
         setSelectedIndex(null);
       }
     }
@@ -517,33 +529,35 @@ export function ArtworkMuralWindow({
     <div className="flex h-full min-w-0 flex-col gap-3 rounded-lg border border-slate-200 bg-slate-100/80 p-3 shadow-sm">
       <div className="hidden items-center justify-between gap-3 md:flex">
         <div>
-          <p className="text-sm font-semibold text-slate-950">Artworks</p>
+          <p className="text-sm font-semibold text-slate-950">
+            {isSingleArtwork ? 'Artwork' : 'Artworks'}
+          </p>
           <p className="text-xs leading-5 text-slate-500">
             {uploadedArtworkCount}/{maxCount}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {hasSelectedArtwork && activeArtwork && (
+          {hasSelectedArtwork && activeArtwork?.previewDataUrl && (
             <button
               className="text-tertiary-red inline-flex items-center gap-1.5 rounded-full bg-white/75 px-3 py-2 text-sm font-bold shadow-sm"
               type="button"
               onClick={() => {
                 onDeleteArtwork(activeArtwork.id);
-                setSelectedIndex(null);
+                setSelectedIndex(isSingleArtwork ? 0 : null);
               }}
             >
               <Trash2 aria-hidden="true" className="h-4 w-4" />
               Delete
             </button>
           )}
-          {hasImages && (
+          {hasImages && (!isSingleArtwork || !hasSelectedArtwork) && (
             <button
               className="text-tertiary-red inline-flex items-center gap-1.5 rounded-full bg-white/75 px-3 py-2 text-sm font-bold shadow-sm"
               type="button"
               onClick={() => setIsDeleteAllOpen(true)}
             >
               <Trash2 aria-hidden="true" className="h-4 w-4" />
-              Delete all
+              {isSingleArtwork ? 'Delete' : 'Delete all'}
             </button>
           )}
           <button
@@ -570,7 +584,9 @@ export function ArtworkMuralWindow({
         }}
         onSwipe={(direction) => step(direction)}
         onTouchStart={setTouchStart}
-        onUnselect={() => setSelectedIndex(null)}
+        onUnselect={
+          isSingleArtwork ? undefined : () => setSelectedIndex(null)
+        }
       />
 
       <ArtworkDetailsPane
@@ -607,7 +623,7 @@ export function ArtworkMuralWindow({
         ref={inputRef}
         className="sr-only"
         accept="image/avif,image/gif,image/jpeg,image/png,image/webp"
-        multiple
+        multiple={!isSingleArtwork}
         type="file"
         onChange={(event) => {
           handleFiles(event.target.files ?? []);
@@ -619,13 +635,13 @@ export function ArtworkMuralWindow({
         <div className="fixed inset-0 z-[120] w-screen overflow-x-hidden bg-white md:hidden">
           <section className="relative flex h-full w-full min-w-0 flex-col overflow-hidden">
             <div className="pointer-events-none absolute left-0 right-0 top-2 z-10 flex h-12 items-center justify-center px-4">
-              {hasSelectedArtwork && activeArtwork && (
+              {hasSelectedArtwork && activeArtwork?.previewDataUrl && (
                 <button
                   className="bg-tertiary-red pointer-events-auto inline-flex h-10 items-center rounded-full px-4 text-sm font-bold text-white shadow-sm"
                   type="button"
                   onClick={() => {
                     onDeleteArtwork(activeArtwork.id);
-                    setSelectedIndex(null);
+                    setSelectedIndex(isSingleArtwork ? 0 : null);
                   }}
                 >
                   Delete selected artwork
@@ -638,7 +654,7 @@ export function ArtworkMuralWindow({
                     type="button"
                     onClick={() => setIsDeleteAllOpen(true)}
                   >
-                    Delete all artworks
+                    {isSingleArtwork ? 'Delete artwork' : 'Delete all artworks'}
                   </button>
                 )}
               <button
@@ -654,7 +670,9 @@ export function ArtworkMuralWindow({
               <div className="absolute inset-0 z-20 grid place-items-center bg-slate-950/45 px-4">
                 <div className="w-full max-w-sm rounded-lg bg-white p-5 shadow-xl">
                   <p className="text-base font-semibold text-slate-950">
-                    Really delete all of your artworks on this page?
+                    {isSingleArtwork
+                      ? 'Really delete your artwork on this page?'
+                      : 'Really delete all of your artworks on this page?'}
                   </p>
                   <div className="mt-5 grid grid-cols-2 gap-3">
                     <button
@@ -691,7 +709,7 @@ export function ArtworkMuralWindow({
                 type="button"
                 onClick={chooseFiles}
               >
-                Upload more artworks
+                {isSingleArtwork ? 'Upload artwork' : 'Upload more artworks'}
               </button>
               <button
                 className="bg-secondary-green h-12 min-w-0 rounded-full px-3 text-sm font-bold leading-tight text-white shadow-sm"
@@ -708,7 +726,9 @@ export function ArtworkMuralWindow({
         <div className="fixed inset-0 z-[120] grid place-items-center bg-slate-950/45 px-4">
           <div className="w-full max-w-sm rounded-lg bg-white p-5 shadow-xl">
             <p className="text-base font-semibold text-slate-950">
-              Really delete all of your artworks on this page?
+              {isSingleArtwork
+                ? 'Really delete your artwork on this page?'
+                : 'Really delete all of your artworks on this page?'}
             </p>
             <div className="mt-5 grid grid-cols-2 gap-3">
               <button

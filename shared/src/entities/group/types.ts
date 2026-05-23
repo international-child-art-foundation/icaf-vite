@@ -133,6 +133,8 @@ export interface UpdateGroupRequest {
     description?: string;
     class_name?: string;
     guardian_display_name?: string;
+    country?: string;
+    region?: string;
     theme_family?: string;
     theme_instance?: string;
     cover_art_ids?: string[];
@@ -159,4 +161,10 @@ export interface ChangeGroupStatusResponse {
     success: true;
     group_id: string;
     status: Extract<GroupStatus, 'approved' | 'hidden' | 'rejected'>;
+}
+
+export interface AdminUpdateGroupResponse {
+    success: true;
+    group_id: string;
+    status: GroupStatus;
 }

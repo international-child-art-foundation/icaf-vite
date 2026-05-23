@@ -45,6 +45,8 @@ export type TResolvedArtwork = TArtwork & {
   alt: string;
   /** API artwork id for remote artworks. */
   art_id?: string;
+  /** Approved group id this artwork belongs to, when submitted through a group. */
+  group_id?: string;
   /** Theme family used by remote gallery filtering. */
   theme_family?: string;
   /** Theme instance retained as display metadata. */
@@ -55,6 +57,10 @@ export type TResolvedArtwork = TArtwork & {
   groupOwnerName?: string;
   /** Group type label, e.g. classroom. */
   groupType?: string;
+  /** Country associated with the group submission. */
+  groupCountry?: string;
+  /** Region associated with the group submission. */
+  groupRegion?: string;
   /** Number of kudos recorded for this artwork. */
   kudos_count?: number;
 };

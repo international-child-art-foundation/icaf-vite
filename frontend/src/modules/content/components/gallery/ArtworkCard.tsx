@@ -1,7 +1,10 @@
 import { gsap } from 'gsap';
 import type { ReactNode } from 'react';
 import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
-import { formatArtistName } from '@/utils/galleryProcessing';
+import {
+  formatArtworkByline,
+  getArtistDisplayName,
+} from '@/utils/galleryProcessing';
 
 type ArtworkCardProps = {
   artwork: TResolvedArtwork;
@@ -12,7 +15,7 @@ type ArtworkCardProps = {
 const ArtworkCard = ({ artwork, openModal, actionSlot }: ArtworkCardProps) => {
   const { id, artists, lastInitial, age, country, region, event, thumbUrl } =
     artwork;
-  const artistText = formatArtistName(artists ?? [], lastInitial);
+  const artistText = getArtistDisplayName(artists ?? [], lastInitial);
 
   const manageEnter = (e: React.MouseEvent<HTMLImageElement>) => {
     gsap.to(e.target, {
@@ -60,15 +63,13 @@ const ArtworkCard = ({ artwork, openModal, actionSlot }: ArtworkCardProps) => {
 
         <section className="relative flex w-full flex-col gap-4 rounded-b-lg p-4 py-6">
           <div>
-            {artistText && (
-              <p className="truncate text-base font-semibold xl:text-xl">
-                {artistText}
-              </p>
-            )}
+            <p className="truncate text-base font-semibold xl:text-xl">
+              {artistText}
+            </p>
             <p className="truncate text-sm text-gray-500">
               {[age != null ? `${age}` : null, locationText]
                 .filter(Boolean)
-                .join(' · ') || '\u00A0'}
+                .join(' · ') || formatArtworkByline(artwork)}
             </p>
             <p className="truncate text-sm text-gray-400">
               {event || '\u00A0'}

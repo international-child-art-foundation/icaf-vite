@@ -70,8 +70,8 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
     <div className="site-w m-pad py-10">
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-[#026997]">
-            Dashboard
+          <p className="text-sm font-semibold uppercase tracking-wide text-primary">
+            My ICAF
           </p>
           <h1 className="font-montserrat mt-2 text-4xl font-bold text-neutral-950 md:text-5xl">
             Workspace
@@ -79,7 +79,7 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
         </div>
         <Link
           to="/submit-artwork"
-          className="inline-flex h-11 items-center justify-center rounded-md bg-black px-4 text-sm font-semibold text-white transition hover:bg-[#EE2F4D]"
+          className="inline-flex h-11 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-white transition hover:bg-secondary-blue"
         >
           Submit artwork
         </Link>
@@ -97,7 +97,7 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
                   onClick={() => setSearchParams({ tab: tab.id })}
                   className={`flex min-w-[190px] items-start gap-3 rounded-md px-3 py-3 text-left transition lg:min-w-0 ${
                     active
-                      ? 'bg-black text-white'
+                      ? 'bg-primary text-white'
                       : 'text-neutral-700 hover:bg-neutral-100'
                   }`}
                 >

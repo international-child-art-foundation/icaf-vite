@@ -38,6 +38,8 @@ export const apiEndpoints = {
     updateNews: (newsId: PathParam) => `/admin/news/${encodePathParam(newsId)}`,
     adminUpdateArtwork: (artId: PathParam) =>
       `/admin/artworks/${encodePathParam(artId)}`,
+    adminUpdateGroup: (groupId: PathParam) =>
+      `/admin/groups/${encodePathParam(groupId)}`,
   },
   auth: {
     changePassword: '/auth/change-password',
@@ -61,6 +63,7 @@ export const apiEndpoints = {
     updateTheme: (themeSk: PathParam) =>
       `/contributor/themes/${encodePathParam(themeSk)}`,
     hiddenArtworks: '/contributor/artworks/hidden',
+    rejectedArtworks: '/contributor/artworks/rejected',
     hiddenGroups: '/contributor/groups/hidden',
     pendingArtworks: '/contributor/artworks/pending',
     pendingGroups: '/contributor/groups/pending',

@@ -22,6 +22,8 @@ export function sanitizeUpdateGroupRequest(data: UpdateGroupRequest): UpdateGrou
         description: cleanOptionalString(data.description),
         class_name: cleanOptionalString(data.class_name),
         guardian_display_name: cleanOptionalString(data.guardian_display_name),
+        country: cleanOptionalString(data.country),
+        region: cleanOptionalString(data.region),
         theme_family: cleanOptionalString(data.theme_family),
         theme_instance: cleanOptionalString(data.theme_instance),
     };

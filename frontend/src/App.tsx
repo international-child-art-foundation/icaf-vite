@@ -135,6 +135,11 @@ const SubmitArtworkGroup = lazy(() =>
     default: m.SubmitArtworkGroup,
   })),
 );
+const SubmitArtwork = lazy(() =>
+  import('./modules/submissions/pages/SubmitArtwork').then((m) => ({
+    default: m.SubmitArtwork,
+  })),
+);
 const Dashboard = lazy(() =>
   import('./modules/dashboard/pages/Dashboard').then((m) => ({
     default: m.Dashboard,
@@ -223,10 +228,19 @@ export default function App() {
               </Route>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/submit-artwork" element={<SubmitArtworkGroup />} />
+              <Route path="/my-icaf" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Navigate to="/my-icaf" replace />} />
+              <Route path="/submit-artwork" element={<SubmitArtwork />} />
               <Route
                 path="/submit-artwork/artworks"
+                element={<SubmitArtwork />}
+              />
+              <Route
+                path="/submit-artwork-group"
+                element={<SubmitArtworkGroup />}
+              />
+              <Route
+                path="/submit-artwork-group/artworks"
                 element={<SubmitArtworkGroup />}
               />
 

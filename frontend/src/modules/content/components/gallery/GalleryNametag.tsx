@@ -1,22 +1,19 @@
-import { formatArtistName } from '@/utils/galleryProcessing';
-import { TResolvedArtwork } from '@/modules/content/types/Gallery';
+import {
+  formatArtworkByline,
+  formatArtworkContext,
+  getArtistDisplayName,
+} from '@/utils/galleryProcessing';
+import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
 import { DescriptionScroll } from './DescriptionScroll';
 
 export const galleryNametag = (artwork: TResolvedArtwork) => {
-  const name =
-    (artwork.artists?.length ?? 0) > 0
-      ? formatArtistName(artwork.artists ?? [], artwork.lastInitial)
-      : null;
-  const location = [artwork.region, artwork.country].filter(Boolean).join(', ');
+  const name = getArtistDisplayName(artwork.artists ?? [], artwork.lastInitial);
   const theme = [artwork.theme_family, artwork.theme_instance]
     .filter(Boolean)
     .join(' ');
-  const classroomSticker =
-    artwork.groupType === 'classroom' && artwork.groupOwnerName
-      ? `Part of ${artwork.groupOwnerName}'s classroom`
-      : artwork.groupTitle
-        ? `Part of ${artwork.groupTitle}`
-        : null;
+  const artworkContext = formatArtworkContext(artwork);
+  const byline = formatArtworkByline(artwork);
+  const ageLine = artwork.age !== undefined ? `Age ${artwork.age}` : null;
 
   return (
     <div
@@ -27,11 +24,11 @@ export const galleryNametag = (artwork: TResolvedArtwork) => {
       }}
     >
       <div className="m-[3px] rounded-xl bg-white px-4 py-3 text-neutral-700">
-        {(classroomSticker || theme) && (
+        {(artworkContext || theme) && (
           <div className="mb-2 flex flex-wrap gap-1.5 pr-6">
-            {classroomSticker && (
+            {artworkContext && (
               <span className="rounded-full bg-[#FBB22E]/25 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-[#775000]">
-                {classroomSticker}
+                {artworkContext}
               </span>
             )}
             {theme && (
@@ -41,31 +38,19 @@ export const galleryNametag = (artwork: TResolvedArtwork) => {
             )}
           </div>
         )}
-        {name && (
-          <p className="pr-6 text-lg font-semibold leading-snug">{name}</p>
-        )}
+        <p className="pr-6 text-lg font-semibold leading-snug">{name}</p>
+        <p className="mt-0.5 pr-6 text-sm font-medium text-neutral-600">
+          {byline}
+        </p>
         {artwork.title && (
           <p className="mt-0.5 text-base font-medium italic text-neutral-900 opacity-90">
             &ldquo;{artwork.title}&rdquo;
           </p>
         )}
-        {artwork.age !== undefined && (
-          <p className="mt-0.5 text-sm opacity-85">
-            {artwork.age}
-            {location && (
-              <span className="text-sm opacity-85"> · {location}</span>
-            )}
-          </p>
-        )}
-        {artwork.event && (
-          <p className="mt-1 text-xs capitalize opacity-60">{artwork.event}</p>
-        )}
+        {ageLine && <p className="mt-0.5 text-sm opacity-85">{ageLine}</p>}
         {artwork.description && (
           <>
-            <p className="mt-2 text-sm opacity-90">
-              {artwork.artists && artwork.artists[0] && artwork.artists[0]}{' '}
-              says:
-            </p>
+            <p className="mt-2 text-sm opacity-90">{name} says:</p>
             <DescriptionScroll
               key={`desc-${artwork.id}`}
               description={artwork.description}

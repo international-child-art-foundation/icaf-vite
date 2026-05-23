@@ -6,7 +6,7 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom';
-import { LoaderCircle, Play } from 'lucide-react';
+import { Images, LoaderCircle, Play } from 'lucide-react';
 import { useWindowSize } from 'usehooks-ts';
 import type { GroupListItem, ThemeListItem } from '@icaf/shared';
 import { listGalleryThemes } from '@/api/public';
@@ -23,6 +23,7 @@ import { GalleryThemeCard } from './GalleryThemeCard';
 import {
   fetchAllGalleryArtworks,
   fetchAllGalleryGroups,
+  fetchArtworkGroupMetadata,
   fetchGroupArtworks,
   toSortOrder,
 } from './galleryData';
@@ -80,9 +81,6 @@ const GalleryCoreInner = () => {
       .then((response) => {
         if (cancelled) return;
         setThemes(response.themes);
-        setSelectedThemeFamily(
-          (current) => current ?? response.themes[0]?.theme_family ?? null,
-        );
       })
       .catch((error: unknown) => {
         if (cancelled) return;
@@ -101,11 +99,6 @@ const GalleryCoreInner = () => {
 
   useEffect(() => {
     if (themesLoading) return;
-    if (!selectedThemeFamily) {
-      setArtworks([]);
-      setArtworksLoading(false);
-      return;
-    }
 
     let cancelled = false;
     setArtworksLoading(true);
@@ -135,11 +128,6 @@ const GalleryCoreInner = () => {
 
   useEffect(() => {
     if (themesLoading) return;
-    if (!selectedThemeFamily) {
-      setGroups([]);
-      setGroupsLoading(false);
-      return;
-    }
 
     let cancelled = false;
     setGroupsLoading(true);
@@ -242,9 +230,23 @@ const GalleryCoreInner = () => {
   }, [closeSlideshow]);
 
   const openSlideshow = () => {
-    setSlideshowArtworks(artworks);
-    void navigate('/gallery/slideshow');
-    setModalOpen(false);
+    setGroupSlideshowLoading(true);
+    setGroupSlideshowError(null);
+
+    fetchArtworkGroupMetadata(artworks)
+      .then((enrichedArtworks) => {
+        setSlideshowArtworks(enrichedArtworks);
+        void navigate('/gallery/slideshow');
+        setModalOpen(false);
+      })
+      .catch((error: unknown) => {
+        setGroupSlideshowError(
+          error instanceof Error
+            ? error.message
+            : 'Failed to load slideshow details',
+        );
+      })
+      .finally(() => setGroupSlideshowLoading(false));
   };
 
   const openGroupSlideshow = (group: GroupListItem) => {
@@ -393,12 +395,35 @@ const GalleryCoreInner = () => {
             <p className="text-center text-gray-600">Loading themes...</p>
           ) : themesError ? (
             <p className="text-center text-red-500">{themesError}</p>
-          ) : themes.length === 0 ? (
-            <p className="text-center text-gray-600">
-              No gallery themes are available yet.
-            </p>
           ) : (
             <div className="flex w-max">
+              <button
+                type="button"
+                onClick={() => {
+                  if (selectedThemeFamily === null) return;
+                  setSelectedThemeFamily(null);
+                  setPageNumber(1);
+                }}
+                className={`group relative h-[80px] w-[230px] flex-none overflow-hidden bg-white p-3 text-left text-gray-950 shadow-sm ring-inset transition duration-200 sm:w-[250px] ${
+                  selectedThemeFamily === null
+                    ? 'ring-4 ring-black/20'
+                    : 'ring-1 ring-gray-300 hover:-translate-y-0.5 hover:shadow-md'
+                }`}
+              >
+                <span className="absolute inset-0 bg-[linear-gradient(135deg,rgba(2,134,195,0.12),rgba(246,192,38,0.18))]" />
+                <span className="absolute bottom-0 left-0 h-1 w-full bg-[#0286C3] opacity-90 transition group-hover:bg-[#F6C026]" />
+                <span className="relative z-10 flex h-full items-center justify-between gap-3">
+                  <span>
+                    <span className="font-montserrat block text-lg font-bold leading-tight">
+                      All Themes
+                    </span>
+                    <span className="mt-1 block text-xs leading-tight text-gray-600">
+                      Show every gallery entry
+                    </span>
+                  </span>
+                  <Images size={24} aria-hidden="true" />
+                </span>
+              </button>
               {themes.map((theme) => (
                 <GalleryThemeCard
                   key={`${theme.theme_family}-${theme.theme_instance}`}
@@ -432,7 +457,7 @@ const GalleryCoreInner = () => {
           ) : activeItems.length === 0 ? (
             <p className="py-20 text-center text-gray-600">
               No {viewMode === 'group' ? 'groups' : 'artworks'} are available
-              for this theme yet.
+              {selectedThemeFamily ? ' for this theme' : ''} yet.
             </p>
           ) : viewMode === 'group' ? (
             <div
@@ -470,8 +495,10 @@ const GalleryCoreInner = () => {
               <div className="inline-flex items-center gap-2 rounded-md bg-white/90 px-4 py-3 text-sm font-medium text-gray-700 shadow-md">
                 <LoaderCircle size={18} className="animate-spin" />
                 {groupSlideshowLoading
-                  ? 'Loading group slideshow...'
-                  : `Loading theme ${viewMode === 'group' ? 'groups' : 'artworks'}...`}
+                  ? 'Loading slideshow details...'
+                  : `Loading ${selectedThemeFamily ? 'theme ' : ''}${
+                      viewMode === 'group' ? 'groups' : 'artworks'
+                    }...`}
               </div>
             </div>
           )}

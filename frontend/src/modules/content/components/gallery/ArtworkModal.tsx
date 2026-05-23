@@ -2,7 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
-import { formatArtistName } from '@/utils/galleryProcessing';
+import {
+  formatArtworkByline,
+  getArtistDisplayName,
+} from '@/utils/galleryProcessing';
 import { SocialShare } from './SocialShare';
 
 type ArtworkModalProps = {
@@ -92,7 +95,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
   if (!modalState) return null;
 
   const artistText = artworkData
-    ? formatArtistName(artworkData.artists ?? [], artworkData.lastInitial)
+    ? getArtistDisplayName(artworkData.artists ?? [], artworkData.lastInitial)
     : '';
   const locationText = [artworkData?.region, artworkData?.country]
     .filter(Boolean)
@@ -120,7 +123,10 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
     return (
       <div className="mx-auto grid max-h-full grid-cols-2 gap-5 overflow-hidden px-6 md:gap-10">
         <div className="flex flex-col overflow-auto">
-          {artistText && <p className="mt-5 text-xl font-bold">{artistText}</p>}
+          <p className="mt-5 text-xl font-bold">{artistText}</p>
+          <p className="mt-0.5 text-sm font-medium text-gray-500">
+            {formatArtworkByline(artworkData)}
+          </p>
           {artworkData.title && (
             <p className="mt-0.5 text-lg font-medium italic text-gray-700">
               &ldquo;{artworkData.title}&rdquo;

@@ -6,8 +6,13 @@ import {
   COMMON_HEADERS,
   CommonErrors,
   ArtworkEntity,
-  UpdateArtworkRequest,
-  validateUpdateArtworkRequest,
+  FORBIDDEN_CHARS_MULTILINE,
+  FORBIDDEN_CHARS_SINGLELINE,
+  MAX_DESCRIPTION_LEN,
+  MAX_STRING_LEN,
+  MAX_TITLE_LEN,
+  SubmitterRelationship,
+  THEME_INSTANCE_FORMAT,
 } from "@icaf/shared";
 import { buildApprovedArtworkGsiAttrs } from "../../dynamo/artGsis";
 import { parseJsonBody } from "../../utils/request";
@@ -26,6 +31,26 @@ const ALLOWED_UPDATE_FIELDS = new Set([
   "theme_instance",
   "notifications",
 ]);
+const RELATIONSHIPS: SubmitterRelationship[] = ["self", "parent", "guardian", "teacher"];
+type AdminArtworkUpdateRequest = Record<string, unknown>;
+
+function isRemoval(value: unknown) {
+  return value === null || value === "";
+}
+
+function validateStringField(
+  field: string,
+  value: unknown,
+  maxLength: number,
+  multiline = false,
+): string | undefined {
+  if (isRemoval(value)) return undefined;
+  if (typeof value !== "string") return `${field} must be a string`;
+  if (value.length > maxLength) return `${field} must be ${maxLength} characters or less`;
+  const forbiddenChars = multiline ? FORBIDDEN_CHARS_MULTILINE : FORBIDDEN_CHARS_SINGLELINE;
+  if (forbiddenChars.test(value)) return `${field} contains invalid characters`;
+  return undefined;
+}
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -56,16 +81,47 @@ export const handler = async (
 
     const art = artResult.Item as ArtworkEntity;
 
-    const parsedBody = parseJsonBody<Record<string, unknown>>(event);
+    const parsedBody = parseJsonBody<AdminArtworkUpdateRequest>(event);
     if (!parsedBody.ok) return parsedBody.response;
     const unknownFields = Object.keys(parsedBody.value).filter((key) => !ALLOWED_UPDATE_FIELDS.has(key));
     if (unknownFields.length > 0) {
       return CommonErrors.badRequest(`Unsupported field(s): ${unknownFields.join(", ")}`);
     }
+    const STRING_FIELDS: Array<[field: string, maxLength: number, multiline: boolean]> = [
+      ["title", MAX_TITLE_LEN, false],
+      ["description", MAX_DESCRIPTION_LEN, true],
+      ["f_name", MAX_STRING_LEN, false],
+      ["country", MAX_STRING_LEN, false],
+      ["region", MAX_STRING_LEN, false],
+      ["theme_family", MAX_STRING_LEN, false],
+    ];
 
-    const body = parsedBody.value as UpdateArtworkRequest;
-    const fieldErrors = validateUpdateArtworkRequest(body);
-    if (fieldErrors.length > 0) {
+    const body = parsedBody.value;
+    const fieldErrors = [
+      ...STRING_FIELDS.map(([field, maxLength, multiline]) =>
+        field in body
+          ? validateStringField(field, body[field], maxLength, multiline)
+          : undefined,
+      ),
+      "age" in body && !isRemoval(body.age) && (!Number.isInteger(body.age) || (body.age as number) < 1 || (body.age as number) > 150)
+        ? "age, if provided, must be an integer between 1 and 150"
+        : undefined,
+      "submitter_relationship" in body &&
+        !isRemoval(body.submitter_relationship) &&
+        !RELATIONSHIPS.includes(body.submitter_relationship as SubmitterRelationship)
+        ? `submitter_relationship must be one of: ${RELATIONSHIPS.join(", ")}`
+        : undefined,
+      "theme_instance" in body &&
+        !isRemoval(body.theme_instance) &&
+        (typeof body.theme_instance !== "string" || !THEME_INSTANCE_FORMAT.test(body.theme_instance))
+        ? "theme_instance must be a zero-padded 4-digit string"
+        : undefined,
+      "notifications" in body &&
+        !isRemoval(body.notifications) &&
+        typeof body.notifications !== "boolean"
+        ? "notifications, if provided, must be a boolean"
+        : undefined,
+    ].filter(Boolean) as string[];    if (fieldErrors.length > 0) {
       return CommonErrors.badRequest(fieldErrors.join("; "));
     }
     if (Object.keys(body).length === 0) {
@@ -78,28 +134,60 @@ export const handler = async (
     const exprNames: Record<string, string> = {};
     const exprValues: Record<string, unknown> = {};
 
-    if (body.title !== undefined) { setExprParts.push("title = :title"); exprValues[":title"] = body.title; }
-    if (body.description !== undefined) { setExprParts.push("description = :desc"); exprValues[":desc"] = body.description; }
-    if (body.f_name !== undefined) { setExprParts.push("f_name = :f_name"); exprValues[":f_name"] = body.f_name; }
-    if (body.age !== undefined) { setExprParts.push("age = :age"); exprValues[":age"] = body.age; }
-    if (body.country !== undefined) { setExprParts.push("country = :country"); exprValues[":country"] = body.country; }
-    if (body.region !== undefined) { setExprParts.push("#region = :region"); exprNames["#region"] = "region"; exprValues[":region"] = body.region; }
-    if (body.submitter_relationship !== undefined) { setExprParts.push("submitter_relationship = :rel"); exprValues[":rel"] = body.submitter_relationship; }
-    if (body.theme_family !== undefined) { setExprParts.push("theme_family = :tf"); exprValues[":tf"] = body.theme_family; }
-    if (body.theme_instance !== undefined) { setExprParts.push("theme_instance = :ti"); exprValues[":ti"] = body.theme_instance; }
+    function setOrRemove(field: string, placeholder: string, value: unknown, namePlaceholder?: string) {
+      if (isRemoval(value)) {
+        removeExprParts.push(namePlaceholder ?? field);
+        if (namePlaceholder) exprNames[namePlaceholder] = field;
+        return;
+      }
+      setExprParts.push(`${namePlaceholder ?? field} = ${placeholder}`);
+      if (namePlaceholder) exprNames[namePlaceholder] = field;
+      exprValues[placeholder] = value;
+    }
+
+    if ("title" in body) setOrRemove("title", ":title", body.title);
+    if ("description" in body) setOrRemove("description", ":desc", body.description);
+    if ("f_name" in body) setOrRemove("f_name", ":f_name", body.f_name);
+    if ("age" in body) setOrRemove("age", ":age", body.age);
+    if ("country" in body) setOrRemove("country", ":country", body.country);
+    if ("region" in body) setOrRemove("region", ":region", body.region, "#region");
+    if ("submitter_relationship" in body) setOrRemove("submitter_relationship", ":rel", body.submitter_relationship);
+    if ("theme_family" in body) setOrRemove("theme_family", ":tf", body.theme_family);
+    if ("theme_instance" in body) setOrRemove("theme_instance", ":ti", body.theme_instance);
+    if (isRemoval(body.theme_family) && !("theme_instance" in body)) {
+      removeExprParts.push("theme_instance");
+    }
     if (art.group_id) {
       setExprParts.push("notifications = :notifications");
       exprValues[":notifications"] = false;
-    } else if (body.notifications !== undefined) {
-      setExprParts.push("notifications = :notifications");
-      exprValues[":notifications"] = body.notifications;
+    } else if ("notifications" in body) {
+      if (isRemoval(body.notifications)) {
+        removeExprParts.push("notifications");
+      } else {
+        setExprParts.push("notifications = :notifications");
+        exprValues[":notifications"] = body.notifications;
+      }
     }
     if (art.status === "approved") {
+      const nextThemeFamily =
+        "theme_family" in body
+          ? isRemoval(body.theme_family)
+            ? undefined
+            : body.theme_family as string
+          : art.theme_family;
+      const nextThemeInstance =
+        "theme_instance" in body
+          ? isRemoval(body.theme_instance)
+            ? undefined
+            : body.theme_instance as string
+          : isRemoval(body.theme_family)
+            ? undefined
+            : art.theme_instance;
       const gsiAttrs = buildApprovedArtworkGsiAttrs({
         timestampMs: art.timestamp * 1000,
         artId,
-        family: body.theme_family ?? art.theme_family,
-        instance: body.theme_instance ?? art.theme_instance,
+        family: nextThemeFamily,
+        instance: nextThemeInstance,
       });
 
       Object.entries(gsiAttrs).forEach(([key, value], index) => {
@@ -115,12 +203,12 @@ export const handler = async (
       }
     }
 
-    if (setExprParts.length === 0) {
+    if (setExprParts.length === 0 && removeExprParts.length === 0) {
       return CommonErrors.badRequest("at least one field must be provided");
     }
 
     const updateExpression = [
-      `SET ${setExprParts.join(", ")}`,
+      setExprParts.length > 0 ? `SET ${setExprParts.join(", ")}` : "",
       removeExprParts.length > 0 ? `REMOVE ${removeExprParts.join(", ")}` : "",
     ].filter(Boolean).join(" ");
 
@@ -130,7 +218,7 @@ export const handler = async (
         Key: { PK: `ART#${artId}`, SK: "-" },
         UpdateExpression: updateExpression,
         ...(Object.keys(exprNames).length > 0 && { ExpressionAttributeNames: exprNames }),
-        ExpressionAttributeValues: exprValues,
+        ...(Object.keys(exprValues).length > 0 && { ExpressionAttributeValues: exprValues }),
         ConditionExpression: "attribute_exists(PK)",
       }),
     );

@@ -194,7 +194,7 @@ export const navItems: NavItem[] = [
     key: 'my-icaf',
     label: 'My ICAF',
     navLabel: 'My ICAF',
-    href: '/dashboard',
+    href: '/my-icaf',
     children: [],
   },
 ];

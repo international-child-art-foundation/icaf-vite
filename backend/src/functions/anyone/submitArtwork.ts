@@ -61,6 +61,9 @@ export const handler = async (
 
     const nowMs = Date.now();
     const nowSeconds = Math.floor(nowMs / 1000);
+    const isGuardianSubmission =
+      body.submitter_relationship === "guardian" ||
+      body.submitter_relationship === "parent";
 
     // ── Step 1: Find or create virtual USER entity ─────────────────────────
     let user: UserEntity;
@@ -91,6 +94,18 @@ export const handler = async (
           "This account already exists. Please log in to submit artwork.",
         );
       }
+      if (isGuardianSubmission && user.role !== "guardian") {
+        await dynamodb.send(
+          new UpdateCommand({
+            TableName: TABLE_NAME,
+            Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
+            UpdateExpression: "SET #role = :role",
+            ExpressionAttributeNames: { "#role": "role" },
+            ExpressionAttributeValues: { ":role": "guardian" },
+          }),
+        );
+        user.role = "guardian";
+      }
     } else {
       // New or returning email-based guest — query Email GSI
       const email = body.email!.trim();
@@ -117,6 +132,18 @@ export const handler = async (
             "An account with this email already exists. Please log in to submit artwork.",
           );
         }
+        if (isGuardianSubmission && existing.role !== "guardian") {
+          await dynamodb.send(
+            new UpdateCommand({
+              TableName: TABLE_NAME,
+              Key: { PK: `USER#${existing.user_id}`, SK: "PROFILE" },
+              UpdateExpression: "SET #role = :role",
+              ExpressionAttributeNames: { "#role": "role" },
+              ExpressionAttributeValues: { ":role": "guardian" },
+            }),
+          );
+          existing.role = "guardian";
+        }
         user = existing;
       } else {
         // Create new virtual USER entity
@@ -131,6 +158,7 @@ export const handler = async (
           banned: false,
           has_magazine_subscription: false,
           has_newsletter_subscription: false,
+          ...(isGuardianSubmission && { role: "guardian" }),
           type: "USER" as const,
           // Email GSI
           EMAIL_PK: emailPk(email),

@@ -34,6 +34,14 @@ export function fetchHiddenArtworks(
   });
 }
 
+export function fetchRejectedArtworks(
+  query?: PaginationQuery,
+): Promise<ReviewArtworkQueueResponse> {
+  return apiRequest<ReviewArtworkQueueResponse>(apiEndpoints.contributor.rejectedArtworks, {
+    query,
+  });
+}
+
 export function changeArtworkStatus(
   artId: string,
   request: ChangeArtworkStatusRequest,

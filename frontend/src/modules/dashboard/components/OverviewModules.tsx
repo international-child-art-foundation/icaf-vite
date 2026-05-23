@@ -14,10 +14,15 @@ export function OverviewModules({ role }: { role: Role | null }) {
           <ActionLink
             to="/submit-artwork"
             label="Submit artwork"
-            detail="Create an individual or group artwork submission."
+            detail="Create an individual artwork submission."
           />
           <ActionLink
-            to="/dashboard?tab=submissions"
+            to="/submit-artwork-group"
+            label="Submit artwork group"
+            detail="Create a group artwork submission."
+          />
+          <ActionLink
+            to="/my-icaf?tab=submissions"
             label="View my submissions"
             detail="Check status for artwork and groups tied to this account."
           />
@@ -35,16 +40,26 @@ export function OverviewModules({ role }: { role: Role | null }) {
           description="Admins see these because they inherit contributor review responsibilities."
         >
           <div className="grid gap-3 md:grid-cols-2">
-            <ActionLink
-              to="/dashboard?tab=review"
-              label="Review groups"
-              detail="Approve submitted groups before they appear publicly."
-            />
-            <ActionLink
-              to="/dashboard?tab=review"
-              label="Review artworks"
-              detail="Approve, hide, or reject submitted artworks."
-            />
+            {canAdmin(role) ? (
+              <ActionLink
+                to="/my-icaf?tab=review"
+                label="Artwork review"
+                detail="Review approved, pending, hidden, and rejected artwork."
+              />
+            ) : (
+              <>
+                <ActionLink
+                  to="/my-icaf?tab=review"
+                  label="Review groups"
+                  detail="Approve submitted groups before they appear publicly."
+                />
+                <ActionLink
+                  to="/my-icaf?tab=review"
+                  label="Review artworks"
+                  detail="Approve, hide, or reject submitted artworks."
+                />
+              </>
+            )}
           </div>
         </DashboardModule>
       )}
@@ -56,14 +71,9 @@ export function OverviewModules({ role }: { role: Role | null }) {
         >
           <div className="grid gap-3 md:grid-cols-2">
             <ActionLink
-              to="/dashboard?tab=admin"
-              label="Bulk artwork correction"
-              detail="Change metadata for selected artworks with a confirmation step."
-            />
-            <ActionLink
-              to="/dashboard?tab=admin"
-              label="Group correction readiness"
-              detail="See what group edit API support is still missing."
+              to="/my-icaf?tab=admin"
+              label="Artwork admin"
+              detail="Start with approved artwork, then switch status views."
             />
           </div>
         </DashboardModule>

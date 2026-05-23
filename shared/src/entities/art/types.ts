@@ -121,6 +121,7 @@ export interface ArtworkListItem {
     timestamp: number;
     is_virtual: boolean;
     notifications?: boolean;
+    submitter_relationship?: SubmitterRelationship;
 }
 
 export interface ListArtworkSubmissionsResponse {

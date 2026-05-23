@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, Link } from 'lucide-react';
-import { TResolvedArtwork } from '@/modules/content/types/Gallery';
-import { formatArtistName } from '@/utils/galleryProcessing';
+import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
+import {
+  formatArtworkByline,
+  formatArtworkContext,
+  getArtistDisplayName,
+} from '@/utils/galleryProcessing';
 
 export const LIP_COLLAPSED_H = 76; // px — used by parent for gesture hit-testing
 
@@ -243,26 +247,22 @@ export const MobileLip = ({
     return () => el.removeEventListener('touchmove', onMove);
   }, [artwork]);
 
-  const name =
-    (artwork.artists?.length ?? 0) > 0
-      ? formatArtistName(artwork.artists ?? [], artwork.lastInitial)
-      : null;
-  const location = [artwork.region, artwork.country].filter(Boolean).join(', ');
+  const name = getArtistDisplayName(
+    artwork.artists ?? [],
+    artwork.lastInitial,
+  );
   const theme = [artwork.theme_family, artwork.theme_instance]
     .filter(Boolean)
     .join(' ');
-  const classroomSticker =
-    artwork.groupType === 'classroom' && artwork.groupOwnerName
-      ? `Part of ${artwork.groupOwnerName}'s classroom`
-      : artwork.groupTitle
-        ? `Part of ${artwork.groupTitle}`
-        : null;
+  const artworkContext = formatArtworkContext(artwork);
+  const byline = formatArtworkByline(artwork);
+  const ageLine = artwork.age !== undefined ? `Age ${artwork.age}` : null;
 
   const t = maxLipY > 0 ? Math.min(lipY / maxLipY, 1) : 0;
 
   const hasTitle = !!artwork.title;
   const primaryText = hasTitle ? `\u201c${artwork.title}\u201d` : name;
-  const secondaryText = hasTitle ? name : null;
+  const secondaryText = hasTitle ? name : byline;
 
   const maxDescH = Math.floor(window.innerHeight * 0.6 * 0.4);
 
@@ -349,7 +349,7 @@ export const MobileLip = ({
           }}
         />
 
-        {(classroomSticker || theme) && (
+        {(artworkContext || theme) && (
           <div
             style={{
               display: 'flex',
@@ -359,7 +359,7 @@ export const MobileLip = ({
               marginBottom: 12,
             }}
           >
-            {classroomSticker && (
+            {artworkContext && (
               <span
                 style={{
                   ...FONT,
@@ -373,7 +373,7 @@ export const MobileLip = ({
                   textTransform: 'uppercase',
                 }}
               >
-                {classroomSticker}
+                {artworkContext}
               </span>
             )}
             {theme && (
@@ -396,7 +396,7 @@ export const MobileLip = ({
           </div>
         )}
 
-        {artwork.age !== undefined && (
+        {ageLine && (
           <p
             style={{
               ...FONT,
@@ -410,8 +410,7 @@ export const MobileLip = ({
                 : 'opacity 0.1s ease',
             }}
           >
-            {artwork.age}
-            {location && <span style={{ color: '#888' }}> · {location}</span>}
+            {ageLine}
           </p>
         )}
         {artwork.event && (
@@ -442,18 +441,16 @@ export const MobileLip = ({
           <div style={{ overflow: 'hidden' }}>
             {artwork.description && (
               <>
-                {artwork.artists?.[0] && (
-                  <p
-                    style={{
-                      ...FONT,
-                      fontSize: 13,
-                      color: '#666',
-                      marginBottom: 6,
-                    }}
-                  >
-                    {artwork.artists[0]} says:
-                  </p>
-                )}
+                <p
+                  style={{
+                    ...FONT,
+                    fontSize: 13,
+                    color: '#666',
+                    marginBottom: 6,
+                  }}
+                >
+                  {name} says:
+                </p>
                 <div
                   ref={descRef}
                   style={{

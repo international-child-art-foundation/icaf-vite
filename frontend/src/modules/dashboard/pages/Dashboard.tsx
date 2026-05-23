@@ -13,9 +13,9 @@ import { ReviewGroupQueue } from '../components/ReviewGroupQueue';
 import { canAdmin, canReview } from '../utils/dashboardFormat';
 
 const dashboardMetadata = {
-  title: 'Dashboard | ICAF',
+  title: 'My ICAF | ICAF',
   description: 'Manage ICAF submissions, review queues, and admin actions.',
-  path: '/dashboard',
+  path: '/my-icaf',
 };
 
 export function Dashboard() {
@@ -30,7 +30,7 @@ export function Dashboard() {
         setError(
           err instanceof Error
             ? err.message
-            : 'Failed to load dashboard access',
+            : 'Failed to load My ICAF access',
         );
       })
       .finally(() => setLoading(false));
@@ -43,7 +43,7 @@ export function Dashboard() {
       <Seo {...dashboardMetadata} />
       {loading ? (
         <div className="site-w m-pad py-16">
-          <ModuleState>Loading dashboard...</ModuleState>
+          <ModuleState>Loading My ICAF...</ModuleState>
         </div>
       ) : error ? (
         <div className="site-w m-pad py-16">
@@ -53,11 +53,11 @@ export function Dashboard() {
         <div className="site-w m-pad py-16">
           <DashboardModule
             title="Sign in required"
-            description="Use your account to view submissions and dashboard tools."
+            description="Use your account to view submissions and My ICAF tools."
           >
             <Link
               to="/login"
-              className="inline-flex h-11 items-center rounded-md bg-black px-4 text-sm font-semibold text-white"
+              className="inline-flex h-11 items-center rounded-md bg-primary px-4 text-sm font-semibold text-white transition hover:bg-secondary-blue"
             >
               Sign in
             </Link>
@@ -72,18 +72,13 @@ export function Dashboard() {
             if (tab === 'review' && canReview(role)) {
               return (
                 <>
-                  <ReviewGroupQueue admin={canAdmin(role)} />
                   <ReviewArtworkQueue admin={canAdmin(role)} />
+                  {!canAdmin(role) && <ReviewGroupQueue />}
                 </>
               );
             }
             if (tab === 'admin' && canAdmin(role)) {
-              return (
-                <>
-                  <ReviewArtworkQueue admin />
-                  <ReviewGroupQueue admin />
-                </>
-              );
+              return <ReviewArtworkQueue admin />;
             }
             return <OverviewModules role={role} />;
           }}

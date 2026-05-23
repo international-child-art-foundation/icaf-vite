@@ -247,7 +247,8 @@ export function SubmitArtworkGroup({
 
   const isSubmitting = status === 'submitting';
   const artworkErrors = errors.artworks ?? {};
-  const isArtworkWindowOpen = location.pathname === '/submit-artwork/artworks';
+  const isArtworkWindowOpen =
+    location.pathname === '/submit-artwork-group/artworks';
   const themeParams = useMemo(
     () => readThemeParams(location.search),
     [location.search],
@@ -361,11 +362,11 @@ export function SubmitArtworkGroup({
 
   function openArtworkWindow() {
     if (!isArtworkWindowOpen)
-      void navigate(`/submit-artwork/artworks${location.search}`);
+      void navigate(`/submit-artwork-group/artworks${location.search}`);
   }
 
   function closeArtworkWindow() {
-    void navigate(`/submit-artwork${location.search}`);
+    void navigate(`/submit-artwork-group${location.search}`);
   }
 
   function deleteArtwork(artworkId: string) {

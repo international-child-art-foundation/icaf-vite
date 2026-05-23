@@ -133,6 +133,18 @@ export function validateUpdateGroupRequest(data: UpdateGroupRequest): string[] {
         errors.push(`guardian_display_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
     }
 
+    if (data.country !== undefined) {
+        if (!data.country.trim()) {
+            errors.push('country, if provided, must be non-empty');
+        } else if (data.country.length > GROUP_MAX_STRING_LEN) {
+            errors.push(`country must be ${GROUP_MAX_STRING_LEN} characters or less`);
+        }
+    }
+
+    if (data.region !== undefined && typeof data.region === 'string' && data.region.length > GROUP_MAX_STRING_LEN) {
+        errors.push(`region must be ${GROUP_MAX_STRING_LEN} characters or less`);
+    }
+
     if (data.theme_family !== undefined && typeof data.theme_family === 'string' && data.theme_family.length > GROUP_MAX_STRING_LEN) {
         errors.push(`theme_family must be ${GROUP_MAX_STRING_LEN} characters or less`);
     }

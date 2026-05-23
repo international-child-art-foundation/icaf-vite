@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { GroupListItem, GroupStatus } from '@icaf/shared';
+import type {
+  GroupListItem,
+  GroupStatus,
+  UpdateGroupRequest,
+} from '@icaf/shared';
+import { adminUpdateGroup } from '@/api/admin';
 import {
   changeGroupStatus,
   fetchHiddenGroups,
@@ -12,6 +17,16 @@ import { DashboardModule, ModuleState } from './DashboardModule';
 type QueueMode = 'pending' | 'hidden';
 type ReviewStatus = Extract<GroupStatus, 'approved' | 'hidden' | 'rejected'>;
 
+const editableFields: (keyof UpdateGroupRequest)[] = [
+  'title',
+  'class_name',
+  'guardian_display_name',
+  'country',
+  'region',
+  'theme_family',
+  'theme_instance',
+];
+
 export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
   const [mode, setMode] = useState<QueueMode>('pending');
   const [groups, setGroups] = useState<GroupListItem[]>([]);
@@ -20,6 +35,9 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [bulkEditOpen, setBulkEditOpen] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+  const [edits, setEdits] = useState<UpdateGroupRequest>({});
   const selectedIds = useMemo(() => [...selected], [selected]);
 
   const loadQueue = useCallback(() => {
@@ -58,10 +76,50 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
     }
   };
 
+  const applyBulkEdits = async () => {
+    const payload = Object.fromEntries(
+      editableFields
+        .map((field) => [field, edits[field]])
+        .filter(
+          ([, value]) => typeof value === 'string' && value.trim() !== '',
+        ),
+    ) as UpdateGroupRequest;
+
+    if (
+      !confirmed ||
+      selectedIds.length === 0 ||
+      Object.keys(payload).length === 0
+    ) {
+      return;
+    }
+
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+    try {
+      await Promise.all(
+        selectedIds.map(async (id): Promise<void> => {
+          await adminUpdateGroup(id, payload);
+        }),
+      );
+      setMessage(`${selectedIds.length} group attribute set updated.`);
+      setEdits({});
+      setConfirmed(false);
+      setBulkEditOpen(false);
+      loadQueue();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to update group attributes',
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <DashboardModule
-      title="Group review"
-      description="Approve groups first when the submission looks ready. Hiding and rejection are available for moderation cases; group attribute editing needs a dedicated admin API before it can be safely exposed here."
+      title={admin ? 'Group review and correction' : 'Group review'}
+      description="Approval is the normal path. Rejection and hiding are moderation decisions, while attribute changes should be reserved for fixing clear submission errors."
       aside={
         <select
           value={mode}
@@ -98,12 +156,61 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
         >
           Reject selected
         </button>
+        {admin && (
+          <button
+            type="button"
+            disabled={selectedIds.length === 0}
+            onClick={() => setBulkEditOpen((value) => !value)}
+            className="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
+          >
+            Edit selected attributes
+          </button>
+        )}
       </div>
 
-      {admin && (
-        <div className="mb-5 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          Admin group attribute editing is intentionally not wired yet because
-          the frontend only has guardian self-edit endpoints for group metadata.
+      {bulkEditOpen && admin && (
+        <div className="mb-5 rounded-md border border-primary/20 bg-primary/5 p-4">
+          <p className="text-sm font-semibold text-primary">
+            Attribute editing is a last-resort correction tool.
+          </p>
+          <div className="mt-3 grid gap-3 md:grid-cols-3">
+            {editableFields.map((field) => (
+              <label
+                key={field}
+                className="text-xs font-semibold uppercase text-neutral-600"
+              >
+                {field.replace(/_/g, ' ')}
+                <input
+                  value={String(edits[field] ?? '')}
+                  onChange={(event) =>
+                    setEdits((current) => ({
+                      ...current,
+                      [field]: event.target.value,
+                    }))
+                  }
+                  className="mt-1 h-10 w-full rounded-md border border-neutral-300 bg-white px-3 text-sm font-normal normal-case"
+                />
+              </label>
+            ))}
+          </div>
+          <label className="mt-3 flex items-center gap-2 text-sm text-primary">
+            <input
+              type="checkbox"
+              checked={confirmed}
+              onChange={(event) => setConfirmed(event.target.checked)}
+              className="accent-primary"
+            />
+            I understand this rewrites submitted details for every selected
+            group.
+          </label>
+          <button
+            type="button"
+            disabled={busy || !confirmed}
+            onClick={() => void applyBulkEdits()}
+            className="mt-3 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
+          >
+            Apply attribute changes
+          </button>
         </div>
       )}
       {message && <ModuleState tone="success">{message}</ModuleState>}

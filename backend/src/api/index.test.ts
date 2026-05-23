@@ -98,6 +98,30 @@ describe("api router", () => {
     expect(authMocks.requireRole).not.toHaveBeenCalled();
   });
 
+  it("rejects invalid admin group ids before auth", async () => {
+    const response = await handler(event("PATCH", "/api/admin/groups/not-a-uuid", "{}"));
+
+    expect(response.statusCode).toBe(400);
+    expect(responseBody(response)).toMatchObject({
+      code: "BAD_REQUEST",
+      message: "Invalid group_id path parameter",
+    });
+    expect(authMocks.requireRole).not.toHaveBeenCalled();
+  });
+
+  it("routes valid admin group updates", async () => {
+    const response = await handler(
+      event("PATCH", "/api/admin/groups/00000000-0000-4000-8000-000000000002", "{"),
+    );
+
+    expect(response.statusCode).toBe(400);
+    expect(responseBody(response)).toMatchObject({
+      code: "BAD_REQUEST",
+      message: "Invalid JSON body",
+    });
+    expect(authMocks.requireRole).toHaveBeenCalledOnce();
+  });
+
   it("rejects invalid theme keys before auth", async () => {
     const response = await handler(event("PATCH", "/api/contributor/themes/FAMILY%23bad%23INSTANCE%230001", "{}"));
 

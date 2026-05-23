@@ -33,7 +33,9 @@ export async function fetchAllGalleryArtworks(
       ? await listGalleryArtworksByFamily(themeFamily, query)
       : await listGalleryArtworks(query);
 
-    artworks.push(...response.artworks.map((artwork) => resolveApiArtwork(artwork)));
+    artworks.push(
+      ...response.artworks.map((artwork) => resolveApiArtwork(artwork)),
+    );
     lastKey = response.last_key;
   } while (lastKey);
 
@@ -71,6 +73,8 @@ export async function fetchGroupArtworks(group: GroupListItem) {
     groupTitle: groupEntity.class_name || groupEntity.title,
     groupOwnerName: groupEntity.guardian_display_name,
     groupType: groupEntity.group_type,
+    groupCountry: groupEntity.country,
+    groupRegion: groupEntity.region,
   };
   const artworkResponses = await Promise.all(
     groupEntity.member_art_ids.map((artId) => getArtwork(artId)),
@@ -79,4 +83,45 @@ export async function fetchGroupArtworks(group: GroupListItem) {
   return artworkResponses
     .filter(({ artwork }) => artwork.status === 'approved')
     .map(({ artwork }) => resolveApiArtwork(artwork, groupMetadata));
+}
+
+export async function fetchArtworkGroupMetadata(
+  artworks: TResolvedArtwork[],
+): Promise<TResolvedArtwork[]> {
+  const groupIds = Array.from(
+    new Set(
+      artworks
+        .map((artwork) => artwork.group_id)
+        .filter((groupId): groupId is string => Boolean(groupId)),
+    ),
+  );
+
+  if (groupIds.length === 0) return artworks;
+
+  const groupEntries = await Promise.all(
+    groupIds.map(async (groupId) => {
+      try {
+        const response = await getGroup(groupId);
+        return [groupId, response.group] as const;
+      } catch {
+        return [groupId, null] as const;
+      }
+    }),
+  );
+  const groupsById = new Map(groupEntries);
+
+  return artworks.map((artwork) => {
+    if (!artwork.group_id) return artwork;
+    const group = groupsById.get(artwork.group_id);
+    if (!group) return artwork;
+
+    return {
+      ...artwork,
+      groupTitle: group.class_name || group.title || artwork.groupTitle,
+      groupOwnerName: group.guardian_display_name ?? artwork.groupOwnerName,
+      groupType: group.group_type ?? artwork.groupType,
+      groupCountry: group.country ?? artwork.groupCountry,
+      groupRegion: group.region ?? artwork.groupRegion,
+    };
+  });
 }

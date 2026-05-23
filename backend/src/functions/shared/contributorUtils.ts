@@ -64,6 +64,7 @@ export async function fetchArtworkReviewPage(
     timestamp: item.timestamp as number,
     is_virtual: item.is_virtual as boolean,
     notifications: item.notifications as boolean | undefined,
+    submitter_relationship: item.submitter_relationship as ArtworkListItem["submitter_relationship"],
   }));
 
   const cursor = has_more ? items[limit - 1] : lastEvaluatedKey;

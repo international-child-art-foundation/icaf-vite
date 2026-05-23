@@ -4,6 +4,8 @@ import type {
   TResolvedArtwork,
 } from '@/modules/content/types/Gallery';
 
+export const MYSTERY_ARTIST_NAME = 'Mystery Artist';
+
 /** Derives the folder slug from a human-readable event name: spaces → hyphens. */
 export function eventToSlug(event: string): string {
   return event.replace(/\s+/g, '-');
@@ -21,10 +23,7 @@ export function resolveArtwork(a: TArtwork): TResolvedArtwork {
     thumbUrl: `/gallery-arts/${eventSlug}/thumbs/${base}.webp`,
     displayUrl: `/gallery-arts/${eventSlug}/display/${base}.webp`,
     featureUrl: `/gallery-arts/${eventSlug}/feature/${base}.webp`,
-    alt:
-      formatArtistName(a.artists ?? [], a.lastInitial) ||
-      a.country ||
-      'Artwork',
+    alt: getArtistDisplayName(a.artists ?? [], a.lastInitial),
   };
 }
 
@@ -61,7 +60,11 @@ export function resolveApiArtwork(
   a: ArtworkListItem | ArtworkEntity,
   groupMetadata?: Pick<
     TResolvedArtwork,
-    'groupOwnerName' | 'groupTitle' | 'groupType'
+    | 'groupCountry'
+    | 'groupOwnerName'
+    | 'groupRegion'
+    | 'groupTitle'
+    | 'groupType'
   >,
 ): TResolvedArtwork {
   const artists = a.f_name?.trim() ? [a.f_name.trim()] : [];
@@ -83,15 +86,18 @@ export function resolveApiArtwork(
     description: a.description,
     theme_family: a.theme_family,
     theme_instance: a.theme_instance,
+    group_id: a.group_id,
     groupTitle: groupMetadata?.groupTitle,
     groupOwnerName: groupMetadata?.groupOwnerName,
     groupType: groupMetadata?.groupType,
+    groupCountry: groupMetadata?.groupCountry,
+    groupRegion: groupMetadata?.groupRegion,
     kudos_count: a.kudos_count,
     url: artworkAssetUrl(a.art_id, 'original'),
     thumbUrl: artworkAssetUrl(a.art_id, 'thumb'),
     displayUrl: artworkAssetUrl(a.art_id, 'medium'),
     featureUrl: artworkAssetUrl(a.art_id, 'original'),
-    alt: a.title || formatArtistName(artists) || a.country || 'Artwork',
+    alt: a.title || getArtistDisplayName(artists),
   };
 }
 
@@ -111,4 +117,62 @@ export function formatArtistName(
     ? [`${artists[0]} ${lastInitial}.`, ...artists.slice(1)]
     : artists;
   return withInitial.join(' & ');
+}
+
+export function getArtistDisplayName(
+  artists: string[],
+  lastInitial?: string,
+): string {
+  return formatArtistName(artists, lastInitial) || MYSTERY_ARTIST_NAME;
+}
+
+export function formatGalleryLocation(
+  region?: string,
+  country?: string,
+): string {
+  return [region, country].filter(Boolean).join(', ');
+}
+
+export function formatArtworkByline(artwork: TResolvedArtwork): string {
+  const location = formatGalleryLocation(artwork.region, artwork.country);
+  if (location) return `${location}`;
+
+  const groupLocation = formatGalleryLocation(
+    artwork.groupRegion,
+    artwork.groupCountry,
+  );
+  if (groupLocation) return `Part of a group from ${groupLocation}`;
+
+  if (artwork.groupType === 'classroom' && artwork.groupOwnerName) {
+    return `Part of ${artwork.groupOwnerName}'s classroom`;
+  }
+
+  if (artwork.groupTitle) return `Part of ${artwork.groupTitle}`;
+
+  return 'Artist details unavailable';
+}
+
+export function formatArtworkContext(artwork: TResolvedArtwork): string | null {
+  const groupLocation = formatGalleryLocation(
+    artwork.groupRegion,
+    artwork.groupCountry,
+  );
+
+  if (artwork.groupType === 'classroom') {
+    if (artwork.groupTitle && groupLocation) {
+      return `Part of ${artwork.groupTitle} in ${groupLocation}`;
+    }
+    if (artwork.groupOwnerName && groupLocation) {
+      return `Part of ${artwork.groupOwnerName}'s classroom in ${groupLocation}`;
+    }
+  }
+
+  if (artwork.groupTitle && groupLocation) {
+    return `Part of ${artwork.groupTitle} in ${groupLocation}`;
+  }
+
+  if (artwork.groupTitle) return `Part of ${artwork.groupTitle}`;
+  if (groupLocation) return `Part of a group from ${groupLocation}`;
+
+  return null;
 }

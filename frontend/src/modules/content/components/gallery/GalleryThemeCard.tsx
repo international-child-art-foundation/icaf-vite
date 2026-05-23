@@ -27,12 +27,11 @@ export function GalleryThemeCard({
 }: GalleryThemeCardProps) {
   const accent = theme.colors?.accent ?? theme.colors?.secondary ?? '#ffffff';
   const textColor = themeTextColor(theme.colors);
-
   return (
     <button
       type="button"
       onClick={onSelect}
-      className={`group relative h-[80px] w-[230px] flex-none overflow-hidden p-4 text-left shadow-sm transition duration-200 sm:w-[250px] ${
+      className={`group relative h-[80px] w-[230px] flex-none overflow-hidden p-3 text-left shadow-sm transition duration-200 sm:w-[250px] ${
         active
           ? 'ring-4 ring-black/20'
           : 'hover:-translate-y-0.5 hover:shadow-md'
@@ -50,20 +49,13 @@ export function GalleryThemeCard({
         className="bottom-0 h-1 opacity-90 transition"
         style={{ backgroundColor: accent }}
       />
-      <span className="relative z-10 flex h-full flex-col justify-between gap-2">
-        <span>
-          <span className="font-montserrat block text-lg font-bold leading-tight">
-            {theme.display_name}
-          </span>
-          {theme.description && (
-            <span className="mt-1 block max-h-[1.15rem] overflow-hidden text-xs leading-tight opacity-90">
-              {theme.description}
-            </span>
-          )}
+      <span className="relative z-10 flex h-full flex-col justify-between">
+        <span className="font-montserrat block text-lg font-bold">
+          {theme.display_name}
         </span>
-        {theme.theme_instance && (
-          <span className="text-xs font-semibold uppercase tracking-wider opacity-80">
-            {theme.theme_instance}
+        {theme.description && (
+          <span className="overflow-hidden text-xs opacity-90">
+            {theme.description}
           </span>
         )}
       </span>

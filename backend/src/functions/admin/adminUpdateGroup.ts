@@ -1,19 +1,32 @@
 import { GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
 import {
+  AdminUpdateGroupResponse,
   ApiGatewayEvent,
-  HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
   GroupEntity,
+  HTTP_STATUS,
   UpdateGroupRequest,
+  hasMinimumRole,
   validateUpdateGroupRequest,
 } from "@icaf/shared";
-import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
-import { EntityType } from "../../dynamo/ddbSchemaConsts";
-import { Status } from "../../dynamo/shared";
+import { buildApprovedGroupGsiAttrs } from "../../dynamo/groupGsis";
 import { parseJsonBody } from "../../utils/request";
 import { getCurrentUser } from "../../utils/auth";
+
+const ALLOWED_UPDATE_FIELDS = new Set([
+  "title",
+  "description",
+  "class_name",
+  "guardian_display_name",
+  "country",
+  "region",
+  "theme_family",
+  "theme_instance",
+  "cover_art_ids",
+  "notifications",
+]);
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -21,19 +34,15 @@ export const handler = async (
   try {
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
-    const guardian = currentUser.user;
-    const userId = guardian.user_id;
+    if (!hasMinimumRole(currentUser.user.role, "admin")) {
+      return CommonErrors.forbidden("Admin access required");
+    }
 
     const groupId = event.pathParameters?.group_id;
     if (!groupId) {
       return CommonErrors.badRequest("group_id path parameter is required");
     }
 
-    if (guardian.banned) {
-      return CommonErrors.forbidden("This account is banned");
-    }
-
-    // ── Verify group ownership ─────────────────────────────────────────────
     const groupResult = await dynamodb.send(
       new GetCommand({
         TableName: TABLE_NAME,
@@ -46,41 +55,34 @@ export const handler = async (
     }
 
     const group = groupResult.Item as GroupEntity;
-    if (group.user_id !== userId) {
-      return CommonErrors.forbidden("Not authorized to update this group");
+    const parsedBody = parseJsonBody<Record<string, unknown>>(event);
+    if (!parsedBody.ok) return parsedBody.response;
+
+    const unknownFields = Object.keys(parsedBody.value).filter(
+      (key) => !ALLOWED_UPDATE_FIELDS.has(key),
+    );
+    if (unknownFields.length > 0) {
+      return CommonErrors.badRequest(`Unsupported field(s): ${unknownFields.join(", ")}`);
     }
 
-    const parsedBody = parseJsonBody<UpdateGroupRequest>(event);
-    if (!parsedBody.ok) {
-      return parsedBody.response;
+    const body = parsedBody.value as UpdateGroupRequest;
+    const fieldErrors = validateUpdateGroupRequest(body);
+    if (fieldErrors.length > 0) {
+      return CommonErrors.badRequest(fieldErrors.join("; "));
+    }
+    if (Object.keys(body).length === 0) {
+      return CommonErrors.badRequest("at least one field must be provided");
     }
 
-    const body = parsedBody.value;
-    const groupErrors = validateUpdateGroupRequest(body);
-    if (groupErrors.length > 0) {
-      return CommonErrors.badRequest(groupErrors.join("; "));
-    }
-
-    // ── Build update expression ────────────────────────────────────────────
-    const nowMs = Date.now();
-
-    const setExprParts: string[] = [
-      "#status = :status",
-      "REV_PK = :revPk",
-      "REV_SK = :revSk",
-    ];
-
-    const exprNames: Record<string, string> = { "#status": "status" };
-    const exprValues: Record<string, unknown> = {
-      ":status": "pending_review",
-      ":revPk": reviewPk(),
-      ":revSk": reviewGsiSk(Status.Pending, EntityType.Group, nowMs, groupId),
-    };
+    const setExprParts: string[] = [];
+    const removeExprParts: string[] = [];
+    const exprNames: Record<string, string> = {};
+    const exprValues: Record<string, unknown> = {};
 
     if (body.title !== undefined) { setExprParts.push("title = :title"); exprValues[":title"] = body.title; }
     if (body.description !== undefined) { setExprParts.push("description = :desc"); exprValues[":desc"] = body.description; }
     if (body.class_name !== undefined) { setExprParts.push("class_name = :cn"); exprValues[":cn"] = body.class_name; }
-    if (body.guardian_display_name !== undefined) { setExprParts.push("guardian_display_name = :tdn"); exprValues[":tdn"] = body.guardian_display_name; }
+    if (body.guardian_display_name !== undefined) { setExprParts.push("guardian_display_name = :gdn"); exprValues[":gdn"] = body.guardian_display_name; }
     if (body.country !== undefined) { setExprParts.push("country = :country"); exprValues[":country"] = body.country; }
     if (body.region !== undefined) { setExprParts.push("#region = :region"); exprNames["#region"] = "region"; exprValues[":region"] = body.region; }
     if (body.theme_family !== undefined) { setExprParts.push("theme_family = :tf"); exprValues[":tf"] = body.theme_family; }
@@ -88,24 +90,48 @@ export const handler = async (
     if (body.cover_art_ids !== undefined) { setExprParts.push("cover_art_ids = :covers"); exprValues[":covers"] = body.cover_art_ids; }
     if (body.notifications !== undefined) { setExprParts.push("notifications = :notifications"); exprValues[":notifications"] = body.notifications; }
 
-    // Remove gallery GSI attrs (group is no longer approved)
-    const updateExpr =
-      `SET ${setExprParts.join(", ")} REMOVE GRP_PK, FGRP_PK, IGRP_PK, GRP_GSI_SK`;
+    if (group.status === "approved") {
+      const gsiAttrs = buildApprovedGroupGsiAttrs({
+        timestampMs: group.timestamp * 1000,
+        groupId,
+        family: body.theme_family ?? group.theme_family,
+        instance: body.theme_instance ?? group.theme_instance,
+      });
+
+      Object.entries(gsiAttrs).forEach(([key, value], index) => {
+        setExprParts.push(`${key} = :gsi${index}`);
+        exprValues[`:gsi${index}`] = value;
+      });
+
+      if (!gsiAttrs.FGRP_PK) removeExprParts.push("FGRP_PK");
+      if (!gsiAttrs.IGRP_PK) removeExprParts.push("IGRP_PK");
+    }
+
+    const updateExpression = [
+      `SET ${setExprParts.join(", ")}`,
+      removeExprParts.length > 0 ? `REMOVE ${removeExprParts.join(", ")}` : "",
+    ].filter(Boolean).join(" ");
 
     await dynamodb.send(
       new UpdateCommand({
         TableName: TABLE_NAME,
         Key: { PK: `GROUP#${groupId}`, SK: "-" },
-        UpdateExpression: updateExpr,
-        ExpressionAttributeNames: exprNames,
+        UpdateExpression: updateExpression,
+        ...(Object.keys(exprNames).length > 0 && { ExpressionAttributeNames: exprNames }),
         ExpressionAttributeValues: exprValues,
         ConditionExpression: "attribute_exists(PK)",
       }),
     );
 
+    const response: AdminUpdateGroupResponse = {
+      success: true,
+      group_id: groupId,
+      status: group.status,
+    };
+
     return {
       statusCode: HTTP_STATUS.OK,
-      body: JSON.stringify({ success: true, group_id: groupId, status: "pending_review" }),
+      body: JSON.stringify(response),
       headers: COMMON_HEADERS,
     };
   } catch (error: unknown) {

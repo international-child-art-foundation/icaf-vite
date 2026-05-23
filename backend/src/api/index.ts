@@ -18,6 +18,7 @@ import {
 
 import { handler as alterUserRole } from "../functions/admin/alterUserRole";
 import { handler as adminUpdateArtwork } from "../functions/admin/adminUpdateArtwork";
+import { handler as adminUpdateGroup } from "../functions/admin/adminUpdateGroup";
 import { handler as banUser } from "../functions/admin/banUser";
 import { handler as cancelTakedownRequest } from "../functions/admin/cancelTakedownRequest";
 import { handler as createNews } from "../functions/admin/createNews";
@@ -61,6 +62,7 @@ import { handler as createTheme } from "../functions/contributor/createTheme";
 import { handler as updateTheme } from "../functions/contributor/updateTheme";
 import { handler as fetchHiddenArtworks } from "../functions/contributor/fetchHiddenArtworks";
 import { handler as fetchHiddenGroups } from "../functions/contributor/fetchHiddenGroups";
+import { handler as fetchRejectedArtworks } from "../functions/contributor/fetchRejectedArtworks";
 import { handler as fetchUnapprovedArtworks } from "../functions/contributor/fetchUnapprovedArtworks";
 import { handler as fetchUnapprovedGroups } from "../functions/contributor/fetchUnapprovedGroups";
 import { handler as updateUserRole } from "../functions/contributor/updateUserRole";
@@ -175,6 +177,7 @@ const routes: Route[] = [
 
   roleProtected({ method: "GET", path: "/api/contributor/artworks/pending", handler: fetchUnapprovedArtworks }, contributorRoles),
   roleProtected({ method: "GET", path: "/api/contributor/artworks/hidden", handler: fetchHiddenArtworks }, contributorRoles),
+  roleProtected({ method: "GET", path: "/api/contributor/artworks/rejected", handler: fetchRejectedArtworks }, contributorRoles),
   roleProtected({ method: "PATCH", path: "/api/contributor/artworks/{art_id}/status", handler: changeArtworkStatus }, contributorRoles),
   roleProtected({ method: "GET", path: "/api/contributor/groups/pending", handler: fetchUnapprovedGroups }, contributorRoles),
   roleProtected({ method: "GET", path: "/api/contributor/groups/hidden", handler: fetchHiddenGroups }, contributorRoles),
@@ -187,6 +190,7 @@ const routes: Route[] = [
   roleProtected({ method: "POST", path: "/api/admin/users/{user_id}/unban", handler: unbanUser }, adminRoles),
   roleProtected({ method: "PATCH", path: "/api/admin/users/{user_id}/role", handler: alterUserRole }, adminRoles),
   roleProtected({ method: "PATCH", path: "/api/admin/artworks/{art_id}", handler: adminUpdateArtwork }, adminRoles),
+  roleProtected({ method: "PATCH", path: "/api/admin/groups/{group_id}", handler: adminUpdateGroup }, adminRoles),
   roleProtected({ method: "GET", path: "/api/admin/users/{user_id}/cognito-info", handler: getUserCognitoInfo }, adminRoles),
   roleProtected({ method: "GET", path: "/api/admin/users/{user_id}/email", handler: getEmailByUserId }, adminRoles),
   roleProtected({ method: "DELETE", path: "/api/admin/users/{user_id}/account", handler: deleteUserAccount }, adminRoles),

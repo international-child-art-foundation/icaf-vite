@@ -391,7 +391,8 @@ export class InfraStack extends Stack {
     });
 
     // ─── 7. Lambda Functions ──────────────────────────────────────────────────
-    // TODO: Update APP_URL, SES_FROM_EMAIL, and MAGAZINES_CLOUDFRONT_DOMAIN before deployment
+    // TODO: Update APP_URL and MAGAZINES_CLOUDFRONT_DOMAIN before deployment
+    const SES_FROM_EMAIL = "no-reply@icaf.org";
     const commonEnv = {
       TABLE_NAME: icafTable.tableName,
       USER_POOL_ID: userPool.userPoolId,
@@ -400,7 +401,7 @@ export class InfraStack extends Stack {
       MAGAZINES_BUCKET_NAME: magazinesBucket.bucketName,
       CLEANUP_QUEUE_URL: cleanupQueue.queueUrl,
       APP_URL: "https://revise.icaf.org",
-      SES_FROM_EMAIL: "",             // TODO: set to verified SES sender address before email features go live
+      SES_FROM_EMAIL,
       MAGAZINES_CLOUDFRONT_DOMAIN: "", // TODO: set after first deploy (CloudFront domain not known until then)
     };
 

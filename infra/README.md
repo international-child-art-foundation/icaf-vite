@@ -17,3 +17,8 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 To import a .ts file within this project, you must use the extension '.js'. 
 After changing the sharp version in layers/sharp/package.json, re-run the build script.
 The build script must be run in WSL: bash scripts/build-sharp-layer.sh
+
+## Email setup
+
+- The API Lambda sends mail through SES using the verified sender address configured in [`lib/infra-stack.ts`](/workspace/infra/lib/infra-stack.ts).
+- This stack currently sets `SES_FROM_EMAIL` to `no-reply@icaf.org`.

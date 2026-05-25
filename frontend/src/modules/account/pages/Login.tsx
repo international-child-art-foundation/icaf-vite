@@ -1,9 +1,36 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight, User } from 'lucide-react';
 import { LoginForm } from '@/modules/account/components/LoginForm';
 import { Button } from '@/shared/components/ui/button';
+import {
+  getLastKnownUser,
+  getLastVisitedPath,
+  normalizeInternalPath,
+} from '@/shared/utils/authSession';
 
 export const Login = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const lastKnownUser = getLastKnownUser();
+  const requestedReturnTo =
+    normalizeInternalPath(searchParams.get('returnTo')) ??
+    getLastVisitedPath() ??
+    '/my-icaf';
+  const returnTo =
+    requestedReturnTo === '/login' || requestedReturnTo === '/register'
+      ? '/my-icaf'
+      : requestedReturnTo;
+  const reason = searchParams.get('reason');
+  const staleAuthNotice =
+    reason === 'stale-auth' && lastKnownUser
+      ? `We found a saved account for ${lastKnownUser.email}, but your session could not be verified. Please sign in again.`
+      : null;
+
+  function handleLoginSuccess() {
+    void navigate(returnTo, { replace: true });
+  }
+
   return (
     <div className="my-auto h-full flex-grow bg-white py-12 lg:py-16">
       <div className="content-w m-pad my-auto grid gap-8 lg:grid-cols-2 lg:items-stretch">
@@ -62,7 +89,17 @@ export const Login = () => {
         </section>
 
         <section className="flex items-center">
-          <LoginForm />
+          <div className="w-full">
+            {staleAuthNotice && (
+              <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
+                {staleAuthNotice}
+              </div>
+            )}
+            <LoginForm
+              initialEmail={lastKnownUser?.email ?? ''}
+              onSuccess={handleLoginSuccess}
+            />
+          </div>
         </section>
       </div>
     </div>

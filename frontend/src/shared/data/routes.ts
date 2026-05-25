@@ -77,6 +77,10 @@ export const routes: RouteAliasGroup[] = [
     aliases: ['/sponsor', '/sponsorships'],
   },
   {
+    main: '/request-takedown',
+    aliases: ['/takedown'],
+  },
+  {
     main: '/access',
     aliases: ['/acess', '/access-magazine'],
   },

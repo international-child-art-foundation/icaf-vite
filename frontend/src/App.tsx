@@ -13,6 +13,7 @@ import { GlobalContextProvider } from './modules/content/components/shared/Globa
 import GoogleAnalytics from './modules/content/components/shared/GoogleAnalytics';
 import CookieBanner from './modules/content/components/shared/CookieBanner';
 import { GallerySlideshowEntry } from './modules/content/components/gallery/GallerySlideshowEntry';
+import { MyIcafAccessGate } from './modules/dashboard/components/MyIcafAccessGate';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -140,9 +141,9 @@ const SubmitArtwork = lazy(() =>
     default: m.SubmitArtwork,
   })),
 );
-const Dashboard = lazy(() =>
-  import('./modules/dashboard/pages/Dashboard').then((m) => ({
-    default: m.Dashboard,
+const TakedownRequest = lazy(() =>
+  import('./modules/submissions/pages/TakedownRequest').then((m) => ({
+    default: m.TakedownRequest,
   })),
 );
 
@@ -228,7 +229,7 @@ export default function App() {
               </Route>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/my-icaf" element={<Dashboard />} />
+              <Route path="/my-icaf" element={<MyIcafAccessGate />} />
               <Route path="/dashboard" element={<Navigate to="/my-icaf" replace />} />
               <Route path="/submit-artwork" element={<SubmitArtwork />} />
               <Route
@@ -243,6 +244,7 @@ export default function App() {
                 path="/submit-artwork-group/artworks"
                 element={<SubmitArtworkGroup />}
               />
+              <Route path="/request-takedown" element={<TakedownRequest />} />
 
               {routes.map(({ main, aliases }) =>
                 aliases.map((alias) => (

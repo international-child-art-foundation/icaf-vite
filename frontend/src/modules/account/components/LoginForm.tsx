@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent, ReactNode } from 'react';
 import { LockKeyhole, Mail } from 'lucide-react';
+import type { LoginResponse } from '@icaf/shared';
 import { login } from '@/api/auth';
 import { ApiError } from '@/api/client';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
@@ -19,6 +20,11 @@ import {
 } from '@/modules/account/utils/loginValidation';
 import { Button } from '@/shared/components/ui/button';
 
+type LoginFormProps = {
+  initialEmail?: string;
+  onSuccess?: (response: LoginResponse) => void;
+};
+
 const fieldIcons: Record<LoginFieldName, ReactNode> = {
   email: <Mail aria-hidden="true" className="h-4 w-4" />,
   password: <LockKeyhole aria-hidden="true" className="h-4 w-4" />,
@@ -29,8 +35,11 @@ function getSubmitError(error: unknown): string {
   return 'Login failed. Please try again.';
 }
 
-export const LoginForm = () => {
-  const [values, setValues] = useState<LoginFormValues>(initialLoginFormValues);
+export const LoginForm = ({ initialEmail = '', onSuccess }: LoginFormProps) => {
+  const [values, setValues] = useState<LoginFormValues>(() => ({
+    ...initialLoginFormValues,
+    email: initialEmail.trim(),
+  }));
   const [errors, setErrors] = useState<LoginFormErrors>({});
   const [touched, setTouched] = useState<
     Partial<Record<LoginFieldName, boolean>>
@@ -86,8 +95,9 @@ export const LoginForm = () => {
 
   async function submitLogin() {
     try {
-      await login(toLoginRequest(values));
+      const response = await login(toLoginRequest(values));
       setStatus('success');
+      onSuccess?.(response);
     } catch (error) {
       setSubmitError(getSubmitError(error));
       setStatus('idle');

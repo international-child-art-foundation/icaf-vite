@@ -1,76 +1,66 @@
-import type { ReactNode } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import {
-  ClipboardCheck,
-  GalleryHorizontal,
-  LayoutDashboard,
-  ShieldAlert,
-} from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { Role } from '@icaf/shared';
-import { canAdmin, canReview } from '../utils/dashboardFormat';
-
-export type DashboardTab = 'overview' | 'submissions' | 'review' | 'admin';
+import { MySubmissionsModule } from '../components/MySubmissionsModule';
+import { OverviewModules } from '../components/OverviewModules';
+import { ReviewArtworkQueue } from '../components/ReviewArtworkQueue';
+import { ReviewGroupQueue } from '../components/ReviewGroupQueue';
+import { canAdmin, canReview } from '@/modules/dashboard/utils/dashboardFormat';
+import { dashboardTabNames } from '@/modules/dashboard/data/DashboardTabs';
+import { dashboardTabData } from '@/modules/dashboard/data/DashboardTabs';
+import { SetURLSearchParams } from 'react-router-dom';
 
 type DashboardShellProps = {
   role: Role | null;
-  children: (tab: DashboardTab) => ReactNode;
+  className: string;
+  activeTab: string;
+  setSearchParams: SetURLSearchParams;
 };
 
-const allTabs: {
-  id: DashboardTab;
-  label: string;
-  description: string;
-  icon: ReactNode;
-  roles: 'all' | 'review' | 'admin';
-}[] = [
-  {
-    id: 'overview',
-    label: 'Overview',
-    description: 'Quick links and status',
-    icon: <LayoutDashboard size={18} />,
-    roles: 'all',
-  },
-  {
-    id: 'submissions',
-    label: 'My submissions',
-    description: 'Artwork and groups you manage',
-    icon: <GalleryHorizontal size={18} />,
-    roles: 'all',
-  },
-  {
-    id: 'review',
-    label: 'Review queues',
-    description: 'Approve or reject pending work',
-    icon: <ClipboardCheck size={18} />,
-    roles: 'review',
-  },
-  {
-    id: 'admin',
-    label: 'Admin tools',
-    description: 'Last-resort corrections',
-    icon: <ShieldAlert size={18} />,
-    roles: 'admin',
-  },
-];
+export function DashboardShell({
+  role,
+  className,
+  activeTab,
+  setSearchParams,
+}: DashboardShellProps) {
+  let content;
+  if (activeTab === 'submissions') {
+    content = <MySubmissionsModule role={role} />;
+  } else if (activeTab === 'review' && canReview(role)) {
+    content = (
+      <>
+        <ReviewArtworkQueue admin={canAdmin(role)} />
+        {!canAdmin(role) && <ReviewGroupQueue />}
+      </>
+    );
+  } else if (activeTab === 'admin' && canAdmin(role)) {
+    content = <ReviewArtworkQueue admin />;
+  } else {
+    content = <OverviewModules role={role} />;
+  }
+  const tabsArray = Array.from(dashboardTabNames);
 
-export function DashboardShell({ role, children }: DashboardShellProps) {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tabs = allTabs.filter((tab) => {
-    if (tab.roles === 'admin') return canAdmin(role);
-    if (tab.roles === 'review') return canReview(role);
-    return true;
-  });
-  const requestedTab = searchParams.get('tab') as DashboardTab | null;
-  const activeTab: DashboardTab =
-    requestedTab && tabs.some((tab) => tab.id === requestedTab)
-      ? requestedTab
-      : tabs[0].id;
+  // if (activeTab === 'submissions') {
+  //           return <MySubmissionsModule role={role} />;
+  //         }
+  //         if (activeTab === 'review' && canReview(role)) {
+  //           return (
+  //             <>
+  //               <ReviewArtworkQueue admin={canAdmin(role)} />
+  //               {!canAdmin(role) && <ReviewGroupQueue />}
+  //             </>
+  //           );
+  //         }
+  //         if (activeTab === 'admin' && canAdmin(role)) {
+  //           return <ReviewArtworkQueue admin />;
+  //         }
+  //         return <OverviewModules role={role} />;
+  //       }}
 
   return (
-    <div className="site-w m-pad py-10">
+    <div className={`${className} site-w m-pad py-10`}>
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-primary">
+          <p className="text-primary text-sm font-semibold uppercase tracking-wide">
             My ICAF
           </p>
           <h1 className="font-montserrat mt-2 text-4xl font-bold text-neutral-950 md:text-5xl">
@@ -79,7 +69,7 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
         </div>
         <Link
           to="/submit-artwork"
-          className="inline-flex h-11 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-white transition hover:bg-secondary-blue"
+          className="bg-primary hover:bg-secondary-blue inline-flex h-11 items-center justify-center rounded-md px-4 text-sm font-semibold text-white transition"
         >
           Submit artwork
         </Link>
@@ -88,7 +78,8 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
       <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
         <aside className="lg:sticky lg:top-28 lg:self-start">
           <nav className="flex gap-2 overflow-x-auto rounded-lg border border-black/10 bg-white p-2 shadow-sm lg:flex-col">
-            {tabs.map((tab) => {
+            {tabsArray.map((tabName) => {
+              const tab = dashboardTabData[tabName];
               const active = tab.id === activeTab;
               return (
                 <button
@@ -119,7 +110,9 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
             })}
           </nav>
         </aside>
-        <div className="flex min-w-0 flex-col gap-6">{children(activeTab)}</div>
+        <div className="z-10 flex min-w-0 flex-col gap-6 rounded-md bg-white">
+          {content}
+        </div>
       </div>
     </div>
   );

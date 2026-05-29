@@ -1,8 +1,9 @@
 import type { ChangeEvent, ReactNode } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type {
   BulkCreateNewsItem,
   CreateNewsRequest,
+  NewsKind,
   NewsListItem,
   UpdateNewsRequest,
 } from '@icaf/shared';
@@ -21,7 +22,7 @@ import { DashboardModule, ModuleState } from './DashboardModule';
 type NewsDraft = {
   body: string;
   date: string;
-  kind: 'article' | 'audio';
+  kind: NewsKind | '';
   link: string;
   place: string;
   source: string;
@@ -31,15 +32,15 @@ type NewsDraft = {
 
 type PendingAction =
   | { type: 'create' }
-  | { type: 'update' }
-  | { type: 'delete' }
+  | { type: 'update'; newsId: string }
+  | { type: 'delete'; newsId: string }
   | { type: 'bulk' }
   | null;
 
 const emptyDraft: NewsDraft = {
   body: '',
   date: '',
-  kind: 'article',
+  kind: '',
   link: '',
   place: '',
   source: '',
@@ -57,7 +58,7 @@ function toDraft(item: NewsListItem): NewsDraft {
   return {
     body: item.body ?? '',
     date: item.date ?? '',
-    kind: item.kind ?? 'article',
+    kind: item.kind ?? '',
     link: item.link ?? '',
     place: item.place ?? '',
     source: item.source ?? '',
@@ -100,19 +101,39 @@ function draftToCreateRequest(draft: NewsDraft): CreateNewsRequest | null {
     timestamp,
     ...(draft.body.trim() ? { body: draft.body.trim() } : {}),
     ...(draft.date.trim() ? { date: draft.date.trim() } : {}),
-    ...(draft.kind !== 'article' ? { kind: draft.kind } : {}),
+    ...(draft.kind && draft.kind !== 'article' ? { kind: draft.kind } : {}),
     ...(draft.link.trim() ? { link: draft.link.trim() } : {}),
     ...(draft.place.trim() ? { place: draft.place.trim() } : {}),
     ...(draft.src.trim() ? { src: draft.src.trim() } : {}),
   };
 }
 
-function draftToUpdateRequest(draft: NewsDraft): UpdateNewsRequest {
-  const request = draftToCreateRequest(draft);
-  if (!request) {
-    throw new Error('Selected news item cannot be empty.');
+function draftToUpdateRequest(
+  draft: NewsDraft,
+  original: NewsListItem,
+): UpdateNewsRequest {
+  const source = draft.source.trim() || original.source;
+  const timestampText = draft.timestamp.trim();
+  const timestamp = timestampText ? Number(timestampText) : original.timestamp;
+
+  if (!source) {
+    throw new Error('Source is required before saving a news item.');
   }
-  return request;
+
+  if (!Number.isInteger(timestamp) || timestamp < 0) {
+    throw new Error('Timestamp must be a non-negative integer.');
+  }
+
+  return {
+    source,
+    timestamp,
+    body: draft.body.trim() || original.body,
+    date: draft.date.trim() || original.date,
+    kind: draft.kind || original.kind,
+    link: draft.link.trim() || original.link,
+    place: draft.place.trim() || original.place,
+    src: draft.src.trim() || original.src,
+  };
 }
 
 function extractBulkItems(raw: unknown): BulkCreateNewsItem[] {
@@ -132,7 +153,7 @@ function extractBulkItems(raw: unknown): BulkCreateNewsItem[] {
 
 export function NewsAdminPanel() {
   const [news, setNews] = useState<NewsListItem[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [edits, setEdits] = useState<NewsDraft>(emptyDraft);
   const [newItem, setNewItem] = useState<NewsDraft>(emptyDraft);
   const [bulkItems, setBulkItems] = useState<BulkCreateNewsItem[]>([]);
@@ -141,11 +162,6 @@ export function NewsAdminPanel() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-
-  const selectedItem = useMemo(
-    () => news.find((item) => item.news_id === selectedId) ?? null,
-    [news, selectedId],
-  );
 
   const loadNews = async () => {
     setLoading(true);
@@ -164,10 +180,6 @@ export function NewsAdminPanel() {
     void loadNews();
   }, []);
 
-  useEffect(() => {
-    if (selectedItem) setEdits(toDraft(selectedItem));
-  }, [selectedItem]);
-
   const updateDraft = (
     setter: (value: NewsDraft) => void,
     draft: NewsDraft,
@@ -175,6 +187,14 @@ export function NewsAdminPanel() {
     value: string,
   ) => {
     setter({ ...draft, [field]: value });
+  };
+
+  const beginEditing = (item: NewsListItem) => {
+    setEditingId(item.news_id);
+    setEdits(emptyDraft);
+    setPendingAction(null);
+    setMessage(null);
+    setError(null);
   };
 
   const processBulkFile = async (file: File, input: HTMLInputElement) => {
@@ -228,15 +248,16 @@ export function NewsAdminPanel() {
         setNewItem(emptyDraft);
         setMessage('News item created.');
       } else if (pendingAction.type === 'update') {
-        if (!selectedItem)
-          throw new Error('Select a news item before updating.');
-        await updateNews(selectedItem.news_id, draftToUpdateRequest(edits));
+        const item = news.find(
+          (newsItem) => newsItem.news_id === pendingAction.newsId,
+        );
+        if (!item) throw new Error('Select a news item before updating.');
+        await updateNews(item.news_id, draftToUpdateRequest(edits, item));
         setMessage('News item updated.');
       } else if (pendingAction.type === 'delete') {
-        if (!selectedItem)
-          throw new Error('Select a news item before deleting.');
-        await deleteNews(selectedItem.news_id);
-        setSelectedId(null);
+        await deleteNews(pendingAction.newsId);
+        setEditingId(null);
+        setEdits(emptyDraft);
         setMessage('News item deleted.');
       } else if (pendingAction.type === 'bulk') {
         if (bulkItems.length === 0) {
@@ -251,6 +272,10 @@ export function NewsAdminPanel() {
       }
 
       await loadNews();
+      if (pendingAction.type === 'update') {
+        setEditingId(null);
+        setEdits(emptyDraft);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'News update failed.');
     } finally {
@@ -291,31 +316,53 @@ export function NewsAdminPanel() {
           ) : news.length === 0 ? (
             <ModuleState>No news items found.</ModuleState>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="">
               {news.map((item, index) => {
-                const selected = item.news_id === selectedId;
+                const editing = item.news_id === editingId;
                 return (
-                  <div
-                    key={item.news_id}
-                    className={`block rounded-lg border p-3 transition ${
-                      selected
-                        ? 'border-primary bg-primary/5'
-                        : 'border-black/10 bg-white hover:border-black/30'
-                    }`}
-                  >
-                    <span className="mb-2 flex items-center gap-2 text-sm font-semibold text-neutral-700">
-                      <input
-                        type="radio"
-                        name="selected-news"
-                        aria-label={`Select ${
-                          item.body || item.source || 'news item'
-                        }`}
-                        checked={selected}
-                        onChange={() => setSelectedId(item.news_id)}
+                  <div key={item.news_id}>
+                    {editing ? (
+                      <InlineNewsEditor
+                        busy={busy}
+                        draft={edits}
+                        item={item}
+                        onCancel={() => {
+                          setEditingId(null);
+                          setEdits(emptyDraft);
+                          setPendingAction(null);
+                        }}
+                        onCancelConfirm={() => setPendingAction(null)}
+                        onChange={(field, value) =>
+                          updateDraft(setEdits, edits, field, value)
+                        }
+                        onDelete={() =>
+                          setPendingAction({
+                            type: 'delete',
+                            newsId: item.news_id,
+                          })
+                        }
+                        onSave={() =>
+                          setPendingAction({
+                            type: 'update',
+                            newsId: item.news_id,
+                          })
+                        }
+                        onConfirm={handleConfirmClick}
+                        pendingAction={pendingAction}
                       />
-                      Select for editing
-                    </span>
-                    <NewsItem newsItem={item} idx={index} />
+                    ) : (
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        className="flex flex-col"
+                        onClickCapture={(event) => {
+                          event.preventDefault();
+                          beginEditing(item);
+                        }}
+                      >
+                        <NewsItem newsItem={item} idx={index} />
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -324,39 +371,6 @@ export function NewsAdminPanel() {
         </div>
 
         <div className="flex min-w-0 flex-col gap-5">
-          <Panel title="Selected item">
-            {selectedItem ? (
-              <>
-                <NewsFields
-                  draft={edits}
-                  disabled={busy}
-                  onChange={(field, value) =>
-                    updateDraft(setEdits, edits, field, value)
-                  }
-                />
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    onClick={() => setPendingAction({ type: 'update' })}
-                    disabled={busy}
-                  >
-                    Save selected
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => setPendingAction({ type: 'delete' })}
-                    disabled={busy}
-                  >
-                    Delete selected
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <ModuleState>Select one news item before editing.</ModuleState>
-            )}
-          </Panel>
-
           <Panel title="Add one news item">
             <NewsFields
               draft={newItem}
@@ -398,33 +412,35 @@ export function NewsAdminPanel() {
             </Button>
           </Panel>
 
-          {pendingAction && (
-            <div className="border-primary/20 bg-primary/5 rounded-lg border p-4">
-              <p className="text-sm font-semibold text-neutral-950">
-                Confirm {pendingAction.type} action
-              </p>
-              <p className="mt-1 text-sm leading-6 text-neutral-700">
-                This will write to the live news database.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  onClick={handleConfirmClick}
-                  disabled={busy}
-                >
-                  Confirm
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setPendingAction(null)}
-                  disabled={busy}
-                >
-                  Cancel
-                </Button>
+          {pendingAction &&
+            (pendingAction.type === 'create' ||
+              pendingAction.type === 'bulk') && (
+              <div className="border-primary/20 bg-primary/5 rounded-lg border p-4">
+                <p className="text-sm font-semibold text-neutral-950">
+                  Confirm {pendingAction.type} action
+                </p>
+                <p className="mt-1 text-sm leading-6 text-neutral-700">
+                  This will write to the live news database.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    onClick={handleConfirmClick}
+                    disabled={busy}
+                  >
+                    Confirm
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setPendingAction(null)}
+                    disabled={busy}
+                  >
+                    Cancel
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       </div>
     </DashboardModule>
@@ -442,20 +458,110 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
+function InlineNewsEditor({
+  busy,
+  draft,
+  item,
+  onCancel,
+  onCancelConfirm,
+  onChange,
+  onConfirm,
+  onDelete,
+  onSave,
+  pendingAction,
+}: {
+  busy: boolean;
+  draft: NewsDraft;
+  item: NewsListItem;
+  onCancel: () => void;
+  onCancelConfirm: () => void;
+  onChange: (field: keyof NewsDraft, value: string) => void;
+  onConfirm: () => void;
+  onDelete: () => void;
+  onSave: () => void;
+  pendingAction: PendingAction;
+}) {
+  const placeholders = toDraft(item);
+  const confirmingAction =
+    pendingAction?.type === 'update' || pendingAction?.type === 'delete'
+      ? pendingAction.newsId === item.news_id
+        ? pendingAction
+        : null
+      : null;
+
+  return (
+    <section className="border-primary/20 rounded-md border bg-white p-4 shadow-sm">
+      <NewsFields
+        draft={draft}
+        disabled={busy}
+        onChange={onChange}
+        placeholders={placeholders}
+      />
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button type="button" onClick={onSave} disabled={busy}>
+          Save
+        </Button>
+        <Button
+          type="button"
+          variant="destructive"
+          onClick={onDelete}
+          disabled={busy}
+        >
+          Delete
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={busy}
+        >
+          Cancel
+        </Button>
+      </div>
+      {confirmingAction && (
+        <div className="border-primary/20 bg-primary/5 mt-4 rounded-md border p-3">
+          <p className="text-sm font-semibold text-neutral-950">
+            Confirm {confirmingAction.type}
+          </p>
+          <p className="mt-1 text-sm leading-6 text-neutral-700">
+            This will write to the live news database.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button type="button" onClick={onConfirm} disabled={busy}>
+              Confirm
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancelConfirm}
+              disabled={busy}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function NewsFields({
   disabled,
   draft,
   onChange,
+  placeholders,
 }: {
   disabled: boolean;
   draft: NewsDraft;
   onChange: (field: keyof NewsDraft, value: string) => void;
+  placeholders?: NewsDraft;
 }) {
   return (
     <div className="grid gap-3">
       <Field label="Source">
         <Input
           value={draft.source}
+          placeholder={placeholders?.source}
           onChange={(event) => onChange('source', event.target.value)}
           disabled={disabled}
         />
@@ -463,6 +569,7 @@ function NewsFields({
       <Field label="Body">
         <textarea
           value={draft.body}
+          placeholder={placeholders?.body}
           onChange={(event) => onChange('body', event.target.value)}
           disabled={disabled}
           className="border-input bg-background focus-visible:ring-ring min-h-24 w-full rounded-md border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -472,6 +579,7 @@ function NewsFields({
         <Field label="Place">
           <Input
             value={draft.place}
+            placeholder={placeholders?.place}
             onChange={(event) => onChange('place', event.target.value)}
             disabled={disabled}
           />
@@ -479,6 +587,7 @@ function NewsFields({
         <Field label="Date">
           <Input
             value={draft.date}
+            placeholder={placeholders?.date}
             onChange={(event) => onChange('date', event.target.value)}
             disabled={disabled}
           />
@@ -487,6 +596,7 @@ function NewsFields({
       <Field label="Link">
         <Input
           value={draft.link}
+          placeholder={placeholders?.link}
           onChange={(event) => onChange('link', event.target.value)}
           disabled={disabled}
         />
@@ -494,6 +604,7 @@ function NewsFields({
       <Field label="Audio source">
         <Input
           value={draft.src}
+          placeholder={placeholders?.src}
           onChange={(event) => onChange('src', event.target.value)}
           disabled={disabled}
         />
@@ -506,6 +617,9 @@ function NewsFields({
             disabled={disabled}
             className="border-input bg-background focus-visible:ring-ring h-10 w-full rounded-md border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
+            <option value="">
+              {placeholders?.kind ? `Keep ${placeholders.kind}` : 'Article'}
+            </option>
             <option value="article">Article</option>
             <option value="audio">Audio</option>
           </select>
@@ -513,6 +627,7 @@ function NewsFields({
         <Field label="Timestamp">
           <Input
             value={draft.timestamp}
+            placeholder={placeholders?.timestamp}
             onChange={(event) => onChange('timestamp', event.target.value)}
             disabled={disabled}
             inputMode="numeric"

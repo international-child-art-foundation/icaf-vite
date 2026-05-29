@@ -91,6 +91,7 @@ type Route = {
   method: string;
   path: string;
   handler: Handler;
+  allowArrayJsonBody?: boolean;
   auth?: {
     roles?: Role[];
   };
@@ -203,7 +204,7 @@ const routes: Route[] = [
   roleProtected({ method: "PATCH", path: "/api/admin/magazines/{slug}/status", handler: updateMagazineStatus }, adminRoles),
   roleProtected({ method: "DELETE", path: "/api/admin/magazines/{slug}", handler: deleteMagazine }, adminRoles),
   roleProtected({ method: "POST", path: "/api/admin/news", handler: createNews }, adminRoles),
-  roleProtected({ method: "POST", path: "/api/admin/news/bulk", handler: bulkCreateNews }, adminRoles),
+  roleProtected({ method: "POST", path: "/api/admin/news/bulk", handler: bulkCreateNews, allowArrayJsonBody: true }, adminRoles),
   roleProtected({ method: "PATCH", path: "/api/admin/news/{news_id}", handler: updateNews }, adminRoles),
   roleProtected({ method: "DELETE", path: "/api/admin/news/{news_id}", handler: deleteNews }, adminRoles),
 ];
@@ -303,7 +304,7 @@ function withCors(event: ApiGatewayEvent, response: ApiGatewayResponse): ApiGate
   };
 }
 
-function validateJsonBody(event: ApiEvent): ApiGatewayResponse | null {
+function validateJsonBody(event: ApiEvent, allowArrayJsonBody = false): ApiGatewayResponse | null {
   if (!["POST", "PUT", "PATCH", "DELETE"].includes(event.httpMethod)) {
     return null;
   }
@@ -318,7 +319,7 @@ function validateJsonBody(event: ApiEvent): ApiGatewayResponse | null {
 
   try {
     const value = JSON.parse(event.body) as unknown;
-    if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    if (value === null || typeof value !== "object" || (!allowArrayJsonBody && Array.isArray(value))) {
       return CommonErrors.badRequest("JSON body must be an object");
     }
 
@@ -404,7 +405,7 @@ export const handler = async (event: ApiEvent): Promise<ApiGatewayResponse> => {
     return withCors(routedEvent, authError);
   }
 
-  const jsonError = validateJsonBody(routedEvent);
+  const jsonError = validateJsonBody(routedEvent, route.route.allowArrayJsonBody);
   if (jsonError) {
     return withCors(routedEvent, jsonError);
   }

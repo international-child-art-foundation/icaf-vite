@@ -3,9 +3,9 @@ import { randomUUID } from "crypto";
 import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
 import { getCurrentUser } from "../../utils/auth";
-import { parseJsonBody } from "../../utils/request";
 import {
     ApiGatewayEvent,
+    ApiGatewayResponse,
     BulkCreateNewsItem,
     BulkCreateNewsRequest,
     COMMON_HEADERS,
@@ -23,6 +23,34 @@ const MAX_BATCH_WRITE_ATTEMPTS = 3;
 
 type NewsDynamoItem = NewsEntity & { PK: string; SK: string };
 type NewsWriteRequest = { PutRequest: { Item: NewsDynamoItem } };
+
+function parseBulkNewsBody(
+    event: ApiGatewayEvent,
+): { ok: true; value: BulkCreateNewsRequest } | { ok: false; response: ApiGatewayResponse } {
+    if (event.body === undefined || event.body === null) {
+        return { ok: false, response: CommonErrors.badRequest("at least one news item is required") };
+    }
+
+    if (event.body.trim() === "") {
+        return { ok: false, response: CommonErrors.badRequest("Invalid JSON body") };
+    }
+
+    try {
+        const value = JSON.parse(event.body) as unknown;
+        if (value === null || typeof value !== "object") {
+            return {
+                ok: false,
+                response: CommonErrors.badRequest(
+                    "request body must be a news array or an object with a news array",
+                ),
+            };
+        }
+
+        return { ok: true, value: value as BulkCreateNewsRequest };
+    } catch {
+        return { ok: false, response: CommonErrors.badRequest("Invalid JSON body") };
+    }
+}
 
 function extractNewsItems(
     body: BulkCreateNewsRequest,
@@ -104,7 +132,7 @@ export const handler = async (
             return CommonErrors.forbidden("Admin access required");
         }
 
-        const parsedBody = parseJsonBody<BulkCreateNewsRequest>(event);
+        const parsedBody = parseBulkNewsBody(event);
         if (!parsedBody.ok) {
             return parsedBody.response;
         }

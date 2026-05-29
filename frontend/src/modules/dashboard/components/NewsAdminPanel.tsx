@@ -177,15 +177,7 @@ export function NewsAdminPanel() {
     setter({ ...draft, [field]: value });
   };
 
-  const onBulkFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    setPendingAction(null);
-    setMessage(null);
-    setError(null);
-    setBulkItems([]);
-
-    if (!file) return;
-
+  const processBulkFile = async (file: File, input: HTMLInputElement) => {
     try {
       const parsed = JSON.parse(await file.text()) as unknown;
       const items = extractBulkItems(parsed);
@@ -202,8 +194,21 @@ export function NewsAdminPanel() {
         err instanceof Error ? err.message : 'Unable to read that JSON file.',
       );
     } finally {
-      event.target.value = '';
+      input.value = '';
     }
+  };
+
+  const onBulkFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    setPendingAction(null);
+    setMessage(null);
+    setError(null);
+    setBulkItems([]);
+
+    if (!file) return;
+
+    void processBulkFile(file, input);
   };
 
   const runPendingAction = async () => {
@@ -254,6 +259,14 @@ export function NewsAdminPanel() {
     }
   };
 
+  const handleRefreshClick = () => {
+    void loadNews();
+  };
+
+  const handleConfirmClick = () => {
+    void runPendingAction();
+  };
+
   return (
     <DashboardModule
       title="News admin"
@@ -262,7 +275,7 @@ export function NewsAdminPanel() {
         <Button
           type="button"
           variant="outline"
-          onClick={void loadNews}
+          onClick={handleRefreshClick}
           disabled={busy}
         >
           Refresh
@@ -366,7 +379,7 @@ export function NewsAdminPanel() {
             <Input
               type="file"
               accept="application/json,.json"
-              onChange={void onBulkFileChange}
+              onChange={onBulkFileChange}
               disabled={busy}
             />
             {bulkItems.length > 0 && (
@@ -396,7 +409,7 @@ export function NewsAdminPanel() {
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button
                   type="button"
-                  onClick={void runPendingAction}
+                  onClick={handleConfirmClick}
                   disabled={busy}
                 >
                   Confirm

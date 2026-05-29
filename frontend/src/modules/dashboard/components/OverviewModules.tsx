@@ -7,8 +7,8 @@ export function OverviewModules({ role }: { role: Role | null }) {
   return (
     <>
       <DashboardModule
-        title="Common actions"
-        description="Start from the action that matches the work in front of you."
+        title="Manage your ICAF resources"
+        description="Submit artwork or manage your active submissions."
       >
         <div className="grid gap-3 md:grid-cols-3">
           <ActionLink
@@ -29,16 +29,13 @@ export function OverviewModules({ role }: { role: Role | null }) {
           <ActionLink
             to="/gallery"
             label="Open gallery"
-            detail="Review the public gallery experience."
+            detail="Get inspired by the creations of others."
           />
         </div>
       </DashboardModule>
 
       {canReview(role) && (
-        <DashboardModule
-          title="Contributor actions"
-          description="Admins see these because they inherit contributor review responsibilities."
-        >
+        <DashboardModule title="Contributor Corner" description="">
           <div className="grid gap-3 md:grid-cols-2">
             {canAdmin(role) ? (
               <ActionLink
@@ -65,15 +62,17 @@ export function OverviewModules({ role }: { role: Role | null }) {
       )}
 
       {canAdmin(role) && (
-        <DashboardModule
-          title="Admin actions"
-          description="Use these for corrections after normal review is not enough."
-        >
+        <DashboardModule title="Admin Actions" description="">
           <div className="grid gap-3 md:grid-cols-2">
             <ActionLink
               to="/my-icaf?tab=admin"
               label="Artwork admin"
               detail="Start with approved artwork, then switch status views."
+            />
+            <ActionLink
+              to="/my-icaf?tab=news"
+              label="News admin"
+              detail="Create, edit, delete, or bulk upload public news items."
             />
           </div>
         </DashboardModule>

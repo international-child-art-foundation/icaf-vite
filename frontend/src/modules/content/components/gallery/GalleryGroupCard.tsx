@@ -29,23 +29,19 @@ export function GalleryGroupCard({
     .join(' ');
 
   return (
-    <div
-      className="group relative grid w-full overflow-hidden rounded-lg border border-black/10 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg lg:grid-cols-[minmax(320px,0.95fr)_1.05fr]"
-    >
+    <div className="group relative grid w-full overflow-hidden rounded-lg border border-black/10 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg lg:grid-cols-[minmax(320px,0.95fr)_1.05fr]">
       <button
         type="button"
         onClick={() => onOpen(group)}
-        className="relative grid min-h-[230px] grid-cols-4 overflow-hidden bg-neutral-100 text-left lg:min-h-[260px]"
+        className="relative grid min-h-[230px] grid-cols-4 items-center overflow-hidden bg-neutral-100 text-left lg:min-h-[260px]"
       >
         {coverIds.length > 0 ? (
-          coverIds.map((artId, index) => (
+          coverIds.map((artId) => (
             <img
               key={artId}
-              src={artworkAssetUrl(artId, 'medium')}
+              src={artworkAssetUrl(artId, 'thumb')}
               alt=""
-              className={`h-full w-full object-cover transition duration-300 group-hover:scale-105 ${
-                index % 2 === 0 ? 'translate-y-4' : '-translate-y-4'
-              }`}
+              className={`h-full w-full object-cover transition duration-300 group-hover:scale-105`}
               loading="lazy"
             />
           ))
@@ -54,10 +50,9 @@ export function GalleryGroupCard({
             <Images size={42} />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/5 to-transparent" />
         <span className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-neutral-800 shadow-sm">
           <Users size={14} />
-          {group.member_count} artworks
+          {group.member_count} artwork{group.member_count != 1 && 's'}
         </span>
       </button>
 
@@ -73,7 +68,7 @@ export function GalleryGroupCard({
               </span>
             )}
           </div>
-          <h3 className="mt-4 font-montserrat text-2xl font-bold leading-tight text-neutral-950 sm:text-3xl">
+          <h3 className="font-montserrat mt-4 text-2xl font-bold leading-tight text-neutral-950 sm:text-3xl">
             {title}
           </h3>
           {group.class_name && group.title !== group.class_name && (
@@ -100,7 +95,7 @@ export function GalleryGroupCard({
           <p className="text-sm text-neutral-500">
             Open a slideshow from this group only
           </p>
-          <span className="inline-flex h-11 w-11 flex-none items-center justify-center rounded-full bg-black text-white transition group-hover:bg-[#EE2F4D]">
+          <span className="bg-primary group-hover:bg-secondary-blue inline-flex h-11 w-11 flex-none items-center justify-center rounded-full text-white transition">
             <Play size={18} fill="currentColor" />
           </span>
         </button>

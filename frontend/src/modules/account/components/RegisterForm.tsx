@@ -130,13 +130,13 @@ export const RegisterForm = () => {
           Check your email
         </h1>
         <p className="mt-3 text-base leading-7 text-slate-600">
-          Your account was created. Enter the verification code sent to{' '}
+          Your account was created. Open the verification link sent to{' '}
           <span className="font-semibold text-slate-900">{values.email}</span>{' '}
           to finish setup.
         </p>
         {registrationResult?.destination && (
           <p className="mt-3 text-sm text-slate-500">
-            Code sent by {registrationResult.delivery_medium} to{' '}
+            Verification link sent by {registrationResult.delivery_medium} to{' '}
             {registrationResult.destination}.
           </p>
         )}

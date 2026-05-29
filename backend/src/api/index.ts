@@ -20,6 +20,7 @@ import { handler as alterUserRole } from "../functions/admin/alterUserRole";
 import { handler as adminUpdateArtwork } from "../functions/admin/adminUpdateArtwork";
 import { handler as adminUpdateGroup } from "../functions/admin/adminUpdateGroup";
 import { handler as banUser } from "../functions/admin/banUser";
+import { handler as bulkCreateNews } from "../functions/admin/bulkCreateNews";
 import { handler as cancelTakedownRequest } from "../functions/admin/cancelTakedownRequest";
 import { handler as createNews } from "../functions/admin/createNews";
 import { handler as deleteMagazine } from "../functions/admin/deleteMagazine";
@@ -38,7 +39,6 @@ import { handler as updateMagazineStatus } from "../functions/admin/updateMagazi
 import { handler as updateNews } from "../functions/admin/updateNews";
 import { handler as confirmForgotPassword } from "../functions/anyone/confirmForgotPassword";
 import { handler as createAndVerify } from "../functions/anyone/createAndVerify";
-import { handler as confirmDefaultRegistration } from "../functions/anyone/confirmDefaultRegistration";
 import { handler as forgotPassword } from "../functions/anyone/forgotPassword";
 import { handler as galleryArtworks } from "../functions/anyone/gallery/galleryArtworks";
 import { handler as galleryGroups } from "../functions/anyone/gallery/galleryGroups";
@@ -147,7 +147,6 @@ const routes: Route[] = [
   { method: "GET", path: "/api/unsubscribe/artwork", handler: unsubscribeArtworkEmails },
 
   { method: "POST", path: "/api/auth/default-registration", handler: defaultRegistration },
-  { method: "POST", path: "/api/auth/default-registration/confirm", handler: confirmDefaultRegistration },
   { method: "POST", path: "/api/auth/login", handler: login },
   { method: "POST", path: "/api/auth/logout", handler: logout },
   { method: "POST", path: "/api/auth/create-and-verify", handler: createAndVerify },
@@ -204,6 +203,7 @@ const routes: Route[] = [
   roleProtected({ method: "PATCH", path: "/api/admin/magazines/{slug}/status", handler: updateMagazineStatus }, adminRoles),
   roleProtected({ method: "DELETE", path: "/api/admin/magazines/{slug}", handler: deleteMagazine }, adminRoles),
   roleProtected({ method: "POST", path: "/api/admin/news", handler: createNews }, adminRoles),
+  roleProtected({ method: "POST", path: "/api/admin/news/bulk", handler: bulkCreateNews }, adminRoles),
   roleProtected({ method: "PATCH", path: "/api/admin/news/{news_id}", handler: updateNews }, adminRoles),
   roleProtected({ method: "DELETE", path: "/api/admin/news/{news_id}", handler: deleteNews }, adminRoles),
 ];

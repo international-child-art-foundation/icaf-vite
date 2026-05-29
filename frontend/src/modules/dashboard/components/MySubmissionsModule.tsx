@@ -42,7 +42,7 @@ export function MySubmissionsModule({ role }: { role: Role | null }) {
   return (
     <DashboardModule
       title="My submissions"
-      description="A compact view of artwork and group submissions connected to your account."
+      description="See your published and pending artwork submissions."
     >
       {error && <ModuleState tone="error">{error}</ModuleState>}
       {loading ? (

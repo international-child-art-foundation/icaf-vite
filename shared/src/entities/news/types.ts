@@ -40,6 +40,14 @@ export interface CreateNewsRequest {
     link?: string;
 }
 
+export type BulkCreateNewsItem = Omit<CreateNewsRequest, 'timestamp'> & {
+    timestamp?: number;
+};
+
+export type BulkCreateNewsRequest = BulkCreateNewsItem[] | {
+    news: BulkCreateNewsItem[];
+};
+
 export interface UpdateNewsRequest {
     source?: string;
     timestamp?: number;
@@ -63,4 +71,10 @@ export interface ListNewsResponse {
 export interface NewsMutationResponse {
     success: true;
     news_id: string;
+}
+
+export interface BulkCreateNewsResponse {
+    success: true;
+    count: number;
+    news_ids: string[];
 }

@@ -66,8 +66,6 @@ export interface DefaultRegistrationResponse extends DeliveryMessageResponse {
     user_id?: string;
 }
 
-export type ConfirmDefaultRegistrationResponse = MessageResponse;
-
 export interface ChangePasswordRequest {
     old_password: string;
     new_password: string;

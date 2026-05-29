@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
-import { Globe2, Mail, Send } from 'lucide-react';
+import { ChevronLeft, Globe2, Mail, Send } from 'lucide-react';
 import { submitGuestArtwork } from '@/api/public';
 import { uploadToPresignedUrl } from '@/api/uploads';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
@@ -158,11 +158,11 @@ function readPersistedDraft(): SubmitArtworkDraft {
 function hasSubmissionErrors(errors: SubmitArtworkErrors) {
   return Boolean(
     errors.root ||
-      errors.submitterEmail ||
-      errors.certificationAccepted ||
-      errors.country ||
-      errors.region ||
-      (errors.artworks && Object.keys(errors.artworks).length > 0),
+    errors.submitterEmail ||
+    errors.certificationAccepted ||
+    errors.country ||
+    errors.region ||
+    (errors.artworks && Object.keys(errors.artworks).length > 0),
   );
 }
 
@@ -325,9 +325,7 @@ export function SubmitArtwork() {
       if (!fileType) throw new Error(`${uploadFile.name} is not supported.`);
 
       const response = await submitGuestArtwork({
-        age: draft.artwork.age.trim()
-          ? Number(draft.artwork.age)
-          : undefined,
+        age: draft.artwork.age.trim() ? Number(draft.artwork.age) : undefined,
         country: draft.country.trim(),
         description: draft.artwork.description.trim() || undefined,
         email: draft.submitterEmail.trim(),
@@ -368,7 +366,10 @@ export function SubmitArtwork() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    window.localStorage.setItem(SUBMIT_ARTWORK_DRAFT_KEY, JSON.stringify(draft));
+    window.localStorage.setItem(
+      SUBMIT_ARTWORK_DRAFT_KEY,
+      JSON.stringify(draft),
+    );
   }, [draft]);
 
   useEffect(() => {
@@ -380,7 +381,13 @@ export function SubmitArtwork() {
 
   return (
     <div className="my-auto h-full flex-grow bg-slate-50 py-8 sm:py-12">
-      <div className="content-w m-pad my-auto">
+      <div className="content-w m-pad my-auto flex flex-col gap-2">
+        <div className="mx-auto w-full max-w-3xl">
+          <Button onClick={() => void navigate(-1)}>
+            <ChevronLeft />
+            Go back
+          </Button>
+        </div>
         <form
           className="mx-auto w-full max-w-3xl"
           noValidate

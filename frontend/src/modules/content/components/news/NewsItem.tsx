@@ -1,13 +1,14 @@
 import { memo, useMemo } from 'react';
-import { INewsItem } from '@/modules/content/types/NewsTypes';
+import { NewsListItem } from '@icaf/shared';
 import { FlairColorMap } from '../shared/FlairColorMap';
 
 interface NewsItemProps {
-  newsItem: INewsItem;
+  newsItem: NewsListItem;
   idx: number;
 }
 
 export const NewsItem = memo(({ newsItem, idx }: NewsItemProps) => {
+  const title = newsItem.body || newsItem.source || 'News item';
   const colorKey = useMemo(() => {
     const keys = [
       'red',
@@ -24,11 +25,11 @@ export const NewsItem = memo(({ newsItem, idx }: NewsItemProps) => {
 
   return (
     <a
-      href={newsItem.link}
-      target="_blank"
-      rel="noopener noreferrer"
+      href={newsItem.link || newsItem.src || '#'}
+      target={newsItem.link || newsItem.src ? '_blank' : undefined}
+      rel={newsItem.link || newsItem.src ? 'noopener noreferrer' : undefined}
       className="group relative z-10 rounded-md p-6 shadow-sm transition-colors duration-300 hover:bg-white"
-      aria-label={newsItem.body}
+      aria-label={title}
     >
       <div
         className={[
@@ -51,7 +52,7 @@ export const NewsItem = memo(({ newsItem, idx }: NewsItemProps) => {
             "[font-variation-settings:'wght'_600]",
           ].join(' ')}
         >
-          {newsItem.body}
+          {title}
         </span>
 
         <span
@@ -64,7 +65,7 @@ export const NewsItem = memo(({ newsItem, idx }: NewsItemProps) => {
             'motion-reduce:transition-none',
           ].join(' ')}
         >
-          {newsItem.body}
+          {title}
         </span>
       </div>
 
@@ -76,10 +77,14 @@ export const NewsItem = memo(({ newsItem, idx }: NewsItemProps) => {
           </>
         ) : newsItem.source ? (
           <span className="italic">{newsItem.source} — </span>
-        ) : (
+        ) : newsItem.place ? (
           <span>{newsItem.place} — </span>
+        ) : null}
+        {newsItem.kind === 'audio' ? (
+          <span>{newsItem.date ? `${newsItem.date} - Audio` : 'Audio'}</span>
+        ) : (
+          <span>{newsItem.date}</span>
         )}
-        <span>{newsItem.date}</span>
       </p>
     </a>
   );

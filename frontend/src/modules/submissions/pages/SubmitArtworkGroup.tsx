@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ChangeEvent, FormEvent, ReactNode } from 'react';
-import { Bell, BookOpen, Globe2, Mail, Send, UserRound } from 'lucide-react';
+import {
+  Bell,
+  BookOpen,
+  ChevronLeft,
+  Globe2,
+  Mail,
+  Send,
+  UserRound,
+} from 'lucide-react';
 import { createGuestGroup } from '@/api/public';
 import { uploadToPresignedUrl } from '@/api/uploads';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
@@ -548,7 +556,14 @@ export function SubmitArtworkGroup({
 
   return (
     <div className="my-auto h-full flex-grow bg-slate-50 py-8 sm:py-12">
-      <div className="content-w m-pad my-auto">
+      <div className="content-w m-pad my-auto flex flex-col gap-2">
+        <div className="mx-auto w-full max-w-3xl">
+          <Button onClick={() => void navigate(-1)}>
+            <ChevronLeft />
+            Go back
+          </Button>
+        </div>
+
         <form
           className="mx-auto w-full max-w-3xl"
           noValidate

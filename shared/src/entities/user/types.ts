@@ -58,7 +58,7 @@ export interface UserProfileResponse {
     timestamp: number;
 }
 
-// Default registration request. Cognito sign-up is the only verification step.
+// Default registration request. Cognito sign-up sends the verification link.
 export interface DefaultRegistrationRequest {
     email: string;
     password: string;
@@ -67,13 +67,6 @@ export interface DefaultRegistrationRequest {
     dob: string;    // YYYY-MM-DD
     role: Extract<Role, 'guardian' | 'user'>;
     has_newsletter_subscription?: boolean;
-}
-
-// Confirm default registration after POST /auth/default-registration.
-// The verification code is generated and emailed by Cognito.
-export interface ConfirmDefaultRegistrationRequest {
-    email: string;
-    confirmation_code: string;
 }
 
 // Create a Cognito login and verify an existing app-side user in one step.

@@ -3,7 +3,7 @@ import { Seo } from '@/modules/content/components/shared/Seo';
 import { PageBottomSpacer } from '@/modules/content/components/shared/PageBottomSpacer';
 import { DashboardShell } from '../components/DashboardShell';
 import { canAdmin, canReview } from '../utils/dashboardFormat';
-// import { DashboardSplash } from '@/modules/dashboard/assets/DashboardSplash';
+import { DashboardSplash } from '@/modules/dashboard/assets/DashboardSplash';
 import { useSearchParams } from 'react-router-dom';
 import {
   dashboardTabData,
@@ -39,10 +39,10 @@ export function Dashboard({ auth }: DashboardProps) {
   return (
     <div className="relative flex h-full flex-grow overflow-hidden">
       <Seo {...dashboardMetadata} />
-      {/* <DashboardSplash
+      <DashboardSplash
         className="absolute"
         colorClass={dashboardTabData[activeTab].color}
-      /> */}
+      />
       <DashboardShell
         role={role}
         className={'col-start-1 row-start-1'}

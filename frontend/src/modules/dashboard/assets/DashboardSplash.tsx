@@ -13,7 +13,7 @@ export const DashboardSplash = ({
       version="1.1"
       viewBox="0 0 1080 1920"
       preserveAspectRatio="xMidYMid slice"
-      className={`${className} ${colorClass}`}
+      className={`${className} ${colorClass} transition-color pointer-events-none mt-24 select-none duration-700 lg:mt-16 2xl:mt-24`}
       aria-hidden="true"
     >
       <path

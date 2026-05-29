@@ -2,8 +2,6 @@ import type {
   AuthStatusResponse,
   ChangePasswordRequest,
   ChangePasswordResponse,
-  ConfirmDefaultRegistrationRequest,
-  ConfirmDefaultRegistrationResponse,
   ConfirmForgotPasswordRequest,
   ConfirmForgotPasswordResponse,
   CreateAndVerifyRequest,
@@ -44,15 +42,6 @@ export function defaultRegistration(
 ): Promise<DefaultRegistrationResponse> {
   return apiRequest<DefaultRegistrationResponse, DefaultRegistrationRequest>(
     apiEndpoints.auth.defaultRegistration,
-    { body: request, method: 'POST' },
-  );
-}
-
-export function confirmDefaultRegistration(
-  request: ConfirmDefaultRegistrationRequest,
-): Promise<ConfirmDefaultRegistrationResponse> {
-  return apiRequest<ConfirmDefaultRegistrationResponse, ConfirmDefaultRegistrationRequest>(
-    apiEndpoints.auth.confirmDefaultRegistration,
     { body: request, method: 'POST' },
   );
 }

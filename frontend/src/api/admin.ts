@@ -13,6 +13,9 @@ import type {
   InitiateMagazineUploadRequest,
   InitiateMagazineUploadResponse,
   ListTakedownRequestsResponse,
+  BulkCreateNewsRequest,
+  BulkCreateNewsResponse,
+  CreateNewsRequest,
   NewsMutationResponse,
   RemoveAllUserArtworkRequest,
   RemoveAllUserArtworkResponse,
@@ -21,7 +24,6 @@ import type {
   UnhideAllUserArtworkResponse,
   UpdateMagazineStatusRequest,
   UpdateMagazineStatusResponse,
-  CreateNewsRequest,
   UpdateNewsRequest,
   UpdateArtworkRequest,
   UpdateGroupRequest,
@@ -190,6 +192,18 @@ export function createNews(
   );
 }
 
+export function bulkCreateNews(
+  request: BulkCreateNewsRequest,
+): Promise<BulkCreateNewsResponse> {
+  return apiRequest<BulkCreateNewsResponse, BulkCreateNewsRequest>(
+    apiEndpoints.admin.newsBulk,
+    {
+      body: request,
+      method: 'POST',
+    },
+  );
+}
+
 export function updateNews(
   newsId: string,
   request: UpdateNewsRequest,
@@ -213,13 +227,13 @@ export function adminUpdateArtwork(
   art_id: string,
   request: UpdateArtworkRequest | Record<string, unknown>,
 ): Promise<{ success: true; art_id: string; status: ArtworkStatus }> {
-  return apiRequest<{ success: true; art_id: string; status: ArtworkStatus }, UpdateArtworkRequest | Record<string, unknown>>(
-    apiEndpoints.admin.adminUpdateArtwork(art_id),
-    {
-      body: request,
-      method: 'PATCH',
-    },
-  );
+  return apiRequest<
+    { success: true; art_id: string; status: ArtworkStatus },
+    UpdateArtworkRequest | Record<string, unknown>
+  >(apiEndpoints.admin.adminUpdateArtwork(art_id), {
+    body: request,
+    method: 'PATCH',
+  });
 }
 
 export function adminUpdateGroup(

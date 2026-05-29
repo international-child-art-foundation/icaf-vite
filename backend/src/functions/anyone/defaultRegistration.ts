@@ -124,7 +124,7 @@ export const handler = async (
     return {
       statusCode: HTTP_STATUS.CREATED,
       body: JSON.stringify({
-        message: "Registration successful. Please check your email to verify your account.",
+        message: "Registration successful. Please check your email for a verification link.",
         user_id: signUpResult.UserSub,
         delivery_medium: signUpResult.CodeDeliveryDetails?.DeliveryMedium ?? "EMAIL",
         destination: signUpResult.CodeDeliveryDetails?.Destination,

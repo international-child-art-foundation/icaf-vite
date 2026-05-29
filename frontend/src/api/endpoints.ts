@@ -25,6 +25,7 @@ export const apiEndpoints = {
       `/admin/users/${encodePathParam(userId)}/hide-all`,
     magazines: '/admin/magazines',
     news: '/admin/news',
+    newsBulk: '/admin/news/bulk',
     removeAllUserArtwork: (userId: PathParam) =>
       `/admin/users/${encodePathParam(userId)}/artworks`,
     takedown: (takedownSortKey: PathParam) =>
@@ -43,7 +44,6 @@ export const apiEndpoints = {
   },
   auth: {
     changePassword: '/auth/change-password',
-    confirmDefaultRegistration: '/auth/default-registration/confirm',
     confirmForgotPassword: '/auth/confirm-forgot-password',
     createAndVerify: '/auth/create-and-verify',
     defaultRegistration: '/auth/default-registration',

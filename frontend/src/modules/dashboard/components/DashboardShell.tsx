@@ -1,13 +1,15 @@
-import { Link } from 'react-router-dom';
 import type { Role } from '@icaf/shared';
 import { MySubmissionsModule } from '../components/MySubmissionsModule';
 import { OverviewModules } from '../components/OverviewModules';
+import { NewsAdminPanel } from '../components/NewsAdminPanel';
 import { ReviewArtworkQueue } from '../components/ReviewArtworkQueue';
 import { ReviewGroupQueue } from '../components/ReviewGroupQueue';
 import { canAdmin, canReview } from '@/modules/dashboard/utils/dashboardFormat';
 import { dashboardTabNames } from '@/modules/dashboard/data/DashboardTabs';
 import { dashboardTabData } from '@/modules/dashboard/data/DashboardTabs';
 import { SetURLSearchParams } from 'react-router-dom';
+import { Button } from '@/shared/components/ui/button';
+import { ChevronLeft } from 'lucide-react';
 
 type DashboardShellProps = {
   role: Role | null;
@@ -34,6 +36,8 @@ export function DashboardShell({
     );
   } else if (activeTab === 'admin' && canAdmin(role)) {
     content = <ReviewArtworkQueue admin />;
+  } else if (activeTab === 'news' && canAdmin(role)) {
+    content = <NewsAdminPanel />;
   } else {
     content = <OverviewModules role={role} />;
   }
@@ -57,26 +61,34 @@ export function DashboardShell({
   //       }}
 
   return (
-    <div className={`${className} site-w m-pad py-10`}>
-      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div className={`${className} site-w m-pad z-10 py-10`}>
+      <div className="mb-8 flex flex-row justify-between gap-4 md:items-end">
         <div>
           <p className="text-primary text-sm font-semibold uppercase tracking-wide">
             My ICAF
           </p>
           <h1 className="font-montserrat mt-2 text-4xl font-bold text-neutral-950 md:text-5xl">
-            Workspace
+            Home
           </h1>
         </div>
-        <Link
+        <div className="my-auto mr-0 flex flex-col gap-4">
+          {activeTab != 'overview' && (
+            <Button onClick={() => setSearchParams({ tab: 'overview' })}>
+              <ChevronLeft />
+              Back to overview
+            </Button>
+          )}
+        </div>
+        {/* <Link
           to="/submit-artwork"
           className="bg-primary hover:bg-secondary-blue inline-flex h-11 items-center justify-center rounded-md px-4 text-sm font-semibold text-white transition"
         >
           Submit artwork
-        </Link>
+        </Link> */}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-        <aside className="lg:sticky lg:top-28 lg:self-start">
+        <aside className="hidden lg:sticky lg:top-28 lg:block lg:self-start">
           <nav className="flex gap-2 overflow-x-auto rounded-lg border border-black/10 bg-white p-2 shadow-sm lg:flex-col">
             {tabsArray.map((tabName) => {
               const tab = dashboardTabData[tabName];

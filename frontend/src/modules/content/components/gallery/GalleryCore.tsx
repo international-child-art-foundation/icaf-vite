@@ -28,6 +28,7 @@ import {
   toSortOrder,
 } from './galleryData';
 import Pagination from './Pagination';
+import { ChevronDown } from 'lucide-react';
 
 const ARTWORKS_PER_PAGE = 20;
 const GROUPS_PER_PAGE = 8;
@@ -350,18 +351,25 @@ const GalleryCoreInner = () => {
 
       <div className="breakout-w m-pad relative z-0 m-auto flex flex-col gap-8">
         <div className="relative z-[100] flex items-center justify-between gap-3">
-          <select
-            value={viewMode}
-            onChange={(event) => {
-              setViewMode(event.target.value as GalleryViewMode);
-              setPageNumber(1);
-            }}
-            className="h-[50px] rounded-md border border-gray-600 bg-white px-4 text-sm font-medium"
-            aria-label="Gallery view"
-          >
-            <option value="group">Group</option>
-            <option value="individual">Individual</option>
-          </select>
+          <div className="relative inline-block">
+            <select
+              value={viewMode}
+              onChange={(event) => {
+                setViewMode(event.target.value as GalleryViewMode);
+                setPageNumber(1);
+              }}
+              className="h-[50px] appearance-none rounded-md border border-gray-600 bg-white px-4 pr-12 text-sm font-medium"
+              aria-label="Gallery view"
+            >
+              <option value="group">Group</option>
+              <option value="individual">Individual</option>
+            </select>
+
+            <ChevronDown
+              className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-700"
+              aria-hidden="true"
+            />
+          </div>{' '}
           <div className="absolute left-1/2 top-0 -translate-x-1/2">
             <button
               type="button"
@@ -383,12 +391,16 @@ const GalleryCoreInner = () => {
           <select
             value={sortValue}
             onChange={(event) => setSortValue(event.target.value as SortValue)}
-            className="h-[50px] rounded-md border border-gray-600 bg-white px-4 text-sm font-medium"
+            className="h-[50px] appearance-none rounded-md border border-gray-600 bg-white px-4 pr-12 text-sm font-medium"
             aria-label="Sort artworks"
           >
             <option value="Newest Event">Newest</option>
             <option value="Oldest Event">Oldest</option>
           </select>
+          <ChevronDown
+            className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-700"
+            aria-hidden="true"
+          />
         </div>
         <section className="-mx-4 overflow-x-auto px-4 pb-0">
           {themesLoading ? (

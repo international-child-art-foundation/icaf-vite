@@ -58,6 +58,12 @@ export function saveLastKnownUser(user: AuthenticatedUserSummary): void {
   );
 }
 
+export function clearLastKnownUser(): void {
+  if (typeof window === 'undefined') return;
+
+  window.localStorage.removeItem(LAST_KNOWN_USER_KEY);
+}
+
 export function getLastVisitedPath(): string | null {
   if (typeof window === 'undefined') return null;
 

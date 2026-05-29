@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Role } from '@icaf/shared';
 import { MySubmissionsModule } from '../components/MySubmissionsModule';
 import { OverviewModules } from '../components/OverviewModules';
@@ -7,9 +8,11 @@ import { ReviewGroupQueue } from '../components/ReviewGroupQueue';
 import { canAdmin, canReview } from '@/modules/dashboard/utils/dashboardFormat';
 import { dashboardTabNames } from '@/modules/dashboard/data/DashboardTabs';
 import { dashboardTabData } from '@/modules/dashboard/data/DashboardTabs';
-import { SetURLSearchParams } from 'react-router-dom';
+import { SetURLSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
+import { logout } from '@/api/auth';
+import { clearLastKnownUser } from '@/shared/utils/authSession';
 
 type DashboardShellProps = {
   role: Role | null;
@@ -24,6 +27,29 @@ export function DashboardShell({
   activeTab,
   setSearchParams,
 }: DashboardShellProps) {
+  const navigate = useNavigate();
+  const [logoutBusy, setLogoutBusy] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
+
+  const handleLogout = () => {
+    setLogoutBusy(true);
+    setLogoutError(null);
+
+    void logout()
+      .then(() => {
+        void clearLastKnownUser();
+        void navigate('/login', { replace: true });
+      })
+      .catch((error: unknown) => {
+        setLogoutError(
+          error instanceof Error ? error.message : 'Unable to log out.',
+        );
+      })
+      .finally(() => {
+        setLogoutBusy(false);
+      });
+  };
+
   let content;
   if (activeTab === 'submissions') {
     content = <MySubmissionsModule role={role} />;
@@ -77,6 +103,16 @@ export function DashboardShell({
               <ChevronLeft />
               Back to overview
             </Button>
+          )}
+          {activeTab === 'overview' && (
+            <Button onClick={handleLogout} disabled={logoutBusy}>
+              {logoutBusy ? 'Logging out...' : 'Logout'}
+            </Button>
+          )}
+          {logoutError && (
+            <p className="max-w-48 text-sm font-semibold text-red-700">
+              {logoutError}
+            </p>
           )}
         </div>
         {/* <Link

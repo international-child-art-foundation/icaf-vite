@@ -16,7 +16,7 @@
 import { ArtworkListItem } from '../entities/art/types.js';
 import { GroupListItem } from '../entities/group/types.js';
 
-// Gallery supports newest/oldest only — the SK encodes timestamp
+// Gallery supports newest/oldest only — the SK encodes ts
 export type SortOrder = 'newest' | 'oldest';
 
 // Query parameters accepted by gallery endpoints (theme_family/instance are path params, not query params)

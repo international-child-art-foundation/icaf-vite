@@ -23,13 +23,14 @@ function mapArtwork(item: Record<string, unknown>): ArtworkListItem {
     region: item.region as string | undefined,
     title: item.title as string | undefined,
     description: item.description as string | undefined,
+    l_name: item.l_name as string | undefined,
     theme_family: item.theme_family as string | undefined,
     theme_instance: item.theme_instance as string | undefined,
     group_id: item.group_id as string | undefined,
     status: item.status as ArtworkStatus,
     kudos_count: item.kudos_count as number,
-    timestamp: item.timestamp as number,
-    is_virtual: item.is_virtual as boolean,
+    ts: item.ts as number,
+    promotional_use: (item.promotional_use as boolean | undefined) ?? false,
   };
 }
 

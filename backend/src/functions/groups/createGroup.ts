@@ -93,15 +93,16 @@ export const handler = async (
             SK: "-",
             art_id: artId,
             user_id: userId,
-            is_virtual: true,
             group_id: groupId,
             status: Status.Pending,
             kudos_count: 0,
-            timestamp: nowSeconds,
+            ts: nowSeconds,
             release_hash: artwork.release_hash.trim(),
+            promotional_use: artwork.promotional_use ?? false,
             type: "ART",
             notifications: false,
             ...(artwork.f_name && { f_name: artwork.f_name }),
+            ...(artwork.l_name && { l_name: artwork.l_name }),
             ...(artwork.age !== undefined && { age: artwork.age }),
             ...(artwork.country && { country: artwork.country }),
             ...(artwork.region && { region: artwork.region }),
@@ -142,8 +143,7 @@ export const handler = async (
           group_type: body.group_type,
           status: Status.Pending,
           member_art_ids: memberArtIds,
-          cover_art_ids: memberArtIds.slice(0, 4),
-          timestamp: nowSeconds,
+          ts: nowSeconds,
           type: "GROUP",
           notifications: body.notifications ?? false,
           // optional fields
@@ -151,7 +151,7 @@ export const handler = async (
           ...(body.theme_instance !== undefined && { theme_instance: body.theme_instance }),
           ...(body.title !== undefined && { title: body.title }),
           ...(body.class_name !== undefined && { class_name: body.class_name }),
-          ...(body.guardian_display_name !== undefined && { guardian_display_name: body.guardian_display_name }),
+          ...(body.submitter_display_name !== undefined && { submitter_display_name: body.submitter_display_name }),
           ...(body.country !== undefined && { country: body.country }),
           ...(body.region !== undefined && { region: body.region }),
           ...(body.description !== undefined && { description: body.description }),
@@ -171,7 +171,7 @@ export const handler = async (
       message: sentSignupEmail
         ? "Group created. Upload images using the presigned URLs. Check your email to verify your account."
         : "Group created. Upload images using the presigned URLs.",
-      timestamp: nowSeconds,
+      ts: nowSeconds,
       art_uploads: artUploads,
     };
 

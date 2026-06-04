@@ -17,6 +17,7 @@ import { getCurrentUser } from "../../utils/auth";
 
 interface UpdateConstituentArtworkBody {
   f_name?: string;
+  l_name?: string;
   age?: number;
   country?: string;
   region?: string;
@@ -34,15 +35,15 @@ export const handler = async (
   try {
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
-    const guardian = currentUser.user;
-    const userId = guardian.user_id;
+    const user = currentUser.user;
+    const userId = user.user_id;
 
     const artId = event.pathParameters?.art_id;
     if (!artId) {
       return CommonErrors.badRequest("art_id path parameter is required");
     }
 
-    if (guardian.banned) {
+    if (user.banned) {
       return CommonErrors.forbidden("This account is banned");
     }
 
@@ -92,6 +93,7 @@ export const handler = async (
     };
 
     if (body.f_name !== undefined) { setExprParts.push("f_name = :f_name"); exprValues[":f_name"] = body.f_name; }
+    if (body.l_name !== undefined) { setExprParts.push("l_name = :l_name"); exprValues[":l_name"] = body.l_name; }
     if (body.age !== undefined) { setExprParts.push("age = :age"); exprValues[":age"] = body.age; }
     if (body.country !== undefined) { setExprParts.push("country = :country"); exprValues[":country"] = body.country; }
     if (body.region !== undefined) { setExprParts.push("#region = :region"); exprNames["#region"] = "region"; exprValues[":region"] = body.region; }

@@ -44,8 +44,8 @@ export function validateSubmitGroupRequest(data: SubmitGroupRequest): string[] {
         errors.push(`class_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
     }
 
-    if (data.guardian_display_name !== undefined && typeof data.guardian_display_name === 'string' && data.guardian_display_name.length > GROUP_MAX_STRING_LEN) {
-        errors.push(`guardian_display_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
+    if (data.submitter_display_name !== undefined && typeof data.submitter_display_name === 'string' && data.submitter_display_name.length > GROUP_MAX_STRING_LEN) {
+        errors.push(`submitter_display_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
     }
 
     if (data.theme_family !== undefined && typeof data.theme_family === 'string' && data.theme_family.length > GROUP_MAX_STRING_LEN) {
@@ -102,6 +102,9 @@ export function validateCreateGroupRequest(data: CreateGroupRequest, identityReq
         if (!artwork.release_hash?.trim() || !SHA256_HEX.test(artwork.release_hash)) {
             errors.push(`artworks[${index}].release_hash must be a valid SHA-256 hex string`);
         }
+        if (artwork.promotional_use !== undefined && typeof artwork.promotional_use !== 'boolean') {
+            errors.push(`artworks[${index}].promotional_use, if provided, must be a boolean`);
+        }
 
         const artworkErrors = validateOptionalArtworkFields(artwork);
         errors.push(...artworkErrors.map((error) => `artworks[${index}].${error}`));
@@ -129,8 +132,8 @@ export function validateUpdateGroupRequest(data: UpdateGroupRequest): string[] {
         errors.push(`class_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
     }
 
-    if (data.guardian_display_name !== undefined && typeof data.guardian_display_name === 'string' && data.guardian_display_name.length > GROUP_MAX_STRING_LEN) {
-        errors.push(`guardian_display_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
+    if (data.submitter_display_name !== undefined && typeof data.submitter_display_name === 'string' && data.submitter_display_name.length > GROUP_MAX_STRING_LEN) {
+        errors.push(`submitter_display_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
     }
 
     if (data.country !== undefined) {

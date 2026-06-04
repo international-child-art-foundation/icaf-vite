@@ -50,6 +50,9 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
     }
     const email = String(payload["email"] ?? body.email.trim());
     const user = await getUserByEmail(email);
+    if (user && !user.verified_at) {
+      return CommonErrors.forbidden("Please verify your email before logging in");
+    }
 
     return {
       statusCode: HTTP_STATUS.OK,

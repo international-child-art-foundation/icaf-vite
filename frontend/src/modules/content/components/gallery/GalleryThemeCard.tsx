@@ -3,7 +3,7 @@ import type { ThemeColors, ThemeListItem } from '@icaf/shared';
 function themeCardBackground(theme: ThemeListItem): string {
   const color = theme.colors?.primary ?? theme.colors?.background ?? '#0286C3';
   const secondary = theme.colors?.secondary ?? '#202020';
-  const imageUrl = theme.card_image_url ?? theme.image_url;
+  const imageUrl = theme.i_img_url ?? theme.f_img_url;
   const image = imageUrl ? `url("${imageUrl}")` : '';
   return image
     ? `linear-gradient(135deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.42)), ${image}`

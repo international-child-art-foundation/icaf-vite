@@ -66,13 +66,13 @@ import { handler as fetchRejectedArtworks } from "../functions/contributor/fetch
 import { handler as fetchUnapprovedArtworks } from "../functions/contributor/fetchUnapprovedArtworks";
 import { handler as fetchUnapprovedGroups } from "../functions/contributor/fetchUnapprovedGroups";
 import { handler as updateUserRole } from "../functions/contributor/updateUserRole";
-import { handler as createGroup } from "../functions/guardian/createGroup";
-import { handler as deleteArtworkFromGroup } from "../functions/guardian/deleteArtworkFromGroup";
-import { handler as deleteGroup } from "../functions/guardian/deleteGroup";
-import { handler as listGroupSubmissions } from "../functions/guardian/listGroupSubmissions";
-import { handler as submitArtworkToGroup } from "../functions/guardian/submitArtworkToGroup";
-import { handler as updateConstituentArtwork } from "../functions/guardian/updateConstituentArtwork";
-import { handler as updateGroup } from "../functions/guardian/updateGroup";
+import { handler as createGroup } from "../functions/groups/createGroup";
+import { handler as deleteArtworkFromGroup } from "../functions/groups/deleteArtworkFromGroup";
+import { handler as deleteGroup } from "../functions/groups/deleteGroup";
+import { handler as listGroupSubmissions } from "../functions/groups/listGroupSubmissions";
+import { handler as submitArtworkToGroup } from "../functions/groups/submitArtworkToGroup";
+import { handler as updateConstituentArtwork } from "../functions/groups/updateConstituentArtwork";
+import { handler as updateGroup } from "../functions/groups/updateGroup";
 import { handler as changePassword } from "../functions/user/changePassword";
 import { handler as deleteAccount } from "../functions/user/deleteAccount";
 import { handler as deleteAllArtworks } from "../functions/user/deleteAllArtworks";
@@ -107,7 +107,6 @@ type ApiEvent = ApiGatewayEvent & {
 };
 
 const allowedOrigins = new Set(["https://revise.icaf.org", "http://localhost:5173"]);
-const guardianRoles: Role[] = ["guardian", "contributor", "admin"];
 const contributorRoles: Role[] = ["contributor", "admin"];
 const adminRoles: Role[] = ["admin"];
 const pathParamValidators: Record<string, (value: string) => boolean> = {
@@ -168,12 +167,12 @@ const routes: Route[] = [
   authenticated({ method: "DELETE", path: "/api/user/artworks/{art_id}", handler: deleteArtwork }),
   authenticated({ method: "POST", path: "/api/user/artworks/{art_id}/kudos", handler: voteArtwork }),
 
-  roleProtected({ method: "GET", path: "/api/guardian/groups", handler: listGroupSubmissions }, guardianRoles),
-  roleProtected({ method: "PATCH", path: "/api/guardian/groups/{group_id}", handler: updateGroup }, guardianRoles),
-  roleProtected({ method: "DELETE", path: "/api/guardian/groups/{group_id}", handler: deleteGroup }, guardianRoles),
-  roleProtected({ method: "POST", path: "/api/guardian/groups/{group_id}/artworks", handler: submitArtworkToGroup }, guardianRoles),
-  roleProtected({ method: "DELETE", path: "/api/guardian/groups/{group_id}/artworks/{art_id}", handler: deleteArtworkFromGroup }, guardianRoles),
-  roleProtected({ method: "PATCH", path: "/api/guardian/artworks/{art_id}", handler: updateConstituentArtwork }, guardianRoles),
+  authenticated({ method: "GET", path: "/api/user/groups", handler: listGroupSubmissions }),
+  authenticated({ method: "PATCH", path: "/api/user/groups/{group_id}", handler: updateGroup }),
+  authenticated({ method: "DELETE", path: "/api/user/groups/{group_id}", handler: deleteGroup }),
+  authenticated({ method: "POST", path: "/api/user/groups/{group_id}/artworks", handler: submitArtworkToGroup }),
+  authenticated({ method: "DELETE", path: "/api/user/groups/{group_id}/artworks/{art_id}", handler: deleteArtworkFromGroup }),
+  authenticated({ method: "PATCH", path: "/api/user/group-artworks/{art_id}", handler: updateConstituentArtwork }),
 
   roleProtected({ method: "GET", path: "/api/contributor/artworks/pending", handler: fetchUnapprovedArtworks }, contributorRoles),
   roleProtected({ method: "GET", path: "/api/contributor/artworks/hidden", handler: fetchHiddenArtworks }, contributorRoles),

@@ -1,5 +1,6 @@
 import {
   AdminCreateUserCommand,
+  AdminEnableUserCommand,
   AdminSetUserPasswordCommand,
   AdminUpdateUserAttributesCommand,
   MessageActionType,
@@ -33,7 +34,7 @@ export const handler = async (
     const body = parsedBody.value;
 
     if (!body.user_id?.trim()) return CommonErrors.badRequest("user_id is required");
-    if (!body.verify_token?.trim()) return CommonErrors.badRequest("verify_token is required");
+    if (!body.auth_action_token?.trim()) return CommonErrors.badRequest("auth_action_token is required");
     if (body.f_name !== undefined && (!body.f_name.trim() || body.f_name.length > MAX_NAME_LEN)) {
       return CommonErrors.badRequest(`f_name must be 1-${MAX_NAME_LEN} characters when provided`);
     }
@@ -42,9 +43,6 @@ export const handler = async (
     }
     if (body.dob !== undefined && !DOB_RE.test(body.dob)) {
       return CommonErrors.badRequest("dob must be in YYYY-MM-DD format");
-    }
-    if (body.role !== undefined && body.role !== "guardian" && body.role !== "user") {
-      return CommonErrors.badRequest("role must be one of: guardian, user");
     }
     if (
       body.has_newsletter_subscription !== undefined &&
@@ -66,20 +64,22 @@ export const handler = async (
 
     const user = result.Item as UserEntity;
 
-    if (user.verify_token !== body.verify_token) {
-      return CommonErrors.badRequest("Invalid verification token");
+    if (user.auth_action_token !== body.auth_action_token) {
+      return CommonErrors.badRequest("Invalid auth action token");
     }
 
     const nowSeconds = Math.floor(Date.now() / 1000);
-    if (user.verify_token_expiration !== undefined && user.verify_token_expiration < nowSeconds) {
-      return CommonErrors.badRequest("Verification token has expired");
+    if (user.auth_action_token_exp !== undefined && user.auth_action_token_exp < nowSeconds) {
+      return CommonErrors.badRequest("Auth action token has expired");
     }
 
     const fName = body.f_name?.trim() ?? user.f_name;
     const lName = body.l_name?.trim() ?? user.l_name;
     const dob = body.dob ?? user.dob;
-    const role = body.role ?? user.role ?? "user";
+    const role = user.role ?? "user";
 
+    // Virtual users originate from non-signup actions. They get a Cognito login
+    // only when they follow the emailed link and choose a password here.
     if (user.is_virtual) {
       if (!body.password) {
         return CommonErrors.badRequest("password is required to create your account");
@@ -109,16 +109,23 @@ export const handler = async (
           Permanent: true,
         }),
       );
-    } else if (body.f_name !== undefined || body.l_name !== undefined || body.dob !== undefined || body.role !== undefined) {
+    } else {
+      await cognitoClient.send(
+        new AdminEnableUserCommand({
+          UserPoolId: USER_POOL_ID,
+          Username: user.email,
+        }),
+      );
+
       await cognitoClient.send(
         new AdminUpdateUserAttributesCommand({
           UserPoolId: USER_POOL_ID,
           Username: user.email,
           UserAttributes: [
+            { Name: "email_verified", Value: "true" },
             ...(body.f_name !== undefined && fName ? [{ Name: "given_name", Value: fName }] : []),
             ...(body.l_name !== undefined && lName ? [{ Name: "family_name", Value: lName }] : []),
             ...(body.dob !== undefined && dob ? [{ Name: "birthdate", Value: dob }] : []),
-            ...(body.role !== undefined ? [{ Name: "custom:role", Value: role }] : []),
           ],
         }),
       );
@@ -155,7 +162,7 @@ export const handler = async (
         TableName: TABLE_NAME,
         Key: { PK: `USER#${body.user_id}`, SK: "PROFILE" },
         UpdateExpression:
-          `SET ${setExprParts.join(", ")} REMOVE verify_token, verify_token_expiration`,
+          `SET ${setExprParts.join(", ")} REMOVE auth_action_token, auth_action_token_exp`,
         ExpressionAttributeNames: { "#role": "role" },
         ExpressionAttributeValues: exprValues,
       }),

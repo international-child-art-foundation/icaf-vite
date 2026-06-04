@@ -23,7 +23,7 @@ import { ensureThemeEntity } from "../shared/themeUtils";
 import { randomUUID } from "crypto";
 
 const PRESIGNED_URL_EXPIRES_SECONDS = 15 * 60; // 15 minutes
-const VERIFY_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 days
+const AUTH_ACTION_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
 const CONTENT_TYPES: Record<string, string> = {
   jpg: "image/jpeg",
@@ -61,10 +61,6 @@ export const handler = async (
 
     const nowMs = Date.now();
     const nowSeconds = Math.floor(nowMs / 1000);
-    const isGuardianSubmission =
-      body.submitter_relationship === "guardian" ||
-      body.submitter_relationship === "parent";
-
     // ── Step 1: Find or create virtual USER entity ─────────────────────────
     let user: UserEntity;
 
@@ -94,18 +90,6 @@ export const handler = async (
           "This account already exists. Please log in to submit artwork.",
         );
       }
-      if (isGuardianSubmission && user.role !== "guardian") {
-        await dynamodb.send(
-          new UpdateCommand({
-            TableName: TABLE_NAME,
-            Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
-            UpdateExpression: "SET #role = :role",
-            ExpressionAttributeNames: { "#role": "role" },
-            ExpressionAttributeValues: { ":role": "guardian" },
-          }),
-        );
-        user.role = "guardian";
-      }
     } else {
       // New or returning email-based guest — query Email GSI
       const email = body.email!.trim();
@@ -132,18 +116,6 @@ export const handler = async (
             "An account with this email already exists. Please log in to submit artwork.",
           );
         }
-        if (isGuardianSubmission && existing.role !== "guardian") {
-          await dynamodb.send(
-            new UpdateCommand({
-              TableName: TABLE_NAME,
-              Key: { PK: `USER#${existing.user_id}`, SK: "PROFILE" },
-              UpdateExpression: "SET #role = :role",
-              ExpressionAttributeNames: { "#role": "role" },
-              ExpressionAttributeValues: { ":role": "guardian" },
-            }),
-          );
-          existing.role = "guardian";
-        }
         user = existing;
       } else {
         // Create new virtual USER entity
@@ -154,11 +126,10 @@ export const handler = async (
           user_id: userId,
           email,
           is_virtual: true,
-          timestamp: nowSeconds,
+          ts: nowSeconds,
           banned: false,
           has_magazine_subscription: false,
           has_newsletter_subscription: false,
-          ...(isGuardianSubmission && { role: "guardian" }),
           type: "USER" as const,
           // Email GSI
           EMAIL_PK: emailPk(email),
@@ -186,17 +157,18 @@ export const handler = async (
           SK: "-",
           art_id: artId,
           user_id: user.user_id,
-          is_virtual: body.is_virtual,
           status: "pending_review" as const,
           kudos_count: 0,
-          timestamp: nowSeconds,
+          ts: nowSeconds,
           release_hash: body.release_hash.trim(),
+          promotional_use: body.promotional_use ?? false,
           type: "ART",
           notifications: body.group_id ? false : body.notifications ?? false,
           // optional fields
           ...(body.title && { title: body.title }),
           ...(body.description && { description: body.description }),
           ...(body.f_name && { f_name: body.f_name }),
+          ...(body.l_name && { l_name: body.l_name }),
           ...(body.age !== undefined && { age: body.age }),
           ...(body.country && { country: body.country }),
           ...(body.region && { region: body.region }),
@@ -230,46 +202,59 @@ export const handler = async (
       { expiresIn: PRESIGNED_URL_EXPIRES_SECONDS },
     );
 
-    // ── Step 4: Send one-time create-and-verify email for virtual users ───
+    // ── Step 4: Refresh auth-action token and email virtual users ─────────
     let sentSignupEmail = false;
-    if (!user.emailed_signup_at) {
-      const verifyToken = randomUUID();
-      const verifyTokenExpiration = nowSeconds + VERIFY_TOKEN_TTL_SECONDS;
+    if (user.email_blocked === true) {
+      const response: SubmitArtworkResponse = {
+        success: true,
+        art_id: artId,
+        presigned_url: presignedUrl,
+        message: "Artwork submitted. Upload your image using the presigned URL.",
+      };
+
+      return {
+        statusCode: HTTP_STATUS.CREATED,
+        body: JSON.stringify(response),
+        headers: COMMON_HEADERS,
+      };
+    }
+
+    const authActionToken = randomUUID();
+    const authActionTokenExp = nowSeconds + AUTH_ACTION_TOKEN_TTL_SECONDS;
+
+    await dynamodb.send(
+      new UpdateCommand({
+        TableName: TABLE_NAME,
+        Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
+        UpdateExpression:
+          "SET auth_action_token = :token, auth_action_token_exp = :exp",
+        ExpressionAttributeValues: {
+          ":token": authActionToken,
+          ":exp": authActionTokenExp,
+        },
+      }),
+    );
+
+    try {
+      await sendArtworkSubmissionEmail({
+        toEmail: user.email,
+        userId: user.user_id,
+        authActionToken,
+      });
+      sentSignupEmail = true;
 
       await dynamodb.send(
         new UpdateCommand({
           TableName: TABLE_NAME,
           Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
-          UpdateExpression:
-            "SET verify_token = :token, verify_token_expiration = :exp",
+          UpdateExpression: "SET emailed_signup_at = :emailSignupAt",
           ExpressionAttributeValues: {
-            ":token": verifyToken,
-            ":exp": verifyTokenExpiration,
+            ":emailSignupAt": nowSeconds,
           },
         }),
       );
-
-      try {
-        await sendArtworkSubmissionEmail({
-          toEmail: user.email,
-          userId: user.user_id,
-          verifyToken,
-        });
-        sentSignupEmail = true;
-
-        await dynamodb.send(
-          new UpdateCommand({
-            TableName: TABLE_NAME,
-            Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
-            UpdateExpression: "SET emailed_signup_at = :emailSignupAt",
-            ExpressionAttributeValues: {
-              ":emailSignupAt": nowSeconds,
-            },
-          }),
-        );
-      } catch (error) {
-        console.error("Artwork submission signup email failed:", error);
-      }
+    } catch (error) {
+      console.error("Artwork submission signup email failed:", error);
     }
 
     const response: SubmitArtworkResponse = {

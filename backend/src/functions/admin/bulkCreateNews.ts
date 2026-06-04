@@ -60,7 +60,7 @@ function extractNewsItems(
     return null;
 }
 
-function timestampFromDate(
+function tsFromDate(
     date: string | undefined,
     fallbackOffset: number,
 ): number {
@@ -77,7 +77,7 @@ function timestampFromDate(
 function normalizeItem(item: BulkCreateNewsItem, index: number): CreateNewsRequest {
     return {
         ...item,
-        timestamp: item.timestamp ?? timestampFromDate(item.date, index),
+        ts: item.ts ?? tsFromDate(item.date, index),
     };
 }
 
@@ -87,7 +87,7 @@ function toDynamoItem(item: CreateNewsRequest, news_id: string): NewsDynamoItem 
         SK: news_id,
         news_id,
         source: item.source,
-        timestamp: item.timestamp,
+        ts: item.ts,
         type: EntityType.News as "NEWS",
         ...(item.body !== undefined && { body: item.body }),
         ...(item.date !== undefined && { date: item.date }),

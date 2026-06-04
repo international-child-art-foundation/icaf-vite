@@ -71,7 +71,7 @@ export async function fetchGroupArtworks(group: GroupListItem) {
   const groupEntity = response.group;
   const groupMetadata = {
     groupTitle: groupEntity.class_name || groupEntity.title,
-    groupOwnerName: groupEntity.guardian_display_name,
+    groupOwnerName: groupEntity.submitter_display_name,
     groupType: groupEntity.group_type,
     groupCountry: groupEntity.country,
     groupRegion: groupEntity.region,
@@ -118,7 +118,7 @@ export async function fetchArtworkGroupMetadata(
     return {
       ...artwork,
       groupTitle: group.class_name || group.title || artwork.groupTitle,
-      groupOwnerName: group.guardian_display_name ?? artwork.groupOwnerName,
+      groupOwnerName: group.submitter_display_name ?? artwork.groupOwnerName,
       groupType: group.group_type ?? artwork.groupType,
       groupCountry: group.country ?? artwork.groupCountry,
       groupRegion: group.region ?? artwork.groupRegion,

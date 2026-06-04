@@ -23,6 +23,7 @@ export function validateOptionalArtworkFields(data: {
     title?: string;
     description?: string;
     f_name?: string;
+    l_name?: string;
     age?: number;
     country?: string;
     region?: string;
@@ -54,13 +55,16 @@ export function validateOptionalArtworkFields(data: {
         }
     }
 
-    if (data.f_name !== undefined) {
-        if (typeof data.f_name !== 'string' || !data.f_name.trim()) {
-            errors.push('f_name, if provided, must be a non-empty string');
-        } else if (data.f_name.length > MAX_STRING_LEN) {
-            errors.push(`f_name must be ${MAX_STRING_LEN} characters or less`);
-        } else if (FORBIDDEN_CHARS_SINGLELINE.test(data.f_name)) {
-            errors.push('f_name contains invalid characters');
+    for (const field of ['f_name', 'l_name'] as const) {
+        const value = data[field];
+        if (value !== undefined) {
+            if (typeof value !== 'string' || !value.trim()) {
+                errors.push(`${field}, if provided, must be a non-empty string`);
+            } else if (value.length > MAX_STRING_LEN) {
+                errors.push(`${field} must be ${MAX_STRING_LEN} characters or less`);
+            } else if (FORBIDDEN_CHARS_SINGLELINE.test(value)) {
+                errors.push(`${field} contains invalid characters`);
+            }
         }
     }
 
@@ -89,7 +93,7 @@ export function validateOptionalArtworkFields(data: {
     }
 
     if (data.submitter_relationship !== undefined) {
-        const valid: SubmitterRelationship[] = ['self', 'parent', 'guardian', 'teacher'];
+        const valid: SubmitterRelationship[] = ['parent', 'guardian', 'teacher'];
         if (!valid.includes(data.submitter_relationship)) {
             errors.push(`submitter_relationship must be one of: ${valid.join(', ')}`);
         }
@@ -134,8 +138,8 @@ export function validateSubmissionData(data: SubmitArtworkRequest): string[] {
         errors.push(`file_type must be one of: ${UPLOAD_FILE_TYPES.join(', ')}`);
     }
 
-    if (typeof data.is_virtual !== 'boolean') {
-        errors.push('is_virtual must be a boolean');
+    if (data.promotional_use !== undefined && typeof data.promotional_use !== 'boolean') {
+        errors.push('promotional_use, if provided, must be a boolean');
     }
 
     if (!data.release_hash || !SHA256_HEX.test(data.release_hash)) {

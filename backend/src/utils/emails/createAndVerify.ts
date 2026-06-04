@@ -1,5 +1,5 @@
 import { SendEmailCommand } from "@aws-sdk/client-ses";
-import { sesClient, SES_FROM_EMAIL } from "../../config/aws-clients";
+import { sesClient, SES_CONFIGURATION_SET, SES_FROM_EMAIL } from "../../config/aws-clients";
 import { emailTags } from "./tags";
 import { buildCreateAndVerifyEmail } from "./templates/createAndVerify";
 
@@ -10,16 +10,17 @@ import { buildCreateAndVerifyEmail } from "./templates/createAndVerify";
 export async function sendCreateAndVerifyEmail(args: {
   toEmail: string;
   userId: string;
-  verifyToken: string;
+  authActionToken: string;
 }): Promise<void> {
   const email = buildCreateAndVerifyEmail({
     userId: args.userId,
-    verifyToken: args.verifyToken,
+    authActionToken: args.authActionToken,
   });
 
   await sesClient.send(
     new SendEmailCommand({
       Source: SES_FROM_EMAIL,
+      ...(SES_CONFIGURATION_SET ? { ConfigurationSetName: SES_CONFIGURATION_SET } : {}),
       Destination: { ToAddresses: [args.toEmail] },
       Tags: emailTags("create_and_verify"),
       Message: {

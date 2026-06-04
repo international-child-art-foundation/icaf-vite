@@ -58,7 +58,7 @@ export const handler = async (
           PK: `USER#${targetUserId}`,
           SK: `AA#${nowSeconds}`,
           user_id: targetUserId,
-          timestamp: nowSeconds,
+          ts: nowSeconds,
           initiator_id: adminId,
           action: "unban",
           type: "ACCOUNT_ACTION",
@@ -71,7 +71,7 @@ export const handler = async (
       user_id: targetUserId,
       banned: false,
       admin_action_id: actionId,
-      timestamp: nowSeconds,
+      ts: nowSeconds,
     };
 
     return {

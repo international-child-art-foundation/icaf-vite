@@ -68,7 +68,7 @@ export const handler = async (
     if (newStatus === "approved") {
       // Write gallery GSI attrs, remove review GSI attrs
       const gsiAttrs = buildApprovedArtworkGsiAttrs({
-        timestampMs: art.timestamp * 1000,
+        tsMs: art.ts * 1000,
         artId,
         family: art.theme_family,
         instance: art.theme_instance,

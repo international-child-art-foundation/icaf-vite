@@ -3,7 +3,6 @@ import type { ArtworkListItem, GroupListItem, Role } from '@icaf/shared';
 export function roleRank(role: Role | null): number {
   if (role === 'admin') return 3;
   if (role === 'contributor') return 2;
-  if (role === 'guardian') return 1;
   return 0;
 }
 
@@ -15,11 +14,11 @@ export function canAdmin(role: Role | null): boolean {
   return role === 'admin';
 }
 
-export function formatDate(timestamp: number): string {
+export function formatDate(ts: number): string {
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: 'medium',
     timeStyle: 'short',
-  }).format(new Date(timestamp * 1000));
+  }).format(new Date(ts * 1000));
 }
 
 export function artworkLabel(artwork: ArtworkListItem): string {

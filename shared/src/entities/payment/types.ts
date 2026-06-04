@@ -17,7 +17,7 @@ export interface PaymentEntity {
     email?: string;             // stored to allow future account linking
     amount_cents: number;
     currency: string;           // e.g. 'USD', 'EUR'
-    timestamp: number;          // Unix timestamp (seconds)
+    ts: number;          // Unix ts (seconds)
     type: 'PAYMENT';
 }
 
@@ -29,7 +29,7 @@ export interface PaymentListItem {
     email?: string;
     amount_cents: number;
     currency: string;
-    timestamp: number;
+    ts: number;
 }
 
 export interface ListPaymentsResponse {
@@ -45,7 +45,7 @@ export interface UserPaymentItem {
     payment_id: string;
     amount_cents: number;
     currency: string;
-    timestamp: number;
+    ts: number;
 }
 
 export interface ListUserPaymentsResponse {

@@ -7,9 +7,9 @@ import {
   MAX_STRING_LEN,
   MAX_TITLE_LEN,
   S3_MAX_FILE_SIZE_BYTES,
+  type SubmitArtworkToGroupRequest,
   UPLOAD_FILE_TYPES,
 } from '@icaf/shared';
-import type { SubmitArtworkToGroupRequest } from '@/api/guardian';
 import type {
   ArtworkDraft,
   ArtworkGroupInfo,
@@ -32,7 +32,7 @@ export const initialArtworkGroupInfo: ArtworkGroupInfo = {
   region: '',
   theme_family: '',
   theme_instance: '',
-  guardian_display_name: '',
+  submitter_display_name: '',
   title: '',
 };
 
@@ -58,7 +58,9 @@ export function createArtworkDraft(): ArtworkDraft {
 export const initialArtworkGroupSubmissionDraft: ArtworkGroupSubmissionDraft = {
   artworks: [createArtworkDraft()],
   certificationAccepted: false,
+  digitalSignature: '',
   group: initialArtworkGroupInfo,
+  promotionalUse: false,
   submitterEmail: '',
 };
 
@@ -121,10 +123,10 @@ export function validateArtworkGroupSubmission(
   }
 
   if (
-    draft.group.guardian_display_name.trim() &&
-    draft.group.guardian_display_name.length > GROUP_MAX_STRING_LEN
+    draft.group.submitter_display_name.trim() &&
+    draft.group.submitter_display_name.length > GROUP_MAX_STRING_LEN
   ) {
-    groupErrors.guardian_display_name = `Use ${GROUP_MAX_STRING_LEN} characters or less.`;
+    groupErrors.submitter_display_name = `Use ${GROUP_MAX_STRING_LEN} characters or less.`;
   }
 
   if (
@@ -187,6 +189,11 @@ export function validateArtworkGroupSubmission(
   if (!draft.certificationAccepted) {
     errors.certificationAccepted = 'Certification is required.';
   }
+  if (!draft.digitalSignature.trim()) {
+    errors.digitalSignature = 'Digital signature is required.';
+  } else if (draft.digitalSignature.length > GROUP_MAX_STRING_LEN) {
+    errors.digitalSignature = `Use ${GROUP_MAX_STRING_LEN} characters or less.`;
+  }
 
   if (Object.keys(groupErrors).length > 0) errors.group = groupErrors;
   if (Object.keys(artworkErrors).length > 0) errors.artworks = artworkErrors;
@@ -199,6 +206,7 @@ export function hasSubmissionErrors(errors: ArtworkGroupSubmissionErrors) {
     errors.root ||
     errors.submitterEmail ||
     errors.certificationAccepted ||
+    errors.digitalSignature ||
     (errors.group && Object.keys(errors.group).length > 0) ||
     (errors.artworks && Object.keys(errors.artworks).length > 0),
   );
@@ -220,6 +228,7 @@ export function toArtworkRequest(
   file: File,
   releaseHash: string,
   group: ArtworkGroupInfo,
+  promotionalUse: boolean,
 ): SubmitArtworkToGroupRequest {
   const fileType = getUploadFileType(file);
   if (!fileType) throw new Error('Unsupported file type.');
@@ -231,6 +240,7 @@ export function toArtworkRequest(
     f_name: artwork.f_name.trim() || undefined,
     file_type: fileType,
     notifications: group.notifications,
+    promotional_use: promotionalUse,
     region: group.region.trim() || undefined,
     release_hash: releaseHash,
     submitter_relationship: artwork.submitter_relationship,

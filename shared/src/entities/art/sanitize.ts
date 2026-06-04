@@ -7,6 +7,7 @@ export function sanitizeSubmissionData(data: SubmitArtworkRequest): SubmitArtwor
         title: cleanOptionalString(data.title),
         description: cleanOptionalString(data.description),
         f_name: cleanOptionalString(data.f_name),
+        l_name: cleanOptionalString(data.l_name),
         country: cleanOptionalString(data.country),
         region: cleanOptionalString(data.region),
         theme_family: cleanOptionalString(data.theme_family),

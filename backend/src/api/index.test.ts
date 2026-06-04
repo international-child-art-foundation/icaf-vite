@@ -1,22 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const authMocks = vi.hoisted(() => ({
-  requireRole: vi.fn(async () => ({
-    user_id: "00000000-0000-4000-8000-000000000001",
-    email: "guardian@example.com",
-    role: "guardian",
-    banned: false,
-  })),
-}));
-
-vi.mock("../utils/auth", () => ({
-  isApiGatewayResponse: (value: unknown) => Boolean(value && typeof value === "object" && "statusCode" in value),
   requireAuth: vi.fn(async () => ({
     user_id: "00000000-0000-4000-8000-000000000001",
     email: "user@example.com",
     role: "user",
     banned: false,
   })),
+  requireRole: vi.fn(async () => ({
+    user_id: "00000000-0000-4000-8000-000000000001",
+    email: "admin@example.com",
+    role: "admin",
+    banned: false,
+  })),
+}));
+
+vi.mock("../utils/auth", () => ({
+  isApiGatewayResponse: (value: unknown) => Boolean(value && typeof value === "object" && "statusCode" in value),
+  requireAuth: authMocks.requireAuth,
   getOptionalAuth: vi.fn(async () => null),
   requireRole: authMocks.requireRole,
 }));
@@ -39,10 +40,11 @@ function responseBody(response: Awaited<ReturnType<typeof handler>>) {
 describe("api router", () => {
   beforeEach(() => {
     authMocks.requireRole.mockClear();
+    authMocks.requireAuth.mockClear();
   });
 
   it("rejects empty internal path segments instead of collapsing them", async () => {
-    const response = await handler(event("POST", "/api/guardian/groups//artworks", "{}"));
+    const response = await handler(event("POST", "/api/user/groups//artworks", "{}"));
 
     expect(response.statusCode).toBe(400);
     expect(responseBody(response)).toMatchObject({
@@ -50,11 +52,12 @@ describe("api router", () => {
       message: "Malformed path",
     });
     expect(authMocks.requireRole).not.toHaveBeenCalled();
+    expect(authMocks.requireAuth).not.toHaveBeenCalled();
   });
 
-  it("routes valid guardian group artwork submissions", async () => {
+  it("routes valid user group artwork submissions", async () => {
     const response = await handler(
-      event("POST", "/api/guardian/groups/00000000-0000-4000-8000-000000000002/artworks", "{"),
+      event("POST", "/api/user/groups/00000000-0000-4000-8000-000000000002/artworks", "{"),
     );
 
     expect(response.statusCode).toBe(400);
@@ -62,11 +65,11 @@ describe("api router", () => {
       code: "BAD_REQUEST",
       message: "Invalid JSON body",
     });
-    expect(authMocks.requireRole).toHaveBeenCalledOnce();
+    expect(authMocks.requireAuth).toHaveBeenCalledOnce();
   });
 
   it("does not treat the literal artworks segment as a group id", async () => {
-    const response = await handler(event("POST", "/api/guardian/groups/artworks", "{}"));
+    const response = await handler(event("POST", "/api/user/groups/artworks", "{}"));
 
     expect(response.statusCode).toBe(400);
     expect(responseBody(response)).toMatchObject({
@@ -74,6 +77,7 @@ describe("api router", () => {
       message: "Invalid group_id path parameter",
     });
     expect(authMocks.requireRole).not.toHaveBeenCalled();
+    expect(authMocks.requireAuth).not.toHaveBeenCalled();
   });
 
   it("rejects invalid compound takedown request keys before auth", async () => {
@@ -146,7 +150,7 @@ describe("api router", () => {
 
   it("preserves method-not-allowed for valid paths with unsupported methods", async () => {
     const response = await handler(
-      event("GET", "/api/guardian/groups/00000000-0000-4000-8000-000000000002/artworks"),
+      event("GET", "/api/user/groups/00000000-0000-4000-8000-000000000002/artworks"),
     );
 
     expect(response.statusCode).toBe(405);
@@ -156,5 +160,6 @@ describe("api router", () => {
       allowed_methods: ["POST"],
     });
     expect(authMocks.requireRole).not.toHaveBeenCalled();
+    expect(authMocks.requireAuth).not.toHaveBeenCalled();
   });
 });

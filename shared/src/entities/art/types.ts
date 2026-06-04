@@ -34,23 +34,24 @@ export type ArtworkStatus =
     | 'deleted_by_user';
 
 // How the artwork was submitted relative to the submitter's account
-export type SubmitterRelationship = 'self' | 'parent' | 'guardian' | 'teacher';
+export type SubmitterRelationship = 'parent' | 'guardian' | 'teacher';
 
 // Full ART entity as stored in DynamoDB
 export interface ArtworkEntity {
     // ── Required ───────────────────────────────────────────────────────────
     art_id: string;
-    user_id: string;            // submitting user (guardian if is_virtual)
-    is_virtual: boolean;        // true = artist has no account (guardian-submitted)
+    user_id: string;            // submitting user
     status: ArtworkStatus;
     kudos_count: number;
-    timestamp: number;          // Unix timestamp (seconds)
+    ts: number;          // Unix ts (seconds)
     release_hash: string;       // SHA-256 hash of the legal release PDF text accepted at submission
+    promotional_use: boolean;   // submitter opted into promotional/commercial use
     type: 'ART';
     notifications?: boolean;    // true when submitter opted into submission notifications
 
     // ── Optional ───────────────────────────────────────────────────────────
     f_name?: string;
+    l_name?: string;
     age?: number;
     country?: string;
     region?: string;
@@ -67,10 +68,11 @@ export interface ArtworkEntity {
 interface ArtworkSubmissionFields {
     file_type: UploadFileType;
     release_hash: string;
-    is_virtual: boolean;
+    promotional_use?: boolean;
     title?: string;
     description?: string;
     f_name?: string;
+    l_name?: string;
     age?: number;
     country?: string;
     region?: string;
@@ -108,6 +110,7 @@ export interface GetArtworkResponse {
 export interface ArtworkListItem {
     art_id: string;
     f_name?: string;
+    l_name?: string;
     age?: number;
     country?: string;
     region?: string;
@@ -118,8 +121,8 @@ export interface ArtworkListItem {
     group_id?: string;
     status: ArtworkStatus;
     kudos_count: number;
-    timestamp: number;
-    is_virtual: boolean;
+    ts: number;
+    promotional_use: boolean;
     notifications?: boolean;
     submitter_relationship?: SubmitterRelationship;
 }
@@ -147,6 +150,7 @@ export interface UpdateArtworkRequest {
     title?: string;
     description?: string;
     f_name?: string;
+    l_name?: string;
     age?: number;
     country?: string;
     region?: string;
@@ -159,7 +163,9 @@ export interface UpdateArtworkRequest {
 export interface SubmitArtworkToGroupRequest {
     file_type: UploadFileType;
     release_hash: string;
+    promotional_use?: boolean;
     f_name?: string;
+    l_name?: string;
     age?: number;
     country?: string;
     region?: string;

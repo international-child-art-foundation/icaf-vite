@@ -21,15 +21,15 @@ export const handler = async (
   try {
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
-    const guardian = currentUser.user;
-    const userId = guardian.user_id;
+    const user = currentUser.user;
+    const userId = user.user_id;
 
     const groupId = event.pathParameters?.group_id;
     if (!groupId) {
       return CommonErrors.badRequest("group_id path parameter is required");
     }
 
-    if (guardian.banned) {
+    if (user.banned) {
       return CommonErrors.forbidden("This account is banned");
     }
 
@@ -80,12 +80,11 @@ export const handler = async (
     if (body.title !== undefined) { setExprParts.push("title = :title"); exprValues[":title"] = body.title; }
     if (body.description !== undefined) { setExprParts.push("description = :desc"); exprValues[":desc"] = body.description; }
     if (body.class_name !== undefined) { setExprParts.push("class_name = :cn"); exprValues[":cn"] = body.class_name; }
-    if (body.guardian_display_name !== undefined) { setExprParts.push("guardian_display_name = :tdn"); exprValues[":tdn"] = body.guardian_display_name; }
+    if (body.submitter_display_name !== undefined) { setExprParts.push("submitter_display_name = :tdn"); exprValues[":tdn"] = body.submitter_display_name; }
     if (body.country !== undefined) { setExprParts.push("country = :country"); exprValues[":country"] = body.country; }
     if (body.region !== undefined) { setExprParts.push("#region = :region"); exprNames["#region"] = "region"; exprValues[":region"] = body.region; }
     if (body.theme_family !== undefined) { setExprParts.push("theme_family = :tf"); exprValues[":tf"] = body.theme_family; }
     if (body.theme_instance !== undefined) { setExprParts.push("theme_instance = :ti"); exprValues[":ti"] = body.theme_instance; }
-    if (body.cover_art_ids !== undefined) { setExprParts.push("cover_art_ids = :covers"); exprValues[":covers"] = body.cover_art_ids; }
     if (body.notifications !== undefined) { setExprParts.push("notifications = :notifications"); exprValues[":notifications"] = body.notifications; }
 
     // Remove gallery GSI attrs (group is no longer approved)

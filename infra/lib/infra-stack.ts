@@ -14,6 +14,7 @@ import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as snsSubscriptions from "aws-cdk-lib/aws-sns-subscriptions";
+import * as ses from "aws-cdk-lib/aws-ses";
 import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
 import * as cloudwatchActions from "aws-cdk-lib/aws-cloudwatch-actions";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
@@ -393,6 +394,35 @@ export class InfraStack extends Stack {
     // ─── 7. Lambda Functions ──────────────────────────────────────────────────
     // TODO: Update APP_URL and MAGAZINES_CLOUDFRONT_DOMAIN before deployment
     const SES_FROM_EMAIL = "no-reply@icaf.org";
+    const sesConfigurationSet = new ses.CfnConfigurationSet(this, "IcafSesConfigurationSet", {
+      name: "icaf-transactional",
+    });
+
+    const sesFeedbackTopic = new sns.Topic(this, "SesFeedbackTopic", {
+      topicName: "icaf-ses-feedback",
+      displayName: "ICAF SES Bounce and Complaint Feedback",
+    });
+
+    sesFeedbackTopic.addToResourcePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        principals: [new iam.ServicePrincipal("ses.amazonaws.com")],
+        actions: ["sns:Publish"],
+        resources: [sesFeedbackTopic.topicArn],
+      }),
+    );
+
+    new ses.CfnConfigurationSetEventDestination(this, "IcafSesFeedbackEventDestination", {
+      configurationSetName: sesConfigurationSet.ref,
+      eventDestination: {
+        enabled: true,
+        matchingEventTypes: ["bounce", "complaint"],
+        snsDestination: {
+          topicArn: sesFeedbackTopic.topicArn,
+        },
+      },
+    });
+
     const commonEnv = {
       TABLE_NAME: icafTable.tableName,
       USER_POOL_ID: userPool.userPoolId,
@@ -402,6 +432,7 @@ export class InfraStack extends Stack {
       CLEANUP_QUEUE_URL: cleanupQueue.queueUrl,
       APP_URL: "https://revise.icaf.org",
       SES_FROM_EMAIL,
+      SES_CONFIGURATION_SET: sesConfigurationSet.ref,
       MAGAZINES_CLOUDFRONT_DOMAIN: "", // TODO: set after first deploy (CloudFront domain not known until then)
     };
 
@@ -474,6 +505,21 @@ export class InfraStack extends Stack {
       }),
     );
 
+    const processSesFeedbackFn = new NodejsFunction(this, "ProcessSesFeedbackFn", {
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(30),
+      memorySize: 256,
+      environment: {
+        TABLE_NAME: icafTable.tableName,
+      },
+      entry: src("processSesFeedback.ts"),
+      logGroup: lambdaLogGroup("ProcessSesFeedbackFn"),
+    });
+
+    sesFeedbackTopic.addSubscription(
+      new snsSubscriptions.LambdaSubscription(processSesFeedbackFn),
+    );
+
     // EmergencyShutdown: throttles API Gateway to 0 req/s
     const emergencyShutdownFn = new NodejsFunction(this, "EmergencyShutdownFn", {
       runtime: Runtime.NODEJS_20_X,
@@ -489,9 +535,10 @@ export class InfraStack extends Stack {
     // DynamoDB — HTTP handlers share one router Lambda.
     icafTable.grantReadWriteData(apiFn);
 
-    // processImage and processZip also need DDB access
+    // processImage, processZip, and SES feedback processing also need DDB access
     icafTable.grantReadWriteData(processImageFn);
     icafTable.grantReadWriteData(processZipFn);
+    icafTable.grantReadWriteData(processSesFeedbackFn);
 
     // S3 artwork bucket — presigned PUT or delete
     artworkBucket.grantReadWrite(apiFn);
@@ -515,7 +562,6 @@ export class InfraStack extends Stack {
 
     // Cognito admin operations
     const cognitoAdminActions = [
-      "cognito-idp:AdminInitiateAuth",
       "cognito-idp:AdminGetUser",
       "cognito-idp:AdminUpdateUserAttributes",
       "cognito-idp:AdminDeleteUser",
@@ -528,13 +574,8 @@ export class InfraStack extends Stack {
 
     const cognitoClientActions = [
       "cognito-idp:InitiateAuth",
-      "cognito-idp:ForgotPassword",
-      "cognito-idp:ConfirmForgotPassword",
       "cognito-idp:ChangePassword",
-      "cognito-idp:ResendConfirmationCode",
       "cognito-idp:GetUser",
-      "cognito-idp:SignUp",
-      "cognito-idp:ConfirmSignUp",
     ];
 
     apiFn.addToRolePolicy(new iam.PolicyStatement({

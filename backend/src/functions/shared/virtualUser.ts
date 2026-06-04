@@ -7,7 +7,7 @@ import { EntityType, GSI } from "../../dynamo/ddbSchemaConsts";
 import { emailGsiSk, emailPk } from "../../dynamo/emailGsi";
 import { sendArtworkSubmissionEmail } from "../../utils/emails/artworkSubmission";
 
-const VERIFY_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 days
+const AUTH_ACTION_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
 export type VirtualUserResult =
   | { ok: true; user: UserEntity; sentSignupEmail: boolean }
@@ -45,7 +45,7 @@ export async function getOrCreateVirtualUser(
       user_id: userId,
       email: normalizedEmail,
       is_virtual: true,
-      timestamp: nowSeconds,
+      ts: nowSeconds,
       banned: false,
       has_magazine_subscription: false,
       has_newsletter_subscription: false,
@@ -70,22 +70,22 @@ export async function getOrCreateVirtualUser(
     };
   }
 
-  if (user.emailed_signup_at) {
+  if (user.email_blocked === true) {
     return { ok: true, user, sentSignupEmail: false };
   }
 
-  const verifyToken = randomUUID();
-  const verifyTokenExpiration = nowSeconds + VERIFY_TOKEN_TTL_SECONDS;
+  const authActionToken = randomUUID();
+  const authActionTokenExp = nowSeconds + AUTH_ACTION_TOKEN_TTL_SECONDS;
 
   await dynamodb.send(
     new UpdateCommand({
       TableName: TABLE_NAME,
       Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
       UpdateExpression:
-        "SET verify_token = :token, verify_token_expiration = :exp",
+        "SET auth_action_token = :token, auth_action_token_exp = :exp",
       ExpressionAttributeValues: {
-        ":token": verifyToken,
-        ":exp": verifyTokenExpiration,
+        ":token": authActionToken,
+        ":exp": authActionTokenExp,
       },
     }),
   );
@@ -94,7 +94,7 @@ export async function getOrCreateVirtualUser(
     await sendArtworkSubmissionEmail({
       toEmail: user.email,
       userId: user.user_id,
-      verifyToken,
+      authActionToken,
     });
   } catch (error) {
     console.error("Artwork submission signup email failed:", error);

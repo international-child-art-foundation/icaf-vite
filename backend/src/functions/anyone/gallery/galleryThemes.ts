@@ -33,8 +33,8 @@ function mapTheme(item: Record<string, unknown>): ThemeListItem {
     description: item.description as string | undefined,
     featured_on: stringArray(item.featured_on)!,
     colors: themeColors(item.colors),
-    image_url: item.image_url as string | undefined,
-    card_image_url: item.card_image_url as string | undefined,
+    f_img_url: item.f_img_url as string | undefined,
+    i_img_url: item.i_img_url as string | undefined,
     style: item.style as string | undefined,
   };
 }

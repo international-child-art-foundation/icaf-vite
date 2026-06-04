@@ -17,12 +17,13 @@ export interface ThemeEntity {
     description?: string;       // prompt / description shown on the theme page
     featured_on: string[];     // surfaces where this theme is featured, e.g. ['gallery']
     colors: ThemeColors;       // presentation metadata for theme cards/pages
-    image_url?: string;         // presentation metadata for theme artwork/image
+    f_img_url: string;          // family-level background/flair image
+    i_img_url?: string;         // instance-level background/flair image
     type: 'THEME';
 }
 
 export type PatchTheme = Partial<
-    Pick<ThemeEntity, "display_name" | "description" | "featured_on" | "colors" | "image_url">
+    Pick<ThemeEntity, "display_name" | "description" | "featured_on" | "colors" | "f_img_url" | "i_img_url">
 >;
 
 export interface ThemeColors {
@@ -41,8 +42,8 @@ export interface ThemeListItem {
     description?: string;
     featured_on: string[];
     colors?: ThemeColors;
-    image_url?: string;
-    card_image_url?: string;
+    f_img_url?: string;
+    i_img_url?: string;
     style?: string;
 }
 

@@ -40,7 +40,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 type SubmissionStatus = 'idle' | 'submitting' | 'success';
 
-type GroupIconField = 'class_name' | 'country' | 'guardian_display_name';
+type GroupIconField = 'class_name' | 'country' | 'submitter_display_name';
 
 export type SubmitArtworkGroupCopy = {
   artworkHelpText: string;
@@ -67,7 +67,7 @@ type StringArtworkGroupField = {
 const textArtworkGroupFields = [
   'class_name',
   'country',
-  'guardian_display_name',
+  'submitter_display_name',
   'region',
   'title',
 ] as const satisfies readonly StringArtworkGroupField[];
@@ -77,13 +77,15 @@ type TextArtworkGroupField = (typeof textArtworkGroupFields)[number];
 const groupFieldIcons: Record<GroupIconField, ReactNode> = {
   class_name: <BookOpen aria-hidden="true" className="h-4 w-4" />,
   country: <Globe2 aria-hidden="true" className="h-4 w-4" />,
-  guardian_display_name: <UserRound aria-hidden="true" className="h-4 w-4" />,
+  submitter_display_name: <UserRound aria-hidden="true" className="h-4 w-4" />,
 };
 
 const initialPersistedDraft: StoredArtworkGroupSubmissionDraft = {
   certificationAccepted:
     initialArtworkGroupSubmissionDraft.certificationAccepted,
+  digitalSignature: initialArtworkGroupSubmissionDraft.digitalSignature,
   group: initialArtworkGroupSubmissionDraft.group,
+  promotionalUse: initialArtworkGroupSubmissionDraft.promotionalUse,
   submitterEmail: initialArtworkGroupSubmissionDraft.submitterEmail,
 };
 
@@ -126,9 +128,9 @@ function readStoredGroup(value: unknown): ArtworkGroupInfo {
       initialPersistedDraft.group.description,
     ),
     group_type: readStoredGroupType(group.group_type),
-    guardian_display_name: readString(
-      group.guardian_display_name,
-      initialPersistedDraft.group.guardian_display_name,
+    submitter_display_name: readString(
+      group.submitter_display_name,
+      initialPersistedDraft.group.submitter_display_name,
     ),
     notifications:
       typeof group.notifications === 'boolean'
@@ -216,7 +218,15 @@ function readPersistedDraft(): StoredArtworkGroupSubmissionDraft {
         typeof storedDraft.certificationAccepted === 'boolean'
           ? storedDraft.certificationAccepted
           : initialPersistedDraft.certificationAccepted,
+      digitalSignature: readString(
+        storedDraft.digitalSignature,
+        initialPersistedDraft.digitalSignature,
+      ),
       group: readStoredGroup(storedDraft.group),
+      promotionalUse:
+        typeof storedDraft.promotionalUse === 'boolean'
+          ? storedDraft.promotionalUse
+          : initialPersistedDraft.promotionalUse,
       submitterEmail: readString(
         storedDraft.submitterEmail,
         initialPersistedDraft.submitterEmail,
@@ -307,10 +317,12 @@ export function SubmitArtworkGroup({
   ) {
     setDraft((current) => ({
       certificationAccepted: current.certificationAccepted,
+      digitalSignature: current.digitalSignature,
       group: {
         ...current.group,
         [name]: value,
       },
+      promotionalUse: current.promotionalUse,
       submitterEmail: current.submitterEmail,
     }));
   }
@@ -484,7 +496,13 @@ export function SubmitArtworkGroup({
         if (!file) throw new Error('A selected image is missing.');
         if (!getUploadFileType(file))
           throw new Error(`${file.name} is not supported.`);
-        return toArtworkRequest(artwork, file, releaseHash, effectiveGroup);
+        return toArtworkRequest(
+          artwork,
+          file,
+          releaseHash,
+          effectiveGroup,
+          draft.promotionalUse,
+        );
       });
       const groupResponse = await createGuestGroup({
         email: draft.submitterEmail.trim(),
@@ -495,8 +513,8 @@ export function SubmitArtworkGroup({
         group_type: effectiveGroup.group_type,
         notifications: effectiveGroup.notifications,
         region: effectiveGroup.region.trim() || undefined,
-        guardian_display_name:
-          effectiveGroup.guardian_display_name.trim() || undefined,
+        submitter_display_name:
+          effectiveGroup.submitter_display_name.trim() || undefined,
         theme_family: effectiveGroup.theme_family.trim() || undefined,
         theme_instance: effectiveGroup.theme_instance.trim() || undefined,
         title: effectiveGroup.title.trim(),
@@ -615,12 +633,12 @@ export function SubmitArtworkGroup({
                 onChange={handleGroupTextChange}
               />
               <AccountTextField
-                error={errors.group?.guardian_display_name}
-                label="Guardian display name"
-                leadingIcon={groupFieldIcons.guardian_display_name}
+                error={errors.group?.submitter_display_name}
+                label="Submitter display name"
+                leadingIcon={groupFieldIcons.submitter_display_name}
                 maxLength={200}
-                name="guardian_display_name"
-                value={draft.group.guardian_display_name}
+                name="submitter_display_name"
+                value={draft.group.submitter_display_name}
                 onChange={handleGroupTextChange}
               />
               <AccountTextField
@@ -693,7 +711,9 @@ export function SubmitArtworkGroup({
                 onChange={(event) =>
                   setDraft((current) => ({
                     certificationAccepted: event.target.checked,
+                    digitalSignature: current.digitalSignature,
                     group: current.group,
+                    promotionalUse: current.promotionalUse,
                     submitterEmail: current.submitterEmail,
                   }))
                 }
@@ -706,6 +726,40 @@ export function SubmitArtworkGroup({
                     {errors.certificationAccepted}
                   </span>
                 )}
+              </span>
+            </label>
+
+            <div className="mt-3">
+              <AccountTextField
+                error={errors.digitalSignature}
+                label="Digital signature"
+                maxLength={200}
+                name="digitalSignature"
+                value={draft.digitalSignature}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    digitalSignature: event.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            <label className="mt-3 flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+              <input
+                checked={draft.promotionalUse}
+                className="accent-secondary-blue mt-1 h-4 w-4"
+                name="promotionalUse"
+                type="checkbox"
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    promotionalUse: event.target.checked,
+                  }))
+                }
+              />
+              <span>
+                I allow ICAF to use these artworks for promotional purposes.
               </span>
             </label>
 

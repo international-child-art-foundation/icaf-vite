@@ -9,7 +9,7 @@ export type ArtworkGroupInfo = {
   region: string;
   theme_family: string;
   theme_instance: string;
-  guardian_display_name: string;
+  submitter_display_name: string;
   title: string;
 };
 
@@ -25,13 +25,19 @@ export type ArtworkDraft = {
 export type ArtworkGroupSubmissionDraft = {
   artworks: ArtworkDraft[];
   certificationAccepted: boolean;
+  digitalSignature: string;
   group: ArtworkGroupInfo;
+  promotionalUse: boolean;
   submitterEmail: string;
 };
 
 export type StoredArtworkGroupSubmissionDraft = Pick<
   ArtworkGroupSubmissionDraft,
-  'certificationAccepted' | 'group' | 'submitterEmail'
+  | 'certificationAccepted'
+  | 'digitalSignature'
+  | 'group'
+  | 'promotionalUse'
+  | 'submitterEmail'
 >;
 
 export type ArtworkGroupSubmissionErrors = {
@@ -40,6 +46,7 @@ export type ArtworkGroupSubmissionErrors = {
     Partial<Record<keyof ArtworkDraft | 'file', string>>
   >;
   certificationAccepted?: string;
+  digitalSignature?: string;
   group?: Partial<Record<keyof ArtworkGroupInfo, string>>;
   root?: string;
   submitterEmail?: string;

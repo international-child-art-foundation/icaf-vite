@@ -41,8 +41,8 @@ export interface ForgotPasswordRequest {
 export type ForgotPasswordResponse = DeliveryMessageResponse | MessageResponse;
 
 export interface ConfirmForgotPasswordRequest {
-    email: string;
-    code: string;
+    user_id: string;
+    auth_action_token: string;
     new_password: string;
 }
 

@@ -96,7 +96,7 @@ export const handler = async (
           PK: `USER#${targetUserId}`,
           SK: `AA#${nowSeconds}`,
           user_id: targetUserId,
-          timestamp: nowSeconds,
+          ts: nowSeconds,
           initiator_id: adminId,
           action: "hide_all",
           type: "ACCOUNT_ACTION",

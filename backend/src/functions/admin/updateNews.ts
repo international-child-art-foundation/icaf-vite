@@ -13,7 +13,7 @@ import { parseJsonBody } from "../../utils/request";
 import { getCurrentUser } from "../../utils/auth";
 
 const UPDATABLE_FIELDS: (keyof UpdateNewsRequest)[] = [
-    "source", "body", "date", "timestamp", "kind", "place", "link", "src",
+    "source", "body", "date", "ts", "kind", "place", "link", "src",
 ];
 
 export const handler = async (

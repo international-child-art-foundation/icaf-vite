@@ -9,8 +9,8 @@ export const instanceGroupPk = (family: string, instance: string) =>
   `GROUPS#FAMILY#${family}#INSTANCE#${instance}` as const;
 
 
-export const groupGsiSk = (timestampMs: number, groupId: string) =>
-  `TS#${timestampMs}#ID#${groupId}` as const;
+export const groupGsiSk = (tsMs: number, groupId: string) =>
+  `TS#${tsMs}#ID#${groupId}` as const;
 
 export interface ApprovedGroupGSIAttrs {
   GRP_PK: string;
@@ -20,14 +20,14 @@ export interface ApprovedGroupGSIAttrs {
 }
 
 export function buildApprovedGroupGsiAttrs(args: {
-  timestampMs: number;
+  tsMs: number;
   groupId: string;
   family?: string;
   instance?: string;
 }): ApprovedGroupGSIAttrs {
   const attrs: ApprovedGroupGSIAttrs = {
     GRP_PK: groupPk(),
-    GRP_GSI_SK: groupGsiSk(args.timestampMs, args.groupId),
+    GRP_GSI_SK: groupGsiSk(args.tsMs, args.groupId),
   };
   if (args.family) {
     attrs.FGRP_PK = familyGroupPk(args.family);

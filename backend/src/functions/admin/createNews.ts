@@ -45,7 +45,7 @@ export const handler = async (
             source: body.source,
             body: body.body,
             date: body.date,
-            timestamp: body.timestamp,
+            ts: body.ts,
             type: EntityType.News as "NEWS",
             ...(body.kind !== undefined && { kind: body.kind }),
             ...(body.place !== undefined && { place: body.place }),

@@ -23,6 +23,7 @@ const ALLOWED_UPDATE_FIELDS = new Set([
   "title",
   "description",
   "f_name",
+  "l_name",
   "age",
   "country",
   "region",
@@ -31,7 +32,7 @@ const ALLOWED_UPDATE_FIELDS = new Set([
   "theme_instance",
   "notifications",
 ]);
-const RELATIONSHIPS: SubmitterRelationship[] = ["self", "parent", "guardian", "teacher"];
+const RELATIONSHIPS: SubmitterRelationship[] = ["parent", "guardian", "teacher"];
 type AdminArtworkUpdateRequest = Record<string, unknown>;
 
 function isRemoval(value: unknown) {
@@ -91,6 +92,7 @@ export const handler = async (
       ["title", MAX_TITLE_LEN, false],
       ["description", MAX_DESCRIPTION_LEN, true],
       ["f_name", MAX_STRING_LEN, false],
+      ["l_name", MAX_STRING_LEN, false],
       ["country", MAX_STRING_LEN, false],
       ["region", MAX_STRING_LEN, false],
       ["theme_family", MAX_STRING_LEN, false],
@@ -148,6 +150,7 @@ export const handler = async (
     if ("title" in body) setOrRemove("title", ":title", body.title);
     if ("description" in body) setOrRemove("description", ":desc", body.description);
     if ("f_name" in body) setOrRemove("f_name", ":f_name", body.f_name);
+    if ("l_name" in body) setOrRemove("l_name", ":l_name", body.l_name);
     if ("age" in body) setOrRemove("age", ":age", body.age);
     if ("country" in body) setOrRemove("country", ":country", body.country);
     if ("region" in body) setOrRemove("region", ":region", body.region, "#region");
@@ -184,7 +187,7 @@ export const handler = async (
             ? undefined
             : art.theme_instance;
       const gsiAttrs = buildApprovedArtworkGsiAttrs({
-        timestampMs: art.timestamp * 1000,
+        tsMs: art.ts * 1000,
         artId,
         family: nextThemeFamily,
         instance: nextThemeInstance,

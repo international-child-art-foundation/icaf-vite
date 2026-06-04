@@ -1,7 +1,7 @@
 import type {
   ListGroupSubmissionsResponse,
   SubmitArtworkResponse,
-  SubmitArtworkRequest,
+  SubmitArtworkToGroupRequest,
   UpdateArtworkRequest,
   UpdateArtworkResponse,
   UpdateGroupRequest,
@@ -12,13 +12,12 @@ import { apiRequest } from './client';
 import { apiEndpoints } from './endpoints';
 import type { PaginationQuery } from './types';
 
-export type SubmitArtworkToGroupRequest = Omit<SubmitArtworkRequest, 'group_id' | 'is_virtual'>;
 export type UpdateConstituentArtworkRequest = UpdateArtworkRequest;
 
 export function listGroupSubmissions(
   query?: PaginationQuery,
 ): Promise<ListGroupSubmissionsResponse> {
-  return apiRequest<ListGroupSubmissionsResponse>(apiEndpoints.guardian.groups, {
+  return apiRequest<ListGroupSubmissionsResponse>(apiEndpoints.groups.groups, {
     query,
   });
 }
@@ -28,13 +27,13 @@ export function updateGroup(
   request: UpdateGroupRequest,
 ): Promise<UpdateGroupResponse> {
   return apiRequest<UpdateGroupResponse, UpdateGroupRequest>(
-    apiEndpoints.guardian.group(groupId),
+    apiEndpoints.groups.group(groupId),
     { body: request, method: 'PATCH' },
   );
 }
 
 export function deleteGroup(groupId: string): Promise<void> {
-  return apiRequest<void>(apiEndpoints.guardian.group(groupId), { method: 'DELETE' });
+  return apiRequest<void>(apiEndpoints.groups.group(groupId), { method: 'DELETE' });
 }
 
 export function submitArtworkToGroup(
@@ -42,13 +41,13 @@ export function submitArtworkToGroup(
   request: SubmitArtworkToGroupRequest,
 ): Promise<SubmitArtworkResponse> {
   return apiRequest<SubmitArtworkResponse, SubmitArtworkToGroupRequest>(
-    apiEndpoints.guardian.groupArtworks(groupId),
+    apiEndpoints.groups.groupArtworks(groupId),
     { body: request, method: 'POST' },
   );
 }
 
 export function deleteArtworkFromGroup(groupId: string, artId: string): Promise<void> {
-  return apiRequest<void>(apiEndpoints.guardian.groupArtwork(groupId, artId), {
+  return apiRequest<void>(apiEndpoints.groups.groupArtwork(groupId, artId), {
     method: 'DELETE',
   });
 }
@@ -58,7 +57,7 @@ export function updateConstituentArtwork(
   request: UpdateConstituentArtworkRequest,
 ): Promise<UpdateArtworkResponse> {
   return apiRequest<UpdateArtworkResponse, UpdateConstituentArtworkRequest>(
-    apiEndpoints.guardian.artwork(artId),
+    apiEndpoints.groups.artwork(artId),
     { body: request, method: 'PATCH' },
   );
 }

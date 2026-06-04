@@ -6,7 +6,7 @@ const baseUser: UserEntity = {
   user_id: 'u1',
   email: 'test@example.com',
   is_virtual: false,
-  timestamp: 1000,
+  ts: 1000,
   banned: false,
   has_magazine_subscription: false,
   has_newsletter_subscription: false,
@@ -16,11 +16,11 @@ const baseUser: UserEntity = {
 const baseArtwork: ArtworkEntity = {
   art_id: 'art1',
   user_id: 'u2',
-  is_virtual: false,
   status: 'approved',
   kudos_count: 0,
-  timestamp: 1000,
+  ts: 1000,
   release_hash: 'a'.repeat(64),
+  promotional_use: false,
   type: 'ART',
 };
 

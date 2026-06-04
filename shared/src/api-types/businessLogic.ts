@@ -1,12 +1,11 @@
 import { Role } from '../entities/user/types.js';
 
 // Role hierarchy check
-// Order (ascending): user < guardian < contributor < admin
+// Order (ascending): user < contributor < admin
 const ROLE_RANK: Record<Role, number> = {
     user: 0,
-    guardian: 1,
-    contributor: 2,
-    admin: 3,
+    contributor: 1,
+    admin: 2,
 };
 
 export function hasMinimumRole(userRole: Role | undefined, requiredRole: Role): boolean {

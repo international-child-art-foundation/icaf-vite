@@ -83,16 +83,16 @@ export const apiEndpoints = {
     groupsByInstance: (family: PathParam, instance: PathParam) =>
       `/gallery/groups/family/${encodePathParam(family)}/instance/${encodePathParam(instance)}`,
   },
-  guardian: {
+  groups: {
     artwork: (artId: PathParam) =>
-      `/guardian/artworks/${encodePathParam(artId)}`,
+      `/user/group-artworks/${encodePathParam(artId)}`,
     group: (groupId: PathParam) =>
-      `/guardian/groups/${encodePathParam(groupId)}`,
+      `/user/groups/${encodePathParam(groupId)}`,
     groupArtwork: (groupId: PathParam, artId: PathParam) =>
-      `/guardian/groups/${encodePathParam(groupId)}/artworks/${encodePathParam(artId)}`,
+      `/user/groups/${encodePathParam(groupId)}/artworks/${encodePathParam(artId)}`,
     groupArtworks: (groupId: PathParam) =>
-      `/guardian/groups/${encodePathParam(groupId)}/artworks`,
-    groups: '/guardian/groups',
+      `/user/groups/${encodePathParam(groupId)}/artworks`,
+    groups: '/user/groups',
   },
   public: {
     artwork: (artId: PathParam) => `/artworks/${encodePathParam(artId)}`,

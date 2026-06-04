@@ -171,7 +171,7 @@ export const handler = async (
           PK: `USER#${targetUserId}`,
           SK: `AA#${nowSeconds}`,
           user_id: targetUserId,
-          timestamp: nowSeconds,
+          ts: nowSeconds,
           initiator_id: adminId,
           action: "delete_account_admin",
           reason: body.reason.trim(),
@@ -187,7 +187,7 @@ export const handler = async (
       entries_deleted: entriesDeleted,
       cognito_deleted: cognitoDeleted,
       admin_action_id: actionId,
-      timestamp: nowSeconds,
+      ts: nowSeconds,
     };
 
     return {

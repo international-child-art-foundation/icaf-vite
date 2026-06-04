@@ -6,7 +6,7 @@
  *
  * DynamoDB ACCOUNT_ACTION entity key structure:
  *   PK = USER#<user_id>     (the user being acted upon)
- *   SK = AA#<unix_timestamp>
+ *   SK = AA#<unix_ts>
  */
 
 export type AccountActionType =
@@ -30,7 +30,7 @@ export type AccountActionType =
 // Full ACCOUNT_ACTION entity as stored in DynamoDB
 export interface AccountActionEntity {
     user_id: string;                // target user (from PK)
-    timestamp: number;              // Unix timestamp (from SK)
+    ts: number;              // Unix ts (from SK)
     initiator_id?: string;          // blank if initiator === target user
     action: AccountActionType;
     reason?: string;                // required for some actions (contributor-only)

@@ -20,9 +20,9 @@ export function GalleryGroupCard({
   onOpen,
   actionSlot,
 }: GalleryGroupCardProps) {
-  const coverIds = group.cover_art_ids.slice(0, 4);
+  const coverIds = group.preview_art_ids.slice(0, 4);
   const location = [group.region, group.country].filter(Boolean).join(', ');
-  const owner = group.guardian_display_name || 'Group submission';
+  const owner = group.submitter_display_name || 'Group submission';
   const title = group.class_name || group.title;
   const theme = [group.theme_family, group.theme_instance]
     .filter(Boolean)
@@ -36,7 +36,7 @@ export function GalleryGroupCard({
         className="relative grid min-h-[230px] grid-cols-4 items-center overflow-hidden bg-neutral-100 text-left lg:min-h-[260px]"
       >
         {coverIds.length > 0 ? (
-          coverIds.map((artId) => (
+          coverIds.map((artId: string) => (
             <img
               key={artId}
               src={artworkAssetUrl(artId, 'thumb')}

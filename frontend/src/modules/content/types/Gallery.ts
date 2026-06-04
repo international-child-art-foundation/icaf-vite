@@ -53,7 +53,7 @@ export type TResolvedArtwork = TArtwork & {
   theme_instance?: string;
   /** Display name of the classroom/group this artwork belongs to. */
   groupTitle?: string;
-  /** Display name for the guardian/teacher/group submitter. */
+  /** Display name for the teacher/group submitter. */
   groupOwnerName?: string;
   /** Group type label, e.g. classroom. */
   groupType?: string;

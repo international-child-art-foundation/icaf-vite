@@ -32,7 +32,7 @@ export const handler = async (
                 TableName: TABLE_NAME,
                 KeyConditionExpression: "PK = :pk",
                 ExpressionAttributeValues: { ":pk": "NEWS" },
-                // SK = 'ID#<uuid>' — sort alphabetically by SK, client sorts by timestamp
+                // SK = 'ID#<uuid>' — sort alphabetically by SK, client sorts by ts
                 Limit: limit + 1,
                 ExclusiveStartKey: exclusiveStartKey,
             }),
@@ -44,8 +44,8 @@ export const handler = async (
 
         const news: NewsListItem[] = page
             .map(({ type: _type, ...rest }) => rest as NewsListItem)
-            // Newest first by timestamp
-            .sort((a, b) => b.timestamp - a.timestamp);
+            // Newest first by ts
+            .sort((a, b) => b.ts - a.ts);
 
         const last_key_out = has_more && result.LastEvaluatedKey
             ? Buffer.from(JSON.stringify(result.LastEvaluatedKey)).toString("base64")

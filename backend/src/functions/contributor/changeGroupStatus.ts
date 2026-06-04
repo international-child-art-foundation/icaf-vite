@@ -69,7 +69,7 @@ export const handler = async (
 
     if (newStatus === "approved") {
       const gsiAttrs = buildApprovedGroupGsiAttrs({
-        timestampMs: group.timestamp * 1000,
+        tsMs: group.ts * 1000,
         groupId,
         family: group.theme_family,
         instance: group.theme_instance,

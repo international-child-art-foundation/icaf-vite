@@ -19,12 +19,11 @@ const ALLOWED_UPDATE_FIELDS = new Set([
   "title",
   "description",
   "class_name",
-  "guardian_display_name",
+  "submitter_display_name",
   "country",
   "region",
   "theme_family",
   "theme_instance",
-  "cover_art_ids",
   "notifications",
 ]);
 
@@ -82,17 +81,16 @@ export const handler = async (
     if (body.title !== undefined) { setExprParts.push("title = :title"); exprValues[":title"] = body.title; }
     if (body.description !== undefined) { setExprParts.push("description = :desc"); exprValues[":desc"] = body.description; }
     if (body.class_name !== undefined) { setExprParts.push("class_name = :cn"); exprValues[":cn"] = body.class_name; }
-    if (body.guardian_display_name !== undefined) { setExprParts.push("guardian_display_name = :gdn"); exprValues[":gdn"] = body.guardian_display_name; }
+    if (body.submitter_display_name !== undefined) { setExprParts.push("submitter_display_name = :gdn"); exprValues[":gdn"] = body.submitter_display_name; }
     if (body.country !== undefined) { setExprParts.push("country = :country"); exprValues[":country"] = body.country; }
     if (body.region !== undefined) { setExprParts.push("#region = :region"); exprNames["#region"] = "region"; exprValues[":region"] = body.region; }
     if (body.theme_family !== undefined) { setExprParts.push("theme_family = :tf"); exprValues[":tf"] = body.theme_family; }
     if (body.theme_instance !== undefined) { setExprParts.push("theme_instance = :ti"); exprValues[":ti"] = body.theme_instance; }
-    if (body.cover_art_ids !== undefined) { setExprParts.push("cover_art_ids = :covers"); exprValues[":covers"] = body.cover_art_ids; }
     if (body.notifications !== undefined) { setExprParts.push("notifications = :notifications"); exprValues[":notifications"] = body.notifications; }
 
     if (group.status === "approved") {
       const gsiAttrs = buildApprovedGroupGsiAttrs({
-        timestampMs: group.timestamp * 1000,
+        tsMs: group.ts * 1000,
         groupId,
         family: body.theme_family ?? group.theme_family,
         instance: body.theme_instance ?? group.theme_instance,

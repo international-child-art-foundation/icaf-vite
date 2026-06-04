@@ -52,7 +52,7 @@ export function DashboardShell({
 
   let content;
   if (activeTab === 'submissions') {
-    content = <MySubmissionsModule role={role} />;
+    content = <MySubmissionsModule />;
   } else if (activeTab === 'review' && canReview(role)) {
     content = (
       <>
@@ -68,23 +68,6 @@ export function DashboardShell({
     content = <OverviewModules role={role} />;
   }
   const tabsArray = Array.from(dashboardTabNames);
-
-  // if (activeTab === 'submissions') {
-  //           return <MySubmissionsModule role={role} />;
-  //         }
-  //         if (activeTab === 'review' && canReview(role)) {
-  //           return (
-  //             <>
-  //               <ReviewArtworkQueue admin={canAdmin(role)} />
-  //               {!canAdmin(role) && <ReviewGroupQueue />}
-  //             </>
-  //           );
-  //         }
-  //         if (activeTab === 'admin' && canAdmin(role)) {
-  //           return <ReviewArtworkQueue admin />;
-  //         }
-  //         return <OverviewModules role={role} />;
-  //       }}
 
   return (
     <div className={`${className} site-w m-pad z-10 py-10`}>

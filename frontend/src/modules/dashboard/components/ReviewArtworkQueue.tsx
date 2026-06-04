@@ -34,7 +34,6 @@ type ArtworkEdits = {
 };
 
 const RELATIONSHIPS: SubmitterRelationship[] = [
-  'self',
   'parent',
   'guardian',
   'teacher',
@@ -331,7 +330,7 @@ export function ReviewArtworkQueue({ admin = false }: { admin?: boolean }) {
                         )}
                         <p className="text-xs text-neutral-500">
                           {artworkLabel(artwork)} · {artwork.status} ·{' '}
-                          {formatDate(artwork.timestamp)}
+                          {formatDate(artwork.ts)}
                         </p>
                         <div className="grid grid-cols-3 gap-2">
                           <button
@@ -388,7 +387,7 @@ export function ReviewArtworkQueue({ admin = false }: { admin?: boolean }) {
                     </p>
                     <p className="mt-1 text-xs text-neutral-500">
                       {editingArtwork.status} ·{' '}
-                      {formatDate(editingArtwork.timestamp)}
+                      {formatDate(editingArtwork.ts)}
                     </p>
                   </div>
 

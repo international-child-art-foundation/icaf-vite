@@ -37,7 +37,9 @@ const CONTENT_TYPES: Record<string, string> = {
 interface SubmitArtworkToGroupBody {
   file_type: string;
   release_hash: string;
+  promotional_use?: boolean;
   f_name?: string;
+  l_name?: string;
   age?: number;
   country?: string;
   region?: string;
@@ -55,15 +57,15 @@ export const handler = async (
   try {
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
-    const guardian = currentUser.user;
-    const userId = guardian.user_id;
+    const user = currentUser.user;
+    const userId = user.user_id;
 
     const groupId = event.pathParameters?.group_id;
     if (!groupId) {
       return CommonErrors.badRequest("group_id path parameter is required");
     }
 
-    if (guardian.banned) {
+    if (user.banned) {
       return CommonErrors.forbidden("This account is banned");
     }
 
@@ -119,17 +121,18 @@ export const handler = async (
           PK: `ART#${artId}`,
           SK: "-",
           art_id: artId,
-          user_id: userId, // guardian owns the record
-          is_virtual: true, // constituent has no account
+          user_id: userId,
           group_id: groupId,
           status: "pending_review" as const,
           kudos_count: 0,
-          timestamp: nowSeconds,
+          ts: nowSeconds,
           release_hash: body.release_hash.trim(),
+          promotional_use: body.promotional_use ?? false,
           type: "ART",
           notifications: false,
           // optional fields
           ...(body.f_name && { f_name: body.f_name }),
+          ...(body.l_name && { l_name: body.l_name }),
           ...(body.age !== undefined && { age: body.age }),
           ...(body.country && { country: body.country }),
           ...(body.region && { region: body.region }),
@@ -148,18 +151,11 @@ export const handler = async (
       }),
     );
 
-    // ── Update GROUP: append art_id to member_art_ids, cover if room ───────
-    const currentCoverCount = group.cover_art_ids.length;
-    const updateExpr =
-      currentCoverCount < 4
-        ? "SET member_art_ids = list_append(member_art_ids, :newArt), cover_art_ids = list_append(cover_art_ids, :newArt)"
-        : "SET member_art_ids = list_append(member_art_ids, :newArt)";
-
     await dynamodb.send(
       new UpdateCommand({
         TableName: TABLE_NAME,
         Key: { PK: `GROUP#${groupId}`, SK: "-" },
-        UpdateExpression: updateExpr,
+        UpdateExpression: "SET member_art_ids = list_append(member_art_ids, :newArt)",
         ExpressionAttributeValues: { ":newArt": [artId] },
       }),
     );

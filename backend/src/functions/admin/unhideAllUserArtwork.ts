@@ -76,7 +76,7 @@ export const handler = async (
       if (type === "ART") {
         const art = entityResult.Item as ArtworkEntity;
         const gsiAttrs = buildApprovedArtworkGsiAttrs({
-          timestampMs: art.timestamp * 1000,
+          tsMs: art.ts * 1000,
           artId: id,
           family: art.theme_family,
           instance: art.theme_instance,
@@ -89,7 +89,7 @@ export const handler = async (
       } else {
         const group = entityResult.Item as GroupEntity;
         const gsiAttrs = buildApprovedGroupGsiAttrs({
-          timestampMs: group.timestamp * 1000,
+          tsMs: group.ts * 1000,
           groupId: id,
           family: group.theme_family,
           instance: group.theme_instance,
@@ -122,7 +122,7 @@ export const handler = async (
           PK: `USER#${targetUserId}`,
           SK: `AA#${nowSeconds}`,
           user_id: targetUserId,
-          timestamp: nowSeconds,
+          ts: nowSeconds,
           initiator_id: adminId,
           action: "unhide_all",
           type: "ACCOUNT_ACTION",

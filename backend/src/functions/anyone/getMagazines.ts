@@ -30,9 +30,9 @@ export const handler = async (): Promise<{ statusCode: number; body: string; hea
                 volume: m.volume,
                 status: m.status,
                 thumbnail_url: `https://${MAGAZINES_CLOUDFRONT_DOMAIN}/${m.slug}/${m.thumbnail_key}`,
-                created_at: m.created_at,
+                ts: m.ts,
             }))
-            .sort((a, b) => b.created_at - a.created_at);
+            .sort((a, b) => b.ts - a.ts);
 
         const response: ListMagazinesResponse = { magazines };
 

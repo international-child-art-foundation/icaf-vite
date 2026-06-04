@@ -25,7 +25,7 @@ export const handler = async (
     const adminId = currentUser.user.user_id;
 
     // TDR SK format: TS#<unix_ts>#TDR_ID#<tdr_id>
-    // Both the timestamp and tdr_id must come from path params since the SK is compound
+    // Both the ts and tdr_id must come from path params since the SK is compound
     const tdrSk = event.pathParameters?.tdr_sk;
     if (!tdrSk) {
       return CommonErrors.badRequest("tdr_sk path parameter is required");

@@ -27,7 +27,7 @@ type NewsDraft = {
   place: string;
   source: string;
   src: string;
-  timestamp: string;
+  ts: string;
 };
 
 type PendingAction =
@@ -45,10 +45,10 @@ const emptyDraft: NewsDraft = {
   place: '',
   source: '',
   src: '',
-  timestamp: '',
+  ts: '',
 };
 
-function timestampFromDate(date: string): number {
+function tsFromDate(date: string): number {
   const parsed = Date.parse(date);
   if (!Number.isNaN(parsed)) return Math.floor(parsed / 1000);
   return Math.floor(Date.now() / 1000);
@@ -63,7 +63,7 @@ function toDraft(item: NewsListItem): NewsDraft {
     place: item.place ?? '',
     source: item.source ?? '',
     src: item.src ?? '',
-    timestamp: String(item.timestamp),
+    ts: String(item.ts),
   };
 }
 
@@ -75,7 +75,7 @@ function hasDraftContent(draft: NewsDraft): boolean {
     draft.place,
     draft.source,
     draft.src,
-    draft.timestamp,
+    draft.ts,
   ].some((value) => value.trim());
 }
 
@@ -87,18 +87,18 @@ function draftToCreateRequest(draft: NewsDraft): CreateNewsRequest | null {
     throw new Error('Source is required before saving a news item.');
   }
 
-  const timestampText = draft.timestamp.trim();
-  const timestamp = timestampText
-    ? Number(timestampText)
-    : timestampFromDate(draft.date);
+  const tsText = draft.ts.trim();
+  const ts = tsText
+    ? Number(tsText)
+    : tsFromDate(draft.date);
 
-  if (!Number.isInteger(timestamp) || timestamp < 0) {
-    throw new Error('Timestamp must be a non-negative integer.');
+  if (!Number.isInteger(ts) || ts < 0) {
+    throw new Error('ts must be a non-negative integer.');
   }
 
   return {
     source,
-    timestamp,
+    ts,
     ...(draft.body.trim() ? { body: draft.body.trim() } : {}),
     ...(draft.date.trim() ? { date: draft.date.trim() } : {}),
     ...(draft.kind && draft.kind !== 'article' ? { kind: draft.kind } : {}),
@@ -113,20 +113,20 @@ function draftToUpdateRequest(
   original: NewsListItem,
 ): UpdateNewsRequest {
   const source = draft.source.trim() || original.source;
-  const timestampText = draft.timestamp.trim();
-  const timestamp = timestampText ? Number(timestampText) : original.timestamp;
+  const tsText = draft.ts.trim();
+  const ts = tsText ? Number(tsText) : original.ts;
 
   if (!source) {
     throw new Error('Source is required before saving a news item.');
   }
 
-  if (!Number.isInteger(timestamp) || timestamp < 0) {
-    throw new Error('Timestamp must be a non-negative integer.');
+  if (!Number.isInteger(ts) || ts < 0) {
+    throw new Error('ts must be a non-negative integer.');
   }
 
   return {
     source,
-    timestamp,
+    ts,
     body: draft.body.trim() || original.body,
     date: draft.date.trim() || original.date,
     kind: draft.kind || original.kind,
@@ -624,11 +624,11 @@ function NewsFields({
             <option value="audio">Audio</option>
           </select>
         </Field>
-        <Field label="Timestamp">
+        <Field label="Unix ts">
           <Input
-            value={draft.timestamp}
-            placeholder={placeholders?.timestamp}
-            onChange={(event) => onChange('timestamp', event.target.value)}
+            value={draft.ts}
+            placeholder={placeholders?.ts}
+            onChange={(event) => onChange('ts', event.target.value)}
             disabled={disabled}
             inputMode="numeric"
           />

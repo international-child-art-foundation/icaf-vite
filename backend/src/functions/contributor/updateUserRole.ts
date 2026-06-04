@@ -38,7 +38,7 @@ export const handler = async (
     }
 
     // UpdateUserRoleRequest excludes 'admin' — enforced by type
-    const allowedRoles = ["user", "guardian", "contributor"] as const;
+    const allowedRoles = ["user", "contributor"] as const;
     if (!(allowedRoles as readonly string[]).includes(body.new_role)) {
       return CommonErrors.badRequest(`new_role must be one of: ${allowedRoles.join(", ")}`);
     }

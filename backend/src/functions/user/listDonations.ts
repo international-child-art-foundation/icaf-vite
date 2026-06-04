@@ -57,7 +57,7 @@ export const handler = async (
         payment_id: p.payment_id,
         amount_cents: p.amount_cents,
         currency: p.currency,
-        timestamp: p.timestamp,
+        ts: p.ts,
       };
     });
 

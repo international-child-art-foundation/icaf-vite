@@ -64,7 +64,7 @@ export const handler = async (
                     volume,
                     status: "processing",
                     uploaded_by: userId,
-                    created_at: now,
+                    ts: now,
                     type: EntityType.Magazine,
                 },
             }),

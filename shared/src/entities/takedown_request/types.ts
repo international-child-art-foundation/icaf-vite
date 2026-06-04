@@ -19,16 +19,16 @@ export type TakedownStatus =
 export interface TakedownRequestEntity {
     // PK = 'TDR', SK = 'TS#<unix_ts>#TDR_ID#<tdr_id>'
     tdr_id: string;
-    timestamp: number;              // Unix timestamp (seconds); duplicated from SK
+    ts: number;              // Unix ts (seconds); duplicated from SK
     status: TakedownStatus;
     art_id?: string;                // target artwork (or group, or both)
     group_id?: string;              // target group
     requester_email: string;
     requester_name: string;
     reason: string;
-    scheduled_execution_at: number; // Unix timestamp — auto-execute deadline
+    scheduled_execution_at: number; // Unix ts — auto-execute deadline
     reviewed_by?: string;           // user_id of reviewer (contributor/admin)
-    reviewed_at?: number;           // Unix timestamp of review
+    reviewed_at?: number;           // Unix ts of review
     review_notes?: string;
     type: 'TAKEDOWN_REQUEST';
 }
@@ -52,7 +52,7 @@ export interface InitiateTakedownResponse {
 // Admin/contributor response shape for review list
 export interface TakedownRequestListItem {
     tdr_id: string;
-    timestamp: number;
+    ts: number;
     status: TakedownStatus;
     art_id?: string;
     group_id?: string;

@@ -35,10 +35,8 @@ function validateNewsFields(data: Partial<CreateNewsRequest>): string[] {
         }
     }
 
-    if (data.timestamp !== undefined) {
-        if (!Number.isInteger(data.timestamp) || data.timestamp < 0) {
-            errors.push('timestamp must be a non-negative integer (Unix seconds)');
-        }
+    if (data.ts !== undefined && (!Number.isInteger(data.ts) || data.ts < 0)) {
+        errors.push('ts must be a non-negative integer (Unix seconds)');
     }
 
     if (data.kind !== undefined && !VALID_KINDS.includes(data.kind)) {
@@ -78,8 +76,8 @@ export function validateCreateNewsRequest(data: CreateNewsRequest): string[] {
     if (!data.source || typeof data.source !== 'string' || !data.source.trim()) {
         errors.push('source is required');
     }
-    if (data.timestamp === undefined || data.timestamp === null) {
-        errors.push('timestamp is required');
+    if (data.ts === undefined || data.ts === null) {
+        errors.push('ts is required');
     }
 
     return [...errors, ...validateNewsFields(data)];

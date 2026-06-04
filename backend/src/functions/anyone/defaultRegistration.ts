@@ -1,10 +1,17 @@
-import { SignUpCommand } from "@aws-sdk/client-cognito-identity-provider";
-import { QueryCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  AdminCreateUserCommand,
+  AdminDeleteUserCommand,
+  AdminDisableUserCommand,
+  AdminSetUserPasswordCommand,
+  MessageActionType,
+} from "@aws-sdk/client-cognito-identity-provider";
+import { DeleteCommand, QueryCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { randomUUID } from "crypto";
 import {
   cognitoClient,
   dynamodb,
   TABLE_NAME,
-  USER_POOL_CLIENT_ID,
+  USER_POOL_ID,
 } from "../../config/aws-clients";
 import {
   ApiGatewayEvent,
@@ -19,6 +26,9 @@ import {
 import { EntityType, GSI } from "../../dynamo/ddbSchemaConsts";
 import { emailGsiSk, emailPk } from "../../dynamo/emailGsi";
 import { parseJsonBody } from "../../utils/request";
+import { sendCreateAndVerifyEmail } from "../../utils/emails/createAndVerify";
+
+const AUTH_ACTION_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60;
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -35,9 +45,6 @@ export const handler = async (
     if (!body.f_name?.trim()) return CommonErrors.badRequest("f_name is required");
     if (!body.l_name?.trim()) return CommonErrors.badRequest("l_name is required");
     if (!body.dob?.trim()) return CommonErrors.badRequest("dob is required");
-    if (body.role !== "guardian" && body.role !== "user") {
-      return CommonErrors.badRequest("role must be one of: guardian, user");
-    }
     if (
       body.has_newsletter_subscription !== undefined &&
       typeof body.has_newsletter_subscription !== "boolean"
@@ -56,9 +63,11 @@ export const handler = async (
     const email = body.email.trim();
     const fName = body.f_name.trim();
     const lName = body.l_name.trim();
-    const role = body.role;
+    const role = "user";
     const hasNewsletterSubscription = body.has_newsletter_subscription ?? false;
     const nowSeconds = Math.floor(Date.now() / 1000);
+    const authActionToken = randomUUID();
+    const authActionTokenExp = nowSeconds + AUTH_ACTION_TOKEN_TTL_SECONDS;
 
     const existingUser = await dynamodb.send(
       new QueryCommand({
@@ -77,13 +86,17 @@ export const handler = async (
       return CommonErrors.conflict("An account with this email already exists");
     }
 
-    const signUpResult = await cognitoClient.send(
-      new SignUpCommand({
-        ClientId: USER_POOL_CLIENT_ID,
+    // Direct registration: create a disabled Cognito login immediately, then
+    // enable it only after the user clicks the app-generated verification link.
+    const createUserResult = await cognitoClient.send(
+      new AdminCreateUserCommand({
+        UserPoolId: USER_POOL_ID,
         Username: email,
-        Password: body.password,
+        MessageAction: MessageActionType.SUPPRESS,
+        TemporaryPassword: body.password,
         UserAttributes: [
           { Name: "email", Value: email },
+          { Name: "email_verified", Value: "false" },
           { Name: "given_name", Value: fName },
           { Name: "family_name", Value: lName },
           { Name: "birthdate", Value: body.dob },
@@ -92,27 +105,46 @@ export const handler = async (
       }),
     );
 
-    if (!signUpResult.UserSub) {
+    const userId = createUserResult.User?.Attributes?.find((attribute) => attribute.Name === "sub")?.Value;
+    if (!userId) {
       return CommonErrors.internalServerError("Registration failed: missing Cognito user id");
     }
+
+    await cognitoClient.send(
+      new AdminSetUserPasswordCommand({
+        UserPoolId: USER_POOL_ID,
+        Username: email,
+        Password: body.password,
+        Permanent: true,
+      }),
+    );
+
+    await cognitoClient.send(
+      new AdminDisableUserCommand({
+        UserPoolId: USER_POOL_ID,
+        Username: email,
+      }),
+    );
 
     await dynamodb.send(
       new PutCommand({
         TableName: TABLE_NAME,
         Item: {
-          PK: `USER#${signUpResult.UserSub}`,
+          PK: `USER#${userId}`,
           SK: "PROFILE",
-          user_id: signUpResult.UserSub,
+          user_id: userId,
           email,
           f_name: fName,
           l_name: lName,
           dob: body.dob,
           role,
           is_virtual: false,
-          timestamp: nowSeconds,
+          ts: nowSeconds,
           banned: false,
           has_magazine_subscription: false,
           has_newsletter_subscription: hasNewsletterSubscription,
+          auth_action_token: authActionToken,
+          auth_action_token_exp: authActionTokenExp,
           type: "USER",
           EMAIL_PK: emailPk(email),
           EMAIL_SK: emailGsiSk(EntityType.User),
@@ -121,13 +153,43 @@ export const handler = async (
       }),
     );
 
+    try {
+      await sendCreateAndVerifyEmail({
+        toEmail: email,
+        userId,
+        authActionToken,
+      });
+    } catch (error) {
+      console.error("Default registration verification email failed:", error);
+      try {
+        await dynamodb.send(
+          new DeleteCommand({
+            TableName: TABLE_NAME,
+            Key: { PK: `USER#${userId}`, SK: "PROFILE" },
+          }),
+        );
+      } catch (cleanupError) {
+        console.error("Default registration DDB cleanup failed:", cleanupError);
+      }
+      try {
+        await cognitoClient.send(
+          new AdminDeleteUserCommand({
+            UserPoolId: USER_POOL_ID,
+            Username: email,
+          }),
+        );
+      } catch (cleanupError) {
+        console.error("Default registration Cognito cleanup failed:", cleanupError);
+      }
+      return CommonErrors.internalServerError("Registration failed because the verification email could not be sent. Please try again later.");
+    }
+
     return {
       statusCode: HTTP_STATUS.CREATED,
       body: JSON.stringify({
         message: "Registration successful. Please check your email for a verification link.",
-        user_id: signUpResult.UserSub,
-        delivery_medium: signUpResult.CodeDeliveryDetails?.DeliveryMedium ?? "EMAIL",
-        destination: signUpResult.CodeDeliveryDetails?.Destination,
+        user_id: userId,
+        delivery_medium: "EMAIL",
       }),
       headers: COMMON_HEADERS,
     };

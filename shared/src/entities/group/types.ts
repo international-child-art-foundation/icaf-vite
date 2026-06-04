@@ -41,8 +41,7 @@ export interface GroupEntity {
     group_type: GroupType;
     status: GroupStatus;
     member_art_ids: string[];       // ordered list of art_ids (max ~50)
-    cover_art_ids: string[];        // 3–4 art_ids for gallery card thumbnails; may be []
-    timestamp: number;              // Unix timestamp (seconds)
+    ts: number;              // Unix ts (seconds)
     type: 'GROUP';
     notifications?: boolean;        // true when owner opted into group submission notifications
 
@@ -51,7 +50,7 @@ export interface GroupEntity {
     theme_instance?: string;        // zero-padded 4-digit string, e.g. '2025'
     title?: string;
     class_name?: string;            // e.g. 'BIO 1017'
-    guardian_display_name?: string;  // may differ from owner's account name
+    submitter_display_name?: string; // may differ from owner's account name
     country?: string;
     region?: string;
     description?: string;
@@ -64,7 +63,7 @@ export interface SubmitGroupRequest {
     group_type: GroupType;
     title: string;
     class_name?: string;
-    guardian_display_name?: string;
+    submitter_display_name?: string;
     country?: string;
     region?: string;
     description?: string;
@@ -75,7 +74,7 @@ export interface SubmitGroupResponse {
     success: boolean;
     group_id: string;
     message: string;
-    timestamp: number;
+    ts: number;
     art_uploads?: {
         art_id: string;
         presigned_url: string;
@@ -111,13 +110,13 @@ export interface GroupListItem {
     group_type: GroupType;
     title: string;
     class_name?: string;
-    guardian_display_name?: string;
+    submitter_display_name?: string;
     country: string;
     region?: string;
-    cover_art_ids: string[];
+    preview_art_ids: string[];
     member_count: number;
     status: GroupStatus;
-    timestamp: number;
+    ts: number;
     notifications?: boolean;
 }
 
@@ -132,12 +131,11 @@ export interface UpdateGroupRequest {
     title?: string;
     description?: string;
     class_name?: string;
-    guardian_display_name?: string;
+    submitter_display_name?: string;
     country?: string;
     region?: string;
     theme_family?: string;
     theme_instance?: string;
-    cover_art_ids?: string[];
     notifications?: boolean;
 }
 

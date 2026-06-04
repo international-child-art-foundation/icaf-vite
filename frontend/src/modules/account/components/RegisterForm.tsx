@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent, ReactNode } from 'react';
-import { CalendarDays, Mail, User, UsersRound } from 'lucide-react';
+import { CalendarDays, Mail, User } from 'lucide-react';
 import type { DefaultRegistrationResponse } from '@icaf/shared';
 import { defaultRegistration } from '@/api/auth';
 import { ApiError } from '@/api/client';
@@ -96,7 +96,6 @@ export const RegisterForm = () => {
       email: true,
       f_name: true,
       l_name: true,
-      role: true,
     });
     setErrors(nextErrors);
     setSubmitError(null);
@@ -201,51 +200,6 @@ export const RegisterForm = () => {
             </div>
           ))}
         </div>
-
-        <fieldset className="mt-6">
-          <legend className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
-            <UsersRound aria-hidden="true" className="h-4 w-4 text-slate-500" />
-            Account type <span className="text-tertiary-red">*</span>
-          </legend>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {(['user', 'guardian'] as const).map((role) => (
-              <label
-                key={role}
-                className={cn(
-                  'flex cursor-pointer items-start gap-3 rounded-lg border bg-white p-4 shadow-sm transition-all',
-                  values.role === role
-                    ? 'border-secondary-blue ring-secondary-blue/15 ring-2'
-                    : 'border-slate-200 hover:border-slate-300',
-                )}
-              >
-                <input
-                  className="accent-secondary-blue mt-1 h-4 w-4"
-                  checked={values.role === role}
-                  name="role"
-                  type="radio"
-                  value={role}
-                  onBlur={() => handleBlur('role')}
-                  onChange={() => updateField('role', role)}
-                />
-                <span>
-                  <span className="block text-sm font-semibold capitalize text-slate-950">
-                    {role}
-                  </span>
-                  <span className="mt-1 block text-sm leading-6 text-slate-500">
-                    {role === 'guardian'
-                      ? 'For parents, guardians, and adults managing child participation.'
-                      : 'For participants creating their own ICAF account.'}
-                  </span>
-                </span>
-              </label>
-            ))}
-          </div>
-          {errors.role && (
-            <p className="text-tertiary-red mt-2 text-xs font-semibold">
-              {errors.role}
-            </p>
-          )}
-        </fieldset>
 
         <label className="mt-6 flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
           <input

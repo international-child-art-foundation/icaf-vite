@@ -35,13 +35,16 @@ type SubmitArtworkDraft = {
   artwork: ArtworkDraft;
   certificationAccepted: boolean;
   country: string;
+  digitalSignature: string;
   notifications: boolean;
+  promotionalUse: boolean;
   region: string;
   submitterEmail: string;
 };
 
 type SubmitArtworkErrors = ArtworkGroupSubmissionErrors & {
   country?: string;
+  digitalSignature?: string;
   region?: string;
 };
 
@@ -50,15 +53,17 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_EMAIL_LEN = 254;
 
 const initialSubmitArtworkDraft: SubmitArtworkDraft = {
-  artwork: createGuardianArtworkDraft(),
+  artwork: createDefaultArtworkDraft(),
   certificationAccepted: false,
   country: '',
+  digitalSignature: '',
   notifications: true,
+  promotionalUse: false,
   region: '',
   submitterEmail: '',
 };
 
-function createGuardianArtworkDraft(): ArtworkDraft {
+function createDefaultArtworkDraft(): ArtworkDraft {
   return {
     ...createArtworkDraft(),
     submitter_relationship: 'guardian',
@@ -134,7 +139,7 @@ function readPersistedDraft(): SubmitArtworkDraft {
         age: readString(artwork.age),
         description: readString(artwork.description),
         f_name: readString(artwork.f_name),
-        id: createGuardianArtworkDraft().id,
+        id: createDefaultArtworkDraft().id,
         submitter_relationship: 'guardian',
         title: readString(artwork.title),
       },
@@ -143,10 +148,15 @@ function readPersistedDraft(): SubmitArtworkDraft {
           ? storedDraft.certificationAccepted
           : initialSubmitArtworkDraft.certificationAccepted,
       country: readString(storedDraft.country),
+      digitalSignature: readString(storedDraft.digitalSignature),
       notifications:
         typeof storedDraft.notifications === 'boolean'
           ? storedDraft.notifications
           : initialSubmitArtworkDraft.notifications,
+      promotionalUse:
+        typeof storedDraft.promotionalUse === 'boolean'
+          ? storedDraft.promotionalUse
+          : initialSubmitArtworkDraft.promotionalUse,
       region: readString(storedDraft.region),
       submitterEmail: readString(storedDraft.submitterEmail),
     };
@@ -160,6 +170,7 @@ function hasSubmissionErrors(errors: SubmitArtworkErrors) {
     errors.root ||
     errors.submitterEmail ||
     errors.certificationAccepted ||
+    errors.digitalSignature ||
     errors.country ||
     errors.region ||
     (errors.artworks && Object.keys(errors.artworks).length > 0),
@@ -228,6 +239,11 @@ function validateSubmitArtwork(
 
   if (!draft.certificationAccepted) {
     errors.certificationAccepted = 'Certification is required.';
+  }
+  if (!draft.digitalSignature.trim()) {
+    errors.digitalSignature = 'Digital signature is required.';
+  } else if (draft.digitalSignature.length > MAX_STRING_LEN) {
+    errors.digitalSignature = `Use ${MAX_STRING_LEN} characters or less.`;
   }
 
   if (Object.keys(itemErrors).length > 0) {
@@ -331,8 +347,8 @@ export function SubmitArtwork() {
         email: draft.submitterEmail.trim(),
         f_name: draft.artwork.f_name.trim() || undefined,
         file_type: fileType,
-        is_virtual: true,
         notifications: draft.notifications,
+        promotional_use: draft.promotionalUse,
         region: draft.region.trim() || undefined,
         release_hash: releaseHash,
         submitter_relationship: 'guardian',
@@ -411,7 +427,7 @@ export function SubmitArtwork() {
               <div className="sm:col-span-2">
                 <AccountTextField
                   error={errors.submitterEmail}
-                  label="Guardian email"
+                  label="Submitter email"
                   leadingIcon={<Mail aria-hidden="true" className="h-4 w-4" />}
                   maxLength={254}
                   name="submitterEmail"
@@ -514,6 +530,40 @@ export function SubmitArtwork() {
                     {errors.certificationAccepted}
                   </span>
                 )}
+              </span>
+            </label>
+
+            <div className="mt-3">
+              <AccountTextField
+                error={errors.digitalSignature}
+                label="Digital signature"
+                maxLength={200}
+                name="digitalSignature"
+                value={draft.digitalSignature}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    digitalSignature: event.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            <label className="mt-3 flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+              <input
+                checked={draft.promotionalUse}
+                className="accent-secondary-blue mt-1 h-4 w-4"
+                name="promotionalUse"
+                type="checkbox"
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    promotionalUse: event.target.checked,
+                  }))
+                }
+              />
+              <span>
+                I allow ICAF to use this artwork for promotional purposes.
               </span>
             </label>
 

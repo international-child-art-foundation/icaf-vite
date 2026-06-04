@@ -3,9 +3,9 @@ import { htmlParagraphs, renderButton, renderEmailDocument, renderInfoBox, textP
 
 export function buildArtworkSubmissionEmail(args: {
   userId: string;
-  verifyToken: string;
+  authActionToken: string;
 }): { subject: string; text: string; html: string } {
-  const link = `${APP_URL}/create-account?id=${encodeURIComponent(args.userId)}&token=${encodeURIComponent(args.verifyToken)}`;
+  const link = `${APP_URL}/create-account?id=${encodeURIComponent(args.userId)}&token=${encodeURIComponent(args.authActionToken)}`;
 
   const subject = 'Thanks for your artwork submission to ICAF!';
   const text = textParagraphs([

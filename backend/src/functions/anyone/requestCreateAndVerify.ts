@@ -13,7 +13,7 @@ import { sendCreateAndVerifyEmail } from "../../utils/emails/createAndVerify";
 import { parseJsonBody } from "../../utils/request";
 import { randomUUID } from "crypto";
 
-const VERIFY_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 days
+const AUTH_ACTION_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -55,23 +55,26 @@ export const handler = async (
 
     const user = emailResult.Items[0] as UserEntity;
 
-    if (!user.is_virtual || user.emailed_signup_at) {
+    if (!user.is_virtual) {
+      return okResponse;
+    }
+    if (user.email_blocked === true) {
       return okResponse;
     }
 
     const nowSeconds = Math.floor(Date.now() / 1000);
-    const verifyToken = randomUUID();
-    const verifyTokenExpiration = nowSeconds + VERIFY_TOKEN_TTL_SECONDS;
+    const authActionToken = randomUUID();
+    const authActionTokenExp = nowSeconds + AUTH_ACTION_TOKEN_TTL_SECONDS;
 
     await dynamodb.send(
       new UpdateCommand({
         TableName: TABLE_NAME,
         Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
         UpdateExpression:
-          "SET verify_token = :token, verify_token_expiration = :exp, emailed_signup_at = :emailSignupAt",
+          "SET auth_action_token = :token, auth_action_token_exp = :exp, emailed_signup_at = :emailSignupAt",
         ExpressionAttributeValues: {
-          ":token": verifyToken,
-          ":exp": verifyTokenExpiration,
+          ":token": authActionToken,
+          ":exp": authActionTokenExp,
           ":emailSignupAt": nowSeconds,
         },
       }),
@@ -80,7 +83,7 @@ export const handler = async (
     await sendCreateAndVerifyEmail({
       toEmail: user.email,
       userId: user.user_id,
-      verifyToken,
+      authActionToken,
     });
 
     return okResponse;

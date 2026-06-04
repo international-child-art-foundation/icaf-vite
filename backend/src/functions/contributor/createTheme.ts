@@ -2,14 +2,22 @@ import { getCurrentUser } from "@/utils/auth";
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import { TABLE_NAME, dynamodb } from "@/config/aws-clients";
 import { parseJsonBody } from "@/utils/request";
-import { HTTP_STATUS, COMMON_HEADERS, CommonErrors, ApiGatewayEvent, ApiGatewayResponse, ThemeEntity, createThemeResponse, buildThemeSK, hasMinimumRole } from "@icaf/shared";
+import { HTTP_STATUS, COMMON_HEADERS, CommonErrors, ApiGatewayEvent, ApiGatewayResponse, ThemeEntity, createThemeResponse, buildThemeSK, hasMinimumRole, sanitizeThemeEntity, validateThemeEntity } from "@icaf/shared";
 
 export const handler = async(event: ApiGatewayEvent): Promise<ApiGatewayResponse> => {
   try {
     const parsedBody = parseJsonBody<ThemeEntity>(event);
     if (!parsedBody.ok) return parsedBody.response;
 
-    const body = parsedBody.value;
+    const body = sanitizeThemeEntity(parsedBody.value);
+    const errors = validateThemeEntity({
+      ...body,
+      type: "THEME",
+    });
+    if (errors.length > 0) {
+      return CommonErrors.badRequest(errors.join("; "));
+    }
+
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
     if (!hasMinimumRole(currentUser.user.role, "contributor")) {
@@ -28,9 +36,11 @@ export const handler = async(event: ApiGatewayEvent): Promise<ApiGatewayResponse
         theme_family: body.theme_family,
         theme_instance: body.theme_instance,
         display_name: body.display_name,
+        featured_on: body.featured_on,
         colors: body.colors,
         ...(body.description && {description: body.description}),
-        ...(body.image_url && {image_url: body.image_url}),
+        f_img_url: body.f_img_url,
+        ...(body.i_img_url && {i_img_url: body.i_img_url}),
       },
         ConditionExpression: "attribute_not_exists(PK) AND attribute_not_exists(SK)",
     })

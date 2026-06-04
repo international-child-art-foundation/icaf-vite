@@ -8,7 +8,7 @@
  *   SK = '<news_id>'
  *
  * All news items live under a single partition. List queries return all of them
- * (dataset is small — a few dozen items). Clients sort by timestamp descending.
+ * (dataset is small — a few dozen items). Clients sort by ts descending.
  */
 
 export type NewsKind = 'article' | 'audio';
@@ -17,7 +17,7 @@ export interface NewsEntity {
     // ── Required ───────────────────────────────────────────────────────────
     news_id: string;    // UUID (also SK)
     source: string;     // e.g. 'National Law Review'
-    timestamp: number;  // Unix timestamp (seconds) — used for client-side sorting
+    ts: number;  // Unix ts (seconds) — used for client-side sorting
     type: 'NEWS';
 
     // ── Optional ───────────────────────────────────────────────────────────
@@ -31,7 +31,7 @@ export interface NewsEntity {
 
 export interface CreateNewsRequest {
     source: string;
-    timestamp: number;  // Unix seconds — caller supplies so dates can be backdated
+    ts: number;  // Unix seconds — caller supplies so dates can be backdated
     kind?: NewsKind;
     place?: string;
     body?: string;
@@ -40,8 +40,8 @@ export interface CreateNewsRequest {
     link?: string;
 }
 
-export type BulkCreateNewsItem = Omit<CreateNewsRequest, 'timestamp'> & {
-    timestamp?: number;
+export type BulkCreateNewsItem = Omit<CreateNewsRequest, 'ts'> & {
+    ts?: number;
 };
 
 export type BulkCreateNewsRequest = BulkCreateNewsItem[] | {
@@ -50,7 +50,7 @@ export type BulkCreateNewsRequest = BulkCreateNewsItem[] | {
 
 export interface UpdateNewsRequest {
     source?: string;
-    timestamp?: number;
+    ts?: number;
     kind?: NewsKind;
     place?: string;
     body?: string;

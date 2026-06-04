@@ -16,7 +16,6 @@ export const initialRegisterFormValues: RegisterFormValues = {
   has_newsletter_subscription: true,
   l_name: '',
   password: '',
-  role: 'user',
 };
 
 function isRealDate(value: string): boolean {
@@ -94,10 +93,6 @@ export function getRegisterFieldError(
       return 'Date of birth cannot be in the future.';
   }
 
-  if (name === 'role' && values.role !== 'guardian' && values.role !== 'user') {
-    return 'Choose an account type.';
-  }
-
   return undefined;
 }
 
@@ -111,7 +106,6 @@ export function validateRegisterForm(
     'password',
     'confirmPassword',
     'dob',
-    'role',
   ];
 
   return fieldNames.reduce<RegisterFormErrors>((errors, fieldName) => {
@@ -133,6 +127,5 @@ export function toDefaultRegistrationRequest(values: RegisterFormValues) {
     has_newsletter_subscription: values.has_newsletter_subscription,
     l_name: values.l_name.trim(),
     password: values.password,
-    role: values.role,
   };
 }

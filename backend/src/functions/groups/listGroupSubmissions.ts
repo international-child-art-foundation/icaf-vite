@@ -63,13 +63,13 @@ export const handler = async (
       group_type: item.group_type as GroupListItem["group_type"],
       title: item.title as string,
       class_name: item.class_name as string | undefined,
-      guardian_display_name: item.guardian_display_name as string | undefined,
+      submitter_display_name: item.submitter_display_name as string | undefined,
       country: item.country as string,
       region: item.region as string | undefined,
-      cover_art_ids: (item.cover_art_ids as string[]) ?? [],
+      preview_art_ids: ((item.member_art_ids as string[]) ?? []).slice(0, 4),
       member_count: ((item.member_art_ids as string[]) ?? []).length,
       status: item.status as GroupListItem["status"],
-      timestamp: item.timestamp as number,
+      ts: item.ts as number,
       notifications: item.notifications as boolean | undefined,
     }));
 

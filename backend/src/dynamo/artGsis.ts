@@ -5,8 +5,8 @@ const familyGalleryPk = (family: string) =>
   `FAMILY#${family}` as const;
 const instanceGalleryPk = (family: string, instance: string) =>
   `FAMILY#${family}#INSTANCE#${instance}` as const;
-const artGsiSk = (timestampMs: number, artId: string) =>
-  `TS#${timestampMs}#ART#${artId}` as const;
+const artGsiSk = (tsMs: number, artId: string) =>
+  `TS#${tsMs}#ART#${artId}` as const;
 
 interface ApprovedArtworkGsiAttrs {
   GALL_PK: string;
@@ -16,14 +16,14 @@ interface ApprovedArtworkGsiAttrs {
 }
 
 export function buildApprovedArtworkGsiAttrs(args: {
-  timestampMs: number;
+  tsMs: number;
   artId: string;
   family?: string;
   instance?: string;
 }): ApprovedArtworkGsiAttrs {
   const attrs: ApprovedArtworkGsiAttrs = {
     GALL_PK: galleryPk(),
-    ART_GSI_SK: artGsiSk(args.timestampMs, args.artId),
+    ART_GSI_SK: artGsiSk(args.tsMs, args.artId),
   };
   if (args.family) {
     attrs.FAM_PK = familyGalleryPk(args.family);

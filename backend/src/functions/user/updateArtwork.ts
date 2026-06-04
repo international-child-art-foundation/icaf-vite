@@ -73,6 +73,7 @@ export const handler = async (
     if (body.title !== undefined) { setExprParts.push("title = :title"); exprValues[":title"] = body.title; }
     if (body.description !== undefined) { setExprParts.push("description = :desc"); exprValues[":desc"] = body.description; }
     if (body.f_name !== undefined) { setExprParts.push("f_name = :f_name"); exprValues[":f_name"] = body.f_name; }
+    if (body.l_name !== undefined) { setExprParts.push("l_name = :l_name"); exprValues[":l_name"] = body.l_name; }
     if (body.age !== undefined) { setExprParts.push("age = :age"); exprValues[":age"] = body.age; }
     if (body.country !== undefined) { setExprParts.push("country = :country"); exprValues[":country"] = body.country; }
     if (body.region !== undefined) { setExprParts.push("#region = :region"); exprNames["#region"] = "region"; exprValues[":region"] = body.region; }

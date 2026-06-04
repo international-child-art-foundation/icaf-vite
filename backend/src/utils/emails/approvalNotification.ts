@@ -1,5 +1,5 @@
 import { SendEmailCommand } from "@aws-sdk/client-ses";
-import { sesClient, SES_FROM_EMAIL } from "../../config/aws-clients";
+import { sesClient, SES_CONFIGURATION_SET, SES_FROM_EMAIL } from "../../config/aws-clients";
 import { emailTags } from "./tags";
 import { buildApprovalEmail } from "./templates/approvalNotification";
 
@@ -21,6 +21,7 @@ export async function sendApprovalEmail(args: {
   await sesClient.send(
     new SendEmailCommand({
       Source: SES_FROM_EMAIL,
+      ...(SES_CONFIGURATION_SET ? { ConfigurationSetName: SES_CONFIGURATION_SET } : {}),
       Destination: { ToAddresses: [args.toEmail] },
       Tags: emailTags(`approval_${args.type}`),
       Message: {

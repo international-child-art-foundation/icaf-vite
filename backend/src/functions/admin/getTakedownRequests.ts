@@ -56,7 +56,7 @@ export const handler = async (
 
     const requests: TakedownRequestListItem[] = page.map((item) => ({
       tdr_id: item.tdr_id as string,
-      timestamp: item.timestamp as number,
+      ts: item.ts as number,
       status: item.status as TakedownRequestListItem["status"],
       art_id: item.art_id as string | undefined,
       group_id: item.group_id as string | undefined,

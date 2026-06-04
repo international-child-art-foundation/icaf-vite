@@ -20,7 +20,7 @@ type ReviewStatus = Extract<GroupStatus, 'approved' | 'hidden' | 'rejected'>;
 const editableFields: (keyof UpdateGroupRequest)[] = [
   'title',
   'class_name',
-  'guardian_display_name',
+  'submitter_display_name',
   'country',
   'region',
   'theme_family',
@@ -245,7 +245,7 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
                   </label>
                   <p className="text-xs text-neutral-500">
                     {groupTitle(group)} · {group.status} ·{' '}
-                    {formatDate(group.timestamp)}
+                    {formatDate(group.ts)}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <button

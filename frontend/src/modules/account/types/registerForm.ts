@@ -12,7 +12,7 @@ export type RegisterFormErrors = Partial<Record<RegisterFieldName, string>>;
 
 export type RegisterTextFieldName = Exclude<
   RegisterFieldName,
-  'has_newsletter_subscription' | 'role'
+  'has_newsletter_subscription'
 >;
 
 export type RegisterTextFieldConfig = {

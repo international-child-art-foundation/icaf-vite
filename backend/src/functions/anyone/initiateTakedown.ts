@@ -38,7 +38,7 @@ export const handler = async (
           PK: "TDR",
           SK: `TS#${nowSeconds}#TDR_ID#${tdr_id}`,
           tdr_id,
-          timestamp: nowSeconds,
+          ts: nowSeconds,
           status: "requesting",
           requester_email: body.requester_email.trim(),
           requester_name: body.requester_name.trim(),

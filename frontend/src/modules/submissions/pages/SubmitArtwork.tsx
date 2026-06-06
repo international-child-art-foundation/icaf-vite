@@ -1,10 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { ChevronLeft, Globe2, Mail, Send } from 'lucide-react';
 import { submitGuestArtwork } from '@/api/public';
 import { uploadToPresignedUrl } from '@/api/uploads';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { ArtworkMuralWindow } from '@/modules/submissions/components/ArtworkMuralWindow';
+import {
+  getSubmitArtworkPageCopy,
+  type SubmitterFlow,
+} from '@/modules/submissions/data/submitArtworkCopy';
 import type {
   ArtworkDraft,
   ArtworkGroupSubmissionErrors,
@@ -22,12 +26,15 @@ import {
 import { Button } from '@/shared/components/ui/button';
 import {
   MAX_DESCRIPTION_LEN,
+  MAX_ARTIST_AGE,
   MAX_STRING_LEN,
   MAX_TITLE_LEN,
   S3_MAX_FILE_SIZE_BYTES,
+  type SubmitterRelationship,
   UPLOAD_FILE_TYPES,
 } from '@icaf/shared';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { ArtworkDisclaimer } from '@/modules/submissions/components/ArtworkDisclaimer';
 
 type SubmissionStatus = 'idle' | 'submitting' | 'success';
 
@@ -180,6 +187,10 @@ function hasSubmissionErrors(errors: SubmitArtworkErrors) {
 function validateSubmitArtwork(
   draft: SubmitArtworkDraft,
   file: File | undefined,
+  options: {
+    artworkDetailsMode: 'basic' | 'full';
+    requiresDigitalSignature: boolean;
+  },
 ): SubmitArtworkErrors {
   const errors: SubmitArtworkErrors = {};
   const artworkErrors: NonNullable<SubmitArtworkErrors['artworks']> = {};
@@ -219,14 +230,16 @@ function validateSubmitArtwork(
     itemErrors.title = `Use ${MAX_TITLE_LEN} characters or less.`;
   }
 
-  if (draft.artwork.f_name.length > MAX_STRING_LEN) {
-    itemErrors.f_name = `Use ${MAX_STRING_LEN} characters or less.`;
-  }
+  if (options.artworkDetailsMode === 'full') {
+    if (draft.artwork.f_name.length > MAX_STRING_LEN) {
+      itemErrors.f_name = `Use ${MAX_STRING_LEN} characters or less.`;
+    }
 
-  if (draft.artwork.age.trim()) {
-    const age = Number(draft.artwork.age);
-    if (!Number.isInteger(age) || age < 1 || age > 120) {
-      itemErrors.age = 'Enter a whole number from 1 to 120.';
+    if (draft.artwork.age.trim()) {
+      const age = Number(draft.artwork.age);
+      if (!Number.isInteger(age) || age < 1 || age > MAX_ARTIST_AGE) {
+        itemErrors.age = `Enter a whole number from 1 to ${MAX_ARTIST_AGE}.`;
+      }
     }
   }
 
@@ -240,10 +253,12 @@ function validateSubmitArtwork(
   if (!draft.certificationAccepted) {
     errors.certificationAccepted = 'Certification is required.';
   }
-  if (!draft.digitalSignature.trim()) {
-    errors.digitalSignature = 'Digital signature is required.';
-  } else if (draft.digitalSignature.length > MAX_STRING_LEN) {
-    errors.digitalSignature = `Use ${MAX_STRING_LEN} characters or less.`;
+  if (options.requiresDigitalSignature) {
+    if (!draft.digitalSignature.trim()) {
+      errors.digitalSignature = 'Digital signature is required.';
+    } else if (draft.digitalSignature.length > MAX_STRING_LEN) {
+      errors.digitalSignature = `Use ${MAX_STRING_LEN} characters or less.`;
+    }
   }
 
   if (Object.keys(itemErrors).length > 0) {
@@ -254,9 +269,26 @@ function validateSubmitArtwork(
   return errors;
 }
 
+function getSubmitterFlow(value: string | undefined): SubmitterFlow {
+  return value === 'educator' ? 'educator' : 'parent';
+}
+
+function getFlowPath(flow: SubmitterFlow, nested = false) {
+  return `/submit-artwork/single/${flow}${nested ? '/artworks' : ''}`;
+}
+
 export function SubmitArtwork() {
   const location = useLocation();
   const navigate = useNavigate();
+  const params = useParams();
+  const submitterFlow = getSubmitterFlow(params.submitterFlow);
+  const isEducatorFlow = submitterFlow === 'educator';
+  const copy = getSubmitArtworkPageCopy(submitterFlow, 'single');
+  const artworkDetailsMode = isEducatorFlow ? 'basic' : 'full';
+  const submitterRelationship: SubmitterRelationship = isEducatorFlow
+    ? 'teacher'
+    : 'guardian';
+  const artworkSectionRef = useRef<HTMLElement | null>(null);
   const [draft, setDraft] = useState(readPersistedDraft);
   const [file, setFile] = useState<File | undefined>();
   const [previewDataUrl, setPreviewDataUrl] = useState<string | undefined>();
@@ -266,7 +298,7 @@ export function SubmitArtwork() {
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
 
   const isSubmitting = status === 'submitting';
-  const isArtworkWindowOpen = location.pathname === '/submit-artwork/artworks';
+  const isArtworkWindowOpen = location.pathname.endsWith('/artworks');
   const themeParams = useMemo(
     () => readThemeParams(location.search),
     [location.search],
@@ -281,6 +313,38 @@ export function SubmitArtwork() {
   );
   const viewerError =
     errors.root ?? errors.artworks?.[draft.artwork.id]?.file ?? null;
+  const artworkAge = Number(draft.artwork.age);
+  const hasOverageArtwork =
+    artworkDetailsMode === 'full' &&
+    draft.artwork.age.trim() !== '' &&
+    !Number.isNaN(artworkAge) &&
+    artworkAge > MAX_ARTIST_AGE;
+  const liveAgeError =
+    artworkDetailsMode === 'full' && draft.artwork.age.trim()
+      ? !Number.isInteger(artworkAge) || artworkAge < 1
+        ? `Enter a whole number from 1 to ${MAX_ARTIST_AGE}.`
+        : artworkAge > MAX_ARTIST_AGE
+          ? `Artist age must be ${MAX_ARTIST_AGE} or younger.`
+          : undefined
+      : undefined;
+  const displayedArtworkErrors = useMemo(() => {
+    const nextErrors = { ...(errors.artworks ?? {}) };
+    const currentArtworkErrors = { ...nextErrors[draft.artwork.id] };
+    delete currentArtworkErrors.age;
+
+    if (liveAgeError) {
+      nextErrors[draft.artwork.id] = {
+        ...currentArtworkErrors,
+        age: liveAgeError,
+      };
+    } else if (Object.keys(currentArtworkErrors).length > 0) {
+      nextErrors[draft.artwork.id] = currentArtworkErrors;
+    } else {
+      delete nextErrors[draft.artwork.id];
+    }
+
+    return Object.keys(nextErrors).length > 0 ? nextErrors : undefined;
+  }, [draft.artwork.id, errors.artworks, liveAgeError]);
 
   function updateArtwork<Name extends keyof ArtworkDraft>(
     artworkId: string,
@@ -293,7 +357,7 @@ export function SubmitArtwork() {
       artwork: {
         ...current.artwork,
         [name]: value,
-        submitter_relationship: 'guardian',
+        submitter_relationship: submitterRelationship,
       },
     }));
   }
@@ -322,7 +386,12 @@ export function SubmitArtwork() {
     event.preventDefault();
     setSubmitMessage(null);
 
-    const nextErrors = validateSubmitArtwork(draft, file);
+    if (hasOverageArtwork) return;
+
+    const nextErrors = validateSubmitArtwork(draft, file, {
+      artworkDetailsMode,
+      requiresDigitalSignature: !isEducatorFlow,
+    });
     setErrors(nextErrors);
 
     if (hasSubmissionErrors(nextErrors)) return;
@@ -341,17 +410,23 @@ export function SubmitArtwork() {
       if (!fileType) throw new Error(`${uploadFile.name} is not supported.`);
 
       const response = await submitGuestArtwork({
-        age: draft.artwork.age.trim() ? Number(draft.artwork.age) : undefined,
+        age:
+          artworkDetailsMode === 'full' && draft.artwork.age.trim()
+            ? Number(draft.artwork.age)
+            : undefined,
         country: draft.country.trim(),
         description: draft.artwork.description.trim() || undefined,
         email: draft.submitterEmail.trim(),
-        f_name: draft.artwork.f_name.trim() || undefined,
+        f_name:
+          artworkDetailsMode === 'full'
+            ? draft.artwork.f_name.trim() || undefined
+            : undefined,
         file_type: fileType,
         notifications: draft.notifications,
-        promotional_use: draft.promotionalUse,
+        promotional_use: isEducatorFlow ? false : draft.promotionalUse,
         region: draft.region.trim() || undefined,
         release_hash: releaseHash,
-        submitter_relationship: 'guardian',
+        submitter_relationship: submitterRelationship,
         theme_family: themeParams.theme_family || undefined,
         theme_instance: themeParams.theme_family
           ? themeParams.theme_instance || undefined
@@ -397,7 +472,7 @@ export function SubmitArtwork() {
 
   return (
     <div className="my-auto h-full flex-grow bg-slate-50 py-8 sm:py-12">
-      <div className="content-w m-pad my-auto flex flex-col gap-2">
+      <div className="content-w m-pad my-auto flex flex-col gap-4">
         <div className="mx-auto w-full max-w-3xl">
           <Button onClick={() => void navigate(-1)}>
             <ChevronLeft />
@@ -409,25 +484,26 @@ export function SubmitArtwork() {
           noValidate
           onSubmit={handleSubmit}
         >
-          <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-xl sm:p-6">
-            <div className="mb-5">
-              <p className="text-secondary-blue mb-2 text-xs font-bold uppercase tracking-widest">
-                Artwork submission
+          <div className="flex flex-col gap-6 rounded-lg border border-slate-200 bg-white p-4 shadow-xl sm:p-6">
+            <div className="flex flex-col gap-2">
+              <p className="text-secondary-blue text-xs font-bold uppercase tracking-widest">
+                {copy.kicker}
               </p>
-              <h1 className="font-montserrat text-2xl font-semibold text-slate-950 sm:text-3xl">
-                Submit artwork
-              </h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-                Submit one child&apos;s artwork with its image and artwork
-                details.
-              </p>
+              <div>
+                <h1 className="font-montserrat text-2xl font-semibold text-slate-950 sm:text-3xl">
+                  {copy.title}
+                </h1>
+                <p className="max-w-2xl text-sm leading-6 text-slate-600">
+                  {copy.description}
+                </p>
+              </div>
             </div>
 
             <section className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <AccountTextField
                   error={errors.submitterEmail}
-                  label="Submitter email"
+                  label="Your email address"
                   leadingIcon={<Mail aria-hidden="true" className="h-4 w-4" />}
                   maxLength={254}
                   name="submitterEmail"
@@ -470,32 +546,37 @@ export function SubmitArtwork() {
               />
             </section>
 
-            <section className="mt-6 flex flex-col gap-3">
+            <section ref={artworkSectionRef} className="flex flex-col gap-3">
               <div>
                 <h2 className="font-montserrat text-xl font-semibold text-slate-950">
                   Artwork
                 </h2>
                 {themeParams.theme_family && (
-                  <p className="mt-1 text-xs font-semibold text-slate-500">
+                  <p className="text-xs font-semibold text-slate-500">
                     Theme: {themeParams.theme_family}
                     {themeParams.theme_instance
                       ? ` ${formatThemeInstance(themeParams.theme_instance)}`
                       : ''}
                   </p>
                 )}
-                <p className="mt-0.5 text-xs leading-5 text-slate-500">
-                  Click or tap the box to upload, review, and annotate one
-                  artwork.
+                <p className="text-xs leading-5 text-slate-500">
+                  {copy.artworkHelpText}
                 </p>
               </div>
               <ArtworkMuralWindow
+                artworkDetailsMode={artworkDetailsMode}
                 artworks={[displayedArtwork]}
-                errors={errors.artworks}
+                errors={displayedArtworkErrors}
+                focusedArtworkId={
+                  hasOverageArtwork ? draft.artwork.id : undefined
+                }
                 isOpen={isArtworkWindowOpen}
                 maxCount={1}
                 onArtworkChange={updateArtwork}
                 onClose={() =>
-                  void navigate(`/submit-artwork${location.search}`)
+                  void navigate(
+                    `${getFlowPath(submitterFlow)}${location.search}`,
+                  )
                 }
                 onDeleteArtwork={deleteArtwork}
                 onFilesSelected={(newFiles) => {
@@ -503,13 +584,17 @@ export function SubmitArtwork() {
                   if (nextFile) void attachFile(nextFile);
                 }}
                 onOpen={() =>
-                  void navigate(`/submit-artwork/artworks${location.search}`)
+                  void navigate(
+                    `${getFlowPath(submitterFlow, true)}${location.search}`,
+                  )
                 }
                 onRotateArtwork={() => void rotateArtwork()}
               />
             </section>
 
-            <label className="mt-5 flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+            {!isEducatorFlow && <ArtworkDisclaimer />}
+
+            <label className="flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
               <input
                 checked={draft.certificationAccepted}
                 className="accent-secondary-blue mt-1 h-4 w-4"
@@ -526,57 +611,80 @@ export function SubmitArtwork() {
                 I certify that I have the right to submit this artwork to ICAF
                 on behalf of its creator.
                 {errors.certificationAccepted && (
-                  <span className="text-tertiary-red mt-1 block text-xs font-semibold">
+                  <span className="text-tertiary-red block text-xs font-semibold">
                     {errors.certificationAccepted}
                   </span>
                 )}
               </span>
             </label>
 
-            <div className="mt-3">
-              <AccountTextField
-                error={errors.digitalSignature}
-                label="Digital signature"
-                maxLength={200}
-                name="digitalSignature"
-                value={draft.digitalSignature}
-                onChange={(event) =>
-                  setDraft((current) => ({
-                    ...current,
-                    digitalSignature: event.target.value,
-                  }))
-                }
-              />
-            </div>
+            {!isEducatorFlow && (
+              <>
+                <div className="">
+                  <AccountTextField
+                    error={errors.digitalSignature}
+                    label="Digital signature"
+                    placeholder="Your full legal name"
+                    maxLength={200}
+                    name="digitalSignature"
+                    value={draft.digitalSignature}
+                    onChange={(event) =>
+                      setDraft((current) => ({
+                        ...current,
+                        digitalSignature: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
 
-            <label className="mt-3 flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-              <input
-                checked={draft.promotionalUse}
-                className="accent-secondary-blue mt-1 h-4 w-4"
-                name="promotionalUse"
-                type="checkbox"
-                onChange={(event) =>
-                  setDraft((current) => ({
-                    ...current,
-                    promotionalUse: event.target.checked,
-                  }))
-                }
-              />
-              <span>
-                I allow ICAF to use this artwork for promotional purposes.
-              </span>
-            </label>
+                <label className="flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+                  <input
+                    checked={draft.promotionalUse}
+                    className="accent-secondary-blue mt-1 h-4 w-4"
+                    name="promotionalUse"
+                    type="checkbox"
+                    onChange={(event) =>
+                      setDraft((current) => ({
+                        ...current,
+                        promotionalUse: event.target.checked,
+                      }))
+                    }
+                  />
+                  <span>
+                    I allow ICAF to use this artwork for promotional purposes.
+                  </span>
+                </label>
+              </>
+            )}
+
+            {hasOverageArtwork && (
+              <div
+                className="text-tertiary-red rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold"
+                role="alert"
+              >
+                <p>
+                  Submit is disabled because one or more artworks are for an
+                  artist of age {artworkAge}. Artwork submissions must be for
+                  artists age {MAX_ARTIST_AGE} or younger.
+                </p>
+                <p className="mt-1 text-xs leading-5 text-red-700">
+                  Artwork details: {draft.artwork.title || 'Untitled'}
+                  {draft.artwork.f_name ? ` by ${draft.artwork.f_name}` : ''}
+                  {file?.name ? `, file ${file.name}` : ''}
+                </p>
+              </div>
+            )}
 
             <Button
-              className="mt-6 h-12 w-full rounded-full text-base font-bold"
-              disabled={isSubmitting}
+              className="h-12 w-full rounded-full text-base font-bold"
+              disabled={isSubmitting || hasOverageArtwork}
               type="submit"
             >
               <Send aria-hidden="true" className="h-4 w-4" />
-              {isSubmitting ? 'Submitting...' : 'Submit artwork'}
+              {isSubmitting ? 'Submitting...' : copy.submitLabel}
             </Button>
             {viewerError && (
-              <p className="text-tertiary-red mt-2 text-xs font-semibold">
+              <p className="text-tertiary-red text-xs font-semibold">
                 {viewerError}
               </p>
             )}
@@ -584,8 +692,8 @@ export function SubmitArtwork() {
               <div
                 className={
                   status === 'success'
-                    ? 'text-secondary-green mb-5 mt-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold'
-                    : 'text-tertiary-red mb-5 mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold'
+                    ? 'text-secondary-green rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold'
+                    : 'text-tertiary-red rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold'
                 }
                 role={status === 'success' ? 'status' : 'alert'}
               >

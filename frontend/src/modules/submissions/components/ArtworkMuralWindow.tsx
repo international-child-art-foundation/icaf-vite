@@ -20,7 +20,9 @@ export type ArtworkWithPreview = ArtworkDraft & {
 
 export type ArtworkMuralWindowProps = {
   artworks: ArtworkWithPreview[];
+  artworkDetailsMode?: 'basic' | 'full';
   errors?: Record<string, Partial<Record<keyof ArtworkDraft | 'file', string>>>;
+  focusedArtworkId?: string | null;
   isOpen: boolean;
   maxCount: number;
   onArtworkChange: <Name extends keyof ArtworkDraft>(
@@ -326,6 +328,7 @@ function ArtworkMural({
 function ArtworkDetailsPane({
   activeArtwork,
   activeErrors,
+  artworkDetailsMode,
   artworkCount,
   hasSelectedArtwork,
   onArtworkChange,
@@ -334,6 +337,7 @@ function ArtworkDetailsPane({
 }: {
   activeArtwork: ArtworkWithPreview | undefined;
   activeErrors?: Partial<Record<keyof ArtworkDraft | 'file', string>>;
+  artworkDetailsMode: 'basic' | 'full';
   artworkCount: number;
   hasSelectedArtwork: boolean;
   onArtworkChange: <Name extends keyof ArtworkDraft>(
@@ -392,7 +396,12 @@ function ArtworkDetailsPane({
         </p>
       )}
 
-      <div className="grid gap-2 sm:grid-cols-[1fr_1fr_88px]">
+      <div
+        className={cn(
+          'grid gap-2',
+          artworkDetailsMode === 'full' && 'sm:grid-cols-[1fr_1fr_88px]',
+        )}
+      >
         <SeamlessInput
           error={activeErrors?.title}
           label="Artwork title"
@@ -403,26 +412,31 @@ function ArtworkDetailsPane({
             activeArtwork && onArtworkChange(activeArtwork.id, 'title', value)
           }
         />
-        <SeamlessInput
-          error={activeErrors?.f_name}
-          label="Artist first name"
-          maxLength={200}
-          placeholder="Artist first name"
-          value={activeArtwork?.f_name ?? ''}
-          onChange={(value) =>
-            activeArtwork && onArtworkChange(activeArtwork.id, 'f_name', value)
-          }
-        />
-        <SeamlessInput
-          error={activeErrors?.age}
-          inputMode="numeric"
-          label="Artist age"
-          placeholder="Age"
-          value={activeArtwork?.age ?? ''}
-          onChange={(value) =>
-            activeArtwork && onArtworkChange(activeArtwork.id, 'age', value)
-          }
-        />
+        {artworkDetailsMode === 'full' && (
+          <>
+            <SeamlessInput
+              error={activeErrors?.f_name}
+              label="Artist first name"
+              maxLength={200}
+              placeholder="Artist first name"
+              value={activeArtwork?.f_name ?? ''}
+              onChange={(value) =>
+                activeArtwork &&
+                onArtworkChange(activeArtwork.id, 'f_name', value)
+              }
+            />
+            <SeamlessInput
+              error={activeErrors?.age}
+              inputMode="numeric"
+              label="Artist age"
+              placeholder="Age"
+              value={activeArtwork?.age ?? ''}
+              onChange={(value) =>
+                activeArtwork && onArtworkChange(activeArtwork.id, 'age', value)
+              }
+            />
+          </>
+        )}
       </div>
 
       <SeamlessTextarea
@@ -442,7 +456,9 @@ function ArtworkDetailsPane({
 
 export function ArtworkMuralWindow({
   artworks,
+  artworkDetailsMode = 'full',
   errors,
+  focusedArtworkId,
   isOpen,
   maxCount,
   onArtworkChange,
@@ -472,6 +488,15 @@ export function ArtworkMuralWindow({
     activeArtwork && errors ? errors[activeArtwork.id] : undefined;
   const hasImages = uploadedArtworkCount > 0;
   const hasSelectedArtwork = selectedIndex !== null;
+
+  useEffect(() => {
+    if (!focusedArtworkId) return;
+
+    const nextIndex = artworks.findIndex(
+      (artwork) => artwork.id === focusedArtworkId,
+    );
+    if (nextIndex >= 0) setSelectedIndex(nextIndex);
+  }, [artworks, focusedArtworkId]);
 
   useEffect(() => {
     if (isSingleArtwork) {
@@ -592,6 +617,7 @@ export function ArtworkMuralWindow({
       <ArtworkDetailsPane
         activeArtwork={activeArtwork}
         activeErrors={activeErrors}
+        artworkDetailsMode={artworkDetailsMode}
         artworkCount={uploadedArtworkCount}
         hasSelectedArtwork={hasSelectedArtwork}
         onArtworkChange={onArtworkChange}

@@ -89,6 +89,24 @@ export class ApiError extends Error {
   }
 }
 
+export class InvalidApiResponseError extends Error {
+  readonly body: unknown;
+  readonly status: number;
+
+  constructor(response: Response, body: unknown) {
+    super('The site could not reach the ICAF account service.');
+    this.name = 'InvalidApiResponseError';
+    this.body = body;
+    this.status = response.status;
+  }
+}
+
+export function getApiErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof ApiError) return error.message;
+  if (error instanceof InvalidApiResponseError) return error.message;
+  return fallback;
+}
+
 export async function apiRequest<TResponse, TBody = never>(
   path: string,
   options: ApiRequestOptions<TBody> = {},
@@ -112,6 +130,10 @@ export async function apiRequest<TResponse, TBody = never>(
 
   if (!response.ok) {
     throw new ApiError(response, responseBody);
+  }
+
+  if (typeof responseBody === 'string') {
+    throw new InvalidApiResponseError(response, responseBody);
   }
 
   return responseBody as TResponse;

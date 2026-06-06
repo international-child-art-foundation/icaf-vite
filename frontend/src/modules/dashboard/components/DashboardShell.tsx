@@ -6,8 +6,10 @@ import { NewsAdminPanel } from '../components/NewsAdminPanel';
 import { ReviewArtworkQueue } from '../components/ReviewArtworkQueue';
 import { ReviewGroupQueue } from '../components/ReviewGroupQueue';
 import { canAdmin, canReview } from '@/modules/dashboard/utils/dashboardFormat';
-import { dashboardTabNames } from '@/modules/dashboard/data/DashboardTabs';
-import { dashboardTabData } from '@/modules/dashboard/data/DashboardTabs';
+import {
+  dashboardTabData,
+  getDashboardTabsForRole,
+} from '@/modules/dashboard/data/DashboardTabs';
 import { SetURLSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
@@ -67,7 +69,7 @@ export function DashboardShell({
   } else {
     content = <OverviewModules role={role} />;
   }
-  const tabsArray = Array.from(dashboardTabNames);
+  const tabsArray = getDashboardTabsForRole(role);
 
   return (
     <div className={`${className} site-w m-pad z-10 py-10`}>

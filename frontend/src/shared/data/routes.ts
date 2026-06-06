@@ -81,6 +81,10 @@ export const routes: RouteAliasGroup[] = [
     aliases: ['/takedown'],
   },
   {
+    main: '/submit-artwork',
+    aliases: ['/submit', '/artwork-submission', '/submit-art'],
+  },
+  {
     main: '/access',
     aliases: ['/acess', '/access-magazine'],
   },

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { LockKeyhole, Mail } from 'lucide-react';
 import type { LoginResponse } from '@icaf/shared';
 import { login } from '@/api/auth';
-import { ApiError } from '@/api/client';
+import { getApiErrorMessage } from '@/api/client';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { loginTextFields } from '@/modules/account/data/loginFields';
 import type {
@@ -32,8 +32,7 @@ const fieldIcons: Record<LoginFieldName, ReactNode> = {
 };
 
 function getSubmitError(error: unknown): string {
-  if (error instanceof ApiError) return error.message;
-  return 'Login failed. Please try again.';
+  return getApiErrorMessage(error, 'Login failed. Please try again.');
 }
 
 export const LoginForm = ({ initialEmail = '', onSuccess }: LoginFormProps) => {

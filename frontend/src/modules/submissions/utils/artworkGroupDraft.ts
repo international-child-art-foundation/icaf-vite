@@ -3,11 +3,13 @@ import {
   GROUP_MAX_MEMBERS,
   GROUP_MAX_STRING_LEN,
   GROUP_MAX_TITLE_LEN,
+  MAX_ARTIST_AGE,
   MAX_DESCRIPTION_LEN,
   MAX_STRING_LEN,
   MAX_TITLE_LEN,
   S3_MAX_FILE_SIZE_BYTES,
   type SubmitArtworkToGroupRequest,
+  type SubmitterRelationship,
   UPLOAD_FILE_TYPES,
 } from '@icaf/shared';
 import type {
@@ -81,7 +83,13 @@ export function formatFileSize(bytes: number) {
 export function validateArtworkGroupSubmission(
   draft: ArtworkGroupSubmissionDraft,
   files: Record<string, File | undefined>,
+  options: {
+    artworkDetailsMode?: 'basic' | 'full';
+    requiresDigitalSignature?: boolean;
+  } = {},
 ): ArtworkGroupSubmissionErrors {
+  const artworkDetailsMode = options.artworkDetailsMode ?? 'full';
+  const requiresDigitalSignature = options.requiresDigitalSignature ?? true;
   const errors: ArtworkGroupSubmissionErrors = {};
   const groupErrors: ArtworkGroupSubmissionErrors['group'] = {};
   const artworkErrors: NonNullable<ArtworkGroupSubmissionErrors['artworks']> =
@@ -163,14 +171,16 @@ export function validateArtworkGroupSubmission(
       itemErrors.title = `Use ${MAX_TITLE_LEN} characters or less.`;
     }
 
-    if (artwork.f_name.length > MAX_STRING_LEN) {
-      itemErrors.f_name = `Use ${MAX_STRING_LEN} characters or less.`;
-    }
+    if (artworkDetailsMode === 'full') {
+      if (artwork.f_name.length > MAX_STRING_LEN) {
+        itemErrors.f_name = `Use ${MAX_STRING_LEN} characters or less.`;
+      }
 
-    if (artwork.age.trim()) {
-      const age = Number(artwork.age);
-      if (!Number.isInteger(age) || age < 1 || age > 120) {
-        itemErrors.age = 'Enter a whole number from 1 to 120.';
+      if (artwork.age.trim()) {
+        const age = Number(artwork.age);
+        if (!Number.isInteger(age) || age < 1 || age > MAX_ARTIST_AGE) {
+          itemErrors.age = `Enter a whole number from 1 to ${MAX_ARTIST_AGE}.`;
+        }
       }
     }
 
@@ -189,10 +199,12 @@ export function validateArtworkGroupSubmission(
   if (!draft.certificationAccepted) {
     errors.certificationAccepted = 'Certification is required.';
   }
-  if (!draft.digitalSignature.trim()) {
-    errors.digitalSignature = 'Digital signature is required.';
-  } else if (draft.digitalSignature.length > GROUP_MAX_STRING_LEN) {
-    errors.digitalSignature = `Use ${GROUP_MAX_STRING_LEN} characters or less.`;
+  if (requiresDigitalSignature) {
+    if (!draft.digitalSignature.trim()) {
+      errors.digitalSignature = 'Digital signature is required.';
+    } else if (draft.digitalSignature.length > GROUP_MAX_STRING_LEN) {
+      errors.digitalSignature = `Use ${GROUP_MAX_STRING_LEN} characters or less.`;
+    }
   }
 
   if (Object.keys(groupErrors).length > 0) errors.group = groupErrors;
@@ -229,21 +241,33 @@ export function toArtworkRequest(
   releaseHash: string,
   group: ArtworkGroupInfo,
   promotionalUse: boolean,
+  options: {
+    artworkDetailsMode?: 'basic' | 'full';
+    submitterRelationship?: SubmitterRelationship;
+  } = {},
 ): SubmitArtworkToGroupRequest {
   const fileType = getUploadFileType(file);
   if (!fileType) throw new Error('Unsupported file type.');
+  const artworkDetailsMode = options.artworkDetailsMode ?? 'full';
 
   return {
-    age: artwork.age.trim() ? Number(artwork.age) : undefined,
+    age:
+      artworkDetailsMode === 'full' && artwork.age.trim()
+        ? Number(artwork.age)
+        : undefined,
     country: group.country.trim(),
     description: artwork.description.trim() || undefined,
-    f_name: artwork.f_name.trim() || undefined,
+    f_name:
+      artworkDetailsMode === 'full'
+        ? artwork.f_name.trim() || undefined
+        : undefined,
     file_type: fileType,
     notifications: group.notifications,
     promotional_use: promotionalUse,
     region: group.region.trim() || undefined,
     release_hash: releaseHash,
-    submitter_relationship: artwork.submitter_relationship,
+    submitter_relationship:
+      options.submitterRelationship ?? artwork.submitter_relationship,
     theme_family: group.theme_family.trim() || undefined,
     theme_instance: group.theme_instance.trim() || undefined,
     title: artwork.title.trim() || undefined,

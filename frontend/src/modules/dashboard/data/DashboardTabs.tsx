@@ -5,7 +5,9 @@ import {
   GalleryHorizontal,
   Newspaper,
 } from 'lucide-react';
+import type { Role } from '@icaf/shared';
 import { TabData } from '@/modules/dashboard/types/dashboardTypes';
+import { canAdmin, canReview } from '@/modules/dashboard/utils/dashboardFormat';
 
 export const dashboardTabData = {
   overview: {
@@ -55,3 +57,11 @@ export type DashboardTabKey = keyof typeof dashboardTabData;
 export const dashboardTabNames = Object.keys(
   dashboardTabData,
 ) as DashboardTabKey[];
+
+export function getDashboardTabsForRole(role: Role | null): DashboardTabKey[] {
+  return dashboardTabNames.filter((tabName) => {
+    if (dashboardTabData[tabName].roles === 'admin') return canAdmin(role);
+    if (dashboardTabData[tabName].roles === 'review') return canReview(role);
+    return true;
+  });
+}

@@ -2,14 +2,13 @@ import type { AuthStatusResponse, Role } from '@icaf/shared';
 import { Seo } from '@/modules/content/components/shared/Seo';
 import { PageBottomSpacer } from '@/modules/content/components/shared/PageBottomSpacer';
 import { DashboardShell } from '../components/DashboardShell';
-import { canAdmin, canReview } from '../utils/dashboardFormat';
 import { DashboardSplash } from '@/modules/dashboard/assets/DashboardSplash';
 import { useSearchParams } from 'react-router-dom';
 import {
   dashboardTabData,
   DashboardTabKey,
+  getDashboardTabsForRole,
 } from '@/modules/dashboard/data/DashboardTabs';
-import { dashboardTabNames } from '@/modules/dashboard/data/DashboardTabs';
 
 const dashboardMetadata = {
   title: 'My ICAF | ICAF',
@@ -24,11 +23,7 @@ type DashboardProps = {
 export function Dashboard({ auth }: DashboardProps) {
   const role: Role = auth.role;
   const [searchParams, setSearchParams] = useSearchParams();
-  const tabs = dashboardTabNames.filter((tabName) => {
-    if (dashboardTabData[tabName].roles === 'admin') return canAdmin(role);
-    if (dashboardTabData[tabName].roles === 'review') return canReview(role);
-    return true;
-  });
+  const tabs = getDashboardTabsForRole(role);
   const requestedTab = searchParams.get('tab') as DashboardTabKey;
   const activeTab =
     requestedTab &&

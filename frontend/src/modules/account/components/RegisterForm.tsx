@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent, ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { CalendarDays, Mail, User } from 'lucide-react';
 import type { DefaultRegistrationResponse } from '@icaf/shared';
 import { defaultRegistration } from '@/api/auth';
-import { ApiError } from '@/api/client';
+import { getApiErrorMessage } from '@/api/client';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { registerTextFields } from '@/modules/account/data/registerFields';
 import type {
@@ -30,8 +31,7 @@ const fieldIcons: Partial<Record<RegisterTextFieldName, ReactNode>> = {
 };
 
 function getSubmitError(error: unknown): string {
-  if (error instanceof ApiError) return error.message;
-  return 'Registration failed. Please try again.';
+  return getApiErrorMessage(error, 'Registration failed. Please try again.');
 }
 
 export const RegisterForm = () => {
@@ -168,7 +168,10 @@ export const RegisterForm = () => {
             className="text-tertiary-red mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold"
             role="alert"
           >
-            {submitError}
+            <p>{submitError}</p>
+            <Link className="mt-2 inline-block underline" to="/contact">
+              Visit our contact page for help.
+            </Link>
           </div>
         )}
 

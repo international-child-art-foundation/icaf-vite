@@ -1,3 +1,6 @@
+allowBuilds:
+  esbuild: true
+  sharp: true
 ignoredBuiltDependencies:
   - esbuild
 packages:
@@ -5,3 +8,4 @@ packages:
   - "backend"
   - "infra"
   - "shared"
+minimumReleaseAge: 10080

@@ -4,7 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { CheckCircle2, KeyRound } from 'lucide-react';
 import { MAX_PASSWORD_LEN } from '@icaf/shared';
 import { createAndVerify } from '@/api/auth';
-import { ApiError } from '@/api/client';
+import { getApiErrorMessage } from '@/api/client';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import {
   getConfirmPasswordError,
@@ -13,8 +13,7 @@ import {
 import { Button } from '@/shared/components/ui/button';
 
 function getSubmitError(error: unknown): string {
-  if (error instanceof ApiError) return error.message;
-  return 'Account setup failed. Please try again.';
+  return getApiErrorMessage(error, 'Account setup failed. Please try again.');
 }
 
 export const CreateAccount = () => {
@@ -120,8 +119,13 @@ export const CreateAccount = () => {
               className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-tertiary-red"
               role="alert"
             >
-              {submitError ??
-                'This account link is missing required information.'}
+              <p>
+                {submitError ??
+                  'This account link is missing required information.'}
+              </p>
+              <Link className="mt-2 inline-block underline" to="/contact">
+                Visit our contact page for help.
+              </Link>
             </div>
           )}
 

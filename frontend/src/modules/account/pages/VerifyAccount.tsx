@@ -2,14 +2,16 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { CheckCircle2, Loader2, MailWarning } from 'lucide-react';
 import { createAndVerify } from '@/api/auth';
-import { ApiError } from '@/api/client';
+import { getApiErrorMessage } from '@/api/client';
 import { Button } from '@/shared/components/ui/button';
 
 type VerifyStatus = 'idle' | 'verifying' | 'success' | 'error';
 
 function getErrorMessage(error: unknown): string {
-  if (error instanceof ApiError) return error.message;
-  return 'We could not verify this account link. Please request a new verification email.';
+  return getApiErrorMessage(
+    error,
+    'Sorry, we could not verify this account link.',
+  );
 }
 
 export const VerifyAccount = () => {
@@ -80,6 +82,14 @@ export const VerifyAccount = () => {
           <p className="mt-3 text-base leading-7 text-slate-600">
             {message ?? 'Please wait while we activate your ICAF account.'}
           </p>
+          {!isWorking && !isSuccess && (
+            <Link
+              className="text-secondary-blue mt-3 inline-block text-sm font-semibold underline-offset-4 hover:underline"
+              to="/contact"
+            >
+              Visit our contact page for help.
+            </Link>
+          )}
           <Button
             asChild
             className="mt-8 h-12 rounded-full px-7 text-base font-bold"

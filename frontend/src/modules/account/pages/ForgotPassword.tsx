@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { CheckCircle2, Mail, UserPlus } from 'lucide-react';
 import { MAX_EMAIL_LEN, normalizeEmail } from '@icaf/shared';
 import { forgotPassword, requestCreateAndVerify } from '@/api/auth';
-import { ApiError } from '@/api/client';
+import { getApiErrorMessage } from '@/api/client';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { Button } from '@/shared/components/ui/button';
 
@@ -21,8 +21,10 @@ function getEmailError(emailValue: string): string | undefined {
 }
 
 function getSubmitError(error: unknown): string {
-  if (error instanceof ApiError) return error.message;
-  return 'We could not send the email link. Please try again.';
+  return getApiErrorMessage(
+    error,
+    'We could not send the email link. Please try again.',
+  );
 }
 
 export const ForgotPassword = () => {
@@ -94,7 +96,10 @@ export const ForgotPassword = () => {
                 className="text-tertiary-red mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold"
                 role="alert"
               >
-                {createAccountError}
+                <p>{createAccountError}</p>
+                <Link className="mt-2 inline-block underline" to="/contact">
+                  Visit our contact page for help.
+                </Link>
               </div>
             )}
             <Button
@@ -163,7 +168,10 @@ export const ForgotPassword = () => {
               className="text-tertiary-red mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold"
               role="alert"
             >
-              {submitError}
+              <p>{submitError}</p>
+              <Link className="mt-2 inline-block underline" to="/contact">
+                Visit our contact page for help.
+              </Link>
             </div>
           )}
 

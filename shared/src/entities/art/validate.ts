@@ -2,6 +2,7 @@ import { GuestSubmitArtworkRequest, SubmitArtworkRequest, UpdateArtworkRequest, 
 import {
     UPLOAD_FILE_TYPES,
     MAX_TITLE_LEN,
+    MAX_ARTIST_AGE,
     MAX_DESCRIPTION_LEN,
     MAX_STRING_LEN,
     SHA256_HEX,
@@ -69,8 +70,8 @@ export function validateOptionalArtworkFields(data: {
     }
 
     if (data.age !== undefined) {
-        if (!Number.isInteger(data.age) || data.age < 1 || data.age > 150) {
-            errors.push('age, if provided, must be an integer between 1 and 150');
+        if (!Number.isInteger(data.age) || data.age < 1 || data.age > MAX_ARTIST_AGE) {
+            errors.push(`age, if provided, must be an integer between 1 and ${MAX_ARTIST_AGE}`);
         }
     }
 

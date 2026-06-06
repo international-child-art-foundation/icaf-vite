@@ -4,7 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { CheckCircle2, KeyRound, MailWarning } from 'lucide-react';
 import { MAX_PASSWORD_LEN } from '@icaf/shared';
 import { confirmForgotPassword, createAndVerify } from '@/api/auth';
-import { ApiError } from '@/api/client';
+import { getApiErrorMessage } from '@/api/client';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import {
   getConfirmPasswordError,
@@ -12,9 +12,13 @@ import {
 } from '@/modules/account/utils/passwordValidation';
 import { Button } from '@/shared/components/ui/button';
 
-function getSubmitError(error: unknown): string {
-  if (error instanceof ApiError) return error.message;
-  return 'We could not reset your password. Please try again.';
+function getSubmitError(error: unknown, isActivation: boolean): string {
+  return getApiErrorMessage(
+    error,
+    isActivation
+      ? 'Sorry, we could not activate your account.'
+      : 'Sorry, we could not reset your password.',
+  );
 }
 
 export const ConfirmForgotPassword = () => {
@@ -78,7 +82,7 @@ export const ConfirmForgotPassword = () => {
     void request
       .then(() => setStatus('success'))
       .catch((error) => {
-        setSubmitError(getSubmitError(error));
+        setSubmitError(getSubmitError(error, isActivation));
         setStatus('idle');
       });
   }

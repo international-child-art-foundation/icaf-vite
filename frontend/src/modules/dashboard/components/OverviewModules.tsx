@@ -14,12 +14,12 @@ export function OverviewModules({ role }: { role: Role | null }) {
           <ActionLink
             to="/submit-artwork"
             label="Submit artwork"
-            detail="Create an individual artwork submission."
+            detail="Choose the right submission flow."
           />
           <ActionLink
-            to="/submit-artwork-group"
+            to="/submit-artwork?quantity=group"
             label="Submit artwork group"
-            detail="Create a group artwork submission."
+            detail="Start with group submission preselected."
           />
           <ActionLink
             to="/my-icaf?tab=submissions"

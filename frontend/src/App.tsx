@@ -161,6 +161,11 @@ const SubmitArtwork = lazy(() =>
     default: m.SubmitArtwork,
   })),
 );
+const SubmitArtworkRouter = lazy(() =>
+  import('./modules/submissions/pages/SubmitArtworkRouter').then((m) => ({
+    default: m.SubmitArtworkRouter,
+  })),
+);
 const TakedownRequest = lazy(() =>
   import('./modules/submissions/pages/TakedownRequest').then((m) => ({
     default: m.TakedownRequest,
@@ -258,17 +263,24 @@ export default function App() {
               />
               <Route path="/my-icaf" element={<MyIcafAccessGate />} />
               <Route path="/dashboard" element={<Navigate to="/my-icaf" replace />} />
-              <Route path="/submit-artwork" element={<SubmitArtwork />} />
               <Route
-                path="/submit-artwork/artworks"
+                path="/submit-artwork"
+                element={<SubmitArtworkRouter />}
+              />
+              <Route
+                path="/submit-artwork/single/:submitterFlow"
                 element={<SubmitArtwork />}
               />
               <Route
-                path="/submit-artwork-group"
+                path="/submit-artwork/single/:submitterFlow/artworks"
+                element={<SubmitArtwork />}
+              />
+              <Route
+                path="/submit-artwork/group/:submitterFlow"
                 element={<SubmitArtworkGroup />}
               />
               <Route
-                path="/submit-artwork-group/artworks"
+                path="/submit-artwork/group/:submitterFlow/artworks"
                 element={<SubmitArtworkGroup />}
               />
               <Route path="/request-takedown" element={<TakedownRequest />} />

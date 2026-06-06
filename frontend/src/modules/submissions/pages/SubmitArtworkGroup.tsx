@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent, FormEvent, ReactNode } from 'react';
 import {
   Bell,
@@ -14,6 +14,11 @@ import { uploadToPresignedUrl } from '@/api/uploads';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { ArtworkMuralWindow } from '@/modules/submissions/components/ArtworkMuralWindow';
 import { CompactTextarea } from '@/modules/submissions/components/CompactTextarea';
+import {
+  getSubmitArtworkPageCopy,
+  type SubmitArtworkPageCopy,
+  type SubmitterFlow,
+} from '@/modules/submissions/data/submitArtworkCopy';
 import type {
   ArtworkDraft,
   ArtworkGroupInfo,
@@ -35,28 +40,19 @@ import {
   createRotatedImageFile,
 } from '@/modules/submissions/utils/imagePreview';
 import { Button } from '@/shared/components/ui/button';
-import { GROUP_MAX_MEMBERS } from '@icaf/shared';
-import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  GROUP_MAX_MEMBERS,
+  MAX_ARTIST_AGE,
+  type SubmitterRelationship,
+} from '@icaf/shared';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { ArtworkDisclaimer } from '@/modules/submissions/components/ArtworkDisclaimer';
 
 type SubmissionStatus = 'idle' | 'submitting' | 'success';
 
 type GroupIconField = 'class_name' | 'country' | 'submitter_display_name';
 
-export type SubmitArtworkGroupCopy = {
-  artworkHelpText: string;
-  description: string;
-  heading: string;
-  kicker: string;
-  submitLabel: string;
-};
-
-const defaultSubmitArtworkGroupCopy: SubmitArtworkGroupCopy = {
-  artworkHelpText: `Click or tap the box to upload, review, and annotate up to ${GROUP_MAX_MEMBERS} artworks.`,
-  description: 'Create one group with individually annotated artwork images.',
-  heading: 'Submit artwork for a group',
-  kicker: 'Artwork submission',
-  submitLabel: 'Submit artwork group',
-};
+export type SubmitArtworkGroupCopy = SubmitArtworkPageCopy;
 
 type StringArtworkGroupField = {
   [Key in keyof ArtworkGroupInfo]: ArtworkGroupInfo[Key] extends string
@@ -237,6 +233,14 @@ function readPersistedDraft(): StoredArtworkGroupSubmissionDraft {
   }
 }
 
+function getSubmitterFlow(value: string | undefined): SubmitterFlow {
+  return value === 'parent' ? 'parent' : 'educator';
+}
+
+function getFlowPath(flow: SubmitterFlow, nested = false) {
+  return `/submit-artwork/group/${flow}${nested ? '/artworks' : ''}`;
+}
+
 export function SubmitArtworkGroup({
   copy: copyOverrides,
 }: {
@@ -244,7 +248,18 @@ export function SubmitArtworkGroup({
 } = {}) {
   const location = useLocation();
   const navigate = useNavigate();
-  const copy = { ...defaultSubmitArtworkGroupCopy, ...copyOverrides };
+  const params = useParams();
+  const submitterFlow = getSubmitterFlow(params.submitterFlow);
+  const isEducatorFlow = submitterFlow === 'educator';
+  const copy = {
+    ...getSubmitArtworkPageCopy(submitterFlow, 'group'),
+    ...copyOverrides,
+  };
+  const artworkDetailsMode = isEducatorFlow ? 'basic' : 'full';
+  const submitterRelationship: SubmitterRelationship = isEducatorFlow
+    ? 'teacher'
+    : 'guardian';
+  const artworkSectionRef = useRef<HTMLElement | null>(null);
   const [draft, setDraft] = useState(readPersistedDraft);
   const [artworks, setArtworks] = useState<ArtworkDraft[]>([
     createArtworkDraft(),
@@ -265,8 +280,7 @@ export function SubmitArtworkGroup({
 
   const isSubmitting = status === 'submitting';
   const artworkErrors = errors.artworks ?? {};
-  const isArtworkWindowOpen =
-    location.pathname === '/submit-artwork-group/artworks';
+  const isArtworkWindowOpen = location.pathname.endsWith('/artworks');
   const themeParams = useMemo(
     () => readThemeParams(location.search),
     [location.search],
@@ -302,6 +316,56 @@ export function SubmitArtworkGroup({
       }),
     [artworks, files, previewDataUrls],
   );
+  const overageArtworks = useMemo(
+    () =>
+      artworkDetailsMode === 'full'
+        ? displayArtworks
+            .map((artwork, index) => ({
+              artwork,
+              age: Number(artwork.age),
+              index,
+            }))
+            .filter(
+              ({ age, artwork }) =>
+                artwork.age.trim() !== '' &&
+                !Number.isNaN(age) &&
+                age > MAX_ARTIST_AGE,
+            )
+        : [],
+    [artworkDetailsMode, displayArtworks],
+  );
+  const displayedArtworkErrors = useMemo(() => {
+    const nextErrors = { ...artworkErrors };
+
+    displayArtworks.forEach((artwork) => {
+      const age = Number(artwork.age);
+      const currentArtworkErrors = { ...nextErrors[artwork.id] };
+      delete currentArtworkErrors.age;
+
+      const liveAgeError =
+        artworkDetailsMode === 'full' && artwork.age.trim()
+          ? !Number.isInteger(age) || age < 1
+            ? `Enter a whole number from 1 to ${MAX_ARTIST_AGE}.`
+            : age > MAX_ARTIST_AGE
+              ? `Artist age must be ${MAX_ARTIST_AGE} or younger.`
+              : undefined
+          : undefined;
+
+      if (liveAgeError) {
+        nextErrors[artwork.id] = {
+          ...currentArtworkErrors,
+          age: liveAgeError,
+        };
+      } else if (Object.keys(currentArtworkErrors).length > 0) {
+        nextErrors[artwork.id] = currentArtworkErrors;
+      } else {
+        delete nextErrors[artwork.id];
+      }
+    });
+
+    return nextErrors;
+  }, [artworkDetailsMode, artworkErrors, displayArtworks]);
+  const firstOverageArtwork = overageArtworks[0]?.artwork;
 
   const viewerError = useMemo(() => {
     if (errors.root) return errors.root;
@@ -382,11 +446,21 @@ export function SubmitArtworkGroup({
 
   function openArtworkWindow() {
     if (!isArtworkWindowOpen)
-      void navigate(`/submit-artwork-group/artworks${location.search}`);
+      void navigate(`${getFlowPath(submitterFlow, true)}${location.search}`);
   }
 
   function closeArtworkWindow() {
-    void navigate(`/submit-artwork-group${location.search}`);
+    void navigate(`${getFlowPath(submitterFlow)}${location.search}`);
+  }
+
+  function selectArtworkInWindow() {
+    artworkSectionRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+    if (!isArtworkWindowOpen) {
+      void navigate(`${getFlowPath(submitterFlow, true)}${location.search}`);
+    }
   }
 
   function deleteArtwork(artworkId: string) {
@@ -472,7 +546,12 @@ export function SubmitArtworkGroup({
     event.preventDefault();
     setSubmitMessage(null);
 
-    const nextErrors = validateArtworkGroupSubmission(submissionDraft, files);
+    if (overageArtworks.length > 0) return;
+
+    const nextErrors = validateArtworkGroupSubmission(submissionDraft, files, {
+      artworkDetailsMode,
+      requiresDigitalSignature: !isEducatorFlow,
+    });
     setErrors(nextErrors);
 
     if (hasSubmissionErrors(nextErrors)) return;
@@ -501,7 +580,11 @@ export function SubmitArtworkGroup({
           file,
           releaseHash,
           effectiveGroup,
-          draft.promotionalUse,
+          isEducatorFlow ? false : draft.promotionalUse,
+          {
+            artworkDetailsMode,
+            submitterRelationship,
+          },
         );
       });
       const groupResponse = await createGuestGroup({
@@ -593,7 +676,7 @@ export function SubmitArtworkGroup({
                 {copy.kicker}
               </p>
               <h1 className="font-montserrat text-2xl font-semibold text-slate-950 sm:text-3xl">
-                {copy.heading}
+                {copy.title}
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
                 {copy.description}
@@ -661,7 +744,7 @@ export function SubmitArtworkGroup({
               <div className="sm:col-span-2">
                 <CompactTextarea
                   error={errors.group?.description}
-                  label="Group notes"
+                  label="Describe your group!"
                   maxLength={2000}
                   name="description"
                   value={draft.group.description}
@@ -672,7 +755,10 @@ export function SubmitArtworkGroup({
               </div>
             </section>
 
-            <section className="mt-6 flex flex-col gap-3">
+            <section
+              ref={artworkSectionRef}
+              className="mt-6 flex flex-col gap-3"
+            >
               <div>
                 <h2 className="font-montserrat text-xl font-semibold text-slate-950">
                   Artworks
@@ -690,8 +776,10 @@ export function SubmitArtworkGroup({
                 </p>
               </div>
               <ArtworkMuralWindow
+                artworkDetailsMode={artworkDetailsMode}
                 artworks={displayArtworks}
-                errors={artworkErrors}
+                errors={displayedArtworkErrors}
+                focusedArtworkId={firstOverageArtwork?.id}
                 isOpen={isArtworkWindowOpen}
                 maxCount={GROUP_MAX_MEMBERS}
                 onArtworkChange={updateArtwork}
@@ -702,6 +790,8 @@ export function SubmitArtworkGroup({
                 onRotateArtwork={(artworkId) => void rotateArtwork(artworkId)}
               />
             </section>
+            {!isEducatorFlow && <ArtworkDisclaimer />}
+
             <label className="mt-5 flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
               <input
                 checked={draft.certificationAccepted}
@@ -729,39 +819,43 @@ export function SubmitArtworkGroup({
               </span>
             </label>
 
-            <div className="mt-3">
-              <AccountTextField
-                error={errors.digitalSignature}
-                label="Digital signature"
-                maxLength={200}
-                name="digitalSignature"
-                value={draft.digitalSignature}
-                onChange={(event) =>
-                  setDraft((current) => ({
-                    ...current,
-                    digitalSignature: event.target.value,
-                  }))
-                }
-              />
-            </div>
+            {!isEducatorFlow && (
+              <>
+                <div className="mt-3">
+                  <AccountTextField
+                    error={errors.digitalSignature}
+                    label="Digital signature"
+                    maxLength={200}
+                    name="digitalSignature"
+                    value={draft.digitalSignature}
+                    onChange={(event) =>
+                      setDraft((current) => ({
+                        ...current,
+                        digitalSignature: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
 
-            <label className="mt-3 flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-              <input
-                checked={draft.promotionalUse}
-                className="accent-secondary-blue mt-1 h-4 w-4"
-                name="promotionalUse"
-                type="checkbox"
-                onChange={(event) =>
-                  setDraft((current) => ({
-                    ...current,
-                    promotionalUse: event.target.checked,
-                  }))
-                }
-              />
-              <span>
-                I allow ICAF to use these artworks for promotional purposes.
-              </span>
-            </label>
+                <label className="mt-3 flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+                  <input
+                    checked={draft.promotionalUse}
+                    className="accent-secondary-blue mt-1 h-4 w-4"
+                    name="promotionalUse"
+                    type="checkbox"
+                    onChange={(event) =>
+                      setDraft((current) => ({
+                        ...current,
+                        promotionalUse: event.target.checked,
+                      }))
+                    }
+                  />
+                  <span>
+                    I allow ICAF to use these artworks for promotional purposes.
+                  </span>
+                </label>
+              </>
+            )}
 
             <label className="mt-3 flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
               <input
@@ -782,9 +876,42 @@ export function SubmitArtworkGroup({
               </span>
             </label>
 
+            {overageArtworks.length > 0 && (
+              <div
+                className="text-tertiary-red mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold"
+                role="alert"
+              >
+                <p>
+                  Submit is disabled because{' '}
+                  {overageArtworks.length === 1
+                    ? 'an artwork is'
+                    : `${overageArtworks.length} artworks are`}{' '}
+                  for artists over age {MAX_ARTIST_AGE}.
+                </p>
+                <div className="mt-3 flex flex-col gap-2">
+                  {overageArtworks.map(({ age, artwork, index }) => (
+                    <button
+                      key={artwork.id}
+                      className="inline-flex min-h-10 items-center justify-between gap-3 rounded-lg bg-white px-3 py-2 text-left text-xs font-bold text-red-700 shadow-sm"
+                      type="button"
+                      onClick={() => selectArtworkInWindow()}
+                    >
+                      <span>
+                        Artwork {index + 1}: {artwork.title || 'Untitled'}, age{' '}
+                        {age}
+                        {artwork.f_name ? `, artist ${artwork.f_name}` : ''}
+                        {artwork.fileName ? `, file ${artwork.fileName}` : ''}
+                      </span>
+                      <span className="shrink-0 text-sm">Select</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <Button
               className="mt-6 h-12 w-full rounded-full text-base font-bold"
-              disabled={isSubmitting}
+              disabled={isSubmitting || overageArtworks.length > 0}
               type="submit"
             >
               <Send aria-hidden="true" className="h-4 w-4" />

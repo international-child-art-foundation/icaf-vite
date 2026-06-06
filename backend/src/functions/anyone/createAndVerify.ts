@@ -110,6 +110,17 @@ export const handler = async (
         }),
       );
     } else {
+      if (body.password) {
+        await cognitoClient.send(
+          new AdminSetUserPasswordCommand({
+            UserPoolId: USER_POOL_ID,
+            Username: user.email,
+            Password: body.password,
+            Permanent: true,
+          }),
+        );
+      }
+
       await cognitoClient.send(
         new AdminEnableUserCommand({
           UserPoolId: USER_POOL_ID,

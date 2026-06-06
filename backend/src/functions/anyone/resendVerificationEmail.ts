@@ -6,6 +6,7 @@ import {
   HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
+  normalizeEmail,
   UserEntity,
 } from "@icaf/shared";
 import { EntityType, GSI } from "../../dynamo/ddbSchemaConsts";
@@ -28,7 +29,7 @@ export const handler = async (
       return CommonErrors.badRequest("email is required");
     }
 
-    const email = body.email.trim();
+    const email = normalizeEmail(body.email);
     const result = await dynamodb.send(
       new QueryCommand({
         TableName: TABLE_NAME,

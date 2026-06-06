@@ -7,6 +7,7 @@ import {
   CommonErrors,
   Role,
   ROLES,
+  normalizeEmail,
   UserEntity,
 } from "@icaf/shared";
 import {
@@ -55,7 +56,8 @@ function getCookieHeader(event: ApiGatewayEvent): string | undefined {
 
 async function getEmailFromAccessToken(accessToken: string): Promise<string | undefined> {
   const result = await cognitoClient.send(new GetUserCommand({ AccessToken: accessToken }));
-  return result.UserAttributes?.find((attribute) => attribute.Name === "email")?.Value?.trim();
+  const email = result.UserAttributes?.find((attribute) => attribute.Name === "email")?.Value;
+  return email ? normalizeEmail(email) : undefined;
 }
 
 function normalizeRole(role: UserEntity["role"]): Role {
@@ -80,7 +82,7 @@ async function resolveAuth(event: ApiGatewayEvent): Promise<ResolvedAuth | null>
   if (idToken) {
     try {
       const idClaims = await idTokenVerifier.verify(idToken);
-      email = typeof idClaims.email === "string" ? idClaims.email.trim() : undefined;
+      email = typeof idClaims.email === "string" ? normalizeEmail(idClaims.email) : undefined;
     } catch {
       email = undefined;
     }

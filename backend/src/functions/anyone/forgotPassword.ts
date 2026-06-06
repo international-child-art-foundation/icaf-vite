@@ -1,5 +1,5 @@
 import { QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { randomUUID } from "crypto";
+import { createHash, randomUUID } from "crypto";
 import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
 import {
   ApiGatewayEvent,
@@ -7,14 +7,27 @@ import {
   HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
+  normalizeEmail,
   UserEntity,
 } from "@icaf/shared";
 import { EntityType, GSI } from "../../dynamo/ddbSchemaConsts";
 import { emailGsiSk, emailPk } from "../../dynamo/emailGsi";
-import { sendResetPasswordEmail } from "../../utils/emails/resetPassword";
+import {
+  sendActivateAccountFromForgotPasswordEmail,
+  sendResetPasswordEmail,
+} from "../../utils/emails/resetPassword";
 import { parseJsonBody } from "../../utils/request";
 
 const AUTH_ACTION_TOKEN_TTL_SECONDS = 60 * 60;
+
+function emailDebugFingerprint(email: string) {
+  const trimmed = email.trim();
+  return {
+    email_hash: createHash("sha256").update(trimmed.toLowerCase()).digest("hex").slice(0, 12),
+    has_uppercase: /[A-Z]/.test(trimmed),
+    length: trimmed.length,
+  };
+}
 
 export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayResponse> => {
   try {
@@ -28,11 +41,18 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
 
     const okResponse = {
       statusCode: HTTP_STATUS.OK,
-      body: JSON.stringify({ message: "If this email is registered, a password reset link has been sent" }),
+      body: JSON.stringify({
+        message: "If this email is registered, a password reset link has been sent",
+        account_status: "email_sent",
+        delivery_medium: "EMAIL",
+      }),
       headers: COMMON_HEADERS,
     };
 
-    const email = body.email.trim();
+    const debugEmail = emailDebugFingerprint(body.email);
+    const email = normalizeEmail(body.email);
+    console.info("ForgotPassword lookup started", debugEmail);
+
     const result = await dynamodb.send(
       new QueryCommand({
         TableName: TABLE_NAME,
@@ -47,8 +67,37 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
     );
 
     const user = result.Items?.[0] as UserEntity | undefined;
-    if (!user || user.email_blocked === true || user.is_virtual || !user.verified_at) {
+    if (!user) {
+      console.info("ForgotPassword lookup complete", {
+        ...debugEmail,
+        result: "no_user",
+      });
       return okResponse;
+    }
+
+    if (user.email_blocked === true) {
+      console.info("ForgotPassword lookup complete", {
+        ...debugEmail,
+        result: "blocked",
+        user_id: user.user_id,
+      });
+      return okResponse;
+    }
+
+    if (user.is_virtual) {
+      console.info("ForgotPassword lookup complete", {
+        ...debugEmail,
+        result: "virtual",
+        user_id: user.user_id,
+      });
+      return {
+        statusCode: HTTP_STATUS.OK,
+        body: JSON.stringify({
+          message: "We found your email in our system, but you do not yet have an account.",
+          account_status: "virtual",
+        }),
+        headers: COMMON_HEADERS,
+      };
     }
 
     const nowSeconds = Math.floor(Date.now() / 1000);
@@ -65,15 +114,41 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
       }),
     );
 
-    await sendResetPasswordEmail({
-      toEmail: user.email,
-      userId: user.user_id,
-      authActionToken,
-    });
+    if (user.verified_at) {
+      const messageId = await sendResetPasswordEmail({
+        toEmail: user.email,
+        userId: user.user_id,
+        authActionToken,
+      });
+      console.info("ForgotPassword email sent", {
+        ...debugEmail,
+        result: "verified_reset_email_sent",
+        user_id: user.user_id,
+        ses_message_id: messageId,
+      });
+    } else {
+      const messageId = await sendActivateAccountFromForgotPasswordEmail({
+        toEmail: user.email,
+        userId: user.user_id,
+        authActionToken,
+      });
+      console.info("ForgotPassword email sent", {
+        ...debugEmail,
+        result: "unverified_activation_email_sent",
+        user_id: user.user_id,
+        ses_message_id: messageId,
+      });
+    }
 
     return okResponse;
   } catch (error: any) {
-    console.error("ForgotPassword error:", error);
+    console.error("ForgotPassword error", {
+      name: error?.name,
+      message: error?.message,
+      http_status_code: error?.$metadata?.httpStatusCode,
+      request_id: error?.$metadata?.requestId,
+      fault: error?.$fault,
+    });
     return CommonErrors.internalServerError();
   }
 };

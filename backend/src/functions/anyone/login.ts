@@ -9,6 +9,7 @@ import {
   HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
+  normalizeEmail,
 } from "@icaf/shared";
 import { createCookie, decodeJwtPayload } from "../../utils/cookies";
 import { parseJsonBody } from "../../utils/request";
@@ -25,13 +26,14 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
 
     if (!body.email?.trim()) return CommonErrors.badRequest("email is required");
     if (!body.password) return CommonErrors.badRequest("password is required");
+    const email = normalizeEmail(body.email);
 
     const authResult = await cognitoClient.send(
       new InitiateAuthCommand({
         AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
         ClientId: USER_POOL_CLIENT_ID,
         AuthParameters: {
-          USERNAME: body.email.trim(),
+          USERNAME: email,
           PASSWORD: body.password,
         },
       }),
@@ -48,8 +50,9 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
     if (!payload) {
       return CommonErrors.internalServerError("Failed to decode token");
     }
-    const email = String(payload["email"] ?? body.email.trim());
-    const user = await getUserByEmail(email);
+    const payloadEmail =
+      typeof payload["email"] === "string" ? normalizeEmail(payload["email"]) : email;
+    const user = await getUserByEmail(payloadEmail);
     if (user && !user.verified_at) {
       return CommonErrors.forbidden("Please verify your email before logging in");
     }
@@ -59,7 +62,7 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
       body: JSON.stringify({
         message: "Login successful",
         user_id: user?.user_id ?? payload["sub"],
-        email,
+        email: user?.email ?? payloadEmail,
         role: user?.role ?? payload["custom:role"] ?? "user",
       }),
       headers: {

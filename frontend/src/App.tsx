@@ -141,6 +141,16 @@ const CreateAccount = lazy(() =>
     default: m.CreateAccount,
   })),
 );
+const ForgotPassword = lazy(() =>
+  import('./modules/account/pages/ForgotPassword').then((m) => ({
+    default: m.ForgotPassword,
+  })),
+);
+const ConfirmForgotPassword = lazy(() =>
+  import('./modules/account/pages/ConfirmForgotPassword').then((m) => ({
+    default: m.ConfirmForgotPassword,
+  })),
+);
 const SubmitArtworkGroup = lazy(() =>
   import('./modules/submissions/pages/SubmitArtworkGroup').then((m) => ({
     default: m.SubmitArtworkGroup,
@@ -241,6 +251,11 @@ export default function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/verify-account" element={<VerifyAccount />} />
               <Route path="/create-account" element={<CreateAccount />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route
+                path="/confirm-forgot-password"
+                element={<ConfirmForgotPassword />}
+              />
               <Route path="/my-icaf" element={<MyIcafAccessGate />} />
               <Route path="/dashboard" element={<Navigate to="/my-icaf" replace />} />
               <Route path="/submit-artwork" element={<SubmitArtwork />} />

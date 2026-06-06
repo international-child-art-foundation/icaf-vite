@@ -1,6 +1,6 @@
 import { QueryCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
-import { CommonErrors } from "@icaf/shared";
+import { CommonErrors, normalizeEmail } from "@icaf/shared";
 import type { ApiGatewayResponse, UserEntity } from "@icaf/shared";
 import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
 import { EntityType, GSI } from "../../dynamo/ddbSchemaConsts";
@@ -34,7 +34,7 @@ export async function getOrCreateVirtualUser(
   email: string,
   nowSeconds: number,
 ): Promise<VirtualUserResult> {
-  const normalizedEmail = email.trim();
+  const normalizedEmail = normalizeEmail(email);
   let user = await getUserByEmail(normalizedEmail);
 
   if (!user) {

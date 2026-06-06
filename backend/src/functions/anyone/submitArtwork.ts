@@ -10,6 +10,7 @@ import {
   GuestSubmitArtworkRequest,
   SubmitArtworkResponse,
   UserEntity,
+  normalizeEmail,
   validateGuestSubmitArtworkRequest,
 } from "@icaf/shared";
 import { GSI, EntityType } from "../../dynamo/ddbSchemaConsts";
@@ -92,7 +93,7 @@ export const handler = async (
       }
     } else {
       // New or returning email-based guest — query Email GSI
-      const email = body.email!.trim();
+      const email = normalizeEmail(body.email!);
       const emailResult = await dynamodb.send(
         new QueryCommand({
           TableName: TABLE_NAME,

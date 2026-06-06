@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent, ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { LockKeyhole, Mail } from 'lucide-react';
 import type { LoginResponse } from '@icaf/shared';
 import { login } from '@/api/auth';
@@ -168,6 +169,14 @@ export const LoginForm = ({ initialEmail = '', onSuccess }: LoginFormProps) => {
         >
           {isSubmitting ? 'Logging in...' : 'Log in'}
         </Button>
+        <div className="mt-4 text-center text-sm font-semibold">
+          <Link
+            to="/forgot-password"
+            className="text-secondary-blue underline-offset-4 transition hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
       </div>
     </form>
   );

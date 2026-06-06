@@ -22,6 +22,7 @@ import {
   MAX_NAME_LEN,
   MAX_EMAIL_LEN,
   MAX_PASSWORD_LEN,
+  normalizeEmail,
 } from "@icaf/shared";
 import { EntityType, GSI } from "../../dynamo/ddbSchemaConsts";
 import { emailGsiSk, emailPk } from "../../dynamo/emailGsi";
@@ -39,7 +40,8 @@ export const handler = async (
     const body = parsedBody.value;
 
     if (!body.email?.trim()) return CommonErrors.badRequest("email is required");
-    if (body.email.length > MAX_EMAIL_LEN) return CommonErrors.badRequest(`email must be ${MAX_EMAIL_LEN} characters or less`);
+    const email = normalizeEmail(body.email);
+    if (email.length > MAX_EMAIL_LEN) return CommonErrors.badRequest(`email must be ${MAX_EMAIL_LEN} characters or less`);
     if (!body.password) return CommonErrors.badRequest("password is required");
     if (body.password.length > MAX_PASSWORD_LEN) return CommonErrors.badRequest(`password must be ${MAX_PASSWORD_LEN} characters or less`);
     if (!body.f_name?.trim()) return CommonErrors.badRequest("f_name is required");
@@ -60,7 +62,6 @@ export const handler = async (
       return CommonErrors.badRequest("dob must be in YYYY-MM-DD format");
     }
 
-    const email = body.email.trim();
     const fName = body.f_name.trim();
     const lName = body.l_name.trim();
     const role = "user";

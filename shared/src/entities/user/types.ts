@@ -8,8 +8,12 @@
  *   SK = 'PROFILE'
  *
  * GSI attributes written on creation:
- *   EMAIL_PK = 'EMAIL#<email>'
+ *   EMAIL_PK = 'EMAIL#<normalized lowercase email>'
  *   EMAIL_SK = 'TYPE#USER'
+ *
+ * User email identity is case-insensitive. Store user.email and EMAIL_PK using
+ * normalizeEmail(email) so auth, reset, registration, and virtual-account
+ * flows resolve to the same user.
  */
 
 export const ROLES = ['admin', 'contributor', 'user'] as const;
@@ -72,7 +76,7 @@ export interface DefaultRegistrationRequest {
 export interface CreateAndVerifyRequest {
     user_id: string;        // from link: icaf.org/create-account?id=<user_id>
     auth_action_token: string;   // app-generated slug from the action email link
-    password?: string;      // required when is_virtual=true (creates Cognito account)
+    password?: string;      // required when is_virtual=true; optional for unverified Cognito users resetting during activation
     f_name?: string;        // optional profile update during account creation
     l_name?: string;        // optional profile update during account creation
     dob?: string;           // optional profile update during account creation

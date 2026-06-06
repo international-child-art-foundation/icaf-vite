@@ -2,7 +2,7 @@ const EMAIL_BACKGROUND = '#eef7ff';
 const EMAIL_CARD = '#ffffff';
 const EMAIL_TEXT = '#1f2933';
 const EMAIL_BORDER = '#cfe2f3';
-const EMAIL_BUTTON = '#0f5c8a';
+const EMAIL_BUTTON = '#134380';
 const EMAIL_LINK = '#0f5c8a';
 const EMAIL_FOOTER = '#6b7280';
 const EMAIL_BRAND = '#0f5c8a';
@@ -78,7 +78,7 @@ export function renderEmailDocument(args: {
   const safePreheader = escapeHtml(args.preheader);
   const safeTitle = escapeHtml(args.title);
   const safeHeadline = escapeHtml(args.headline);
-  const footerNote = args.footerNote ?? 'If you need help, reply to this email and we will route your message to the right person.';
+  const footerNote = args.footerNote ?? '';
 
   return [
     '<!doctype html>',

@@ -1,4 +1,4 @@
-import { MAX_EMAIL_LEN, MAX_PASSWORD_LEN } from '@icaf/shared';
+import { MAX_EMAIL_LEN, MAX_PASSWORD_LEN, normalizeEmail } from '@icaf/shared';
 import type {
   LoginFieldName,
   LoginFormErrors,
@@ -52,7 +52,7 @@ export function hasLoginErrors(errors: LoginFormErrors): boolean {
 
 export function toLoginRequest(values: LoginFormValues) {
   return {
-    email: values.email.trim(),
+    email: normalizeEmail(values.email),
     password: values.password,
   };
 }

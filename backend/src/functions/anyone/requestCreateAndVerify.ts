@@ -5,6 +5,7 @@ import {
   HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
+  normalizeEmail,
   UserEntity,
 } from "@icaf/shared";
 import { GSI, EntityType } from "../../dynamo/ddbSchemaConsts";
@@ -22,7 +23,7 @@ export const handler = async (
     const parsedBody = parseJsonBody<{ email?: string }>(event);
     if (!parsedBody.ok) return parsedBody.response;
     const body = parsedBody.value;
-    const email = body.email?.trim();
+    const email = body.email ? normalizeEmail(body.email) : undefined;
 
     if (!email) {
       return CommonErrors.badRequest("email is required");

@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { CheckCircle2, KeyRound } from 'lucide-react';
+import { CheckCircle2, KeyRound, MailWarning } from 'lucide-react';
 import { MAX_PASSWORD_LEN } from '@icaf/shared';
-import { createAndVerify } from '@/api/auth';
+import { confirmForgotPassword, createAndVerify } from '@/api/auth';
 import { ApiError } from '@/api/client';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import {
@@ -14,10 +14,10 @@ import { Button } from '@/shared/components/ui/button';
 
 function getSubmitError(error: unknown): string {
   if (error instanceof ApiError) return error.message;
-  return 'Account setup failed. Please try again.';
+  return 'We could not reset your password. Please try again.';
 }
 
-export const CreateAccount = () => {
+export const ConfirmForgotPassword = () => {
   const [searchParams] = useSearchParams();
   const userId = useMemo(
     () => searchParams.get('id')?.trim() ?? '',
@@ -27,6 +27,9 @@ export const CreateAccount = () => {
     () => searchParams.get('token')?.trim() ?? '',
     [searchParams],
   );
+  const mode = searchParams.get('mode');
+  const isActivation = mode === 'activate';
+
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<{
@@ -54,17 +57,25 @@ export const CreateAccount = () => {
     event.preventDefault();
     setSubmitError(null);
     if (missingLinkData) {
-      setSubmitError('This account link is missing required information.');
+      setSubmitError('This reset link is missing required information.');
       return;
     }
     if (!validate()) return;
 
     setStatus('submitting');
-    void createAndVerify({
-      auth_action_token: token,
-      password,
-      user_id: userId,
-    })
+    const request = isActivation
+      ? createAndVerify({
+          auth_action_token: token,
+          password,
+          user_id: userId,
+        })
+      : confirmForgotPassword({
+          auth_action_token: token,
+          new_password: password,
+          user_id: userId,
+        });
+
+    void request
       .then(() => setStatus('success'))
       .catch((error) => {
         setSubmitError(getSubmitError(error));
@@ -81,13 +92,17 @@ export const CreateAccount = () => {
               <CheckCircle2 aria-hidden="true" className="h-6 w-6" />
             </div>
             <h1 className="font-montserrat text-3xl font-semibold text-slate-950">
-              Account created
+              {isActivation ? 'Account activated' : 'Password reset'}
             </h1>
             <p className="mt-3 text-base leading-7 text-slate-600">
-              Your ICAF account is ready. You can now log in and manage your
-              submissions.
+              {isActivation
+                ? 'Your account has been activated and your password has been set.'
+                : 'Your password has been successfully reset.'}
             </p>
-            <Button asChild className="mt-8 h-12 rounded-full px-7 text-base font-bold">
+            <Button
+              asChild
+              className="mt-8 h-12 rounded-full px-7 text-base font-bold"
+            >
               <Link to="/login">Log in</Link>
             </Button>
           </div>
@@ -105,14 +120,19 @@ export const CreateAccount = () => {
           onSubmit={handleSubmit}
         >
           <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-secondary-blue">
-            <KeyRound aria-hidden="true" className="h-6 w-6" />
+            {missingLinkData ? (
+              <MailWarning aria-hidden="true" className="h-6 w-6" />
+            ) : (
+              <KeyRound aria-hidden="true" className="h-6 w-6" />
+            )}
           </div>
           <h1 className="font-montserrat text-3xl font-semibold text-slate-950">
-            Create your account
+            {isActivation ? 'Set your password' : 'Reset your password'}
           </h1>
           <p className="mt-3 text-base leading-7 text-slate-600">
-            Set a password to activate your ICAF account and manage artwork
-            submitted from this email address.
+            {isActivation
+              ? 'Choose a new password to activate your ICAF account.'
+              : 'Choose a new password for your ICAF account.'}
           </p>
 
           {(submitError || missingLinkData) && (
@@ -120,8 +140,13 @@ export const CreateAccount = () => {
               className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-tertiary-red"
               role="alert"
             >
-              {submitError ??
-                'This account link is missing required information.'}
+              <p>
+                {submitError ??
+                  'This reset link is missing required information.'}
+              </p>
+              <Link className="mt-2 inline-block underline" to="/contact">
+                Visit our contact page for help.
+              </Link>
             </div>
           )}
 
@@ -130,7 +155,7 @@ export const CreateAccount = () => {
               autoComplete="new-password"
               error={errors.password}
               helperText="Use at least 8 characters with upper/lowercase letters, a number, and a symbol."
-              label="Password"
+              label="New password"
               maxLength={MAX_PASSWORD_LEN}
               name="password"
               required
@@ -143,7 +168,7 @@ export const CreateAccount = () => {
             <AccountTextField
               autoComplete="new-password"
               error={errors.confirmPassword}
-              label="Confirm password"
+              label="Confirm new password"
               maxLength={MAX_PASSWORD_LEN}
               name="confirmPassword"
               required
@@ -160,7 +185,13 @@ export const CreateAccount = () => {
             disabled={isSubmitting || missingLinkData}
             type="submit"
           >
-            {isSubmitting ? 'Creating account...' : 'Create account'}
+            {isSubmitting
+              ? isActivation
+                ? 'Activating...'
+                : 'Resetting...'
+              : isActivation
+                ? 'Activate account'
+                : 'Reset password'}
           </Button>
         </form>
       </div>

@@ -4,6 +4,10 @@ export function cleanOptionalString(s: unknown): string | undefined {
     return cleaned.length === 0 ? undefined : cleaned;
 }
 
+export function normalizeEmail(email: string): string {
+    return email.normalize('NFC').trim().toLowerCase();
+}
+
 // Permissive email check — blocks obvious non-emails without being RFC-pedantic
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export function isValidEmail(email: string): boolean {

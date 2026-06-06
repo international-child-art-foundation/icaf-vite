@@ -1,4 +1,9 @@
-import { MAX_EMAIL_LEN, MAX_NAME_LEN, MAX_PASSWORD_LEN } from '@icaf/shared';
+import {
+  MAX_EMAIL_LEN,
+  MAX_NAME_LEN,
+  MAX_PASSWORD_LEN,
+  normalizeEmail,
+} from '@icaf/shared';
 import type {
   RegisterFieldName,
   RegisterFormErrors,
@@ -125,7 +130,7 @@ export function hasRegisterErrors(errors: RegisterFormErrors): boolean {
 export function toDefaultRegistrationRequest(values: RegisterFormValues) {
   return {
     dob: values.dob,
-    email: values.email.trim(),
+    email: normalizeEmail(values.email),
     f_name: values.f_name.trim(),
     has_newsletter_subscription: values.has_newsletter_subscription,
     l_name: values.l_name.trim(),

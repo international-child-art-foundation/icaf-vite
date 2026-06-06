@@ -74,6 +74,10 @@ export async function getOrCreateVirtualUser(
     return { ok: true, user, sentSignupEmail: false };
   }
 
+  if (user.emailed_signup_at) {
+    return { ok: true, user, sentSignupEmail: false };
+  }
+
   const authActionToken = randomUUID();
   const authActionTokenExp = nowSeconds + AUTH_ACTION_TOKEN_TTL_SECONDS;
 

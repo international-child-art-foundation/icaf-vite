@@ -11,6 +11,7 @@ import {
 import { EntityType, GSI } from "../../dynamo/ddbSchemaConsts";
 import { emailGsiSk, emailPk } from "../../dynamo/emailGsi";
 import { sendCreateAndVerifyEmail } from "../../utils/emails/createAndVerify";
+import { sendRegistrationVerificationEmail } from "../../utils/emails/registrationVerification";
 import { parseJsonBody } from "../../utils/request";
 
 const AUTH_ACTION_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60;
@@ -66,7 +67,11 @@ export const handler = async (
       }),
     );
 
-    await sendCreateAndVerifyEmail({
+    const sendVerification = user.is_virtual
+      ? sendCreateAndVerifyEmail
+      : sendRegistrationVerificationEmail;
+
+    await sendVerification({
       toEmail: user.email,
       userId: user.user_id,
       authActionToken,

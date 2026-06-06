@@ -433,7 +433,7 @@ export class InfraStack extends Stack {
       APP_URL: "https://revise.icaf.org",
       SES_FROM_EMAIL,
       SES_CONFIGURATION_SET: sesConfigurationSet.ref,
-      MAGAZINES_CLOUDFRONT_DOMAIN: "", // TODO: set after first deploy (CloudFront domain not known until then)
+      MAGAZINES_CLOUDFRONT_DOMAIN: "d1y7vnzq9a2pjl.cloudfront.net", // CloudFront domain for magazine assets
     };
 
     // Default log retention for all NodejsFunctions in this stack.

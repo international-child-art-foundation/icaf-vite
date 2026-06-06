@@ -29,7 +29,7 @@ export const registerTextFields: readonly RegisterTextFieldConfig[] = [
   {
     autoComplete: 'new-password',
     helperText:
-      'Use at least 8 characters with upper/lowercase letters and a number.',
+      'Use at least 8 characters with upper/lowercase letters, a number, and a symbol.',
     label: 'Password',
     maxLength: MAX_PASSWORD_LEN,
     name: 'password',

@@ -1,11 +1,11 @@
-const EMAIL_BACKGROUND = '#f4f1eb';
+const EMAIL_BACKGROUND = '#eef7ff';
 const EMAIL_CARD = '#ffffff';
 const EMAIL_TEXT = '#1f2933';
-const EMAIL_BORDER = '#dde3e8';
-const EMAIL_BUTTON = '#0f3b57';
+const EMAIL_BORDER = '#cfe2f3';
+const EMAIL_BUTTON = '#0f5c8a';
 const EMAIL_LINK = '#0f5c8a';
 const EMAIL_FOOTER = '#6b7280';
-const EMAIL_BRAND = '#0f3b57';
+const EMAIL_BRAND = '#0f5c8a';
 
 export function escapeHtml(value: string): string {
   return value
@@ -90,12 +90,12 @@ export function renderEmailDocument(args: {
     '</head>',
     `<body style="margin:0;padding:0;background:${EMAIL_BACKGROUND};font-family:Arial,Helvetica,sans-serif;color:${EMAIL_TEXT};">`,
     `<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;mso-hide:all;">${safePreheader}</div>`,
-    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f1eb;padding:32px 16px;">',
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${EMAIL_BACKGROUND};padding:32px 16px;">`,
     '<tr>',
     '<td align="center">',
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:640px;background:${EMAIL_CARD};border:1px solid ${EMAIL_BORDER};border-radius:18px;overflow:hidden;">`,
     '<tr>',
-    `<td style="padding:28px 32px 10px;border-bottom:1px solid ${EMAIL_BORDER};background:linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);">`,
+    `<td style="padding:28px 32px 10px;border-bottom:1px solid ${EMAIL_BORDER};background:#f8fcff;">`,
     `<div style="font-size:12px;line-height:1.4;letter-spacing:0.16em;text-transform:uppercase;color:${EMAIL_BRAND};font-weight:700;">International Child Art Foundation</div>`,
     `<h1 style="margin:14px 0 0;font-size:28px;line-height:1.2;color:${EMAIL_TEXT};">${safeHeadline}</h1>`,
     '</td>',

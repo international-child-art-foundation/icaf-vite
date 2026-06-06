@@ -26,7 +26,7 @@ import {
 import { EntityType, GSI } from "../../dynamo/ddbSchemaConsts";
 import { emailGsiSk, emailPk } from "../../dynamo/emailGsi";
 import { parseJsonBody } from "../../utils/request";
-import { sendCreateAndVerifyEmail } from "../../utils/emails/createAndVerify";
+import { sendRegistrationVerificationEmail } from "../../utils/emails/registrationVerification";
 
 const AUTH_ACTION_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60;
 
@@ -86,8 +86,6 @@ export const handler = async (
       return CommonErrors.conflict("An account with this email already exists");
     }
 
-    // Direct registration: create a disabled Cognito login immediately, then
-    // enable it only after the user clicks the app-generated verification link.
     const createUserResult = await cognitoClient.send(
       new AdminCreateUserCommand({
         UserPoolId: USER_POOL_ID,
@@ -154,7 +152,7 @@ export const handler = async (
     );
 
     try {
-      await sendCreateAndVerifyEmail({
+      await sendRegistrationVerificationEmail({
         toEmail: email,
         userId,
         authActionToken,

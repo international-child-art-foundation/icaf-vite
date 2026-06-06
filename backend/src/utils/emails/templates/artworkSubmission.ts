@@ -1,11 +1,19 @@
 import { APP_URL } from '../../../config/aws-clients';
-import { htmlParagraphs, renderButton, renderEmailDocument, renderInfoBox, textParagraphs } from '../templateUtils';
+import {
+  htmlParagraphs,
+  renderButton,
+  renderEmailDocument,
+  renderInfoBox,
+  textParagraphs,
+} from '../templateUtils';
 
 export function buildArtworkSubmissionEmail(args: {
   userId: string;
   authActionToken: string;
 }): { subject: string; text: string; html: string } {
-  const link = `${APP_URL}/create-account?id=${encodeURIComponent(args.userId)}&token=${encodeURIComponent(args.authActionToken)}`;
+  const userId = encodeURIComponent(args.userId);
+  const token = encodeURIComponent(args.authActionToken);
+  const link = `${APP_URL}/create-account?id=${userId}&token=${token}`;
 
   const subject = 'Thanks for your artwork submission to ICAF!';
   const text = textParagraphs([
@@ -32,9 +40,7 @@ export function buildArtworkSubmissionEmail(args: {
         'Account creation is optional and can be completed later if you prefer.',
         `If the button does not work, open this URL: ${link}`,
       ]),
-      htmlParagraphs([
-        'Thank you for participating in ICAF!',
-      ]),
+      htmlParagraphs(['Thank you for participating in ICAF!']),
     ].join(''),
   });
 

@@ -7,39 +7,39 @@ import {
   textParagraphs,
 } from '../templateUtils';
 
-export function buildCreateAndVerifyEmail(args: {
+export function buildRegistrationVerificationEmail(args: {
   userId: string;
   authActionToken: string;
 }): { subject: string; text: string; html: string } {
   const userId = encodeURIComponent(args.userId);
   const token = encodeURIComponent(args.authActionToken);
-  const link = `${APP_URL}/create-account?id=${userId}&token=${token}`;
+  const link = `${APP_URL}/verify-account?id=${userId}&token=${token}`;
 
-  const subject = 'Create your ICAF account';
+  const subject = 'Verify your ICAF account';
   const text = textParagraphs([
-    'You requested to create an ICAF account associated with this email address.',
-    'Use the link below to set your password and complete account creation:',
+    'Thanks for registering for an ICAF account.',
+    'Use the link below to verify your email address and activate your account:',
     link,
-    'This link expires in 7 days. If you did not request this, you can safely ignore this email.',
+    'This link expires in 7 days. If you did not create an account, you can safely ignore this email.',
     'The International Child Art Foundation',
   ]);
 
   const html = renderEmailDocument({
-    preheader: 'Complete your ICAF account setup using the secure link below.',
+    preheader: 'Verify your email address to activate your ICAF account.',
     title: subject,
-    headline: 'Complete your account setup',
+    headline: 'Verify your email',
     bodyHtml: [
       htmlParagraphs([
-        'You requested to create an ICAF account associated with this email address.',
-        'Use the secure link below to set your password and finish account creation.',
+        'Thanks for registering for an ICAF account.',
+        'Use the secure link below to verify your email address and activate your account.',
       ]),
-      renderButton('Create your account', link),
-      renderInfoBox('Account link', [
+      renderButton('Verify account', link),
+      renderInfoBox('Verification link', [
         'This link expires in 7 days.',
         `If the button does not work, open this URL: ${link}`,
       ]),
       htmlParagraphs([
-        'If you did not request this email, you can ignore it.',
+        'If you did not create an account, you can ignore this email.',
         'This message was sent by the International Child Art Foundation.',
       ]),
     ].join(''),

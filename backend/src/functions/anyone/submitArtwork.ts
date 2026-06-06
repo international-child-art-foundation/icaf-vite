@@ -219,6 +219,21 @@ export const handler = async (
       };
     }
 
+    if (user.emailed_signup_at) {
+      const response: SubmitArtworkResponse = {
+        success: true,
+        art_id: artId,
+        presigned_url: presignedUrl,
+        message: "Artwork submitted. Upload your image using the presigned URL.",
+      };
+
+      return {
+        statusCode: HTTP_STATUS.CREATED,
+        body: JSON.stringify(response),
+        headers: COMMON_HEADERS,
+      };
+    }
+
     const authActionToken = randomUUID();
     const authActionTokenExp = nowSeconds + AUTH_ACTION_TOKEN_TTL_SECONDS;
 

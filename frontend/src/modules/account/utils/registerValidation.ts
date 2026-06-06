@@ -77,6 +77,9 @@ export function getRegisterFieldError(
       return 'Use both uppercase and lowercase letters.';
     }
     if (!/\d/.test(values.password)) return 'Use at least one number.';
+    if (!/[^A-Za-z0-9]/.test(values.password)) {
+      return 'Use at least one symbol.';
+    }
   }
 
   if (name === 'confirmPassword') {

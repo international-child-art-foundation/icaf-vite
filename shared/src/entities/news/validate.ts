@@ -94,6 +94,17 @@ export function isValidNewsId(newsId: string): boolean {
     return isValidUUID(newsId);
 }
 
+export function newsSk(ts: number, newsId: string): string {
+    return `TS#${ts}#ID#${newsId}`;
+}
+
+export function isValidNewsSk(newsSkValue: string): boolean {
+    const match = /^TS#(\d+)#ID#(.+)$/.exec(newsSkValue);
+    if (!match) return false;
+
+    return isValidNewsId(match[2]);
+}
+
 export function validateNewsId(newsId: string): string[] {
     const errors: string[] = [];
     if (typeof newsId !== 'string' || !newsId.trim()) {

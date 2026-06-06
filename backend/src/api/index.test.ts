@@ -91,13 +91,13 @@ describe("api router", () => {
     expect(authMocks.requireRole).not.toHaveBeenCalled();
   });
 
-  it("rejects invalid news ids before auth", async () => {
-    const response = await handler(event("DELETE", "/api/admin/news/not-a-uuid"));
+  it("rejects invalid compound news keys before auth", async () => {
+    const response = await handler(event("DELETE", "/api/admin/news/TS%231%23ID%23not-a-uuid"));
 
     expect(response.statusCode).toBe(400);
     expect(responseBody(response)).toMatchObject({
       code: "BAD_REQUEST",
-      message: "Invalid news_id path parameter",
+      message: "Invalid news_sk path parameter",
     });
     expect(authMocks.requireRole).not.toHaveBeenCalled();
   });

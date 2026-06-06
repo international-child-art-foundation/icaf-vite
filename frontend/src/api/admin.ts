@@ -205,18 +205,18 @@ export function bulkCreateNews(
 }
 
 export function updateNews(
-  newsId: string,
+  newsSk: string,
   request: UpdateNewsRequest,
 ): Promise<NewsMutationResponse> {
   return apiRequest<NewsMutationResponse, UpdateNewsRequest>(
-    apiEndpoints.admin.updateNews(newsId),
+    apiEndpoints.admin.updateNews(newsSk),
     { body: request, method: 'PATCH' },
   );
 }
 
-export function deleteNews(newsId: string): Promise<NewsMutationResponse> {
+export function deleteNews(newsSk: string): Promise<NewsMutationResponse> {
   return apiRequest<NewsMutationResponse>(
-    apiEndpoints.admin.deleteNews(newsId),
+    apiEndpoints.admin.deleteNews(newsSk),
     {
       method: 'DELETE',
     },

@@ -11,7 +11,7 @@ export const apiEndpoints = {
       `/admin/users/${encodePathParam(userId)}/ban`,
     deleteMagazine: (slug: PathParam) =>
       `/admin/magazines/${encodePathParam(slug)}`,
-    deleteNews: (newsId: PathParam) => `/admin/news/${encodePathParam(newsId)}`,
+    deleteNews: (newsSk: PathParam) => `/admin/news/${encodePathParam(newsSk)}`,
     deleteUserAccount: (userId: PathParam) =>
       `/admin/users/${encodePathParam(userId)}/account`,
     getArtworkSubmitterEmail: (artId: PathParam) =>
@@ -36,7 +36,7 @@ export const apiEndpoints = {
       `/admin/users/${encodePathParam(userId)}/unhide-all`,
     updateMagazineStatus: (slug: PathParam) =>
       `/admin/magazines/${encodePathParam(slug)}/status`,
-    updateNews: (newsId: PathParam) => `/admin/news/${encodePathParam(newsId)}`,
+    updateNews: (newsSk: PathParam) => `/admin/news/${encodePathParam(newsSk)}`,
     adminUpdateArtwork: (artId: PathParam) =>
       `/admin/artworks/${encodePathParam(artId)}`,
     adminUpdateGroup: (groupId: PathParam) =>

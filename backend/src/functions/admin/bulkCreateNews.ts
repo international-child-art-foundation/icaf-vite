@@ -14,6 +14,7 @@ import {
     HTTP_STATUS,
     NewsEntity,
     hasMinimumRole,
+    newsSk,
     validateCreateNewsRequest,
 } from "@icaf/shared";
 
@@ -84,7 +85,7 @@ function normalizeItem(item: BulkCreateNewsItem, index: number): CreateNewsReque
 function toDynamoItem(item: CreateNewsRequest, news_id: string): NewsDynamoItem {
     return {
         PK: "NEWS",
-        SK: news_id,
+        SK: newsSk(item.ts, news_id),
         news_id,
         source: item.source,
         ts: item.ts,

@@ -7,6 +7,7 @@ import {
     CommonErrors,
     CreateNewsRequest,
     NewsEntity,
+    newsSk,
     validateCreateNewsRequest,
     hasMinimumRole,
 } from "@icaf/shared";
@@ -37,10 +38,11 @@ export const handler = async (
         }
 
         const news_id = randomUUID();
+        const news_sk = newsSk(body.ts, news_id);
 
         const item: NewsEntity & { PK: string; SK: string } = {
             PK: "NEWS",
-            SK: news_id,
+            SK: news_sk,
             news_id,
             source: body.source,
             body: body.body,
@@ -57,7 +59,7 @@ export const handler = async (
 
         return {
             statusCode: HTTP_STATUS.CREATED,
-            body: JSON.stringify({ success: true, news_id }),
+            body: JSON.stringify({ success: true, news_id, news_sk }),
             headers: COMMON_HEADERS,
         };
     } catch (error) {

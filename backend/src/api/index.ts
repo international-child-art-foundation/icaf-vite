@@ -8,6 +8,7 @@ import {
   isValidGroupId,
   isValidMagazineSlug,
   isValidNewsId,
+  isValidNewsSk,
   isValidTdrSk,
   isValidThemeFamily,
   isValidThemeInstance,
@@ -115,6 +116,7 @@ const pathParamValidators: Record<string, (value: string) => boolean> = {
   group_id: isValidGroupId,
   instance: isValidThemeInstance,
   news_id: isValidNewsId,
+  news_sk: isValidNewsSk,
   slug: isValidMagazineSlug,
   tdr_sk: isValidTdrSk,
   theme_sk: isValidThemeSk,
@@ -204,8 +206,8 @@ const routes: Route[] = [
   roleProtected({ method: "DELETE", path: "/api/admin/magazines/{slug}", handler: deleteMagazine }, adminRoles),
   roleProtected({ method: "POST", path: "/api/admin/news", handler: createNews }, adminRoles),
   roleProtected({ method: "POST", path: "/api/admin/news/bulk", handler: bulkCreateNews, allowArrayJsonBody: true }, adminRoles),
-  roleProtected({ method: "PATCH", path: "/api/admin/news/{news_id}", handler: updateNews }, adminRoles),
-  roleProtected({ method: "DELETE", path: "/api/admin/news/{news_id}", handler: deleteNews }, adminRoles),
+  roleProtected({ method: "PATCH", path: "/api/admin/news/{news_sk}", handler: updateNews }, adminRoles),
+  roleProtected({ method: "DELETE", path: "/api/admin/news/{news_sk}", handler: deleteNews }, adminRoles),
 ];
 
 function splitPath(path: string): string[] {

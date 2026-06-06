@@ -32,8 +32,8 @@ type NewsDraft = {
 
 type PendingAction =
   | { type: 'create' }
-  | { type: 'update'; newsId: string }
-  | { type: 'delete'; newsId: string }
+  | { type: 'update'; newsSk: string }
+  | { type: 'delete'; newsSk: string }
   | { type: 'bulk' }
   | null;
 
@@ -167,7 +167,7 @@ export function NewsAdminPanel() {
     setLoading(true);
     setError(null);
     try {
-      const response = await listNews({ limit: 100 });
+      const response = await listNews({ limit: 50 });
       setNews(response.news);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load news.');
@@ -190,7 +190,7 @@ export function NewsAdminPanel() {
   };
 
   const beginEditing = (item: NewsListItem) => {
-    setEditingId(item.news_id);
+    setEditingId(item.news_sk);
     setEdits(emptyDraft);
     setPendingAction(null);
     setMessage(null);
@@ -249,13 +249,13 @@ export function NewsAdminPanel() {
         setMessage('News item created.');
       } else if (pendingAction.type === 'update') {
         const item = news.find(
-          (newsItem) => newsItem.news_id === pendingAction.newsId,
+          (newsItem) => newsItem.news_sk === pendingAction.newsSk,
         );
         if (!item) throw new Error('Select a news item before updating.');
-        await updateNews(item.news_id, draftToUpdateRequest(edits, item));
+        await updateNews(item.news_sk, draftToUpdateRequest(edits, item));
         setMessage('News item updated.');
       } else if (pendingAction.type === 'delete') {
-        await deleteNews(pendingAction.newsId);
+        await deleteNews(pendingAction.newsSk);
         setEditingId(null);
         setEdits(emptyDraft);
         setMessage('News item deleted.');
@@ -318,9 +318,9 @@ export function NewsAdminPanel() {
           ) : (
             <div className="">
               {news.map((item, index) => {
-                const editing = item.news_id === editingId;
+                const editing = item.news_sk === editingId;
                 return (
-                  <div key={item.news_id}>
+                  <div key={item.news_sk}>
                     {editing ? (
                       <InlineNewsEditor
                         busy={busy}
@@ -338,13 +338,13 @@ export function NewsAdminPanel() {
                         onDelete={() =>
                           setPendingAction({
                             type: 'delete',
-                            newsId: item.news_id,
+                            newsSk: item.news_sk,
                           })
                         }
                         onSave={() =>
                           setPendingAction({
                             type: 'update',
-                            newsId: item.news_id,
+                            newsSk: item.news_sk,
                           })
                         }
                         onConfirm={handleConfirmClick}
@@ -484,7 +484,7 @@ function InlineNewsEditor({
   const placeholders = toDraft(item);
   const confirmingAction =
     pendingAction?.type === 'update' || pendingAction?.type === 'delete'
-      ? pendingAction.newsId === item.news_id
+      ? pendingAction.newsSk === item.news_sk
         ? pendingAction
         : null
       : null;

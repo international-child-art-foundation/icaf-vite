@@ -5,17 +5,17 @@
  *
  * DynamoDB NEWS entity key structure:
  *   PK = 'NEWS'
- *   SK = '<news_id>'
+ *   SK = 'TS#<ts>#ID#<news_id>'
  *
- * All news items live under a single partition. List queries return all of them
- * (dataset is small — a few dozen items). Clients sort by ts descending.
+ * All news items live under a single partition. List queries use the SK for
+ * timestamp ordering.
  */
 
 export type NewsKind = 'article' | 'audio';
 
 export interface NewsEntity {
     // ── Required ───────────────────────────────────────────────────────────
-    news_id: string;    // UUID (also SK)
+    news_id: string;    // UUID
     source: string;     // e.g. 'National Law Review'
     ts: number;  // Unix ts (seconds) — used for client-side sorting
     type: 'NEWS';
@@ -59,8 +59,10 @@ export interface UpdateNewsRequest {
     link?: string;
 }
 
-// Shape used in list responses — identical to entity, exposed fully
-export type NewsListItem = Omit<NewsEntity, 'type'>;
+// Shape used in list responses. news_sk is the DynamoDB SK for admin actions.
+export type NewsListItem = Omit<NewsEntity, 'type'> & {
+    news_sk: string;
+};
 
 export interface ListNewsResponse {
     news: NewsListItem[];
@@ -71,6 +73,7 @@ export interface ListNewsResponse {
 export interface NewsMutationResponse {
     success: true;
     news_id: string;
+    news_sk: string;
 }
 
 export interface BulkCreateNewsResponse {

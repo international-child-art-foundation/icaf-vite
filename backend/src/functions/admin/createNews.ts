@@ -37,8 +37,9 @@ export const handler = async (
             return CommonErrors.badRequest(errors.join("; "));
         }
 
+        const ts = Math.floor(Date.now() / 1000);
         const news_id = randomUUID();
-        const news_sk = newsSk(body.ts, news_id);
+        const news_sk = newsSk(ts, news_id);
 
         const item: NewsEntity & { PK: string; SK: string } = {
             PK: "NEWS",
@@ -47,7 +48,7 @@ export const handler = async (
             source: body.source,
             body: body.body,
             date: body.date,
-            ts: body.ts,
+            ts,
             type: EntityType.News as "NEWS",
             ...(body.kind !== undefined && { kind: body.kind }),
             ...(body.place !== undefined && { place: body.place }),

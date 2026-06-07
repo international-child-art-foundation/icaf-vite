@@ -12,17 +12,48 @@ import type {
   createThemeResponse,
 } from '@icaf/shared';
 
-import { apiRequest } from './client';
+import {
+  apiRequest,
+  hasApiMessage,
+  hasApiSuccess,
+  hasArrayProperty,
+  hasStringProperty,
+} from './client';
 import { apiEndpoints } from './endpoints';
 import type { PaginationQuery } from './types';
 
 type CreateThemeRequest = Omit<ThemeEntity, 'type'>;
+
+const isArtworkQueueResponse = (response: unknown): boolean =>
+  hasArrayProperty(response, 'artworks');
+
+const isGroupQueueResponse = (response: unknown): boolean =>
+  hasArrayProperty(response, 'groups');
+
+const isArtworkMutationResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) &&
+  hasStringProperty(response, 'art_id') &&
+  hasStringProperty(response, 'status');
+
+const isGroupMutationResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) &&
+  hasStringProperty(response, 'group_id') &&
+  hasStringProperty(response, 'status');
+
+const isUserRoleResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) &&
+  hasStringProperty(response, 'user_id') &&
+  hasStringProperty(response, 'new_role');
+
+const isThemeMutationResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) && hasApiMessage(response);
 
 export function fetchPendingArtworks(
   query?: PaginationQuery,
 ): Promise<ReviewArtworkQueueResponse> {
   return apiRequest<ReviewArtworkQueueResponse>(apiEndpoints.contributor.pendingArtworks, {
     query,
+    validate: isArtworkQueueResponse,
   });
 }
 
@@ -31,6 +62,7 @@ export function fetchHiddenArtworks(
 ): Promise<ReviewArtworkQueueResponse> {
   return apiRequest<ReviewArtworkQueueResponse>(apiEndpoints.contributor.hiddenArtworks, {
     query,
+    validate: isArtworkQueueResponse,
   });
 }
 
@@ -39,6 +71,7 @@ export function fetchRejectedArtworks(
 ): Promise<ReviewArtworkQueueResponse> {
   return apiRequest<ReviewArtworkQueueResponse>(apiEndpoints.contributor.rejectedArtworks, {
     query,
+    validate: isArtworkQueueResponse,
   });
 }
 
@@ -48,19 +81,21 @@ export function changeArtworkStatus(
 ): Promise<ChangeArtworkStatusResponse> {
   return apiRequest<ChangeArtworkStatusResponse, ChangeArtworkStatusRequest>(
     apiEndpoints.contributor.changeArtworkStatus(artId),
-    { body: request, method: 'PATCH' },
+    { body: request, method: 'PATCH', validate: isArtworkMutationResponse },
   );
 }
 
 export function fetchPendingGroups(query?: PaginationQuery): Promise<ReviewGroupQueueResponse> {
   return apiRequest<ReviewGroupQueueResponse>(apiEndpoints.contributor.pendingGroups, {
     query,
+    validate: isGroupQueueResponse,
   });
 }
 
 export function fetchHiddenGroups(query?: PaginationQuery): Promise<ReviewGroupQueueResponse> {
   return apiRequest<ReviewGroupQueueResponse>(apiEndpoints.contributor.hiddenGroups, {
     query,
+    validate: isGroupQueueResponse,
   });
 }
 
@@ -70,7 +105,7 @@ export function changeGroupStatus(
 ): Promise<ChangeGroupStatusResponse> {
   return apiRequest<ChangeGroupStatusResponse, ChangeGroupStatusRequest>(
     apiEndpoints.contributor.changeGroupStatus(groupId),
-    { body: request, method: 'PATCH' },
+    { body: request, method: 'PATCH', validate: isGroupMutationResponse },
   );
 }
 
@@ -80,14 +115,14 @@ export function updateUserRole(
 ): Promise<UpdateUserRoleResponse> {
   return apiRequest<UpdateUserRoleResponse, UpdateUserRoleRequest>(
     apiEndpoints.contributor.updateUserRole(userId),
-    { body: request, method: 'PATCH' },
+    { body: request, method: 'PATCH', validate: isUserRoleResponse },
   );
 }
 
 export function createTheme(request: CreateThemeRequest): Promise<createThemeResponse> {
   return apiRequest<createThemeResponse, CreateThemeRequest>(
     apiEndpoints.contributor.createTheme,
-    { body: request, method: 'POST' },
+    { body: request, method: 'POST', validate: isThemeMutationResponse },
   );
 }
 
@@ -97,6 +132,6 @@ export function updateTheme(
 ): Promise<createThemeResponse> {
   return apiRequest<createThemeResponse, PatchTheme>(
     apiEndpoints.contributor.updateTheme(themeSk),
-    { body: request, method: 'PATCH' },
+    { body: request, method: 'PATCH', validate: isThemeMutationResponse },
   );
 }

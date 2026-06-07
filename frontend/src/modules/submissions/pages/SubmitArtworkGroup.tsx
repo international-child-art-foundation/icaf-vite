@@ -28,6 +28,7 @@ import type {
 import {
   ARTWORK_GROUP_DRAFT_KEY,
   createArtworkDraft,
+  createDigitalSignature,
   createReleaseHash,
   getUploadFileType,
   hasSubmissionErrors,
@@ -214,10 +215,7 @@ function readPersistedDraft(): StoredArtworkGroupSubmissionDraft {
         typeof storedDraft.certificationAccepted === 'boolean'
           ? storedDraft.certificationAccepted
           : initialPersistedDraft.certificationAccepted,
-      digitalSignature: readString(
-        storedDraft.digitalSignature,
-        initialPersistedDraft.digitalSignature,
-      ),
+      digitalSignature: '',
       group: readStoredGroup(storedDraft.group),
       promotionalUse:
         typeof storedDraft.promotionalUse === 'boolean'
@@ -563,6 +561,9 @@ export function SubmitArtworkGroup({
   async function handleAsyncSubmit() {
     try {
       const releaseHash = await createReleaseHash();
+      const digitalSignature = isEducatorFlow
+        ? undefined
+        : createDigitalSignature(draft.digitalSignature);
       const uploadFiles = await Promise.all(
         artworks.map((artwork) => {
           const file = files[artwork.id];
@@ -579,6 +580,7 @@ export function SubmitArtworkGroup({
           artwork,
           file,
           releaseHash,
+          digitalSignature,
           effectiveGroup,
           isEducatorFlow ? false : draft.promotionalUse,
           {
@@ -645,7 +647,10 @@ export function SubmitArtworkGroup({
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    window.localStorage.setItem(ARTWORK_GROUP_DRAFT_KEY, JSON.stringify(draft));
+    window.localStorage.setItem(
+      ARTWORK_GROUP_DRAFT_KEY,
+      JSON.stringify({ ...draft, digitalSignature: '' }),
+    );
   }, [draft]);
 
   useEffect(() => {

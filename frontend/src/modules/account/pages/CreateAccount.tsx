@@ -13,7 +13,10 @@ import {
 import { Button } from '@/shared/components/ui/button';
 
 function getSubmitError(error: unknown): string {
-  return getApiErrorMessage(error, 'Account setup failed. Please try again.');
+  return getApiErrorMessage(
+    error,
+    'Account setup failed. Please contact us for help.',
+  );
 }
 
 export const CreateAccount = () => {

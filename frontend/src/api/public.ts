@@ -17,16 +17,66 @@ import type {
   SubmitGroupResponse,
 } from '@icaf/shared';
 
-import { apiRequest } from './client';
+import {
+  apiRequest,
+  hasApiSuccess,
+  hasArrayProperty,
+  hasNumberProperty,
+  hasStringProperty,
+} from './client';
 import { apiEndpoints } from './endpoints';
 import type { PaginationQuery } from './types';
+
+const isSuccessfulArtworkSubmitResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) &&
+  hasStringProperty(response, 'art_id') &&
+  hasStringProperty(response, 'presigned_url');
+
+const isSuccessfulGroupSubmitResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) && hasStringProperty(response, 'group_id');
+
+const isArtworkResponse = (response: unknown): boolean =>
+  typeof response === 'object' &&
+  response !== null &&
+  !Array.isArray(response) &&
+  'artwork' in response;
+
+const isGroupResponse = (response: unknown): boolean =>
+  typeof response === 'object' &&
+  response !== null &&
+  !Array.isArray(response) &&
+  'group' in response;
+
+const isSuccessfulTakedownResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) &&
+  hasStringProperty(response, 'tdr_id') &&
+  hasNumberProperty(response, 'scheduled_execution_at');
+
+const isMagazinesResponse = (response: unknown): boolean =>
+  hasArrayProperty(response, 'magazines');
+
+const isNewsResponse = (response: unknown): boolean =>
+  hasArrayProperty(response, 'news');
+
+const isGalleryArtworksResponse = (response: unknown): boolean =>
+  hasArrayProperty(response, 'artworks') &&
+  hasNumberProperty(response, 'count') &&
+  hasStringProperty(response, 'sort');
+
+const isThemesResponse = (response: unknown): boolean =>
+  hasArrayProperty(response, 'themes') && hasNumberProperty(response, 'count');
+
+const isGalleryGroupsResponse = (response: unknown): boolean =>
+  hasArrayProperty(response, 'groups') &&
+  hasNumberProperty(response, 'count') &&
+  hasStringProperty(response, 'sort');
 
 export function submitGuestArtwork(
   request: GuestSubmitArtworkRequest,
 ): Promise<SubmitArtworkResponse> {
   return apiRequest<SubmitArtworkResponse, GuestSubmitArtworkRequest>(
     apiEndpoints.public.artworks,
-    { body: request, method: 'POST' },
+    { body: request, method: 'POST', validate: isSuccessfulArtworkSubmitResponse },
   );
 }
 
@@ -34,6 +84,7 @@ export function createGuestGroup(request: GuestCreateGroupRequest): Promise<Subm
   return apiRequest<SubmitGroupResponse, GuestCreateGroupRequest>(apiEndpoints.public.groups, {
     body: request,
     method: 'POST',
+    validate: isSuccessfulGroupSubmitResponse,
   });
 }
 
@@ -42,7 +93,7 @@ export function createAuthenticatedGroup(
 ): Promise<SubmitGroupResponse> {
   return apiRequest<SubmitGroupResponse, AuthenticatedCreateGroupRequest>(
     apiEndpoints.public.groups,
-    { body: request, method: 'POST' },
+    { body: request, method: 'POST', validate: isSuccessfulGroupSubmitResponse },
   );
 }
 
@@ -50,15 +101,20 @@ export function createGroup(request: CreateGroupRequest): Promise<SubmitGroupRes
   return apiRequest<SubmitGroupResponse, CreateGroupRequest>(apiEndpoints.public.groups, {
     body: request,
     method: 'POST',
+    validate: isSuccessfulGroupSubmitResponse,
   });
 }
 
 export function getArtwork(artId: string): Promise<GetArtworkResponse> {
-  return apiRequest<GetArtworkResponse>(apiEndpoints.public.artwork(artId));
+  return apiRequest<GetArtworkResponse>(apiEndpoints.public.artwork(artId), {
+    validate: isArtworkResponse,
+  });
 }
 
 export function getGroup(groupId: string): Promise<GetGroupResponse> {
-  return apiRequest<GetGroupResponse>(apiEndpoints.public.group(groupId));
+  return apiRequest<GetGroupResponse>(apiEndpoints.public.group(groupId), {
+    validate: isGroupResponse,
+  });
 }
 
 export function initiateTakedown(
@@ -66,17 +122,20 @@ export function initiateTakedown(
 ): Promise<InitiateTakedownResponse> {
   return apiRequest<InitiateTakedownResponse, InitiateTakedownRequest>(
     apiEndpoints.public.takedown,
-    { body: request, method: 'POST' },
+    { body: request, method: 'POST', validate: isSuccessfulTakedownResponse },
   );
 }
 
 export function listMagazines(): Promise<ListMagazinesResponse> {
-  return apiRequest<ListMagazinesResponse>(apiEndpoints.public.magazines);
+  return apiRequest<ListMagazinesResponse>(apiEndpoints.public.magazines, {
+    validate: isMagazinesResponse,
+  });
 }
 
 export function listNews(query?: PaginationQuery): Promise<ListNewsResponse> {
   return apiRequest<ListNewsResponse>(apiEndpoints.public.news, {
     query,
+    validate: isNewsResponse,
   });
 }
 
@@ -85,6 +144,7 @@ export function listGalleryArtworks(
 ): Promise<GalleryArtworksResponse> {
   return apiRequest<GalleryArtworksResponse>(apiEndpoints.gallery.artworks, {
     query,
+    validate: isGalleryArtworksResponse,
   });
 }
 
@@ -94,6 +154,7 @@ export function listGalleryArtworksByFamily(
 ): Promise<GalleryArtworksResponse> {
   return apiRequest<GalleryArtworksResponse>(apiEndpoints.gallery.artworksByFamily(family), {
     query,
+    validate: isGalleryArtworksResponse,
   });
 }
 
@@ -104,17 +165,20 @@ export function listGalleryArtworksByInstance(
 ): Promise<GalleryArtworksResponse> {
   return apiRequest<GalleryArtworksResponse>(
     apiEndpoints.gallery.artworksByInstance(family, instance),
-    { query },
+    { query, validate: isGalleryArtworksResponse },
   );
 }
 
 export function listGalleryThemes(): Promise<ListThemesResponse> {
-  return apiRequest<ListThemesResponse>(apiEndpoints.gallery.themes);
+  return apiRequest<ListThemesResponse>(apiEndpoints.gallery.themes, {
+    validate: isThemesResponse,
+  });
 }
 
 export function listGalleryGroups(query?: GalleryQueryParams): Promise<GalleryGroupsResponse> {
   return apiRequest<GalleryGroupsResponse>(apiEndpoints.gallery.groups, {
     query,
+    validate: isGalleryGroupsResponse,
   });
 }
 
@@ -124,6 +188,7 @@ export function listGalleryGroupsByFamily(
 ): Promise<GalleryGroupsResponse> {
   return apiRequest<GalleryGroupsResponse>(apiEndpoints.gallery.groupsByFamily(family), {
     query,
+    validate: isGalleryGroupsResponse,
   });
 }
 
@@ -134,6 +199,6 @@ export function listGalleryGroupsByInstance(
 ): Promise<GalleryGroupsResponse> {
   return apiRequest<GalleryGroupsResponse>(
     apiEndpoints.gallery.groupsByInstance(family, instance),
-    { query },
+    { query, validate: isGalleryGroupsResponse },
   );
 }

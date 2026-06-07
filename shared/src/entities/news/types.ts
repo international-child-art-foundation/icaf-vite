@@ -31,7 +31,7 @@ export interface NewsEntity {
 
 export interface CreateNewsRequest {
     source: string;
-    ts: number;  // Unix seconds — caller supplies so dates can be backdated
+    ts?: number;  // Unix seconds — derived by the server when omitted
     kind?: NewsKind;
     place?: string;
     body?: string;

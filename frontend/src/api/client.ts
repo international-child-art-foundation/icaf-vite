@@ -6,6 +6,7 @@ export type ApiRequestOptions<TBody> = {
   method?: string;
   query?: ApiQueryParams;
   signal?: AbortSignal;
+  validate?: (body: unknown) => boolean;
 };
 
 export type ApiClientConfig = {
@@ -60,6 +61,12 @@ async function parseResponseBody(response: Response): Promise<unknown> {
   }
 }
 
+function isJsonResponse(response: Response): boolean {
+  return (
+    response.headers.get('Content-Type')?.includes('application/json') ?? false
+  );
+}
+
 export class ApiError extends Error {
   readonly body: unknown;
   readonly status: number;
@@ -101,9 +108,51 @@ export class InvalidApiResponseError extends Error {
   }
 }
 
+export class UnexpectedApiResponseError extends Error {
+  constructor() {
+    super('The site could not reach the ICAF account service.');
+    this.name = 'UnexpectedApiResponseError';
+  }
+}
+
+export function isApiObject(body: unknown): body is Record<string, unknown> {
+  return typeof body === 'object' && body !== null && !Array.isArray(body);
+}
+
+export function hasApiSuccess(body: unknown): body is { success: true } {
+  return isApiObject(body) && body.success === true;
+}
+
+export function hasApiMessage(body: unknown): body is { message: string } {
+  return isApiObject(body) && typeof body.message === 'string';
+}
+
+export function hasStringProperty(
+  body: unknown,
+  property: string,
+): boolean {
+  return isApiObject(body) && typeof body[property] === 'string';
+}
+
+export function hasBooleanProperty(
+  body: unknown,
+  property: string,
+): boolean {
+  return isApiObject(body) && typeof body[property] === 'boolean';
+}
+
+export function hasArrayProperty(body: unknown, property: string): boolean {
+  return isApiObject(body) && Array.isArray(body[property]);
+}
+
+export function hasNumberProperty(body: unknown, property: string): boolean {
+  return isApiObject(body) && typeof body[property] === 'number';
+}
+
 export function getApiErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof ApiError) return error.message;
   if (error instanceof InvalidApiResponseError) return error.message;
+  if (error instanceof UnexpectedApiResponseError) return error.message;
   return fallback;
 }
 
@@ -132,8 +181,26 @@ export async function apiRequest<TResponse, TBody = never>(
     throw new ApiError(response, responseBody);
   }
 
+  if (responseBody !== undefined && !isJsonResponse(response)) {
+    throw new InvalidApiResponseError(response, responseBody);
+  }
+
   if (typeof responseBody === 'string') {
     throw new InvalidApiResponseError(response, responseBody);
+  }
+
+  if (responseBody !== undefined) {
+    if (!isApiObject(responseBody)) {
+      throw new InvalidApiResponseError(response, responseBody);
+    }
+
+    if ('success' in responseBody && responseBody.success !== true) {
+      throw new InvalidApiResponseError(response, responseBody);
+    }
+  }
+
+  if (options.validate && !options.validate(responseBody)) {
+    throw new UnexpectedApiResponseError();
   }
 
   return responseBody as TResponse;

@@ -34,7 +34,6 @@ export const handler = async (
     const body = parsedBody.value;
 
     if (!body.user_id?.trim()) return CommonErrors.badRequest("user_id is required");
-    if (!body.auth_action_token?.trim()) return CommonErrors.badRequest("auth_action_token is required");
     if (body.f_name !== undefined && (!body.f_name.trim() || body.f_name.length > MAX_NAME_LEN)) {
       return CommonErrors.badRequest(`f_name must be 1-${MAX_NAME_LEN} characters when provided`);
     }
@@ -59,18 +58,30 @@ export const handler = async (
     );
 
     if (!result.Item) {
-      return CommonErrors.notFound("User not found");
+      return CommonErrors.notFound("We could not find this account. Please contact us for help.");
     }
 
     const user = result.Item as UserEntity;
 
+    if (user.verified_at) {
+      return {
+        statusCode: HTTP_STATUS.OK,
+        body: JSON.stringify({ message: "This account is already verified", already_verified: true }),
+        headers: COMMON_HEADERS,
+      };
+    }
+
+    if (!body.auth_action_token?.trim()) {
+      return CommonErrors.badRequest("authentication token is required");
+    }
+
     if (user.auth_action_token !== body.auth_action_token) {
-      return CommonErrors.badRequest("Invalid auth action token");
+      return CommonErrors.badRequest("Invalid authentication token");
     }
 
     const nowSeconds = Math.floor(Date.now() / 1000);
     if (user.auth_action_token_exp !== undefined && user.auth_action_token_exp < nowSeconds) {
-      return CommonErrors.badRequest("Auth action token has expired");
+      return CommonErrors.badRequest("Authentication token has expired");
     }
 
     const fName = body.f_name?.trim() ?? user.f_name;

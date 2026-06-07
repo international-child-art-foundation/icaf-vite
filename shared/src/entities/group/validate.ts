@@ -102,6 +102,13 @@ export function validateCreateGroupRequest(data: CreateGroupRequest, identityReq
         if (!artwork.release_hash?.trim() || !SHA256_HEX.test(artwork.release_hash)) {
             errors.push(`artworks[${index}].release_hash must be a valid SHA-256 hex string`);
         }
+        if (artwork.digital_signature !== undefined) {
+            if (typeof artwork.digital_signature !== 'string' || !artwork.digital_signature.trim()) {
+                errors.push(`artworks[${index}].digital_signature, if provided, must be a non-empty string`);
+            } else if (artwork.digital_signature.length > GROUP_MAX_STRING_LEN) {
+                errors.push(`artworks[${index}].digital_signature must be ${GROUP_MAX_STRING_LEN} characters or less`);
+            }
+        }
         if (artwork.promotional_use !== undefined && typeof artwork.promotional_use !== 'boolean') {
             errors.push(`artworks[${index}].promotional_use, if provided, must be a boolean`);
         }

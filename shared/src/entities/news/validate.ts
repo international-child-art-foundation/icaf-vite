@@ -76,10 +76,6 @@ export function validateCreateNewsRequest(data: CreateNewsRequest): string[] {
     if (!data.source || typeof data.source !== 'string' || !data.source.trim()) {
         errors.push('source is required');
     }
-    if (data.ts === undefined || data.ts === null) {
-        errors.push('ts is required');
-    }
-
     return [...errors, ...validateNewsFields(data)];
 }
 

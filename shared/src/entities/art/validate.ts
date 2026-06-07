@@ -147,6 +147,16 @@ export function validateSubmissionData(data: SubmitArtworkRequest): string[] {
         errors.push('release_hash must be a valid SHA-256 hex string');
     }
 
+    if (data.digital_signature !== undefined) {
+        if (typeof data.digital_signature !== 'string' || !data.digital_signature.trim()) {
+            errors.push('digital_signature, if provided, must be a non-empty string');
+        } else if (data.digital_signature.length > MAX_STRING_LEN) {
+            errors.push(`digital_signature must be ${MAX_STRING_LEN} characters or less`);
+        } else if (FORBIDDEN_CHARS_SINGLELINE.test(data.digital_signature)) {
+            errors.push('digital_signature contains invalid characters');
+        }
+    }
+
     return [...errors, ...validateOptionalArtworkFields(data)];
 }
 

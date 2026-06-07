@@ -63,7 +63,9 @@ export interface RequestCreateAndVerifyRequest {
 
 export type RequestCreateAndVerifyResponse = MessageResponse;
 
-export type CreateAndVerifyResponse = MessageResponse;
+export type CreateAndVerifyResponse = MessageResponse & {
+    already_verified?: boolean;
+};
 
 export interface DefaultRegistrationResponse extends DeliveryMessageResponse {
     user_id?: string;

@@ -37,6 +37,7 @@ const CONTENT_TYPES: Record<string, string> = {
 interface SubmitArtworkToGroupBody {
   file_type: string;
   release_hash: string;
+  digital_signature?: string;
   promotional_use?: boolean;
   f_name?: string;
   l_name?: string;
@@ -99,6 +100,14 @@ export const handler = async (
     if (!body.release_hash?.trim() || !SHA256_HEX.test(body.release_hash)) {
       return CommonErrors.badRequest("release_hash must be a valid SHA-256 hex string");
     }
+    if (body.digital_signature !== undefined) {
+      if (typeof body.digital_signature !== "string" || !body.digital_signature.trim()) {
+        return CommonErrors.badRequest("digital_signature, if provided, must be a non-empty string");
+      }
+      if (body.digital_signature.length > 200) {
+        return CommonErrors.badRequest("digital_signature must be 200 characters or less");
+      }
+    }
     const fieldErrors = validateOptionalArtworkFields(body);
     if (fieldErrors.length > 0) {
       return CommonErrors.badRequest(fieldErrors.join("; "));
@@ -127,6 +136,9 @@ export const handler = async (
           kudos_count: 0,
           ts: nowSeconds,
           release_hash: body.release_hash.trim(),
+          ...(body.digital_signature && {
+            digital_signature: body.digital_signature.trim(),
+          }),
           promotional_use: body.promotional_use ?? false,
           type: "ART",
           notifications: false,

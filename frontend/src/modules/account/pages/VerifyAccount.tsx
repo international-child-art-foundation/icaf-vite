@@ -10,7 +10,7 @@ type VerifyStatus = 'idle' | 'verifying' | 'success' | 'error';
 function getErrorMessage(error: unknown): string {
   return getApiErrorMessage(
     error,
-    'Sorry, we could not verify this account link.',
+    'Sorry, we could not verify this account link. Please contact us for help.',
   );
 }
 
@@ -40,10 +40,14 @@ export const VerifyAccount = () => {
       auth_action_token: token,
       user_id: userId,
     })
-      .then(() => {
+      .then((response) => {
         if (cancelled) return;
         setStatus('success');
-        setMessage('Your account has been verified. You can now log in.');
+        setMessage(
+          response.already_verified
+            ? 'This account is already verified. You can log in.'
+            : 'Your account has been verified. You can now log in.',
+        );
       })
       .catch((error) => {
         if (cancelled) return;
@@ -83,12 +87,14 @@ export const VerifyAccount = () => {
             {message ?? 'Please wait while we activate your ICAF account.'}
           </p>
           {!isWorking && !isSuccess && (
-            <Link
-              className="text-secondary-blue mt-3 inline-block text-sm font-semibold underline-offset-4 hover:underline"
-              to="/contact"
-            >
-              Visit our contact page for help.
-            </Link>
+            <div className="mt-3">
+              <Link
+                className="text-secondary-blue inline-block text-sm font-semibold underline-offset-4 hover:underline"
+                to="/contact"
+              >
+                Visit our contact page for help.
+              </Link>
+            </div>
           )}
           <Button
             asChild

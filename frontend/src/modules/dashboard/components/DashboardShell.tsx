@@ -3,6 +3,7 @@ import type { Role } from '@icaf/shared';
 import { MySubmissionsModule } from '../components/MySubmissionsModule';
 import { OverviewModules } from '../components/OverviewModules';
 import { NewsAdminPanel } from '../components/NewsAdminPanel';
+import { CreateThemePanel } from '../components/CreateThemePanel';
 import { ReviewArtworkQueue } from '../components/ReviewArtworkQueue';
 import { ReviewGroupQueue } from '../components/ReviewGroupQueue';
 import { canAdmin, canReview } from '@/modules/dashboard/utils/dashboardFormat';
@@ -66,6 +67,8 @@ export function DashboardShell({
     content = <ReviewArtworkQueue admin />;
   } else if (activeTab === 'news' && canAdmin(role)) {
     content = <NewsAdminPanel />;
+  } else if (activeTab === 'themes' && canReview(role)) {
+    content = <CreateThemePanel />;
   } else {
     content = <OverviewModules role={role} />;
   }

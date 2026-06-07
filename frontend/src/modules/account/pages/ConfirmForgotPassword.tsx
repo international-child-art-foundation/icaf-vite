@@ -16,8 +16,8 @@ function getSubmitError(error: unknown, isActivation: boolean): string {
   return getApiErrorMessage(
     error,
     isActivation
-      ? 'Sorry, we could not activate your account.'
-      : 'Sorry, we could not reset your password.',
+      ? 'Sorry, we could not activate your account. Please contact us for help.'
+      : 'Sorry, we could not reset your password. Please contact us for help.',
   );
 }
 

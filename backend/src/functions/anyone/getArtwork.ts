@@ -28,9 +28,13 @@ export const handler = async (
       return CommonErrors.notFound("Artwork not found");
     }
 
+    const artwork = { ...(result.Item as ArtworkEntity) };
+    delete artwork.digital_signature;
+    delete (artwork as Record<string, unknown>).digital_signature_hash;
+
     return {
       statusCode: HTTP_STATUS.OK,
-      body: JSON.stringify({ artwork: result.Item as ArtworkEntity }),
+      body: JSON.stringify({ artwork }),
       headers: COMMON_HEADERS,
     };
   } catch (error) {

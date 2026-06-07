@@ -235,10 +235,15 @@ export async function createReleaseHash() {
     .join('');
 }
 
+export function createDigitalSignature(signature: string) {
+  return signature.trim();
+}
+
 export function toArtworkRequest(
   artwork: ArtworkDraft,
   file: File,
   releaseHash: string,
+  digitalSignature: string | undefined,
   group: ArtworkGroupInfo,
   promotionalUse: boolean,
   options: {
@@ -262,6 +267,7 @@ export function toArtworkRequest(
         ? artwork.f_name.trim() || undefined
         : undefined,
     file_type: fileType,
+    digital_signature: digitalSignature,
     notifications: group.notifications,
     promotional_use: promotionalUse,
     region: group.region.trim() || undefined,

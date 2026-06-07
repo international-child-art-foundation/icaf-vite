@@ -45,6 +45,7 @@ export interface ArtworkEntity {
     kudos_count: number;
     ts: number;          // Unix ts (seconds)
     release_hash: string;       // SHA-256 hash of the legal release PDF text accepted at submission
+    digital_signature?: string; // Submitter's typed signature captured at submission
     promotional_use: boolean;   // submitter opted into promotional/commercial use
     type: 'ART';
     notifications?: boolean;    // true when submitter opted into submission notifications
@@ -68,6 +69,7 @@ export interface ArtworkEntity {
 interface ArtworkSubmissionFields {
     file_type: UploadFileType;
     release_hash: string;
+    digital_signature?: string;
     promotional_use?: boolean;
     title?: string;
     description?: string;
@@ -103,7 +105,7 @@ export interface SubmitArtworkResponse {
 }
 
 export interface GetArtworkResponse {
-    artwork: ArtworkEntity;
+    artwork: Omit<ArtworkEntity, 'digital_signature' | 'digital_signature_hash'>;
 }
 
 // Shape used in list and gallery responses (subset of ArtworkEntity)
@@ -163,6 +165,7 @@ export interface UpdateArtworkRequest {
 export interface SubmitArtworkToGroupRequest {
     file_type: UploadFileType;
     release_hash: string;
+    digital_signature?: string;
     promotional_use?: boolean;
     f_name?: string;
     l_name?: string;

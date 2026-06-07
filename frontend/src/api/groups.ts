@@ -8,17 +8,37 @@ import type {
   UpdateGroupResponse,
 } from '@icaf/shared';
 
-import { apiRequest } from './client';
+import {
+  apiRequest,
+  hasApiSuccess,
+  hasArrayProperty,
+  hasStringProperty,
+} from './client';
 import { apiEndpoints } from './endpoints';
 import type { PaginationQuery } from './types';
 
 export type UpdateConstituentArtworkRequest = UpdateArtworkRequest;
+
+const isGroupListResponse = (response: unknown): boolean =>
+  hasArrayProperty(response, 'groups');
+
+const isGroupMutationResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) && hasStringProperty(response, 'group_id');
+
+const isArtworkSubmitResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) &&
+  hasStringProperty(response, 'art_id') &&
+  hasStringProperty(response, 'presigned_url');
+
+const isArtworkMutationResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) && hasStringProperty(response, 'art_id');
 
 export function listGroupSubmissions(
   query?: PaginationQuery,
 ): Promise<ListGroupSubmissionsResponse> {
   return apiRequest<ListGroupSubmissionsResponse>(apiEndpoints.groups.groups, {
     query,
+    validate: isGroupListResponse,
   });
 }
 
@@ -28,7 +48,7 @@ export function updateGroup(
 ): Promise<UpdateGroupResponse> {
   return apiRequest<UpdateGroupResponse, UpdateGroupRequest>(
     apiEndpoints.groups.group(groupId),
-    { body: request, method: 'PATCH' },
+    { body: request, method: 'PATCH', validate: isGroupMutationResponse },
   );
 }
 
@@ -42,7 +62,7 @@ export function submitArtworkToGroup(
 ): Promise<SubmitArtworkResponse> {
   return apiRequest<SubmitArtworkResponse, SubmitArtworkToGroupRequest>(
     apiEndpoints.groups.groupArtworks(groupId),
-    { body: request, method: 'POST' },
+    { body: request, method: 'POST', validate: isArtworkSubmitResponse },
   );
 }
 
@@ -58,6 +78,6 @@ export function updateConstituentArtwork(
 ): Promise<UpdateArtworkResponse> {
   return apiRequest<UpdateArtworkResponse, UpdateConstituentArtworkRequest>(
     apiEndpoints.groups.artwork(artId),
-    { body: request, method: 'PATCH' },
+    { body: request, method: 'PATCH', validate: isArtworkMutationResponse },
   );
 }

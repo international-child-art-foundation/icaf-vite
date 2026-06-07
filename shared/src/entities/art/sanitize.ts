@@ -17,5 +17,9 @@ export function sanitizeSubmissionData(data: SubmitArtworkRequest): SubmitArtwor
             typeof data.release_hash === 'string'
                 ? data.release_hash.trim().toLowerCase()
                 : data.release_hash,
+        digital_signature:
+            typeof data.digital_signature === 'string'
+                ? data.digital_signature.trim()
+                : data.digital_signature,
     };
 }

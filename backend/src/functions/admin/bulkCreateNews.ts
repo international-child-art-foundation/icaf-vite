@@ -24,6 +24,7 @@ const MAX_BATCH_WRITE_ATTEMPTS = 3;
 
 type NewsDynamoItem = NewsEntity & { PK: string; SK: string };
 type NewsWriteRequest = { PutRequest: { Item: NewsDynamoItem } };
+type NormalizedCreateNewsRequest = CreateNewsRequest & { ts: number };
 
 function parseBulkNewsBody(
     event: ApiGatewayEvent,
@@ -75,14 +76,14 @@ function tsFromDate(
     return Math.floor(Date.now() / 1000) - fallbackOffset;
 }
 
-function normalizeItem(item: BulkCreateNewsItem, index: number): CreateNewsRequest {
+function normalizeItem(item: BulkCreateNewsItem, index: number): NormalizedCreateNewsRequest {
     return {
         ...item,
         ts: item.ts ?? tsFromDate(item.date, index),
     };
 }
 
-function toDynamoItem(item: CreateNewsRequest, news_id: string): NewsDynamoItem {
+function toDynamoItem(item: NormalizedCreateNewsRequest, news_id: string): NewsDynamoItem {
     return {
         PK: "NEWS",
         SK: newsSk(item.ts, news_id),

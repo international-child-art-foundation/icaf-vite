@@ -15,6 +15,7 @@ import type {
 } from '@/modules/submissions/types/artworkGroupSubmission';
 import {
   createArtworkDraft,
+  createDigitalSignature,
   createReleaseHash,
   formatFileSize,
   getUploadFileType,
@@ -155,7 +156,7 @@ function readPersistedDraft(): SubmitArtworkDraft {
           ? storedDraft.certificationAccepted
           : initialSubmitArtworkDraft.certificationAccepted,
       country: readString(storedDraft.country),
-      digitalSignature: readString(storedDraft.digitalSignature),
+      digitalSignature: '',
       notifications:
         typeof storedDraft.notifications === 'boolean'
           ? storedDraft.notifications
@@ -405,6 +406,9 @@ export function SubmitArtwork() {
       if (!file) throw new Error('A selected image is missing.');
 
       const releaseHash = await createReleaseHash();
+      const digitalSignature = isEducatorFlow
+        ? undefined
+        : createDigitalSignature(draft.digitalSignature);
       const uploadFile = await createRotatedImageFile(file, imageRotation);
       const fileType = getUploadFileType(uploadFile);
       if (!fileType) throw new Error(`${uploadFile.name} is not supported.`);
@@ -426,6 +430,7 @@ export function SubmitArtwork() {
         promotional_use: isEducatorFlow ? false : draft.promotionalUse,
         region: draft.region.trim() || undefined,
         release_hash: releaseHash,
+        digital_signature: digitalSignature,
         submitter_relationship: submitterRelationship,
         theme_family: themeParams.theme_family || undefined,
         theme_instance: themeParams.theme_family
@@ -459,7 +464,7 @@ export function SubmitArtwork() {
     if (typeof window === 'undefined') return;
     window.localStorage.setItem(
       SUBMIT_ARTWORK_DRAFT_KEY,
-      JSON.stringify(draft),
+      JSON.stringify({ ...draft, digitalSignature: '' }),
     );
   }, [draft]);
 

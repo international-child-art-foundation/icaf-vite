@@ -98,6 +98,9 @@ export const handler = async (
             kudos_count: 0,
             ts: nowSeconds,
             release_hash: artwork.release_hash.trim(),
+            ...(artwork.digital_signature && {
+              digital_signature: artwork.digital_signature.trim(),
+            }),
             promotional_use: artwork.promotional_use ?? false,
             type: "ART",
             notifications: false,

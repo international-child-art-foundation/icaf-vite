@@ -22,7 +22,7 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
     const body = parsedBody.value;
 
     if (!body.user_id?.trim()) return CommonErrors.badRequest("user_id is required");
-    if (!body.auth_action_token?.trim()) return CommonErrors.badRequest("auth_action_token is required");
+    if (!body.auth_action_token?.trim()) return CommonErrors.badRequest("authentication token is required");
     if (!body.new_password) return CommonErrors.badRequest("new_password is required");
 
     const result = await dynamodb.send(
@@ -36,10 +36,10 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
     const user = result.Item as UserEntity;
     const nowSeconds = Math.floor(Date.now() / 1000);
     if (user.auth_action_token !== body.auth_action_token) {
-      return CommonErrors.badRequest("Invalid reset token");
+      return CommonErrors.badRequest("Invalid authentication token");
     }
     if (user.auth_action_token_exp !== undefined && user.auth_action_token_exp < nowSeconds) {
-      return CommonErrors.badRequest("Reset token has expired");
+      return CommonErrors.badRequest("Authentication token has expired");
     }
 
     await cognitoClient.send(

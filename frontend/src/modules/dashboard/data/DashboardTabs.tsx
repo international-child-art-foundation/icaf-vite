@@ -4,6 +4,7 @@ import {
   ClipboardCheck,
   GalleryHorizontal,
   Newspaper,
+  Palette,
 } from 'lucide-react';
 import type { Role } from '@icaf/shared';
 import { TabData } from '@/modules/dashboard/types/dashboardTypes';
@@ -49,6 +50,14 @@ export const dashboardTabData = {
     icon: <Newspaper size={18} />,
     color: 'text-secondary-blue/60',
     roles: 'admin',
+  },
+  themes: {
+    id: 'themes',
+    label: 'Create theme',
+    description: 'Set gallery images and colors',
+    icon: <Palette size={18} />,
+    color: 'text-secondary-green/30',
+    roles: 'review',
   },
 } satisfies TabData;
 

@@ -37,10 +37,8 @@ export const handler = async(event: ApiGatewayEvent): Promise<ApiGatewayResponse
         theme_instance: body.theme_instance,
         display_name: body.display_name,
         featured_on: body.featured_on,
-        colors: body.colors,
+        start_date: body.start_date,
         ...(body.description && {description: body.description}),
-        f_img_url: body.f_img_url,
-        ...(body.i_img_url && {i_img_url: body.i_img_url}),
       },
         ConditionExpression: "attribute_not_exists(PK) AND attribute_not_exists(SK)",
     })

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import {
   Outlet,
@@ -6,7 +6,7 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom';
-import { Images, LoaderCircle, Play } from 'lucide-react';
+import { LoaderCircle, Play } from 'lucide-react';
 import { useWindowSize } from 'usehooks-ts';
 import type { GroupListItem, ThemeListItem } from '@icaf/shared';
 import { listGalleryThemes } from '@/api/public';
@@ -19,7 +19,10 @@ import ArtworkCard from './ArtworkCard';
 import ArtworkModal from './ArtworkModal';
 import { FilterProvider, useFilters } from './FilterContext';
 import { GalleryGroupCard } from './GalleryGroupCard';
-import { GalleryThemeCard } from './GalleryThemeCard';
+import {
+  GalleryThemeCard,
+  type ThemeFamilyCardModel,
+} from './GalleryThemeCard';
 import {
   fetchAllGalleryArtworks,
   fetchAllGalleryGroups,
@@ -34,6 +37,11 @@ const ARTWORKS_PER_PAGE = 20;
 const GROUPS_PER_PAGE = 8;
 type GalleryViewMode = 'individual' | 'group';
 
+function themeStartDate(theme: ThemeListItem): number {
+  const value = (theme as { start_date?: unknown }).start_date;
+  return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+}
+
 const GalleryCoreInner = () => {
   const [themes, setThemes] = useState<ThemeListItem[]>([]);
   const [themesLoading, setThemesLoading] = useState(true);
@@ -41,6 +49,9 @@ const GalleryCoreInner = () => {
   const [selectedThemeFamily, setSelectedThemeFamily] = useState<string | null>(
     null,
   );
+  const [selectedThemeInstance, setSelectedThemeInstance] = useState<
+    string | null
+  >(null);
   const [artworks, setArtworks] = useState<TResolvedArtwork[]>([]);
   const [artworksLoading, setArtworksLoading] = useState(true);
   const [artworksError, setArtworksError] = useState<string | null>(null);
@@ -72,6 +83,31 @@ const GalleryCoreInner = () => {
   const isMobile = width < 1024;
   const isHorizontal = width > height;
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const themeFamilies = useMemo<ThemeFamilyCardModel[]>(() => {
+    const familyMap = new Map<string, ThemeListItem[]>();
+    for (const theme of themes) {
+      const themesForFamily = familyMap.get(theme.theme_family) ?? [];
+      themesForFamily.push(theme);
+      familyMap.set(theme.theme_family, themesForFamily);
+    }
+
+    return [...familyMap.entries()]
+      .map(([theme_family, familyThemes]) => {
+        const sortedThemes = [...familyThemes].sort(
+          (a, b) => themeStartDate(b) - themeStartDate(a),
+        );
+        const latestTheme = sortedThemes[0];
+        return {
+          description: latestTheme.description,
+          display_name: latestTheme.display_name,
+          latest_start_date: themeStartDate(latestTheme),
+          theme_family,
+          themes: sortedThemes,
+        };
+      })
+      .sort((a, b) => b.latest_start_date - a.latest_start_date);
+  }, [themes]);
 
   useEffect(() => {
     let cancelled = false;
@@ -105,7 +141,11 @@ const GalleryCoreInner = () => {
     setArtworksLoading(true);
     setArtworksError(null);
 
-    fetchAllGalleryArtworks(selectedThemeFamily, toSortOrder(sortValue))
+    fetchAllGalleryArtworks(
+      selectedThemeFamily,
+      selectedThemeInstance,
+      toSortOrder(sortValue),
+    )
       .then((data) => {
         if (cancelled) return;
         setArtworks(data);
@@ -125,7 +165,13 @@ const GalleryCoreInner = () => {
     return () => {
       cancelled = true;
     };
-  }, [selectedThemeFamily, setPageNumber, sortValue, themesLoading]);
+  }, [
+    selectedThemeFamily,
+    selectedThemeInstance,
+    setPageNumber,
+    sortValue,
+    themesLoading,
+  ]);
 
   useEffect(() => {
     if (themesLoading) return;
@@ -134,7 +180,11 @@ const GalleryCoreInner = () => {
     setGroupsLoading(true);
     setGroupsError(null);
 
-    fetchAllGalleryGroups(selectedThemeFamily, toSortOrder(sortValue))
+    fetchAllGalleryGroups(
+      selectedThemeFamily,
+      selectedThemeInstance,
+      toSortOrder(sortValue),
+    )
       .then((data) => {
         if (cancelled) return;
         setGroups(data);
@@ -154,7 +204,13 @@ const GalleryCoreInner = () => {
     return () => {
       cancelled = true;
     };
-  }, [selectedThemeFamily, setPageNumber, sortValue, themesLoading]);
+  }, [
+    selectedThemeFamily,
+    selectedThemeInstance,
+    setPageNumber,
+    sortValue,
+    themesLoading,
+  ]);
 
   useEffect(() => {
     if (!artworksLoading && !groupsLoading && gridRef.current) {
@@ -186,6 +242,9 @@ const GalleryCoreInner = () => {
     if (location.pathname.includes('/slideshow')) return;
     const currentParams = new URLSearchParams();
     if (selectedThemeFamily) currentParams.set('theme', selectedThemeFamily);
+    if (selectedThemeInstance) {
+      currentParams.set('instance', selectedThemeInstance);
+    }
     if (viewMode === 'individual') currentParams.set('view', viewMode);
     if (pageNumber > 1) currentParams.set('page', pageNumber.toString());
     if (sortValue !== 'Newest Event') currentParams.set('sort', sortValue);
@@ -198,6 +257,7 @@ const GalleryCoreInner = () => {
     location.pathname,
     pageNumber,
     selectedThemeFamily,
+    selectedThemeInstance,
     setSearchParams,
     sortValue,
     viewMode,
@@ -205,9 +265,11 @@ const GalleryCoreInner = () => {
 
   useEffect(() => {
     const themeFromUrl = searchParams.get('theme');
+    const instanceFromUrl = searchParams.get('instance');
     const idFromUrl = searchParams.get('id');
     const viewFromUrl = searchParams.get('view');
     if (themeFromUrl) setSelectedThemeFamily(themeFromUrl);
+    if (instanceFromUrl) setSelectedThemeInstance(instanceFromUrl);
     if (viewFromUrl === 'individual') setViewMode('individual');
     if (idFromUrl) {
       setActiveEntryId(idFromUrl);
@@ -281,6 +343,9 @@ const GalleryCoreInner = () => {
     const base = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
     const url = new URL(base);
     if (selectedThemeFamily) url.searchParams.set('theme', selectedThemeFamily);
+    if (selectedThemeInstance) {
+      url.searchParams.set('instance', selectedThemeInstance);
+    }
     url.searchParams.set('id', activeEntryId);
     return url.toString();
   };
@@ -402,52 +467,49 @@ const GalleryCoreInner = () => {
             aria-hidden="true"
           />
         </div>
-        <section className="-mx-4 overflow-x-auto px-4 pb-0">
+        <section className="-mx-4 px-4 pb-24">
+          <div className="mb-3 flex justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                if (selectedThemeFamily === null) return;
+                setSelectedThemeFamily(null);
+                setSelectedThemeInstance(null);
+                setPageNumber(1);
+              }}
+              className="rounded-md border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50 disabled:opacity-50"
+              disabled={selectedThemeFamily === null}
+            >
+              All themes
+            </button>
+          </div>
           {themesLoading ? (
             <p className="text-center text-gray-600">Loading themes...</p>
           ) : themesError ? (
             <p className="text-center text-red-500">{themesError}</p>
           ) : (
-            <div className="flex w-max">
-              <button
-                type="button"
-                onClick={() => {
-                  if (selectedThemeFamily === null) return;
-                  setSelectedThemeFamily(null);
-                  setPageNumber(1);
-                }}
-                className={`group relative h-[80px] w-[230px] flex-none overflow-hidden bg-white p-3 text-left text-gray-950 shadow-sm ring-inset transition duration-200 sm:w-[250px] ${
-                  selectedThemeFamily === null
-                    ? 'ring-4 ring-black/20'
-                    : 'ring-1 ring-gray-300 hover:-translate-y-0.5 hover:shadow-md'
-                }`}
-              >
-                <span className="absolute inset-0 bg-[linear-gradient(135deg,rgba(2,134,195,0.12),rgba(246,192,38,0.18))]" />
-                <span className="absolute bottom-0 left-0 h-1 w-full bg-[#0286C3] opacity-90 transition group-hover:bg-[#F6C026]" />
-                <span className="relative z-10 flex h-full items-center justify-between gap-3">
-                  <span>
-                    <span className="font-montserrat block text-lg font-bold leading-tight">
-                      All Themes
-                    </span>
-                    <span className="mt-1 block text-xs leading-tight text-gray-600">
-                      Show every gallery entry
-                    </span>
-                  </span>
-                  <Images size={24} aria-hidden="true" />
-                </span>
-              </button>
-              {themes.map((theme) => (
-                <GalleryThemeCard
-                  key={`${theme.theme_family}-${theme.theme_instance}`}
-                  theme={theme}
-                  active={theme.theme_family === selectedThemeFamily}
-                  onSelect={() => {
-                    if (theme.theme_family === selectedThemeFamily) return;
-                    setSelectedThemeFamily(theme.theme_family);
-                    setPageNumber(1);
-                  }}
-                />
-              ))}
+            <div className="overflow-x-auto pb-2">
+              <div className="flex w-max gap-3">
+                {themeFamilies.map((family) => (
+                  <GalleryThemeCard
+                    key={family.theme_family}
+                    family={family}
+                    active={family.theme_family === selectedThemeFamily}
+                    selectedThemeInstance={selectedThemeInstance}
+                    onSelectFamily={() => {
+                      if (family.theme_family === selectedThemeFamily) return;
+                      setSelectedThemeFamily(family.theme_family);
+                      setSelectedThemeInstance(null);
+                      setPageNumber(1);
+                    }}
+                    onSelectInstance={(theme) => {
+                      setSelectedThemeFamily(theme.theme_family);
+                      setSelectedThemeInstance(theme.theme_instance);
+                      setPageNumber(1);
+                    }}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </section>

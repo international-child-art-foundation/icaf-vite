@@ -4,8 +4,10 @@ import {
   getGroup,
   listGalleryArtworks,
   listGalleryArtworksByFamily,
+  listGalleryArtworksByInstance,
   listGalleryGroups,
   listGalleryGroupsByFamily,
+  listGalleryGroupsByInstance,
 } from '@/api/public';
 import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
 import { resolveApiArtwork } from '@/utils/galleryProcessing';
@@ -18,6 +20,7 @@ export function toSortOrder(sortValue: string): SortOrder {
 
 export async function fetchAllGalleryArtworks(
   themeFamily: string | null,
+  themeInstance: string | null,
   sort: SortOrder,
 ): Promise<TResolvedArtwork[]> {
   const artworks: TResolvedArtwork[] = [];
@@ -29,9 +32,12 @@ export async function fetchAllGalleryArtworks(
       limit: API_PAGE_LIMIT,
       ...(lastKey ? { last_key: lastKey } : {}),
     };
-    const response = themeFamily
-      ? await listGalleryArtworksByFamily(themeFamily, query)
-      : await listGalleryArtworks(query);
+    const response =
+      themeFamily && themeInstance
+        ? await listGalleryArtworksByInstance(themeFamily, themeInstance, query)
+        : themeFamily
+          ? await listGalleryArtworksByFamily(themeFamily, query)
+          : await listGalleryArtworks(query);
 
     artworks.push(
       ...response.artworks.map((artwork) => resolveApiArtwork(artwork)),
@@ -44,6 +50,7 @@ export async function fetchAllGalleryArtworks(
 
 export async function fetchAllGalleryGroups(
   themeFamily: string | null,
+  themeInstance: string | null,
   sort: SortOrder,
 ): Promise<GroupListItem[]> {
   const groups: GroupListItem[] = [];
@@ -55,9 +62,12 @@ export async function fetchAllGalleryGroups(
       limit: API_PAGE_LIMIT,
       ...(lastKey ? { last_key: lastKey } : {}),
     };
-    const response = themeFamily
-      ? await listGalleryGroupsByFamily(themeFamily, query)
-      : await listGalleryGroups(query);
+    const response =
+      themeFamily && themeInstance
+        ? await listGalleryGroupsByInstance(themeFamily, themeInstance, query)
+        : themeFamily
+          ? await listGalleryGroupsByFamily(themeFamily, query)
+          : await listGalleryGroups(query);
 
     groups.push(...response.groups);
     lastKey = response.last_key;

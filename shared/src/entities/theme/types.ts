@@ -16,23 +16,13 @@ export interface ThemeEntity {
     display_name: string;       // human-readable, e.g. 'Cherry Blossom 2025'
     description?: string;       // prompt / description shown on the theme page
     featured_on: string[];     // surfaces where this theme is featured, e.g. ['gallery']
-    colors: ThemeColors;       // presentation metadata for theme cards/pages
-    f_img_url: string;          // family-level background/flair image
-    i_img_url?: string;         // instance-level background/flair image
+    start_date: number;         // date added to the theme list, stored as epoch milliseconds
     type: 'THEME';
 }
 
 export type PatchTheme = Partial<
-    Pick<ThemeEntity, "display_name" | "description" | "featured_on" | "colors" | "f_img_url" | "i_img_url">
+    Pick<ThemeEntity, "display_name" | "description" | "featured_on" | "start_date">
 >;
-
-export interface ThemeColors {
-    primary?: string;
-    secondary?: string;
-    accent?: string;
-    text?: string;
-    background?: string;
-}
 
 // API response shape for theme lists
 export interface ThemeListItem {
@@ -41,10 +31,7 @@ export interface ThemeListItem {
     display_name: string;
     description?: string;
     featured_on: string[];
-    colors?: ThemeColors;
-    f_img_url?: string;
-    i_img_url?: string;
-    style?: string;
+    start_date: number;
 }
 
 export interface ListThemesResponse {

@@ -53,8 +53,8 @@ export const dashboardTabData = {
   },
   themes: {
     id: 'themes',
-    label: 'Create theme',
-    description: 'Set gallery images and colors',
+    label: 'Themes',
+    description: 'Create and edit gallery themes',
     icon: <Palette size={18} />,
     color: 'text-secondary-green/30',
     roles: 'review',

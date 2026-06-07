@@ -5,23 +5,14 @@ import {
   CommonErrors,
   HTTP_STATUS,
   ListThemesResponse,
-  ThemeColors,
   ThemeListItem,
 } from "@icaf/shared";
 import { dynamodb, TABLE_NAME } from "../../../config/aws-clients";
 import { EntityType } from "../../../dynamo/ddbSchemaConsts";
 
-const GALLERY_FEATURE = "gallery";
-
 function stringArray(value: unknown): string[] | undefined {
   return Array.isArray(value)
     ? value.filter((entry): entry is string => typeof entry === "string")
-    : undefined;
-}
-
-function themeColors(value: unknown): ThemeColors | undefined {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
-    ? (value as ThemeColors)
     : undefined;
 }
 
@@ -31,11 +22,8 @@ function mapTheme(item: Record<string, unknown>): ThemeListItem {
     theme_instance: item.theme_instance as string,
     display_name: item.display_name as string,
     description: item.description as string | undefined,
-    featured_on: stringArray(item.featured_on)!,
-    colors: themeColors(item.colors),
-    f_img_url: item.f_img_url as string | undefined,
-    i_img_url: item.i_img_url as string | undefined,
-    style: item.style as string | undefined,
+    featured_on: stringArray(item.featured_on) ?? [],
+    start_date: typeof item.start_date === "number" ? item.start_date : 0,
   };
 }
 
@@ -51,14 +39,11 @@ export const handler = async (
         new QueryCommand({
           TableName: TABLE_NAME,
           KeyConditionExpression: "#pk = :pk",
-          FilterExpression: "contains(#featuredOn, :feature)",
           ExpressionAttributeNames: {
             "#pk": "PK",
-            "#featuredOn": "featured_on",
           },
           ExpressionAttributeValues: {
             ":pk": EntityType.Theme,
-            ":feature": GALLERY_FEATURE,
           },
           ExclusiveStartKey: lastKey,
           ScanIndexForward: true,

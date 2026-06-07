@@ -2,8 +2,15 @@ import { PatchTheme, ThemeEntity } from './types.js';
 import { cleanOptionalString } from '../../utils/string.js';
 
 export function sanitizeThemeEntity(
-    data: Pick<ThemeEntity, 'theme_family' | 'theme_instance' | 'display_name' | 'description' | 'featured_on' | 'colors' | 'f_img_url' | 'i_img_url'>
+    data: Pick<ThemeEntity, 'theme_family' | 'theme_instance' | 'display_name' | 'description' | 'featured_on' | 'start_date'>
 ): typeof data {
+    const rawStartDate = data.start_date as unknown;
+    const startDate = typeof rawStartDate === 'number'
+        ? rawStartDate
+        : typeof rawStartDate === 'string'
+            ? Number(rawStartDate)
+            : Number.NaN;
+
     return {
         ...data,
         theme_family: typeof data.theme_family === 'string' ? data.theme_family.normalize('NFC').trim().toUpperCase() : data.theme_family,
@@ -13,9 +20,7 @@ export function sanitizeThemeEntity(
         featured_on: Array.isArray(data.featured_on)
             ? data.featured_on.map((entry) => entry.normalize('NFC').trim()).filter(Boolean)
             : [],
-        colors: data.colors,
-        f_img_url: cleanOptionalString(data.f_img_url) ?? '',
-        i_img_url: cleanOptionalString(data.i_img_url),
+        start_date: startDate,
     };
 }
 
@@ -32,9 +37,6 @@ export function sanitizeThemePartial(
         delete sanitized.featured_on;
     }
 
-    if (data.colors !== undefined) sanitized.colors = data.colors;
-    else delete sanitized.colors;
-
     const displayName = cleanOptionalString(data.display_name);
     if (displayName !== undefined) sanitized.display_name = displayName;
     else delete sanitized.display_name;
@@ -43,13 +45,8 @@ export function sanitizeThemePartial(
     if (description !== undefined) sanitized.description = description;
     else delete sanitized.description;
 
-    const familyImageUrl = cleanOptionalString(data.f_img_url);
-    if (familyImageUrl !== undefined) sanitized.f_img_url = familyImageUrl;
-    else delete sanitized.f_img_url;
-
-    const instanceImageUrl = cleanOptionalString(data.i_img_url);
-    if (instanceImageUrl !== undefined) sanitized.i_img_url = instanceImageUrl;
-    else delete sanitized.i_img_url;
+    if (data.start_date !== undefined) sanitized.start_date = Number(data.start_date);
+    else delete sanitized.start_date;
 
     return sanitized;
 }

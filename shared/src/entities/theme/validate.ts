@@ -22,13 +22,10 @@ export function validateThemeEntity(data: ThemeEntity): string[] {
         errors.push('display_name is required');
     }
     if (!data.featured_on) {
-        errors.push('featured_on is required (can be initialized to [""]');
+        errors.push('featured_on is required (can be initialized to [])');
     }
-    if (!data.colors) {
-        errors.push('colors object is required (can be empty object)');
-    }
-    if (!data.f_img_url?.trim()) {
-        errors.push('f_img_url is required');
+    if (typeof data.start_date !== 'number' || !Number.isFinite(data.start_date)) {
+        errors.push('start_date is required and must be a finite number');
     }
 
     if (
@@ -37,16 +34,6 @@ export function validateThemeEntity(data: ThemeEntity): string[] {
             data.featured_on.some((entry: unknown) => typeof entry !== 'string' || !entry.trim()))
     ) {
         errors.push('featured_on, if provided, must be an array of non-empty strings');
-    }
-
-    if (data.colors !== undefined && (typeof data.colors !== 'object' || data.colors === null || Array.isArray(data.colors))) {
-        errors.push('colors, if provided, must be an object');
-    }
-
-    for (const field of ['f_img_url', 'i_img_url'] as const) {
-        if (data[field] !== undefined && (typeof data[field] !== 'string' || !data[field]!.trim())) {
-            errors.push(`${field}, if provided, must be a non-empty string`);
-        }
     }
 
     return errors;
@@ -63,14 +50,8 @@ export function validateThemePartial(data: PatchTheme): string[] {
         errors.push('featured_on, if provided, must be an array of non-empty strings');
     }
 
-    if (data.colors !== undefined && (typeof data.colors !== 'object' || data.colors === null || Array.isArray(data.colors))) {
-        errors.push('colors, if provided, must be an object');
-    }
-
-    for (const field of ['f_img_url', 'i_img_url'] as const) {
-        if (data[field] !== undefined && (typeof data[field] !== 'string' || !data[field]!.trim())) {
-            errors.push(`${field}, if provided, must be a non-empty string`);
-        }
+    if (data.start_date !== undefined && (typeof data.start_date !== 'number' || !Number.isFinite(data.start_date))) {
+        errors.push('start_date, if provided, must be a finite number');
     }
 
     return errors;

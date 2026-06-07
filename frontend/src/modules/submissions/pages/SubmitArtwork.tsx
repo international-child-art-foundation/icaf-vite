@@ -5,6 +5,7 @@ import { submitGuestArtwork } from '@/api/public';
 import { uploadToPresignedUrl } from '@/api/uploads';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { ArtworkMuralWindow } from '@/modules/submissions/components/ArtworkMuralWindow';
+import { ThemePicker } from '@/modules/submissions/components/ThemePicker';
 import {
   getSubmitArtworkPageCopy,
   type SubmitterFlow,
@@ -105,11 +106,6 @@ function normalizeThemeInstance(value: string | null) {
   return /^\d{1,4}$/.test(trimmedValue)
     ? trimmedValue.padStart(4, '0')
     : trimmedValue;
-}
-
-function formatThemeInstance(value: string) {
-  if (!/^\d+$/.test(value)) return value;
-  return String(Number(value));
 }
 
 function readThemeParams(search: string) {
@@ -278,6 +274,31 @@ function getFlowPath(flow: SubmitterFlow, nested = false) {
   return `/submit-artwork/single/${flow}${nested ? '/artworks' : ''}`;
 }
 
+function updateThemeSearch(
+  search: string,
+  theme: ReturnType<typeof readThemeParams>,
+) {
+  const params = new URLSearchParams(search);
+  for (const key of [
+    'theme_family',
+    'themeFamily',
+    'family',
+    'theme',
+    'theme_instance',
+    'themeInstance',
+    'instance',
+    'id',
+  ]) {
+    params.delete(key);
+  }
+  if (theme.theme_family) params.set('theme_family', theme.theme_family);
+  if (theme.theme_family && theme.theme_instance) {
+    params.set('theme_instance', theme.theme_instance);
+  }
+  const nextSearch = params.toString();
+  return nextSearch ? `?${nextSearch}` : '';
+}
+
 export function SubmitArtwork() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -399,6 +420,13 @@ export function SubmitArtwork() {
 
     setStatus('submitting');
     void handleAsyncSubmit();
+  }
+
+  function selectTheme(theme: ReturnType<typeof readThemeParams>) {
+    void navigate(
+      `${location.pathname}${updateThemeSearch(location.search, theme)}`,
+      { replace: true },
+    );
   }
 
   async function handleAsyncSubmit() {
@@ -551,19 +579,13 @@ export function SubmitArtwork() {
               />
             </section>
 
+            <ThemePicker value={themeParams} onChange={selectTheme} />
+
             <section ref={artworkSectionRef} className="flex flex-col gap-3">
               <div>
                 <h2 className="font-montserrat text-xl font-semibold text-slate-950">
                   Artwork
                 </h2>
-                {themeParams.theme_family && (
-                  <p className="text-xs font-semibold text-slate-500">
-                    Theme: {themeParams.theme_family}
-                    {themeParams.theme_instance
-                      ? ` ${formatThemeInstance(themeParams.theme_instance)}`
-                      : ''}
-                  </p>
-                )}
                 <p className="text-xs leading-5 text-slate-500">
                   {copy.artworkHelpText}
                 </p>

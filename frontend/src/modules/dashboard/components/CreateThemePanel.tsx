@@ -65,8 +65,8 @@ export function CreateThemePanel() {
     const theme_instance = normalizeInstance(draft.theme_instance);
     const start_date = dateToTimestamp(draft.start_date);
 
-    if (!theme_family) throw new Error('Theme family is required.');
-    if (!theme_instance) throw new Error('Theme instance is required.');
+    if (!theme_family) throw new Error('Theme collection is required.');
+    if (!theme_instance) throw new Error('Theme year is required.');
     if (!draft.display_name.trim())
       throw new Error('Display name is required.');
     if (!Number.isFinite(start_date))
@@ -106,7 +106,7 @@ export function CreateThemePanel() {
             Theme details
           </h3>
           <div className="grid gap-3 md:grid-cols-2">
-            <Field label="Theme family">
+            <Field label="Theme collection">
               <Input
                 value={draft.theme_family}
                 placeholder="CHERRY_BLOSSOM"
@@ -122,7 +122,7 @@ export function CreateThemePanel() {
                 disabled={busy}
               />
             </Field>
-            <Field label="Theme instance">
+            <Field label="Theme year">
               <Input
                 value={draft.theme_instance}
                 placeholder="2026"

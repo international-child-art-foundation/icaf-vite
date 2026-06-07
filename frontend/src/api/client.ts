@@ -2,6 +2,8 @@ export type ApiQueryParams = object | undefined;
 
 export type ApiRequestOptions<TBody> = {
   body?: TBody;
+  bypassCache?: boolean;
+  cacheTtlMs?: number;
   headers?: HeadersInit;
   method?: string;
   query?: ApiQueryParams;
@@ -14,6 +16,17 @@ export type ApiClientConfig = {
 };
 
 const DEFAULT_API_BASE_URL = '/api';
+// TODO: Update to prod-acceptable time (currently 10 minutes)
+// Gallery page filter options are cached by x-many minutes before revalidation
+export const DEFAULT_API_CACHE_TTL_MS = 10 * 60 * 1000;
+
+type CachedApiResponse = {
+  expiresAt: number;
+  value: unknown;
+};
+
+const apiResponseCache = new Map<string, CachedApiResponse>();
+const pendingApiResponseCache = new Map<string, Promise<unknown>>();
 
 function resolveApiBaseUrl(config?: ApiClientConfig): string {
   const configuredBaseUrl =
@@ -46,6 +59,70 @@ export function buildApiUrl(
   });
 
   return url.toString();
+}
+
+function buildApiCacheKey(method: string, url: string): string {
+  return `${method.toUpperCase()} ${url}`;
+}
+
+function getCachedApiResponse(cacheKey: string): unknown {
+  const cached = apiResponseCache.get(cacheKey);
+
+  if (!cached) return undefined;
+  if (cached.expiresAt > Date.now()) return cached.value;
+
+  apiResponseCache.delete(cacheKey);
+  return undefined;
+}
+
+async function fetchApiResponse<TBody>(
+  url: string,
+  options: ApiRequestOptions<TBody>,
+  headers: Headers,
+): Promise<{ response: Response; responseBody: unknown }> {
+  const response = await fetch(url, {
+    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    credentials: 'include',
+    headers,
+    method: options.method ?? (options.body === undefined ? 'GET' : 'POST'),
+    signal: options.signal,
+  });
+
+  const responseBody = await parseResponseBody(response);
+
+  if (!response.ok) {
+    throw new ApiError(response, responseBody);
+  }
+
+  if (responseBody !== undefined && !isJsonResponse(response)) {
+    throw new InvalidApiResponseError(response, responseBody);
+  }
+
+  if (typeof responseBody === 'string') {
+    throw new InvalidApiResponseError(response, responseBody);
+  }
+
+  return { response, responseBody };
+}
+
+function validateApiResponse(
+  response: Response,
+  responseBody: unknown,
+  validate?: (body: unknown) => boolean,
+): void {
+  if (responseBody !== undefined) {
+    if (!isApiObject(responseBody)) {
+      throw new InvalidApiResponseError(response, responseBody);
+    }
+
+    if ('success' in responseBody && responseBody.success !== true) {
+      throw new InvalidApiResponseError(response, responseBody);
+    }
+  }
+
+  if (validate && !validate(responseBody)) {
+    throw new UnexpectedApiResponseError();
+  }
 }
 
 async function parseResponseBody(response: Response): Promise<unknown> {
@@ -127,17 +204,11 @@ export function hasApiMessage(body: unknown): body is { message: string } {
   return isApiObject(body) && typeof body.message === 'string';
 }
 
-export function hasStringProperty(
-  body: unknown,
-  property: string,
-): boolean {
+export function hasStringProperty(body: unknown, property: string): boolean {
   return isApiObject(body) && typeof body[property] === 'string';
 }
 
-export function hasBooleanProperty(
-  body: unknown,
-  property: string,
-): boolean {
+export function hasBooleanProperty(body: unknown, property: string): boolean {
   return isApiObject(body) && typeof body[property] === 'boolean';
 }
 
@@ -167,41 +238,50 @@ export async function apiRequest<TResponse, TBody = never>(
     headers.set('Content-Type', 'application/json');
   }
 
-  const response = await fetch(buildApiUrl(path, options.query, config), {
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
-    credentials: 'include',
-    headers,
-    method: options.method ?? (options.body === undefined ? 'GET' : 'POST'),
-    signal: options.signal,
-  });
+  const method =
+    options.method ?? (options.body === undefined ? 'GET' : 'POST');
+  const url = buildApiUrl(path, options.query, config);
+  const cacheEnabled =
+    method.toUpperCase() === 'GET' &&
+    options.body === undefined &&
+    !options.bypassCache &&
+    options.cacheTtlMs !== undefined &&
+    options.cacheTtlMs > 0;
+  const cacheKey = cacheEnabled ? buildApiCacheKey(method, url) : undefined;
 
-  const responseBody = await parseResponseBody(response);
+  if (cacheKey) {
+    const cached = getCachedApiResponse(cacheKey);
+    if (cached !== undefined) return cached as TResponse;
 
-  if (!response.ok) {
-    throw new ApiError(response, responseBody);
+    const pending = pendingApiResponseCache.get(cacheKey);
+    if (pending) return (await pending) as TResponse;
   }
 
-  if (responseBody !== undefined && !isJsonResponse(response)) {
-    throw new InvalidApiResponseError(response, responseBody);
+  const request = fetchApiResponse(url, options, headers).then(
+    ({ response, responseBody }) => {
+      validateApiResponse(response, responseBody, options.validate);
+
+      if (cacheKey) {
+        apiResponseCache.set(cacheKey, {
+          expiresAt:
+            Date.now() + (options.cacheTtlMs ?? DEFAULT_API_CACHE_TTL_MS),
+          value: responseBody,
+        });
+      }
+
+      return responseBody;
+    },
+  );
+
+  if (cacheKey) {
+    pendingApiResponseCache.set(cacheKey, request);
   }
 
-  if (typeof responseBody === 'string') {
-    throw new InvalidApiResponseError(response, responseBody);
-  }
-
-  if (responseBody !== undefined) {
-    if (!isApiObject(responseBody)) {
-      throw new InvalidApiResponseError(response, responseBody);
+  try {
+    return (await request) as TResponse;
+  } finally {
+    if (cacheKey) {
+      pendingApiResponseCache.delete(cacheKey);
     }
-
-    if ('success' in responseBody && responseBody.success !== true) {
-      throw new InvalidApiResponseError(response, responseBody);
-    }
   }
-
-  if (options.validate && !options.validate(responseBody)) {
-    throw new UnexpectedApiResponseError();
-  }
-
-  return responseBody as TResponse;
 }

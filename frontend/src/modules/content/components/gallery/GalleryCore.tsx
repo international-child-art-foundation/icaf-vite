@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import {
+  Link,
   Outlet,
   useLocation,
   useNavigate,
@@ -14,15 +15,12 @@ import type {
   IGalleryContext,
   TResolvedArtwork,
 } from '@/modules/content/types/Gallery';
-import type { SortValue } from '@/modules/content/data/gallery/sortData';
 import ArtworkCard from './ArtworkCard';
 import ArtworkModal from './ArtworkModal';
 import { FilterProvider, useFilters } from './FilterContext';
 import { GalleryGroupCard } from './GalleryGroupCard';
-import {
-  GalleryThemeCard,
-  type ThemeFamilyCardModel,
-} from './GalleryThemeCard';
+import { GalleryThemeCard } from './GalleryThemeCard';
+import { buildThemeFamilies } from './themeFamilies';
 import {
   fetchAllGalleryArtworks,
   fetchAllGalleryGroups,
@@ -32,14 +30,57 @@ import {
 } from './galleryData';
 import Pagination from './Pagination';
 import { ChevronDown } from 'lucide-react';
+import { Button } from '@/shared/components/ui/button';
 
-const ARTWORKS_PER_PAGE = 20;
+const ARTWORKS_PER_PAGE = 24;
 const GROUPS_PER_PAGE = 8;
 type GalleryViewMode = 'individual' | 'group';
+type FilterCategory = ReturnType<
+  typeof useFilters
+>['filterableOptions'][number];
 
-function themeStartDate(theme: ThemeListItem): number {
-  const value = (theme as { start_date?: unknown }).start_date;
-  return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+function getActiveOptionNames(category: FilterCategory) {
+  return category.options
+    .filter((option) => option.active)
+    .map((option) => option.name);
+}
+
+function filterArtworksForSlideshow(
+  artworks: TResolvedArtwork[],
+  filterableOptions: FilterCategory[],
+) {
+  const activeEvents = new Set(
+    filterableOptions
+      .filter((category) => category.categoryType === 'event')
+      .flatMap((category) =>
+        category.regionActive
+          ? category.options.map((option) => option.name)
+          : getActiveOptionNames(category),
+      ),
+  );
+
+  const activeCountries = new Set(
+    filterableOptions
+      .filter((category) => category.categoryType === 'country')
+      .flatMap((category) =>
+        category.regionActive
+          ? category.options.map((option) => option.name)
+          : getActiveOptionNames(category),
+      ),
+  );
+
+  if (activeEvents.size === 0 && activeCountries.size === 0) return artworks;
+
+  return artworks.filter((artwork) => {
+    const country = artwork.country ?? artwork.groupCountry;
+    const matchesEvent =
+      activeEvents.size === 0 || activeEvents.has(artwork.event);
+    const matchesCountry =
+      activeCountries.size === 0 ||
+      (country ? activeCountries.has(country) : false);
+
+    return matchesEvent && matchesCountry;
+  });
 }
 
 const GalleryCoreInner = () => {
@@ -66,16 +107,21 @@ const GalleryCoreInner = () => {
   const [groupSlideshowError, setGroupSlideshowError] = useState<string | null>(
     null,
   );
+  const [showNoArtworksTooltip, setShowNoArtworksTooltip] = useState(false);
+  const noArtworksTooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const gridRef = useRef<HTMLDivElement>(null);
   const didInitialLoad = useRef(false);
+  const wasInSlideshowRef = useRef(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const {
     pageNumber,
     setPageNumber,
     sortValue,
-    setSortValue,
     activeEntryId,
     setActiveEntryId,
+    filterableOptions,
   } = useFilters();
   const navigate = useNavigate();
   const location = useLocation();
@@ -84,30 +130,11 @@ const GalleryCoreInner = () => {
   const isHorizontal = width > height;
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const themeFamilies = useMemo<ThemeFamilyCardModel[]>(() => {
-    const familyMap = new Map<string, ThemeListItem[]>();
-    for (const theme of themes) {
-      const themesForFamily = familyMap.get(theme.theme_family) ?? [];
-      themesForFamily.push(theme);
-      familyMap.set(theme.theme_family, themesForFamily);
-    }
-
-    return [...familyMap.entries()]
-      .map(([theme_family, familyThemes]) => {
-        const sortedThemes = [...familyThemes].sort(
-          (a, b) => themeStartDate(b) - themeStartDate(a),
-        );
-        const latestTheme = sortedThemes[0];
-        return {
-          description: latestTheme.description,
-          display_name: latestTheme.display_name,
-          latest_start_date: themeStartDate(latestTheme),
-          theme_family,
-          themes: sortedThemes,
-        };
-      })
-      .sort((a, b) => b.latest_start_date - a.latest_start_date);
-  }, [themes]);
+  const themeFamilies = useMemo(() => buildThemeFamilies(themes), [themes]);
+  const slideshowAvailableArtworks = useMemo(
+    () => filterArtworksForSlideshow(artworks, filterableOptions),
+    [artworks, filterableOptions],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -239,6 +266,14 @@ const GalleryCoreInner = () => {
   }, [navigate]);
 
   useEffect(() => {
+    const isInSlideshow = location.pathname.includes('/slideshow');
+    if (!isInSlideshow && wasInSlideshowRef.current) {
+      setSlideshowArtworks([]);
+    }
+    wasInSlideshowRef.current = isInSlideshow;
+  }, [location.pathname]);
+
+  useEffect(() => {
     if (location.pathname.includes('/slideshow')) return;
     const currentParams = new URLSearchParams();
     if (selectedThemeFamily) currentParams.set('theme', selectedThemeFamily);
@@ -292,12 +327,51 @@ const GalleryCoreInner = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [closeSlideshow]);
 
+  useEffect(() => {
+    return () => {
+      if (noArtworksTooltipTimer.current) {
+        clearTimeout(noArtworksTooltipTimer.current);
+      }
+    };
+  }, []);
+
+  const hideNoArtworksTooltip = () => {
+    if (noArtworksTooltipTimer.current) {
+      clearTimeout(noArtworksTooltipTimer.current);
+      noArtworksTooltipTimer.current = null;
+    }
+    setShowNoArtworksTooltip(false);
+  };
+
+  const showNoArtworksUnavailableTooltip = () => {
+    if (noArtworksTooltipTimer.current) {
+      clearTimeout(noArtworksTooltipTimer.current);
+    }
+    setShowNoArtworksTooltip(true);
+    noArtworksTooltipTimer.current = setTimeout(() => {
+      setShowNoArtworksTooltip(false);
+      noArtworksTooltipTimer.current = null;
+    }, 3000);
+  };
+
   const openSlideshow = () => {
+    if (artworksLoading || slideshowAvailableArtworks.length === 0) {
+      setSlideshowArtworks([]);
+      setGroupSlideshowError(null);
+      showNoArtworksUnavailableTooltip();
+      return;
+    }
+
     setGroupSlideshowLoading(true);
     setGroupSlideshowError(null);
+    hideNoArtworksTooltip();
 
-    fetchArtworkGroupMetadata(artworks)
+    fetchArtworkGroupMetadata(slideshowAvailableArtworks)
       .then((enrichedArtworks) => {
+        if (enrichedArtworks.length === 0) {
+          showNoArtworksUnavailableTooltip();
+          return;
+        }
         setSlideshowArtworks(enrichedArtworks);
         void navigate('/gallery/slideshow');
         setModalOpen(false);
@@ -393,12 +467,15 @@ const GalleryCoreInner = () => {
 
   return (
     <div className="transition-all duration-300">
-      {(slideshowArtworks.length > 0 || artworks.length > 0) && (
+      {(slideshowArtworks.length > 0 ||
+        slideshowAvailableArtworks.length > 0) && (
         <Outlet
           context={
             {
               artworks:
-                slideshowArtworks.length > 0 ? slideshowArtworks : artworks,
+                slideshowArtworks.length > 0
+                  ? slideshowArtworks
+                  : slideshowAvailableArtworks,
             } satisfies IGalleryContext
           }
         />
@@ -414,36 +491,45 @@ const GalleryCoreInner = () => {
         getShareUrl={getShareUrl}
       />
 
-      <div className="breakout-w m-pad relative z-0 m-auto flex flex-col gap-8">
+      <div className="breakout-w m-pad relative z-0 m-auto flex flex-col gap-10">
         <div className="relative z-[100] flex items-center justify-between gap-3">
-          <div className="relative inline-block">
-            <select
-              value={viewMode}
-              onChange={(event) => {
-                setViewMode(event.target.value as GalleryViewMode);
-                setPageNumber(1);
-              }}
-              className="h-[50px] appearance-none rounded-md border border-gray-600 bg-white px-4 pr-12 text-sm font-medium"
-              aria-label="Gallery view"
-            >
-              <option value="group">Group</option>
-              <option value="individual">Individual</option>
-            </select>
-
-            <ChevronDown
-              className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-700"
-              aria-hidden="true"
-            />
-          </div>{' '}
-          <div className="absolute left-1/2 top-0 -translate-x-1/2">
+          <div className="grid w-full grid-cols-1 grid-rows-1">
             <button
               type="button"
               onClick={() => openSlideshow()}
-              className="inline-flex h-[50px] items-center gap-2 rounded-md border border-gray-600 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100"
+              className="col-start-1 row-start-1 mx-auto inline-flex items-center gap-2 rounded-md border border-gray-600 p-4 text-sm font-medium transition-colors hover:bg-gray-100"
             >
               <Play size={16} />
               <span>Play Slideshow</span>
             </button>
+            <div className="relative col-start-1 row-start-1 ml-auto inline-block flex items-center">
+              <select
+                value={viewMode}
+                onChange={(event) => {
+                  setViewMode(event.target.value as GalleryViewMode);
+                  setPageNumber(1);
+                }}
+                className="appearance-none rounded-md border border-gray-600 bg-white p-4 pr-12 text-sm font-medium"
+                aria-label="Gallery view"
+              >
+                <option value="group">Group View</option>
+                <option value="individual">Artwork View</option>
+              </select>
+
+              <ChevronDown
+                className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-700"
+                aria-hidden="true"
+              />
+            </div>{' '}
+            {showNoArtworksTooltip && (
+              <button
+                type="button"
+                onClick={hideNoArtworksTooltip}
+                className="absolute left-1/2 top-full mt-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-neutral-900 px-3 py-2 text-xs font-medium text-white shadow-lg"
+              >
+                No artworks available
+              </button>
+            )}
           </div>
           {!isMobile && (
             <Pagination
@@ -453,68 +539,75 @@ const GalleryCoreInner = () => {
               updatePageNumber={updatePageNumber}
             />
           )}
-          <select
-            value={sortValue}
-            onChange={(event) => setSortValue(event.target.value as SortValue)}
-            className="h-[50px] appearance-none rounded-md border border-gray-600 bg-white px-4 pr-12 text-sm font-medium"
-            aria-label="Sort artworks"
-          >
-            <option value="Newest Event">Newest</option>
-            <option value="Oldest Event">Oldest</option>
-          </select>
-          <ChevronDown
-            className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-700"
-            aria-hidden="true"
-          />
-        </div>
-        <section className="-mx-4 px-4 pb-24">
-          <div className="mb-3 flex justify-end">
-            <button
-              type="button"
-              onClick={() => {
-                if (selectedThemeFamily === null) return;
-                setSelectedThemeFamily(null);
-                setSelectedThemeInstance(null);
-                setPageNumber(1);
-              }}
-              className="rounded-md border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50 disabled:opacity-50"
-              disabled={selectedThemeFamily === null}
+          {/* <div>
+            <select
+              value={sortValue}
+              onChange={(event) =>
+                setSortValue(event.target.value as SortValue)
+              }
+              className="h-[50px] appearance-none rounded-md border border-gray-600 bg-white px-4 pr-12 text-sm font-medium"
+              aria-label="Sort artworks"
             >
-              All themes
-            </button>
-          </div>
-          {themesLoading ? (
-            <p className="text-center text-gray-600">Loading themes...</p>
-          ) : themesError ? (
-            <p className="text-center text-red-500">{themesError}</p>
-          ) : (
-            <div className="overflow-x-auto pb-2">
-              <div className="flex w-max gap-3">
-                {themeFamilies.map((family) => (
-                  <GalleryThemeCard
-                    key={family.theme_family}
-                    family={family}
-                    active={family.theme_family === selectedThemeFamily}
-                    selectedThemeInstance={selectedThemeInstance}
-                    onSelectFamily={() => {
-                      if (family.theme_family === selectedThemeFamily) return;
-                      setSelectedThemeFamily(family.theme_family);
-                      setSelectedThemeInstance(null);
-                      setPageNumber(1);
-                    }}
-                    onSelectInstance={(theme) => {
-                      setSelectedThemeFamily(theme.theme_family);
-                      setSelectedThemeInstance(theme.theme_instance);
-                      setPageNumber(1);
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
+              <option value="Newest Event">Newest</option>
+              <option value="Oldest Event">Oldest</option>
+            </select>
+            <ChevronDown
+              className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-700"
+              aria-hidden="true"
+            />
+          </div> */}
+        </div>
 
         <section className="relative">
+          <div className="">
+            {/* <div className="flex flex-row justify-between">
+            <div className="mb-3 flex justify-start">
+              <button
+                type="button"
+                onClick={() => {
+                  if (selectedThemeFamily === null) return;
+                  setSelectedThemeFamily(null);
+                  setSelectedThemeInstance(null);
+                  setPageNumber(1);
+                }}
+                className="rounded-md border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50 disabled:border-black/90 disabled:font-bold disabled:opacity-100"
+                disabled={selectedThemeFamily === null}
+              >
+                All Themes
+              </button>
+            </div>
+          </div> */}
+            {themesLoading ? (
+              <p className="text-center text-gray-600">Loading themes...</p>
+            ) : themesError ? (
+              <p className="text-center text-red-500">{themesError}</p>
+            ) : (
+              <div className="overflow-x-auto px-1 py-2">
+                <div className="flex w-max gap-3">
+                  {themeFamilies.map((family) => (
+                    <GalleryThemeCard
+                      key={family.theme_family}
+                      family={family}
+                      active={family.theme_family === selectedThemeFamily}
+                      selectedThemeInstance={selectedThemeInstance}
+                      onSelectFamily={() => {
+                        if (family.theme_family === selectedThemeFamily) return;
+                        setSelectedThemeFamily(family.theme_family);
+                        setSelectedThemeInstance(null);
+                        setPageNumber(1);
+                      }}
+                      onSelectInstance={(theme) => {
+                        setSelectedThemeFamily(theme.theme_family);
+                        setSelectedThemeInstance(theme.theme_instance);
+                        setPageNumber(1);
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           <hr className="mb-10 w-full border-t border-black" />
           {groupSlideshowError && (
             <p className="-mt-4 mb-5 rounded-md bg-red-50 px-4 py-3 text-sm text-red-600">
@@ -529,10 +622,19 @@ const GalleryCoreInner = () => {
           ) : activeError ? (
             <p className="py-20 text-center text-red-500">{activeError}</p>
           ) : activeItems.length === 0 ? (
-            <p className="py-20 text-center text-gray-600">
-              No {viewMode === 'group' ? 'groups' : 'artworks'} are available
-              {selectedThemeFamily ? ' for this theme' : ''} yet.
-            </p>
+            <div className="flex flex-col items-center gap-2 py-20 text-lg">
+              <p className="mb-2 text-center">
+                <p>
+                  No {viewMode === 'group' ? 'groups' : 'artworks'} are
+                  available
+                  {selectedThemeFamily ? ' for this theme' : ''} yet.
+                </p>
+                <p>You can be the first to contribute!</p>
+              </p>
+              <Link to="/submit-artwork">
+                <Button className="text-base">Submit Artwork</Button>
+              </Link>
+            </div>
           ) : viewMode === 'group' ? (
             <div
               ref={gridRef}

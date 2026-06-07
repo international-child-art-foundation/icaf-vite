@@ -88,7 +88,10 @@ export function ReviewArtworkQueue({ admin = false }: { admin?: boolean }) {
 
     const request =
       mode === 'approved'
-        ? listGalleryArtworks({ limit: 48, sort: 'newest' })
+        ? listGalleryArtworks(
+            { limit: 48, sort: 'newest' },
+            { bypassCache: true },
+          )
         : mode === 'pending'
           ? fetchPendingArtworks({ limit: 48 })
           : mode === 'hidden'
@@ -220,19 +223,29 @@ export function ReviewArtworkQueue({ admin = false }: { admin?: boolean }) {
           : 'Approval is the normal path. Rejection and hiding are moderation decisions.'
       }
       aside={
-        <select
-          value={mode}
-          onChange={(event) => {
-            setMode(event.target.value as QueueMode);
-            setEditingId(null);
-          }}
-          className="h-10 rounded-md border border-neutral-300 bg-white px-3 text-sm"
-        >
-          {admin && <option value="approved">Approved</option>}
-          <option value="pending">Pending review</option>
-          <option value="hidden">Hidden</option>
-          {admin && <option value="rejected">Rejected</option>}
-        </select>
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={mode}
+            onChange={(event) => {
+              setMode(event.target.value as QueueMode);
+              setEditingId(null);
+            }}
+            className="h-10 rounded-md border border-neutral-300 bg-white px-3 text-sm"
+          >
+            {admin && <option value="approved">Approved</option>}
+            <option value="pending">Pending review</option>
+            <option value="hidden">Hidden</option>
+            {admin && <option value="rejected">Rejected</option>}
+          </select>
+          <button
+            type="button"
+            disabled={loading || busy}
+            onClick={() => loadQueue()}
+            className="h-10 rounded-md border border-neutral-300 bg-white px-3 text-sm font-semibold disabled:opacity-40"
+          >
+            Update
+          </button>
+        </div>
       }
     >
       <div className="mb-4 flex flex-wrap gap-2">
@@ -397,8 +410,8 @@ export function ReviewArtworkQueue({ admin = false }: { admin?: boolean }) {
                     <EditInput label="Age" inputMode="numeric" value={edits.age} onChange={(age) => setEdits({ ...edits, age })} />
                     <EditInput label="Country" value={edits.country} onChange={(country) => setEdits({ ...edits, country })} />
                     <EditInput label="Region" value={edits.region} onChange={(region) => setEdits({ ...edits, region })} />
-                    <EditInput label="Theme family" value={edits.theme_family} onChange={(theme_family) => setEdits({ ...edits, theme_family })} />
-                    <EditInput label="Theme instance" value={edits.theme_instance} onChange={(theme_instance) => setEdits({ ...edits, theme_instance })} />
+                    <EditInput label="Theme collection" value={edits.theme_family} onChange={(theme_family) => setEdits({ ...edits, theme_family })} />
+                    <EditInput label="Theme year" value={edits.theme_instance} onChange={(theme_instance) => setEdits({ ...edits, theme_instance })} />
                     <label className="text-xs font-semibold uppercase text-neutral-600">
                       Relationship
                       <select

@@ -22,7 +22,7 @@ export type SortOrder = 'newest' | 'oldest';
 // Query parameters accepted by gallery endpoints (theme_family/instance are path params, not query params)
 export interface GalleryQueryParams {
     sort?: SortOrder;       // default: 'newest'
-    limit?: number;         // default: 20, max: 100
+    limit?: number;         // default: 24, max: 100
     last_key?: string;      // base64-encoded pagination cursor
 }
 

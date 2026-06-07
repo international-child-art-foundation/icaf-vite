@@ -18,6 +18,7 @@ import type {
 } from '@icaf/shared';
 
 import {
+  DEFAULT_API_CACHE_TTL_MS,
   apiRequest,
   hasApiSuccess,
   hasArrayProperty,
@@ -26,6 +27,10 @@ import {
 } from './client';
 import { apiEndpoints } from './endpoints';
 import type { PaginationQuery } from './types';
+
+type GalleryRequestOptions = {
+  bypassCache?: boolean;
+};
 
 const isSuccessfulArtworkSubmitResponse = (response: unknown): boolean =>
   hasApiSuccess(response) &&
@@ -141,8 +146,11 @@ export function listNews(query?: PaginationQuery): Promise<ListNewsResponse> {
 
 export function listGalleryArtworks(
   query?: GalleryQueryParams,
+  options?: GalleryRequestOptions,
 ): Promise<GalleryArtworksResponse> {
   return apiRequest<GalleryArtworksResponse>(apiEndpoints.gallery.artworks, {
+    bypassCache: options?.bypassCache,
+    cacheTtlMs: DEFAULT_API_CACHE_TTL_MS,
     query,
     validate: isGalleryArtworksResponse,
   });
@@ -151,21 +159,33 @@ export function listGalleryArtworks(
 export function listGalleryArtworksByFamily(
   family: string,
   query?: GalleryQueryParams,
+  options?: GalleryRequestOptions,
 ): Promise<GalleryArtworksResponse> {
-  return apiRequest<GalleryArtworksResponse>(apiEndpoints.gallery.artworksByFamily(family), {
-    query,
-    validate: isGalleryArtworksResponse,
-  });
+  return apiRequest<GalleryArtworksResponse>(
+    apiEndpoints.gallery.artworksByFamily(family),
+    {
+      bypassCache: options?.bypassCache,
+      cacheTtlMs: DEFAULT_API_CACHE_TTL_MS,
+      query,
+      validate: isGalleryArtworksResponse,
+    },
+  );
 }
 
 export function listGalleryArtworksByInstance(
   family: string,
   instance: string,
   query?: GalleryQueryParams,
+  options?: GalleryRequestOptions,
 ): Promise<GalleryArtworksResponse> {
   return apiRequest<GalleryArtworksResponse>(
     apiEndpoints.gallery.artworksByInstance(family, instance),
-    { query, validate: isGalleryArtworksResponse },
+    {
+      bypassCache: options?.bypassCache,
+      cacheTtlMs: DEFAULT_API_CACHE_TTL_MS,
+      query,
+      validate: isGalleryArtworksResponse,
+    },
   );
 }
 
@@ -175,8 +195,13 @@ export function listGalleryThemes(): Promise<ListThemesResponse> {
   });
 }
 
-export function listGalleryGroups(query?: GalleryQueryParams): Promise<GalleryGroupsResponse> {
+export function listGalleryGroups(
+  query?: GalleryQueryParams,
+  options?: GalleryRequestOptions,
+): Promise<GalleryGroupsResponse> {
   return apiRequest<GalleryGroupsResponse>(apiEndpoints.gallery.groups, {
+    bypassCache: options?.bypassCache,
+    cacheTtlMs: DEFAULT_API_CACHE_TTL_MS,
     query,
     validate: isGalleryGroupsResponse,
   });
@@ -185,20 +210,32 @@ export function listGalleryGroups(query?: GalleryQueryParams): Promise<GalleryGr
 export function listGalleryGroupsByFamily(
   family: string,
   query?: GalleryQueryParams,
+  options?: GalleryRequestOptions,
 ): Promise<GalleryGroupsResponse> {
-  return apiRequest<GalleryGroupsResponse>(apiEndpoints.gallery.groupsByFamily(family), {
-    query,
-    validate: isGalleryGroupsResponse,
-  });
+  return apiRequest<GalleryGroupsResponse>(
+    apiEndpoints.gallery.groupsByFamily(family),
+    {
+      bypassCache: options?.bypassCache,
+      cacheTtlMs: DEFAULT_API_CACHE_TTL_MS,
+      query,
+      validate: isGalleryGroupsResponse,
+    },
+  );
 }
 
 export function listGalleryGroupsByInstance(
   family: string,
   instance: string,
   query?: GalleryQueryParams,
+  options?: GalleryRequestOptions,
 ): Promise<GalleryGroupsResponse> {
   return apiRequest<GalleryGroupsResponse>(
     apiEndpoints.gallery.groupsByInstance(family, instance),
-    { query, validate: isGalleryGroupsResponse },
+    {
+      bypassCache: options?.bypassCache,
+      cacheTtlMs: DEFAULT_API_CACHE_TTL_MS,
+      query,
+      validate: isGalleryGroupsResponse,
+    },
   );
 }

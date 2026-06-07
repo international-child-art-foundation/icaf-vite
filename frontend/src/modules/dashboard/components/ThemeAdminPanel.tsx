@@ -43,7 +43,7 @@ function themeValue(theme: ThemeListItem): string {
 }
 
 function themeDescription(theme: ThemeListItem): string {
-  return `${theme.theme_family} / ${theme.theme_instance}`;
+  return dateInputValue(theme.start_date);
 }
 
 function themeToDraft(theme: ThemeListItem): ThemeDraft {
@@ -247,7 +247,7 @@ export function ThemeAdminPanel() {
               <FuzzyTextDropdown
                 label="Theme"
                 options={themeOptions}
-                placeholder="Search themes by name, family, instance, or date"
+                placeholder="Search themes by name, collection, year, or date"
                 selectedValue={selectedThemeValue}
                 onSelect={setSelectedThemeValue}
                 onFilterChange={handleFilterChange}
@@ -327,7 +327,7 @@ export function ThemeAdminPanel() {
                     <FuzzyTextDropdown
                       label="Page"
                       options={pageOptions}
-                      placeholder="Try submit artw"
+                      placeholder="Search"
                       selectedValue={selectedPage}
                       onSelect={handlePageSelect}
                       disabled={busy}

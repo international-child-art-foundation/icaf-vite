@@ -14,6 +14,7 @@ import { uploadToPresignedUrl } from '@/api/uploads';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { ArtworkMuralWindow } from '@/modules/submissions/components/ArtworkMuralWindow';
 import { CompactTextarea } from '@/modules/submissions/components/CompactTextarea';
+import { ThemePicker } from '@/modules/submissions/components/ThemePicker';
 import {
   getSubmitArtworkPageCopy,
   type SubmitArtworkPageCopy,
@@ -162,11 +163,6 @@ function normalizeThemeInstance(value: string | null) {
     : trimmedValue;
 }
 
-function formatThemeInstance(value: string) {
-  if (!/^\d+$/.test(value)) return value;
-  return String(Number(value));
-}
-
 function readThemeParams(search: string) {
   const params = new URLSearchParams(search);
   const themeFamily = normalizeThemeFamily(
@@ -237,6 +233,31 @@ function getSubmitterFlow(value: string | undefined): SubmitterFlow {
 
 function getFlowPath(flow: SubmitterFlow, nested = false) {
   return `/submit-artwork/group/${flow}${nested ? '/artworks' : ''}`;
+}
+
+function updateThemeSearch(
+  search: string,
+  theme: ReturnType<typeof readThemeParams>,
+) {
+  const params = new URLSearchParams(search);
+  for (const key of [
+    'theme_family',
+    'themeFamily',
+    'family',
+    'theme',
+    'theme_instance',
+    'themeInstance',
+    'instance',
+    'id',
+  ]) {
+    params.delete(key);
+  }
+  if (theme.theme_family) params.set('theme_family', theme.theme_family);
+  if (theme.theme_family && theme.theme_instance) {
+    params.set('theme_instance', theme.theme_instance);
+  }
+  const nextSearch = params.toString();
+  return nextSearch ? `?${nextSearch}` : '';
 }
 
 export function SubmitArtworkGroup({
@@ -394,6 +415,18 @@ export function SubmitArtworkGroup({
       ...current,
       submitterEmail: value,
     }));
+  }
+
+  function selectTheme(theme: ReturnType<typeof readThemeParams>) {
+    updateGroupField('theme_family', theme.theme_family);
+    updateGroupField(
+      'theme_instance',
+      theme.theme_family ? theme.theme_instance : '',
+    );
+    void navigate(
+      `${location.pathname}${updateThemeSearch(location.search, theme)}`,
+      { replace: true },
+    );
   }
 
   function handleGroupTextChange(event: ChangeEvent<HTMLInputElement>) {
@@ -760,6 +793,10 @@ export function SubmitArtworkGroup({
               </div>
             </section>
 
+            <div className="mt-6">
+              <ThemePicker value={activeTheme} onChange={selectTheme} />
+            </div>
+
             <section
               ref={artworkSectionRef}
               className="mt-6 flex flex-col gap-3"
@@ -768,14 +805,6 @@ export function SubmitArtworkGroup({
                 <h2 className="font-montserrat text-xl font-semibold text-slate-950">
                   Artworks
                 </h2>
-                {activeTheme.theme_family && (
-                  <p className="mt-1 text-xs font-semibold text-slate-500">
-                    Theme: {activeTheme.theme_family}
-                    {activeTheme.theme_instance
-                      ? ` ${formatThemeInstance(activeTheme.theme_instance)}`
-                      : ''}
-                  </p>
-                )}
                 <p className="mt-0.5 text-xs leading-5 text-slate-500">
                   {copy.artworkHelpText}
                 </p>

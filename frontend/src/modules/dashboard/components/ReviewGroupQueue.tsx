@@ -27,6 +27,12 @@ const editableFields: (keyof UpdateGroupRequest)[] = [
   'theme_instance',
 ];
 
+function editableFieldLabel(field: keyof UpdateGroupRequest) {
+  if (field === 'theme_family') return 'Theme collection';
+  if (field === 'theme_instance') return 'Theme year';
+  return field.replace(/_/g, ' ');
+}
+
 export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
   const [mode, setMode] = useState<QueueMode>('pending');
   const [groups, setGroups] = useState<GroupListItem[]>([]);
@@ -44,7 +50,7 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
     setLoading(true);
     setError(null);
     const request = mode === 'pending' ? fetchPendingGroups : fetchHiddenGroups;
-    request({ limit: 20 })
+    request({ limit: 24 })
       .then((response) => {
         setGroups(response.groups);
         setSelected(new Set());
@@ -121,14 +127,24 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
       title={admin ? 'Group review and correction' : 'Group review'}
       description="Approval is the normal path. Rejection and hiding are moderation decisions, while attribute changes should be reserved for fixing clear submission errors."
       aside={
-        <select
-          value={mode}
-          onChange={(event) => setMode(event.target.value as QueueMode)}
-          className="h-10 rounded-md border border-neutral-300 bg-white px-3 text-sm"
-        >
-          <option value="pending">Pending review</option>
-          <option value="hidden">Hidden</option>
-        </select>
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={mode}
+            onChange={(event) => setMode(event.target.value as QueueMode)}
+            className="h-10 rounded-md border border-neutral-300 bg-white px-3 text-sm"
+          >
+            <option value="pending">Pending review</option>
+            <option value="hidden">Hidden</option>
+          </select>
+          <button
+            type="button"
+            disabled={loading || busy}
+            onClick={() => loadQueue()}
+            className="h-10 rounded-md border border-neutral-300 bg-white px-3 text-sm font-semibold disabled:opacity-40"
+          >
+            Update
+          </button>
+        </div>
       }
     >
       <div className="mb-4 flex flex-wrap gap-2">
@@ -179,7 +195,7 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
                 key={field}
                 className="text-xs font-semibold uppercase text-neutral-600"
               >
-                {field.replace(/_/g, ' ')}
+                {editableFieldLabel(field)}
                 <input
                   value={String(edits[field] ?? '')}
                   onChange={(event) =>

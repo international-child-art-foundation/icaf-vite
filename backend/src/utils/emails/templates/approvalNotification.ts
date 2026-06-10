@@ -41,13 +41,14 @@ export function buildApprovalEmail(args: {
         `Gallery link: ${galleryUrl}`,
         'Status: approved',
       ]),
-      htmlParagraphs([
-        'Thank you for your contribution to ICAF.',
-        'If you no longer want artwork notification emails, you can unsubscribe below.',
-      ]),
-      `<p style="margin:0;">${renderLink(unsubscribeUrl, 'Unsubscribe from artwork emails')}</p>`,
+      htmlParagraphs(['Thank you for your contribution to ICAF.']),
+      [
+        '<div style="margin-top:26px;padding-top:16px;border-top:1px solid #cfe2f3;font-size:12px;line-height:1.5;color:#6b7280;">',
+        '<p style="margin:0 0 8px;">If you no longer want artwork notification emails, you can unsubscribe below.</p>',
+        `<p style="margin:0;font-size:12px;">${renderLink(unsubscribeUrl, 'Unsubscribe from artwork emails')}</p>`,
+        '</div>',
+      ].join(''),
     ].join(''),
-    footerNote: 'This stops artwork notification emails for this ICAF account.',
   });
 
   return {

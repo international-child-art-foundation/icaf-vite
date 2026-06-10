@@ -6,7 +6,6 @@ import { CalendarDays, RefreshCw, Save, X } from 'lucide-react';
 import { updateTheme } from '@/api/contributor';
 import { listGalleryThemes } from '@/api/public';
 import {
-  filterFuzzyOptions,
   FuzzyTextDropdown,
   type FuzzyDropdownOption,
 } from '@/shared/components/FuzzyTextDropdown';
@@ -216,8 +215,6 @@ export function ThemeAdminPanel() {
     [],
   );
 
-  const pageSearchPreview = filterFuzzyOptions(pageOptions, 'submit')[0];
-
   return (
     <div className="grid gap-6">
       <DashboardModule
@@ -245,6 +242,7 @@ export function ThemeAdminPanel() {
           ) : (
             <>
               <FuzzyTextDropdown
+                collapseAfterSelect
                 label="Theme"
                 options={themeOptions}
                 placeholder="Search themes by name, collection, year, or date"
@@ -332,11 +330,6 @@ export function ThemeAdminPanel() {
                       onSelect={handlePageSelect}
                       disabled={busy}
                     />
-                    {pageSearchPreview && (
-                      <p className="text-xs text-neutral-500">
-                        Best match for submit artw: {pageSearchPreview.label}
-                      </p>
-                    )}
                     <div className="flex flex-wrap gap-2">
                       {draft.featured_on.map((page) => (
                         <button

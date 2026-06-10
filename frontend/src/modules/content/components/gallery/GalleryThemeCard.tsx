@@ -1,13 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ThemeListItem } from '@icaf/shared';
 import { Check, ChevronDown } from 'lucide-react';
 import { GalleryThemeVisual } from './themeVisuals';
+import { GALLERY_THEME_VISUAL_SIZE_CLASS } from './themeVisuals/constants';
 import type { ThemeFamilyCardModel } from './themeFamilies';
 import { themeStartDate } from './themeFamilies';
-
-export const GALLERY_THEME_CARD_SIZE =
-  'h-[80px] w-[300px] sm:h-[88px] sm:w-[340px]';
 
 type GalleryThemeCardProps = {
   active: boolean;
@@ -17,13 +15,15 @@ type GalleryThemeCardProps = {
   selectedThemeInstance?: string | null;
 };
 
+const startDateFormatter = new Intl.DateTimeFormat(undefined, {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+});
+
 function formatStartDate(value: number): string {
   if (!value) return 'No start date';
-  return new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(new Date(value));
+  return startDateFormatter.format(new Date(value));
 }
 
 export function GalleryThemeCard({
@@ -37,12 +37,17 @@ export function GalleryThemeCard({
   const [isThemeHovered, setIsThemeHovered] = useState(false);
   const dropdownButtonRef = useRef<HTMLButtonElement | null>(null);
   const dropdownMenuRef = useRef<HTMLDivElement | null>(null);
+  const positionRafRef = useRef<number | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState({
     left: 0,
     top: 0,
   });
-  const instances = [...family.themes].sort(
-    (a, b) => themeStartDate(b) - themeStartDate(a),
+  const instances = useMemo(
+    () =>
+      [...family.themes].sort(
+        (a, b) => themeStartDate(b) - themeStartDate(a),
+      ),
+    [family.themes],
   );
 
   useLayoutEffect(() => {
@@ -52,18 +57,39 @@ export function GalleryThemeCard({
       const button = dropdownButtonRef.current;
       if (!button) return;
       const rect = button.getBoundingClientRect();
-      setDropdownPosition({
+      const nextPosition = {
         left: Math.min(window.innerWidth - 272, Math.max(8, rect.right - 256)),
         top: rect.bottom + 8,
+      };
+      setDropdownPosition((current) => {
+        if (
+          current.left === nextPosition.left &&
+          current.top === nextPosition.top
+        ) {
+          return current;
+        }
+        return nextPosition;
+      });
+    }
+
+    function requestDropdownPositionUpdate() {
+      if (positionRafRef.current !== null) return;
+      positionRafRef.current = requestAnimationFrame(() => {
+        positionRafRef.current = null;
+        updateDropdownPosition();
       });
     }
 
     updateDropdownPosition();
-    window.addEventListener('resize', updateDropdownPosition);
-    window.addEventListener('scroll', updateDropdownPosition, true);
+    window.addEventListener('resize', requestDropdownPositionUpdate);
+    window.addEventListener('scroll', requestDropdownPositionUpdate, true);
     return () => {
-      window.removeEventListener('resize', updateDropdownPosition);
-      window.removeEventListener('scroll', updateDropdownPosition, true);
+      window.removeEventListener('resize', requestDropdownPositionUpdate);
+      window.removeEventListener('scroll', requestDropdownPositionUpdate, true);
+      if (positionRafRef.current !== null) {
+        cancelAnimationFrame(positionRafRef.current);
+        positionRafRef.current = null;
+      }
     };
   }, [open]);
 
@@ -86,6 +112,7 @@ export function GalleryThemeCard({
 
   return (
     <div
+      data-gallery-theme-card
       className="relative flex-none"
       onMouseEnter={() => setIsThemeHovered(true)}
       onMouseLeave={() => setIsThemeHovered(false)}
@@ -93,7 +120,7 @@ export function GalleryThemeCard({
       <button
         type="button"
         onClick={onSelectFamily}
-        className={`group relative ${GALLERY_THEME_CARD_SIZE} overflow-hidden rounded-md p-3 text-left shadow-sm transition duration-200 ${
+        className={`group relative ${GALLERY_THEME_VISUAL_SIZE_CLASS} overflow-hidden rounded-md p-3 text-left shadow-sm transition duration-200 ${
           active
             ? 'ring-2 ring-black/90'
             : 'hover:-translate-y-0.5 hover:shadow-md'

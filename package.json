@@ -11,6 +11,7 @@
   "packageManager": "pnpm@11.5.2",
   "scripts": {
     "dev": "pnpm --filter @icaf/frontend dev",
+    "guard:debug-flags": "node scripts/ensureDebugFlagsDisabled.mjs",
     "clean": "tsc -b --clean",
     "check": "tsc -b && pnpm --filter @icaf/frontend lint",
     "build": "pnpm run build:shared && pnpm run build:backend && pnpm --filter @icaf/frontend build",

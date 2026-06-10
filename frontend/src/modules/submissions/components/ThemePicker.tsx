@@ -3,6 +3,10 @@ import type { ThemeListItem } from '@icaf/shared';
 import { listGalleryThemes } from '@/api/public';
 import { GalleryThemeCard } from '@/modules/content/components/gallery/GalleryThemeCard';
 import { buildThemeFamilies } from '@/modules/content/components/gallery/themeFamilies';
+import {
+  filterThemesForSurface,
+  THEME_SURFACES,
+} from '@/modules/content/components/gallery/themeVisibility';
 
 type ThemePickerValue = {
   theme_family: string;
@@ -28,7 +32,9 @@ export function ThemePicker({ onChange, value }: ThemePickerProps) {
     listGalleryThemes()
       .then((response) => {
         if (cancelled) return;
-        setThemes(response.themes);
+        setThemes(
+          filterThemesForSurface(response.themes, THEME_SURFACES.submitArtwork),
+        );
       })
       .catch((requestError: unknown) => {
         if (cancelled) return;
@@ -61,7 +67,7 @@ export function ThemePicker({ onChange, value }: ThemePickerProps) {
         <button
           type="button"
           onClick={() => onChange({ theme_family: '', theme_instance: '' })}
-          className="rounded-md border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50 disabled:opacity-50"
+          className="rounded-md border border-2 border-black/10 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 opacity-50 transition disabled:border-gray-800 disabled:bg-gray-50 disabled:text-gray-800 disabled:opacity-100"
           disabled={!value.theme_family}
         >
           No theme

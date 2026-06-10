@@ -83,9 +83,7 @@ function getPathLookupState(url: URL): ArtworkLookupState | null {
 }
 
 function hasGroupContext(input: string): boolean {
-  return /(^|[?&/])(?:group|groups|group_id|groupid)(?:=|\/|:|-)/i.test(
-    input,
-  );
+  return /(^|[?&/])(?:group|groups|group_id|groupid)(?:=|\/|:|-)/i.test(input);
 }
 
 export function lookupArtworkIdFromInput(input: string): ArtworkLookupState {
@@ -95,7 +93,8 @@ export function lookupArtworkIdFromInput(input: string): ArtworkLookupState {
     return {
       artId: null,
       kind: 'missing',
-      message: 'Paste an artwork link so we can look for the artwork UUID.',
+      message:
+        'Use our public gallery to find the artwork you wish to take down, and paste its URL here.',
     };
   }
 

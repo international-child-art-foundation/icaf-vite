@@ -1,5 +1,5 @@
 import type { KeyboardEvent, ReactNode } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, Search, X } from 'lucide-react';
 import { cn } from '@/utils/utils';
 import { Button } from '@/shared/components/ui/button';
@@ -14,6 +14,7 @@ export type FuzzyDropdownOption<Value extends string = string> = {
 };
 
 type FuzzyTextDropdownProps<Value extends string = string> = {
+  collapseAfterSelect?: boolean;
   disabled?: boolean;
   emptyLabel?: string;
   label: string;
@@ -105,6 +106,7 @@ export function filterFuzzyOptions<Value extends string>(
 }
 
 export function FuzzyTextDropdown<Value extends string = string>({
+  collapseAfterSelect = false,
   disabled = false,
   emptyLabel = 'No matches found.',
   label,
@@ -120,18 +122,36 @@ export function FuzzyTextDropdown<Value extends string = string>({
     () => filterFuzzyOptions(options, query),
     [options, query],
   );
+  const [expanded, setExpanded] = useState(false);
+  const previousSelectedValueRef = useRef<Value | null>(selectedValue);
   const selectedOption =
     selectedValue === null
       ? null
       : options.find((option) => option.value === selectedValue) ?? null;
+  const showOptions = !collapseAfterSelect || expanded || !selectedOption;
+  const showSelectedSummary = selectedOption && !collapseAfterSelect;
 
   useEffect(() => {
     onFilterChange?.(filteredOptions, query);
   }, [filteredOptions, onFilterChange, query]);
 
+  useEffect(() => {
+    if (!collapseAfterSelect) {
+      previousSelectedValueRef.current = selectedValue;
+      return;
+    }
+
+    if (previousSelectedValueRef.current !== selectedValue) {
+      setQuery('');
+      setExpanded(false);
+      previousSelectedValueRef.current = selectedValue;
+    }
+  }, [collapseAfterSelect, selectedValue]);
+
   const selectValue = (value: Value | null) => {
     onSelect(value);
     setQuery('');
+    if (collapseAfterSelect) setExpanded(false);
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -144,10 +164,13 @@ export function FuzzyTextDropdown<Value extends string = string>({
   return (
     <div className="grid gap-2">
       <div className="flex items-center justify-between gap-3">
-        <label className="text-sm font-semibold text-neutral-700" htmlFor={`${label}-dropdown`}>
+        <label
+          className="text-sm font-semibold text-neutral-700"
+          htmlFor={`${label}-dropdown`}
+        >
           {label}
         </label>
-        {selectedOption && removable && (
+        {selectedOption && removable && !collapseAfterSelect && (
           <Button
             type="button"
             size="sm"
@@ -161,9 +184,12 @@ export function FuzzyTextDropdown<Value extends string = string>({
           </Button>
         )}
       </div>
-      {selectedOption && (
+      {showSelectedSummary && (
         <div className="flex items-start gap-2 rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-sm">
-          <Check aria-hidden="true" className="mt-0.5 h-4 w-4 flex-none text-primary" />
+          <Check
+            aria-hidden="true"
+            className="mt-0.5 h-4 w-4 flex-none text-primary"
+          />
           <div className="min-w-0">
             <p className="truncate font-semibold text-neutral-950">
               {selectedOption.label}
@@ -186,53 +212,64 @@ export function FuzzyTextDropdown<Value extends string = string>({
           value={query}
           placeholder={placeholder}
           className="pl-9"
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setExpanded(true);
+          }}
+          onFocus={() => setExpanded(true)}
           onKeyDown={handleKeyDown}
           disabled={disabled}
         />
       </div>
-      <div className="max-h-56 overflow-y-auto rounded-md border border-black/10 bg-white p-1 shadow-sm">
-        {filteredOptions.length === 0 ? (
-          <p className="px-3 py-2 text-sm text-neutral-500">{emptyLabel}</p>
-        ) : (
-          filteredOptions.map((option, index) => {
-            const selected = option.value === selectedValue;
-            return (
-              <button
-                key={option.value}
-                type="button"
-                className={cn(
-                  'flex w-full items-start gap-2 rounded px-3 py-2 text-left text-sm transition',
-                  selected
-                    ? 'bg-primary text-white'
-                    : index === 0 && query.trim()
-                      ? 'bg-neutral-100 text-neutral-950'
-                      : 'text-neutral-700 hover:bg-neutral-50',
-                )}
-                onClick={() => selectValue(option.value)}
-                disabled={disabled}
-              >
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate font-semibold">
-                    {option.render ?? option.label}
-                  </span>
-                  {option.description && (
-                    <span
-                      className={cn(
-                        'mt-0.5 block truncate text-xs',
-                        selected ? 'text-white/75' : 'text-neutral-500',
-                      )}
-                    >
-                      {option.description}
-                    </span>
+      {showOptions && (
+        <div className="max-h-56 overflow-y-auto rounded-md border border-black/10 bg-white p-1 shadow-sm">
+          {filteredOptions.length === 0 ? (
+            <p className="px-3 py-2 text-sm text-neutral-500">{emptyLabel}</p>
+          ) : (
+            filteredOptions.map((option, index) => {
+              const selected = option.value === selectedValue;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={cn(
+                    'flex w-full items-start gap-2 rounded px-3 py-2 text-left text-sm transition',
+                    selected
+                      ? 'bg-primary text-white'
+                      : index === 0 && query.trim()
+                        ? 'bg-neutral-100 text-neutral-950'
+                        : 'text-neutral-700 hover:bg-neutral-50',
                   )}
-                </span>
-                {selected && <Check aria-hidden="true" className="mt-0.5 h-4 w-4 flex-none" />}
-              </button>
-            );
-          })
-        )}
-      </div>
+                  onClick={() => selectValue(option.value)}
+                  disabled={disabled}
+                >
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-semibold">
+                      {option.render ?? option.label}
+                    </span>
+                    {option.description && (
+                      <span
+                        className={cn(
+                          'mt-0.5 block truncate text-xs',
+                          selected ? 'text-white/75' : 'text-neutral-500',
+                        )}
+                      >
+                        {option.description}
+                      </span>
+                    )}
+                  </span>
+                  {selected && (
+                    <Check
+                      aria-hidden="true"
+                      className="mt-0.5 h-4 w-4 flex-none"
+                    />
+                  )}
+                </button>
+              );
+            })
+          )}
+        </div>
+      )}
     </div>
   );
 }

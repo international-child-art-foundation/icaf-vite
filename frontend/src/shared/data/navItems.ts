@@ -16,6 +16,7 @@ import upcoming from '@/shared/assets/images/navigation/news/upcomingEvents.webp
 import board from '@/shared/assets/images/icafGroupPhoto.webp';
 import wca from '@/shared/assets/images/navigation/programs/worldChildrensAward.webp';
 import researchAndPublications from '@/shared/assets/images/UnitedStatesSLKorth.webp';
+import submitArtwork from '@/shared/assets/images/navigation/getInvolved/submitArtwork.webp';
 
 export interface NavChild {
   label: string;
@@ -158,6 +159,12 @@ export const navItems: NavItem[] = [
         href: '/news-events/news',
         imageSrc: latest,
         hoverDescription: "See ICAF's recent activity.",
+      },
+      {
+        label: 'Submit Artwork',
+        href: '/submit-artwork',
+        imageSrc: submitArtwork,
+        hoverDescription: "Feature your child's artwork in the ICAF gallery.",
       },
       {
         label: 'Upcoming Events',

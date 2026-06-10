@@ -59,12 +59,16 @@ export function DashboardShell({
   } else if (activeTab === 'review' && canReview(role)) {
     content = (
       <>
-        <ReviewArtworkQueue admin={canAdmin(role)} />
+        <ReviewArtworkQueue
+          key="review-artwork-queue"
+          admin={canAdmin(role)}
+          defaultMode="pending"
+        />
         {!canAdmin(role) && <ReviewGroupQueue />}
       </>
     );
   } else if (activeTab === 'admin' && canAdmin(role)) {
-    content = <ReviewArtworkQueue admin />;
+    content = <ReviewArtworkQueue key="admin-artwork-queue" admin />;
   } else if (activeTab === 'news' && canAdmin(role)) {
     content = <NewsAdminPanel />;
   } else if (activeTab === 'themes' && canReview(role)) {

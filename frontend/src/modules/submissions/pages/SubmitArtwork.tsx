@@ -37,8 +37,9 @@ import {
 } from '@icaf/shared';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ArtworkDisclaimer } from '@/modules/submissions/components/ArtworkDisclaimer';
+import type { SubmitArtworkSuccessState } from './SubmitArtworkSuccess';
 
-type SubmissionStatus = 'idle' | 'submitting' | 'success';
+type SubmissionStatus = 'idle' | 'submitting';
 
 type SubmitArtworkDraft = {
   artwork: ArtworkDraft;
@@ -473,15 +474,29 @@ export function SubmitArtwork() {
         url: response.presigned_url,
       });
 
-      setStatus('success');
-      setSubmitMessage(
-        'Thank you for submitting this artwork for review! Check your email to create an account and receive updates.',
-      );
+      const successState: SubmitArtworkSuccessState = {
+        submission: {
+          artworkDetailsMode,
+          artworks: [
+            {
+              ...draft.artwork,
+              fileName: file.name,
+              previewDataUrl,
+            },
+          ],
+          email: draft.submitterEmail.trim(),
+          kind: 'single',
+        },
+      };
       setDraft(initialSubmitArtworkDraft);
       deleteArtwork();
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem(SUBMIT_ARTWORK_DRAFT_KEY);
       }
+      void navigate('/submit-artwork/success', {
+        replace: true,
+        state: successState,
+      });
     } catch (error) {
       setStatus('idle');
       setSubmitMessage(getSubmitError(error));
@@ -717,12 +732,8 @@ export function SubmitArtwork() {
             )}
             {submitMessage && (
               <div
-                className={
-                  status === 'success'
-                    ? 'text-secondary-green rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold'
-                    : 'text-tertiary-red rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold'
-                }
-                role={status === 'success' ? 'status' : 'alert'}
+                className="text-tertiary-red rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold"
+                role="alert"
               >
                 {submitMessage}
               </div>

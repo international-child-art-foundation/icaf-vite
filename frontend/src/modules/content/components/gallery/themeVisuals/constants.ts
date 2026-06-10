@@ -1,0 +1,2 @@
+export const DEFAULT_THEME_VISUAL_DURATION_SECONDS = 7.2;
+export const GALLERY_THEME_VISUAL_SIZE_CLASS = 'h-[80px] w-[300px]';

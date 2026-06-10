@@ -41,8 +41,7 @@ const roleChoices = [
 const quantityChoices = [
   {
     colorClassName: 'bg-amber-50 text-amber-700 ring-amber-200',
-    description:
-      'I want to upload one artwork image and add details about that piece.',
+    description: 'I want to upload one artwork image on behalf of one child.',
     icon: <Palette aria-hidden="true" className="h-9 w-9" />,
     label: 'One artwork',
     value: 'solo',

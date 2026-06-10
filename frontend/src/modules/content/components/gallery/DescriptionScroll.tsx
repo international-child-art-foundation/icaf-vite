@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 
+const SCROLL_BASE_PX_S = 10;
+const SCROLL_START_DELAY_S = 6;
+const SCROLLBAR_W = 4;
+const SCROLLBAR_GAP = 5;
+
 const getCap = (vh: number) => {
   if (vh <= 768) return 96;
   if (vh <= 1024) return 150;
@@ -7,11 +12,6 @@ const getCap = (vh: number) => {
 };
 
 export const DescriptionScroll = ({ description }: { description: string }) => {
-  const SCROLL_BASE_PX_S = 10;
-  const SCROLL_START_DELAY_S = 6;
-  const SCROLLBAR_W = 4;
-  const SCROLLBAR_GAP = 5;
-
   const pRef = useRef<HTMLParagraphElement>(null);
   const rafRef = useRef<number | null>(null);
 
@@ -27,7 +27,10 @@ export const DescriptionScroll = ({ description }: { description: string }) => {
       if (rafRef.current !== null) return;
       rafRef.current = requestAnimationFrame(() => {
         rafRef.current = null;
-        setCap(getCap(window.innerHeight));
+        setCap((current) => {
+          const next = getCap(window.innerHeight);
+          return current === next ? current : next;
+        });
       });
     };
     window.addEventListener('resize', onResize);
@@ -41,7 +44,12 @@ export const DescriptionScroll = ({ description }: { description: string }) => {
     if (!pRef.current) return;
     setManualOffset(null);
     const el = pRef.current;
-    const measure = () => setNaturalH(el.scrollHeight);
+    const measure = () => {
+      setNaturalH((current) => {
+        const next = el.scrollHeight;
+        return current === next ? current : next;
+      });
+    };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);

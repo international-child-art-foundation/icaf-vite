@@ -168,12 +168,6 @@ function Footer() {
         </div>
         <div className="footer-inverse w-full text-base lg:order-2 lg:w-auto lg:text-base xl:col-span-2 xl:col-start-6">
           <ol className="grid grid-cols-2 gap-x-8 gap-y-5 lg:grid-cols-1 lg:gap-y-4 lg:pl-0 lg:pr-14">
-            {/* <div className="break-words">
-              <a href="/faq">FAQs</a>
-            </div> */}
-            <div className="break-words">
-              <Link to="/contact">Contact Us</Link>
-            </div>
             <div className="break-words">
               <a
                 href="/documents/ICAF_Website_Terms_of_Use.pdf"
@@ -197,6 +191,15 @@ function Footer() {
               onClick={() => setCookieBannerVisible(true)}
             >
               Cookie Settings
+            </div>
+            <div className="break-words">
+              <Link
+                to={'/takedown-request'}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Takedown Request
+              </Link>
             </div>
           </ol>
         </div>

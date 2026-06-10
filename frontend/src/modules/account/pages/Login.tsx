@@ -2,25 +2,13 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight, User } from 'lucide-react';
 import { LoginForm } from '@/modules/account/components/LoginForm';
 import { Button } from '@/shared/components/ui/button';
-import {
-  getLastKnownUser,
-  getLastVisitedPath,
-  normalizeInternalPath,
-} from '@/shared/utils/authSession';
+import { getLastKnownUser } from '@/shared/utils/authSession';
 
 export const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const lastKnownUser = getLastKnownUser();
-  const requestedReturnTo =
-    normalizeInternalPath(searchParams.get('returnTo')) ??
-    getLastVisitedPath() ??
-    '/my-icaf';
-  const returnTo =
-    requestedReturnTo === '/login' || requestedReturnTo === '/register'
-      ? '/my-icaf'
-      : requestedReturnTo;
   const reason = searchParams.get('reason');
   const staleAuthNotice =
     reason === 'stale-auth' && lastKnownUser
@@ -28,13 +16,13 @@ export const Login = () => {
       : null;
 
   function handleLoginSuccess() {
-    void navigate(returnTo, { replace: true });
+    void navigate('/my-icaf', { replace: true });
   }
 
   return (
     <div className="my-auto h-full flex-grow bg-white py-12 lg:py-16">
       <div className="content-w m-pad my-auto grid gap-8 lg:grid-cols-2 lg:items-stretch">
-        <section className="border-1 border-secondary-yellow rounded-lg border bg-white p-6 text-slate-950 shadow-xl sm:p-8 lg:flex lg:flex-col lg:justify-between">
+        <section className="border-1 border-secondary-yellow order-2 mx-auto w-full max-w-xl rounded-lg border bg-white p-6 text-slate-950 shadow-xl sm:p-8 lg:order-1 lg:mx-0 lg:flex lg:max-w-none lg:flex-col lg:justify-between">
           <div>
             <p className="mb-3 text-sm font-bold uppercase tracking-widest text-slate-700">
               New to ICAF?
@@ -88,7 +76,7 @@ export const Login = () => {
           </Button>
         </section>
 
-        <section className="flex items-center">
+        <section className="order-1 flex items-center lg:order-2">
           <div className="w-full">
             {staleAuthNotice && (
               <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">

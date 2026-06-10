@@ -1,4 +1,4 @@
-import { gsap } from 'gsap';
+import { memo } from 'react';
 import type { ReactNode } from 'react';
 import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
 import {
@@ -17,24 +17,6 @@ const ArtworkCard = ({ artwork, openModal, actionSlot }: ArtworkCardProps) => {
     artwork;
   const artistText = getArtistDisplayName(artists ?? [], lastInitial);
 
-  const manageEnter = (e: React.MouseEvent<HTMLImageElement>) => {
-    gsap.to(e.target, {
-      scaleX: 1.1,
-      scaleY: 1.1,
-      duration: 0.3,
-      ease: 'power3.inOut',
-    });
-  };
-
-  const manageLeave = (e: React.MouseEvent<HTMLImageElement>) => {
-    gsap.to(e.target, {
-      scaleX: 1,
-      scaleY: 1,
-      duration: 0.3,
-      ease: 'power3.inOut',
-    });
-  };
-
   const locationText = [region, country].filter(Boolean).join(', ');
 
   return (
@@ -44,10 +26,10 @@ const ArtworkCard = ({ artwork, openModal, actionSlot }: ArtworkCardProps) => {
           <img
             src={thumbUrl}
             alt={artistText || 'Artwork'}
-            onMouseEnter={manageEnter}
-            onMouseLeave={manageLeave}
             onClick={() => openModal(id)}
-            className="absolute inset-0 h-full w-full cursor-pointer object-cover object-center"
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 h-full w-full cursor-pointer object-cover object-center transition-transform duration-300 ease-in-out hover:scale-110"
           />
           {/* {locationText && (
             <div
@@ -91,4 +73,4 @@ const ArtworkCard = ({ artwork, openModal, actionSlot }: ArtworkCardProps) => {
   );
 };
 
-export default ArtworkCard;
+export default memo(ArtworkCard);

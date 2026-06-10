@@ -145,7 +145,7 @@ export const RegisterForm = () => {
 
   return (
     <form
-      className="mx-auto w-full max-w-3xl"
+      className="mx-auto w-full max-w-xl sm:max-w-3xl"
       noValidate
       onSubmit={handleSubmit}
     >

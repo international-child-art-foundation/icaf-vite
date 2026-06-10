@@ -374,7 +374,7 @@ function ArtworkDetailsPane({
             Artwork details
           </p>
           {hasSelectedArtwork && activeArtwork?.fileName && (
-            <p className="mt-0.5 truncate text-xs text-slate-500">
+            <p className="mt-0.5 select-none truncate text-xs text-slate-500">
               {activeArtwork.fileName}
             </p>
           )}
@@ -449,6 +449,184 @@ function ArtworkDetailsPane({
           activeArtwork &&
           onArtworkChange(activeArtwork.id, 'description', value)
         }
+      />
+    </div>
+  );
+}
+
+function ArtworkReadOnlyDetailsPane({
+  activeArtwork,
+  artworkCount,
+  artworkDetailsMode,
+  onNext,
+  onPrevious,
+}: {
+  activeArtwork: ArtworkWithPreview | undefined;
+  artworkCount: number;
+  artworkDetailsMode: 'basic' | 'full';
+  onNext: () => void;
+  onPrevious: () => void;
+}) {
+  return (
+    <div className="relative space-y-3 rounded-lg bg-white/55 p-3 shadow-inner backdrop-blur">
+      <div className="flex items-center justify-between gap-2">
+        <button
+          aria-label="Previous artwork"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-slate-700 shadow-sm disabled:opacity-40"
+          disabled={artworkCount < 2}
+          type="button"
+          onClick={onPrevious}
+        >
+          <ChevronLeft aria-hidden="true" className="h-4 w-4" />
+        </button>
+        <div className="min-w-0 text-center">
+          <p className="select-none text-xs font-bold uppercase tracking-widest text-slate-500">
+            Submitted artwork
+          </p>
+          {activeArtwork?.fileName && (
+            <p className="mt-0.5 select-none truncate text-xs text-slate-500">
+              {activeArtwork.fileName}
+            </p>
+          )}
+        </div>
+        <button
+          aria-label="Next artwork"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-slate-700 shadow-sm disabled:opacity-40"
+          disabled={artworkCount < 2}
+          type="button"
+          onClick={onNext}
+        >
+          <ChevronRight aria-hidden="true" className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div
+        className={cn(
+          'grid gap-2',
+          artworkDetailsMode === 'full' && 'sm:grid-cols-[1fr_1fr_88px]',
+        )}
+      >
+        <div className="rounded-md bg-white/55 px-3 py-2 shadow-inner">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+            Title
+          </p>
+          <p className="mt-1 min-h-5 text-sm font-semibold text-slate-950">
+            {activeArtwork?.title || 'Untitled'}
+          </p>
+        </div>
+        {artworkDetailsMode === 'full' && (
+          <>
+            <div className="rounded-md bg-white/55 px-3 py-2 shadow-inner">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                Artist
+              </p>
+              <p className="mt-1 min-h-5 text-sm font-semibold text-slate-950">
+                {activeArtwork?.f_name || 'Not provided'}
+              </p>
+            </div>
+            <div className="rounded-md bg-white/55 px-3 py-2 shadow-inner">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                Age
+              </p>
+              <p className="mt-1 min-h-5 text-sm font-semibold text-slate-950">
+                {activeArtwork?.age || '-'}
+              </p>
+            </div>
+          </>
+        )}
+      </div>
+
+      {activeArtwork?.description && (
+        <div className="rounded-md bg-white/55 px-3 py-2 shadow-inner">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+            Description
+          </p>
+          <p className="mt-1 text-sm leading-5 text-slate-700">
+            {activeArtwork.description}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function ArtworkSubmissionPreview({
+  artworks,
+  artworkDetailsMode = 'full',
+}: {
+  artworks: ArtworkWithPreview[];
+  artworkDetailsMode?: 'basic' | 'full';
+}) {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(() => {
+    const firstPreviewIndex = artworks.findIndex(
+      (artwork) => artwork.previewDataUrl,
+    );
+    return firstPreviewIndex >= 0 ? firstPreviewIndex : null;
+  });
+  const [touchStart, setTouchStart] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const uploadedArtworkIndexes = artworks
+    .map((artwork, index) => (artwork.previewDataUrl ? index : -1))
+    .filter((index) => index >= 0);
+  const uploadedArtworkCount = uploadedArtworkIndexes.length;
+  const activeArtwork =
+    selectedIndex === null ? undefined : artworks[selectedIndex];
+
+  useEffect(() => {
+    setSelectedIndex((current) => {
+      if (current !== null && artworks[current]?.previewDataUrl) return current;
+
+      const firstPreviewIndex = artworks.findIndex(
+        (artwork) => artwork.previewDataUrl,
+      );
+      return firstPreviewIndex >= 0 ? firstPreviewIndex : null;
+    });
+  }, [artworks]);
+
+  function step(direction: 1 | -1) {
+    if (selectedIndex === null || uploadedArtworkIndexes.length < 2) return;
+
+    const currentPosition = Math.max(
+      0,
+      uploadedArtworkIndexes.indexOf(selectedIndex),
+    );
+    const nextPosition =
+      (currentPosition + direction + uploadedArtworkIndexes.length) %
+      uploadedArtworkIndexes.length;
+    setSelectedIndex(uploadedArtworkIndexes[nextPosition] ?? selectedIndex);
+  }
+
+  return (
+    <div className="flex h-[clamp(520px,65vh,720px)] min-w-0 flex-col gap-3 rounded-lg border border-slate-200 bg-slate-100/80 p-3 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-slate-950">
+            {uploadedArtworkCount === 1 ? 'Artwork preview' : 'Artwork previews'}
+          </p>
+          <p className="text-xs leading-5 text-slate-500">
+            {uploadedArtworkCount} submitted
+          </p>
+        </div>
+      </div>
+
+      <ArtworkMural
+        artworks={artworks}
+        selectedIndex={selectedIndex}
+        touchStart={touchStart}
+        variant="workspace"
+        onSelectArtwork={setSelectedIndex}
+        onSwipe={(direction) => step(direction)}
+        onTouchStart={setTouchStart}
+      />
+
+      <ArtworkReadOnlyDetailsPane
+        activeArtwork={activeArtwork}
+        artworkCount={uploadedArtworkCount}
+        artworkDetailsMode={artworkDetailsMode}
+        onNext={() => step(1)}
+        onPrevious={() => step(-1)}
       />
     </div>
   );
@@ -609,9 +787,7 @@ export function ArtworkMuralWindow({
         }}
         onSwipe={(direction) => step(direction)}
         onTouchStart={setTouchStart}
-        onUnselect={
-          isSingleArtwork ? undefined : () => setSelectedIndex(null)
-        }
+        onUnselect={isSingleArtwork ? undefined : () => setSelectedIndex(null)}
       />
 
       <ArtworkDetailsPane

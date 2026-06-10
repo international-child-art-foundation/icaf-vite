@@ -64,8 +64,16 @@ function textOrClear(value: string, original: string | undefined) {
   return original ? '' : undefined;
 }
 
-export function ReviewArtworkQueue({ admin = false }: { admin?: boolean }) {
-  const [mode, setMode] = useState<QueueMode>(admin ? 'approved' : 'pending');
+export function ReviewArtworkQueue({
+  admin = false,
+  defaultMode,
+}: {
+  admin?: boolean;
+  defaultMode?: QueueMode;
+}) {
+  const [mode, setMode] = useState<QueueMode>(
+    defaultMode ?? (admin ? 'approved' : 'pending'),
+  );
   const [artworks, setArtworks] = useState<ArtworkListItem[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [editingId, setEditingId] = useState<string | null>(null);

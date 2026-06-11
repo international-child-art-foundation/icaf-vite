@@ -6,7 +6,7 @@ import { LeafIcon } from '@/shared/assets/icons/LeafIcon';
 import { HeartsIcon } from '@/shared/assets/icons/HeartsIcon';
 import { HeartHeadIcon } from '@/shared/assets/icons/HeartHeadIcon';
 import { SmallGroupIcon } from '@/shared/assets/icons/SmallGroupIcon';
-import artAsHealing from '@/modules/content/assets/healingArts/art-as-a-source-of-healing.mp4';
+import { largeMedia } from '@/shared/lib/largeMedia';
 
 export const GoalCards: IGoalCard[] = [
   {
@@ -86,7 +86,7 @@ export const ResourceLinks: IResourceLink[] = [
     title: 'Chile — Art as a Source of Healing',
     behavior: 'modal',
     fileType: 'Video',
-    href: artAsHealing,
+    href: largeMedia.artAsSourceOfHealing,
   },
   {
     id: 'sichuan-healing-arts',

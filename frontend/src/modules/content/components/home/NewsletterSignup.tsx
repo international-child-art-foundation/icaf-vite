@@ -121,7 +121,7 @@ export const NewsletterSignup = () => {
                     By signing up, you agree to our
                     <a
                       href="/documents/ICAF_Website_Privacy_Policy.pdf"
-                      className={'text-blue-600 visited:text-purple-600'}
+                      className={'text-blue-700 visited:text-purple-700'}
                       target="_blank"
                       rel="noopener noreferrer"
                     >

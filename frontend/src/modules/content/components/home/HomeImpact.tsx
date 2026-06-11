@@ -1,8 +1,8 @@
 import RedFirework from '@/shared/assets/images/RedFirework.svg';
 import { TitleDescriptionCard } from './TitleDescriptionCard';
 import { VideoWrapper } from '../shared/VideoWrapper';
-import IcafHomeVideo from '@/shared/assets/media/icaf-overview-cropped.mp4';
 import IcafHomeVideoThumb from '@/modules/content/assets/home/icaf-overview-cropped-thumb.webp';
+import { largeMedia } from '@/shared/lib/largeMedia';
 
 export const HomeImpact = () => {
   return (
@@ -46,7 +46,7 @@ export const HomeImpact = () => {
             lazyMode="idle"
             thumbnail={IcafHomeVideoThumb}
             curved={true}
-            src={IcafHomeVideo}
+            src={largeMedia.icafOverviewCropped}
           />
         </div>
         <div className="lg:col-span-10 lg:col-start-1 lg:row-span-2 lg:row-start-5">

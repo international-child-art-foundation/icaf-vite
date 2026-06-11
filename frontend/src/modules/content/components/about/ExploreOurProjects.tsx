@@ -3,13 +3,13 @@ import {
   CardContent,
   CardFooter,
 } from '../../../../shared/components/ui/card';
-import ICAFVideo from '@/shared/assets/media/icaf-overview-cropped.mp4';
 import Poster from '@/modules/content/assets/about/map-video-cover.webp';
 import { FavoriteSportLogo } from '@/modules/content/assets/about/FavoriteSportLogo';
 import { ChevronRight } from 'lucide-react';
 import { VRHeaven } from '@/modules/content/assets/about/VRHeaven';
 import { VideoWrapper } from '../shared/VideoWrapper';
 import { Link } from 'react-router-dom';
+import { largeMedia } from '@/shared/lib/largeMedia';
 
 /**
  *
@@ -57,7 +57,7 @@ export default function ExploreOurProjects() {
         </div>
         <div className="md:col-span-2 xl:col-span-2 xl:col-start-2 xl:row-span-2 xl:row-start-1">
           <VideoWrapper
-            src={ICAFVideo}
+            src={largeMedia.icafOverviewCropped}
             thumbnail={Poster}
             className="w-full rounded-2xl object-cover md:h-[600px] xl:h-full"
           />

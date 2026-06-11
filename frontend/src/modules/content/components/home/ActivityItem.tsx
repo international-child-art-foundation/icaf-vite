@@ -43,6 +43,8 @@ export const ActivityItem = ({ item, expanded, toggle }: ActivityItemProps) => {
         className="col-start-1 row-start-1 h-full w-full object-cover"
         src={item.img}
         alt=""
+        loading="lazy"
+        decoding="async"
       />
       <div
         className={`col-start-1 row-start-1 h-full w-full bg-black ${expanded ? 'opacity-40' : 'opacity-0'}`}

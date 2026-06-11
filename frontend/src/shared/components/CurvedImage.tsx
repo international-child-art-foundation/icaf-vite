@@ -11,6 +11,7 @@ interface CurvedImageProps {
   objectPosition?: string;
   scale?: number;
   height?: string;
+  priority?: boolean;
 }
 
 export const CurvedImage = ({
@@ -22,6 +23,7 @@ export const CurvedImage = ({
   objectPosition = 'center',
   scale = 1,
   height = '625px',
+  priority = false,
 }: CurvedImageProps) => {
   const clipPathId = useId();
   const clipPathClass = `clipped-image-${clipPathId}`;
@@ -61,8 +63,12 @@ export const CurvedImage = ({
           <img
             src={src}
             className={
-              'col-start-1 row-start-1 h-full w-full transition-opacity duration-500 ' +
-              (isLoaded ? 'opacity-100' : 'opacity-0')
+              'col-start-1 row-start-1 h-full w-full ' +
+              (priority
+                ? 'opacity-100'
+                : `transition-opacity duration-500 ${
+                    isLoaded ? 'opacity-100' : 'opacity-0'
+                  }`)
             }
             style={{
               objectFit,
@@ -72,7 +78,13 @@ export const CurvedImage = ({
             }}
             alt=""
             loading="eager"
-            onLoad={() => setIsLoaded(true)}
+            fetchPriority={priority ? 'high' : 'auto'}
+            decoding="async"
+            onLoad={() => {
+              if (!priority) {
+                setIsLoaded(true);
+              }
+            }}
           />
         </div>
 

@@ -7,6 +7,7 @@ interface BannerImageCarouselProps {
   items: BannerItem[];
   displayMs?: number;
   transitionMs?: number;
+  initialDelayMs?: number;
   className?: string;
 }
 
@@ -14,9 +15,17 @@ export function BannerImageCarousel({
   items,
   displayMs = 2000,
   transitionMs = 500,
+  initialDelayMs = 750,
   className = 'w-full',
 }: BannerImageCarouselProps) {
   const size = useWindowSize();
+  const [slideState, setSlideState] = React.useState<{
+    current: number;
+    previous: number | null;
+  }>({ current: 0, previous: null });
+  const [isNearViewport, setIsNearViewport] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const itemCount = items?.length ?? 0;
 
   let carousel_height;
   switch (true) {
@@ -34,39 +43,93 @@ export function BannerImageCarousel({
       break;
   }
 
-  if (!items?.length) return null;
-
-  const [index, setIndex] = React.useState(0);
+  React.useEffect(() => {
+    if (itemCount === 0) return;
+    if (slideState.current < itemCount) return;
+    setSlideState({ current: 0, previous: null });
+  }, [itemCount, slideState.current]);
 
   React.useEffect(() => {
-    const id = setInterval(
-      () => setIndex((p) => (p + 1) % items.length),
-      Math.max(200, displayMs + transitionMs),
+    const element = containerRef.current;
+    if (!element) return;
+
+    if (typeof IntersectionObserver === 'undefined') {
+      setIsNearViewport(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsNearViewport(entry.isIntersecting);
+      },
+      {
+        rootMargin: '300px 0px',
+        threshold: 0,
+      },
     );
-    return () => clearInterval(id);
-  }, [items.length, displayMs, transitionMs]);
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (!isNearViewport || itemCount < 2) return;
+
+    const advanceSlide = () => {
+      setSlideState((previousState) => ({
+        current: (previousState.current + 1) % itemCount,
+        previous: previousState.current,
+      }));
+    };
+
+    let intervalId: ReturnType<typeof setInterval> | undefined;
+    const timeoutId = setTimeout(() => {
+      advanceSlide();
+      intervalId = setInterval(
+        advanceSlide,
+        Math.max(200, displayMs + transitionMs),
+      );
+    }, Math.max(0, initialDelayMs));
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [isNearViewport, itemCount, displayMs, transitionMs, initialDelayMs]);
+
+  if (!itemCount) return null;
+
+  const index = slideState.current % itemCount;
 
   const layerBase =
     'absolute inset-0 transition-opacity ease-in-out motion-reduce:transition-none';
 
   return (
     <div
+      ref={containerRef}
       className={`breakout-w relative overflow-hidden ${className}`}
       style={{ height: carousel_height }}
     >
-      {items.map((item, i) => (
-        <div
-          key={item.id ?? i}
-          className={`${layerBase} ${i === index ? 'opacity-100' : 'opacity-0'}`}
-          style={{
-            height: carousel_height,
-            transitionDuration: `${transitionMs}ms`,
-          }}
-          aria-hidden={i !== index}
-        >
-          <BannerImage data={item} height={carousel_height} />
-        </div>
-      ))}
+      {items.map((item, i) => {
+        return (
+          <div
+            key={item.id ?? i}
+            className={`${layerBase} ${
+              i === index ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{
+              height: carousel_height,
+              transitionDuration: `${transitionMs}ms`,
+            }}
+            aria-hidden={i !== index}
+          >
+            <BannerImage data={item} height={carousel_height} />
+          </div>
+        );
+      })}
 
       <span className="sr-only">
         Slide {index + 1} of {items.length}

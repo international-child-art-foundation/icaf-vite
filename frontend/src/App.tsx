@@ -1,18 +1,16 @@
-import { Suspense, lazy, useEffect } from 'react';
+import { Suspense, lazy } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 
 import { sharedOpenGraph } from '@/shared/data/shared-metadata';
 import NavigationBar from '@/modules/content/components/shared/NavigationBar';
 import Footer from '@/modules/content/components/shared/Footer';
 import { routes } from '@/shared/data/routes';
-import { preloadAllRoutesOnce } from './preloadRoutes';
 
 import Home from './modules/content/pages/Home';
 import './index.css';
 import { GlobalContextProvider } from './modules/content/components/shared/GlobalContext';
 import GoogleAnalytics from './modules/content/components/shared/GoogleAnalytics';
 import CookieBanner from './modules/content/components/shared/CookieBanner';
-import { GallerySlideshowEntry } from './modules/content/components/gallery/GallerySlideshowEntry';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -120,21 +118,15 @@ const Gallery = lazy(() =>
     default: m.Gallery,
   })),
 );
+const GallerySlideshowEntry = lazy(() =>
+  import('./modules/content/components/gallery/GallerySlideshowEntry').then(
+    (m) => ({
+      default: m.GallerySlideshowEntry,
+    }),
+  ),
+);
 
 export default function App() {
-  useEffect(() => {
-    function handleLoad() {
-      preloadAllRoutesOnce();
-    }
-
-    if (document.readyState === 'complete') {
-      handleLoad();
-    } else {
-      window.addEventListener('load', handleLoad, { once: true });
-      return () => window.removeEventListener('load', handleLoad);
-    }
-  }, []);
-
   return (
     <GlobalContextProvider>
       <GoogleAnalytics

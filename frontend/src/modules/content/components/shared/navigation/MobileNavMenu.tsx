@@ -93,7 +93,11 @@ const MobileNavMenu = ({ onCloseMenu }: MobileNavMenuProps) => {
                   );
                 })}
                 {visitable && item.href && (
-                  <Link to={item.href} className="block" onClick={onCloseMenu}>
+                  <Link
+                    to={item.href}
+                    className="block"
+                    onClick={onCloseMenu}
+                  >
                     {item.label} Overview
                   </Link>
                 )}

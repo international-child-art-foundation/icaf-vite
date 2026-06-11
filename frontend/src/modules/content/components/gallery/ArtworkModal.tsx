@@ -173,7 +173,6 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
               <KudosControls
                 artwork={artworkData}
                 onKudosApplied={onKudosApplied}
-                showCounter={false}
               />
             </div>
           </div>
@@ -189,12 +188,6 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
             alt=""
             aria-hidden
             className="absolute inset-0 z-10 h-full w-full rounded-xl object-cover opacity-50 blur-3xl"
-          />
-          <KudosControls
-            artwork={artworkData}
-            className="absolute bottom-3 right-3 z-30"
-            onKudosApplied={onKudosApplied}
-            showButton={false}
           />
         </div>
       </div>
@@ -216,13 +209,6 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
             alt=""
             aria-hidden
             className="absolute inset-0 z-10 h-full w-full rounded-xl object-cover opacity-50 blur-3xl"
-          />
-          <KudosControls
-            artwork={artworkData}
-            className="absolute bottom-3 right-3 z-30"
-            compact
-            onKudosApplied={onKudosApplied}
-            showButton={false}
           />
         </div>
         {artistText && <p className="mt-5 text-xl font-bold">{artistText}</p>}
@@ -265,7 +251,6 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
               artwork={artworkData}
               compact
               onKudosApplied={onKudosApplied}
-              showCounter={false}
             />
           </div>
         </div>

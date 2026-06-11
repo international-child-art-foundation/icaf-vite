@@ -61,17 +61,25 @@ const ensureKudosStyles = () => {
       35% { opacity: 1; transform: scale(1.08) rotate(12deg); }
       100% { opacity: 0; transform: scale(1.45) rotate(42deg); }
     }
-    @keyframes icaf-kudos-outline-rotate {
-      to { transform: rotate(360deg); }
-    }
-    .icaf-kudos-outline-surface:not(:disabled):hover .icaf-kudos-outline-gradient {
-      animation: icaf-kudos-outline-rotate 1.15s linear infinite;
-    }
   `;
   document.head.appendChild(style);
 };
 
 const formatCount = (count: number) => count.toLocaleString('en-US');
+
+const formatCompactCount = (count: number) => {
+  if (count >= 1_000_000) {
+    const value = count / 1_000_000;
+    return `${value >= 10 ? Math.round(value) : value.toFixed(1)}M`;
+  }
+
+  if (count >= 1_000) {
+    const value = count / 1_000;
+    return `${value >= 10 ? Math.round(value) : value.toFixed(1)}K`;
+  }
+
+  return count.toString();
+};
 
 const readKudosCount = (response: unknown): number | undefined => {
   if (typeof response !== 'object' || response === null) return undefined;
@@ -152,8 +160,10 @@ export const KudosControls = ({
   }, [artId, status.alreadyGiven, status.remaining]);
 
   const disabled = Boolean(disabledReason) || isSending;
+  const usedDisabled = disabled && Boolean(artId);
+  const unavailableDisabled = disabled && !artId;
 
-  const animateCount = (nextCount: number) => {
+  const updateCount = (nextCount: number) => {
     setDisplayCount(nextCount);
     setAnimationKey((key) => key + 1);
   };
@@ -182,7 +192,7 @@ export const KudosControls = ({
 
     setErrorAnchor(null);
     setIsSending(true);
-    animateCount(displayCount + KUDOS_AMOUNT);
+    updateCount(displayCount + KUDOS_AMOUNT);
     window.dispatchEvent(
       new CustomEvent(KUDOS_COUNT_EVENT, {
         detail: {
@@ -198,13 +208,13 @@ export const KudosControls = ({
       const response: unknown = await giveArtworkKudos(artId);
       const nextKudosCount = readKudosCount(response);
       if (nextKudosCount !== undefined) {
-        animateCount(nextKudosCount);
+        updateCount(nextKudosCount);
       }
     } catch {
       restoreDailyKudos(artId);
       setStatus(getKudosStatus(artId));
       showErrorTooltip();
-      animateCount(Math.max(0, displayCount));
+      updateCount(Math.max(0, displayCount));
       onKudosApplied?.(artId, -KUDOS_AMOUNT);
     } finally {
       setIsSending(false);
@@ -231,7 +241,7 @@ export const KudosControls = ({
           transformOrigin: '50% 55%',
         }}
       >
-        {formatCount(displayCount)}
+        {formatCompactCount(displayCount)}
       </span>
       {animationKey > 0 && (
         <>
@@ -252,6 +262,49 @@ export const KudosControls = ({
     </div>
   ) : null;
 
+  const buttonCounter = (
+    <span
+      className={cn(
+        'relative flex min-w-0 items-center justify-center self-stretch overflow-hidden border-l border-neutral-200/80 bg-white px-2 font-black text-neutral-900 transition-colors group-hover:bg-white',
+        layout === 'nametag' &&
+          'border-neutral-200 bg-white text-neutral-800 group-hover:bg-white',
+        compact && 'px-1.5 text-[11px]',
+        disabled &&
+          'border-neutral-200/80 bg-white text-neutral-800 group-hover:bg-white',
+        counterClassName,
+      )}
+      aria-label={`${formatCount(displayCount)} kudos`}
+    >
+      <span
+        key={animationKey}
+        className="tabular-nums"
+        style={{
+          animation:
+            animationKey > 0 ? 'icaf-kudos-roll 620ms ease-out both' : '',
+          transformOrigin: '50% 55%',
+        }}
+      >
+        {formatCompactCount(displayCount)}
+      </span>
+      {animationKey > 0 && (
+        <>
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute left-1/2 top-1/2 rounded-full bg-[#FBB22E] px-1.5 py-0.5 text-[10px] font-black text-neutral-950"
+            style={{ animation: 'icaf-kudos-pop 900ms ease-out both' }}
+          >
+            +{KUDOS_AMOUNT}
+          </span>
+          <Sparkles
+            aria-hidden="true"
+            className="pointer-events-none absolute right-1 top-1 h-3.5 w-3.5 text-[#FBB22E]"
+            style={{ animation: 'icaf-kudos-spark 760ms ease-out both' }}
+          />
+        </>
+      )}
+    </span>
+  );
+
   const button = showButton ? (
     <button
       ref={buttonRef}
@@ -266,37 +319,61 @@ export const KudosControls = ({
         'icaf-kudos-outline-surface group relative isolate inline-flex min-h-11 w-full items-stretch justify-center overflow-hidden rounded-md p-[3px] text-center text-sm font-bold text-black shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]',
         layout === 'nametag' &&
           'border border-neutral-200 bg-white p-0 text-neutral-900 shadow-sm hover:shadow-lg',
-        disabled &&
-          'cursor-not-allowed bg-neutral-300 text-neutral-600 shadow-none hover:translate-y-0 hover:shadow-none',
+        usedDisabled &&
+          'cursor-default text-neutral-600 shadow-sm duration-700 hover:translate-y-0 hover:shadow-sm active:scale-100',
+        layout === 'nametag' &&
+          usedDisabled &&
+          'border-neutral-200/60 bg-white/90 shadow-sm hover:shadow-sm',
+        unavailableDisabled &&
+          'cursor-not-allowed text-neutral-500 shadow-none hover:translate-y-0 hover:shadow-none',
         compact && 'min-h-9 text-xs',
       )}
     >
-      {!disabled && layout !== 'nametag' && (
+      {layout !== 'nametag' && (
         <span
           aria-hidden="true"
-          className="icaf-kudos-outline-gradient absolute -inset-16"
+          className={cn(
+            'icaf-kudos-outline-gradient absolute -inset-16 opacity-100 transition-opacity duration-700',
+            usedDisabled && 'opacity-35',
+            unavailableDisabled && 'opacity-20',
+          )}
           style={{ background: GALLERY_OUTLINE_ROTATING_GRADIENT }}
         />
       )}
       <span
         className={cn(
-          'relative inline-flex min-h-[calc(2.75rem-6px)] w-full items-center justify-center gap-1.5 rounded-[5px] bg-white px-4 py-2 text-neutral-950 transition-colors group-hover:bg-white/90',
+          'font-open-sans relative grid min-h-[calc(2.75rem-6px)] w-full grid-cols-[3fr_1fr] overflow-hidden rounded-[5px] bg-white text-neutral-950 transition-colors duration-700',
           layout === 'nametag' &&
             'min-h-[calc(2.75rem-2px)] rounded-[5px] bg-white text-neutral-900 group-hover:bg-neutral-50',
-          compact && 'min-h-[calc(2.25rem-6px)] px-3 py-1',
-          layout === 'nametag' &&
-            compact &&
-            'min-h-[calc(2.25rem-2px)]',
-          disabled &&
-            'bg-neutral-300 text-neutral-600 group-hover:bg-neutral-300',
+          compact && 'min-h-[calc(2.25rem-6px)]',
+          layout === 'nametag' && compact && 'min-h-[calc(2.25rem-2px)]',
         )}
       >
-        <Sparkles className="h-4 w-4" />
-        {status.alreadyGiven
-          ? 'Kudos sent'
-          : status.remaining < KUDOS_AMOUNT
-            ? 'Spent today'
-            : 'Give kudos!'}
+        <span
+          className={cn(
+            'flex min-w-0 items-center justify-center gap-1.5 bg-white px-3 py-2 transition-colors duration-300 group-hover:bg-white/90',
+            usedDisabled &&
+              'bg-neutral-100/80 text-neutral-500 duration-700 group-hover:bg-neutral-100/80',
+            unavailableDisabled &&
+              'bg-neutral-200/80 text-neutral-500 group-hover:bg-neutral-200/80',
+            compact && 'gap-1 px-2 py-1',
+          )}
+        >
+          <Sparkles
+            className={cn(
+              'h-4 w-4 shrink-0 transition-opacity duration-700',
+              usedDisabled && 'opacity-55',
+            )}
+          />
+          <span className="min-w-0 truncate">
+            {status.alreadyGiven
+              ? 'Kudos sent'
+              : status.remaining < KUDOS_AMOUNT
+                ? 'Spent today'
+                : 'Give kudos!'}
+          </span>
+        </span>
+        {buttonCounter}
       </span>
     </button>
   ) : null;
@@ -319,25 +396,10 @@ export const KudosControls = ({
         )
       : null;
 
-  if (showButton && showCounter) {
-    return (
-      <div
-        className={cn(
-          'grid w-full grid-cols-[7fr_3fr] items-stretch gap-2',
-          className,
-        )}
-      >
-        {button}
-        <div className="flex items-center justify-end">{counter}</div>
-        {errorTooltip}
-      </div>
-    );
-  }
-
   return (
     <div className={className}>
       {button}
-      {counter}
+      {!showButton && counter}
       {errorTooltip}
     </div>
   );

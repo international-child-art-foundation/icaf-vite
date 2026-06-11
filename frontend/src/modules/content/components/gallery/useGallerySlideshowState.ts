@@ -27,9 +27,18 @@ export const useGallerySlideshowState = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [uiState, setUiState] = useState<'full' | 'dim' | 'hidden'>('full');
 
-  const { artworks: rawArtworks } = useOutletContext<IGalleryContext>();
+  const {
+    artworks: rawArtworks,
+    onArtworkKudos,
+    preserveOrder = false,
+  } = useOutletContext<IGalleryContext>();
   const [artworks, setArtworks] = useState<TResolvedArtwork[]>(() =>
-    [...rawArtworks].sort(() => Math.random() - 0.5),
+    preserveOrder
+      ? [...rawArtworks]
+      : [...rawArtworks].sort(() => Math.random() - 0.5),
+  );
+  const rawArtworksSignatureRef = useRef(
+    `${preserveOrder}:${rawArtworks.map((artwork) => artwork.id).join('|')}`,
   );
   const navigate = useNavigate();
 
@@ -39,8 +48,27 @@ export const useGallerySlideshowState = () => {
   const onClose = useCallback(() => void navigate('/gallery'), [navigate]);
 
   useEffect(() => {
-    const shuffled = [...rawArtworks].sort(() => Math.random() - 0.5);
-    setArtworks(shuffled);
+    const nextSignature = `${preserveOrder}:${rawArtworks
+      .map((artwork) => artwork.id)
+      .join('|')}`;
+
+    if (rawArtworksSignatureRef.current === nextSignature) {
+      const nextById = new Map(rawArtworks.map((artwork) => [artwork.id, artwork]));
+      setArtworks((current) =>
+        current.map((artwork) => ({
+          ...artwork,
+          kudos_count:
+            nextById.get(artwork.id)?.kudos_count ?? artwork.kudos_count,
+        })),
+      );
+      return;
+    }
+
+    rawArtworksSignatureRef.current = nextSignature;
+    const nextArtworks = preserveOrder
+      ? [...rawArtworks]
+      : [...rawArtworks].sort(() => Math.random() - 0.5);
+    setArtworks(nextArtworks);
     setSlotA({ artworkIdx: 0, animKey: 0 });
     setSlotB({ artworkIdx: 0, animKey: 0 });
     topSlotRef.current = 'a';
@@ -48,7 +76,7 @@ export const useGallerySlideshowState = () => {
     advanceCountRef.current = 0;
     currentIdxRef.current = 0;
     setCurrentIdx(0);
-  }, [rawArtworks]);
+  }, [preserveOrder, rawArtworks]);
 
   const advanceTo = useCallback((nextIdx: number) => {
     advanceCountRef.current++;
@@ -75,6 +103,26 @@ export const useGallerySlideshowState = () => {
       advanceTo(nextIdx);
     },
     [artworks.length, advanceTo],
+  );
+
+  const applyArtworkKudos = useCallback(
+    (artId: string, amount: number) => {
+      setArtworks((current) =>
+        current.map((artwork) =>
+          artwork.art_id === artId
+            ? {
+                ...artwork,
+                kudos_count: Math.max(
+                  0,
+                  (artwork.kudos_count ?? 0) + amount,
+                ),
+              }
+            : artwork,
+        ),
+      );
+      onArtworkKudos?.(artId, amount);
+    },
+    [onArtworkKudos],
   );
 
   const resetUiTimer = useCallback(() => {
@@ -123,6 +171,7 @@ export const useGallerySlideshowState = () => {
     uiState,
     setUiState,
     resetUiTimer,
+    applyArtworkKudos,
     artworkShareUrl,
     onClose,
   };

@@ -1,0 +1,344 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { Sparkles } from 'lucide-react';
+import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
+import { giveArtworkKudos } from '@/api/public';
+import { cn } from '@/utils/utils';
+import {
+  consumeDailyKudos,
+  getKudosStatus,
+  KUDOS_AMOUNT,
+  KUDOS_STORAGE_EVENT,
+  restoreDailyKudos,
+} from './kudosStorage';
+import { GALLERY_OUTLINE_ROTATING_GRADIENT } from './galleryOutline';
+
+type KudosControlsProps = {
+  artwork: TResolvedArtwork;
+  className?: string;
+  compact?: boolean;
+  counterClassName?: string;
+  layout?: 'modal' | 'nametag';
+  onKudosApplied?: (artId: string, amount: number) => void;
+  showButton?: boolean;
+  showCounter?: boolean;
+};
+
+const KUDOS_STYLE_ID = 'icaf-kudos-styles';
+const KUDOS_COUNT_EVENT = 'icaf:kudos-count';
+
+const createControlId = () => {
+  if (
+    typeof crypto !== 'undefined' &&
+    typeof crypto.randomUUID === 'function'
+  ) {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random()}`;
+};
+
+const ensureKudosStyles = () => {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById(KUDOS_STYLE_ID)) return;
+
+  const style = document.createElement('style');
+  style.id = KUDOS_STYLE_ID;
+  style.textContent = `
+    @keyframes icaf-kudos-roll {
+      0% { transform: rotateX(0deg) scale(1); }
+      42% { transform: rotateX(170deg) scale(1.2); }
+      74% { transform: rotateX(330deg) scale(0.98); }
+      100% { transform: rotateX(360deg) scale(1); }
+    }
+    @keyframes icaf-kudos-pop {
+      0% { opacity: 0; transform: translate(-50%, 8px) scale(0.6) rotate(-8deg); }
+      25% { opacity: 1; transform: translate(-50%, -8px) scale(1.05) rotate(5deg); }
+      100% { opacity: 0; transform: translate(-50%, -34px) scale(0.85) rotate(14deg); }
+    }
+    @keyframes icaf-kudos-spark {
+      0% { opacity: 0; transform: scale(0.4) rotate(0deg); }
+      35% { opacity: 1; transform: scale(1.08) rotate(12deg); }
+      100% { opacity: 0; transform: scale(1.45) rotate(42deg); }
+    }
+    @keyframes icaf-kudos-outline-rotate {
+      to { transform: rotate(360deg); }
+    }
+    .icaf-kudos-outline-surface:not(:disabled):hover .icaf-kudos-outline-gradient {
+      animation: icaf-kudos-outline-rotate 1.15s linear infinite;
+    }
+  `;
+  document.head.appendChild(style);
+};
+
+const formatCount = (count: number) => count.toLocaleString('en-US');
+
+const readKudosCount = (response: unknown): number | undefined => {
+  if (typeof response !== 'object' || response === null) return undefined;
+  if (!('kudos_count' in response)) return undefined;
+
+  const value = response.kudos_count;
+  return typeof value === 'number' ? value : undefined;
+};
+
+export const KudosControls = ({
+  artwork,
+  className,
+  compact = false,
+  counterClassName,
+  layout = 'modal',
+  onKudosApplied,
+  showButton = true,
+  showCounter = true,
+}: KudosControlsProps) => {
+  const artId = artwork.art_id;
+  const baseCount = artwork.kudos_count ?? 0;
+  const [displayCount, setDisplayCount] = useState(baseCount);
+  const [animationKey, setAnimationKey] = useState(0);
+  const [isSending, setIsSending] = useState(false);
+  const [status, setStatus] = useState(() => getKudosStatus(artId));
+  const [errorAnchor, setErrorAnchor] = useState<DOMRect | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const controlIdRef = useRef(createControlId());
+
+  useEffect(() => {
+    ensureKudosStyles();
+  }, []);
+
+  useEffect(() => {
+    setDisplayCount(baseCount);
+  }, [baseCount, artId]);
+
+  useEffect(() => {
+    const updateStatus = () => setStatus(getKudosStatus(artId));
+    updateStatus();
+    window.addEventListener(KUDOS_STORAGE_EVENT, updateStatus);
+    window.addEventListener('storage', updateStatus);
+    return () => {
+      window.removeEventListener(KUDOS_STORAGE_EVENT, updateStatus);
+      window.removeEventListener('storage', updateStatus);
+    };
+  }, [artId]);
+
+  useEffect(() => {
+    const handleCountEvent = (event: Event) => {
+      const detail = (event as CustomEvent).detail as
+        | { amount?: number; artId?: string; source?: string }
+        | undefined;
+
+      if (
+        !detail ||
+        detail.artId !== artId ||
+        detail.source === controlIdRef.current ||
+        typeof detail.amount !== 'number'
+      ) {
+        return;
+      }
+
+      setDisplayCount((current) => Math.max(0, current + (detail.amount || 0)));
+      setAnimationKey((key) => key + 1);
+    };
+
+    window.addEventListener(KUDOS_COUNT_EVENT, handleCountEvent);
+    return () =>
+      window.removeEventListener(KUDOS_COUNT_EVENT, handleCountEvent);
+  }, [artId]);
+
+  const disabledReason = useMemo(() => {
+    if (!artId) return 'Kudos are only available for submitted artworks';
+    if (status.alreadyGiven) return 'Kudos sent today';
+    if (status.remaining < KUDOS_AMOUNT) return 'Daily kudos spent';
+    return null;
+  }, [artId, status.alreadyGiven, status.remaining]);
+
+  const disabled = Boolean(disabledReason) || isSending;
+
+  const animateCount = (nextCount: number) => {
+    setDisplayCount(nextCount);
+    setAnimationKey((key) => key + 1);
+  };
+
+  const showErrorTooltip = () => {
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (rect) setErrorAnchor(rect);
+  };
+
+  useEffect(() => {
+    if (!errorAnchor) return;
+    const timer = window.setTimeout(() => setErrorAnchor(null), 3000);
+    return () => window.clearTimeout(timer);
+  }, [errorAnchor]);
+
+  const handleGiveKudos = async () => {
+    if (!artId || disabled) return;
+
+    const consumeResult = consumeDailyKudos(artId);
+    setStatus({
+      alreadyGiven: consumeResult.alreadyGiven,
+      remaining: consumeResult.remaining,
+    });
+
+    if (!consumeResult.ok) return;
+
+    setErrorAnchor(null);
+    setIsSending(true);
+    animateCount(displayCount + KUDOS_AMOUNT);
+    window.dispatchEvent(
+      new CustomEvent(KUDOS_COUNT_EVENT, {
+        detail: {
+          amount: KUDOS_AMOUNT,
+          artId,
+          source: controlIdRef.current,
+        },
+      }),
+    );
+    onKudosApplied?.(artId, KUDOS_AMOUNT);
+
+    try {
+      const response: unknown = await giveArtworkKudos(artId);
+      const nextKudosCount = readKudosCount(response);
+      if (nextKudosCount !== undefined) {
+        animateCount(nextKudosCount);
+      }
+    } catch {
+      restoreDailyKudos(artId);
+      setStatus(getKudosStatus(artId));
+      showErrorTooltip();
+      animateCount(Math.max(0, displayCount));
+      onKudosApplied?.(artId, -KUDOS_AMOUNT);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const counter = showCounter ? (
+    <div
+      className={cn(
+        'relative isolate inline-flex min-w-[74px] items-center justify-center overflow-hidden rounded-full border border-white/45 bg-white/90 px-3 py-2 text-sm font-black text-neutral-900 shadow-lg backdrop-blur',
+        layout === 'nametag' &&
+          'min-w-[70px] border-neutral-200 bg-white text-neutral-800 shadow-sm',
+        compact && 'min-w-[62px] px-2.5 py-1.5 text-xs',
+        counterClassName,
+      )}
+      aria-label={`${formatCount(displayCount)} kudos`}
+    >
+      <span
+        key={animationKey}
+        className="tabular-nums"
+        style={{
+          animation:
+            animationKey > 0 ? 'icaf-kudos-roll 620ms ease-out both' : '',
+          transformOrigin: '50% 55%',
+        }}
+      >
+        {formatCount(displayCount)}
+      </span>
+      {animationKey > 0 && (
+        <>
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute left-1/2 top-1/2 rounded-full bg-[#FBB22E] px-2 py-0.5 text-[11px] font-black text-neutral-950"
+            style={{ animation: 'icaf-kudos-pop 900ms ease-out both' }}
+          >
+            +{KUDOS_AMOUNT}
+          </span>
+          <Sparkles
+            aria-hidden="true"
+            className="pointer-events-none absolute right-1 top-0 h-4 w-4 text-[#FBB22E]"
+            style={{ animation: 'icaf-kudos-spark 760ms ease-out both' }}
+          />
+        </>
+      )}
+    </div>
+  ) : null;
+
+  const button = showButton ? (
+    <button
+      ref={buttonRef}
+      type="button"
+      disabled={disabled}
+      title={disabledReason ?? `${status.remaining} kudos left today`}
+      onClick={(e) => {
+        e.stopPropagation();
+        void handleGiveKudos();
+      }}
+      className={cn(
+        'icaf-kudos-outline-surface group relative isolate inline-flex min-h-11 w-full items-stretch justify-center overflow-hidden rounded-md p-[3px] text-center text-sm font-bold text-black shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]',
+        layout === 'nametag' &&
+          'border border-neutral-200 bg-white p-0 text-neutral-900 shadow-sm hover:shadow-lg',
+        disabled &&
+          'cursor-not-allowed bg-neutral-300 text-neutral-600 shadow-none hover:translate-y-0 hover:shadow-none',
+        compact && 'min-h-9 text-xs',
+      )}
+    >
+      {!disabled && layout !== 'nametag' && (
+        <span
+          aria-hidden="true"
+          className="icaf-kudos-outline-gradient absolute -inset-16"
+          style={{ background: GALLERY_OUTLINE_ROTATING_GRADIENT }}
+        />
+      )}
+      <span
+        className={cn(
+          'relative inline-flex min-h-[calc(2.75rem-6px)] w-full items-center justify-center gap-1.5 rounded-[5px] bg-white px-4 py-2 text-neutral-950 transition-colors group-hover:bg-white/90',
+          layout === 'nametag' &&
+            'min-h-[calc(2.75rem-2px)] rounded-[5px] bg-white text-neutral-900 group-hover:bg-neutral-50',
+          compact && 'min-h-[calc(2.25rem-6px)] px-3 py-1',
+          layout === 'nametag' &&
+            compact &&
+            'min-h-[calc(2.25rem-2px)]',
+          disabled &&
+            'bg-neutral-300 text-neutral-600 group-hover:bg-neutral-300',
+        )}
+      >
+        <Sparkles className="h-4 w-4" />
+        {status.alreadyGiven
+          ? 'Kudos sent'
+          : status.remaining < KUDOS_AMOUNT
+            ? 'Spent today'
+            : 'Give kudos!'}
+      </span>
+    </button>
+  ) : null;
+
+  const errorTooltip =
+    errorAnchor && typeof document !== 'undefined'
+      ? createPortal(
+          <div
+            className="pointer-events-none fixed z-[10000] max-w-[260px] rounded-md bg-neutral-950 px-3 py-2 text-center text-xs font-semibold text-white shadow-xl"
+            style={{
+              left: errorAnchor.left + errorAnchor.width / 2,
+              top: errorAnchor.bottom + 8,
+              transform: 'translateX(-50%)',
+            }}
+            role="status"
+          >
+            Kudos could not be sent. Try again in a moment.
+          </div>,
+          document.body,
+        )
+      : null;
+
+  if (showButton && showCounter) {
+    return (
+      <div
+        className={cn(
+          'grid w-full grid-cols-[7fr_3fr] items-stretch gap-2',
+          className,
+        )}
+      >
+        {button}
+        <div className="flex items-center justify-end">{counter}</div>
+        {errorTooltip}
+      </div>
+    );
+  }
+
+  return (
+    <div className={className}>
+      {button}
+      {counter}
+      {errorTooltip}
+    </div>
+  );
+};

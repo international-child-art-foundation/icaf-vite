@@ -5,8 +5,13 @@ import {
 } from '@/utils/galleryProcessing';
 import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
 import { DescriptionScroll } from './DescriptionScroll';
+import { GALLERY_OUTLINE_GRADIENT } from './galleryOutline';
+import { KudosControls } from './KudosControls';
 
-export const galleryNametag = (artwork: TResolvedArtwork) => {
+export const galleryNametag = (
+  artwork: TResolvedArtwork,
+  onKudosApplied?: (artId: string, amount: number) => void,
+) => {
   const name = getArtistDisplayName(artwork.artists ?? [], artwork.lastInitial);
   const theme = [artwork.theme_family, artwork.theme_instance]
     .filter(Boolean)
@@ -19,8 +24,7 @@ export const galleryNametag = (artwork: TResolvedArtwork) => {
     <div
       className="overflow-hidden rounded-xl"
       style={{
-        backgroundImage:
-          'linear-gradient(to top right, #0286C3, #168C39, #FBB22E, #EE2F4D, #834CAD)',
+        backgroundImage: GALLERY_OUTLINE_GRADIENT,
       }}
     >
       <div className="m-[3px] rounded-xl bg-white px-4 py-3 text-neutral-700">
@@ -57,6 +61,13 @@ export const galleryNametag = (artwork: TResolvedArtwork) => {
             />
           </>
         )}
+        <KudosControls
+          artwork={artwork}
+          className="mt-3"
+          compact
+          layout="nametag"
+          onKudosApplied={onKudosApplied}
+        />
       </div>
     </div>
   );

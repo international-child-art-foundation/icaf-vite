@@ -15,6 +15,7 @@ import type {
   CreateGroupRequest,
   GuestCreateGroupRequest,
   SubmitGroupResponse,
+  VoteArtworkResponse,
 } from '@icaf/shared';
 
 import {
@@ -56,6 +57,9 @@ const isSuccessfulTakedownResponse = (response: unknown): boolean =>
   hasApiSuccess(response) &&
   hasStringProperty(response, 'tdr_id') &&
   hasNumberProperty(response, 'scheduled_execution_at');
+
+const isArtworkKudosResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) && hasStringProperty(response, 'art_id');
 
 const isMagazinesResponse = (response: unknown): boolean =>
   hasArrayProperty(response, 'magazines');
@@ -113,6 +117,13 @@ export function createGroup(request: CreateGroupRequest): Promise<SubmitGroupRes
 export function getArtwork(artId: string): Promise<GetArtworkResponse> {
   return apiRequest<GetArtworkResponse>(apiEndpoints.public.artwork(artId), {
     validate: isArtworkResponse,
+  });
+}
+
+export function giveArtworkKudos(artId: string): Promise<VoteArtworkResponse> {
+  return apiRequest<VoteArtworkResponse>(apiEndpoints.public.artworkKudos(artId), {
+    method: 'POST',
+    validate: isArtworkKudosResponse,
   });
 }
 

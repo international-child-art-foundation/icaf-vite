@@ -191,6 +191,7 @@ export interface UpdateArtworkResponse {
 export interface VoteArtworkResponse {
     success: true;
     art_id: string;
+    kudos_count?: number;
 }
 
 export interface DeleteAllArtworksResponse {

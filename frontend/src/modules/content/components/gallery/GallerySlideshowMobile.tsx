@@ -55,6 +55,7 @@ export const GallerySlideshowMobile = () => {
     advance,
     uiState,
     resetUiTimer,
+    applyArtworkKudos,
     artworkShareUrl,
     onClose,
   } = useGallerySlideshowState();
@@ -514,6 +515,7 @@ export const GallerySlideshowMobile = () => {
               shareVisible={shareVisible}
               textVisible={textVisible}
               descExpanded={descExpanded}
+              onKudosApplied={applyArtworkKudos}
             />
           )}
         </div>

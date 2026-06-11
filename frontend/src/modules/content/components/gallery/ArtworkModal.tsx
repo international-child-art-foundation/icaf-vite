@@ -6,6 +6,7 @@ import {
   formatArtworkByline,
   getArtistDisplayName,
 } from '@/utils/galleryProcessing';
+import { KudosControls } from './KudosControls';
 import { SocialShare } from './SocialShare';
 
 type ArtworkModalProps = {
@@ -17,6 +18,7 @@ type ArtworkModalProps = {
   isHorizontal: boolean;
   closeModal: () => void;
   getShareUrl: () => string;
+  onKudosApplied?: (artId: string, amount: number) => void;
 };
 
 const ArtworkModal: React.FC<ArtworkModalProps> = ({
@@ -28,6 +30,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
   isHorizontal,
   closeModal,
   getShareUrl,
+  onKudosApplied,
 }) => {
   const [artworkData, setArtworkData] = useState<TResolvedArtwork | undefined>(
     undefined,
@@ -82,6 +85,11 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
       return;
     }
 
+    if (artworkData?.id === data?.id) {
+      setArtworkData(data);
+      return;
+    }
+
     const content = modalContentRef.current;
     gsap.set(content, { opacity: 0 });
     setArtworkData(data);
@@ -90,7 +98,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
         gsap.to(content, { opacity: 1, duration: 0.2, ease: 'power2.out' });
       }),
     );
-  }, [id, modalState, artworks]);
+  }, [id, modalState, artworks, artworkData?.id]);
 
   if (!modalState) return null;
 
@@ -153,14 +161,21 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
           <div className="mt-auto pt-6">
             <p className="text-xl font-semibold">Share this post</p>
             <SocialShare shareUrl={getShareUrl()} />
-            <a
-              href={artworkData.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-primary text-text-inverse mt-4 block w-full rounded p-4 text-center text-base"
-            >
-              View full image
-            </a>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <a
+                href={artworkData.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-primary text-text-inverse flex min-h-11 items-center justify-center rounded px-4 py-2.5 text-center text-base"
+              >
+                View full image
+              </a>
+              <KudosControls
+                artwork={artworkData}
+                onKudosApplied={onKudosApplied}
+                showCounter={false}
+              />
+            </div>
           </div>
         </div>
         <div className="relative flex min-h-[400px] flex-shrink items-center justify-center overflow-hidden rounded-xl">
@@ -174,6 +189,12 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
             alt=""
             aria-hidden
             className="absolute inset-0 z-10 h-full w-full rounded-xl object-cover opacity-50 blur-3xl"
+          />
+          <KudosControls
+            artwork={artworkData}
+            className="absolute bottom-3 right-3 z-30"
+            onKudosApplied={onKudosApplied}
+            showButton={false}
           />
         </div>
       </div>
@@ -195,6 +216,13 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
             alt=""
             aria-hidden
             className="absolute inset-0 z-10 h-full w-full rounded-xl object-cover opacity-50 blur-3xl"
+          />
+          <KudosControls
+            artwork={artworkData}
+            className="absolute bottom-3 right-3 z-30"
+            compact
+            onKudosApplied={onKudosApplied}
+            showButton={false}
           />
         </div>
         {artistText && <p className="mt-5 text-xl font-bold">{artistText}</p>}
@@ -224,14 +252,22 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
         <div className="mt-4">
           <p className="text-xl font-semibold">Share this post</p>
           <SocialShare shareUrl={getShareUrl()} />
-          <a
-            href={artworkData.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-primary text-text-inverse mt-4 block w-full rounded p-4 text-center text-base"
-          >
-            View full image
-          </a>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <a
+              href={artworkData.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-primary text-text-inverse flex min-h-9 items-center justify-center rounded px-3 py-1.5 text-center text-sm"
+            >
+              View full image
+            </a>
+            <KudosControls
+              artwork={artworkData}
+              compact
+              onKudosApplied={onKudosApplied}
+              showCounter={false}
+            />
+          </div>
         </div>
       </div>
     );

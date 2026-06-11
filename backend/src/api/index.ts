@@ -146,6 +146,7 @@ const routes: Route[] = [
   { method: "GET", path: "/api/gallery/groups", handler: galleryGroups },
   { method: "GET", path: "/api/gallery/groups/family/{family}", handler: galleryGroups },
   { method: "GET", path: "/api/gallery/groups/family/{family}/instance/{instance}", handler: galleryGroups },
+  { method: "POST", path: "/api/artworks/{art_id}/kudos", handler: voteArtwork },
   { method: "GET", path: "/api/unsubscribe/artwork", handler: unsubscribeArtworkEmails },
 
   { method: "POST", path: "/api/auth/default-registration", handler: defaultRegistration },

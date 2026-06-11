@@ -22,7 +22,7 @@ const ArtworkCard = ({ artwork, openModal, actionSlot }: ArtworkCardProps) => {
   return (
     <div id={id} className="relative h-full w-full rounded-lg">
       <div className="rounded-lg shadow-md shadow-gray-400">
-        <section className="relative h-32 w-full select-none overflow-hidden rounded-t-lg sm:h-52 md:h-60 xl:h-52">
+        <section className="relative h-48 w-full select-none overflow-hidden rounded-t-lg sm:h-60 md:h-72">
           <img
             src={thumbUrl}
             alt={artistText || 'Artwork'}
@@ -43,7 +43,7 @@ const ArtworkCard = ({ artwork, openModal, actionSlot }: ArtworkCardProps) => {
           )} */}
         </section>
 
-        <section className="relative flex w-full flex-col gap-4 rounded-b-lg p-4 py-6">
+        <section className="relative flex w-full flex-col gap-4 rounded-b-lg p-4">
           <div>
             <p className="truncate text-base font-semibold xl:text-xl">
               {artistText}

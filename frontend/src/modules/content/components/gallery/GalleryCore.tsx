@@ -7,7 +7,7 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom';
-import { ChevronDown, LoaderCircle, Play, X } from 'lucide-react';
+import { Image, LoaderCircle, Play, Users, X } from 'lucide-react';
 import type { GroupListItem, ThemeListItem } from '@icaf/shared';
 import { listGalleryThemes } from '@/api/public';
 import type {
@@ -19,8 +19,14 @@ import ArtworkModal from './ArtworkModal';
 import { FilterProvider, useFilters } from './FilterContext';
 import { GalleryGroupCard } from './GalleryGroupCard';
 import { GalleryThemeCard } from './GalleryThemeCard';
-import { buildThemeFamilies } from './themeFamilies';
+import {
+  buildThemeFamilies,
+  buildThemeMenuItems,
+  ThemeFamilyCardModel,
+  type VirtualThemeMenuItem,
+} from './themeFamilies';
 import { filterThemesForSurface, THEME_SURFACES } from './themeVisibility';
+import { galleryVirtualThemeItems } from './virtualThemeItems';
 import {
   fetchAllGalleryArtworks,
   fetchAllGalleryGroups,
@@ -134,6 +140,70 @@ function formatThemeFamilyLabel(themeFamily: string) {
     .join(' ');
 }
 
+type GalleryViewToggleProps = {
+  viewMode: GalleryViewMode;
+  onToggle: () => void;
+};
+
+function GalleryViewToggle({ viewMode, onToggle }: GalleryViewToggleProps) {
+  const isGroup = viewMode === 'group';
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      data-gallery-control
+      aria-label={`Switch to ${isGroup ? 'individual' : 'group'} view`}
+      className={`group relative h-[80px] w-[188px] flex-none overflow-hidden rounded-md p-3 text-left shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-[0.98] ${
+        isGroup ? 'text-neutral-950' : 'text-white'
+      }`}
+    >
+      <span
+        className={`absolute inset-0 transition-opacity duration-500 ${
+          isGroup ? 'opacity-0' : 'opacity-100'
+        } from-secondary-blue/80 to-primary/100 bg-gradient-to-br`}
+      />
+      <span
+        className={`absolute inset-0 transition-opacity duration-500 ${
+          isGroup ? 'opacity-100' : 'opacity-0'
+        } from-secondary-yellow via-tertiary-yellow to-primary-alt bg-gradient-to-br`}
+      />
+      <span className="relative z-10 flex h-full items-center gap-3">
+        <span
+          className={`relative h-10 w-10 flex-none overflow-hidden rounded-full shadow-sm transition-colors duration-300 ${
+            isGroup ? 'bg-white/60 text-neutral-950' : 'bg-white/20 text-white'
+          }`}
+        >
+          <Image
+            aria-hidden="true"
+            className={`absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 transition duration-300 ${
+              isGroup
+                ? 'translate-y-[115%] opacity-0'
+                : '-translate-y-1/2 opacity-100'
+            }`}
+          />
+          <Users
+            aria-hidden="true"
+            className={`absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 transition duration-300 ${
+              isGroup
+                ? '-translate-y-1/2 opacity-100'
+                : '-translate-y-[165%] opacity-0'
+            }`}
+          />
+        </span>
+        <span className="min-w-0">
+          <span className="block text-[11px] font-bold uppercase tracking-[0.18em] opacity-80">
+            View
+          </span>
+          <span className="font-montserrat block text-lg font-bold leading-tight">
+            {isGroup ? 'Group' : 'Artwork'}
+          </span>
+        </span>
+      </span>
+    </button>
+  );
+}
+
 const GalleryCoreInner = () => {
   const [themes, setThemes] = useState<ThemeListItem[]>([]);
   const [themesLoading, setThemesLoading] = useState(true);
@@ -154,6 +224,7 @@ const GalleryCoreInner = () => {
   const [slideshowArtworks, setSlideshowArtworks] = useState<
     TResolvedArtwork[]
   >([]);
+  const [slideshowPreserveOrder, setSlideshowPreserveOrder] = useState(false);
   const [groupSlideshowLoading, setGroupSlideshowLoading] = useState(false);
   const [groupSlideshowError, setGroupSlideshowError] = useState<string | null>(
     null,
@@ -181,6 +252,10 @@ const GalleryCoreInner = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const themeFamilies = useMemo(() => buildThemeFamilies(themes), [themes]);
+  const themeMenuItems = useMemo(
+    () => buildThemeMenuItems(themes, galleryVirtualThemeItems),
+    [themes],
+  );
   const selectedThemeLabel = useMemo(() => {
     if (!selectedThemeFamily) return null;
 
@@ -343,6 +418,7 @@ const GalleryCoreInner = () => {
     const isInSlideshow = location.pathname.includes('/slideshow');
     if (!isInSlideshow && wasInSlideshowRef.current) {
       setSlideshowArtworks([]);
+      setSlideshowPreserveOrder(false);
     }
     wasInSlideshowRef.current = isInSlideshow;
   }, [location.pathname]);
@@ -434,7 +510,55 @@ const GalleryCoreInner = () => {
     }, 3000);
   };
 
+  const fetchGroupsForSlideshow = async (
+    groupsForSlideshow: GroupListItem[],
+  ) => {
+    const groupedArtworks: TResolvedArtwork[] = [];
+
+    for (const group of groupsForSlideshow) {
+      const groupArtworks = await fetchGroupArtworks(group);
+      groupedArtworks.push(...groupArtworks);
+    }
+
+    return groupedArtworks;
+  };
+
   const openSlideshow = () => {
+    if (viewMode === 'group') {
+      if (groupsLoading || groups.length === 0) {
+        setSlideshowArtworks([]);
+        setGroupSlideshowError(null);
+        showNoArtworksUnavailableTooltip();
+        return;
+      }
+
+      setGroupSlideshowLoading(true);
+      setGroupSlideshowError(null);
+      hideNoArtworksTooltip();
+
+      fetchGroupsForSlideshow(groups)
+        .then((data) => {
+          if (data.length === 0) {
+            showNoArtworksUnavailableTooltip();
+            return;
+          }
+
+          setSlideshowPreserveOrder(true);
+          setSlideshowArtworks(data);
+          void navigate('/gallery/slideshow?view=group');
+          setModalOpen(false);
+        })
+        .catch((error: unknown) => {
+          setGroupSlideshowError(
+            error instanceof Error
+              ? error.message
+              : 'Failed to load group slideshow',
+          );
+        })
+        .finally(() => setGroupSlideshowLoading(false));
+      return;
+    }
+
     if (artworksLoading || slideshowAvailableArtworks.length === 0) {
       setSlideshowArtworks([]);
       setGroupSlideshowError(null);
@@ -452,6 +576,7 @@ const GalleryCoreInner = () => {
           showNoArtworksUnavailableTooltip();
           return;
         }
+        setSlideshowPreserveOrder(false);
         setSlideshowArtworks(enrichedArtworks);
         void navigate('/gallery/slideshow');
         setModalOpen(false);
@@ -475,6 +600,7 @@ const GalleryCoreInner = () => {
           setGroupSlideshowError('This group has no approved artworks yet.');
           return;
         }
+        setSlideshowPreserveOrder(true);
         setSlideshowArtworks(data);
         void navigate(`/gallery/slideshow?group=${group.group_id}`);
       })
@@ -496,11 +622,35 @@ const GalleryCoreInner = () => {
     [setActiveEntryId],
   );
 
+  const applyArtworkKudos = useCallback((artId: string, amount: number) => {
+    const updateArtwork = (artwork: TResolvedArtwork) =>
+      artwork.art_id === artId
+        ? {
+            ...artwork,
+            kudos_count: Math.max(0, (artwork.kudos_count ?? 0) + amount),
+          }
+        : artwork;
+
+    setArtworks((current) => current.map(updateArtwork));
+    setSlideshowArtworks((current) => current.map(updateArtwork));
+  }, []);
+
   const deselectTheme = () => {
     if (selectedThemeFamily === null && selectedThemeInstance === null) return;
     setSelectedThemeFamily(null);
     setSelectedThemeInstance(null);
     setPageNumber(1);
+  };
+
+  const selectVirtualThemeItem = (item: VirtualThemeMenuItem) => {
+    if (item.to) {
+      void navigate(item.to);
+      return;
+    }
+
+    if (item.href) {
+      window.location.href = item.href;
+    }
   };
 
   const getShareUrl = () => {
@@ -566,6 +716,8 @@ const GalleryCoreInner = () => {
                 slideshowArtworks.length > 0
                   ? slideshowArtworks
                   : slideshowAvailableArtworks,
+              onArtworkKudos: applyArtworkKudos,
+              preserveOrder: slideshowPreserveOrder,
             } satisfies IGalleryContext
           }
         />
@@ -579,48 +731,22 @@ const GalleryCoreInner = () => {
         isHorizontal={isHorizontal}
         modalState={isModalOpen}
         getShareUrl={getShareUrl}
+        onKudosApplied={applyArtworkKudos}
       />
 
-      <div className="breakout-w m-pad relative z-0 m-auto flex flex-col gap-2 sm:gap-10">
-        <div className="relative z-[100] flex flex-col gap-10">
-          <div className="flex items-center justify-between gap-3">
-            <div className="grid w-full grid-cols-1 grid-rows-1">
+      <div className="breakout-w m-pad relative z-0 m-auto flex flex-col gap-2 sm:gap-4">
+        <div className="relative z-[100] flex flex-col gap-6 sm:gap-10">
+          <div className="hidden items-center justify-between gap-3 sm:flex">
+            <div className="w-full">
               <button
                 type="button"
                 onClick={() => openSlideshow()}
                 data-gallery-control
-                className="col-start-1 row-start-1 mr-auto inline-flex items-center gap-2 rounded-md border border-gray-600 p-4 text-sm font-medium transition-colors hover:bg-gray-100"
+                className="mr-auto inline-flex items-center gap-2 rounded-md border border-gray-600 p-4 text-sm font-medium transition-colors hover:bg-gray-100"
               >
                 <Play size={16} />
-                <span>Play Slideshow</span>
+                Slideshow
               </button>
-              <Link
-                to={'/submit-artwork'}
-                data-gallery-control
-                className="col-start-1 row-start-1 mx-auto inline-flex hidden h-full content-center sm:block"
-              >
-                <Button className="my-auto text-base">Submit Artwork</Button>
-              </Link>
-              <div className="relative col-start-1 row-start-1 ml-auto inline-block flex items-center">
-                <select
-                  value={viewMode}
-                  onChange={(event) => {
-                    setViewMode(event.target.value as GalleryViewMode);
-                    setPageNumber(1);
-                  }}
-                  data-gallery-control
-                  className="appearance-none rounded-md border border-gray-600 bg-white p-4 pr-12 text-sm font-medium"
-                  aria-label="Gallery view"
-                >
-                  <option value="individual">Artwork View</option>
-                  <option value="group">Group View</option>
-                </select>
-
-                <ChevronDown
-                  className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-700"
-                  aria-hidden="true"
-                />
-              </div>{' '}
               {showNoArtworksTooltip && (
                 <button
                   type="button"
@@ -640,23 +766,6 @@ const GalleryCoreInner = () => {
               />
             </div>
           </div>
-          {/* <div>
-            <select
-              value={sortValue}
-              onChange={(event) =>
-                setSortValue(event.target.value as SortValue)
-              }
-              className="h-[50px] appearance-none rounded-md border border-gray-600 bg-white px-4 pr-12 text-sm font-medium"
-              aria-label="Sort artworks"
-            >
-              <option value="Newest Event">Newest</option>
-              <option value="Oldest Event">Oldest</option>
-            </select>
-            <ChevronDown
-              className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-700"
-              aria-hidden="true"
-            />
-          </div> */}
           <div className="relative">
             {selectedThemeFamily !== null && (
               <button
@@ -668,42 +777,56 @@ const GalleryCoreInner = () => {
                 <span>Clear filter</span>
               </button>
             )}
-            {/* <div className="flex flex-row justify-between">
-            <div className="mb-3 flex justify-start">
-              <button
-                type="button"
-                onClick={() => {
-                  if (selectedThemeFamily === null) return;
-                  setSelectedThemeFamily(null);
-                  setSelectedThemeInstance(null);
-                  setPageNumber(1);
-                }}
-                className="rounded-md border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50 disabled:border-black/90 disabled:font-bold disabled:opacity-100"
-                disabled={selectedThemeFamily === null}
-              >
-                All Themes
-              </button>
-            </div>
-          </div> */}
             {themesLoading ? (
               <p className="text-center text-gray-600">Loading themes...</p>
             ) : themesError ? (
               <p className="text-center text-red-500">{themesError}</p>
             ) : (
               <div className="overflow-x-auto px-1 py-2">
-                <div className="flex w-max gap-3">
-                  {themeFamilies.map((family) => (
+                <div className="flex w-max items-stretch gap-3">
+                  <GalleryViewToggle
+                    viewMode={viewMode}
+                    onToggle={() => {
+                      setViewMode((current) =>
+                        current === 'group' ? 'individual' : 'group',
+                      );
+                      setPageNumber(1);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => openSlideshow()}
+                    data-gallery-control
+                    aria-label="Open slideshow"
+                    className="flex h-[80px] w-[80px] flex-none items-center justify-center rounded-md bg-neutral-100 text-neutral-900 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-neutral-200 hover:shadow-md active:translate-y-0 active:scale-[0.98] sm:hidden"
+                  >
+                    <Play aria-hidden="true" className="h-6 w-6" />
+                  </button>
+                  {showNoArtworksTooltip && (
+                    <button
+                      type="button"
+                      onClick={hideNoArtworksTooltip}
+                      className="absolute left-[212px] top-full z-30 mt-1 whitespace-nowrap rounded-md bg-neutral-900 px-3 py-2 text-xs font-medium text-white shadow-lg sm:hidden"
+                    >
+                      No artworks available
+                    </button>
+                  )}
+                  {themeMenuItems.map((item) => (
                     <GalleryThemeCard
-                      key={family.theme_family}
-                      family={family}
-                      active={family.theme_family === selectedThemeFamily}
+                      key={item.kind === 'theme' ? item.theme_family : item.id}
+                      item={item}
+                      active={
+                        item.kind === 'theme' &&
+                        item.theme_family === selectedThemeFamily
+                      }
                       selectedThemeInstance={selectedThemeInstance}
-                      onSelectFamily={() => {
+                      onSelectThemeFamily={(family: ThemeFamilyCardModel) => {
                         if (family.theme_family === selectedThemeFamily) return;
                         setSelectedThemeFamily(family.theme_family);
                         setSelectedThemeInstance(null);
                         setPageNumber(1);
                       }}
+                      onSelectVirtualItem={selectVirtualThemeItem}
                       onSelectInstance={(theme) => {
                         setSelectedThemeFamily(theme.theme_family);
                         setSelectedThemeInstance(theme.theme_instance);

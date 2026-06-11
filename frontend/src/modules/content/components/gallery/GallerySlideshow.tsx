@@ -63,6 +63,7 @@ export const GallerySlideshow = () => {
     setIsPaused,
     uiState,
     resetUiTimer,
+    applyArtworkKudos,
     artworkShareUrl,
     onClose,
   } = useGallerySlideshowState();
@@ -205,7 +206,7 @@ export const GallerySlideshow = () => {
                 aria-hidden="true"
                 style={{ visibility: 'hidden', pointerEvents: 'none' }}
               >
-                {galleryNametag(artworks[deferredIdx])}{' '}
+                {galleryNametag(artworks[deferredIdx], applyArtworkKudos)}{' '}
               </div>
               <div
                 style={{
@@ -220,7 +221,10 @@ export const GallerySlideshow = () => {
                       : 'opacity 0ms',
                 }}
               >
-                {galleryNametag(artworks[slotA.artworkIdx])}
+                {galleryNametag(
+                  artworks[slotA.artworkIdx],
+                  applyArtworkKudos,
+                )}
               </div>
               <div
                 style={{
@@ -235,7 +239,10 @@ export const GallerySlideshow = () => {
                       : 'opacity 0ms',
                 }}
               >
-                {galleryNametag(artworks[slotB.artworkIdx])}
+                {galleryNametag(
+                  artworks[slotB.artworkIdx],
+                  applyArtworkKudos,
+                )}
               </div>
             </div>
 

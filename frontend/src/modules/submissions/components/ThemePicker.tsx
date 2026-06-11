@@ -85,9 +85,9 @@ export function ThemePicker({ onChange, value }: ThemePickerProps) {
               <GalleryThemeCard
                 key={family.theme_family}
                 active={family.theme_family === value.theme_family}
-                family={family}
+                item={family}
                 selectedThemeInstance={value.theme_instance}
-                onSelectFamily={() => {
+                onSelectThemeFamily={() => {
                   const latestTheme = family.themes[0];
                   onChange({
                     theme_family: family.theme_family,

@@ -67,4 +67,6 @@ export type TResolvedArtwork = TArtwork & {
 
 export interface IGalleryContext {
   artworks: TResolvedArtwork[];
+  onArtworkKudos?: (artId: string, amount: number) => void;
+  preserveOrder?: boolean;
 }

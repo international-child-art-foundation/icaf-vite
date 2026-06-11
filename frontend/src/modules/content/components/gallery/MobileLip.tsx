@@ -6,6 +6,7 @@ import {
   formatArtworkContext,
   getArtistDisplayName,
 } from '@/utils/galleryProcessing';
+import { KudosControls } from './KudosControls';
 
 export const LIP_COLLAPSED_H = 76; // px — used by parent for gesture hit-testing
 
@@ -219,6 +220,7 @@ interface Props {
   shareVisible: boolean;
   textVisible: boolean; // parent fades this on artwork change
   descExpanded: boolean; // false while collapsing for artwork swap, then true to expand
+  onKudosApplied?: (artId: string, amount: number) => void;
 }
 
 const FONT: React.CSSProperties = {
@@ -233,6 +235,7 @@ export const MobileLip = ({
   shareVisible,
   textVisible,
   descExpanded,
+  onKudosApplied,
 }: Props) => {
   const descRef = useRef<HTMLDivElement>(null);
 
@@ -487,6 +490,13 @@ export const MobileLip = ({
             transition: shareVisible ? 'opacity 300ms ease' : 'opacity 0ms',
           }}
         >
+          <KudosControls
+            artwork={artwork}
+            className="mb-3"
+            compact
+            layout="nametag"
+            onKudosApplied={onKudosApplied}
+          />
           <MobileShareRow shareUrl={shareUrl} />
         </div>
       </div>

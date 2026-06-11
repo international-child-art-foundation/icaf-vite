@@ -59,7 +59,7 @@ export const Gallery = () => {
 
         <div
           id="gallery-section"
-          className="mt-12 flex flex-col gap-8 sm:mt-24 md:gap-2"
+          className="mt-12 flex flex-col gap-4 sm:mt-24 md:gap-2"
         >
           <div className="sm:text-center">
             <p className="font-montserrat text-center text-5xl font-bold">
@@ -68,18 +68,17 @@ export const Gallery = () => {
             <div className="my-4 flex flex-col gap-4">
               <p className="m-pad flex flex-col gap-0 text-lg text-gray-800">
                 <span>
-                  Children's art is the most honest and pure form of human
-                  creative expression.
+                  ICAF is proud to host the artworks of young artists from all
+                  over the world.
                 </span>
-
                 <span>
-                  Feature your child or student's art to a global audience
-                  today, free of charge.
+                  Add your child's dream to our ever growing gallery of marvels
+                  and murals, free of charge.
                 </span>
               </p>
-              <div className="mx-auto block sm:hidden">
-                <Link to={'/submit-artwork'} className="text-base">
-                  <Button>Submit Artwork</Button>
+              <div className="mx-auto block">
+                <Link to={'/submit-artwork'}>
+                  <Button className="text-base">Add your Masterpiece</Button>
                 </Link>
               </div>
             </div>

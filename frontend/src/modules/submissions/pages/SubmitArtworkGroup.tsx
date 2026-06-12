@@ -9,7 +9,7 @@ import {
   Send,
   UserRound,
 } from 'lucide-react';
-import { createGuestGroup } from '@/api/public';
+import { createArtworkUpload, createGuestGroup } from '@/api/public';
 import { uploadToPresignedUrl } from '@/api/uploads';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { ArtworkMuralWindow } from '@/modules/submissions/components/ArtworkMuralWindow';
@@ -605,14 +605,44 @@ export function SubmitArtworkGroup({
           return createRotatedImageFile(file, imageRotations[artwork.id] ?? 0);
         }),
       );
+      const uploadFileTypes = uploadFiles.map((file) => {
+        const fileType = getUploadFileType(file);
+        if (!fileType) throw new Error(`${file.name} is not supported.`);
+        return fileType;
+      });
+
+      const artworkUploads = await Promise.all(
+        uploadFileTypes.map((fileType) =>
+          createArtworkUpload({ file_type: fileType }),
+        ),
+      );
+
+      for (const [index, upload] of artworkUploads.entries()) {
+        const file = uploadFiles[index];
+        const fileType = uploadFileTypes[index];
+        if (!file || !fileType) throw new Error('A selected image is missing.');
+
+        await uploadToPresignedUrl({
+          file,
+          fileType,
+          url: upload.presigned_url,
+        });
+      }
+
       const artworkRequests = artworks.map((artwork, index) => {
         const file = uploadFiles[index];
+        const upload = artworkUploads[index];
         if (!file) throw new Error('A selected image is missing.');
-        if (!getUploadFileType(file))
-          throw new Error(`${file.name} is not supported.`);
+        if (!upload) {
+          throw new Error(
+            'The server did not return an upload URL for every artwork.',
+          );
+        }
+
         return toArtworkRequest(
           artwork,
           file,
+          upload.art_id,
           releaseHash,
           digitalSignature,
           effectiveGroup,
@@ -623,7 +653,7 @@ export function SubmitArtworkGroup({
           },
         );
       });
-      const groupResponse = await createGuestGroup({
+      await createGuestGroup({
         email: draft.submitterEmail.trim(),
         artworks: artworkRequests,
         class_name: effectiveGroup.class_name.trim() || undefined,
@@ -638,27 +668,6 @@ export function SubmitArtworkGroup({
         theme_instance: effectiveGroup.theme_instance.trim() || undefined,
         title: effectiveGroup.title.trim(),
       });
-
-      if (groupResponse.art_uploads?.length !== artworks.length) {
-        throw new Error(
-          'The server did not return upload URLs for every artwork.',
-        );
-      }
-
-      for (const [index] of artworks.entries()) {
-        const file = uploadFiles[index];
-        if (!file) throw new Error('A selected image is missing.');
-
-        const fileType = getUploadFileType(file);
-        if (!fileType) throw new Error(`${file.name} is not supported.`);
-
-        const artworkResponse = groupResponse.art_uploads[index];
-        await uploadToPresignedUrl({
-          file,
-          fileType,
-          url: artworkResponse.presigned_url,
-        });
-      }
 
       const successState: SubmitArtworkSuccessState = {
         submission: {

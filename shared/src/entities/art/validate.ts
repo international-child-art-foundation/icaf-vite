@@ -139,6 +139,10 @@ export function validateSubmissionData(data: SubmitArtworkRequest): string[] {
         errors.push(`file_type must be one of: ${UPLOAD_FILE_TYPES.join(', ')}`);
     }
 
+    if (!data.art_id || !isValidUUID(data.art_id)) {
+        errors.push('art_id must be a valid UUID');
+    }
+
     if (data.promotional_use !== undefined && typeof data.promotional_use !== 'boolean') {
         errors.push('promotional_use, if provided, must be a boolean');
     }

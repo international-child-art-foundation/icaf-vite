@@ -26,9 +26,7 @@ const isGroupMutationResponse = (response: unknown): boolean =>
   hasApiSuccess(response) && hasStringProperty(response, 'group_id');
 
 const isArtworkSubmitResponse = (response: unknown): boolean =>
-  hasApiSuccess(response) &&
-  hasStringProperty(response, 'art_id') &&
-  hasStringProperty(response, 'presigned_url');
+  hasApiSuccess(response) && hasStringProperty(response, 'art_id');
 
 const isArtworkMutationResponse = (response: unknown): boolean =>
   hasApiSuccess(response) && hasStringProperty(response, 'art_id');

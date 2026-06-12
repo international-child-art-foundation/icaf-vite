@@ -176,7 +176,8 @@ export function TakedownRequest() {
                     Takedown Request Form
                   </h2>
                   <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600">
-                    If you need help,{' '}
+                    Use this page to submit a takedown request for an artwork
+                    active in the ICAF gallery. If you need help,{' '}
                     <Link to={'/contact'} className={linkClasses}>
                       contact us
                     </Link>{' '}
@@ -270,8 +271,7 @@ export function TakedownRequest() {
                 </p>
                 <p className="mt-1">
                   Contact us and we can help track down the correct artwork
-                  before you submit. If the link is for a group page, we will
-                  ask you to use the artwork link instead.
+                  before you submit.
                 </p>
                 <Link
                   to="/contact"

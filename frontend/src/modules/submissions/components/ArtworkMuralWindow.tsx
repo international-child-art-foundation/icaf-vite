@@ -171,6 +171,9 @@ function ArtworkMural({
     );
   }
 
+  const overlayControlClass =
+    'absolute z-20 inline-flex cursor-pointer items-center justify-center gap-3 rounded-full bg-slate-100/90 px-4 py-3 text-xs font-bold text-slate-700 shadow-md transition-colors duration-300 hover:bg-white';
+
   return (
     <div
       className={cn(
@@ -285,7 +288,7 @@ function ArtworkMural({
       )}
       {variant === 'workspace' && hasSelectedArtwork && canUnselect && (
         <button
-          className="absolute left-4 top-4 z-20 hidden h-10 items-center gap-1.5 rounded-full bg-slate-100/90 px-3 text-xs font-bold text-slate-700 shadow-md transition-colors duration-300 hover:bg-white md:inline-flex"
+          className={cn(overlayControlClass, 'left-4 top-4')}
           type="button"
           onClick={(event) => {
             event.stopPropagation();
@@ -296,26 +299,22 @@ function ArtworkMural({
           Grid view
         </button>
       )}
-      {variant === 'workspace' && selectedArtwork?.previewDataUrl && (
-        <div
-          className="absolute bottom-4 right-4 z-20 flex cursor-pointer flex-row items-center justify-center gap-4 rounded-full bg-slate-100/90 p-4 text-slate-700 shadow-md transition-colors duration-300 hover:bg-white"
-          onClick={(event) => {
-            event.stopPropagation();
-            onRotateArtwork?.(selectedArtwork.id);
-          }}
-        >
-          <p className="shadow- select-none text-xs font-bold text-slate-700">
-            Rotate Artwork
-          </p>
+      {variant === 'workspace' &&
+        onRotateArtwork &&
+        selectedArtwork?.previewDataUrl && (
           <button
-            className="h-4 w-4"
+            className={cn(overlayControlClass, 'bottom-4 right-4')}
             aria-label="Rotate artwork 90 degrees"
             type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onRotateArtwork?.(selectedArtwork.id);
+            }}
           >
+            <span className="select-none">Rotate Artwork</span>
             <RotateCw aria-hidden="true" className="h-4 w-4" />
           </button>
-        </div>
-      )}
+        )}
       {visibleArtworks.length > 0 && variant === 'compact' && (
         <span className="absolute bottom-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-slate-700 shadow-sm">
           <Maximize2 aria-hidden="true" className="h-4 w-4" />
@@ -458,22 +457,33 @@ function ArtworkReadOnlyDetailsPane({
   activeArtwork,
   artworkCount,
   artworkDetailsMode,
+  hasSelectedArtwork,
   onNext,
   onPrevious,
 }: {
   activeArtwork: ArtworkWithPreview | undefined;
   artworkCount: number;
   artworkDetailsMode: 'basic' | 'full';
+  hasSelectedArtwork: boolean;
   onNext: () => void;
   onPrevious: () => void;
 }) {
+  const canView = Boolean(activeArtwork && hasSelectedArtwork);
+
   return (
     <div className="relative space-y-3 rounded-lg bg-white/55 p-3 shadow-inner backdrop-blur">
+      {!canView && (
+        <div className="absolute inset-0 z-10 grid place-items-center rounded-lg bg-slate-50/90 px-4 text-center backdrop-blur-[2px]">
+          <p className="text-sm font-bold text-slate-600">
+            Select an artwork to view details
+          </p>
+        </div>
+      )}
       <div className="flex items-center justify-between gap-2">
         <button
           aria-label="Previous artwork"
           className="flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-slate-700 shadow-sm disabled:opacity-40"
-          disabled={artworkCount < 2}
+          disabled={!canView || artworkCount < 2}
           type="button"
           onClick={onPrevious}
         >
@@ -492,7 +502,7 @@ function ArtworkReadOnlyDetailsPane({
         <button
           aria-label="Next artwork"
           className="flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-slate-700 shadow-sm disabled:opacity-40"
-          disabled={artworkCount < 2}
+          disabled={!canView || artworkCount < 2}
           type="button"
           onClick={onNext}
         >
@@ -619,12 +629,16 @@ export function ArtworkSubmissionPreview({
         onSelectArtwork={setSelectedIndex}
         onSwipe={(direction) => step(direction)}
         onTouchStart={setTouchStart}
+        onUnselect={
+          uploadedArtworkCount > 1 ? () => setSelectedIndex(null) : undefined
+        }
       />
 
       <ArtworkReadOnlyDetailsPane
         activeArtwork={activeArtwork}
         artworkCount={uploadedArtworkCount}
         artworkDetailsMode={artworkDetailsMode}
+        hasSelectedArtwork={selectedIndex !== null}
         onNext={() => step(1)}
         onPrevious={() => step(-1)}
       />

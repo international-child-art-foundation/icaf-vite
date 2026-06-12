@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { ChevronLeft, Globe2, Mail, Send } from 'lucide-react';
-import { submitGuestArtwork } from '@/api/public';
+import { createArtworkUpload, submitGuestArtwork } from '@/api/public';
 import { uploadToPresignedUrl } from '@/api/uploads';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { ArtworkMuralWindow } from '@/modules/submissions/components/ArtworkMuralWindow';
@@ -442,7 +442,16 @@ export function SubmitArtwork() {
       const fileType = getUploadFileType(uploadFile);
       if (!fileType) throw new Error(`${uploadFile.name} is not supported.`);
 
-      const response = await submitGuestArtwork({
+      const upload = await createArtworkUpload({ file_type: fileType });
+
+      await uploadToPresignedUrl({
+        file: uploadFile,
+        fileType,
+        url: upload.presigned_url,
+      });
+
+      await submitGuestArtwork({
+        art_id: upload.art_id,
         age:
           artworkDetailsMode === 'full' && draft.artwork.age.trim()
             ? Number(draft.artwork.age)
@@ -466,12 +475,6 @@ export function SubmitArtwork() {
           ? themeParams.theme_instance || undefined
           : undefined,
         title: draft.artwork.title.trim() || undefined,
-      });
-
-      await uploadToPresignedUrl({
-        file: uploadFile,
-        fileType,
-        url: response.presigned_url,
       });
 
       const successState: SubmitArtworkSuccessState = {

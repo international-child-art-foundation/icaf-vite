@@ -35,9 +35,7 @@ const isArtworkListResponse = (response: unknown): boolean =>
   hasArrayProperty(response, 'artworks');
 
 const isSubmitArtworkResponse = (response: unknown): boolean =>
-  hasApiSuccess(response) &&
-  hasStringProperty(response, 'art_id') &&
-  hasStringProperty(response, 'presigned_url');
+  hasApiSuccess(response) && hasStringProperty(response, 'art_id');
 
 const isArtworkMutationResponse = (response: unknown): boolean =>
   hasApiSuccess(response) && hasStringProperty(response, 'art_id');

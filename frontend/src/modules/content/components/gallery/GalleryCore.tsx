@@ -7,7 +7,7 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom';
-import { Image, LoaderCircle, Play, Users, X } from 'lucide-react';
+import { ChevronDown, Image, LoaderCircle, Play, Users, X } from 'lucide-react';
 import type { GroupListItem, ThemeListItem } from '@icaf/shared';
 import { listGalleryThemes } from '@/api/public';
 import type {
@@ -36,6 +36,7 @@ import {
 } from './galleryData';
 import Pagination from './Pagination';
 import { Button } from '@/shared/components/ui/button';
+import { SortValue } from '@/modules/content/data/gallery/sortData';
 
 const ARTWORKS_PER_PAGE = 24;
 const GROUPS_PER_PAGE = 8;
@@ -242,6 +243,7 @@ const GalleryCoreInner = () => {
     pageNumber,
     setPageNumber,
     sortValue,
+    setSortValue,
     activeEntryId,
     setActiveEntryId,
     filterableOptions,
@@ -735,9 +737,9 @@ const GalleryCoreInner = () => {
       />
 
       <div className="breakout-w m-pad relative z-0 m-auto flex flex-col gap-2 sm:gap-4">
-        <div className="relative z-[100] flex flex-col gap-6 sm:gap-10">
+        <div className="relative flex flex-col gap-6 sm:gap-8">
           <div className="hidden items-center justify-between gap-3 sm:flex">
-            <div className="w-full">
+            <div className="hidden w-full sm:flex">
               <button
                 type="button"
                 onClick={() => openSlideshow()}
@@ -751,11 +753,30 @@ const GalleryCoreInner = () => {
                 <button
                   type="button"
                   onClick={hideNoArtworksTooltip}
-                  className="absolute top-full mt-2 whitespace-nowrap rounded-md bg-neutral-900 px-3 py-2 text-xs font-medium text-white shadow-lg"
+                  className="absolute left-32 mt-2 whitespace-nowrap rounded-md bg-neutral-900 px-3 py-2 text-xs font-medium text-white shadow-lg"
                 >
                   No artworks available
                 </button>
               )}
+              <div className="relative ml-auto">
+                <select
+                  id="gallery-sort"
+                  name="gallery-sort"
+                  value={sortValue}
+                  onChange={(event) =>
+                    setSortValue(event.target.value as SortValue)
+                  }
+                  className="h-[50px] appearance-none rounded-md border border-gray-600 bg-white px-4 pr-12 text-sm font-medium"
+                  aria-label="Sort artworks"
+                >
+                  <option value="Newest Event">Newest</option>
+                  <option value="Oldest Event">Oldest</option>
+                </select>
+                <ChevronDown
+                  aria-hidden="true"
+                  className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-700"
+                />
+              </div>
             </div>
             <div className="hidden lg:block">
               <Pagination
@@ -771,7 +792,7 @@ const GalleryCoreInner = () => {
               <button
                 type="button"
                 onClick={deselectTheme}
-                className="absolute -top-8 left-1 z-30 inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-sm transition hover:bg-neutral-50"
+                className="absolute -top-7 left-1 z-30 inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-sm transition hover:bg-neutral-50"
               >
                 <X aria-hidden="true" className="h-3.5 w-3.5" />
                 <span>Clear filter</span>
@@ -798,7 +819,7 @@ const GalleryCoreInner = () => {
                     onClick={() => openSlideshow()}
                     data-gallery-control
                     aria-label="Open slideshow"
-                    className="flex h-[80px] w-[80px] flex-none items-center justify-center rounded-md bg-neutral-100 text-neutral-900 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-neutral-200 hover:shadow-md active:translate-y-0 active:scale-[0.98] sm:hidden"
+                    className="border-neutral/50 flex h-[80px] w-[80px] flex-none items-center justify-center rounded-md border text-neutral-900 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-neutral-50 hover:shadow-md active:translate-y-0 active:scale-[0.98] sm:hidden"
                   >
                     <Play aria-hidden="true" className="h-6 w-6" />
                   </button>
@@ -858,15 +879,32 @@ const GalleryCoreInner = () => {
             <div className="flex flex-col items-center gap-2 py-20 text-lg">
               <div className="mb-2 text-center">
                 <p>
-                  No {viewMode === 'group' ? 'groups' : 'artworks'} are
-                  available
-                  {selectedThemeLabel ? ` for ${selectedThemeLabel}` : ''} yet.
+                  <span>
+                    No {viewMode === 'group' ? 'groups' : 'artworks'} are
+                    available
+                    {selectedThemeLabel
+                      ? ` for ${selectedThemeLabel}`
+                      : ''}{' '}
+                    yet.
+                  </span>
+                  <br className="hidden sm:block" />
+                  <span> You can be the first to contribute!</span>
                 </p>
-                <p>You can be the first to contribute!</p>
               </div>
               <Link to="/submit-artwork">
                 <Button className="text-base">Submit Artwork</Button>
               </Link>
+              {selectedThemeFamily !== null && (
+                <Button
+                  variant={'outline'}
+                  type="button"
+                  onClick={deselectTheme}
+                  className="mt-2"
+                >
+                  <X aria-hidden="true" className="h-3.5 w-3.5" />
+                  <span>Go back</span>
+                </Button>
+              )}
             </div>
           ) : viewMode === 'group' ? (
             <div

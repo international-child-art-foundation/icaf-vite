@@ -20,8 +20,7 @@ function isArtworkPreview(value: unknown): value is ArtworkWithPreview {
 
   const artwork = value as Partial<ArtworkWithPreview>;
   return (
-    typeof artwork.id === 'string' &&
-    typeof artwork.previewDataUrl === 'string'
+    typeof artwork.id === 'string' && typeof artwork.previewDataUrl === 'string'
   );
 }
 
@@ -51,9 +50,7 @@ function readSubmissionState(value: unknown) {
         ? submission.email
         : undefined,
     kind:
-      'kind' in submission && submission.kind === 'group'
-        ? 'group'
-        : 'single',
+      'kind' in submission && submission.kind === 'group' ? 'group' : 'single',
   } satisfies NonNullable<SubmitArtworkSuccessState['submission']>;
 }
 
@@ -67,9 +64,9 @@ export function SubmitArtworkSuccess() {
       <div className="content-w m-pad my-auto flex flex-col gap-5">
         <div className="mx-auto w-full max-w-4xl">
           <Button asChild variant="outline">
-            <Link to="/submit-artwork">
+            <Link to="/gallery">
               <ArrowLeft aria-hidden="true" className="h-4 w-4" />
-              Submit more artwork
+              Back to gallery
             </Link>
           </Button>
         </div>
@@ -95,7 +92,9 @@ export function SubmitArtworkSuccess() {
                 <p>
                   To update the {artworkLabel} later or receive notifications,
                   create an account by checking
-                  {submission?.email ? ` ${submission.email}` : ' your inbox'}{' '}
+                  {submission?.email
+                    ? ` ${submission.email}`
+                    : ' your inbox'}{' '}
                   and finishing setup from the email we sent.
                 </p>
               </div>

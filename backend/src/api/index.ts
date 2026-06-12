@@ -40,6 +40,7 @@ import { handler as updateMagazineStatus } from "../functions/admin/updateMagazi
 import { handler as updateNews } from "../functions/admin/updateNews";
 import { handler as confirmForgotPassword } from "../functions/anyone/confirmForgotPassword";
 import { handler as createAndVerify } from "../functions/anyone/createAndVerify";
+import { handler as createArtworkUpload } from "../functions/anyone/createArtworkUpload";
 import { handler as forgotPassword } from "../functions/anyone/forgotPassword";
 import { handler as galleryArtworks } from "../functions/anyone/gallery/galleryArtworks";
 import { handler as galleryGroups } from "../functions/anyone/gallery/galleryGroups";
@@ -132,6 +133,7 @@ function roleProtected(route: Omit<Route, "auth">, roles: Role[]): Route {
 }
 
 const routes: Route[] = [
+  { method: "POST", path: "/api/artwork-uploads", handler: createArtworkUpload },
   { method: "POST", path: "/api/artworks", handler: guestSubmitArtwork },
   { method: "POST", path: "/api/groups", handler: createGroup },
   { method: "GET", path: "/api/artworks/{art_id}", handler: getArtwork },

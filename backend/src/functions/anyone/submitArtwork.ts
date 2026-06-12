@@ -1,7 +1,5 @@
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { QueryCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { dynamodb, s3Client, TABLE_NAME, S3_BUCKET_NAME } from "../../config/aws-clients";
+import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
 import {
   ApiGatewayEvent,
   HTTP_STATUS,
@@ -21,19 +19,10 @@ import { Status } from "../../dynamo/shared";
 import { sendArtworkSubmissionEmail } from "../../utils/emails/artworkSubmission";
 import { parseJsonBody } from "../../utils/request";
 import { ensureThemeEntity } from "../shared/themeUtils";
+import { hasUploadedArtworkImage } from "../shared/artworkUpload";
 import { randomUUID } from "crypto";
 
-const PRESIGNED_URL_EXPIRES_SECONDS = 15 * 60; // 15 minutes
 const AUTH_ACTION_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 days
-
-const CONTENT_TYPES: Record<string, string> = {
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  png: "image/png",
-  gif: "image/gif",
-  webp: "image/webp",
-  avif: "image/avif",
-};
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -62,8 +51,9 @@ export const handler = async (
 
     const nowMs = Date.now();
     const nowSeconds = Math.floor(nowMs / 1000);
-    // ── Step 1: Find or create virtual USER entity ─────────────────────────
+    // ── Step 1: Find or prepare virtual USER entity ────────────────────────
     let user: UserEntity;
+    let userToCreate: UserEntity | null = null;
 
     if (hasUserId) {
       // Returning guest — look up by user_id directly
@@ -119,7 +109,7 @@ export const handler = async (
         }
         user = existing;
       } else {
-        // Create new virtual USER entity
+        // Prepare the virtual USER entity, but do not write it until S3 is verified.
         const userId = randomUUID();
         const newUser = {
           PK: `USER#${userId}`,
@@ -137,22 +127,37 @@ export const handler = async (
           EMAIL_SK: emailGsiSk(EntityType.User),
         };
 
-        await dynamodb.send(new PutCommand({ TableName: TABLE_NAME, Item: newUser }));
         user = newUser as unknown as UserEntity;
+        userToCreate = user;
       }
     }
 
-    // ── Step 2: Create ART entity ──────────────────────────────────────────
-    const artId = randomUUID();
+    // ── Step 2: Verify the browser upload before any submission writes ─────
+    const artId = body.art_id.trim();
+    const imageUploaded = await hasUploadedArtworkImage(artId);
+    if (!imageUploaded) {
+      return CommonErrors.badRequest("Artwork image must be uploaded before submission");
+    }
 
     await ensureThemeEntity({
       family: body.theme_family,
       instance: body.theme_instance,
     });
 
+    if (userToCreate) {
+      await dynamodb.send(
+        new PutCommand({
+          TableName: TABLE_NAME,
+          Item: userToCreate,
+          ConditionExpression: "attribute_not_exists(PK)",
+        }),
+      );
+    }
+
     await dynamodb.send(
       new PutCommand({
         TableName: TABLE_NAME,
+        ConditionExpression: "attribute_not_exists(PK)",
         Item: {
           PK: `ART#${artId}`,
           SK: "-",
@@ -192,28 +197,13 @@ export const handler = async (
       }),
     );
 
-    // ── Step 3: Generate presigned S3 upload URL ───────────────────────────
-    // Key is always {art_id}/initial (no extension). ProcessImage is triggered
-    // by the S3 ObjectCreated event on this key and auto-detects the format via Sharp.
-    const s3Key = `${artId}/initial`;
-    const presignedUrl = await getSignedUrl(
-      s3Client,
-      new PutObjectCommand({
-        Bucket: S3_BUCKET_NAME,
-        Key: s3Key,
-        ContentType: CONTENT_TYPES[body.file_type],
-      }),
-      { expiresIn: PRESIGNED_URL_EXPIRES_SECONDS },
-    );
-
-    // ── Step 4: Refresh auth-action token and email virtual users ─────────
+    // ── Step 3: Refresh auth-action token and email virtual users ─────────
     let sentSignupEmail = false;
     if (user.email_blocked === true) {
       const response: SubmitArtworkResponse = {
         success: true,
         art_id: artId,
-        presigned_url: presignedUrl,
-        message: "Artwork submitted. Upload your image using the presigned URL.",
+        message: "Artwork submitted.",
       };
 
       return {
@@ -227,8 +217,7 @@ export const handler = async (
       const response: SubmitArtworkResponse = {
         success: true,
         art_id: artId,
-        presigned_url: presignedUrl,
-        message: "Artwork submitted. Upload your image using the presigned URL.",
+        message: "Artwork submitted.",
       };
 
       return {
@@ -279,10 +268,9 @@ export const handler = async (
     const response: SubmitArtworkResponse = {
       success: true,
       art_id: artId,
-      presigned_url: presignedUrl,
       message: sentSignupEmail
-        ? "Artwork submitted. Upload your image using the presigned URL. Check your email to verify your account."
-        : "Artwork submitted. Upload your image using the presigned URL.",
+        ? "Artwork submitted. Check your email to verify your account."
+        : "Artwork submitted.",
     };
 
     return {

@@ -95,6 +95,10 @@ export function validateCreateGroupRequest(data: CreateGroupRequest, identityReq
     }
 
     data.artworks.forEach((artwork, index) => {
+        if (!artwork.art_id || !isValidUUID(artwork.art_id)) {
+            errors.push(`artworks[${index}].art_id must be a valid UUID`);
+        }
+
         if (!artwork.file_type || !(UPLOAD_FILE_TYPES as readonly string[]).includes(artwork.file_type)) {
             errors.push(`artworks[${index}].file_type must be one of: ${UPLOAD_FILE_TYPES.join(', ')}`);
         }

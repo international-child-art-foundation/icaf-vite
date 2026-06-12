@@ -92,9 +92,7 @@ export function GalleryGroupCard({
           onClick={() => onOpen(group)}
           className="flex items-center justify-between gap-4 text-left"
         >
-          <p className="text-sm text-neutral-500">
-            Open a slideshow from this group only
-          </p>
+          <p className="text-sm text-neutral-500"></p>
           <span className="bg-primary group-hover:bg-secondary-blue inline-flex h-11 w-11 flex-none items-center justify-center rounded-full text-white transition">
             <Play size={18} fill="currentColor" />
           </span>

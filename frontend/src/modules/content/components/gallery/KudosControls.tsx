@@ -369,7 +369,7 @@ export const KudosControls = ({
             {status.alreadyGiven
               ? 'Kudos sent!'
               : status.remaining < KUDOS_AMOUNT
-                ? 'Spent today'
+                ? 'Out of kudos'
                 : 'Give kudos!'}
           </span>
         </span>

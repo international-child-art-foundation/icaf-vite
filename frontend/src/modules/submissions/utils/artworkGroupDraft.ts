@@ -242,6 +242,7 @@ export function createDigitalSignature(signature: string) {
 export function toArtworkRequest(
   artwork: ArtworkDraft,
   file: File,
+  artId: string,
   releaseHash: string,
   digitalSignature: string | undefined,
   group: ArtworkGroupInfo,
@@ -256,6 +257,7 @@ export function toArtworkRequest(
   const artworkDetailsMode = options.artworkDetailsMode ?? 'full';
 
   return {
+    art_id: artId,
     age:
       artworkDetailsMode === 'full' && artwork.age.trim()
         ? Number(artwork.age)

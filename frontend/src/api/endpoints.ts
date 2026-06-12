@@ -96,6 +96,7 @@ export const apiEndpoints = {
   },
   public: {
     artwork: (artId: PathParam) => `/artworks/${encodePathParam(artId)}`,
+    artworkUploads: '/artwork-uploads',
     artworkKudos: (artId: PathParam) =>
       `/artworks/${encodePathParam(artId)}/kudos`,
     artworks: '/artworks',

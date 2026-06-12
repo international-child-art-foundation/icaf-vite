@@ -10,7 +10,7 @@ import { NewsAdminPanel } from '../components/NewsAdminPanel';
 import { ThemeAdminPanel } from '../components/ThemeAdminPanel';
 import { TakedownRequestsPanel } from '../components/TakedownRequestsPanel';
 import { ReviewArtworkQueue } from '../components/ReviewArtworkQueue';
-import { ReviewGroupQueue } from '../components/ReviewGroupQueue';
+import { ReviewQueuesPanel } from '../components/ReviewQueuesPanel';
 import { canAdmin, canReview } from '@/modules/dashboard/utils/dashboardFormat';
 import {
   dashboardTabData,
@@ -85,16 +85,7 @@ export function DashboardShell({
   if (activeTab === 'submissions') {
     content = <MySubmissionsModule />;
   } else if (activeTab === 'review' && canReview(role)) {
-    content = (
-      <>
-        <ReviewArtworkQueue
-          key="review-artwork-queue"
-          admin={canAdmin(role)}
-          defaultMode="pending"
-        />
-        {!canAdmin(role) && <ReviewGroupQueue />}
-      </>
-    );
+    content = <ReviewQueuesPanel admin={canAdmin(role)} />;
   } else if (activeTab === 'admin' && canAdmin(role)) {
     content = <ReviewArtworkQueue key="admin-artwork-queue" admin />;
   } else if (activeTab === 'news' && canAdmin(role)) {

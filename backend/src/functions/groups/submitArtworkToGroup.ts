@@ -1,7 +1,5 @@
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { GetCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { dynamodb, s3Client, TABLE_NAME, S3_BUCKET_NAME } from "../../config/aws-clients";
+import { GetCommand, TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
+import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
 import {
   ApiGatewayEvent,
   HTTP_STATUS,
@@ -13,28 +11,19 @@ import {
   UPLOAD_FILE_TYPES,
   validateOptionalArtworkFields,
   SHA256_HEX,
+  isValidUUID,
 } from "@icaf/shared";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
 import { byOwnerPk, byOwnerGsiSk } from "../../dynamo/ownerGsi";
 import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { Status } from "../../dynamo/shared";
-import { randomUUID } from "crypto";
 import { parseJsonBody } from "../../utils/request";
 import { getCurrentUser } from "../../utils/auth";
 import { ensureThemeEntity } from "../shared/themeUtils";
-
-const PRESIGNED_URL_EXPIRES_SECONDS = 20 * 60; // 20 minutes
-
-const CONTENT_TYPES: Record<string, string> = {
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  png: "image/png",
-  gif: "image/gif",
-  webp: "image/webp",
-  avif: "image/avif",
-};
+import { hasUploadedArtworkImage } from "../shared/artworkUpload";
 
 interface SubmitArtworkToGroupBody {
+  art_id: string;
   file_type: string;
   release_hash: string;
   digital_signature?: string;
@@ -97,6 +86,9 @@ export const handler = async (
     if (!body.file_type || !(UPLOAD_FILE_TYPES as readonly string[]).includes(body.file_type)) {
       return CommonErrors.badRequest(`file_type must be one of: ${UPLOAD_FILE_TYPES.join(", ")}`);
     }
+    if (typeof body.art_id !== "string" || !isValidUUID(body.art_id)) {
+      return CommonErrors.badRequest("art_id must be a valid UUID");
+    }
     if (!body.release_hash?.trim() || !SHA256_HEX.test(body.release_hash)) {
       return CommonErrors.badRequest("release_hash must be a valid SHA-256 hex string");
     }
@@ -115,7 +107,11 @@ export const handler = async (
 
     const nowMs = Date.now();
     const nowSeconds = Math.floor(nowMs / 1000);
-    const artId = randomUUID();
+    const artId = body.art_id.trim();
+    const imageUploaded = await hasUploadedArtworkImage(artId);
+    if (!imageUploaded) {
+      return CommonErrors.badRequest("Artwork image must be uploaded before submission");
+    }
 
     await ensureThemeEntity({
       family: body.theme_family,
@@ -124,72 +120,61 @@ export const handler = async (
 
     // ── Create ART entity ──────────────────────────────────────────────────
     await dynamodb.send(
-      new PutCommand({
-        TableName: TABLE_NAME,
-        Item: {
-          PK: `ART#${artId}`,
-          SK: "-",
-          art_id: artId,
-          user_id: userId,
-          group_id: groupId,
-          status: "pending_review" as const,
-          kudos_count: 0,
-          ts: nowSeconds,
-          release_hash: body.release_hash.trim(),
-          ...(body.digital_signature && {
-            digital_signature: body.digital_signature.trim(),
-          }),
-          promotional_use: body.promotional_use ?? false,
-          type: "ART",
-          notifications: false,
-          // optional fields
-          ...(body.f_name && { f_name: body.f_name }),
-          ...(body.l_name && { l_name: body.l_name }),
-          ...(body.age !== undefined && { age: body.age }),
-          ...(body.country && { country: body.country }),
-          ...(body.region && { region: body.region }),
-          ...(body.title && { title: body.title }),
-          ...(body.description && { description: body.description }),
-          ...(body.submitter_relationship && { submitter_relationship: body.submitter_relationship }),
-          ...(body.theme_family && { theme_family: body.theme_family }),
-          ...(body.theme_instance && { theme_instance: body.theme_instance }),
-          // Owner GSI
-          OWN_PK: byOwnerPk(userId),
-          OWN_SK: byOwnerGsiSk(EntityType.Art, nowMs, artId),
-          // Review GSI
-          REV_PK: reviewPk(),
-          REV_SK: reviewGsiSk(Status.Pending, EntityType.Art, nowMs, artId),
-        },
+      new TransactWriteCommand({
+        TransactItems: [
+          {
+            Put: {
+              TableName: TABLE_NAME,
+              ConditionExpression: "attribute_not_exists(PK)",
+              Item: {
+                PK: `ART#${artId}`,
+                SK: "-",
+                art_id: artId,
+                user_id: userId,
+                group_id: groupId,
+                status: "pending_review" as const,
+                kudos_count: 0,
+                ts: nowSeconds,
+                release_hash: body.release_hash.trim(),
+                ...(body.digital_signature && {
+                  digital_signature: body.digital_signature.trim(),
+                }),
+                promotional_use: body.promotional_use ?? false,
+                type: "ART",
+                notifications: false,
+                ...(body.f_name && { f_name: body.f_name }),
+                ...(body.l_name && { l_name: body.l_name }),
+                ...(body.age !== undefined && { age: body.age }),
+                ...(body.country && { country: body.country }),
+                ...(body.region && { region: body.region }),
+                ...(body.title && { title: body.title }),
+                ...(body.description && { description: body.description }),
+                ...(body.submitter_relationship && { submitter_relationship: body.submitter_relationship }),
+                ...(body.theme_family && { theme_family: body.theme_family }),
+                ...(body.theme_instance && { theme_instance: body.theme_instance }),
+                OWN_PK: byOwnerPk(userId),
+                OWN_SK: byOwnerGsiSk(EntityType.Art, nowMs, artId),
+                REV_PK: reviewPk(),
+                REV_SK: reviewGsiSk(Status.Pending, EntityType.Art, nowMs, artId),
+              },
+            },
+          },
+          {
+            Update: {
+              TableName: TABLE_NAME,
+              Key: { PK: `GROUP#${groupId}`, SK: "-" },
+              UpdateExpression: "SET member_art_ids = list_append(member_art_ids, :newArt)",
+              ExpressionAttributeValues: { ":newArt": [artId] },
+            },
+          },
+        ],
       }),
-    );
-
-    await dynamodb.send(
-      new UpdateCommand({
-        TableName: TABLE_NAME,
-        Key: { PK: `GROUP#${groupId}`, SK: "-" },
-        UpdateExpression: "SET member_art_ids = list_append(member_art_ids, :newArt)",
-        ExpressionAttributeValues: { ":newArt": [artId] },
-      }),
-    );
-
-    // ── Generate presigned S3 upload URL ──────────────────────────────────
-    // Key is always {art_id}/initial (no extension). ProcessImage auto-detects format.
-    const s3Key = `${artId}/initial`;
-    const presignedUrl = await getSignedUrl(
-      s3Client,
-      new PutObjectCommand({
-        Bucket: S3_BUCKET_NAME,
-        Key: s3Key,
-        ContentType: CONTENT_TYPES[body.file_type],
-      }),
-      { expiresIn: PRESIGNED_URL_EXPIRES_SECONDS },
     );
 
     const response: SubmitArtworkResponse = {
       success: true,
       art_id: artId,
-      presigned_url: presignedUrl,
-      message: "Artwork added to group. Upload your image using the presigned URL.",
+      message: "Artwork added to group.",
     };
 
     return {

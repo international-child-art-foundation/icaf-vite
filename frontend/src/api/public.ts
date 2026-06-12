@@ -5,6 +5,8 @@ import type {
   GetArtworkResponse,
   GetGroupResponse,
   GuestSubmitArtworkRequest,
+  CreateArtworkUploadRequest,
+  CreateArtworkUploadResponse,
   InitiateTakedownRequest,
   InitiateTakedownResponse,
   ListMagazinesResponse,
@@ -34,6 +36,9 @@ type GalleryRequestOptions = {
 };
 
 const isSuccessfulArtworkSubmitResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) && hasStringProperty(response, 'art_id');
+
+const isSuccessfulArtworkUploadResponse = (response: unknown): boolean =>
   hasApiSuccess(response) &&
   hasStringProperty(response, 'art_id') &&
   hasStringProperty(response, 'presigned_url');
@@ -86,6 +91,19 @@ export function submitGuestArtwork(
   return apiRequest<SubmitArtworkResponse, GuestSubmitArtworkRequest>(
     apiEndpoints.public.artworks,
     { body: request, method: 'POST', validate: isSuccessfulArtworkSubmitResponse },
+  );
+}
+
+export function createArtworkUpload(
+  request: CreateArtworkUploadRequest,
+): Promise<CreateArtworkUploadResponse> {
+  return apiRequest<CreateArtworkUploadResponse, CreateArtworkUploadRequest>(
+    apiEndpoints.public.artworkUploads,
+    {
+      body: request,
+      method: 'POST',
+      validate: isSuccessfulArtworkUploadResponse,
+    },
   );
 }
 

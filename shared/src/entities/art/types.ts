@@ -67,6 +67,7 @@ export interface ArtworkEntity {
 // Artwork fields common to all submission flows
 // file_type is used only to generate the presigned S3 upload URL; not stored on the entity
 interface ArtworkSubmissionFields {
+    art_id: string;
     file_type: UploadFileType;
     release_hash: string;
     digital_signature?: string;
@@ -99,6 +100,16 @@ export type GuestSubmitArtworkRequest = ArtworkSubmissionFields & (
 
 export interface SubmitArtworkResponse {
     success: boolean;
+    art_id: string;
+    message: string;
+}
+
+export interface CreateArtworkUploadRequest {
+    file_type: UploadFileType;
+}
+
+export interface CreateArtworkUploadResponse {
+    success: true;
     art_id: string;
     presigned_url: string;
     message: string;
@@ -163,6 +174,7 @@ export interface UpdateArtworkRequest {
 }
 
 export interface SubmitArtworkToGroupRequest {
+    art_id: string;
     file_type: UploadFileType;
     release_hash: string;
     digital_signature?: string;

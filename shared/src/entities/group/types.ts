@@ -75,10 +75,6 @@ export interface SubmitGroupResponse {
     group_id: string;
     message: string;
     ts: number;
-    art_uploads?: {
-        art_id: string;
-        presigned_url: string;
-    }[];
 }
 
 export type CreateGroupArtworkRequest = SubmitArtworkToGroupRequest;

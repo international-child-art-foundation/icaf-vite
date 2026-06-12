@@ -1,9 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Role } from '@icaf/shared';
+import {
+  hasActiveTakedownRequests,
+  TAKEDOWN_ACTIVITY_CACHE_MS,
+} from '@/api/admin';
 import { MySubmissionsModule } from '../components/MySubmissionsModule';
 import { OverviewModules } from '../components/OverviewModules';
 import { NewsAdminPanel } from '../components/NewsAdminPanel';
 import { ThemeAdminPanel } from '../components/ThemeAdminPanel';
+import { TakedownRequestsPanel } from '../components/TakedownRequestsPanel';
 import { ReviewArtworkQueue } from '../components/ReviewArtworkQueue';
 import { ReviewGroupQueue } from '../components/ReviewGroupQueue';
 import { canAdmin, canReview } from '@/modules/dashboard/utils/dashboardFormat';
@@ -33,6 +38,29 @@ export function DashboardShell({
   const navigate = useNavigate();
   const [logoutBusy, setLogoutBusy] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
+  const [hasActiveTakedowns, setHasActiveTakedowns] = useState(false);
+
+  useEffect(() => {
+    if (!canAdmin(role)) {
+      setHasActiveTakedowns(false);
+      return;
+    }
+
+    let canceled = false;
+    void hasActiveTakedownRequests({
+      cacheTtlMs: TAKEDOWN_ACTIVITY_CACHE_MS,
+    })
+      .then((hasActive) => {
+        if (!canceled) setHasActiveTakedowns(hasActive);
+      })
+      .catch(() => {
+        if (!canceled) setHasActiveTakedowns(false);
+      });
+
+    return () => {
+      canceled = true;
+    };
+  }, [role]);
 
   const handleLogout = () => {
     setLogoutBusy(true);
@@ -71,6 +99,10 @@ export function DashboardShell({
     content = <ReviewArtworkQueue key="admin-artwork-queue" admin />;
   } else if (activeTab === 'news' && canAdmin(role)) {
     content = <NewsAdminPanel />;
+  } else if (activeTab === 'takedowns' && canAdmin(role)) {
+    content = (
+      <TakedownRequestsPanel onActiveChange={setHasActiveTakedowns} />
+    );
   } else if (activeTab === 'themes' && canReview(role)) {
     content = <ThemeAdminPanel />;
   } else {
@@ -121,17 +153,22 @@ export function DashboardShell({
             {tabsArray.map((tabName) => {
               const tab = dashboardTabData[tabName];
               const active = tab.id === activeTab;
+              const showTakedownPip =
+                tab.id === 'takedowns' && hasActiveTakedowns;
               return (
                 <button
                   key={tab.id}
                   type="button"
                   onClick={() => setSearchParams({ tab: tab.id })}
-                  className={`flex min-w-[190px] items-start gap-3 rounded-md px-3 py-3 text-left transition lg:min-w-0 ${
+                  className={`relative flex min-w-[190px] items-start gap-3 rounded-md px-3 py-3 text-left transition lg:min-w-0 ${
                     active
                       ? 'bg-primary text-white'
                       : 'text-neutral-700 hover:bg-neutral-100'
                   }`}
                 >
+                  {showTakedownPip && (
+                    <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-secondary-blue ring-2 ring-white" />
+                  )}
                   <span className="mt-0.5 flex-none">{tab.icon}</span>
                   <span>
                     <span className="block text-sm font-semibold">

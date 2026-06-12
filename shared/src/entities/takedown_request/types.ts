@@ -52,6 +52,7 @@ export interface InitiateTakedownResponse {
 // Admin/contributor response shape for review list
 export interface TakedownRequestListItem {
     tdr_id: string;
+    tdr_sk: string;
     ts: number;
     status: TakedownStatus;
     art_id?: string;
@@ -71,14 +72,17 @@ export interface ListTakedownRequestsResponse {
     last_key?: string;
 }
 
-// Request to cancel or dispute a takedown (contributor/admin)
+// Request to cancel, dispute, or execute a takedown (admin)
 export interface ReviewTakedownRequest {
-    action: 'cancel' | 'dispute';
+    action: 'cancel' | 'dispute' | 'execute';
     review_notes?: string;
 }
 
 export interface ReviewTakedownResponse {
     success: true;
     tdr_sk: string;
-    status: Extract<TakedownStatus, 'canceled' | 'disputing'>;
+    status: Extract<TakedownStatus, 'canceled' | 'disputing' | 'executed'>;
+    affected_art_ids?: string[];
+    affected_group_ids?: string[];
+    tagged_object_count?: number;
 }

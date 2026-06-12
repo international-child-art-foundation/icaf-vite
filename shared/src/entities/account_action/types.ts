@@ -25,6 +25,7 @@ export type AccountActionType =
     | 'unhide_group'
     | 'hide_all'
     | 'unhide_all'
+    | 'execute_takedown'
     | 'delete_account_admin';
 
 // Full ACCOUNT_ACTION entity as stored in DynamoDB
@@ -37,5 +38,6 @@ export interface AccountActionEntity {
     target_user_id?: string;        // if a bulk action was taken, the affected user ID
     art_id?: string;                // include where applicable
     group_id?: string;              // include where applicable
+    tdr_id?: string;                // include where applicable
     type: 'ACCOUNT_ACTION';
 }

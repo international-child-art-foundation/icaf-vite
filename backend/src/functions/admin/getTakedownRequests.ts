@@ -14,6 +14,10 @@ import { getCurrentUser } from "../../utils/auth";
 
 const DEFAULT_LIMIT = 20;
 
+function isTruthyQueryFlag(value: string | undefined): boolean {
+  return value === "1" || value === "true";
+}
+
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
@@ -37,25 +41,45 @@ export const handler = async (
       return parsedLastKey.response;
     }
     const lastKey = parsedLastKey?.value;
+    const activeOnly = isTruthyQueryFlag(qp.active_only);
 
-    // Query TDR partition — all takedown requests
-    const result = await dynamodb.send(
-      new QueryCommand({
-        TableName: TABLE_NAME,
-        KeyConditionExpression: "PK = :pk",
-        ExpressionAttributeValues: { ":pk": "TDR" },
-        Limit: limit + 1,
-        ScanIndexForward: false, // newest first
-        ...(lastKey && { ExclusiveStartKey: lastKey }),
-      }),
-    );
+    const items: Record<string, unknown>[] = [];
+    let queryLastKey = lastKey;
+    let resultLastKey: Record<string, unknown> | undefined;
 
-    const items = result.Items ?? [];
+    do {
+      const result = await dynamodb.send(
+        new QueryCommand({
+          TableName: TABLE_NAME,
+          KeyConditionExpression: "PK = :pk",
+          ...(activeOnly && {
+            FilterExpression: "#status IN (:requesting, :disputing)",
+            ExpressionAttributeNames: { "#status": "status" },
+          }),
+          ExpressionAttributeValues: {
+            ":pk": "TDR",
+            ...(activeOnly && {
+              ":requesting": "requesting",
+              ":disputing": "disputing",
+            }),
+          },
+          Limit: limit + 1,
+          ScanIndexForward: false, // newest first
+          ...(queryLastKey && { ExclusiveStartKey: queryLastKey }),
+        }),
+      );
+
+      items.push(...((result.Items ?? []) as Record<string, unknown>[]));
+      resultLastKey = result.LastEvaluatedKey as Record<string, unknown> | undefined;
+      queryLastKey = resultLastKey;
+    } while (activeOnly && items.length <= limit && queryLastKey);
+
     const has_more = items.length > limit;
     const page = has_more ? items.slice(0, limit) : items;
 
     const requests: TakedownRequestListItem[] = page.map((item) => ({
       tdr_id: item.tdr_id as string,
+      tdr_sk: item.SK as string,
       ts: item.ts as number,
       status: item.status as TakedownRequestListItem["status"],
       art_id: item.art_id as string | undefined,
@@ -69,7 +93,7 @@ export const handler = async (
       review_notes: item.review_notes as string | undefined,
     }));
 
-    const lastEvaluatedKey = has_more ? items[limit - 1] : result.LastEvaluatedKey;
+    const lastEvaluatedKey = has_more ? items[limit - 1] : resultLastKey;
     const response: ListTakedownRequestsResponse = {
       requests,
       has_more,

@@ -11,6 +11,7 @@ import {
 } from "@icaf/shared";
 import { parseJsonBody } from "../../utils/request";
 import { getCurrentUser } from "../../utils/auth";
+import { executeTakedownRequest } from "./takedownExecution";
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -37,12 +38,34 @@ export const handler = async (
     }
 
     const body = parsedBody.value;
-    if (!body.action || !["cancel", "dispute"].includes(body.action)) {
-      return CommonErrors.badRequest("action must be 'cancel' or 'dispute'");
+    if (!body.action || !["cancel", "dispute", "execute"].includes(body.action)) {
+      return CommonErrors.badRequest("action must be 'cancel', 'dispute', or 'execute'");
     }
     const tdrErrors = validateReviewTakedownRequest(body);
     if (tdrErrors.length > 0) {
       return CommonErrors.badRequest(tdrErrors.join("; "));
+    }
+
+    if (body.action === "execute") {
+      const result = await executeTakedownRequest({
+        tdrSk,
+        adminId,
+        reviewNotes: body.review_notes,
+      });
+      if (!result.ok) return result.response;
+
+      return {
+        statusCode: HTTP_STATUS.OK,
+        body: JSON.stringify({
+          success: true,
+          tdr_sk: tdrSk,
+          status: result.status,
+          affected_art_ids: result.affectedArtIds,
+          affected_group_ids: result.affectedGroupIds,
+          tagged_object_count: result.taggedObjectCount,
+        }),
+        headers: COMMON_HEADERS,
+      };
     }
 
     const newStatus = body.action === "cancel" ? "canceled" : "disputing";
@@ -59,17 +82,19 @@ export const handler = async (
           ExpressionAttributeNames: { "#status": "status" },
           ExpressionAttributeValues: {
             ":status": newStatus,
+            ":requesting": "requesting",
+            ":disputing": "disputing",
             ":reviewer": adminId,
             ":reviewedAt": nowSeconds,
             ...(body.review_notes && { ":notes": body.review_notes }),
           },
-          ConditionExpression: "attribute_exists(PK)",
+          ConditionExpression: "attribute_exists(PK) AND #status IN (:requesting, :disputing)",
         }),
       );
     } catch (err: unknown) {
       const ddbErr = err as { name?: string };
       if (ddbErr.name === "ConditionalCheckFailedException") {
-        return CommonErrors.notFound("Takedown request not found");
+        return CommonErrors.badRequest("Takedown request is not active");
       }
       throw err;
     }

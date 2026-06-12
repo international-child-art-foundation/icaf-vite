@@ -86,7 +86,7 @@ export const SocialShare = ({ shareUrl, center = false }: SocialShareProps) => {
         ))}
       </div>
       <p
-        className={`mt-1 text-sm transition-opacity ${showCopiedPopup ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+        className={` mt-1 text-sm transition-opacity ${showCopiedPopup ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
       >
         Link copied!
       </p>

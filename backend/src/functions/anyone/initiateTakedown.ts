@@ -11,6 +11,7 @@ import {
 } from "@icaf/shared";
 import { parseJsonBody } from "../../utils/request";
 import { randomUUID } from "crypto";
+import { sendTakedownNotificationEmail } from "../../utils/emails/takedownNotification";
 
 // Takedown requests auto-execute 5 days after submission
 const EXECUTION_WINDOW_SECONDS = 5 * 24 * 60 * 60;
@@ -30,6 +31,9 @@ export const handler = async (
     const tdr_id = randomUUID();
     const nowSeconds = Math.floor(Date.now() / 1000);
     const scheduled_execution_at = nowSeconds + EXECUTION_WINDOW_SECONDS;
+    const requesterEmail = body.requester_email.trim();
+    const requesterName = body.requester_name.trim();
+    const reason = body.reason.trim();
 
     await dynamodb.send(
       new PutCommand({
@@ -40,9 +44,9 @@ export const handler = async (
           tdr_id,
           ts: nowSeconds,
           status: "requesting",
-          requester_email: body.requester_email.trim(),
-          requester_name: body.requester_name.trim(),
-          reason: body.reason.trim(),
+          requester_email: requesterEmail,
+          requester_name: requesterName,
+          reason,
           scheduled_execution_at,
           ...(body.art_id && { art_id: body.art_id }),
           ...(body.group_id && { group_id: body.group_id }),
@@ -50,6 +54,25 @@ export const handler = async (
         },
       }),
     );
+
+    try {
+      const messageId = await sendTakedownNotificationEmail({
+        tdrId: tdr_id,
+        submittedAt: nowSeconds,
+        scheduledExecutionAt: scheduled_execution_at,
+        requesterEmail,
+        requesterName,
+        reason,
+        artId: body.art_id,
+        groupId: body.group_id,
+      });
+      console.info("Takedown notification email sent", {
+        tdr_id,
+        ses_message_id: messageId,
+      });
+    } catch (error) {
+      console.error("Takedown notification email failed:", error);
+    }
 
     const response: InitiateTakedownResponse = {
       success: true,

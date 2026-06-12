@@ -808,7 +808,7 @@ export function SubmitArtworkGroup({
 
             <section
               ref={artworkSectionRef}
-              className="mt-6 flex flex-col gap-3"
+              className="mb-4 mt-6 flex flex-col gap-3"
             >
               <div>
                 <h2 className="font-montserrat text-xl font-semibold text-slate-950">

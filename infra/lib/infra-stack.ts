@@ -394,6 +394,10 @@ export class InfraStack extends Stack {
     // ─── 7. Lambda Functions ──────────────────────────────────────────────────
     // TODO: Update APP_URL and MAGAZINES_CLOUDFRONT_DOMAIN before deployment
     const SES_FROM_EMAIL = "no-reply@icaf.org";
+    const TAKEDOWN_NOTIFICATION_EMAILS = [
+      "childart@icaf.org",
+      "noah.zaranka@icaf.org",
+    ];
     const sesConfigurationSet = new ses.CfnConfigurationSet(this, "IcafSesConfigurationSet", {
       name: "icaf-transactional",
     });
@@ -433,6 +437,8 @@ export class InfraStack extends Stack {
       APP_URL: "https://revise.icaf.org",
       SES_FROM_EMAIL,
       SES_CONFIGURATION_SET: sesConfigurationSet.ref,
+      TAKEDOWN_NOTIFICATION_EMAILS: JSON.stringify(TAKEDOWN_NOTIFICATION_EMAILS),
+      ARTWORK_CLOUDFRONT_DISTRIBUTION_ID: artworkDistribution.distributionId,
       MAGAZINES_CLOUDFRONT_DOMAIN: "d1y7vnzq9a2pjl.cloudfront.net", // CloudFront domain for magazine assets
     };
 
@@ -558,6 +564,14 @@ export class InfraStack extends Stack {
       effect: iam.Effect.ALLOW,
       actions: ["ses:SendEmail", "ses:SendRawEmail"],
       resources: ["*"],
+    }));
+
+    apiFn.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ["cloudfront:CreateInvalidation"],
+      resources: [
+        `arn:aws:cloudfront::${this.account}:distribution/${artworkDistribution.distributionId}`,
+      ],
     }));
 
     // Cognito admin operations

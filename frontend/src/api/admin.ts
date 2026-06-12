@@ -42,6 +42,8 @@ import {
 import { apiEndpoints } from './endpoints';
 import type { PaginationQuery } from './types';
 
+export const TAKEDOWN_ACTIVITY_CACHE_MS = 30 * 60 * 1000;
+
 const hasMessageAndUserId = (response: unknown): boolean =>
   hasStringProperty(response, 'message') && hasStringProperty(response, 'user_id');
 
@@ -213,13 +215,30 @@ export function getArtworkSubmitterEmail(
 
 export function listTakedownRequests(
   query?: PaginationQuery,
+  options: { bypassCache?: boolean; cacheTtlMs?: number } = {},
 ): Promise<ListTakedownRequestsResponse> {
   return apiRequest<ListTakedownRequestsResponse>(
     apiEndpoints.admin.getTakedownRequests,
     {
+      bypassCache: options.bypassCache,
+      cacheTtlMs: options.cacheTtlMs,
       query,
       validate: isTakedownListResponse,
     },
+  );
+}
+
+export async function hasActiveTakedownRequests(
+  options: { bypassCache?: boolean; cacheTtlMs?: number } = {},
+): Promise<boolean> {
+  const response = await listTakedownRequests(
+    { active_only: true, limit: 1 },
+    options,
+  );
+
+  return response.requests.some(
+    (request) =>
+      request.status === 'requesting' || request.status === 'disputing',
   );
 }
 

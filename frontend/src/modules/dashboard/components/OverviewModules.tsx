@@ -74,6 +74,11 @@ export function OverviewModules({ role }: { role: Role | null }) {
               label="News admin"
               detail="Create, edit, delete, or bulk upload public news items."
             />
+            <ActionLink
+              to="/my-icaf?tab=takedowns"
+              label="Takedown requests"
+              detail="Review requests, cancel invalid claims, or mark disputes."
+            />
           </div>
         </DashboardModule>
       )}

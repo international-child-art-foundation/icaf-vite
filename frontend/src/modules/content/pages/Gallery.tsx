@@ -27,6 +27,10 @@ export const Gallery = () => {
   // } else {
   //   gradientDefinition = OpinionatedGradients.sm;
   // }
+  const blurb1 =
+    'ICAF is proud to host the artworks of young artists from all over the world.';
+  const blurb2 =
+    "Add your child's dream to our ever growing gallery of marvels and murals, free of charge.";
 
   return (
     <>
@@ -67,13 +71,10 @@ export const Gallery = () => {
             </p>
             <div className="my-4 flex flex-col gap-4">
               <p className="m-pad flex flex-col gap-0 text-lg text-gray-800">
-                <span>
-                  ICAF is proud to host the artworks of young artists from all
-                  over the world.
-                </span>
-                <span>
-                  Add your child's dream to our ever growing gallery of marvels
-                  and murals, free of charge.
+                <span className="hidden sm:block">{blurb1}</span>
+                <span className="hidden sm:block">{blurb2}</span>
+                <span className="block sm:hidden">
+                  {blurb1} {blurb2}
                 </span>
               </p>
               <div className="mx-auto block">

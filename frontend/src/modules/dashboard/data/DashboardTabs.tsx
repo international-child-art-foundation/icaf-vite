@@ -5,6 +5,7 @@ import {
   GalleryHorizontal,
   Newspaper,
   Palette,
+  Scale,
 } from 'lucide-react';
 import type { Role } from '@icaf/shared';
 import { TabData } from '@/modules/dashboard/types/dashboardTypes';
@@ -58,6 +59,14 @@ export const dashboardTabData = {
     icon: <Palette size={18} />,
     color: 'text-secondary-green/30',
     roles: 'review',
+  },
+  takedowns: {
+    id: 'takedowns',
+    label: 'Takedowns',
+    description: 'Review submitted takedown requests',
+    icon: <Scale size={18} />,
+    color: 'text-secondary-pink/30',
+    roles: 'admin',
   },
 } satisfies TabData;
 

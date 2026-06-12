@@ -367,7 +367,7 @@ export const KudosControls = ({
           />
           <span className="min-w-0 truncate">
             {status.alreadyGiven
-              ? 'Kudos sent'
+              ? 'Kudos sent!'
               : status.remaining < KUDOS_AMOUNT
                 ? 'Spent today'
                 : 'Give kudos!'}

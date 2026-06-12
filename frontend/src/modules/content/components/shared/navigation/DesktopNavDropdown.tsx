@@ -3,6 +3,7 @@ import { NavItem, NavChild } from '@/shared/data/navItems';
 import { NavGraphic } from '@/shared/assets/images/navigation/navGraphic';
 import { CircleArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { preloadRoute } from '@/preloadRoutes';
 
 interface DesktopNavDropdownProps {
   item: NavItem;
@@ -11,6 +12,7 @@ interface DesktopNavDropdownProps {
   isOpening: boolean;
   openingFromClosed: boolean;
   onItemSelected?: () => void;
+  shouldRenderContent?: boolean;
 }
 
 const MAX_DROPDOWN_HEIGHT = 330;
@@ -22,6 +24,7 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
   isOpening,
   openingFromClosed,
   onItemSelected,
+  shouldRenderContent = true,
 }) => {
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
 
@@ -58,6 +61,7 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
       aria-hidden={progress === 0}
       className="overflow-hidden"
     >
+      {!shouldRenderContent ? null : (
       <div className="2xl:max-w-screen-3xl mx-auto w-full">
         <div
           className="grid h-64"
@@ -140,6 +144,8 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
                 key={child.href}
                 to={child.href}
                 className={commonClassName}
+                onMouseEnter={() => preloadRoute(child.href)}
+                onFocus={() => preloadRoute(child.href)}
                 onClick={() => handleSelect(i)}
               >
                 {tileContent}
@@ -152,6 +158,8 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
           <Link
             className="bg-primary text-text-inverse group flex h-16 items-center gap-2 font-sans text-lg font-semibold"
             to={item.href}
+            onMouseEnter={() => preloadRoute(item.href)}
+            onFocus={() => preloadRoute(item.href)}
             onClick={() => onItemSelected?.()}
           >
             <NavGraphic />
@@ -164,6 +172,7 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
           </div>
         )}
       </div>
+      )}
     </div>
   );
 };

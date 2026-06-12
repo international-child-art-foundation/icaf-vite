@@ -14,7 +14,7 @@ const MobileNav: React.FC = () => {
 
   return (
     <>
-      <Link to={'/'} className="my-2 cursor-pointer">
+      <Link to={'/'} className="my-2 cursor-pointer" aria-label="ICAF home">
         <ICAFlogo />
       </Link>
       <Button

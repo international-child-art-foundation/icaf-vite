@@ -103,6 +103,8 @@ export const HomeCarousel = () => {
                       src={cover.image}
                       className="w-full object-cover"
                       alt=""
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 </CarouselItem>

@@ -3,7 +3,6 @@ import { Button } from '../../../../shared/components/ui/button';
 import { Input } from '../../../../shared/components/ui/input';
 import { Mail } from 'lucide-react';
 import Ribbons from '@/shared/assets/images/Ribbons.svg';
-import { linkClasses } from '@/shared/data/linkClasses';
 
 export const NewsletterSignup = () => {
   const [email, setEmail] = useState('');
@@ -122,7 +121,7 @@ export const NewsletterSignup = () => {
                     By signing up, you agree to our
                     <a
                       href="/documents/ICAF_Website_Privacy_Policy.pdf"
-                      className={linkClasses}
+                      className={'text-blue-700 visited:text-purple-700'}
                       target="_blank"
                       rel="noopener noreferrer"
                     >

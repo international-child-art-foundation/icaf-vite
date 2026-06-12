@@ -28,13 +28,13 @@ export default function CookieBanner() {
         <p className="mx-auto mb-3 w-[800px] max-w-[90%]">
           🍪 We use cookies to help us learn more about the behavior and
           location of our users so we can provide you with the best possible
-          experience.
+          experience. You can choose to accept or deny these optional cookies.
         </p>
-        <p className="mx-auto mb-6 w-[800px] max-w-[90%]">
+        {/* <p className="mx-auto mb-6 w-[800px] max-w-[90%]">
           You can choose to accept or deny these cookies. And don't worry, you
           can change your cookie settings anytime by clicking the Cookie
           Settings button at the bottom of the page.
-        </p>
+        </p> */}
 
         <div className="m-auto flex justify-center">
           <button

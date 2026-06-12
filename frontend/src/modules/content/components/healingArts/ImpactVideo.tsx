@@ -3,8 +3,8 @@
 import { VideoWrapper } from '../shared/VideoWrapper';
 import healingArtsImg from '@/shared/assets/images/navigation/programs/healingArtsProgram_smaller.webp';
 import { useWindowSize } from 'usehooks-ts';
-import healingArtsVideo from '@/modules/content/assets/healingArts/healing-arts.mp4';
 import healingArtsThumb from '@/modules/content/assets/healingArts/healing-arts-thumb.webp';
+import { largeMedia } from '@/shared/lib/largeMedia';
 
 export const ImpactVideo = () => {
   const size = useWindowSize();
@@ -20,7 +20,10 @@ export const ImpactVideoThreeRows = () => {
     <div className="breakout-w m-pad">
       <div className="relative flex w-full flex-col gap-8 overflow-hidden rounded-xl 2xl:flex-row">
         <div className="relative h-full w-full overflow-hidden rounded-xl 2xl:basis-[70%]">
-          <VideoWrapper src={healingArtsVideo} thumbnail={healingArtsThumb} />
+          <VideoWrapper
+            src={largeMedia.katrinaHealingArtsProgram}
+            thumbnail={healingArtsThumb}
+          />
         </div>
         <div className="flex h-auto w-full flex-col justify-between gap-4 overflow-hidden rounded-[20px] bg-[#DFE7F8] p-8 lg:justify-around 2xl:basis-[30%]">
           <div className="relative flex flex-col gap-10">
@@ -53,7 +56,10 @@ export const ImpactVideoTwoRows = () => {
     <div className="content-w m-pad">
       <div className="relative flex flex-col gap-8 overflow-hidden rounded-xl 2xl:flex-row">
         <div className="relative h-full w-full overflow-hidden rounded-xl">
-          <VideoWrapper src={healingArtsVideo} thumbnail={healingArtsThumb} />
+          <VideoWrapper
+            src={largeMedia.katrinaHealingArtsProgram}
+            thumbnail={healingArtsThumb}
+          />
         </div>
         <div className="flex h-[250px] w-full flex-row justify-between gap-4 overflow-hidden rounded-[20px] bg-[#DFE7F8] p-8 lg:justify-around 2xl:h-auto 2xl:w-[400px] 2xl:flex-col 2xl:gap-4">
           <div className="relative flex flex-col gap-10">

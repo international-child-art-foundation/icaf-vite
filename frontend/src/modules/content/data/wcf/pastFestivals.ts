@@ -6,10 +6,8 @@ import openingAddressThumb from '@/shared/assets/media/thumb/2021 World Children
 import watchThumb from '@/shared/assets/media/thumb/Swatchs master watchmaker at the World Childrens Festival.webp';
 import musicThumb from '@/shared/assets/media/thumb/WCF Musical Celebration.webp';
 
-import openingAddressVideo from '@/shared/assets/media/2021 World Childrens Festival opening address by Dr. Liston Bochette III.mp4';
-import watchVideo from '@/shared/assets/media/Swatchs master watchmaker at the World Childrens Festival.mp4';
-import musicVideo from '@/shared/assets/media/WCF Musical Celebration.mp4';
 import { ColorKey } from '@/modules/content/components/shared/FlairColorMap';
+import { largeMedia } from '@/shared/lib/largeMedia';
 
 //At this time missing video links for each video, and may need a poster to lay over the video.
 
@@ -31,7 +29,7 @@ export const pastFestivalsData: PastFestivalsData[] = [
     paragraph:
       'Featured creativity workshops, cultural performances, and leadership training.',
     color: 'red',
-    videoSrc: openingAddressVideo,
+    videoSrc: largeMedia.wcf2021OpeningAddress,
     thumbSrc: openingAddressThumb,
     magazineCover: pastFestival_1,
     magazineLink: 'https://icaf.org/ChildArt/2021WCF/',
@@ -42,7 +40,7 @@ export const pastFestivalsData: PastFestivalsData[] = [
     paragraph:
       'Global collaboration through interactive arts and storytelling.',
     color: 'tertiaryYellow',
-    videoSrc: watchVideo,
+    videoSrc: largeMedia.swatchMasterWatchmaker,
     thumbSrc: watchThumb,
     magazineCover: pastFestival_2,
     magazineLink: 'https://icaf.org/ChildArt/Creativity,DiversityandUnity/',
@@ -53,7 +51,7 @@ export const pastFestivalsData: PastFestivalsData[] = [
     paragraph:
       'A landmark event showcasing art, dance, and music from young talents worldwide.',
     color: 'tertiaryBlue',
-    videoSrc: musicVideo,
+    videoSrc: largeMedia.wcfMusicalCelebration,
     thumbSrc: musicThumb,
     magazineCover: pastFestival_3,
     magazineLink: 'https://icaf.org/ChildArt/2011WCF/',

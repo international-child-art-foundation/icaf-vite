@@ -6,7 +6,6 @@ import {
   AccordionContent,
 } from '@/shared/components/ui/accordion';
 import { useState } from 'react';
-import { toUpper } from 'lodash';
 import { Link } from 'react-router-dom';
 
 type MobileNavMenuProps = {
@@ -41,7 +40,7 @@ const MobileNavMenu = ({ onCloseMenu }: MobileNavMenuProps) => {
             if (!href) {
               return (
                 <div key={item.key} className="px-1 py-2 text-base">
-                  {toUpper(item.label)}
+                  {item.label.toUpperCase()}
                 </div>
               );
             }
@@ -52,7 +51,7 @@ const MobileNavMenu = ({ onCloseMenu }: MobileNavMenuProps) => {
                 className="block px-1 py-2 text-base font-semibold"
                 onClick={onCloseMenu}
               >
-                {toUpper(item.label)}
+                {item.label.toUpperCase()}
               </Link>
             );
           }
@@ -60,7 +59,7 @@ const MobileNavMenu = ({ onCloseMenu }: MobileNavMenuProps) => {
           return (
             <AccordionItem value={item.key} key={item.key}>
               <AccordionTrigger className="flex justify-between font-semibold">
-                {toUpper(item.label)}
+                {item.label.toUpperCase()}
               </AccordionTrigger>
               <AccordionContent className="space-y-2 pl-4 text-base font-normal">
                 {children?.map((child) => {

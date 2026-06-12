@@ -4,6 +4,7 @@ import { NavItem, navItems } from '@/shared/data/navItems';
 import DesktopNavDropdown from './DesktopNavDropdown';
 import { Link } from 'react-router-dom';
 import DonateButton from '@/shared/components/ui/donateButton';
+import { preloadRoute } from '@/preloadRoutes';
 
 type DropdownAnimationState = {
   progress: number;
@@ -39,8 +40,24 @@ const DesktopNav: React.FC = () => {
 
   const headerRef = useRef<HTMLDivElement | null>(null);
   const zCounterRef = useRef<number>(1);
+  const renderedDropdownLabelsRef = useRef<Set<string>>(new Set());
+  const preloadedImagesRef = useRef<Set<string>>(new Set());
+  const openRequestIdRef = useRef(0);
+
+  const preloadMenuImages = (item: NavItem) => {
+    item.children?.forEach((child) => {
+      if (!child.imageSrc || preloadedImagesRef.current.has(child.imageSrc)) {
+        return;
+      }
+
+      const img = new Image();
+      img.src = child.imageSrc;
+      preloadedImagesRef.current.add(child.imageSrc);
+    });
+  };
 
   const collapseDropdowns = useCallback(() => {
+    openRequestIdRef.current += 1;
     setCurrentItemLabel(null);
     setDropdownState((prev) => {
       const next: DropdownStateMap = {};
@@ -58,6 +75,8 @@ const DesktopNav: React.FC = () => {
   }, []);
 
   const handleItemHover = (item: NavItem) => {
+    preloadRoute(item.href);
+
     const hasChildren = !!item.children && item.children.length > 0;
 
     if (!hasChildren) {
@@ -66,19 +85,26 @@ const DesktopNav: React.FC = () => {
       return;
     }
 
+    renderedDropdownLabelsRef.current.add(item.label);
+    preloadMenuImages(item);
+
     if (currentItemLabel === item.label) {
       return;
     }
 
     setCurrentItemLabel(item.label);
+    const requestId = (openRequestIdRef.current += 1);
+    const newZIndex = zCounterRef.current++;
 
     setDropdownState((prev) => {
+      if (openRequestIdRef.current !== requestId) {
+        return prev;
+      }
+
       const next: DropdownStateMap = {};
       const currentState = prev[item.label];
 
       const openingFromClosed = !currentState || currentState.progress === 0;
-
-      const newZIndex = zCounterRef.current++;
 
       for (const key of Object.keys(prev)) {
         const state = prev[key];
@@ -123,6 +149,7 @@ const DesktopNav: React.FC = () => {
   };
 
   const handleDonateHover = () => {
+    preloadRoute('/donate');
     setCurrentItemLabel(null);
     collapseDropdowns();
   };
@@ -130,15 +157,6 @@ const DesktopNav: React.FC = () => {
   const handleDropdownItemSelected = () => {
     collapseDropdowns();
   };
-
-  useEffect(() => {
-    navItems.forEach((item) => {
-      item.children?.forEach((child) => {
-        const img = new Image();
-        img.src = child.imageSrc;
-      });
-    });
-  }, []);
 
   useEffect(() => {
     const anyOpen = Object.values(dropdownState).some(
@@ -170,8 +188,9 @@ const DesktopNav: React.FC = () => {
     >
       {navItems.map((item: NavItem) => {
         const state = dropdownState[item.label];
+        const hasChildren = !!item.children && item.children.length > 0;
 
-        if (!state) {
+        if (!state || !hasChildren) {
           return null;
         }
 
@@ -184,12 +203,15 @@ const DesktopNav: React.FC = () => {
             isOpening={state.isOpening}
             openingFromClosed={state.openingFromClosed}
             onItemSelected={handleDropdownItemSelected}
+            shouldRenderContent={renderedDropdownLabelsRef.current.has(
+              item.label,
+            )}
           />
         );
       })}
 
       <div className="absolute left-0 top-0 z-30 h-full w-full bg-white"></div>
-      <Link to="/" className="z-50 my-2 cursor-pointer">
+      <Link to="/" className="z-50 my-2 cursor-pointer" aria-label="ICAF home">
         <ICAFlogo />
       </Link>
 

@@ -5,10 +5,16 @@ require_once "Mail.php";
 require_once "Mail/mime.php";
 
 // ---- config ----
-$to = "childart@icaf.org";
 $mailDomain = "icaf.org";
 $username = "no-reply@" . $mailDomain;
 $from = "ICAF <no-reply@" . $mailDomain . ">";
+
+$recipients = [
+  "childart@icaf.org",
+  "noah.zaranka@icaf.org",
+];
+
+$toHeader = implode(", ", $recipients);
 
 header("Referrer-Policy: no-referrer");
 header("X-Content-Type-Options: nosniff");
@@ -55,13 +61,16 @@ const LIMIT_ORGANIZATION = 500;
 function clamp_utf8(string $s, int $n): string {
   return mb_strlen($s, "UTF-8") > $n ? mb_substr($s, 0, $n, "UTF-8") : $s;
 }
+
 function header_safe(string $s): string {
   if (preg_match("/\r|\n/", $s)) bail(422, "invalid_chars");
   return $s;
 }
+
 function is_valid_email(string $email): bool {
   return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 }
+
 function h(string $s): string {
   return htmlspecialchars($s, ENT_QUOTES, "UTF-8");
 }
@@ -70,20 +79,21 @@ function h(string $s): string {
  * Send an email (text + HTML) and return JSON { ok: true } on success.
  */
 function send_mail_json(string $replyTo, string $mailSubject, string $textBody, string $htmlBody): void {
-  global $to, $from, $username, $password;
+  global $recipients, $toHeader, $from, $username, $password;
 
   $mime = new Mail_mime(["eol" => "\r\n"]);
   $mime->setTXTBody($textBody);
   $mime->setHTMLBody($htmlBody);
 
-  $body    = $mime->get([
+  $body = $mime->get([
     "text_charset" => "UTF-8",
     "html_charset" => "UTF-8",
     "head_charset" => "UTF-8",
   ]);
+
   $headers = $mime->headers([
     "From"         => $from,
-    "To"           => $to,
+    "To"           => $toHeader,
     "Reply-To"     => $replyTo,
     "Subject"      => $mailSubject,
     "MIME-Version" => "1.0",
@@ -99,7 +109,7 @@ function send_mail_json(string $replyTo, string $mailSubject, string $textBody, 
     "persist"  => false,
   ]);
 
-  $result = $smtp->send($to, $headers, $body);
+  $result = $smtp->send($recipients, $headers, $body);
 
   if (\PEAR::isError($result)) {
     bail(500, "send_failed");
@@ -114,18 +124,25 @@ $type = (string)($_POST["type"] ?? "");
 
 // ---- subscribe ----
 if ($type === "subscribe") {
+  global $recipients, $toHeader, $from, $username, $password;
+
   $email = clamp_utf8(trim((string)($_POST["email"] ?? "")), LIMIT_EMAIL);
+
   if (!is_valid_email($email)) {
     exit("invalid_request");
   }
 
+  header_safe($email);
+
   $subject = "{$email} would like to subscribe to the ICAF newsletter";
+
   $headers = [
     "From"         => $from,
-    "To"           => $to,
+    "To"           => $toHeader,
     "Subject"      => $subject,
     "Content-Type" => "text/html; charset=UTF-8",
   ];
+
   $smtp = Mail::factory("smtp", [
     "host"     => "ssl://smtp.ionos.com",
     "port"     => 465,
@@ -135,11 +152,14 @@ if ($type === "subscribe") {
     "timeout"  => 10,
     "persist"  => false,
   ]);
-  $result = $smtp->send($to, $headers, $subject);
+
+  $result = $smtp->send($recipients, $headers, $subject);
+
   if (\PEAR::isError($result)) {
     echo "<p>An error occurred while sending the email. Please try again later.</p>";
     exit;
   }
+
   echo "success";
   exit;
 }
@@ -229,6 +249,7 @@ if ($type === "professionals") {
 
   header_safe($name);
   header_safe($email);
+
   if ($subject !== "") {
     header_safe($subject);
   }

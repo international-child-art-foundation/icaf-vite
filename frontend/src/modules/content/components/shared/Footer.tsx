@@ -150,7 +150,7 @@ function Footer() {
         <div className="w-full lg:order-3 lg:my-auto lg:w-1/5 xl:col-span-2 xl:col-start-8 xl:my-0 xl:w-full">
           <ol className="my-2 grid w-full grid-flow-col justify-between lg:my-0 lg:grid-flow-row lg:grid-cols-3 lg:place-items-center lg:gap-6">
             {icons.map((icon) => (
-              <div key={icon.href}>
+              <li key={icon.href}>
                 <a
                   aria-label={icon.altText}
                   href={icon.href}
@@ -162,13 +162,13 @@ function Footer() {
                     aria-hidden="true"
                   />
                 </a>
-              </div>
+              </li>
             ))}
           </ol>
         </div>
         <div className="footer-inverse w-full text-base lg:order-2 lg:w-auto lg:text-base xl:col-span-2 xl:col-start-6">
           <ol className="grid grid-cols-2 gap-x-8 gap-y-5 lg:grid-cols-1 lg:gap-y-4 lg:pl-0 lg:pr-14">
-            <div className="break-words">
+            <li className="break-words">
               <a
                 href="/documents/ICAF_Website_Terms_of_Use.pdf"
                 target="_blank"
@@ -176,8 +176,8 @@ function Footer() {
               >
                 Terms of use
               </a>
-            </div>
-            <div className="break-words">
+            </li>
+            <li className="break-words">
               <a
                 href="/documents/ICAF_Website_Privacy_Policy.pdf"
                 target="_blank"
@@ -185,14 +185,14 @@ function Footer() {
               >
                 Privacy policy
               </a>
-            </div>
-            <div
+            </li>
+            <li
               className="cursor-pointer break-words"
               onClick={() => setCookieBannerVisible(true)}
             >
               Cookie Settings
-            </div>
-            <div className="break-words">
+            </li>
+            <li className="break-words">
               <Link
                 to={'/takedown-request'}
                 target="_blank"
@@ -200,7 +200,7 @@ function Footer() {
               >
                 Takedown Request
               </Link>
-            </div>
+            </li>
           </ol>
         </div>
         <div className="min-h-[100px] w-full lg:order-4 xl:col-span-3 xl:col-start-10">

@@ -49,6 +49,7 @@ const HomeHeader = () => {
           }`}
           objectFit="cover"
           objectPosition="center bottom"
+          priority
         />
       </div>
     </div>

@@ -1,8 +1,7 @@
 import { IClimateChangeVideoCallout } from '@/modules/content/types/ClimateChangeTypes';
-import katrinaHealingArtsVideo from '@/shared/assets/media/ICAF Katrina Healing Arts program.mp4';
-import savingEndangeredSpeciesVideo from '@/shared/assets/media/2014 ICAF Judges Saving Endangered Species Art Contest.mp4';
 import katrinaHealingArtsThumb from '@/modules/content/assets/climateChange/katrina-healing-arts-thumb.webp';
 import savingEndangeredSpeciesThumb from '@/modules/content/assets/climateChange/saving-endangered-species-thumb.webp';
+import { largeMedia } from '@/shared/lib/largeMedia';
 
 export const ClimateChangeVideoCalloutData: IClimateChangeVideoCallout[] = [
   {
@@ -22,7 +21,7 @@ export const ClimateChangeVideoCalloutData: IClimateChangeVideoCallout[] = [
         </span>
       </div>
     ),
-    video: katrinaHealingArtsVideo,
+    video: largeMedia.katrinaHealingArtsProgram,
     thumb: katrinaHealingArtsThumb,
     color: 'red',
     link: {
@@ -41,7 +40,7 @@ export const ClimateChangeVideoCalloutData: IClimateChangeVideoCallout[] = [
         </span>
       </div>
     ),
-    video: savingEndangeredSpeciesVideo,
+    video: largeMedia.savingEndangeredSpeciesArtContest,
     thumb: savingEndangeredSpeciesThumb,
     color: 'yellow',
     link: {

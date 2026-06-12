@@ -1,4 +1,11 @@
-import { useId, useRef, useState, useMemo, useLayoutEffect } from 'react';
+import {
+  useId,
+  useRef,
+  useState,
+  useMemo,
+  useEffect,
+  useLayoutEffect,
+} from 'react';
 import { BannerItem } from '@/modules/content/types/BannerItem';
 import { ribbonPaths } from '@/modules/content/types/RibbonTypes';
 import { useWindowSize } from 'usehooks-ts';
@@ -21,6 +28,7 @@ interface BannerImageProps {
   data: BannerItem;
   height?: number;
   scrollConfig?: RibbonScrollResponsiveConfig;
+  loading?: 'eager' | 'lazy';
 }
 
 const DEFAULT_SCROLL_CONFIG: RibbonScrollResponsiveConfig = {
@@ -150,10 +158,12 @@ export const BannerImage = ({
   data,
   height = 550,
   scrollConfig,
+  loading = 'lazy',
 }: BannerImageProps) => {
   const { width: viewportWidth } = useWindowSize();
   const baseId = useId();
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const scrollAnimationRef = useRef<SVGAnimateElement | null>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
   useLayoutEffect(() => {
@@ -250,6 +260,41 @@ export const BannerImage = ({
     };
   }, [hasText, scrollParams, baseText, separator]);
 
+  useEffect(() => {
+    if (
+      !hasText ||
+      !textPathScaled ||
+      !repeatedText ||
+      durationSeconds <= 0 ||
+      shiftPercent === 0
+    ) {
+      return;
+    }
+
+    const animation = scrollAnimationRef.current;
+    if (!animation) return;
+
+    let frameId: number | undefined;
+    const timeoutId = window.setTimeout(() => {
+      frameId = window.requestAnimationFrame(() => {
+        animation.beginElement();
+      });
+    }, 150);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      if (frameId !== undefined) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
+  }, [
+    hasText,
+    textPathScaled,
+    repeatedText,
+    durationSeconds,
+    shiftPercent,
+  ]);
+
   const imageClassName = useMemo(() => {
     const classes = ['col-start-1', 'row-start-1', 'w-full'];
     if (data.objectFit) {
@@ -310,6 +355,8 @@ export const BannerImage = ({
                 className={imageClassName}
                 alt="Banner image"
                 style={{ height: effectiveHeight }}
+                loading={loading}
+                decoding="async"
               />
             </div>
           </div>
@@ -337,7 +384,9 @@ export const BannerImage = ({
               >
                 <textPath href={`#${textPathId}`} startOffset="0%">
                   <animate
+                    ref={scrollAnimationRef}
                     attributeName="startOffset"
+                    begin="indefinite"
                     from="0%"
                     to={`-${shiftPercent}%`}
                     dur={`${durationSeconds}s`}

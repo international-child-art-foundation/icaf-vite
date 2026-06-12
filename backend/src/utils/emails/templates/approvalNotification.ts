@@ -1,5 +1,6 @@
 import { APP_URL } from '../../../config/aws-clients';
 import { htmlParagraphs, renderButton, renderEmailDocument, renderInfoBox, renderLink, textParagraphs } from '../templateUtils';
+import { buildArtworkUnsubscribeUrl } from '../unsubscribe';
 
 export function buildApprovalEmail(args: {
   userId: string;
@@ -13,7 +14,7 @@ export function buildApprovalEmail(args: {
   const galleryUrl = isGroup
     ? `${APP_URL}/gallery/group/${encodeURIComponent(args.id)}`
     : `${APP_URL}/gallery/artwork/${encodeURIComponent(args.id)}`;
-  const unsubscribeUrl = `${APP_URL}/unsubscribe/artwork?u=${encodeURIComponent(args.userId)}&t=${encodeURIComponent(args.unsubscribeToken)}`;
+  const unsubscribeUrl = buildArtworkUnsubscribeUrl(args.userId, args.unsubscribeToken);
   const titleLine = args.title ? `"${args.title}"` : `Your ${label}`;
 
   const subject = `${titleLine} has been approved!`;
@@ -22,7 +23,7 @@ export function buildApprovalEmail(args: {
     `It is now visible in the ICAF gallery:`,
     galleryUrl,
     'Thank you for your contribution to ICAF!',
-    'To stop receiving artwork and group notification emails from ICAF, use this link:',
+    'To stop receiving ICAF artwork notification emails, use this link:',
     unsubscribeUrl,
   ]);
 
@@ -44,8 +45,8 @@ export function buildApprovalEmail(args: {
       htmlParagraphs(['Thank you for your contribution to ICAF.']),
       [
         '<div style="margin-top:26px;padding-top:16px;border-top:1px solid #cfe2f3;font-size:12px;line-height:1.5;color:#6b7280;">',
-        '<p style="margin:0 0 8px;">If you no longer want artwork notification emails, you can unsubscribe below.</p>',
-        `<p style="margin:0;font-size:12px;">${renderLink(unsubscribeUrl, 'Unsubscribe from artwork emails')}</p>`,
+        '<p style="margin:0 0 8px;">If you no longer want ICAF artwork notification emails, you can unsubscribe below.</p>',
+        `<p style="margin:0;font-size:12px;">${renderLink(unsubscribeUrl, 'Unsubscribe from notification emails')}</p>`,
         '</div>',
       ].join(''),
     ].join(''),

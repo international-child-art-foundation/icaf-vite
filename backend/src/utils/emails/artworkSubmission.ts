@@ -11,10 +11,12 @@ export async function sendArtworkSubmissionEmail(args: {
   toEmail: string;
   userId: string;
   authActionToken: string;
+  unsubscribeToken: string;
 }): Promise<void> {
   const email = buildArtworkSubmissionEmail({
     userId: args.userId,
     authActionToken: args.authActionToken,
+    unsubscribeToken: args.unsubscribeToken,
   });
 
   await sesClient.send(

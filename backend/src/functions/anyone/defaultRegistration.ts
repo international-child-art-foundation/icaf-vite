@@ -142,6 +142,7 @@ export const handler = async (
           banned: false,
           has_magazine_subscription: false,
           has_newsletter_subscription: hasNewsletterSubscription,
+          artwork_emails_off: false,
           auth_action_token: authActionToken,
           auth_action_token_exp: authActionTokenExp,
           type: "USER",

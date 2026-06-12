@@ -6,6 +6,7 @@ import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
 import { EntityType, GSI } from "../../dynamo/ddbSchemaConsts";
 import { emailGsiSk, emailPk } from "../../dynamo/emailGsi";
 import { sendArtworkSubmissionEmail } from "../../utils/emails/artworkSubmission";
+import { ensureArtworkUnsubscribeToken, shouldSuppressArtworkEmail } from "../../utils/emails/unsubscribe";
 
 const AUTH_ACTION_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
@@ -49,6 +50,7 @@ export async function getOrCreateVirtualUser(
       banned: false,
       has_magazine_subscription: false,
       has_newsletter_subscription: false,
+      artwork_emails_off: false,
       type: "USER",
       EMAIL_PK: emailPk(normalizedEmail),
       EMAIL_SK: emailGsiSk(EntityType.User),
@@ -70,7 +72,7 @@ export async function getOrCreateVirtualUser(
     };
   }
 
-  if (user.email_blocked === true) {
+  if (shouldSuppressArtworkEmail(user)) {
     return { ok: true, user, sentSignupEmail: false };
   }
 
@@ -95,10 +97,13 @@ export async function getOrCreateVirtualUser(
   );
 
   try {
+    const unsubscribeToken = await ensureArtworkUnsubscribeToken(user);
+
     await sendArtworkSubmissionEmail({
       toEmail: user.email,
       userId: user.user_id,
       authActionToken,
+      unsubscribeToken,
     });
   } catch (error) {
     console.error("Artwork submission signup email failed:", error);

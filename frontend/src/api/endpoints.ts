@@ -105,6 +105,7 @@ export const apiEndpoints = {
     magazines: '/magazines',
     news: '/news',
     takedown: '/takedown',
+    unsubscribeArtwork: '/unsubscribe/artwork',
   },
   user: {
     account: '/user/account',

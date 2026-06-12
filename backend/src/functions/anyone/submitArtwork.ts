@@ -17,6 +17,7 @@ import { byOwnerPk, byOwnerGsiSk } from "../../dynamo/ownerGsi";
 import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { Status } from "../../dynamo/shared";
 import { sendArtworkSubmissionEmail } from "../../utils/emails/artworkSubmission";
+import { ensureArtworkUnsubscribeToken, shouldSuppressArtworkEmail } from "../../utils/emails/unsubscribe";
 import { parseJsonBody } from "../../utils/request";
 import { ensureThemeEntity } from "../shared/themeUtils";
 import { hasUploadedArtworkImage } from "../shared/artworkUpload";
@@ -121,6 +122,7 @@ export const handler = async (
           banned: false,
           has_magazine_subscription: false,
           has_newsletter_subscription: false,
+          artwork_emails_off: false,
           type: "USER" as const,
           // Email GSI
           EMAIL_PK: emailPk(email),
@@ -199,7 +201,7 @@ export const handler = async (
 
     // ── Step 3: Refresh auth-action token and email virtual users ─────────
     let sentSignupEmail = false;
-    if (user.email_blocked === true) {
+    if (shouldSuppressArtworkEmail(user)) {
       const response: SubmitArtworkResponse = {
         success: true,
         art_id: artId,
@@ -244,10 +246,13 @@ export const handler = async (
     );
 
     try {
+      const unsubscribeToken = await ensureArtworkUnsubscribeToken(user);
+
       await sendArtworkSubmissionEmail({
         toEmail: user.email,
         userId: user.user_id,
         authActionToken,
+        unsubscribeToken,
       });
       sentSignupEmail = true;
 

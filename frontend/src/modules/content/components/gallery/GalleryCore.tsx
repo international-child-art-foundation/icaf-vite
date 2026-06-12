@@ -862,7 +862,7 @@ const GalleryCoreInner = () => {
         </div>
 
         <section className="relative">
-          <hr className="mb-10 w-full border-t border-black" />
+          <hr className="from-border-black/20 via-border-black/30 to-border-black/40 mb-10 w-full border-2 border-t bg-gradient-to-r" />
           {groupSlideshowError && (
             <p className="-mt-4 mb-5 rounded-md bg-red-50 px-4 py-3 text-sm text-red-600">
               {groupSlideshowError}

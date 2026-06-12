@@ -156,6 +156,11 @@ const ConfirmForgotPassword = lazy(() =>
     default: m.ConfirmForgotPassword,
   })),
 );
+const Unsubscribe = lazy(() =>
+  import('./modules/account/pages/Unsubscribe').then((m) => ({
+    default: m.Unsubscribe,
+  })),
+);
 const SubmitArtworkGroup = lazy(() =>
   import('./modules/submissions/pages/SubmitArtworkGroup').then((m) => ({
     default: m.SubmitArtworkGroup,
@@ -258,6 +263,8 @@ export default function App() {
                 path="/confirm-forgot-password"
                 element={<ConfirmForgotPassword />}
               />
+              <Route path="/unsubscribe" element={<Unsubscribe />} />
+              <Route path="/unsubscribe/artwork" element={<Unsubscribe />} />
               <Route path="/my-icaf" element={<MyIcafAccessGate />} />
               <Route
                 path="/dashboard"

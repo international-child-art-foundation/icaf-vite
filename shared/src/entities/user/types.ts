@@ -40,8 +40,9 @@ export interface UserEntity {
     auth_action_token_exp?: number;   // Unix ts; cleared after use
     verified_at?: number;               // Unix ts of account verification
     emailed_signup_at?: number;           // Unix ts when a create-and-verify email was sent
+    artwork_email_unsub_at?: number;     // Unix ts when artwork notification emails were disabled
     unsub_token?: string;               // Permanent token for user-level email unsubscribe links
-    artwork_emails_off?: true;          // User opted out of artwork/group notification emails
+    artwork_emails_off?: boolean;       // User opted out of artwork/group notification emails
     email_blocked?: true;                   // Address should not be emailed after bounce/complaint
 }
 

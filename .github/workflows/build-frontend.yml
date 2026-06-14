@@ -32,16 +32,19 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+
+      - name: Guard debug flags
+        run: node scripts/ensureDebugFlagsDisabled.mjs
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 11.5.2
           run_install: false
 
       - name: Setup Node (LTS) with pnpm cache
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: "pnpm"
@@ -84,7 +87,7 @@ jobs:
           fi
 
       - name: Upload artifact (full release payload)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-${{ env.SITE_NAME }}-${{ steps.rel.outputs.RELEASE_ID }}
           path: release
@@ -98,18 +101,18 @@ jobs:
     environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frontend-${{ env.SITE_NAME }}-${{ needs.build_frontend.outputs.release_id }}
           path: release
 
       - name: Upload via SFTP (mirror full to versioned folder)
-        uses: milanmk/actions-file-deployer@1.16
+        uses: milanmk/actions-file-deployer@1.18
         with:
           remote-protocol: "sftp"
           remote-host: ${{ secrets.SFTP_HOST }}
@@ -132,6 +135,7 @@ jobs:
           RewriteRule ^ - [E=RELEASE:${{ needs.build_frontend.outputs.release_id }}]
           # ── PDF short URLs (add/remove alongside the FilesMatch block below) ───
           RewriteRule ^2026WCF$ /documents/2026WCF.pdf [END,NC]
+          RewriteRule ^CulturalExposition$ /documents/Cultural_Exposition.pdf [END,NC]
           # ── Daily magazine: rotate one ChildArt issue per day at /daily-magazine ──
           # Served by /php-api/daily-magazine.php, which reads data/childArtMagazineData.json
           RewriteRule ^daily-magazine$ /daily-magazine/ [R=301,L]
@@ -158,6 +162,10 @@ jobs:
             <FilesMatch "^2026WCF\.pdf$">
               Header set Content-Disposition "inline; filename=\"2026WCF.pdf\""
             </FilesMatch>
+
+            <FilesMatch "^Cultural_Exposition\.pdf$">
+              Header set Content-Disposition "inline; filename=\"Cultural_Exposition.pdf\""
+            </FilesMatch>            
             # ─────────────────────────────────────────────────────────────────────────
           </IfModule>
           <IfModule mod_deflate.c>
@@ -167,7 +175,7 @@ jobs:
           HTACCESS
 
       - name: Upload .htaccess pointer to docroot
-        uses: milanmk/actions-file-deployer@1.16
+        uses: milanmk/actions-file-deployer@1.18
         with:
           remote-protocol: "sftp"
           remote-host: ${{ secrets.SFTP_HOST }}

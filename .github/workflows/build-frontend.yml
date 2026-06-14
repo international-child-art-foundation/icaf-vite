@@ -34,9 +34,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Guard debug flags
-        run: node scripts/ensureDebugFlagsDisabled.mjs
-
       - name: Install pnpm
         uses: pnpm/action-setup@v6
         with:

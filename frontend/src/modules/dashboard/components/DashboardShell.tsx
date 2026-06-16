@@ -24,6 +24,7 @@ import { clearLastKnownUser } from '@/shared/utils/authSession';
 
 type DashboardShellProps = {
   role: Role | null;
+  email: string;
   className: string;
   activeTab: string;
   setSearchParams: SetURLSearchParams;
@@ -31,6 +32,7 @@ type DashboardShellProps = {
 
 export function DashboardShell({
   role,
+  email,
   className,
   activeTab,
   setSearchParams,
@@ -91,9 +93,7 @@ export function DashboardShell({
   } else if (activeTab === 'news' && canAdmin(role)) {
     content = <NewsAdminPanel />;
   } else if (activeTab === 'takedowns' && canAdmin(role)) {
-    content = (
-      <TakedownRequestsPanel onActiveChange={setHasActiveTakedowns} />
-    );
+    content = <TakedownRequestsPanel onActiveChange={setHasActiveTakedowns} />;
   } else if (activeTab === 'themes' && canReview(role)) {
     content = <ThemeAdminPanel />;
   } else {
@@ -111,6 +111,12 @@ export function DashboardShell({
           <h1 className="font-montserrat mt-2 text-4xl font-bold text-neutral-950 md:text-5xl">
             Home
           </h1>
+          {activeTab === 'overview' && (
+            <p className="mt-3 text-sm font-semibold text-neutral-700">
+              You are authenticated as{' '}
+              <span className="text-secondary-blue break-all">{email}</span>.
+            </p>
+          )}
         </div>
         <div className="my-auto mr-0 flex flex-col gap-4">
           {activeTab != 'overview' && (
@@ -158,7 +164,7 @@ export function DashboardShell({
                   }`}
                 >
                   {showTakedownPip && (
-                    <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-secondary-blue ring-2 ring-white" />
+                    <span className="bg-secondary-blue absolute right-2 top-2 h-2.5 w-2.5 rounded-full ring-2 ring-white" />
                   )}
                   <span className="mt-0.5 flex-none">{tab.icon}</span>
                   <span>

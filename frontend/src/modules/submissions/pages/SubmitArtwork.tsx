@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
-import { ChevronLeft, Globe2, Mail, Send } from 'lucide-react';
+import { ChevronLeft, Globe2, LogOut, Mail, Send } from 'lucide-react';
+import type { AuthStatusResponse } from '@icaf/shared';
+import { getAuthStatus, logout } from '@/api/auth';
 import { createArtworkUpload, submitGuestArtwork } from '@/api/public';
 import { uploadToPresignedUrl } from '@/api/uploads';
+import { submitArtwork } from '@/api/user';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { ArtworkMuralWindow } from '@/modules/submissions/components/ArtworkMuralWindow';
 import { ThemePicker } from '@/modules/submissions/components/ThemePicker';
@@ -35,11 +38,17 @@ import {
   type SubmitterRelationship,
   UPLOAD_FILE_TYPES,
 } from '@icaf/shared';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import {
+  buildLoginRedirectPath,
+  clearLastKnownUser,
+  saveLastKnownUser,
+} from '@/shared/utils/authSession';
 import { ArtworkDisclaimer } from '@/modules/submissions/components/ArtworkDisclaimer';
 import type { SubmitArtworkSuccessState } from './SubmitArtworkSuccess';
 
 type SubmissionStatus = 'idle' | 'submitting';
+type AuthenticatedSubmissionUser = AuthStatusResponse & { authenticated: true };
 
 type SubmitArtworkDraft = {
   artwork: ArtworkDraft;
@@ -83,6 +92,15 @@ function createDefaultArtworkDraft(): ArtworkDraft {
 function getSubmitError(error: unknown): string {
   if (error instanceof Error) return error.message;
   return 'Artwork submission failed. Please try again.';
+}
+
+function isExistingAccountError(message: string) {
+  const normalizedMessage = message.toLowerCase();
+  return (
+    normalizedMessage.includes('account') &&
+    (normalizedMessage.includes('already exists') ||
+      normalizedMessage.includes('log in'))
+  );
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -319,8 +337,15 @@ export function SubmitArtwork() {
   const [errors, setErrors] = useState<SubmitArtworkErrors>({});
   const [status, setStatus] = useState<SubmissionStatus>('idle');
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+  const [authenticatedUser, setAuthenticatedUser] =
+    useState<AuthenticatedSubmissionUser | null>(null);
 
   const isSubmitting = status === 'submitting';
+  const currentPath = `${location.pathname}${location.search}${location.hash}`;
+  const loginPath = useMemo(
+    () => buildLoginRedirectPath(currentPath, 'auth-required'),
+    [currentPath],
+  );
   const isArtworkWindowOpen = location.pathname.endsWith('/artworks');
   const themeParams = useMemo(
     () => readThemeParams(location.search),
@@ -450,7 +475,7 @@ export function SubmitArtwork() {
         url: upload.presigned_url,
       });
 
-      await submitGuestArtwork({
+      const artworkRequest = {
         art_id: upload.art_id,
         age:
           artworkDetailsMode === 'full' && draft.artwork.age.trim()
@@ -458,7 +483,6 @@ export function SubmitArtwork() {
             : undefined,
         country: draft.country.trim(),
         description: draft.artwork.description.trim() || undefined,
-        email: draft.submitterEmail.trim(),
         f_name:
           artworkDetailsMode === 'full'
             ? draft.artwork.f_name.trim() || undefined
@@ -475,7 +499,16 @@ export function SubmitArtwork() {
           ? themeParams.theme_instance || undefined
           : undefined,
         title: draft.artwork.title.trim() || undefined,
-      });
+      };
+
+      if (authenticatedUser) {
+        await submitArtwork(artworkRequest);
+      } else {
+        await submitGuestArtwork({
+          ...artworkRequest,
+          email: draft.submitterEmail.trim(),
+        });
+      }
 
       const successState: SubmitArtworkSuccessState = {
         submission: {
@@ -515,6 +548,44 @@ export function SubmitArtwork() {
   }, [draft]);
 
   useEffect(() => {
+    let active = true;
+
+    void getAuthStatus()
+      .then((auth) => {
+        if (!active) return;
+
+        if (auth.authenticated) {
+          saveLastKnownUser(auth);
+          setAuthenticatedUser(auth);
+          setDraft((current) => ({
+            ...current,
+            submitterEmail: auth.email,
+          }));
+          return;
+        }
+
+        setAuthenticatedUser(null);
+      })
+      .catch(() => {
+        if (!active) return;
+        setAuthenticatedUser(null);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function handleLogout() {
+    try {
+      await logout();
+    } finally {
+      clearLastKnownUser();
+      setAuthenticatedUser(null);
+    }
+  }
+
+  useEffect(() => {
     document.body.style.overflow = isArtworkWindowOpen ? 'hidden' : '';
     return () => {
       document.body.style.overflow = '';
@@ -524,11 +595,21 @@ export function SubmitArtwork() {
   return (
     <div className="my-auto h-full flex-grow bg-slate-50 py-8 sm:py-12">
       <div className="content-w m-pad my-auto flex flex-col gap-4">
-        <div className="mx-auto w-full max-w-3xl">
+        <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3">
           <Button onClick={() => void navigate(-1)}>
             <ChevronLeft />
             Go back
           </Button>
+          {authenticatedUser && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void handleLogout()}
+            >
+              <LogOut aria-hidden="true" className="h-4 w-4" />
+              Logout
+            </Button>
+          )}
         </div>
         <form
           className="mx-auto w-full max-w-3xl"
@@ -560,6 +641,12 @@ export function SubmitArtwork() {
                   name="submitterEmail"
                   type="email"
                   value={draft.submitterEmail}
+                  disabled={Boolean(authenticatedUser)}
+                  className={
+                    authenticatedUser
+                      ? 'border-slate-300 bg-slate-100 text-slate-700 opacity-100'
+                      : undefined
+                  }
                   onChange={(event: ChangeEvent<HTMLInputElement>) =>
                     setDraft((current) => ({
                       ...current,
@@ -567,6 +654,30 @@ export function SubmitArtwork() {
                     }))
                   }
                 />
+                {authenticatedUser ? (
+                  <p className="mt-2 text-xs leading-5 text-slate-500">
+                    You are logged in with this email address.{' '}
+                    <button
+                      type="button"
+                      className="text-secondary-blue font-semibold underline-offset-4 hover:underline"
+                      onClick={() => void handleLogout()}
+                    >
+                      Logout
+                    </button>{' '}
+                    to submit under another email.
+                  </p>
+                ) : (
+                  <p className="mt-2 text-xs leading-5 text-slate-500">
+                    If you have an ICAF account, please{' '}
+                    <Link
+                      to={loginPath}
+                      className="text-secondary-blue font-semibold underline-offset-4 hover:underline"
+                    >
+                      Log In
+                    </Link>{' '}
+                    before submitting artwork.
+                  </p>
+                )}
               </div>
               <AccountTextField
                 error={errors.country}
@@ -738,7 +849,16 @@ export function SubmitArtwork() {
                 className="text-tertiary-red rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold"
                 role="alert"
               >
-                {submitMessage}
+                <p>{submitMessage}</p>
+                {isExistingAccountError(submitMessage) && (
+                  <Button
+                    asChild
+                    className="mt-3 rounded-full"
+                    variant="secondary"
+                  >
+                    <Link to={loginPath}>Log In</Link>
+                  </Button>
+                )}
               </div>
             )}
           </div>

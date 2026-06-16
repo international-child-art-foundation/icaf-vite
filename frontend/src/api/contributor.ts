@@ -14,6 +14,7 @@ import type {
 
 import {
   apiRequest,
+  clearApiResponseCache,
   hasApiMessage,
   hasApiSuccess,
   hasArrayProperty,
@@ -51,28 +52,37 @@ const isThemeMutationResponse = (response: unknown): boolean =>
 export function fetchPendingArtworks(
   query?: PaginationQuery,
 ): Promise<ReviewArtworkQueueResponse> {
-  return apiRequest<ReviewArtworkQueueResponse>(apiEndpoints.contributor.pendingArtworks, {
-    query,
-    validate: isArtworkQueueResponse,
-  });
+  return apiRequest<ReviewArtworkQueueResponse>(
+    apiEndpoints.contributor.pendingArtworks,
+    {
+      query,
+      validate: isArtworkQueueResponse,
+    },
+  );
 }
 
 export function fetchHiddenArtworks(
   query?: PaginationQuery,
 ): Promise<ReviewArtworkQueueResponse> {
-  return apiRequest<ReviewArtworkQueueResponse>(apiEndpoints.contributor.hiddenArtworks, {
-    query,
-    validate: isArtworkQueueResponse,
-  });
+  return apiRequest<ReviewArtworkQueueResponse>(
+    apiEndpoints.contributor.hiddenArtworks,
+    {
+      query,
+      validate: isArtworkQueueResponse,
+    },
+  );
 }
 
 export function fetchRejectedArtworks(
   query?: PaginationQuery,
 ): Promise<ReviewArtworkQueueResponse> {
-  return apiRequest<ReviewArtworkQueueResponse>(apiEndpoints.contributor.rejectedArtworks, {
-    query,
-    validate: isArtworkQueueResponse,
-  });
+  return apiRequest<ReviewArtworkQueueResponse>(
+    apiEndpoints.contributor.rejectedArtworks,
+    {
+      query,
+      validate: isArtworkQueueResponse,
+    },
+  );
 }
 
 export function changeArtworkStatus(
@@ -82,21 +92,41 @@ export function changeArtworkStatus(
   return apiRequest<ChangeArtworkStatusResponse, ChangeArtworkStatusRequest>(
     apiEndpoints.contributor.changeArtworkStatus(artId),
     { body: request, method: 'PATCH', validate: isArtworkMutationResponse },
+  ).then((response) => {
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.gallery.artworks,
+    });
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.public.artwork(artId),
+    });
+    return response;
+  });
+}
+
+export function fetchPendingGroups(
+  query?: PaginationQuery,
+): Promise<ReviewGroupQueueResponse> {
+  return apiRequest<ReviewGroupQueueResponse>(
+    apiEndpoints.contributor.pendingGroups,
+    {
+      query,
+      validate: isGroupQueueResponse,
+    },
   );
 }
 
-export function fetchPendingGroups(query?: PaginationQuery): Promise<ReviewGroupQueueResponse> {
-  return apiRequest<ReviewGroupQueueResponse>(apiEndpoints.contributor.pendingGroups, {
-    query,
-    validate: isGroupQueueResponse,
-  });
-}
-
-export function fetchHiddenGroups(query?: PaginationQuery): Promise<ReviewGroupQueueResponse> {
-  return apiRequest<ReviewGroupQueueResponse>(apiEndpoints.contributor.hiddenGroups, {
-    query,
-    validate: isGroupQueueResponse,
-  });
+export function fetchHiddenGroups(
+  query?: PaginationQuery,
+): Promise<ReviewGroupQueueResponse> {
+  return apiRequest<ReviewGroupQueueResponse>(
+    apiEndpoints.contributor.hiddenGroups,
+    {
+      query,
+      validate: isGroupQueueResponse,
+    },
+  );
 }
 
 export function changeGroupStatus(
@@ -106,7 +136,17 @@ export function changeGroupStatus(
   return apiRequest<ChangeGroupStatusResponse, ChangeGroupStatusRequest>(
     apiEndpoints.contributor.changeGroupStatus(groupId),
     { body: request, method: 'PATCH', validate: isGroupMutationResponse },
-  );
+  ).then((response) => {
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.gallery.groups,
+    });
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.public.group(groupId),
+    });
+    return response;
+  });
 }
 
 export function updateUserRole(
@@ -119,11 +159,19 @@ export function updateUserRole(
   );
 }
 
-export function createTheme(request: CreateThemeRequest): Promise<createThemeResponse> {
+export function createTheme(
+  request: CreateThemeRequest,
+): Promise<createThemeResponse> {
   return apiRequest<createThemeResponse, CreateThemeRequest>(
     apiEndpoints.contributor.createTheme,
     { body: request, method: 'POST', validate: isThemeMutationResponse },
-  );
+  ).then((response) => {
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.gallery.themes,
+    });
+    return response;
+  });
 }
 
 export function updateTheme(
@@ -133,5 +181,11 @@ export function updateTheme(
   return apiRequest<createThemeResponse, PatchTheme>(
     apiEndpoints.contributor.updateTheme(themeSk),
     { body: request, method: 'PATCH', validate: isThemeMutationResponse },
-  );
+  ).then((response) => {
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.gallery.themes,
+    });
+    return response;
+  });
 }

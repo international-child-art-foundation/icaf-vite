@@ -16,17 +16,21 @@ export type ApiClientConfig = {
 };
 
 const DEFAULT_API_BASE_URL = '/api';
-// TODO: Update to prod-acceptable time (currently 10 minutes)
-// Gallery page filter options are cached by x-many minutes before revalidation
-export const DEFAULT_API_CACHE_TTL_MS = 10 * 60 * 1000;
+export const DEFAULT_API_CACHE_TTL_MS = 5 * 60 * 1000;
 
 type CachedApiResponse = {
   expiresAt: number;
   value: unknown;
 };
 
+type ApiCacheMatch = {
+  method?: string;
+  pathPrefix?: string;
+};
+
 const apiResponseCache = new Map<string, CachedApiResponse>();
 const pendingApiResponseCache = new Map<string, Promise<unknown>>();
+const apiCacheInvalidationVersions = new Map<string, number>();
 
 function resolveApiBaseUrl(config?: ApiClientConfig): string {
   const configuredBaseUrl =
@@ -63,6 +67,76 @@ export function buildApiUrl(
 
 function buildApiCacheKey(method: string, url: string): string {
   return `${method.toUpperCase()} ${url}`;
+}
+
+function parseApiCacheKey(
+  cacheKey: string,
+): { method: string; url: URL } | null {
+  const separatorIndex = cacheKey.indexOf(' ');
+  if (separatorIndex === -1) return null;
+
+  try {
+    return {
+      method: cacheKey.slice(0, separatorIndex),
+      url: new URL(cacheKey.slice(separatorIndex + 1)),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function normalizeCachePath(path: string): string {
+  const pathWithLeadingSlash = path.startsWith('/') ? path : `/${path}`;
+  return pathWithLeadingSlash.replace(/\/+$/, '');
+}
+
+function cachePathMatches(pathname: string, pathPrefix: string): boolean {
+  const normalizedPath = normalizeCachePath(pathPrefix);
+  return pathname.endsWith(normalizedPath) || pathname.includes(`${normalizedPath}/`);
+}
+
+function apiCacheKeyMatches(cacheKey: string, match: ApiCacheMatch): boolean {
+  const parsedKey = parseApiCacheKey(cacheKey);
+  if (!parsedKey) return false;
+
+  if (
+    match.method &&
+    parsedKey.method !== match.method.toUpperCase()
+  ) {
+    return false;
+  }
+
+  if (match.pathPrefix && !cachePathMatches(parsedKey.url.pathname, match.pathPrefix)) {
+    return false;
+  }
+
+  return true;
+}
+
+function getCacheInvalidationVersion(cacheKey: string): number {
+  return apiCacheInvalidationVersions.get(cacheKey) ?? 0;
+}
+
+function invalidateApiCacheKey(cacheKey: string): void {
+  apiResponseCache.delete(cacheKey);
+  pendingApiResponseCache.delete(cacheKey);
+  apiCacheInvalidationVersions.set(
+    cacheKey,
+    getCacheInvalidationVersion(cacheKey) + 1,
+  );
+}
+
+export function clearApiResponseCache(match: ApiCacheMatch = {}): void {
+  const cacheKeys = new Set([
+    ...apiResponseCache.keys(),
+    ...pendingApiResponseCache.keys(),
+  ]);
+
+  cacheKeys.forEach((cacheKey) => {
+    if (apiCacheKeyMatches(cacheKey, match)) {
+      invalidateApiCacheKey(cacheKey);
+    }
+  });
 }
 
 function getCachedApiResponse(cacheKey: string): unknown {
@@ -248,6 +322,8 @@ export async function apiRequest<TResponse, TBody = never>(
     options.cacheTtlMs !== undefined &&
     options.cacheTtlMs > 0;
   const cacheKey = cacheEnabled ? buildApiCacheKey(method, url) : undefined;
+  const cacheInvalidationVersion =
+    cacheKey === undefined ? undefined : getCacheInvalidationVersion(cacheKey);
 
   if (cacheKey) {
     const cached = getCachedApiResponse(cacheKey);
@@ -261,7 +337,10 @@ export async function apiRequest<TResponse, TBody = never>(
     ({ response, responseBody }) => {
       validateApiResponse(response, responseBody, options.validate);
 
-      if (cacheKey) {
+      if (
+        cacheKey &&
+        cacheInvalidationVersion === getCacheInvalidationVersion(cacheKey)
+      ) {
         apiResponseCache.set(cacheKey, {
           expiresAt:
             Date.now() + (options.cacheTtlMs ?? DEFAULT_API_CACHE_TTL_MS),

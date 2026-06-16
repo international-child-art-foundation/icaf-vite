@@ -40,6 +40,7 @@ export function Dashboard({ auth }: DashboardProps) {
       />
       <DashboardShell
         role={role}
+        email={auth.email}
         className={'col-start-1 row-start-1'}
         activeTab={activeTab}
         setSearchParams={setSearchParams}

@@ -33,6 +33,12 @@ import type { PaginationQuery } from './types';
 
 type GalleryRequestOptions = {
   bypassCache?: boolean;
+  cacheTtlMs?: number;
+};
+
+type PublicReadOptions = {
+  bypassCache?: boolean;
+  cacheTtlMs?: number;
 };
 
 const isSuccessfulArtworkSubmitResponse = (response: unknown): boolean =>
@@ -132,8 +138,13 @@ export function createGroup(request: CreateGroupRequest): Promise<SubmitGroupRes
   });
 }
 
-export function getArtwork(artId: string): Promise<GetArtworkResponse> {
+export function getArtwork(
+  artId: string,
+  options?: PublicReadOptions,
+): Promise<GetArtworkResponse> {
   return apiRequest<GetArtworkResponse>(apiEndpoints.public.artwork(artId), {
+    bypassCache: options?.bypassCache,
+    cacheTtlMs: options?.cacheTtlMs ?? DEFAULT_API_CACHE_TTL_MS,
     validate: isArtworkResponse,
   });
 }
@@ -145,8 +156,13 @@ export function giveArtworkKudos(artId: string): Promise<VoteArtworkResponse> {
   });
 }
 
-export function getGroup(groupId: string): Promise<GetGroupResponse> {
+export function getGroup(
+  groupId: string,
+  options?: PublicReadOptions,
+): Promise<GetGroupResponse> {
   return apiRequest<GetGroupResponse>(apiEndpoints.public.group(groupId), {
+    bypassCache: options?.bypassCache,
+    cacheTtlMs: options?.cacheTtlMs ?? DEFAULT_API_CACHE_TTL_MS,
     validate: isGroupResponse,
   });
 }
@@ -160,14 +176,23 @@ export function initiateTakedown(
   );
 }
 
-export function listMagazines(): Promise<ListMagazinesResponse> {
+export function listMagazines(
+  options?: PublicReadOptions,
+): Promise<ListMagazinesResponse> {
   return apiRequest<ListMagazinesResponse>(apiEndpoints.public.magazines, {
+    bypassCache: options?.bypassCache,
+    cacheTtlMs: options?.cacheTtlMs ?? DEFAULT_API_CACHE_TTL_MS,
     validate: isMagazinesResponse,
   });
 }
 
-export function listNews(query?: PaginationQuery): Promise<ListNewsResponse> {
+export function listNews(
+  query?: PaginationQuery,
+  options?: PublicReadOptions,
+): Promise<ListNewsResponse> {
   return apiRequest<ListNewsResponse>(apiEndpoints.public.news, {
+    bypassCache: options?.bypassCache,
+    cacheTtlMs: options?.cacheTtlMs ?? DEFAULT_API_CACHE_TTL_MS,
     query,
     validate: isNewsResponse,
   });
@@ -179,7 +204,7 @@ export function listGalleryArtworks(
 ): Promise<GalleryArtworksResponse> {
   return apiRequest<GalleryArtworksResponse>(apiEndpoints.gallery.artworks, {
     bypassCache: options?.bypassCache,
-    cacheTtlMs: DEFAULT_API_CACHE_TTL_MS,
+    cacheTtlMs: options?.cacheTtlMs ?? DEFAULT_API_CACHE_TTL_MS,
     query,
     validate: isGalleryArtworksResponse,
   });
@@ -194,7 +219,7 @@ export function listGalleryArtworksByFamily(
     apiEndpoints.gallery.artworksByFamily(family),
     {
       bypassCache: options?.bypassCache,
-      cacheTtlMs: DEFAULT_API_CACHE_TTL_MS,
+      cacheTtlMs: options?.cacheTtlMs ?? DEFAULT_API_CACHE_TTL_MS,
       query,
       validate: isGalleryArtworksResponse,
     },
@@ -211,15 +236,19 @@ export function listGalleryArtworksByInstance(
     apiEndpoints.gallery.artworksByInstance(family, instance),
     {
       bypassCache: options?.bypassCache,
-      cacheTtlMs: DEFAULT_API_CACHE_TTL_MS,
+      cacheTtlMs: options?.cacheTtlMs ?? DEFAULT_API_CACHE_TTL_MS,
       query,
       validate: isGalleryArtworksResponse,
     },
   );
 }
 
-export function listGalleryThemes(): Promise<ListThemesResponse> {
+export function listGalleryThemes(
+  options?: PublicReadOptions,
+): Promise<ListThemesResponse> {
   return apiRequest<ListThemesResponse>(apiEndpoints.gallery.themes, {
+    bypassCache: options?.bypassCache,
+    cacheTtlMs: options?.cacheTtlMs ?? DEFAULT_API_CACHE_TTL_MS,
     validate: isThemesResponse,
   });
 }
@@ -230,7 +259,7 @@ export function listGalleryGroups(
 ): Promise<GalleryGroupsResponse> {
   return apiRequest<GalleryGroupsResponse>(apiEndpoints.gallery.groups, {
     bypassCache: options?.bypassCache,
-    cacheTtlMs: DEFAULT_API_CACHE_TTL_MS,
+    cacheTtlMs: options?.cacheTtlMs ?? DEFAULT_API_CACHE_TTL_MS,
     query,
     validate: isGalleryGroupsResponse,
   });
@@ -245,7 +274,7 @@ export function listGalleryGroupsByFamily(
     apiEndpoints.gallery.groupsByFamily(family),
     {
       bypassCache: options?.bypassCache,
-      cacheTtlMs: DEFAULT_API_CACHE_TTL_MS,
+      cacheTtlMs: options?.cacheTtlMs ?? DEFAULT_API_CACHE_TTL_MS,
       query,
       validate: isGalleryGroupsResponse,
     },
@@ -262,7 +291,7 @@ export function listGalleryGroupsByInstance(
     apiEndpoints.gallery.groupsByInstance(family, instance),
     {
       bypassCache: options?.bypassCache,
-      cacheTtlMs: DEFAULT_API_CACHE_TTL_MS,
+      cacheTtlMs: options?.cacheTtlMs ?? DEFAULT_API_CACHE_TTL_MS,
       query,
       validate: isGalleryGroupsResponse,
     },

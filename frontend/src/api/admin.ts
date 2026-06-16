@@ -33,6 +33,7 @@ import type {
 
 import {
   apiRequest,
+  clearApiResponseCache,
   hasApiSuccess,
   hasArrayProperty,
   hasBooleanProperty,
@@ -262,6 +263,12 @@ export function publishMagazine(
     body: request,
     method: 'POST',
     validate: isMagazineUploadResponse,
+  }).then((response) => {
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.public.magazines,
+    });
+    return response;
   });
 }
 
@@ -272,7 +279,13 @@ export function updateMagazineStatus(
   return apiRequest<UpdateMagazineStatusResponse, UpdateMagazineStatusRequest>(
     apiEndpoints.admin.updateMagazineStatus(slug),
     { body: request, method: 'PATCH', validate: isMagazineMutationResponse },
-  );
+  ).then((response) => {
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.public.magazines,
+    });
+    return response;
+  });
 }
 
 export function deleteMagazine(slug: string): Promise<DeleteMagazineResponse> {
@@ -282,7 +295,13 @@ export function deleteMagazine(slug: string): Promise<DeleteMagazineResponse> {
       method: 'DELETE',
       validate: isMagazineMutationResponse,
     },
-  );
+  ).then((response) => {
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.public.magazines,
+    });
+    return response;
+  });
 }
 
 export function createNews(
@@ -295,7 +314,10 @@ export function createNews(
       method: 'POST',
       validate: isNewsMutationResponse,
     },
-  );
+  ).then((response) => {
+    clearApiResponseCache({ method: 'GET', pathPrefix: apiEndpoints.public.news });
+    return response;
+  });
 }
 
 export function bulkCreateNews(
@@ -308,7 +330,10 @@ export function bulkCreateNews(
       method: 'POST',
       validate: isBulkNewsResponse,
     },
-  );
+  ).then((response) => {
+    clearApiResponseCache({ method: 'GET', pathPrefix: apiEndpoints.public.news });
+    return response;
+  });
 }
 
 export function updateNews(
@@ -318,7 +343,10 @@ export function updateNews(
   return apiRequest<NewsMutationResponse, UpdateNewsRequest>(
     apiEndpoints.admin.updateNews(newsSk),
     { body: request, method: 'PATCH', validate: isNewsMutationResponse },
-  );
+  ).then((response) => {
+    clearApiResponseCache({ method: 'GET', pathPrefix: apiEndpoints.public.news });
+    return response;
+  });
 }
 
 export function deleteNews(newsSk: string): Promise<NewsMutationResponse> {
@@ -328,7 +356,10 @@ export function deleteNews(newsSk: string): Promise<NewsMutationResponse> {
       method: 'DELETE',
       validate: isNewsMutationResponse,
     },
-  );
+  ).then((response) => {
+    clearApiResponseCache({ method: 'GET', pathPrefix: apiEndpoints.public.news });
+    return response;
+  });
 }
 
 export function adminUpdateArtwork(
@@ -342,6 +373,13 @@ export function adminUpdateArtwork(
     body: request,
     method: 'PATCH',
     validate: isArtworkMutationResponse,
+  }).then((response) => {
+    clearApiResponseCache({ method: 'GET', pathPrefix: apiEndpoints.gallery.artworks });
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.public.artwork(art_id),
+    });
+    return response;
   });
 }
 
@@ -356,5 +394,12 @@ export function adminUpdateGroup(
       method: 'PATCH',
       validate: isGroupMutationResponse,
     },
-  );
+  ).then((response) => {
+    clearApiResponseCache({ method: 'GET', pathPrefix: apiEndpoints.gallery.groups });
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.public.group(groupId),
+    });
+    return response;
+  });
 }

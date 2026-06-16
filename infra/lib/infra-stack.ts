@@ -440,6 +440,8 @@ export class InfraStack extends Stack {
       TAKEDOWN_NOTIFICATION_EMAILS: JSON.stringify(TAKEDOWN_NOTIFICATION_EMAILS),
       ARTWORK_CLOUDFRONT_DISTRIBUTION_ID: artworkDistribution.distributionId,
       MAGAZINES_CLOUDFRONT_DOMAIN: "d1y7vnzq9a2pjl.cloudfront.net", // CloudFront domain for magazine assets
+      STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET ?? "",
+      EVERY_WEBHOOK_SECRET: process.env.EVERY_WEBHOOK_SECRET ?? "",
     };
 
     // Default log retention for all NodejsFunctions in this stack.

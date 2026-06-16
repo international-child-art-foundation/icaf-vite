@@ -16,6 +16,8 @@ export interface ApiGatewayEvent {
         }
     };
     body?: string;
+    rawBody?: string;
+    isBase64Encoded?: boolean;
     pathParameters?: Record<string, string>;
     queryStringParameters?: Record<string, string> | null;
     httpMethod: string;

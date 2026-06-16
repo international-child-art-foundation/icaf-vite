@@ -21,7 +21,6 @@ export const handler = async (
     }
 
     const key = { PK: `ART#${artId}`, SK: "-" };
-
     const result = await dynamodb.send(
       new UpdateCommand({
         TableName: TABLE_NAME,

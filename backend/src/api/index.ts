@@ -53,6 +53,10 @@ import { handler as getNews } from "../functions/anyone/getNews";
 import { handler as initiateTakedown } from "../functions/anyone/initiateTakedown";
 import { handler as login } from "../functions/anyone/login";
 import { handler as logout } from "../functions/anyone/logout";
+import {
+  everyWebhookHandler,
+  stripeWebhookHandler,
+} from "../functions/anyone/paymentWebhooks";
 import { handler as defaultRegistration } from "../functions/anyone/defaultRegistration";
 import { handler as requestCreateAndVerify } from "../functions/anyone/requestCreateAndVerify";
 import { handler as resendVerification } from "../functions/anyone/resendVerificationEmail";
@@ -150,6 +154,8 @@ const routes: Route[] = [
   { method: "GET", path: "/api/gallery/groups/family/{family}/instance/{instance}", handler: galleryGroups },
   { method: "POST", path: "/api/artworks/{art_id}/kudos", handler: voteArtwork },
   { method: "GET", path: "/api/unsubscribe/artwork", handler: unsubscribeArtworkEmails },
+  { method: "POST", path: "/api/webhooks/stripe", handler: stripeWebhookHandler },
+  { method: "POST", path: "/api/webhooks/every", handler: everyWebhookHandler },
 
   { method: "POST", path: "/api/auth/default-registration", handler: defaultRegistration },
   { method: "POST", path: "/api/auth/login", handler: login },
@@ -186,7 +192,7 @@ const routes: Route[] = [
   roleProtected({ method: "GET", path: "/api/contributor/groups/pending", handler: fetchUnapprovedGroups }, contributorRoles),
   roleProtected({ method: "GET", path: "/api/contributor/groups/hidden", handler: fetchHiddenGroups }, contributorRoles),
   roleProtected({ method: "PATCH", path: "/api/contributor/groups/{group_id}/status", handler: changeGroupStatus }, contributorRoles),
-  roleProtected({ method: "PATCH", path: "/api/contributor/users/{user_id}/role", handler: updateUserRole }, contributorRoles),
+  roleProtected({ method: "PATCH", path: "/api/contributor/users/{user_id}/role", handler: updateUserRole }, adminRoles),
   roleProtected({ method: "POST", path: "/api/contributor/themes", handler: createTheme }, contributorRoles),
   roleProtected({ method: "PATCH", path: "/api/contributor/themes/{theme_sk}", handler: updateTheme }, contributorRoles),
 
@@ -293,16 +299,19 @@ function getHeader(event: ApiGatewayEvent, name: string): string | undefined {
 
 function withCors(event: ApiGatewayEvent, response: ApiGatewayResponse): ApiGatewayResponse {
   const origin = getHeader(event, "origin");
-  const allowOrigin = origin && allowedOrigins.has(origin)
+  const isAllowedOrigin = !!origin && allowedOrigins.has(origin);
+  const allowOrigin = isAllowedOrigin
     ? origin
-    : response.headers["Access-Control-Allow-Origin"] ?? "*";
+    : "https://revise.icaf.org";
+  const baseHeaders = { ...response.headers };
+  delete baseHeaders["Access-Control-Allow-Credentials"];
 
   return {
     ...response,
     headers: {
-      ...response.headers,
+      ...baseHeaders,
       "Access-Control-Allow-Origin": allowOrigin,
-      "Access-Control-Allow-Credentials": "true",
+      ...(isAllowedOrigin && { "Access-Control-Allow-Credentials": "true" }),
       Vary: "Origin",
     },
   };

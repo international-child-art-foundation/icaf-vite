@@ -130,7 +130,7 @@ export const ForgotPassword = () => {
               Check your email
             </h1>
             <p className="mt-3 text-base leading-7 text-slate-600">
-              If this email is registered, we sent instructions to continue.
+              We sent instructions to continue.
             </p>
             <Button
               asChild

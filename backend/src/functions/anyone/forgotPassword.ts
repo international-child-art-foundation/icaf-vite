@@ -72,7 +72,7 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
         ...debugEmail,
         result: "no_user",
       });
-      return okResponse;
+      return CommonErrors.notFound("No ICAF account was found for that email address");
     }
 
     if (user.email_blocked === true) {
@@ -81,7 +81,7 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
         result: "blocked",
         user_id: user.user_id,
       });
-      return okResponse;
+      return CommonErrors.forbidden("This email address cannot receive ICAF emails");
     }
 
     if (user.is_virtual) {

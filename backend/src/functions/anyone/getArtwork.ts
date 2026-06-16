@@ -30,7 +30,6 @@ export const handler = async (
 
     const artwork = { ...(result.Item as ArtworkEntity) };
     delete artwork.digital_signature;
-    delete (artwork as Record<string, unknown>).digital_signature_hash;
 
     return {
       statusCode: HTTP_STATUS.OK,

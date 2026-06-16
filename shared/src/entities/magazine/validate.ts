@@ -6,6 +6,10 @@ const SLUG_PATTERN = /^[A-Za-z0-9&+\-_.]+$/;
 const MAX_SLUG_LEN = 120;
 const MAX_FIELD_LEN = 200;
 
+function isReservedPathSegment(value: string): boolean {
+    return value === '.' || value === '..';
+}
+
 export function validateInitiateMagazineUploadRequest(data: InitiateMagazineUploadRequest): string[] {
     const errors: string[] = [];
 
@@ -13,6 +17,8 @@ export function validateInitiateMagazineUploadRequest(data: InitiateMagazineUplo
         errors.push('slug is required');
     } else if (data.slug.length > MAX_SLUG_LEN) {
         errors.push(`slug must be ${MAX_SLUG_LEN} characters or less`);
+    } else if (isReservedPathSegment(data.slug)) {
+        errors.push('slug cannot be . or ..');
     } else if (!SLUG_PATTERN.test(data.slug)) {
         errors.push('slug may only contain letters, digits, &, +, -, _, .');
     }
@@ -39,7 +45,13 @@ export function validateInitiateMagazineUploadRequest(data: InitiateMagazineUplo
 }
 
 export function isValidMagazineSlug(slug: string): boolean {
-    return typeof slug === 'string' && slug.length > 0 && slug.length <= MAX_SLUG_LEN && SLUG_PATTERN.test(slug);
+    return (
+        typeof slug === 'string' &&
+        slug.length > 0 &&
+        slug.length <= MAX_SLUG_LEN &&
+        !isReservedPathSegment(slug) &&
+        SLUG_PATTERN.test(slug)
+    );
 }
 
 export function validateMagazineSlug(slug: string): string[] {
@@ -49,6 +61,8 @@ export function validateMagazineSlug(slug: string): string[] {
         errors.push('slug path parameter is required');
     } else if (slug.length > MAX_SLUG_LEN) {
         errors.push(`slug must be ${MAX_SLUG_LEN} characters or less`);
+    } else if (isReservedPathSegment(slug)) {
+        errors.push('slug cannot be . or ..');
     } else if (!isValidMagazineSlug(slug)) {
         errors.push('slug may only contain letters, digits, &, +, -, _, .');
     }

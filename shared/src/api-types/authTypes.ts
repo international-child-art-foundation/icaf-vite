@@ -39,9 +39,8 @@ export interface ForgotPasswordRequest {
 }
 
 export type ForgotPasswordResponse =
-    | (DeliveryMessageResponse & { account_status?: "email_sent" })
-    | (MessageResponse & { account_status: "virtual" })
-    | MessageResponse;
+    | (DeliveryMessageResponse & { account_status: "email_sent" })
+    | (MessageResponse & { account_status: "virtual" });
 
 export interface ConfirmForgotPasswordRequest {
     user_id: string;

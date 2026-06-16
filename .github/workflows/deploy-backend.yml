@@ -69,4 +69,7 @@ jobs:
       # ── CDK deploy ───────────────────────────────────────────────────────────
       - name: CDK deploy
         working-directory: infra
+        env:
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          EVERY_WEBHOOK_SECRET: ${{ secrets.EVERY_WEBHOOK_SECRET }}
         run: pnpm exec cdk deploy InfraStack --require-approval never

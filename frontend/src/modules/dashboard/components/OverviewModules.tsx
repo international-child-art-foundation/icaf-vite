@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { Role } from '@icaf/shared';
 import { canAdmin, canReview } from '../utils/dashboardFormat';
+import { AdminUserRolePanel } from './AdminUserRolePanel';
 import { DashboardModule } from './DashboardModule';
 
 export function OverviewModules({ role }: { role: Role | null }) {
@@ -62,25 +63,29 @@ export function OverviewModules({ role }: { role: Role | null }) {
       )}
 
       {canAdmin(role) && (
-        <DashboardModule title="Admin Actions" description="">
-          <div className="grid gap-3 md:grid-cols-2">
-            <ActionLink
-              to="/my-icaf?tab=admin"
-              label="Artwork admin"
-              detail="Start with approved artwork, then switch status views."
-            />
-            <ActionLink
-              to="/my-icaf?tab=news"
-              label="News admin"
-              detail="Create, edit, delete, or bulk upload public news items."
-            />
-            <ActionLink
-              to="/my-icaf?tab=takedowns"
-              label="Takedown requests"
-              detail="Review requests, cancel invalid claims, or mark disputes."
-            />
-          </div>
-        </DashboardModule>
+        <>
+          <AdminUserRolePanel />
+
+          <DashboardModule title="Admin Actions" description="">
+            <div className="grid gap-3 md:grid-cols-2">
+              <ActionLink
+                to="/my-icaf?tab=admin"
+                label="Artwork admin"
+                detail="Start with approved artwork, then switch status views."
+              />
+              <ActionLink
+                to="/my-icaf?tab=news"
+                label="News admin"
+                detail="Create, edit, delete, or bulk upload public news items."
+              />
+              <ActionLink
+                to="/my-icaf?tab=takedowns"
+                label="Takedown requests"
+                detail="Review requests, cancel invalid claims, or mark disputes."
+              />
+            </div>
+          </DashboardModule>
+        </>
       )}
     </>
   );

@@ -22,7 +22,6 @@ import { handler as adminUpdateArtwork } from "../functions/admin/adminUpdateArt
 import { handler as adminUpdateGroup } from "../functions/admin/adminUpdateGroup";
 import { handler as banUser } from "../functions/admin/banUser";
 import { handler as bulkCreateNews } from "../functions/admin/bulkCreateNews";
-import { handler as cancelTakedownRequest } from "../functions/admin/cancelTakedownRequest";
 import { handler as createNews } from "../functions/admin/createNews";
 import { handler as deleteMagazine } from "../functions/admin/deleteMagazine";
 import { handler as deleteNews } from "../functions/admin/deleteNews";
@@ -34,6 +33,7 @@ import { handler as getUserCognitoInfo } from "../functions/admin/getUserCognito
 import { handler as hideAllUserArtwork } from "../functions/admin/hideAllUserArtwork";
 import { handler as publishMagazine } from "../functions/admin/publishMagazine";
 import { handler as removeAllUserArtwork } from "../functions/admin/removeAllUserArtwork";
+import { handler as reviewTakedownRequest } from "../functions/admin/reviewTakedownRequest";
 import { handler as unbanUser } from "../functions/admin/unbanUser";
 import { handler as unhideAllUserArtwork } from "../functions/admin/unhideAllUserArtwork";
 import { handler as updateMagazineStatus } from "../functions/admin/updateMagazineStatus";
@@ -209,7 +209,7 @@ const routes: Route[] = [
   roleProtected({ method: "POST", path: "/api/admin/users/{user_id}/unhide-all", handler: unhideAllUserArtwork }, adminRoles),
   roleProtected({ method: "GET", path: "/api/admin/artworks/{art_id}/submitter-email", handler: getArtworkSubmitterEmail }, adminRoles),
   roleProtected({ method: "GET", path: "/api/admin/takedowns", handler: getTakedownRequests }, adminRoles),
-  roleProtected({ method: "PATCH", path: "/api/admin/takedowns/{tdr_sk}", handler: cancelTakedownRequest }, adminRoles),
+  roleProtected({ method: "PATCH", path: "/api/admin/takedowns/{tdr_sk}", handler: reviewTakedownRequest }, adminRoles),
   roleProtected({ method: "POST", path: "/api/admin/magazines", handler: publishMagazine }, adminRoles),
   roleProtected({ method: "PATCH", path: "/api/admin/magazines/{slug}/status", handler: updateMagazineStatus }, adminRoles),
   roleProtected({ method: "DELETE", path: "/api/admin/magazines/{slug}", handler: deleteMagazine }, adminRoles),

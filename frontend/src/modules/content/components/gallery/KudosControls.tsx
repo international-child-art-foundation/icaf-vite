@@ -26,6 +26,7 @@ type KudosControlsProps = {
 
 const KUDOS_STYLE_ID = 'icaf-kudos-styles';
 const KUDOS_COUNT_EVENT = 'icaf:kudos-count';
+const KUDOS_FAILURE_COOLDOWN_MS = 30_000;
 
 const createControlId = () => {
   if (
@@ -104,8 +105,13 @@ export const KudosControls = ({
   const [displayCount, setDisplayCount] = useState(baseCount);
   const [animationKey, setAnimationKey] = useState(0);
   const [isSending, setIsSending] = useState(false);
+  const [failureCooldownUntil, setFailureCooldownUntil] = useState(0);
+  const [cooldownRemainingSeconds, setCooldownRemainingSeconds] = useState(0);
   const [status, setStatus] = useState(() => getKudosStatus(artId));
-  const [errorAnchor, setErrorAnchor] = useState<DOMRect | null>(null);
+  const [tooltipState, setTooltipState] = useState<{
+    anchor: DOMRect;
+    message: string;
+  } | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const controlIdRef = useRef(createControlId());
 
@@ -116,6 +122,30 @@ export const KudosControls = ({
   useEffect(() => {
     setDisplayCount(baseCount);
   }, [baseCount, artId]);
+
+  useEffect(() => {
+    setFailureCooldownUntil(0);
+    setCooldownRemainingSeconds(0);
+  }, [artId]);
+
+  useEffect(() => {
+    if (failureCooldownUntil <= 0) return;
+
+    const updateRemaining = () => {
+      const remainingMs = failureCooldownUntil - Date.now();
+      const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+      setCooldownRemainingSeconds(remainingSeconds);
+
+      if (remainingMs <= 0) {
+        setFailureCooldownUntil(0);
+      }
+    };
+
+    updateRemaining();
+    const timer = window.setInterval(updateRemaining, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [failureCooldownUntil]);
 
   useEffect(() => {
     const updateStatus = () => setStatus(getKudosStatus(artId));
@@ -154,10 +184,19 @@ export const KudosControls = ({
 
   const disabledReason = useMemo(() => {
     if (!artId) return 'Kudos are only available for submitted artworks';
+    if (failureCooldownUntil > Date.now()) {
+      return `Try again in ${cooldownRemainingSeconds || 30}s`;
+    }
     if (status.alreadyGiven) return 'Kudos sent today';
     if (status.remaining < KUDOS_AMOUNT) return 'Daily kudos spent';
     return null;
-  }, [artId, status.alreadyGiven, status.remaining]);
+  }, [
+    artId,
+    cooldownRemainingSeconds,
+    failureCooldownUntil,
+    status.alreadyGiven,
+    status.remaining,
+  ]);
 
   const disabled = Boolean(disabledReason) || isSending;
   const usedDisabled = disabled && Boolean(artId);
@@ -168,19 +207,24 @@ export const KudosControls = ({
     setAnimationKey((key) => key + 1);
   };
 
-  const showErrorTooltip = () => {
+  const showTooltip = (message: string) => {
     const rect = buttonRef.current?.getBoundingClientRect();
-    if (rect) setErrorAnchor(rect);
+    if (rect) setTooltipState({ anchor: rect, message });
   };
 
   useEffect(() => {
-    if (!errorAnchor) return;
-    const timer = window.setTimeout(() => setErrorAnchor(null), 3000);
+    if (!tooltipState) return;
+    const timer = window.setTimeout(() => setTooltipState(null), 3000);
     return () => window.clearTimeout(timer);
-  }, [errorAnchor]);
+  }, [tooltipState]);
 
   const handleGiveKudos = async () => {
-    if (!artId || disabled) return;
+    if (!artId || disabled) {
+      if (artId && status.remaining < KUDOS_AMOUNT) {
+        showTooltip('More kudos tomorrow.');
+      }
+      return;
+    }
 
     const consumeResult = consumeDailyKudos(artId);
     setStatus({
@@ -188,9 +232,14 @@ export const KudosControls = ({
       remaining: consumeResult.remaining,
     });
 
-    if (!consumeResult.ok) return;
+    if (!consumeResult.ok) {
+      if (consumeResult.remaining < KUDOS_AMOUNT) {
+        showTooltip('More kudos tomorrow.');
+      }
+      return;
+    }
 
-    setErrorAnchor(null);
+    setTooltipState(null);
     setIsSending(true);
     updateCount(displayCount + KUDOS_AMOUNT);
     window.dispatchEvent(
@@ -213,7 +262,8 @@ export const KudosControls = ({
     } catch {
       restoreDailyKudos(artId);
       setStatus(getKudosStatus(artId));
-      showErrorTooltip();
+      setFailureCooldownUntil(Date.now() + KUDOS_FAILURE_COOLDOWN_MS);
+      showTooltip('Kudos could not be sent. Try again in a moment.');
       updateCount(Math.max(0, displayCount));
       onKudosApplied?.(artId, -KUDOS_AMOUNT);
     } finally {
@@ -309,7 +359,7 @@ export const KudosControls = ({
     <button
       ref={buttonRef}
       type="button"
-      disabled={disabled}
+      aria-disabled={disabled}
       title={disabledReason ?? `${status.remaining} kudos left today`}
       onClick={(e) => {
         e.stopPropagation();
@@ -368,7 +418,9 @@ export const KudosControls = ({
           <span className="min-w-0 truncate">
             {status.alreadyGiven
               ? 'Kudos sent!'
-              : status.remaining < KUDOS_AMOUNT
+              : failureCooldownUntil > Date.now()
+                ? 'Try again soon'
+                : status.remaining < KUDOS_AMOUNT
                 ? 'Out of kudos'
                 : 'Give kudos!'}
           </span>
@@ -378,19 +430,19 @@ export const KudosControls = ({
     </button>
   ) : null;
 
-  const errorTooltip =
-    errorAnchor && typeof document !== 'undefined'
+  const tooltip =
+    tooltipState && typeof document !== 'undefined'
       ? createPortal(
           <div
             className="pointer-events-none fixed z-[10000] max-w-[260px] rounded-md bg-neutral-950 px-3 py-2 text-center text-xs font-semibold text-white shadow-xl"
             style={{
-              left: errorAnchor.left + errorAnchor.width / 2,
-              top: errorAnchor.bottom + 8,
+              left: tooltipState.anchor.left + tooltipState.anchor.width / 2,
+              top: tooltipState.anchor.bottom + 8,
               transform: 'translateX(-50%)',
             }}
             role="status"
           >
-            Kudos could not be sent. Try again in a moment.
+            {tooltipState.message}
           </div>,
           document.body,
         )
@@ -400,7 +452,7 @@ export const KudosControls = ({
     <div className={className}>
       {button}
       {!showButton && counter}
-      {errorTooltip}
+      {tooltip}
     </div>
   );
 };

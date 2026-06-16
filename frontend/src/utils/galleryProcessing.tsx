@@ -15,7 +15,7 @@ export function eventToSlug(event: string): string {
 export function resolveArtwork(a: TArtwork): TResolvedArtwork {
   const base = a.file.replace(/\.[^.]+$/, '');
   const eventSlug = eventToSlug(a.event);
-  return {
+  const resolvedArtwork = {
     ...a,
     id: `${eventSlug}/${a.file}`,
     eventSlug,
@@ -23,7 +23,11 @@ export function resolveArtwork(a: TArtwork): TResolvedArtwork {
     thumbUrl: `/gallery-arts/${eventSlug}/thumbs/${base}.webp`,
     displayUrl: `/gallery-arts/${eventSlug}/display/${base}.webp`,
     featureUrl: `/gallery-arts/${eventSlug}/feature/${base}.webp`,
-    alt: getArtistDisplayName(a.artists ?? [], a.lastInitial),
+    alt: '',
+  };
+  return {
+    ...resolvedArtwork,
+    alt: getArtistDisplayNameWithAge(resolvedArtwork),
   };
 }
 
@@ -72,7 +76,7 @@ export function resolveApiArtwork(
     .filter(Boolean)
     .join(' ');
 
-  return {
+  const resolvedArtwork = {
     art_id: a.art_id,
     id: a.art_id,
     file: `${a.art_id}.avif`,
@@ -97,7 +101,11 @@ export function resolveApiArtwork(
     thumbUrl: artworkAssetUrl(a.art_id, 'thumb'),
     displayUrl: artworkAssetUrl(a.art_id, 'medium'),
     featureUrl: artworkAssetUrl(a.art_id, 'original'),
-    alt: a.title || getArtistDisplayName(artists),
+    alt: '',
+  };
+  return {
+    ...resolvedArtwork,
+    alt: a.title || getArtistDisplayNameWithAge(resolvedArtwork),
   };
 }
 
@@ -126,11 +134,107 @@ export function getArtistDisplayName(
   return formatArtistName(artists, lastInitial) || MYSTERY_ARTIST_NAME;
 }
 
+export function getArtistDisplayNameWithAge(
+  artwork: Pick<TResolvedArtwork, 'age' | 'artists' | 'lastInitial'>,
+): string {
+  const artist = getArtistDisplayName(
+    artwork.artists ?? [],
+    artwork.lastInitial,
+  );
+
+  return artwork.age != null ? `${artist}, ${artwork.age}` : artist;
+}
+
 export function formatGalleryLocation(
   region?: string,
   country?: string,
 ): string {
   return [region, country].filter(Boolean).join(', ');
+}
+
+const LOWERCASE_THEME_WORDS = new Set([
+  'a',
+  'an',
+  'and',
+  'as',
+  'at',
+  'but',
+  'by',
+  'for',
+  'from',
+  'in',
+  'nor',
+  'of',
+  'on',
+  'or',
+  'the',
+  'to',
+  'with',
+]);
+
+function titleCaseThemeWord(word: string, index: number): string {
+  const normalized = word.toLowerCase();
+  if (index > 0 && LOWERCASE_THEME_WORDS.has(normalized)) return normalized;
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
+export function formatGalleryThemeName(value?: string): string {
+  const trimmed = value?.trim();
+  if (!trimmed) return '';
+
+  return trimmed
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .split(' ')
+    .filter(Boolean)
+    .map(titleCaseThemeWord)
+    .join(' ');
+}
+
+export function formatGalleryThemeInstance(value?: string): string {
+  const trimmed = value?.trim();
+  if (!trimmed) return '';
+
+  const withoutLeadingZeros = trimmed.replace(/^0+(?=\d)/, '');
+  return withoutLeadingZeros || '0';
+}
+
+export function formatGalleryTheme(artwork: TResolvedArtwork): string {
+  const themeName = formatGalleryThemeName(artwork.theme_family);
+  const instance = formatGalleryThemeInstance(artwork.theme_instance);
+  const remoteTheme = [themeName, instance].filter(Boolean).join(' ');
+  if (remoteTheme) return remoteTheme;
+
+  return formatGalleryThemeName(artwork.event);
+}
+
+export function getArtworkDisplayTitle(artwork: TResolvedArtwork): string {
+  const artist = getArtistDisplayNameWithAge(artwork);
+  return artwork.title?.trim() || artist || MYSTERY_ARTIST_NAME;
+}
+
+export function getArtworkSecondaryTitle(artwork: TResolvedArtwork): string {
+  if (!artwork.title?.trim()) return 'Untitled';
+
+  const artist = getArtistDisplayNameWithAge(artwork);
+  return artist === MYSTERY_ARTIST_NAME ? '' : artist;
+}
+
+export function formatGalleryGroup(artwork: TResolvedArtwork): string {
+  const groupLocation = formatGalleryLocation(
+    artwork.groupRegion,
+    artwork.groupCountry,
+  );
+
+  if (artwork.groupTitle) return artwork.groupTitle;
+
+  if (artwork.groupType === 'classroom' && artwork.groupOwnerName) {
+    return `${artwork.groupOwnerName}'s classroom`;
+  }
+
+  if (groupLocation) return `Group from ${groupLocation}`;
+
+  return '';
 }
 
 export function formatArtworkByline(artwork: TResolvedArtwork): string {

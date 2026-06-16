@@ -13,6 +13,7 @@ import {
 } from '@/api/contributor';
 import { listGalleryArtworks } from '@/api/public';
 import ArtworkCard from '@/modules/content/components/gallery/ArtworkCard';
+import ArtworkModal from '@/modules/content/components/gallery/ArtworkModal';
 import { resolveApiArtwork } from '@/utils/galleryProcessing';
 import { artworkLabel, formatDate } from '../utils/dashboardFormat';
 import { DashboardModule, ModuleState } from './DashboardModule';
@@ -64,6 +65,28 @@ function textOrClear(value: string, original: string | undefined) {
   return original ? '' : undefined;
 }
 
+function useMediaQuery(query: string, fallback = false) {
+  const getMatches = useCallback(() => {
+    if (typeof window === 'undefined') return fallback;
+    return window.matchMedia(query).matches;
+  }, [fallback, query]);
+
+  const [matches, setMatches] = useState(getMatches);
+
+  useEffect(() => {
+    const mediaQueryList = window.matchMedia(query);
+    const updateMatches = () => setMatches(mediaQueryList.matches);
+
+    updateMatches();
+    mediaQueryList.addEventListener('change', updateMatches);
+    return () => {
+      mediaQueryList.removeEventListener('change', updateMatches);
+    };
+  }, [query]);
+
+  return matches;
+}
+
 export function ReviewArtworkQueue({
   admin = false,
   defaultMode,
@@ -83,8 +106,14 @@ export function ReviewArtworkQueue({
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
+  const [activeArtworkId, setActiveArtworkId] = useState('');
+  const isHorizontal = useMediaQuery('(orientation: landscape)', true);
 
   const selectedIds = useMemo(() => [...selected], [selected]);
+  const resolvedArtworks = useMemo(
+    () => artworks.map((artwork) => resolveApiArtwork(artwork)),
+    [artworks],
+  );
   const editingArtwork = useMemo(
     () => artworks.find((artwork) => artwork.art_id === editingId) ?? null,
     [artworks, editingId],
@@ -256,6 +285,16 @@ export function ReviewArtworkQueue({
         </div>
       }
     >
+      <ArtworkModal
+        id={activeArtworkId}
+        artworks={resolvedArtworks}
+        navigationList={resolvedArtworks}
+        onNavigate={setActiveArtworkId}
+        closeModal={() => setActiveArtworkId('')}
+        isHorizontal={isHorizontal}
+        modalState={Boolean(activeArtworkId)}
+        getShareUrl={() => window.location.href}
+      />
       <div className="mb-4 flex flex-wrap gap-2">
         <button
           type="button"
@@ -299,7 +338,10 @@ export function ReviewArtworkQueue({
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
             {artworks.map((artwork) => {
-              const resolvedArtwork = resolveApiArtwork(artwork);
+              const resolvedArtwork =
+                resolvedArtworks.find(
+                  (resolved) => resolved.art_id === artwork.art_id,
+                ) ?? resolveApiArtwork(artwork);
               const isEditing = editingId === artwork.art_id;
 
               return (
@@ -313,13 +355,7 @@ export function ReviewArtworkQueue({
                 >
                   <ArtworkCard
                     artwork={resolvedArtwork}
-                    openModal={() =>
-                      window.open(
-                        resolvedArtwork.displayUrl,
-                        '_blank',
-                        'noopener,noreferrer',
-                      )
-                    }
+                    openModal={setActiveArtworkId}
                     actionSlot={
                       <div className="space-y-3 text-sm">
                         <label className="flex items-center gap-2 font-semibold">

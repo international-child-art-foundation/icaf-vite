@@ -23,7 +23,7 @@ export const dashboardTabData = {
   submissions: {
     id: 'submissions',
     label: 'My submissions',
-    description: 'Artwork and groups you manage',
+    description: 'Submitted artworks and groups',
     icon: <GalleryHorizontal size={18} />,
     color: 'text-secondary-yellow/20',
     roles: 'all',

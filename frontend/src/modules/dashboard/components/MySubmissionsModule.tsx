@@ -1,18 +1,49 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ArtworkListItem, GroupListItem } from '@icaf/shared';
 import { listGroupSubmissions } from '@/api/groups';
 import { listArtworkSubmissions } from '@/api/user';
 import ArtworkCard from '@/modules/content/components/gallery/ArtworkCard';
+import ArtworkModal from '@/modules/content/components/gallery/ArtworkModal';
 import { GalleryGroupCard } from '@/modules/content/components/gallery/GalleryGroupCard';
 import { resolveApiArtwork } from '@/utils/galleryProcessing';
-import { artworkLabel, formatDate, groupTitle } from '../utils/dashboardFormat';
+import { formatDate, groupTitle } from '../utils/dashboardFormat';
 import { DashboardModule, ModuleState } from './DashboardModule';
+
+function useMediaQuery(query: string, fallback = false) {
+  const getMatches = useCallback(() => {
+    if (typeof window === 'undefined') return fallback;
+    return window.matchMedia(query).matches;
+  }, [fallback, query]);
+
+  const [matches, setMatches] = useState(getMatches);
+
+  useEffect(() => {
+    const mediaQueryList = window.matchMedia(query);
+    const updateMatches = () => setMatches(mediaQueryList.matches);
+
+    updateMatches();
+    mediaQueryList.addEventListener('change', updateMatches);
+    return () => {
+      mediaQueryList.removeEventListener('change', updateMatches);
+    };
+  }, [query]);
+
+  return matches;
+}
 
 export function MySubmissionsModule() {
   const [artworks, setArtworks] = useState<ArtworkListItem[]>([]);
   const [groups, setGroups] = useState<GroupListItem[]>([]);
+  const [activeArtworkId, setActiveArtworkId] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isHorizontal = useMediaQuery('(orientation: landscape)', true);
+  const resolvedArtworks = useMemo(
+    () => artworks.map((artwork) => resolveApiArtwork(artwork)),
+    [artworks],
+  );
+  const isModalOpen = Boolean(activeArtworkId);
+
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -39,6 +70,16 @@ export function MySubmissionsModule() {
       title="My submissions"
       description="See your published and pending artwork submissions."
     >
+      <ArtworkModal
+        id={activeArtworkId}
+        artworks={resolvedArtworks}
+        navigationList={resolvedArtworks}
+        onNavigate={setActiveArtworkId}
+        closeModal={() => setActiveArtworkId('')}
+        isHorizontal={isHorizontal}
+        modalState={isModalOpen}
+        getShareUrl={() => window.location.href}
+      />
       {error && <ModuleState tone="error">{error}</ModuleState>}
       {loading ? (
         <ModuleState>Loading your submissions...</ModuleState>
@@ -52,22 +93,19 @@ export function MySubmissionsModule() {
               <ModuleState>No artwork submissions found.</ModuleState>
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {artworks.map((artwork) => {
-                  const resolvedArtwork = resolveApiArtwork(artwork);
+                {resolvedArtworks.map((resolvedArtwork) => {
+                  const artwork = artworks.find(
+                    (item) => item.art_id === resolvedArtwork.art_id,
+                  );
+                  if (!artwork) return null;
                   return (
                     <ArtworkCard
-                      key={artwork.art_id}
+                      key={resolvedArtwork.id}
                       artwork={resolvedArtwork}
-                      openModal={() =>
-                        window.open(
-                          resolvedArtwork.displayUrl,
-                          '_blank',
-                          'noopener,noreferrer',
-                        )
-                      }
+                      openModal={setActiveArtworkId}
                       actionSlot={
                         <p className="text-xs text-neutral-500">
-                          {artworkLabel(artwork)} · {artwork.status} ·{' '}
+                          {artwork.status} · Submitted on{' '}
                           {formatDate(artwork.ts)}
                         </p>
                       }

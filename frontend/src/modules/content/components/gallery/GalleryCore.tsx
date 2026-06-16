@@ -847,10 +847,20 @@ const GalleryCoreInner = () => {
                         setSelectedThemeInstance(null);
                         setPageNumber(1);
                       }}
+                      onDeselectThemeFamily={() => {
+                        setSelectedThemeFamily(null);
+                        setSelectedThemeInstance(null);
+                        setPageNumber(1);
+                      }}
                       onSelectVirtualItem={selectVirtualThemeItem}
                       onSelectInstance={(theme) => {
                         setSelectedThemeFamily(theme.theme_family);
                         setSelectedThemeInstance(theme.theme_instance);
+                        setPageNumber(1);
+                      }}
+                      onDeselectInstance={() => {
+                        setSelectedThemeFamily(null);
+                        setSelectedThemeInstance(null);
                         setPageNumber(1);
                       }}
                     />
@@ -938,7 +948,7 @@ const GalleryCoreInner = () => {
             </div>
           )}
           {showLoadingOverlay && (
-            <div className="absolute inset-0 flex items-start justify-center pt-20">
+            <div className="absolute inset-0 z-[100] flex items-start justify-center pt-20">
               <div className="inline-flex items-center gap-2 rounded-md bg-white/90 px-4 py-3 text-sm font-medium text-gray-700 shadow-md">
                 <LoaderCircle size={18} className="animate-spin" />
                 {groupSlideshowLoading

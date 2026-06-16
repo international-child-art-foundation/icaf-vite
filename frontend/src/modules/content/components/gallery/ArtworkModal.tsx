@@ -2,10 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
-import {
-  formatArtworkByline,
-  getArtistDisplayName,
-} from '@/utils/galleryProcessing';
+import { getArtistDisplayNameWithAge } from '@/utils/galleryProcessing';
+import { GalleryArtworkInfo } from './GalleryArtworkInfo';
 import { KudosControls } from './KudosControls';
 import { SocialShare } from './SocialShare';
 
@@ -103,11 +101,8 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
   if (!modalState) return null;
 
   const artistText = artworkData
-    ? getArtistDisplayName(artworkData.artists ?? [], artworkData.lastInitial)
+    ? getArtistDisplayNameWithAge(artworkData)
     : '';
-  const locationText = [artworkData?.region, artworkData?.country]
-    .filter(Boolean)
-    .join(', ');
 
   function renderError() {
     return (
@@ -131,33 +126,12 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
     return (
       <div className="mx-auto grid max-h-full grid-cols-2 gap-5 overflow-hidden px-6 md:gap-10">
         <div className="flex flex-col overflow-auto">
-          <p className="mt-5 text-xl font-bold">{artistText}</p>
-          <p className="mt-0.5 text-sm font-medium text-gray-500">
-            {formatArtworkByline(artworkData)}
-          </p>
-          {artworkData.title && (
-            <p className="mt-0.5 text-lg font-medium italic text-gray-700">
-              &ldquo;{artworkData.title}&rdquo;
-            </p>
-          )}
-          <div className="mt-1 space-y-0.5 text-gray-500">
-            {(artworkData.age != null || locationText) && (
-              <p>
-                {[
-                  artworkData.age != null ? `${artworkData.age}` : null,
-                  locationText,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </p>
-            )}
-            {artworkData.event && <p>{artworkData.event}</p>}
-          </div>
-          {artworkData.description && (
-            <p className="mt-3 text-base text-gray-600">
-              {artworkData.description}
-            </p>
-          )}
+          <GalleryArtworkInfo
+            artwork={artworkData}
+            variant="modal"
+            descriptionMode="plain"
+            className="mt-5"
+          />
           <div className="mt-auto pt-6">
             <p className="text-xl font-semibold">Share this post</p>
             <SocialShare shareUrl={getShareUrl()} />
@@ -211,30 +185,12 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
             className="absolute inset-0 z-10 h-full w-full rounded-xl object-cover opacity-50 blur-3xl"
           />
         </div>
-        {artistText && <p className="mt-5 text-xl font-bold">{artistText}</p>}
-        {artworkData.title && (
-          <p className="mt-0.5 text-lg font-medium italic text-gray-700">
-            &ldquo;{artworkData.title}&rdquo;
-          </p>
-        )}
-        <div className="mt-1 space-y-0.5 text-gray-500">
-          {(artworkData.age != null || locationText) && (
-            <p>
-              {[
-                artworkData.age != null ? `${artworkData.age}` : null,
-                locationText,
-              ]
-                .filter(Boolean)
-                .join(' · ')}
-            </p>
-          )}
-          {artworkData.event && <p>{artworkData.event}</p>}
-        </div>
-        {artworkData.description && (
-          <p className="mt-3 text-sm text-gray-600">
-            {artworkData.description}
-          </p>
-        )}
+        <GalleryArtworkInfo
+          artwork={artworkData}
+          variant="modal"
+          descriptionMode="plain"
+          className="mt-5"
+        />
         <div className="mt-4">
           <p className="text-xl font-semibold">Share this post</p>
           <SocialShare shareUrl={getShareUrl()} />

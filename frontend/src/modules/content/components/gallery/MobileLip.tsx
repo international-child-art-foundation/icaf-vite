@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { Check, Link } from 'lucide-react';
 import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
 import {
-  formatArtworkByline,
-  formatArtworkContext,
-  getArtistDisplayName,
+  getArtworkDisplayTitle,
+  getArtworkSecondaryTitle,
 } from '@/utils/galleryProcessing';
+import { getGalleryInfoTags } from './GalleryArtworkInfo';
 import { KudosControls } from './KudosControls';
 
 export const LIP_COLLAPSED_H = 76; // px — used by parent for gesture hit-testing
@@ -250,22 +250,13 @@ export const MobileLip = ({
     return () => el.removeEventListener('touchmove', onMove);
   }, [artwork]);
 
-  const name = getArtistDisplayName(
-    artwork.artists ?? [],
-    artwork.lastInitial,
-  );
-  const theme = [artwork.theme_family, artwork.theme_instance]
-    .filter(Boolean)
-    .join(' ');
-  const artworkContext = formatArtworkContext(artwork);
-  const byline = formatArtworkByline(artwork);
-  const ageLine = artwork.age !== undefined ? `Age ${artwork.age}` : null;
+  const tags = getGalleryInfoTags(artwork);
 
   const t = maxLipY > 0 ? Math.min(lipY / maxLipY, 1) : 0;
 
   const hasTitle = !!artwork.title;
-  const primaryText = hasTitle ? `\u201c${artwork.title}\u201d` : name;
-  const secondaryText = hasTitle ? name : byline;
+  const primaryText = getArtworkDisplayTitle(artwork);
+  const secondaryText = getArtworkSecondaryTitle(artwork);
 
   const maxDescH = Math.floor(window.innerHeight * 0.6 * 0.4);
 
@@ -321,7 +312,7 @@ export const MobileLip = ({
               textOverflow: t > 0.05 ? 'clip' : 'ellipsis',
             }}
           >
-            {primaryText}
+            {hasTitle ? <>&ldquo;{primaryText}&rdquo;</> : primaryText}
           </p>
         )}
         {secondaryText && (
@@ -352,7 +343,7 @@ export const MobileLip = ({
           }}
         />
 
-        {(artworkContext || theme) && (
+        {tags.length > 0 && (
           <div
             style={{
               display: 'flex',
@@ -362,78 +353,55 @@ export const MobileLip = ({
               marginBottom: 12,
             }}
           >
-            {artworkContext && (
+            {tags.map(({ label, icon: Icon, tone }) => (
               <span
+                key={`${tone}-${label}`}
                 style={{
                   ...FONT,
                   borderRadius: 999,
-                  background: 'rgba(251,178,46,0.22)',
-                  color: '#775000',
+                  background:
+                    tone === 'location'
+                      ? 'rgba(16,185,129,0.10)'
+                      : tone === 'group'
+                        ? 'rgba(251,178,46,0.22)'
+                        : 'rgba(2,134,195,0.10)',
+                  border:
+                    tone === 'location'
+                      ? '1px solid rgba(16,185,129,0.22)'
+                      : tone === 'group'
+                        ? '1px solid rgba(251,178,46,0.35)'
+                        : '1px solid rgba(2,134,195,0.18)',
+                  color:
+                    tone === 'location'
+                      ? '#047857'
+                      : tone === 'group'
+                        ? '#775000'
+                        : '#026997',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
                   fontSize: 10,
                   fontWeight: 700,
                   letterSpacing: 0,
                   padding: '4px 8px',
-                  textTransform: 'uppercase',
+                  maxWidth: '100%',
                 }}
               >
-                {artworkContext}
+                <Icon size={12} strokeWidth={2.2} />
+                <span
+                  style={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {label}
+                </span>
               </span>
-            )}
-            {theme && (
-              <span
-                style={{
-                  ...FONT,
-                  borderRadius: 999,
-                  background: 'rgba(2,134,195,0.10)',
-                  color: '#026997',
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: 0,
-                  padding: '4px 8px',
-                  textTransform: 'uppercase',
-                }}
-              >
-                {theme}
-              </span>
-            )}
+            ))}
           </div>
         )}
 
-        {ageLine && (
-          <p
-            style={{
-              ...FONT,
-              fontSize: 13,
-              color: '#555',
-              marginBottom: 3,
-              textAlign: 'center',
-              opacity: textVisible ? 1 : 0,
-              transition: textVisible
-                ? 'opacity 0.2s ease'
-                : 'opacity 0.1s ease',
-            }}
-          >
-            {ageLine}
-          </p>
-        )}
-        {artwork.event && (
-          <p
-            style={{
-              ...FONT,
-              fontSize: 11,
-              color: '#aaa',
-              textTransform: 'capitalize',
-              marginBottom: 14,
-              textAlign: 'center',
-              opacity: textVisible ? 1 : 0,
-              transition: textVisible
-                ? 'opacity 0.2s ease'
-                : 'opacity 0.1s ease',
-            }}
-          >
-            {artwork.event}
-          </p>
-        )}
         <div
           style={{
             display: 'grid',
@@ -452,7 +420,7 @@ export const MobileLip = ({
                     marginBottom: 6,
                   }}
                 >
-                  {name} says:
+                  Description
                 </p>
                 <div
                   ref={descRef}

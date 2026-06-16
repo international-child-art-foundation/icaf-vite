@@ -88,17 +88,34 @@ export function ThemePicker({ onChange, value }: ThemePickerProps) {
                 item={family}
                 selectedThemeInstance={value.theme_instance}
                 onSelectThemeFamily={() => {
+                  if (family.theme_family === value.theme_family) {
+                    onChange({ theme_family: '', theme_instance: '' });
+                    return;
+                  }
                   const latestTheme = family.themes[0];
                   onChange({
                     theme_family: family.theme_family,
                     theme_instance: latestTheme?.theme_instance ?? '',
                   });
                 }}
-                onSelectInstance={(theme) =>
+                onDeselectThemeFamily={() =>
+                  onChange({ theme_family: '', theme_instance: '' })
+                }
+                onSelectInstance={(theme) => {
+                  if (
+                    theme.theme_family === value.theme_family &&
+                    theme.theme_instance === value.theme_instance
+                  ) {
+                    onChange({ theme_family: '', theme_instance: '' });
+                    return;
+                  }
                   onChange({
                     theme_family: theme.theme_family,
                     theme_instance: theme.theme_instance,
-                  })
+                  });
+                }}
+                onDeselectInstance={() =>
+                  onChange({ theme_family: '', theme_instance: '' })
                 }
               />
             ))}

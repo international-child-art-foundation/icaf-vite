@@ -1,7 +1,11 @@
 import type { GroupListItem } from '@icaf/shared';
-import { Images, MapPin, Play, Users } from 'lucide-react';
-import type { ReactNode } from 'react';
-import { artworkAssetUrl } from '@/utils/galleryProcessing';
+import { Images, MapPin, Palette, Play, Users, UsersRound } from 'lucide-react';
+import type { KeyboardEvent, ReactNode } from 'react';
+import {
+  artworkAssetUrl,
+  formatGalleryThemeInstance,
+  formatGalleryThemeName,
+} from '@/utils/galleryProcessing';
 
 type GalleryGroupCardProps = {
   group: GroupListItem;
@@ -12,7 +16,18 @@ type GalleryGroupCardProps = {
 function groupLabel(group: GroupListItem): string {
   return group.group_type === 'classroom'
     ? 'Classroom'
-    : group.group_type.replace(/_/g, ' ');
+    : group.group_type
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function groupThemeLabel(group: GroupListItem): string {
+  return [
+    formatGalleryThemeName(group.theme_family),
+    formatGalleryThemeInstance(group.theme_instance),
+  ]
+    .filter(Boolean)
+    .join(' ');
 }
 
 export function GalleryGroupCard({
@@ -24,47 +39,68 @@ export function GalleryGroupCard({
   const location = [group.region, group.country].filter(Boolean).join(', ');
   const owner = group.submitter_display_name || 'Group submission';
   const title = group.class_name || group.title;
-  const theme = [group.theme_family, group.theme_instance]
-    .filter(Boolean)
-    .join(' ');
+  const theme = groupThemeLabel(group);
+  const isWholeCardInteractive = !actionSlot;
+  const openGroup = () => onOpen(group);
+  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (!isWholeCardInteractive) return;
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    openGroup();
+  };
 
   return (
-    <div className="group relative grid w-full overflow-hidden rounded-lg border border-black/10 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg lg:grid-cols-[minmax(320px,0.95fr)_1.05fr]">
-      <button
-        type="button"
-        onClick={() => onOpen(group)}
-        className="relative grid min-h-[230px] grid-cols-4 items-center overflow-hidden bg-neutral-100 text-left lg:min-h-[260px]"
-      >
+    <article
+      role={isWholeCardInteractive ? 'button' : undefined}
+      tabIndex={isWholeCardInteractive ? 0 : undefined}
+      onClick={isWholeCardInteractive ? openGroup : undefined}
+      onKeyDown={handleKeyDown}
+      className={`focus-visible:ring-primary group relative grid w-full overflow-hidden rounded-lg border border-black/10 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 lg:grid-cols-[minmax(320px,0.95fr)_1.05fr] ${
+        isWholeCardInteractive ? 'cursor-pointer' : ''
+      }`}
+    >
+      <div className="relative flex min-h-[230px] items-center justify-center overflow-hidden bg-neutral-100 text-left lg:min-h-[260px]">
         {coverIds.length > 0 ? (
-          coverIds.map((artId: string) => (
-            <img
-              key={artId}
-              src={artworkAssetUrl(artId, 'thumb')}
-              alt=""
-              className={`h-full w-full object-cover transition duration-300 group-hover:scale-105`}
-              loading="lazy"
-            />
-          ))
+          <div className="flex h-full w-full items-stretch justify-center -space-x-20 sm:-space-x-24 lg:-space-x-28">
+            {coverIds.map((artId: string, index) => (
+              <img
+                key={artId}
+                src={artworkAssetUrl(artId, 'thumb')}
+                alt=""
+                className="h-full min-h-[230px] w-[58%] min-w-[190px] border-y-0 border-l-4 border-r-0 border-white object-cover shadow-md transition duration-300 group-hover:scale-[1.03] sm:w-[54%] lg:min-h-[260px] lg:w-[50%]"
+                style={{ zIndex: coverIds.length - index }}
+                loading="lazy"
+              />
+            ))}
+          </div>
         ) : (
-          <div className="col-span-4 flex items-center justify-center bg-[linear-gradient(135deg,#0286C3,#FBB22E,#EE2F4D)] text-white">
+          <div className="flex h-full min-h-40 w-full items-center justify-center rounded-md bg-[linear-gradient(135deg,#0286C3,#FBB22E,#EE2F4D)] text-white">
             <Images size={42} />
           </div>
         )}
-        <span className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-neutral-800 shadow-sm">
+        <span className="absolute bottom-4 left-4 z-10 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-neutral-800 shadow-sm">
           <Users size={14} />
           {group.member_count} artwork{group.member_count != 1 && 's'}
         </span>
-      </button>
+      </div>
 
       <div className="relative flex min-h-[230px] flex-col justify-between gap-6 p-5 sm:p-7 lg:min-h-[260px]">
         <div>
           <div className="flex flex-wrap gap-2">
-            <span className="rounded-full bg-[#0286C3]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#026997]">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold leading-tight text-amber-800">
+              <UsersRound size={12} strokeWidth={2.2} />
               {groupLabel(group)}
             </span>
             {theme && (
-              <span className="rounded-full bg-[#FBB22E]/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#805600]">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-semibold leading-tight text-sky-800">
+                <Palette size={12} strokeWidth={2.2} />
                 {theme}
+              </span>
+            )}
+            {location && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold leading-tight text-emerald-800">
+                <MapPin size={12} strokeWidth={2.2} />
+                {location}
               </span>
             )}
           </div>
@@ -78,27 +114,17 @@ export function GalleryGroupCard({
           )}
           <p className="mt-4 text-sm leading-6 text-neutral-600">
             Submitted by {owner}
-            {location && (
-              <span className="mt-1 flex items-center gap-1 text-neutral-500">
-                <MapPin size={14} />
-                {location}
-              </span>
-            )}
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => onOpen(group)}
-          className="flex items-center justify-between gap-4 text-left"
-        >
+        <div className="flex items-center justify-between gap-4 text-left">
           <p className="text-sm text-neutral-500"></p>
           <span className="bg-primary group-hover:bg-secondary-blue inline-flex h-11 w-11 flex-none items-center justify-center rounded-full text-white transition">
             <Play size={18} fill="currentColor" />
           </span>
-        </button>
+        </div>
         {actionSlot && <div className="border-t pt-5">{actionSlot}</div>}
       </div>
-    </div>
+    </article>
   );
 }

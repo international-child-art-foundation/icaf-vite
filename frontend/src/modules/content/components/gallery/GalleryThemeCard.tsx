@@ -18,7 +18,9 @@ type GalleryThemeCardProps = {
   active: boolean;
   item: GalleryThemeMenuItem;
   onSelectThemeFamily: (family: ThemeFamilyCardModel) => void;
+  onDeselectThemeFamily?: (family: ThemeFamilyCardModel) => void;
   onSelectInstance?: (theme: ThemeListItem) => void;
+  onDeselectInstance?: (theme: ThemeListItem) => void;
   onSelectVirtualItem?: (item: VirtualThemeMenuItem) => void;
   selectedThemeInstance?: string | null;
 };
@@ -72,7 +74,9 @@ function useMobileThemeActivation() {
 export function GalleryThemeCard({
   active,
   item,
+  onDeselectThemeFamily,
   onSelectThemeFamily,
+  onDeselectInstance,
   onSelectInstance,
   onSelectVirtualItem,
   selectedThemeInstance,
@@ -179,6 +183,10 @@ export function GalleryThemeCard({
         }
         onClick={() => {
           if (item.kind === 'theme') {
+            if (active && onDeselectThemeFamily) {
+              onDeselectThemeFamily(item);
+              return;
+            }
             onSelectThemeFamily(item);
             return;
           }
@@ -273,6 +281,10 @@ export function GalleryThemeCard({
                 className="flex w-full items-start gap-3 px-3 py-2 text-left text-sm transition hover:bg-neutral-50"
                 onClick={() => {
                   setOpen(false);
+                  if (active && theme.theme_instance === selectedThemeInstance) {
+                    onDeselectInstance?.(theme);
+                    return;
+                  }
                   onSelectInstance?.(theme);
                 }}
               >

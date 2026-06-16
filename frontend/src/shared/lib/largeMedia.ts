@@ -19,6 +19,7 @@ export const largeMedia = {
     '2014 ICAF Judges Saving Endangered Species Art Contest.mp4',
   ),
   artAsSourceOfHealing: largeMediaUrl('art-as-a-source-of-healing.mp4'),
+  fourthOfJuly: largeMediaUrl('4th-of-July.mp4'),
 } as const;
 
 export type LargeMediaKey = keyof typeof largeMedia;

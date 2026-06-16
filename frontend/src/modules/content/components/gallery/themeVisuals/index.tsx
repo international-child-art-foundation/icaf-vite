@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { debugFlags } from '@/shared/debugFlags';
 import { DEFAULT_THEME_VISUAL_DURATION_SECONDS } from './constants';
 import { customThemeVisuals } from './registry';
@@ -27,23 +28,72 @@ export function GalleryThemeVisual({
   isActive = false,
 }: ThemeVisualProps) {
   const definition = findThemeVisual(family);
-  const Visual = definition?.Visual ?? DefaultThemeVisual;
   const durationSeconds =
     definition?.durationSeconds ?? DEFAULT_THEME_VISUAL_DURATION_SECONDS;
 
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <Visual
-        family={family}
-        isActive={isActive}
-        durationSeconds={durationSeconds}
-      />
+      <DefaultThemeVisual />
+      {definition?.videoSrc && (
+        <ThemeVideoVisual
+          isActive={isActive}
+          src={definition.videoSrc}
+          mirrored={definition.mirrored === true}
+        />
+      )}
       {debugFlags.theme_debug && (
         <ThemeVisualDebug
           durationSeconds={durationSeconds}
           isActive={isActive}
         />
       )}
+    </div>
+  );
+}
+
+type ThemeVideoVisualProps = {
+  isActive: boolean;
+  src: string;
+  mirrored?: boolean;
+};
+
+function ThemeVideoVisual({
+  isActive,
+  src,
+  mirrored = false,
+}: ThemeVideoVisualProps) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (!isActive) {
+      video.pause();
+      video.currentTime = 0;
+      return;
+    }
+
+    video.currentTime = 0;
+    const playPromise = video.play();
+    playPromise?.catch(() => {
+      video.pause();
+    });
+  }, [isActive, src]);
+
+  return (
+    <div className="h-full w-full border-2">
+      <video
+        ref={videoRef}
+        aria-hidden="true"
+        className={`absolute inset-0 h-full w-full object-cover ${
+          mirrored ? '-scale-x-100' : ''
+        }`}
+        muted
+        playsInline
+        preload="metadata"
+        src={src}
+      />
     </div>
   );
 }

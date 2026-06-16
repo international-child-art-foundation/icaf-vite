@@ -1,16 +1,23 @@
 import type { ThemeVisualDefinition } from './types';
-import { CherryBlossomVisual } from './visuals/CherryBlossomVisual';
-import { FourthOfJulyVisual } from '@/modules/content/components/gallery/themeVisuals/visuals/FourthOfJulyVisual';
+import { largeMedia } from '@/shared/lib/largeMedia';
 
 export const customThemeVisuals: ThemeVisualDefinition[] = [
   {
     aliases: ['CHERRY_BLOSSOM', 'CHERRYBLOSSOM'],
     decorated: true,
-    Visual: CherryBlossomVisual,
+    palette: {
+      background: '#fff7fb',
+      foreground: '#ffffff',
+    },
   },
   {
     aliases: ['FOURTH_OF_JULY'],
     decorated: false,
-    Visual: FourthOfJulyVisual,
+    videoSrc: largeMedia.fourthOfJuly,
+    mirrored: true,
+    palette: {
+      background: '#f8fafc',
+      foreground: '#2d4069',
+    },
   },
 ];

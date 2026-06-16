@@ -49,6 +49,26 @@ function getVirtualThemeWidth(item: VirtualThemeMenuItem) {
   ];
 }
 
+function useMobileThemeActivation() {
+  const [usesMobileActivation, setUsesMobileActivation] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(hover: none), (pointer: coarse)');
+
+    function updateMobileActivation() {
+      setUsesMobileActivation(mediaQuery.matches);
+    }
+
+    updateMobileActivation();
+    mediaQuery.addEventListener('change', updateMobileActivation);
+    return () => {
+      mediaQuery.removeEventListener('change', updateMobileActivation);
+    };
+  }, []);
+
+  return usesMobileActivation;
+}
+
 export function GalleryThemeCard({
   active,
   item,
@@ -59,6 +79,7 @@ export function GalleryThemeCard({
 }: GalleryThemeCardProps) {
   const [open, setOpen] = useState(false);
   const [isThemeHovered, setIsThemeHovered] = useState(false);
+  const usesMobileActivation = useMobileThemeActivation();
   const dropdownButtonRef = useRef<HTMLButtonElement | null>(null);
   const dropdownMenuRef = useRef<HTMLDivElement | null>(null);
   const positionRafRef = useRef<number | null>(null);
@@ -173,7 +194,7 @@ export function GalleryThemeCard({
           <>
             <GalleryThemeVisual
               family={item.theme_family}
-              isActive={isThemeHovered}
+              isActive={isThemeHovered || (usesMobileActivation && active)}
             />
             <span className="relative z-10 grid h-full grid-cols-[minmax(0,1fr)_2rem] gap-3">
               <span className="flex min-w-0 flex-col justify-center">

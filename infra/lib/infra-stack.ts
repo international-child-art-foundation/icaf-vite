@@ -396,7 +396,7 @@ export class InfraStack extends Stack {
 
     // ─── 7. Lambda Functions ──────────────────────────────────────────────────
     // TODO: Update APP_URL and MAGAZINES_CLOUDFRONT_DOMAIN before deployment
-    const SES_FROM_EMAIL = "no-reply@icaf.org";
+    const SES_FROM_EMAIL = "ICAF <no-reply@icaf.org>";
     const TAKEDOWN_NOTIFICATION_EMAILS = [
       "childart@icaf.org",
       "noah.zaranka@icaf.org",

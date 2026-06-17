@@ -16,8 +16,8 @@ export const customThemeVisuals: ThemeVisualDefinition[] = [
     videoSrc: largeMedia.fourthOfJuly,
     mirrored: true,
     palette: {
-      background: '#f8fafc',
-      foreground: '#2d4069',
+      background: '#B22234',
+      foreground: '#3C3B6E',
     },
   },
 ];

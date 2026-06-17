@@ -21,6 +21,7 @@ import {
   hasStringProperty,
 } from './client';
 import { apiEndpoints } from './endpoints';
+import { clearGalleryThemesCache } from './public';
 import type { PaginationQuery } from './types';
 
 const isArtworkQueueResponse = (response: unknown): boolean =>
@@ -164,6 +165,7 @@ export function createTheme(
     apiEndpoints.contributor.createTheme,
     { body: request, method: 'POST', validate: isThemeMutationResponse },
   ).then((response) => {
+    clearGalleryThemesCache();
     clearApiResponseCache({
       method: 'GET',
       pathPrefix: apiEndpoints.gallery.themes,
@@ -180,6 +182,7 @@ export function updateTheme(
     apiEndpoints.contributor.updateTheme(themeSk),
     { body: request, method: 'PATCH', validate: isThemeMutationResponse },
   ).then((response) => {
+    clearGalleryThemesCache();
     clearApiResponseCache({
       method: 'GET',
       pathPrefix: apiEndpoints.gallery.themes,

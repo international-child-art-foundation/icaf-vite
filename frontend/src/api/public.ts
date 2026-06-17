@@ -41,6 +41,14 @@ type PublicReadOptions = {
   cacheTtlMs?: number;
 };
 
+const THEME_LIST_CACHE_KEY = 'icaf:gallery-themes:v1';
+const THEME_LIST_CACHE_TTL_MS = 30 * 60 * 1000;
+
+type CachedThemeListResponse = {
+  expiresAt: number;
+  value: ListThemesResponse;
+};
+
 const isSuccessfulArtworkSubmitResponse = (response: unknown): boolean =>
   hasApiSuccess(response) && hasStringProperty(response, 'art_id');
 
@@ -83,8 +91,61 @@ const isGalleryArtworksResponse = (response: unknown): boolean =>
   hasNumberProperty(response, 'count') &&
   hasStringProperty(response, 'sort');
 
-const isThemesResponse = (response: unknown): boolean =>
+const isThemesResponse = (response: unknown): response is ListThemesResponse =>
   hasArrayProperty(response, 'themes') && hasNumberProperty(response, 'count');
+
+function getLocalStorage(): Storage | null {
+  try {
+    return typeof window === 'undefined' ? null : window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
+function readCachedGalleryThemes(): ListThemesResponse | null {
+  const storage = getLocalStorage();
+  if (!storage) return null;
+
+  try {
+    const rawCache = storage.getItem(THEME_LIST_CACHE_KEY);
+    if (!rawCache) return null;
+
+    const cached = JSON.parse(rawCache) as Partial<CachedThemeListResponse>;
+    if (
+      typeof cached.expiresAt !== 'number' ||
+      cached.expiresAt <= Date.now() ||
+      !isThemesResponse(cached.value)
+    ) {
+      storage.removeItem(THEME_LIST_CACHE_KEY);
+      return null;
+    }
+
+    return cached.value;
+  } catch {
+    storage.removeItem(THEME_LIST_CACHE_KEY);
+    return null;
+  }
+}
+
+function writeCachedGalleryThemes(response: ListThemesResponse): void {
+  const storage = getLocalStorage();
+  if (!storage) return;
+
+  const cached: CachedThemeListResponse = {
+    expiresAt: Date.now() + THEME_LIST_CACHE_TTL_MS,
+    value: response,
+  };
+
+  try {
+    storage.setItem(THEME_LIST_CACHE_KEY, JSON.stringify(cached));
+  } catch {
+    storage.removeItem(THEME_LIST_CACHE_KEY);
+  }
+}
+
+export function clearGalleryThemesCache(): void {
+  getLocalStorage()?.removeItem(THEME_LIST_CACHE_KEY);
+}
 
 const isGalleryGroupsResponse = (response: unknown): boolean =>
   hasArrayProperty(response, 'groups') &&
@@ -247,10 +308,18 @@ export function listGalleryArtworksByInstance(
 export function listGalleryThemes(
   options?: PublicReadOptions,
 ): Promise<ListThemesResponse> {
+  if (!options?.bypassCache) {
+    const cachedThemes = readCachedGalleryThemes();
+    if (cachedThemes) return Promise.resolve(cachedThemes);
+  }
+
   return apiRequest<ListThemesResponse>(apiEndpoints.gallery.themes, {
     bypassCache: options?.bypassCache,
-    cacheTtlMs: options?.cacheTtlMs ?? DEFAULT_API_CACHE_TTL_MS,
+    cacheTtlMs: options?.cacheTtlMs ?? THEME_LIST_CACHE_TTL_MS,
     validate: isThemesResponse,
+  }).then((response) => {
+    writeCachedGalleryThemes(response);
+    return response;
   });
 }
 

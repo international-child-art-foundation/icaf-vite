@@ -129,18 +129,21 @@ export function ThemeAdminPanel() {
     return themes.filter((theme) => values.has(themeValue(theme)));
   }, [filteredThemeOptions, themeFilterQuery, themeOptions, themes]);
 
-  const loadThemes = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await listGalleryThemes();
-      setThemes(response.themes);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to load themes.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const loadThemes = useCallback(
+    async (options?: { bypassCache?: boolean }) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await listGalleryThemes(options);
+        setThemes(response.themes);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unable to load themes.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     void loadThemes();
@@ -206,7 +209,7 @@ export function ThemeAdminPanel() {
 
       const response = await updateTheme(selectedTheme.theme_sk, request);
       setMessage(response.message);
-      await loadThemes();
+      await loadThemes({ bypassCache: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Theme update failed.');
     } finally {
@@ -231,7 +234,7 @@ export function ThemeAdminPanel() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => void loadThemes()}
+            onClick={() => void loadThemes({ bypassCache: true })}
             disabled={busy || loading}
           >
             <RefreshCw aria-hidden="true" />

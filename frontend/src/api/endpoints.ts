@@ -50,6 +50,7 @@ export const apiEndpoints = {
     forgotPassword: '/auth/forgot-password',
     login: '/auth/login',
     logout: '/auth/logout',
+    refresh: '/auth/refresh',
     requestCreateAndVerify: '/auth/create-and-verify/request',
     resendVerification: '/auth/resend-verification',
     status: '/auth/status',

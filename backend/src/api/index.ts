@@ -54,6 +54,7 @@ import { handler as getNews } from "../functions/anyone/getNews";
 import { handler as initiateTakedown } from "../functions/anyone/initiateTakedown";
 import { handler as login } from "../functions/anyone/login";
 import { handler as logout } from "../functions/anyone/logout";
+import { handler as refresh } from "../functions/anyone/refresh";
 import {
   everyWebhookHandler,
   stripeWebhookHandler,
@@ -162,6 +163,7 @@ const routes: Route[] = [
   { method: "POST", path: "/api/auth/default-registration", handler: defaultRegistration },
   { method: "POST", path: "/api/auth/login", handler: login },
   { method: "POST", path: "/api/auth/logout", handler: logout },
+  { method: "POST", path: "/api/auth/refresh", handler: refresh },
   { method: "POST", path: "/api/auth/create-and-verify", handler: createAndVerify },
   { method: "POST", path: "/api/auth/forgot-password", handler: forgotPassword },
   { method: "POST", path: "/api/auth/confirm-forgot-password", handler: confirmForgotPassword },

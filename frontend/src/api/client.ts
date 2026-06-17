@@ -179,6 +179,42 @@ async function fetchApiResponse<TBody>(
   return { response, responseBody };
 }
 
+async function refreshAuthSession(config?: ApiClientConfig): Promise<boolean> {
+  const refreshUrl = buildApiUrl('/auth/refresh', undefined, config);
+  const headers = new Headers();
+  headers.set('Content-Type', 'application/json');
+
+  try {
+    await fetchApiResponse(refreshUrl, { method: 'POST' }, headers);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function fetchApiResponseWithAuthRefresh<TBody>(
+  url: string,
+  options: ApiRequestOptions<TBody>,
+  headers: Headers,
+  config?: ApiClientConfig,
+): Promise<{ response: Response; responseBody: unknown }> {
+  try {
+    return await fetchApiResponse(url, options, headers);
+  } catch (error) {
+    const isRefreshRequest = new URL(url).pathname.endsWith('/auth/refresh');
+    if (
+      error instanceof ApiError &&
+      error.status === 401 &&
+      !isRefreshRequest &&
+      (await refreshAuthSession(config))
+    ) {
+      return fetchApiResponse(url, options, headers);
+    }
+
+    throw error;
+  }
+}
+
 function validateApiResponse(
   response: Response,
   responseBody: unknown,
@@ -333,8 +369,12 @@ export async function apiRequest<TResponse, TBody = never>(
     if (pending) return (await pending) as TResponse;
   }
 
-  const request = fetchApiResponse(url, options, headers).then(
-    ({ response, responseBody }) => {
+  const request = fetchApiResponseWithAuthRefresh(
+    url,
+    options,
+    headers,
+    config,
+  ).then(({ response, responseBody }) => {
       validateApiResponse(response, responseBody, options.validate);
 
       if (

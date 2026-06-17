@@ -314,6 +314,9 @@ export class InfraStack extends Stack {
         userPassword: true,
         userSrp: true,
       },
+      accessTokenValidity: Duration.hours(1),
+      idTokenValidity: Duration.hours(1),
+      refreshTokenValidity: Duration.days(30),
     });
 
     // ─── 5. SQS — Background Queues ──────────────────────────────────────────

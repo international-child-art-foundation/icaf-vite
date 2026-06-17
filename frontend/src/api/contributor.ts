@@ -3,10 +3,10 @@ import type {
   ChangeArtworkStatusResponse,
   ChangeGroupStatusRequest,
   ChangeGroupStatusResponse,
+  CreateThemeRequest,
   PatchTheme,
   ReviewArtworkQueueResponse,
   ReviewGroupQueueResponse,
-  ThemeEntity,
   UpdateUserRoleRequest,
   UpdateUserRoleResponse,
   createThemeResponse,
@@ -22,8 +22,6 @@ import {
 } from './client';
 import { apiEndpoints } from './endpoints';
 import type { PaginationQuery } from './types';
-
-type CreateThemeRequest = Omit<ThemeEntity, 'type'>;
 
 const isArtworkQueueResponse = (response: unknown): boolean =>
   hasArrayProperty(response, 'artworks');

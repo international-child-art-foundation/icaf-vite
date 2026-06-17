@@ -78,8 +78,7 @@ export const handler = async (
         const gsiAttrs = buildApprovedArtworkGsiAttrs({
           tsMs: art.ts * 1000,
           artId: id,
-          family: art.theme_family,
-          instance: art.theme_instance,
+          theme: art.theme,
         });
         const gsiParts = Object.entries(gsiAttrs).map(([k, v], i) => {
           exprValues[`:gsi${i}`] = v;
@@ -91,8 +90,7 @@ export const handler = async (
         const gsiAttrs = buildApprovedGroupGsiAttrs({
           tsMs: group.ts * 1000,
           groupId: id,
-          family: group.theme_family,
-          instance: group.theme_instance,
+          theme: group.theme,
         });
         const gsiParts = Object.entries(gsiAttrs).map(([k, v], i) => {
           exprValues[`:gsi${i}`] = v;

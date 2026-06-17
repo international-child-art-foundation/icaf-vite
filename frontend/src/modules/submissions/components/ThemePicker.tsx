@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { ThemeListItem } from '@icaf/shared';
+import { parseThemeSK, type ThemeListItem } from '@icaf/shared';
 import { listGalleryThemes } from '@/api/public';
 import { GalleryThemeCard } from '@/modules/content/components/gallery/GalleryThemeCard';
 import { buildThemeFamilies } from '@/modules/content/components/gallery/themeFamilies';
@@ -9,8 +9,7 @@ import {
 } from '@/modules/content/components/gallery/themeVisibility';
 
 type ThemePickerValue = {
-  theme_family: string;
-  theme_instance: string;
+  theme: string;
 };
 
 type ThemePickerProps = {
@@ -23,6 +22,10 @@ export function ThemePicker({ onChange, value }: ThemePickerProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const themeFamilies = useMemo(() => buildThemeFamilies(themes), [themes]);
+  const selectedTheme = useMemo(
+    () => (value.theme ? parseThemeSK(value.theme) : null),
+    [value.theme],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -32,8 +35,12 @@ export function ThemePicker({ onChange, value }: ThemePickerProps) {
     listGalleryThemes()
       .then((response) => {
         if (cancelled) return;
+        const now = Date.now();
         setThemes(
-          filterThemesForSurface(response.themes, THEME_SURFACES.submitArtwork),
+          filterThemesForSurface(
+            response.themes,
+            THEME_SURFACES.submitArtwork,
+          ).filter((theme) => !theme.retired_at || theme.retired_at > now),
         );
       })
       .catch((requestError: unknown) => {
@@ -66,9 +73,9 @@ export function ThemePicker({ onChange, value }: ThemePickerProps) {
         </div>
         <button
           type="button"
-          onClick={() => onChange({ theme_family: '', theme_instance: '' })}
+          onClick={() => onChange({ theme: '' })}
           className="rounded-md border border-2 border-black/10 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 opacity-50 transition disabled:border-gray-800 disabled:bg-gray-50 disabled:text-gray-800 disabled:opacity-100"
-          disabled={!value.theme_family}
+          disabled={!value.theme}
         >
           No theme
         </button>
@@ -84,38 +91,33 @@ export function ThemePicker({ onChange, value }: ThemePickerProps) {
             {themeFamilies.map((family) => (
               <GalleryThemeCard
                 key={family.theme_family}
-                active={family.theme_family === value.theme_family}
+                active={family.theme_family === selectedTheme?.theme_family}
                 item={family}
-                selectedThemeInstance={value.theme_instance}
+                selectedThemeSk={value.theme}
                 onSelectThemeFamily={() => {
-                  if (family.theme_family === value.theme_family) {
-                    onChange({ theme_family: '', theme_instance: '' });
+                  if (family.theme_family === selectedTheme?.theme_family) {
+                    onChange({ theme: '' });
                     return;
                   }
-                  const latestTheme = family.themes[0];
                   onChange({
-                    theme_family: family.theme_family,
-                    theme_instance: latestTheme?.theme_instance ?? '',
+                    theme:
+                      family.themes.length === 1
+                        ? family.themes[0].theme_sk
+                        : family.theme_sk,
                   });
                 }}
                 onDeselectThemeFamily={() =>
-                  onChange({ theme_family: '', theme_instance: '' })
+                  onChange({ theme: '' })
                 }
                 onSelectInstance={(theme) => {
-                  if (
-                    theme.theme_family === value.theme_family &&
-                    theme.theme_instance === value.theme_instance
-                  ) {
-                    onChange({ theme_family: '', theme_instance: '' });
+                  if (theme.theme_sk === value.theme) {
+                    onChange({ theme: '' });
                     return;
                   }
-                  onChange({
-                    theme_family: theme.theme_family,
-                    theme_instance: theme.theme_instance,
-                  });
+                  onChange({ theme: theme.theme_sk });
                 }}
                 onDeselectInstance={() =>
-                  onChange({ theme_family: '', theme_instance: '' })
+                  onChange({ theme: '' })
                 }
               />
             ))}

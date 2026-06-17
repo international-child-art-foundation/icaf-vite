@@ -12,7 +12,7 @@ import {
   MAX_STRING_LEN,
   MAX_TITLE_LEN,
   SubmitterRelationship,
-  THEME_INSTANCE_FORMAT,
+  isValidThemeSk,
 } from "@icaf/shared";
 import { buildApprovedArtworkGsiAttrs } from "../../dynamo/artGsis";
 import { parseJsonBody } from "../../utils/request";
@@ -28,8 +28,7 @@ const ALLOWED_UPDATE_FIELDS = new Set([
   "country",
   "region",
   "submitter_relationship",
-  "theme_family",
-  "theme_instance",
+  "theme",
   "notifications",
 ]);
 const RELATIONSHIPS: SubmitterRelationship[] = ["parent", "guardian", "teacher"];
@@ -95,7 +94,7 @@ export const handler = async (
       ["l_name", MAX_STRING_LEN, false],
       ["country", MAX_STRING_LEN, false],
       ["region", MAX_STRING_LEN, false],
-      ["theme_family", MAX_STRING_LEN, false],
+      ["theme", MAX_STRING_LEN, false],
     ];
 
     const body = parsedBody.value;
@@ -113,10 +112,10 @@ export const handler = async (
         !RELATIONSHIPS.includes(body.submitter_relationship as SubmitterRelationship)
         ? `submitter_relationship must be one of: ${RELATIONSHIPS.join(", ")}`
         : undefined,
-      "theme_instance" in body &&
-        !isRemoval(body.theme_instance) &&
-        (typeof body.theme_instance !== "string" || !THEME_INSTANCE_FORMAT.test(body.theme_instance))
-        ? "theme_instance must be a zero-padded 4-digit string"
+      "theme" in body &&
+        !isRemoval(body.theme) &&
+        (typeof body.theme !== "string" || !isValidThemeSk(body.theme))
+        ? "theme must be a valid theme SK"
         : undefined,
       "notifications" in body &&
         !isRemoval(body.notifications) &&
@@ -155,11 +154,7 @@ export const handler = async (
     if ("country" in body) setOrRemove("country", ":country", body.country);
     if ("region" in body) setOrRemove("region", ":region", body.region, "#region");
     if ("submitter_relationship" in body) setOrRemove("submitter_relationship", ":rel", body.submitter_relationship);
-    if ("theme_family" in body) setOrRemove("theme_family", ":tf", body.theme_family);
-    if ("theme_instance" in body) setOrRemove("theme_instance", ":ti", body.theme_instance);
-    if (isRemoval(body.theme_family) && !("theme_instance" in body)) {
-      removeExprParts.push("theme_instance");
-    }
+    if ("theme" in body) setOrRemove("theme", ":theme", body.theme);
     if (art.group_id) {
       setExprParts.push("notifications = :notifications");
       exprValues[":notifications"] = false;
@@ -172,25 +167,16 @@ export const handler = async (
       }
     }
     if (art.status === "approved") {
-      const nextThemeFamily =
-        "theme_family" in body
-          ? isRemoval(body.theme_family)
+      const nextTheme =
+        "theme" in body
+          ? isRemoval(body.theme)
             ? undefined
-            : body.theme_family as string
-          : art.theme_family;
-      const nextThemeInstance =
-        "theme_instance" in body
-          ? isRemoval(body.theme_instance)
-            ? undefined
-            : body.theme_instance as string
-          : isRemoval(body.theme_family)
-            ? undefined
-            : art.theme_instance;
+            : body.theme as string
+          : art.theme;
       const gsiAttrs = buildApprovedArtworkGsiAttrs({
         tsMs: art.ts * 1000,
         artId,
-        family: nextThemeFamily,
-        instance: nextThemeInstance,
+        theme: nextTheme,
       });
 
       Object.entries(gsiAttrs).forEach(([key, value], index) => {

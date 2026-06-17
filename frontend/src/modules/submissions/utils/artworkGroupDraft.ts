@@ -32,8 +32,7 @@ export const initialArtworkGroupInfo: ArtworkGroupInfo = {
   group_type: 'classroom',
   notifications: true,
   region: '',
-  theme_family: '',
-  theme_instance: '',
+  theme: '',
   submitter_display_name: '',
   title: '',
 };
@@ -276,8 +275,7 @@ export function toArtworkRequest(
     release_hash: releaseHash,
     submitter_relationship:
       options.submitterRelationship ?? artwork.submitter_relationship,
-    theme_family: group.theme_family.trim() || undefined,
-    theme_instance: group.theme_instance.trim() || undefined,
+    theme: group.theme.trim() || undefined,
     title: artwork.title.trim() || undefined,
   };
 }

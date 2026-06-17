@@ -5,6 +5,7 @@ import {
   CommonErrors,
   HTTP_STATUS,
   ListThemesResponse,
+  parseThemeSK,
   ThemeListItem,
 } from "@icaf/shared";
 import { dynamodb, TABLE_NAME } from "../../../config/aws-clients";
@@ -17,13 +18,18 @@ function stringArray(value: unknown): string[] | undefined {
 }
 
 function mapTheme(item: Record<string, unknown>): ThemeListItem {
+  const parsed = parseThemeSK(item.SK as string);
   return {
+    theme_sk: item.SK as string,
     theme_family: item.theme_family as string,
-    theme_instance: item.theme_instance as string,
-    display_name: item.display_name as string,
+    ...(parsed?.kind === "instance" && {
+      instance_type: parsed.instance_type,
+      theme_instance: parsed.theme_instance,
+    }),
     description: item.description as string | undefined,
     featured_on: stringArray(item.featured_on) ?? [],
     start_date: typeof item.start_date === "number" ? item.start_date : 0,
+    retired_at: typeof item.retired_at === "number" ? item.retired_at : undefined,
   };
 }
 

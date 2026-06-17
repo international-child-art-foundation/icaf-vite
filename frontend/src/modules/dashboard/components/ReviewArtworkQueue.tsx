@@ -29,8 +29,7 @@ type ArtworkEdits = {
   notifications: boolean;
   region: string;
   submitter_relationship: SubmitterRelationship | '';
-  theme_family: string;
-  theme_instance: string;
+  theme: string;
   title: string;
 };
 
@@ -53,8 +52,7 @@ function toEdits(artwork: ArtworkListItem): ArtworkEdits {
     notifications: artwork.notifications ?? false,
     region: artwork.region ?? '',
     submitter_relationship: artwork.submitter_relationship ?? '',
-    theme_family: artwork.theme_family ?? '',
-    theme_instance: artwork.theme_instance ?? '',
+    theme: artwork.theme ?? '',
     title: artwork.title ?? '',
   };
 }
@@ -192,8 +190,7 @@ export function ReviewArtworkQueue({
       'f_name',
       'country',
       'region',
-      'theme_family',
-      'theme_instance',
+      'theme',
     ] as const;
 
     textFields.forEach((field) => {
@@ -454,8 +451,7 @@ export function ReviewArtworkQueue({
                     <EditInput label="Age" inputMode="numeric" value={edits.age} onChange={(age) => setEdits({ ...edits, age })} />
                     <EditInput label="Country" value={edits.country} onChange={(country) => setEdits({ ...edits, country })} />
                     <EditInput label="Region" value={edits.region} onChange={(region) => setEdits({ ...edits, region })} />
-                    <EditInput label="Theme collection" value={edits.theme_family} onChange={(theme_family) => setEdits({ ...edits, theme_family })} />
-                    <EditInput label="Theme year" value={edits.theme_instance} onChange={(theme_instance) => setEdits({ ...edits, theme_instance })} />
+                    <EditInput label="Theme SK" value={edits.theme} onChange={(theme) => setEdits({ ...edits, theme })} />
                     <label className="text-xs font-semibold uppercase text-neutral-600">
                       Relationship
                       <select

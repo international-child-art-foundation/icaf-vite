@@ -72,16 +72,12 @@ export const handler = async (
       return CommonErrors.internalServerError("Unable to resolve submission owner");
     }
 
-    await ensureThemeEntity({
-      family: body.theme_family,
-      instance: body.theme_instance,
-    });
+    const groupThemeCheck = await ensureThemeEntity({ theme: body.theme, nowMs });
+    if (!groupThemeCheck.ok) return groupThemeCheck.response;
 
     for (const artwork of body.artworks) {
-      await ensureThemeEntity({
-        family: artwork.theme_family,
-        instance: artwork.theme_instance,
-      });
+      const artworkThemeCheck = await ensureThemeEntity({ theme: artwork.theme, nowMs });
+      if (!artworkThemeCheck.ok) return artworkThemeCheck.response;
     }
 
     await dynamodb.send(
@@ -115,8 +111,7 @@ export const handler = async (
                 ...(artwork.title && { title: artwork.title }),
                 ...(artwork.description && { description: artwork.description }),
                 ...(artwork.submitter_relationship && { submitter_relationship: artwork.submitter_relationship }),
-                ...(artwork.theme_family && { theme_family: artwork.theme_family }),
-                ...(artwork.theme_instance && { theme_instance: artwork.theme_instance }),
+                ...(artwork.theme && { theme: artwork.theme }),
                 OWN_PK: byOwnerPk(ownerUserId),
                 OWN_SK: byOwnerGsiSk(EntityType.Art, nowMs, artwork.art_id.trim()),
                 REV_PK: reviewPk(),
@@ -139,8 +134,7 @@ export const handler = async (
                 ts: nowSeconds,
                 type: "GROUP",
                 notifications: body.notifications ?? false,
-                ...(body.theme_family !== undefined && { theme_family: body.theme_family }),
-                ...(body.theme_instance !== undefined && { theme_instance: body.theme_instance }),
+                ...(body.theme !== undefined && { theme: body.theme }),
                 ...(body.title !== undefined && { title: body.title }),
                 ...(body.class_name !== undefined && { class_name: body.class_name }),
                 ...(body.submitter_display_name !== undefined && { submitter_display_name: body.submitter_display_name }),

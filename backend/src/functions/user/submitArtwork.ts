@@ -51,10 +51,8 @@ export const handler = async (
       return CommonErrors.badRequest("Artwork image must be uploaded before submission");
     }
 
-    await ensureThemeEntity({
-      family: body.theme_family,
-      instance: body.theme_instance,
-    });
+    const themeCheck = await ensureThemeEntity({ theme: body.theme, nowMs });
+    if (!themeCheck.ok) return themeCheck.response;
 
     await dynamodb.send(
       new PutCommand({
@@ -86,8 +84,7 @@ export const handler = async (
           ...(body.submitter_relationship && {
             submitter_relationship: body.submitter_relationship,
           }),
-          ...(body.theme_family && { theme_family: body.theme_family }),
-          ...(body.theme_instance && { theme_instance: body.theme_instance }),
+          ...(body.theme && { theme: body.theme }),
           ...(body.group_id && { group_id: body.group_id }),
           // Owner GSI (always written)
           OWN_PK: byOwnerPk(userId),

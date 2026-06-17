@@ -70,8 +70,7 @@ export const handler = async (
       const gsiAttrs = buildApprovedArtworkGsiAttrs({
         tsMs: art.ts * 1000,
         artId,
-        family: art.theme_family,
-        instance: art.theme_instance,
+        theme: art.theme,
       });
 
       const setAttrs = Object.entries(gsiAttrs)

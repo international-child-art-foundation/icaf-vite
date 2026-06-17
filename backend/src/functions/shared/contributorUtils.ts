@@ -57,8 +57,7 @@ export async function fetchArtworkReviewPage(
     title: item.title as string | undefined,
     description: item.description as string | undefined,
     l_name: item.l_name as string | undefined,
-    theme_family: item.theme_family as string | undefined,
-    theme_instance: item.theme_instance as string | undefined,
+    theme: item.theme as string | undefined,
     group_id: item.group_id as string | undefined,
     status: item.status as ArtworkListItem["status"],
     kudos_count: (item.kudos_count as number) ?? 0,
@@ -89,8 +88,7 @@ export async function fetchGroupReviewPage(
 
   const groups: GroupListItem[] = page.map((item) => ({
     group_id: item.group_id as string,
-    theme_family: item.theme_family as string | undefined,
-    theme_instance: item.theme_instance as string | undefined,
+    theme: item.theme as string | undefined,
     group_type: item.group_type as GroupListItem["group_type"],
     title: item.title as string,
     class_name: item.class_name as string | undefined,

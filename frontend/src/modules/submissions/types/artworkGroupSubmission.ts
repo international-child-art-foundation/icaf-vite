@@ -7,8 +7,7 @@ export type ArtworkGroupInfo = {
   group_type: string;
   notifications: boolean;
   region: string;
-  theme_family: string;
-  theme_instance: string;
+  theme: string;
   submitter_display_name: string;
   title: string;
 };

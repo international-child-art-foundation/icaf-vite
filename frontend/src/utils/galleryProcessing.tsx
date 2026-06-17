@@ -1,4 +1,10 @@
-import type { ArtworkEntity, ArtworkListItem } from '@icaf/shared';
+import {
+  formatThemeDisplayName,
+  formatThemeFamilyName,
+  parseThemeSK,
+  type ArtworkEntity,
+  type ArtworkListItem,
+} from '@icaf/shared';
 import type {
   TArtwork,
   TResolvedArtwork,
@@ -72,24 +78,24 @@ export function resolveApiArtwork(
   >,
 ): TResolvedArtwork {
   const artists = a.f_name?.trim() ? [a.f_name.trim()] : [];
-  const themeLabel = [a.theme_family, a.theme_instance]
-    .filter(Boolean)
-    .join(' ');
+  const parsedTheme = a.theme ? parseThemeSK(a.theme) : null;
+  const themeLabel = parsedTheme
+    ? formatThemeDisplayName(parsedTheme)
+    : '';
 
   const resolvedArtwork = {
     art_id: a.art_id,
     id: a.art_id,
     file: `${a.art_id}.avif`,
     event: themeLabel,
-    eventSlug: a.theme_family ?? 'gallery',
+    eventSlug: parsedTheme?.theme_family ?? 'gallery',
     artists,
     age: a.age,
     country: a.country,
     region: a.region,
     title: a.title,
     description: a.description,
-    theme_family: a.theme_family,
-    theme_instance: a.theme_instance,
+    theme: a.theme,
     group_id: a.group_id,
     groupTitle: groupMetadata?.groupTitle,
     groupOwnerName: groupMetadata?.groupOwnerName,
@@ -152,58 +158,13 @@ export function formatGalleryLocation(
   return [region, country].filter(Boolean).join(', ');
 }
 
-const LOWERCASE_THEME_WORDS = new Set([
-  'a',
-  'an',
-  'and',
-  'as',
-  'at',
-  'but',
-  'by',
-  'for',
-  'from',
-  'in',
-  'nor',
-  'of',
-  'on',
-  'or',
-  'the',
-  'to',
-  'with',
-]);
-
-function titleCaseThemeWord(word: string, index: number): string {
-  const normalized = word.toLowerCase();
-  if (index > 0 && LOWERCASE_THEME_WORDS.has(normalized)) return normalized;
-  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
-}
-
 export function formatGalleryThemeName(value?: string): string {
-  const trimmed = value?.trim();
-  if (!trimmed) return '';
-
-  return trimmed
-    .replace(/[_-]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .split(' ')
-    .filter(Boolean)
-    .map(titleCaseThemeWord)
-    .join(' ');
-}
-
-export function formatGalleryThemeInstance(value?: string): string {
-  const trimmed = value?.trim();
-  if (!trimmed) return '';
-
-  const withoutLeadingZeros = trimmed.replace(/^0+(?=\d)/, '');
-  return withoutLeadingZeros || '0';
+  return formatThemeFamilyName(value);
 }
 
 export function formatGalleryTheme(artwork: TResolvedArtwork): string {
-  const themeName = formatGalleryThemeName(artwork.theme_family);
-  const instance = formatGalleryThemeInstance(artwork.theme_instance);
-  const remoteTheme = [themeName, instance].filter(Boolean).join(' ');
-  if (remoteTheme) return remoteTheme;
+  const parsedTheme = artwork.theme ? parseThemeSK(artwork.theme) : null;
+  if (parsedTheme) return formatThemeDisplayName(parsedTheme);
 
   return formatGalleryThemeName(artwork.event);
 }

@@ -16,8 +16,8 @@ import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 const UPDATABLE_FIELDS: (keyof Pick<
   PatchTheme,
-  "display_name" | "description" | "featured_on" | "start_date"
->)[] = ["display_name", "description", "featured_on", "start_date"];
+  "description" | "featured_on" | "start_date" | "retired_at"
+>)[] = ["description", "featured_on", "start_date", "retired_at"];
 
 export const handler = async(event: ApiGatewayEvent): Promise<ApiGatewayResponse> =>  {
   try {

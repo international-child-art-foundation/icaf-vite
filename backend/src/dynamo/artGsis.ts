@@ -1,10 +1,11 @@
 import { GSI } from "./ddbSchemaConsts";
+import { parseThemeSK } from "@icaf/shared";
 
 const galleryPk = () => "GALLERY" as const;
 const familyGalleryPk = (family: string) =>
   `FAMILY#${family}` as const;
-const instanceGalleryPk = (family: string, instance: string) =>
-  `FAMILY#${family}#INSTANCE#${instance}` as const;
+const instanceGalleryPk = (family: string, instanceType: string, instance: string) =>
+  `FAMILY#${family}#${instanceType}#${instance}` as const;
 const artGsiSk = (tsMs: number, artId: string) =>
   `TS#${tsMs}#ART#${artId}` as const;
 
@@ -18,18 +19,18 @@ interface ApprovedArtworkGsiAttrs {
 export function buildApprovedArtworkGsiAttrs(args: {
   tsMs: number;
   artId: string;
-  family?: string;
-  instance?: string;
+  theme?: string;
 }): ApprovedArtworkGsiAttrs {
   const attrs: ApprovedArtworkGsiAttrs = {
     GALL_PK: galleryPk(),
     ART_GSI_SK: artGsiSk(args.tsMs, args.artId),
   };
-  if (args.family) {
-    attrs.FAM_PK = familyGalleryPk(args.family);
+  const theme = args.theme ? parseThemeSK(args.theme) : null;
+  if (theme) {
+    attrs.FAM_PK = familyGalleryPk(theme.theme_family);
   }
-  if (args.family && args.instance) {
-    attrs.INST_PK = instanceGalleryPk(args.family, args.instance);
+  if (theme?.kind === "instance") {
+    attrs.INST_PK = instanceGalleryPk(theme.theme_family, theme.instance_type, theme.theme_instance);
   }
   return attrs;
 }
@@ -47,6 +48,6 @@ export function queryGallery() {
 export function queryFamilyGallery(family: string) {
   return { IndexName: GSI.FamilyGallery, pkAttr: "FAM_PK" as const, pk: familyGalleryPk(family) };
 }
-export function queryInstanceGallery(family: string, instance: string) {
-  return { IndexName: GSI.InstanceGallery, pkAttr: "INST_PK" as const, pk: instanceGalleryPk(family, instance) };
+export function queryInstanceGallery(family: string, instanceType: string, instance: string) {
+  return { IndexName: GSI.InstanceGallery, pkAttr: "INST_PK" as const, pk: instanceGalleryPk(family, instanceType, instance) };
 }

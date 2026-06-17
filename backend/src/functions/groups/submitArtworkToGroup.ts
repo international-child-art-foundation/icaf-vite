@@ -36,8 +36,7 @@ interface SubmitArtworkToGroupBody {
   title?: string;
   description?: string;
   submitter_relationship?: SubmitterRelationship;
-  theme_family?: string;
-  theme_instance?: string;
+  theme?: string;
   notifications?: boolean;
 }
 
@@ -113,10 +112,8 @@ export const handler = async (
       return CommonErrors.badRequest("Artwork image must be uploaded before submission");
     }
 
-    await ensureThemeEntity({
-      family: body.theme_family,
-      instance: body.theme_instance,
-    });
+    const themeCheck = await ensureThemeEntity({ theme: body.theme, nowMs });
+    if (!themeCheck.ok) return themeCheck.response;
 
     // ── Create ART entity ──────────────────────────────────────────────────
     await dynamodb.send(
@@ -150,8 +147,7 @@ export const handler = async (
                 ...(body.title && { title: body.title }),
                 ...(body.description && { description: body.description }),
                 ...(body.submitter_relationship && { submitter_relationship: body.submitter_relationship }),
-                ...(body.theme_family && { theme_family: body.theme_family }),
-                ...(body.theme_instance && { theme_instance: body.theme_instance }),
+                ...(body.theme && { theme: body.theme }),
                 OWN_PK: byOwnerPk(userId),
                 OWN_SK: byOwnerGsiSk(EntityType.Art, nowMs, artId),
                 REV_PK: reviewPk(),

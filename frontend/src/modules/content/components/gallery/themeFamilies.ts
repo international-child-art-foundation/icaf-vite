@@ -1,5 +1,11 @@
 import type { ComponentType, SVGProps } from 'react';
-import type { ThemeListItem } from '@icaf/shared';
+import {
+  buildThemeFamilySK,
+  formatThemeDisplayName,
+  formatThemeFamilyName,
+  parseThemeSK,
+  type ThemeListItem,
+} from '@icaf/shared';
 
 export type ThemeFamilyCardModel = {
   kind: 'theme';
@@ -7,6 +13,7 @@ export type ThemeFamilyCardModel = {
   display_name: string;
   latest_start_date: number;
   theme_family: string;
+  theme_sk: string;
   themes: ThemeListItem[];
 };
 
@@ -36,9 +43,11 @@ export function buildThemeFamilies(
 ): ThemeFamilyCardModel[] {
   const familyMap = new Map<string, ThemeListItem[]>();
   for (const theme of themes) {
-    const themesForFamily = familyMap.get(theme.theme_family) ?? [];
+    const parsed = parseThemeSK(theme.theme_sk);
+    const family = parsed?.theme_family ?? theme.theme_family;
+    const themesForFamily = familyMap.get(family) ?? [];
     themesForFamily.push(theme);
-    familyMap.set(theme.theme_family, themesForFamily);
+    familyMap.set(family, themesForFamily);
   }
 
   return [...familyMap.entries()]
@@ -46,14 +55,24 @@ export function buildThemeFamilies(
       const sortedThemes = [...familyThemes].sort(
         (a, b) => themeStartDate(b) - themeStartDate(a),
       );
-      const latestTheme = sortedThemes[0];
+      const familyTheme =
+        sortedThemes.find((theme) => parseThemeSK(theme.theme_sk)?.kind === 'family') ??
+        null;
+      const instanceThemes = sortedThemes.filter(
+        (theme) => parseThemeSK(theme.theme_sk)?.kind === 'instance',
+      );
+      const latestTheme = familyTheme ?? sortedThemes[0];
       return {
         kind: 'theme' as const,
         description: latestTheme.description,
-        display_name: latestTheme.display_name,
+        display_name:
+          latestTheme && parseThemeSK(latestTheme.theme_sk)?.kind === 'family'
+            ? formatThemeDisplayName(latestTheme)
+            : formatThemeFamilyName(theme_family),
         latest_start_date: themeStartDate(latestTheme),
         theme_family,
-        themes: sortedThemes,
+        theme_sk: familyTheme?.theme_sk ?? buildThemeFamilySK(theme_family),
+        themes: instanceThemes,
       };
     })
     .sort((a, b) => b.latest_start_date - a.latest_start_date);

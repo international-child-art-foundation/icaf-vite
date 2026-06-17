@@ -47,10 +47,8 @@ export type TResolvedArtwork = TArtwork & {
   art_id?: string;
   /** Approved group id this artwork belongs to, when submitted through a group. */
   group_id?: string;
-  /** Theme family used by remote gallery filtering. */
-  theme_family?: string;
-  /** Theme instance retained as display metadata. */
-  theme_instance?: string;
+  /** Theme SK used by remote gallery filtering/display. */
+  theme?: string;
   /** Display name of the classroom/group this artwork belongs to. */
   groupTitle?: string;
   /** Display name for the teacher/group submitter. */

@@ -6,11 +6,11 @@ import {
     MAX_DESCRIPTION_LEN,
     MAX_STRING_LEN,
     SHA256_HEX,
-    THEME_INSTANCE_FORMAT,
     FORBIDDEN_CHARS_SINGLELINE,
     FORBIDDEN_CHARS_MULTILINE,
 } from './constants.js';
 import { isValidEmail, isValidUUID } from '../../utils/string.js';
+import { isValidThemeSk } from '../theme/validate.js';
 
 const MAX_EMAIL_LEN = 254;
 
@@ -29,8 +29,7 @@ export function validateOptionalArtworkFields(data: {
     country?: string;
     region?: string;
     submitter_relationship?: SubmitterRelationship;
-    theme_family?: string;
-    theme_instance?: string;
+    theme?: string;
     group_id?: string;
     notifications?: boolean;
 }): string[] {
@@ -100,20 +99,13 @@ export function validateOptionalArtworkFields(data: {
         }
     }
 
-    if (data.theme_family !== undefined) {
-        if (typeof data.theme_family !== 'string' || !data.theme_family.trim()) {
-            errors.push('theme_family, if provided, must be a non-empty string');
-        } else if (data.theme_family.length > MAX_STRING_LEN) {
-            errors.push(`theme_family must be ${MAX_STRING_LEN} characters or less`);
-        }
-    }
-
-    if (data.theme_instance !== undefined) {
-        if (!data.theme_family) {
-            errors.push('theme_family is required when theme_instance is provided');
-        }
-        if (typeof data.theme_instance !== 'string' || !THEME_INSTANCE_FORMAT.test(data.theme_instance)) {
-            errors.push('theme_instance must be a zero-padded 4-digit string');
+    if (data.theme !== undefined) {
+        if (typeof data.theme !== 'string' || !data.theme.trim()) {
+            errors.push('theme, if provided, must be a non-empty string');
+        } else if (data.theme.length > MAX_STRING_LEN) {
+            errors.push(`theme must be ${MAX_STRING_LEN} characters or less`);
+        } else if (!isValidThemeSk(data.theme)) {
+            errors.push('theme must be a valid theme SK');
         }
     }
 

@@ -58,8 +58,7 @@ export const handler = async (
 
     const groups: GroupListItem[] = page.map((item) => ({
       group_id: item.group_id as string,
-      theme_family: item.theme_family as string | undefined,
-      theme_instance: item.theme_instance as string | undefined,
+      theme: item.theme as string | undefined,
       group_type: item.group_type as GroupListItem["group_type"],
       title: item.title as string,
       class_name: item.class_name as string | undefined,

@@ -71,8 +71,7 @@ export const handler = async (
       const gsiAttrs = buildApprovedGroupGsiAttrs({
         tsMs: group.ts * 1000,
         groupId,
-        family: group.theme_family,
-        instance: group.theme_instance,
+        theme: group.theme,
       });
 
       const setAttrs = Object.entries(gsiAttrs)

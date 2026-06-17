@@ -1,4 +1,4 @@
-import type { ThemeListItem } from '@icaf/shared';
+import { parseThemeSK, type ThemeListItem } from '@icaf/shared';
 
 export const THEME_SURFACES = {
   gallery: 'gallery',
@@ -18,5 +18,20 @@ export function filterThemesForSurface(
   themes: ThemeListItem[],
   surface: ThemeSurface,
 ) {
-  return themes.filter((theme) => isThemeFeaturedOn(theme, surface));
+  const featuredFamilies = new Set(
+    themes
+      .filter((theme) => {
+        const parsed = parseThemeSK(theme.theme_sk);
+        return parsed?.kind === 'family' && isThemeFeaturedOn(theme, surface);
+      })
+      .map((theme) => theme.theme_family),
+  );
+
+  return themes.filter((theme) => {
+    const parsed = parseThemeSK(theme.theme_sk);
+    return (
+      isThemeFeaturedOn(theme, surface) ||
+      (parsed?.kind === 'instance' && featuredFamilies.has(parsed.theme_family))
+    );
+  });
 }

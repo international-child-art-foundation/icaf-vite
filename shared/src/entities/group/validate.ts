@@ -8,6 +8,7 @@ import {
 import { isValidEmail, isValidUUID } from '../../utils/string.js';
 import { SHA256_HEX, UPLOAD_FILE_TYPES } from '../art/constants.js';
 import { validateOptionalArtworkFields } from '../art/validate.js';
+import { isValidThemeSk } from '../theme/validate.js';
 
 const MAX_EMAIL_LEN = 254;
 
@@ -48,12 +49,14 @@ export function validateSubmitGroupRequest(data: SubmitGroupRequest): string[] {
         errors.push(`submitter_display_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
     }
 
-    if (data.theme_family !== undefined && typeof data.theme_family === 'string' && data.theme_family.length > GROUP_MAX_STRING_LEN) {
-        errors.push(`theme_family must be ${GROUP_MAX_STRING_LEN} characters or less`);
-    }
-
-    if (data.theme_instance && !data.theme_family) {
-        errors.push('theme_family is required when theme_instance is provided');
+    if (data.theme !== undefined) {
+        if (typeof data.theme !== 'string' || !data.theme.trim()) {
+            errors.push('theme, if provided, must be a non-empty string');
+        } else if (data.theme.length > GROUP_MAX_STRING_LEN) {
+            errors.push(`theme must be ${GROUP_MAX_STRING_LEN} characters or less`);
+        } else if (!isValidThemeSk(data.theme)) {
+            errors.push('theme must be a valid theme SK');
+        }
     }
 
     if (data.notifications !== undefined && typeof data.notifications !== 'boolean') {
@@ -159,12 +162,14 @@ export function validateUpdateGroupRequest(data: UpdateGroupRequest): string[] {
         errors.push(`region must be ${GROUP_MAX_STRING_LEN} characters or less`);
     }
 
-    if (data.theme_family !== undefined && typeof data.theme_family === 'string' && data.theme_family.length > GROUP_MAX_STRING_LEN) {
-        errors.push(`theme_family must be ${GROUP_MAX_STRING_LEN} characters or less`);
-    }
-
-    if (data.theme_instance && !data.theme_family) {
-        errors.push('theme_family is required when theme_instance is provided');
+    if (data.theme !== undefined) {
+        if (typeof data.theme !== 'string' || !data.theme.trim()) {
+            errors.push('theme, if provided, must be a non-empty string');
+        } else if (data.theme.length > GROUP_MAX_STRING_LEN) {
+            errors.push(`theme must be ${GROUP_MAX_STRING_LEN} characters or less`);
+        } else if (!isValidThemeSk(data.theme)) {
+            errors.push('theme must be a valid theme SK');
+        }
     }
 
     if (data.notifications !== undefined && typeof data.notifications !== 'boolean') {

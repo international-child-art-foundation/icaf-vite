@@ -16,8 +16,8 @@
  *
  * GSI attributes written on approval (sparse — remove when hiding/rejecting):
  *   GRP_PK     = 'GROUPS'
- *   FGRP_PK    = 'GROUPS#FAMILY#<theme_family>'                    (if themed)
- *   IGRP_PK    = 'GROUPS#FAMILY#<family>#INSTANCE#<instance>'      (if has instance)
+ *   FGRP_PK    = 'GROUPS#FAMILY#<theme_family>'                   (if themed)
+ *   IGRP_PK    = 'GROUPS#FAMILY#<family>#<instance_type>#<instance>' (if has instance)
  *   GRP_GSI_SK = 'TS#<unix_ts>#ID#<group_id>'                     (shared by all 3 group GSIs)
  */
 
@@ -46,8 +46,7 @@ export interface GroupEntity {
     notifications?: boolean;        // true when owner opted into group submission notifications
 
     // ── Optional ───────────────────────────────────────────────────────────
-    theme_family?: string;          // e.g. 'CHERRYBLOSSOM'
-    theme_instance?: string;        // zero-padded 4-digit string, e.g. '2025'
+    theme?: string;                 // THEME SK, e.g. FAMILY#CHERRY_BLOSSOM#year#2026
     title?: string;
     class_name?: string;            // e.g. 'BIO 1017'
     submitter_display_name?: string; // may differ from owner's account name
@@ -58,8 +57,7 @@ export interface GroupEntity {
 
 // Request body to create a new group (POST /user/groups)
 export interface SubmitGroupRequest {
-    theme_family?: string;
-    theme_instance?: string;
+    theme?: string;
     group_type: GroupType;
     title: string;
     class_name?: string;
@@ -101,8 +99,7 @@ export interface GetGroupResponse {
 // Shape used in list and gallery responses
 export interface GroupListItem {
     group_id: string;
-    theme_family?: string;
-    theme_instance?: string;
+    theme?: string;
     group_type: GroupType;
     title: string;
     class_name?: string;
@@ -130,8 +127,7 @@ export interface UpdateGroupRequest {
     submitter_display_name?: string;
     country?: string;
     region?: string;
-    theme_family?: string;
-    theme_instance?: string;
+    theme?: string;
     notifications?: boolean;
 }
 

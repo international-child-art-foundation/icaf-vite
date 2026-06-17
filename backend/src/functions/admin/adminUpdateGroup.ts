@@ -9,6 +9,7 @@ import {
   HTTP_STATUS,
   UpdateGroupRequest,
   hasMinimumRole,
+  isValidThemeSk,
   validateUpdateGroupRequest,
 } from "@icaf/shared";
 import { buildApprovedGroupGsiAttrs } from "../../dynamo/groupGsis";
@@ -22,8 +23,7 @@ const ALLOWED_UPDATE_FIELDS = new Set([
   "submitter_display_name",
   "country",
   "region",
-  "theme_family",
-  "theme_instance",
+  "theme",
   "notifications",
 ]);
 
@@ -65,6 +65,14 @@ export const handler = async (
     }
 
     const body = parsedBody.value as UpdateGroupRequest;
+    if (
+      "theme" in body &&
+      body.theme !== undefined &&
+      body.theme !== "" &&
+      !isValidThemeSk(body.theme)
+    ) {
+      return CommonErrors.badRequest("theme must be a valid theme SK");
+    }
     const fieldErrors = validateUpdateGroupRequest(body);
     if (fieldErrors.length > 0) {
       return CommonErrors.badRequest(fieldErrors.join("; "));
@@ -84,16 +92,14 @@ export const handler = async (
     if (body.submitter_display_name !== undefined) { setExprParts.push("submitter_display_name = :gdn"); exprValues[":gdn"] = body.submitter_display_name; }
     if (body.country !== undefined) { setExprParts.push("country = :country"); exprValues[":country"] = body.country; }
     if (body.region !== undefined) { setExprParts.push("#region = :region"); exprNames["#region"] = "region"; exprValues[":region"] = body.region; }
-    if (body.theme_family !== undefined) { setExprParts.push("theme_family = :tf"); exprValues[":tf"] = body.theme_family; }
-    if (body.theme_instance !== undefined) { setExprParts.push("theme_instance = :ti"); exprValues[":ti"] = body.theme_instance; }
+    if (body.theme !== undefined) { setExprParts.push("theme = :theme"); exprValues[":theme"] = body.theme; }
     if (body.notifications !== undefined) { setExprParts.push("notifications = :notifications"); exprValues[":notifications"] = body.notifications; }
 
     if (group.status === "approved") {
       const gsiAttrs = buildApprovedGroupGsiAttrs({
         tsMs: group.ts * 1000,
         groupId,
-        family: body.theme_family ?? group.theme_family,
-        instance: body.theme_instance ?? group.theme_instance,
+        theme: body.theme ?? group.theme,
       });
 
       Object.entries(gsiAttrs).forEach(([key, value], index) => {

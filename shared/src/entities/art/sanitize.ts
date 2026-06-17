@@ -10,8 +10,7 @@ export function sanitizeSubmissionData(data: SubmitArtworkRequest): SubmitArtwor
         l_name: cleanOptionalString(data.l_name),
         country: cleanOptionalString(data.country),
         region: cleanOptionalString(data.region),
-        theme_family: cleanOptionalString(data.theme_family),
-        theme_instance: cleanOptionalString(data.theme_instance),
+        theme: cleanOptionalString(data.theme),
         group_id: cleanOptionalString(data.group_id),
         release_hash:
             typeof data.release_hash === 'string'

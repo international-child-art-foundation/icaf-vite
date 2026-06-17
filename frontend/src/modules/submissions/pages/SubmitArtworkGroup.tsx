@@ -52,6 +52,7 @@ import { Button } from '@/shared/components/ui/button';
 import {
   GROUP_MAX_MEMBERS,
   MAX_ARTIST_AGE,
+  isValidThemeSk,
   type SubmitterRelationship,
 } from '@icaf/shared';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -158,52 +159,17 @@ function readStoredGroup(value: unknown): ArtworkGroupInfo {
         ? group.notifications
         : initialPersistedDraft.group.notifications,
     region: readString(group.region, initialPersistedDraft.group.region),
-    theme_family: readString(
-      group.theme_family,
-      initialPersistedDraft.group.theme_family,
-    ),
-    theme_instance: readString(
-      group.theme_instance,
-      initialPersistedDraft.group.theme_instance,
-    ),
+    theme: readString(group.theme, initialPersistedDraft.group.theme),
     title: readString(group.title, initialPersistedDraft.group.title),
   };
 }
 
-function normalizeThemeFamily(value: string | null) {
-  return (
-    value
-      ?.trim()
-      .replace(/[^a-z0-9_]/gi, '')
-      .toUpperCase() ?? ''
-  );
-}
-
-function normalizeThemeInstance(value: string | null) {
-  const trimmedValue = value?.trim() ?? '';
-  return /^\d{1,4}$/.test(trimmedValue)
-    ? trimmedValue.padStart(4, '0')
-    : trimmedValue;
-}
-
 function readThemeParams(search: string) {
   const params = new URLSearchParams(search);
-  const themeFamily = normalizeThemeFamily(
-    params.get('theme_family') ??
-      params.get('themeFamily') ??
-      params.get('family') ??
-      params.get('theme'),
-  );
-  const themeInstance = normalizeThemeInstance(
-    params.get('theme_instance') ??
-      params.get('themeInstance') ??
-      params.get('instance') ??
-      params.get('id'),
-  );
+  const theme = params.get('theme')?.trim() ?? '';
 
   return {
-    theme_family: themeFamily,
-    theme_instance: themeInstance,
+    theme: isValidThemeSk(theme) ? theme : '',
   };
 }
 
@@ -263,22 +229,8 @@ function updateThemeSearch(
   theme: ReturnType<typeof readThemeParams>,
 ) {
   const params = new URLSearchParams(search);
-  for (const key of [
-    'theme_family',
-    'themeFamily',
-    'family',
-    'theme',
-    'theme_instance',
-    'themeInstance',
-    'instance',
-    'id',
-  ]) {
-    params.delete(key);
-  }
-  if (theme.theme_family) params.set('theme_family', theme.theme_family);
-  if (theme.theme_family && theme.theme_instance) {
-    params.set('theme_instance', theme.theme_instance);
-  }
+  params.delete('theme');
+  if (theme.theme) params.set('theme', theme.theme);
   const nextSearch = params.toString();
   return nextSearch ? `?${nextSearch}` : '';
 }
@@ -335,18 +287,14 @@ export function SubmitArtworkGroup({
     [location.search],
   );
   const activeTheme = {
-    theme_family: themeParams.theme_family || draft.group.theme_family,
-    theme_instance: themeParams.theme_instance || draft.group.theme_instance,
+    theme: themeParams.theme || draft.group.theme,
   };
   const effectiveGroup = useMemo(
     () => ({
       ...draft.group,
-      theme_family: activeTheme.theme_family,
-      theme_instance: activeTheme.theme_family
-        ? activeTheme.theme_instance
-        : '',
+      theme: activeTheme.theme,
     }),
-    [activeTheme.theme_family, activeTheme.theme_instance, draft.group],
+    [activeTheme.theme, draft.group],
   );
   const submissionDraft = useMemo(
     () => ({ ...draft, group: effectiveGroup, artworks }),
@@ -448,11 +396,7 @@ export function SubmitArtworkGroup({
   }
 
   function selectTheme(theme: ReturnType<typeof readThemeParams>) {
-    updateGroupField('theme_family', theme.theme_family);
-    updateGroupField(
-      'theme_instance',
-      theme.theme_family ? theme.theme_instance : '',
-    );
+    updateGroupField('theme', theme.theme);
     void navigate(
       `${location.pathname}${updateThemeSearch(location.search, theme)}`,
       { replace: true },
@@ -692,8 +636,7 @@ export function SubmitArtworkGroup({
         region: effectiveGroup.region.trim() || undefined,
         submitter_display_name:
           effectiveGroup.submitter_display_name.trim() || undefined,
-        theme_family: effectiveGroup.theme_family.trim() || undefined,
-        theme_instance: effectiveGroup.theme_instance.trim() || undefined,
+        theme: effectiveGroup.theme.trim() || undefined,
         title: effectiveGroup.title.trim(),
       };
 

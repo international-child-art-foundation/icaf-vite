@@ -10,8 +10,7 @@ export function sanitizeSubmitGroupRequest(data: SubmitGroupRequest): SubmitGrou
         country: data.country?.normalize('NFC').trim(),
         region: cleanOptionalString(data.region),
         description: cleanOptionalString(data.description),
-        theme_family: cleanOptionalString(data.theme_family),
-        theme_instance: cleanOptionalString(data.theme_instance),
+        theme: cleanOptionalString(data.theme),
     };
 }
 
@@ -24,7 +23,6 @@ export function sanitizeUpdateGroupRequest(data: UpdateGroupRequest): UpdateGrou
         submitter_display_name: cleanOptionalString(data.submitter_display_name),
         country: cleanOptionalString(data.country),
         region: cleanOptionalString(data.region),
-        theme_family: cleanOptionalString(data.theme_family),
-        theme_instance: cleanOptionalString(data.theme_instance),
+        theme: cleanOptionalString(data.theme),
     };
 }

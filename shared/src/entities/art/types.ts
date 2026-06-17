@@ -15,8 +15,8 @@
  *
  * GSI attributes written on approval (sparse — remove when hiding/rejecting):
  *   GALL_PK    = 'GALLERY'
- *   FAM_PK     = 'FAMILY#<theme_family>'                        (if themed)
- *   INST_PK    = 'FAMILY#<family>#INSTANCE#<instance>'         (if has instance)
+ *   FAM_PK     = 'FAMILY#<theme_family>'                       (if themed)
+ *   INST_PK    = 'FAMILY#<family>#<instance_type>#<instance>'  (if has instance)
  *   ART_GSI_SK = 'TS#<unix_ts>#ART#<art_id>'                  (shared by all 3 gallery GSIs)
  */
 
@@ -58,8 +58,7 @@ export interface ArtworkEntity {
     region?: string;
     title?: string;
     description?: string;       // max ~300 words
-    theme_family?: string;      // e.g. 'CHERRYBLOSSOM'
-    theme_instance?: string;    // zero-padded 4-digit string, e.g. '2025'
+    theme?: string;             // THEME SK, e.g. FAMILY#CHERRY_BLOSSOM#year#2026
     group_id?: string;          // GROUP#<gid> if part of a group submission
     submitter_relationship?: SubmitterRelationship;
 }
@@ -80,8 +79,7 @@ interface ArtworkSubmissionFields {
     country?: string;
     region?: string;
     submitter_relationship?: SubmitterRelationship;
-    theme_family?: string;
-    theme_instance?: string;
+    theme?: string;
     group_id?: string;
     notifications?: boolean;
 }
@@ -129,8 +127,7 @@ export interface ArtworkListItem {
     region?: string;
     title?: string;
     description?: string;
-    theme_family?: string;
-    theme_instance?: string;
+    theme?: string;
     group_id?: string;
     status: ArtworkStatus;
     kudos_count: number;
@@ -168,8 +165,7 @@ export interface UpdateArtworkRequest {
     country?: string;
     region?: string;
     submitter_relationship?: SubmitterRelationship;
-    theme_family?: string;
-    theme_instance?: string;
+    theme?: string;
     notifications?: boolean;
 }
 
@@ -187,8 +183,7 @@ export interface SubmitArtworkToGroupRequest {
     title?: string;
     description?: string;
     submitter_relationship?: SubmitterRelationship;
-    theme_family?: string;
-    theme_instance?: string;
+    theme?: string;
     notifications?: boolean;
 }
 

@@ -2,11 +2,11 @@ import { getCurrentUser } from "@/utils/auth";
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import { TABLE_NAME, dynamodb } from "@/config/aws-clients";
 import { parseJsonBody } from "@/utils/request";
-import { HTTP_STATUS, COMMON_HEADERS, CommonErrors, ApiGatewayEvent, ApiGatewayResponse, ThemeEntity, createThemeResponse, buildThemeSK, hasMinimumRole, sanitizeThemeEntity, validateThemeEntity } from "@icaf/shared";
+import { HTTP_STATUS, COMMON_HEADERS, CommonErrors, ApiGatewayEvent, ApiGatewayResponse, CreateThemeRequest, createThemeResponse, buildThemeSK, formatThemeDisplayName, hasMinimumRole, sanitizeThemeEntity, validateThemeEntity } from "@icaf/shared";
 
 export const handler = async(event: ApiGatewayEvent): Promise<ApiGatewayResponse> => {
   try {
-    const parsedBody = parseJsonBody<ThemeEntity>(event);
+    const parsedBody = parseJsonBody<CreateThemeRequest>(event);
     if (!parsedBody.ok) return parsedBody.response;
 
     const body = sanitizeThemeEntity(parsedBody.value);
@@ -24,7 +24,7 @@ export const handler = async(event: ApiGatewayEvent): Promise<ApiGatewayResponse
         return CommonErrors.forbidden("Contributor access required");
     }
 
-    const themeSk = buildThemeSK(body.theme_family, body.theme_instance);
+    const themeSk = buildThemeSK(body);
 
     await dynamodb.send(
       new PutCommand({
@@ -34,11 +34,12 @@ export const handler = async(event: ApiGatewayEvent): Promise<ApiGatewayResponse
         SK: themeSk,
         type: `THEME`,
         theme_family: body.theme_family,
-        theme_instance: body.theme_instance,
-        display_name: body.display_name,
+        ...("instance_type" in body && body.instance_type && { instance_type: body.instance_type }),
+        ...("theme_instance" in body && body.theme_instance && { theme_instance: body.theme_instance }),
         featured_on: body.featured_on,
         start_date: body.start_date,
         ...(body.description && {description: body.description}),
+        ...(body.retired_at !== undefined && { retired_at: body.retired_at }),
       },
         ConditionExpression: "attribute_not_exists(PK) AND attribute_not_exists(SK)",
     })
@@ -46,7 +47,7 @@ export const handler = async(event: ApiGatewayEvent): Promise<ApiGatewayResponse
 
   const response: createThemeResponse = {
     success: true,
-    message: `Theme ${body.display_name} successfully created.`
+    message: `Theme ${formatThemeDisplayName(body)} successfully created.`
   }
   return {
     statusCode: HTTP_STATUS.CREATED,

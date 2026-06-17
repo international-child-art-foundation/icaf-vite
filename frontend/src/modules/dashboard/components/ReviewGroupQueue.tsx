@@ -23,13 +23,11 @@ const editableFields: (keyof UpdateGroupRequest)[] = [
   'submitter_display_name',
   'country',
   'region',
-  'theme_family',
-  'theme_instance',
+  'theme',
 ];
 
 function editableFieldLabel(field: keyof UpdateGroupRequest) {
-  if (field === 'theme_family') return 'Theme collection';
-  if (field === 'theme_instance') return 'Theme year';
+  if (field === 'theme') return 'Theme SK';
   return field.replace(/_/g, ' ');
 }
 

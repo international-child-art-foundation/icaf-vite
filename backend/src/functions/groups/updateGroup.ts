@@ -14,6 +14,7 @@ import { EntityType } from "../../dynamo/ddbSchemaConsts";
 import { Status } from "../../dynamo/shared";
 import { parseJsonBody } from "../../utils/request";
 import { getCurrentUser } from "../../utils/auth";
+import { ensureThemeEntity } from "../shared/themeUtils";
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -63,6 +64,10 @@ export const handler = async (
 
     // ── Build update expression ────────────────────────────────────────────
     const nowMs = Date.now();
+    if (body.theme !== undefined) {
+      const themeCheck = await ensureThemeEntity({ theme: body.theme, nowMs });
+      if (!themeCheck.ok) return themeCheck.response;
+    }
 
     const setExprParts: string[] = [
       "#status = :status",
@@ -83,8 +88,7 @@ export const handler = async (
     if (body.submitter_display_name !== undefined) { setExprParts.push("submitter_display_name = :tdn"); exprValues[":tdn"] = body.submitter_display_name; }
     if (body.country !== undefined) { setExprParts.push("country = :country"); exprValues[":country"] = body.country; }
     if (body.region !== undefined) { setExprParts.push("#region = :region"); exprNames["#region"] = "region"; exprValues[":region"] = body.region; }
-    if (body.theme_family !== undefined) { setExprParts.push("theme_family = :tf"); exprValues[":tf"] = body.theme_family; }
-    if (body.theme_instance !== undefined) { setExprParts.push("theme_instance = :ti"); exprValues[":ti"] = body.theme_instance; }
+    if (body.theme !== undefined) { setExprParts.push("theme = :theme"); exprValues[":theme"] = body.theme; }
     if (body.notifications !== undefined) { setExprParts.push("notifications = :notifications"); exprValues[":notifications"] = body.notifications; }
 
     // Remove gallery GSI attrs (group is no longer approved)

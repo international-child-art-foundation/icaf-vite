@@ -20,6 +20,7 @@ export function toSortOrder(sortValue: string): SortOrder {
 
 export async function fetchAllGalleryArtworks(
   themeFamily: string | null,
+  themeInstanceType: string | null,
   themeInstance: string | null,
   sort: SortOrder,
 ): Promise<TResolvedArtwork[]> {
@@ -33,8 +34,8 @@ export async function fetchAllGalleryArtworks(
       ...(lastKey ? { last_key: lastKey } : {}),
     };
     const response =
-      themeFamily && themeInstance
-        ? await listGalleryArtworksByInstance(themeFamily, themeInstance, query)
+      themeFamily && themeInstanceType && themeInstance
+        ? await listGalleryArtworksByInstance(themeFamily, themeInstanceType, themeInstance, query)
         : themeFamily
           ? await listGalleryArtworksByFamily(themeFamily, query)
           : await listGalleryArtworks(query);
@@ -50,6 +51,7 @@ export async function fetchAllGalleryArtworks(
 
 export async function fetchAllGalleryGroups(
   themeFamily: string | null,
+  themeInstanceType: string | null,
   themeInstance: string | null,
   sort: SortOrder,
 ): Promise<GroupListItem[]> {
@@ -63,8 +65,8 @@ export async function fetchAllGalleryGroups(
       ...(lastKey ? { last_key: lastKey } : {}),
     };
     const response =
-      themeFamily && themeInstance
-        ? await listGalleryGroupsByInstance(themeFamily, themeInstance, query)
+      themeFamily && themeInstanceType && themeInstance
+        ? await listGalleryGroupsByInstance(themeFamily, themeInstanceType, themeInstance, query)
         : themeFamily
           ? await listGalleryGroupsByFamily(themeFamily, query)
           : await listGalleryGroups(query);

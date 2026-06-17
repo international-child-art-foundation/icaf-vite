@@ -111,12 +111,6 @@ export function DashboardShell({
           <h1 className="font-montserrat mt-2 text-4xl font-bold text-neutral-950 md:text-5xl">
             Home
           </h1>
-          {activeTab === 'overview' && (
-            <p className="mt-3 text-sm font-semibold text-neutral-700">
-              You are authenticated as{' '}
-              <span className="text-secondary-blue break-all">{email}</span>.
-            </p>
-          )}
         </div>
         <div className="my-auto mr-0 flex flex-col gap-4">
           {activeTab != 'overview' && (
@@ -126,9 +120,22 @@ export function DashboardShell({
             </Button>
           )}
           {activeTab === 'overview' && (
-            <Button onClick={handleLogout} disabled={logoutBusy}>
-              {logoutBusy ? 'Logging out...' : 'Logout'}
-            </Button>
+            <div className="flex flex-col gap-4">
+              <p className="flex flex-col text-right text-sm font-semibold text-neutral-700">
+                <span>You are authenticated as</span>
+                <span>
+                  <span className="text-secondary-blue break-all">{email}</span>
+                  .
+                </span>
+              </p>
+              <Button
+                onClick={handleLogout}
+                disabled={logoutBusy}
+                className="ml-auto"
+              >
+                {logoutBusy ? 'Logging out...' : 'Logout'}
+              </Button>
+            </div>
           )}
           {logoutError && (
             <p className="max-w-48 text-sm font-semibold text-red-700">

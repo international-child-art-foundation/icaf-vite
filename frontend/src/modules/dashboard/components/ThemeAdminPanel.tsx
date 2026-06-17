@@ -1,7 +1,11 @@
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { PatchTheme, ThemeListItem } from '@icaf/shared';
-import { buildThemeSK } from '@icaf/shared';
+import {
+  formatThemeDisplayName,
+  parseThemeSK,
+  type PatchTheme,
+  type ThemeListItem,
+} from '@icaf/shared';
 import { CalendarDays, RefreshCw, Save, X } from 'lucide-react';
 import { updateTheme } from '@/api/contributor';
 import { listGalleryThemes } from '@/api/public';
@@ -17,8 +21,8 @@ import { CreateThemePanel } from './CreateThemePanel';
 
 type ThemeDraft = {
   description: string;
-  display_name: string;
   featured_on: string[];
+  retired_at: string;
   start_date: string;
 };
 
@@ -38,18 +42,19 @@ function dateToTimestamp(value: string) {
 }
 
 function themeValue(theme: ThemeListItem): string {
-  return `${theme.theme_family}#${theme.theme_instance}`;
+  return theme.theme_sk;
 }
 
 function themeDescription(theme: ThemeListItem): string {
-  return dateInputValue(theme.start_date);
+  const parsed = parseThemeSK(theme.theme_sk);
+  return parsed?.kind === 'instance' ? parsed.instance_type : 'family';
 }
 
 function themeToDraft(theme: ThemeListItem): ThemeDraft {
   return {
     description: theme.description ?? '',
-    display_name: theme.display_name,
     featured_on: theme.featured_on ?? [],
+    retired_at: dateInputValue(theme.retired_at ?? Number.NaN),
     start_date: dateInputValue(theme.start_date),
   };
 }
@@ -92,10 +97,11 @@ export function ThemeAdminPanel() {
     () =>
       themes.map((theme) => ({
         value: themeValue(theme),
-        label: theme.display_name,
+        label: formatThemeDisplayName(theme),
         description: themeDescription(theme),
         searchText: [
           theme.theme_family,
+          theme.instance_type,
           theme.theme_instance,
           theme.description,
           dateInputValue(theme.start_date),
@@ -183,21 +189,22 @@ export function ThemeAdminPanel() {
     setMessage(null);
     try {
       const start_date = dateToTimestamp(draft.start_date);
+      const retired_at = draft.retired_at
+        ? dateToTimestamp(draft.retired_at)
+        : undefined;
       const request: PatchTheme = {
         description: draft.description.trim() || undefined,
-        display_name: draft.display_name.trim(),
         featured_on: draft.featured_on,
         start_date,
+        ...(retired_at !== undefined && { retired_at }),
       };
 
-      if (!request.display_name) throw new Error('Display name is required.');
       if (!Number.isFinite(start_date))
         throw new Error('Start date is required.');
+      if (retired_at !== undefined && !Number.isFinite(retired_at))
+        throw new Error('Retired date is invalid.');
 
-      const response = await updateTheme(
-        buildThemeSK(selectedTheme.theme_family, selectedTheme.theme_instance),
-        request,
-      );
+      const response = await updateTheme(selectedTheme.theme_sk, request);
       setMessage(response.message);
       await loadThemes();
     } catch (err) {
@@ -219,7 +226,7 @@ export function ThemeAdminPanel() {
     <div className="grid gap-6">
       <DashboardModule
         title="Edit theme"
-        description="Update theme names, descriptions, featured surfaces, and start dates."
+        description="Update theme descriptions, featured surfaces, and timing."
         aside={
           <Button
             type="button"
@@ -266,11 +273,10 @@ export function ThemeAdminPanel() {
                     disabled={busy}
                   >
                     <span className="font-montserrat block font-bold text-neutral-950">
-                      {theme.display_name}
+                      {formatThemeDisplayName(theme)}
                     </span>
                     <span className="mt-1 block text-xs font-semibold uppercase text-neutral-500">
-                      {themeDescription(theme)} /{' '}
-                      {dateInputValue(theme.start_date)}
+                      {themeDescription(theme)} / {dateInputValue(theme.start_date)}
                     </span>
                   </button>
                 ))}
@@ -281,15 +287,6 @@ export function ThemeAdminPanel() {
                   <h3 className="font-montserrat text-lg font-bold text-neutral-950">
                     Theme details
                   </h3>
-                  <Field label="Display name">
-                    <Input
-                      value={draft.display_name}
-                      onChange={(event) =>
-                        updateDraftField('display_name', event.target.value)
-                      }
-                      disabled={busy}
-                    />
-                  </Field>
                   <Field label="Description">
                     <textarea
                       value={draft.description}
@@ -311,6 +308,23 @@ export function ThemeAdminPanel() {
                         value={draft.start_date}
                         onChange={(event) =>
                           updateDraftField('start_date', event.target.value)
+                        }
+                        disabled={busy}
+                        className="pl-9"
+                      />
+                    </span>
+                  </Field>
+                  <Field label="Retired date">
+                    <span className="relative block">
+                      <CalendarDays
+                        aria-hidden="true"
+                        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500"
+                      />
+                      <Input
+                        type="date"
+                        value={draft.retired_at}
+                        onChange={(event) =>
+                          updateDraftField('retired_at', event.target.value)
                         }
                         disabled={busy}
                         className="pl-9"

@@ -228,12 +228,13 @@ export function listGalleryArtworksByFamily(
 
 export function listGalleryArtworksByInstance(
   family: string,
+  instanceType: string,
   instance: string,
   query?: GalleryQueryParams,
   options?: GalleryRequestOptions,
 ): Promise<GalleryArtworksResponse> {
   return apiRequest<GalleryArtworksResponse>(
-    apiEndpoints.gallery.artworksByInstance(family, instance),
+    apiEndpoints.gallery.artworksByInstance(family, instanceType, instance),
     {
       bypassCache: options?.bypassCache,
       cacheTtlMs: options?.cacheTtlMs ?? DEFAULT_API_CACHE_TTL_MS,
@@ -283,12 +284,13 @@ export function listGalleryGroupsByFamily(
 
 export function listGalleryGroupsByInstance(
   family: string,
+  instanceType: string,
   instance: string,
   query?: GalleryQueryParams,
   options?: GalleryRequestOptions,
 ): Promise<GalleryGroupsResponse> {
   return apiRequest<GalleryGroupsResponse>(
-    apiEndpoints.gallery.groupsByInstance(family, instance),
+    apiEndpoints.gallery.groupsByInstance(family, instanceType, instance),
     {
       bypassCache: options?.bypassCache,
       cacheTtlMs: options?.cacheTtlMs ?? DEFAULT_API_CACHE_TTL_MS,

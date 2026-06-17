@@ -8,8 +8,10 @@ import { DashboardModule, ModuleState } from './DashboardModule';
 
 type ThemeDraft = {
   description: string;
-  display_name: string;
   featuredGallery: boolean;
+  kind: 'family' | 'instance';
+  instance_type: string;
+  retired_at: string;
   start_date: string;
   theme_family: string;
   theme_instance: string;
@@ -19,8 +21,10 @@ const today = new Date().toISOString().slice(0, 10);
 
 const initialDraft: ThemeDraft = {
   description: '',
-  display_name: '',
   featuredGallery: true,
+  kind: 'family',
+  instance_type: 'year',
+  retired_at: '',
   start_date: today,
   theme_family: '',
   theme_instance: '',
@@ -36,8 +40,7 @@ function normalizeFamily(value: string) {
 }
 
 function normalizeInstance(value: string) {
-  const digits = value.replace(/\D/g, '').slice(0, 4);
-  return digits ? digits.padStart(4, '0') : '';
+  return value.trim();
 }
 
 function dateToTimestamp(value: string) {
@@ -62,24 +65,48 @@ export function CreateThemePanel() {
     setMessage(null);
 
     const theme_family = normalizeFamily(draft.theme_family);
+    const instance_type = draft.instance_type.trim().toLowerCase();
     const theme_instance = normalizeInstance(draft.theme_instance);
     const start_date = dateToTimestamp(draft.start_date);
+    const retired_at = draft.retired_at
+      ? dateToTimestamp(draft.retired_at)
+      : undefined;
 
-    if (!theme_family) throw new Error('Theme collection is required.');
-    if (!theme_instance) throw new Error('Theme year is required.');
-    if (!draft.display_name.trim())
-      throw new Error('Display name is required.');
-    if (!Number.isFinite(start_date))
-      throw new Error('Start date is required.');
+    const validationError =
+      !theme_family
+        ? 'Theme collection is required.'
+        : draft.kind === 'instance' && !instance_type
+          ? 'Instance type is required.'
+          : draft.kind === 'instance' && !theme_instance
+            ? 'Theme instance is required.'
+            : !Number.isFinite(start_date)
+              ? 'Start date is required.'
+              : retired_at !== undefined && !Number.isFinite(retired_at)
+                ? 'Retired date is invalid.'
+                : null;
+    if (validationError) {
+      setBusy(false);
+      setError(validationError);
+      return;
+    }
 
-    void createTheme({
-      display_name: draft.display_name.trim(),
+    const baseTheme = {
       featured_on: draft.featuredGallery ? ['gallery'] : [],
       description: draft.description.trim() || undefined,
       start_date,
+      ...(retired_at !== undefined && { retired_at }),
       theme_family,
-      theme_instance,
-    })
+    };
+    const request =
+      draft.kind === 'instance'
+        ? {
+            ...baseTheme,
+            instance_type,
+            theme_instance,
+          }
+        : baseTheme;
+
+    void createTheme(request)
       .then((response) => {
         setMessage(response.message);
         setDraft(initialDraft);
@@ -105,6 +132,19 @@ export function CreateThemePanel() {
           <h3 className="font-montserrat text-lg font-bold text-neutral-950">
             Theme details
           </h3>
+          <Field label="Theme type">
+            <select
+              value={draft.kind}
+              onChange={(event) =>
+                updateDraft('kind', event.target.value as ThemeDraft['kind'])
+              }
+              disabled={busy}
+              className="border-input bg-background h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="family">Family</option>
+              <option value="instance">Instance</option>
+            </select>
+          </Field>
           <div className="grid gap-3 md:grid-cols-2">
             <Field label="Theme collection">
               <Input
@@ -122,11 +162,30 @@ export function CreateThemePanel() {
                 disabled={busy}
               />
             </Field>
-            <Field label="Theme year">
+            {draft.kind === 'instance' && (
+              <Field label="Instance type">
+                <Input
+                  value={draft.instance_type}
+                  placeholder="year"
+                  onBlur={() =>
+                    updateDraft(
+                      'instance_type',
+                      draft.instance_type.trim().toLowerCase(),
+                    )
+                  }
+                  onChange={(event) =>
+                    updateDraft('instance_type', event.target.value)
+                  }
+                  disabled={busy}
+                />
+              </Field>
+            )}
+          </div>
+          {draft.kind === 'instance' && (
+            <Field label="Theme instance">
               <Input
                 value={draft.theme_instance}
                 placeholder="2026"
-                inputMode="numeric"
                 onBlur={() =>
                   updateDraft(
                     'theme_instance',
@@ -139,17 +198,7 @@ export function CreateThemePanel() {
                 disabled={busy}
               />
             </Field>
-          </div>
-          <Field label="Display name">
-            <Input
-              value={draft.display_name}
-              placeholder="Cherry Blossom 2026"
-              onChange={(event) =>
-                updateDraft('display_name', event.target.value)
-              }
-              disabled={busy}
-            />
-          </Field>
+          )}
           <Field label="Description">
             <textarea
               value={draft.description}
@@ -171,6 +220,23 @@ export function CreateThemePanel() {
                 value={draft.start_date}
                 onChange={(event) =>
                   updateDraft('start_date', event.target.value)
+                }
+                disabled={busy}
+                className="pl-9"
+              />
+            </span>
+          </Field>
+          <Field label="Retired date">
+            <span className="relative block">
+              <CalendarDays
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500"
+              />
+              <Input
+                type="date"
+                value={draft.retired_at}
+                onChange={(event) =>
+                  updateDraft('retired_at', event.target.value)
                 }
                 disabled={busy}
                 className="pl-9"

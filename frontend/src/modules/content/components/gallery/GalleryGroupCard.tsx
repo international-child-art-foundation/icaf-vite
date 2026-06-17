@@ -1,11 +1,11 @@
-import type { GroupListItem } from '@icaf/shared';
+import {
+  formatThemeDisplayName,
+  parseThemeSK,
+  type GroupListItem,
+} from '@icaf/shared';
 import { Images, MapPin, Palette, Play, Users, UsersRound } from 'lucide-react';
 import type { KeyboardEvent, ReactNode } from 'react';
-import {
-  artworkAssetUrl,
-  formatGalleryThemeInstance,
-  formatGalleryThemeName,
-} from '@/utils/galleryProcessing';
+import { artworkAssetUrl } from '@/utils/galleryProcessing';
 
 type GalleryGroupCardProps = {
   group: GroupListItem;
@@ -22,12 +22,8 @@ function groupLabel(group: GroupListItem): string {
 }
 
 function groupThemeLabel(group: GroupListItem): string {
-  return [
-    formatGalleryThemeName(group.theme_family),
-    formatGalleryThemeInstance(group.theme_instance),
-  ]
-    .filter(Boolean)
-    .join(' ');
+  const theme = group.theme ? parseThemeSK(group.theme) : null;
+  return theme ? formatThemeDisplayName(theme) : '';
 }
 
 export function GalleryGroupCard({

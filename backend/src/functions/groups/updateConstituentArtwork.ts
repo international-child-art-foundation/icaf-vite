@@ -14,6 +14,7 @@ import { EntityType } from "../../dynamo/ddbSchemaConsts";
 import { Status } from "../../dynamo/shared";
 import { parseJsonBody } from "../../utils/request";
 import { getCurrentUser } from "../../utils/auth";
+import { ensureThemeEntity } from "../shared/themeUtils";
 
 interface UpdateConstituentArtworkBody {
   f_name?: string;
@@ -24,8 +25,7 @@ interface UpdateConstituentArtworkBody {
   title?: string;
   description?: string;
   submitter_relationship?: SubmitterRelationship;
-  theme_family?: string;
-  theme_instance?: string;
+  theme?: string;
   notifications?: boolean;
 }
 
@@ -78,6 +78,10 @@ export const handler = async (
     // ── Build update expression ────────────────────────────────────────────
     // Always: set status = pending_review, restore REV GSI attrs, remove gallery attrs
     const nowMs = Date.now();
+    if (body.theme !== undefined) {
+      const themeCheck = await ensureThemeEntity({ theme: body.theme, nowMs });
+      if (!themeCheck.ok) return themeCheck.response;
+    }
 
     const setExprParts: string[] = [
       "#status = :status",
@@ -100,8 +104,7 @@ export const handler = async (
     if (body.title !== undefined) { setExprParts.push("title = :title"); exprValues[":title"] = body.title; }
     if (body.description !== undefined) { setExprParts.push("description = :desc"); exprValues[":desc"] = body.description; }
     if (body.submitter_relationship !== undefined) { setExprParts.push("submitter_relationship = :rel"); exprValues[":rel"] = body.submitter_relationship; }
-    if (body.theme_family !== undefined) { setExprParts.push("theme_family = :tf"); exprValues[":tf"] = body.theme_family; }
-    if (body.theme_instance !== undefined) { setExprParts.push("theme_instance = :ti"); exprValues[":ti"] = body.theme_instance; }
+    if (body.theme !== undefined) { setExprParts.push("theme = :theme"); exprValues[":theme"] = body.theme; }
     if (art.group_id || body.notifications !== undefined) { setExprParts.push("notifications = :notifications"); exprValues[":notifications"] = false; }
 
     // Remove gallery GSI attrs (artwork is no longer approved)

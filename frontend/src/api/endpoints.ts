@@ -74,14 +74,22 @@ export const apiEndpoints = {
     artworks: '/gallery/artworks',
     artworksByFamily: (family: PathParam) =>
       `/gallery/artworks/family/${encodePathParam(family)}`,
-    artworksByInstance: (family: PathParam, instance: PathParam) =>
-      `/gallery/artworks/family/${encodePathParam(family)}/instance/${encodePathParam(instance)}`,
+    artworksByInstance: (
+      family: PathParam,
+      instanceType: PathParam,
+      instance: PathParam,
+    ) =>
+      `/gallery/artworks/family/${encodePathParam(family)}/${encodePathParam(instanceType)}/${encodePathParam(instance)}`,
     themes: '/gallery/themes',
     groups: '/gallery/groups',
     groupsByFamily: (family: PathParam) =>
       `/gallery/groups/family/${encodePathParam(family)}`,
-    groupsByInstance: (family: PathParam, instance: PathParam) =>
-      `/gallery/groups/family/${encodePathParam(family)}/instance/${encodePathParam(instance)}`,
+    groupsByInstance: (
+      family: PathParam,
+      instanceType: PathParam,
+      instance: PathParam,
+    ) =>
+      `/gallery/groups/family/${encodePathParam(family)}/${encodePathParam(instanceType)}/${encodePathParam(instance)}`,
   },
   groups: {
     artwork: (artId: PathParam) =>

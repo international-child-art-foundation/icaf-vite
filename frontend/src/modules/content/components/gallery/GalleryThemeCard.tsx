@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { ThemeListItem } from '@icaf/shared';
+import { formatThemeDisplayName, type ThemeListItem } from '@icaf/shared';
 import { Check, ChevronDown } from 'lucide-react';
 import { GalleryThemeVisual } from './themeVisuals';
 import {
@@ -22,7 +22,7 @@ type GalleryThemeCardProps = {
   onSelectInstance?: (theme: ThemeListItem) => void;
   onDeselectInstance?: (theme: ThemeListItem) => void;
   onSelectVirtualItem?: (item: VirtualThemeMenuItem) => void;
-  selectedThemeInstance?: string | null;
+  selectedThemeSk?: string | null;
 };
 
 const startDateFormatter = new Intl.DateTimeFormat(undefined, {
@@ -79,7 +79,7 @@ export function GalleryThemeCard({
   onDeselectInstance,
   onSelectInstance,
   onSelectVirtualItem,
-  selectedThemeInstance,
+  selectedThemeSk,
 }: GalleryThemeCardProps) {
   const [open, setOpen] = useState(false);
   const [isThemeHovered, setIsThemeHovered] = useState(false);
@@ -276,12 +276,12 @@ export function GalleryThemeCard({
           >
             {instances.map((theme) => (
               <button
-                key={`${theme.theme_family}-${theme.theme_instance}`}
+                key={theme.theme_sk}
                 type="button"
                 className="flex w-full items-start gap-3 px-3 py-2 text-left text-sm transition hover:bg-neutral-50"
                 onClick={() => {
                   setOpen(false);
-                  if (active && theme.theme_instance === selectedThemeInstance) {
+                  if (active && theme.theme_sk === selectedThemeSk) {
                     onDeselectInstance?.(theme);
                     return;
                   }
@@ -291,14 +291,14 @@ export function GalleryThemeCard({
                 <Check
                   aria-hidden="true"
                   className={`mt-0.5 h-4 w-4 flex-none ${
-                    active && theme.theme_instance === selectedThemeInstance
+                    active && theme.theme_sk === selectedThemeSk
                       ? 'text-[#0286C3]'
                       : 'text-transparent'
                   }`}
                 />
                 <span className="min-w-0">
                   <span className="block font-semibold leading-5">
-                    {theme.display_name}
+                    {formatThemeDisplayName(theme)}
                   </span>
                   <span className="block text-xs text-neutral-500">
                     {formatStartDate(themeStartDate(theme))}

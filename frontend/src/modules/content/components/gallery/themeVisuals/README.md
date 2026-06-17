@@ -15,7 +15,7 @@ overlay. Leave it off for visuals that work with dark text.
 Theme videos play once when active and hold on their final frame. Desktop
 activation is hover-based. Mobile activation is selection-based.
 
-Use `palette` for the static fallback and future supporting colors.
+Use `palette.primary` and `palette.secondary` for theme ribbon colors.
 `staticElements` is reserved for small unanimated accents that should stay
 secondary to the video.
 

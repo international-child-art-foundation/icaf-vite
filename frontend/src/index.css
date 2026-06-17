@@ -6,6 +6,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@property --theme-ribbon-start-opacity {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 90%;
+}
+
+@property --theme-ribbon-end-opacity {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 95%;
+}
+
 @layer base {
   :root {
     font-family: 'Open Sans Variable', sans-serif;

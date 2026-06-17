@@ -6,8 +6,7 @@ export const customThemeVisuals: ThemeVisualDefinition[] = [
     aliases: ['CHERRY_BLOSSOM', 'CHERRYBLOSSOM'],
     decorated: true,
     palette: {
-      background: '#fff7fb',
-      foreground: '#ffffff',
+      primary: '#FEC342',
     },
   },
   {
@@ -16,8 +15,15 @@ export const customThemeVisuals: ThemeVisualDefinition[] = [
     videoSrc: largeMedia.fourthOfJuly,
     mirrored: true,
     palette: {
-      background: '#B22234',
-      foreground: '#3C3B6E',
+      primary: '#B22234',
+      secondary: '#3C3B6E',
+    },
+  },
+  {
+    aliases: ['ARTS_OLYMPIAD'],
+    decorated: false,
+    palette: {
+      primary: '#fec342',
     },
   },
 ];

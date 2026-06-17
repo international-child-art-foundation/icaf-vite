@@ -5,8 +5,8 @@ export type ThemeVisualProps = {
 };
 
 export type ThemeVisualPalette = {
-  background: string;
-  foreground?: string;
+  primary: string;
+  secondary?: string;
 };
 
 export type ThemeVisualStaticElement = {

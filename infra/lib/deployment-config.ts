@@ -6,6 +6,7 @@ export interface DeploymentConfig {
   resourcePrefix: string;
   appUrl: string;
   allowedOrigins: string[];
+  everyWebhookEnabled: boolean;
 }
 
 const CONFIG_BY_ENVIRONMENT: Record<DeploymentEnvironment, DeploymentConfig> = {
@@ -15,6 +16,7 @@ const CONFIG_BY_ENVIRONMENT: Record<DeploymentEnvironment, DeploymentConfig> = {
     resourcePrefix: "icaf-staging",
     appUrl: "https://staging.icaf.org",
     allowedOrigins: ["https://staging.icaf.org", "http://localhost:5173"],
+    everyWebhookEnabled: false,
   },
   production: {
     environment: "production",
@@ -22,6 +24,7 @@ const CONFIG_BY_ENVIRONMENT: Record<DeploymentEnvironment, DeploymentConfig> = {
     resourcePrefix: "icaf-production",
     appUrl: "https://icaf.org",
     allowedOrigins: ["https://icaf.org"],
+    everyWebhookEnabled: true,
   },
 };
 

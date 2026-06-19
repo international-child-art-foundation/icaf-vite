@@ -12,6 +12,13 @@ Staging resources use the `icaf-staging-*` prefix and production resources use
 `icaf-production-*`. The application URLs, CORS allowlists, stack names, and
 resource prefixes are defined in `infra/lib/deployment-config.ts`.
 
+Both environments retain DynamoDB tables, Cognito user pools, and S3 buckets
+when their CloudFormation stack is deleted. This protects staging work as well
+as production data from accidental `cdk destroy` operations. To intentionally
+remove an environment, delete its CloudFormation stack first, then review and
+delete the retained resources in the AWS console. S3 buckets must be emptied
+before they can be deleted.
+
 ## GitHub Environment configuration
 
 Create GitHub Environments named `staging` and `main`.
@@ -20,11 +27,14 @@ Define these secrets in both environments:
 
 - `AWS_DEPLOY_ROLE_ARN`
 - `STRIPE_WEBHOOK_SECRET`
-- `EVERY_WEBHOOK_SECRET`
 - `CLOUDFLARE_API_TOKEN`
 - `SFTP_HOST`
 - `SFTP_USER`
 - `SFTP_PASSWORD`
+
+Define `EVERY_WEBHOOK_SECRET` only in `main`. Every.org supports one webhook,
+so the Every webhook is disabled in staging and its staging route returns 404.
+The production deployment fails if the `main` secret is missing.
 
 Define these variables in both environments:
 

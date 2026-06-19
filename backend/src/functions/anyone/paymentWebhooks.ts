@@ -15,6 +15,7 @@ import {
 } from "@icaf/shared";
 import {
   dynamodb,
+  EVERY_WEBHOOK_ENABLED,
   EVERY_WEBHOOK_SECRET,
   STRIPE_WEBHOOK_SECRET,
   TABLE_NAME,
@@ -452,6 +453,10 @@ export const stripeWebhookHandler = async (event: ApiGatewayEvent): Promise<ApiG
 };
 
 export const everyWebhookHandler = async (event: ApiGatewayEvent): Promise<ApiGatewayResponse> => {
+  if (!EVERY_WEBHOOK_ENABLED) {
+    return CommonErrors.notFound("Route not found");
+  }
+
   try {
     if (!verifyEverySecret(event)) {
       return CommonErrors.badRequest("Invalid Every webhook secret");

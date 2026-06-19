@@ -42,31 +42,10 @@ export class InfraStack extends Stack {
       return value;
     };
 
-    /**
-     * Stateful resources are retained by default so normal deploys/destroys do
-     * not delete user data, uploaded files, or auth state.
-     *
-     * To intentionally delete absolutely everything, run:
-     *
-     *   pnpm cdk destroy \
-     *     -c destroyEverything=true \
-     *     -c confirmDestroyEverything=YES_DELETE_STATEFUL_DATA
-     *
-     * Without both context values, DynamoDB, Cognito, and the S3 buckets are retained.
-     */
-    const destroyEverything =
-      this.node.tryGetContext("destroyEverything") === "true" &&
-      this.node.tryGetContext("confirmDestroyEverything") === "YES_DELETE_STATEFUL_DATA";
-
-    const statefulRemovalPolicy = destroyEverything
-      ? RemovalPolicy.DESTROY
-      : RemovalPolicy.RETAIN;
-
-    if (destroyEverything) {
-      console.warn(
-        "DESTROY EVERYTHING ENABLED: DynamoDB, Cognito, and S3 stateful resources will be deleted.",
-      );
-    }
+    // Stateful resources survive stack deletion in every environment. Cleanup
+    // is intentionally manual so an accidental stack deletion cannot erase
+    // user records, authentication state, or uploaded files.
+    const statefulRemovalPolicy = RemovalPolicy.RETAIN;
 
     // ─── 1. DynamoDB Table — Single Table Design ──────────────────────────────
     const icafTable = new dynamodb.Table(this, "IcafTable", {
@@ -151,7 +130,7 @@ export class InfraStack extends Stack {
     const artworkBucket = new s3.Bucket(this, "IcafArtworkBucket", {
       bucketName: resourceName("artwork-bucket"),
       removalPolicy: statefulRemovalPolicy,
-      autoDeleteObjects: destroyEverything,
+      autoDeleteObjects: false,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       cors: [
         {
@@ -170,7 +149,7 @@ export class InfraStack extends Stack {
     const magazinesBucket = new s3.Bucket(this, "IcafMagazinesBucket", {
       bucketName: resourceName("magazines-bucket"),
       removalPolicy: statefulRemovalPolicy,
-      autoDeleteObjects: destroyEverything,
+      autoDeleteObjects: false,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       cors: [
         {
@@ -459,7 +438,10 @@ export class InfraStack extends Stack {
       ARTWORK_CLOUDFRONT_DISTRIBUTION_ID: artworkDistribution.distributionId,
       MAGAZINES_CLOUDFRONT_DOMAIN: magazinesDistribution.distributionDomainName,
       STRIPE_WEBHOOK_SECRET: requiredEnvironmentValue("STRIPE_WEBHOOK_SECRET"),
-      EVERY_WEBHOOK_SECRET: requiredEnvironmentValue("EVERY_WEBHOOK_SECRET"),
+      EVERY_WEBHOOK_ENABLED: String(deployment.everyWebhookEnabled),
+      EVERY_WEBHOOK_SECRET: deployment.everyWebhookEnabled
+        ? requiredEnvironmentValue("EVERY_WEBHOOK_SECRET")
+        : "",
     };
 
     // Default log retention for all NodejsFunctions in this stack.

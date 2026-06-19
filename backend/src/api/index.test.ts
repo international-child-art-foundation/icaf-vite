@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.hoisted(() => {
+  process.env.ALLOWED_ORIGINS = "https://staging.icaf.org,http://localhost:5173";
+});
+
 const authMocks = vi.hoisted(() => ({
   requireAuth: vi.fn(async () => ({
     user_id: "00000000-0000-4000-8000-000000000001",
@@ -161,5 +165,28 @@ describe("api router", () => {
     });
     expect(authMocks.requireRole).not.toHaveBeenCalled();
     expect(authMocks.requireAuth).not.toHaveBeenCalled();
+  });
+
+  it("allows the staging frontend origin with credentials", async () => {
+    const response = await handler({
+      ...event("OPTIONS", "/api/auth/login"),
+      headers: { Origin: "https://staging.icaf.org" },
+    });
+
+    expect(response.statusCode).toBe(204);
+    expect(response.headers["Access-Control-Allow-Origin"]).toBe("https://staging.icaf.org");
+    expect(response.headers["Access-Control-Allow-Credentials"]).toBe("true");
+  });
+
+  it("omits CORS allow headers for a disallowed origin", async () => {
+    const response = await handler({
+      ...event("OPTIONS", "/api/auth/login"),
+      headers: { Origin: "https://attacker.example" },
+    });
+
+    expect(response.statusCode).toBe(204);
+    expect(response.headers["Access-Control-Allow-Origin"]).toBeUndefined();
+    expect(response.headers["Access-Control-Allow-Credentials"]).toBeUndefined();
+    expect(response.headers.Vary).toBe("Origin");
   });
 });

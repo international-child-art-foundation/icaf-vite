@@ -114,7 +114,17 @@ type ApiEvent = ApiGatewayEvent & {
   rawPath?: string;
 };
 
-const allowedOrigins = new Set(["https://revise.icaf.org", "http://localhost:5173"]);
+const allowedOriginsValue = process.env.ALLOWED_ORIGINS;
+if (!allowedOriginsValue) {
+  throw new Error("ALLOWED_ORIGINS must be configured for the deployed environment.");
+}
+
+const allowedOrigins = new Set(
+  allowedOriginsValue.split(",").map((origin) => origin.trim()).filter(Boolean),
+);
+if (allowedOrigins.size === 0) {
+  throw new Error("ALLOWED_ORIGINS must contain at least one origin.");
+}
 const contributorRoles: Role[] = ["contributor", "admin"];
 const adminRoles: Role[] = ["admin"];
 const pathParamValidators: Record<string, (value: string) => boolean> = {
@@ -304,18 +314,18 @@ function getHeader(event: ApiGatewayEvent, name: string): string | undefined {
 function withCors(event: ApiGatewayEvent, response: ApiGatewayResponse): ApiGatewayResponse {
   const origin = getHeader(event, "origin");
   const isAllowedOrigin = !!origin && allowedOrigins.has(origin);
-  const allowOrigin = isAllowedOrigin
-    ? origin
-    : "https://revise.icaf.org";
   const baseHeaders = { ...response.headers };
+  delete baseHeaders["Access-Control-Allow-Origin"];
   delete baseHeaders["Access-Control-Allow-Credentials"];
 
   return {
     ...response,
     headers: {
       ...baseHeaders,
-      "Access-Control-Allow-Origin": allowOrigin,
-      ...(isAllowedOrigin && { "Access-Control-Allow-Credentials": "true" }),
+      ...(isAllowedOrigin && {
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Credentials": "true",
+      }),
       Vary: "Origin",
     },
   };

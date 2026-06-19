@@ -6,7 +6,8 @@
     "frontend",
     "backend",
     "infra",
-    "shared"
+    "shared",
+    "cloudflare/api-proxy"
   ],
   "packageManager": "pnpm@11.5.2",
   "scripts": {

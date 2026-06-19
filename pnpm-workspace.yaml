@@ -8,4 +8,5 @@ packages:
   - "backend"
   - "infra"
   - "shared"
+  - "cloudflare/api-proxy"
 minimumReleaseAge: 10080

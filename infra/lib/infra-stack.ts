@@ -19,13 +19,28 @@ import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
 import * as cloudwatchActions from "aws-cdk-lib/aws-cloudwatch-actions";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as cloudfrontOrigins from "aws-cdk-lib/aws-cloudfront-origins";
+import type { DeploymentConfig } from "./deployment-config.js";
 
 // Spend threshold (USD) that triggers emergencyShutdown
-const BILLING_ALARM_THRESHOLD_USD = 50;
+const BILLING_ALARM_THRESHOLD_USD = 20;
+
+interface InfraStackProps extends StackProps {
+  deployment: DeploymentConfig;
+}
 
 export class InfraStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props: InfraStackProps) {
     super(scope, id, props);
+
+    const { deployment } = props;
+    const resourceName = (name: string) => `${deployment.resourcePrefix}-${name}`;
+    const requiredEnvironmentValue = (name: string): string => {
+      const value = process.env[name];
+      if (!value) {
+        throw new Error(`${name} must be configured for the deployment environment.`);
+      }
+      return value;
+    };
 
     /**
      * Stateful resources are retained by default so normal deploys/destroys do
@@ -55,7 +70,7 @@ export class InfraStack extends Stack {
 
     // ─── 1. DynamoDB Table — Single Table Design ──────────────────────────────
     const icafTable = new dynamodb.Table(this, "IcafTable", {
-      tableName: "icaf-main-table",
+      tableName: resourceName("main-table"),
       partitionKey: { name: "PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "SK", type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
@@ -134,14 +149,14 @@ export class InfraStack extends Stack {
 
     // Artwork bucket — private, CloudFront via existing setup
     const artworkBucket = new s3.Bucket(this, "IcafArtworkBucket", {
-      bucketName: "icaf-artwork-bucket",
+      bucketName: resourceName("artwork-bucket"),
       removalPolicy: statefulRemovalPolicy,
       autoDeleteObjects: destroyEverything,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       cors: [
         {
           allowedMethods: [s3.HttpMethods.PUT],
-          allowedOrigins: ["https://revise.icaf.org", "http://localhost:5173"],
+          allowedOrigins: deployment.allowedOrigins,
           allowedHeaders: ["*"],
           maxAge: 3000,
         },
@@ -153,7 +168,7 @@ export class InfraStack extends Stack {
     //   staging/<slug>.zip  — temporary upload landing zone (deleted after processing)
     //   <slug>/             — extracted magazine HTML, assets, and thumbnail
     const magazinesBucket = new s3.Bucket(this, "IcafMagazinesBucket", {
-      bucketName: "icaf-magazines-bucket",
+      bucketName: resourceName("magazines-bucket"),
       removalPolicy: statefulRemovalPolicy,
       autoDeleteObjects: destroyEverything,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
@@ -161,7 +176,7 @@ export class InfraStack extends Stack {
         {
           // Volunteers upload zips via presigned PUT URLs from the browser
           allowedMethods: [s3.HttpMethods.PUT],
-          allowedOrigins: ["https://revise.icaf.org", "http://localhost:5173"],
+          allowedOrigins: deployment.allowedOrigins,
           allowedHeaders: ["*"],
           maxAge: 3000,
         },
@@ -181,7 +196,7 @@ export class InfraStack extends Stack {
     //      distribution domain name output by this stack
 
     const indexRewriteFn = new cloudfront.Function(this, "MagazineIndexRewriteFn", {
-      functionName: "icaf-magazine-index-rewrite",
+      functionName: resourceName("magazine-index-rewrite"),
       code: cloudfront.FunctionCode.fromInline(`
         function handler(event) {
           var uri = event.request.uri;
@@ -224,7 +239,7 @@ export class InfraStack extends Stack {
     // Expected paths are /{art_id}/thumb.avif, /{art_id}/medium.avif, and
     // /{art_id}/original.avif.
     const artworkVariantGuardFn = new cloudfront.Function(this, "ArtworkVariantGuardFn", {
-      functionName: "icaf-artwork-variant-guard",
+      functionName: resourceName("artwork-variant-guard"),
       code: cloudfront.FunctionCode.fromInline(`
         function handler(event) {
           var request = event.request;
@@ -276,7 +291,7 @@ export class InfraStack extends Stack {
 
     // ─── 4. Cognito User Pool ─────────────────────────────────────────────────
     const userPool = new cognito.UserPool(this, "IcafUserPool", {
-      userPoolName: "icaf-user-pool",
+      userPoolName: resourceName("user-pool"),
       selfSignUpEnabled: true,
       signInAliases: { email: true },
       autoVerify: { email: true },
@@ -307,7 +322,7 @@ export class InfraStack extends Stack {
 
     const userPoolClient = new cognito.UserPoolClient(this, "IcafUserPoolClient", {
       userPool,
-      userPoolClientName: "icaf-web-client",
+      userPoolClientName: resourceName("web-client"),
       generateSecret: false,
       authFlows: {
         adminUserPassword: true,
@@ -322,12 +337,12 @@ export class InfraStack extends Stack {
     // ─── 5. SQS — Background Queues ──────────────────────────────────────────
 
     const cleanupDLQ = new sqs.Queue(this, "IcafCleanupDLQ", {
-      queueName: "icaf-cleanup-dlq",
+      queueName: resourceName("cleanup-dlq"),
       retentionPeriod: Duration.days(14),
     });
 
     const cleanupQueue = new sqs.Queue(this, "IcafCleanupQueue", {
-      queueName: "icaf-cleanup-queue",
+      queueName: resourceName("cleanup-queue"),
       visibilityTimeout: Duration.seconds(300),
       retentionPeriod: Duration.days(14),
       deadLetterQueue: { queue: cleanupDLQ, maxReceiveCount: 3 },
@@ -335,12 +350,12 @@ export class InfraStack extends Stack {
 
     // processImage queue — fed by S3 ObjectCreated on artwork uploads
     const processImageDLQ = new sqs.Queue(this, "IcafProcessImageDLQ", {
-      queueName: "icaf-process-image-dlq",
+      queueName: resourceName("process-image-dlq"),
       retentionPeriod: Duration.days(14),
     });
 
     const processImageQueue = new sqs.Queue(this, "IcafProcessImageQueue", {
-      queueName: "icaf-process-image-queue",
+      queueName: resourceName("process-image-queue"),
       // Must be ≥ 6× Lambda timeout (AWS recommendation). Lambda timeout is 120s, so 720s.
       visibilityTimeout: Duration.seconds(720),
       retentionPeriod: Duration.days(7),
@@ -361,12 +376,12 @@ export class InfraStack extends Stack {
 
     // processZip queue — fed by S3 ObjectCreated on staging/<slug>.zip uploads
     const processZipDLQ = new sqs.Queue(this, "IcafProcessZipDLQ", {
-      queueName: "icaf-process-zip-dlq",
+      queueName: resourceName("process-zip-dlq"),
       retentionPeriod: Duration.days(14),
     });
 
     const processZipQueue = new sqs.Queue(this, "IcafProcessZipQueue", {
-      queueName: "icaf-process-zip-queue",
+      queueName: resourceName("process-zip-queue"),
       // Must be ≥ Lambda timeout — large zips may take a while to unpack + re-upload
       visibilityTimeout: Duration.seconds(600),
       retentionPeriod: Duration.days(7),
@@ -395,18 +410,17 @@ export class InfraStack extends Stack {
     });
 
     // ─── 7. Lambda Functions ──────────────────────────────────────────────────
-    // TODO: Update APP_URL and MAGAZINES_CLOUDFRONT_DOMAIN before deployment
     const SES_FROM_EMAIL = "ICAF <no-reply@icaf.org>";
     const TAKEDOWN_NOTIFICATION_EMAILS = [
       "childart@icaf.org",
       "noah.zaranka@icaf.org",
     ];
     const sesConfigurationSet = new ses.CfnConfigurationSet(this, "IcafSesConfigurationSet", {
-      name: "icaf-transactional",
+      name: resourceName("transactional"),
     });
 
     const sesFeedbackTopic = new sns.Topic(this, "SesFeedbackTopic", {
-      topicName: "icaf-ses-feedback",
+      topicName: resourceName("ses-feedback"),
       displayName: "ICAF SES Bounce and Complaint Feedback",
     });
 
@@ -437,14 +451,15 @@ export class InfraStack extends Stack {
       S3_BUCKET_NAME: artworkBucket.bucketName,
       MAGAZINES_BUCKET_NAME: magazinesBucket.bucketName,
       CLEANUP_QUEUE_URL: cleanupQueue.queueUrl,
-      APP_URL: "https://revise.icaf.org",
+      APP_URL: deployment.appUrl,
+      ALLOWED_ORIGINS: deployment.allowedOrigins.join(","),
       SES_FROM_EMAIL,
       SES_CONFIGURATION_SET: sesConfigurationSet.ref,
       TAKEDOWN_NOTIFICATION_EMAILS: JSON.stringify(TAKEDOWN_NOTIFICATION_EMAILS),
       ARTWORK_CLOUDFRONT_DISTRIBUTION_ID: artworkDistribution.distributionId,
-      MAGAZINES_CLOUDFRONT_DOMAIN: "d2i0uq3fi9fhva.cloudfront.net", // CloudFront domain for magazine assets
-      STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET ?? "",
-      EVERY_WEBHOOK_SECRET: process.env.EVERY_WEBHOOK_SECRET ?? "",
+      MAGAZINES_CLOUDFRONT_DOMAIN: magazinesDistribution.distributionDomainName,
+      STRIPE_WEBHOOK_SECRET: requiredEnvironmentValue("STRIPE_WEBHOOK_SECRET"),
+      EVERY_WEBHOOK_SECRET: requiredEnvironmentValue("EVERY_WEBHOOK_SECRET"),
     };
 
     // Default log retention for all NodejsFunctions in this stack.
@@ -622,11 +637,11 @@ export class InfraStack extends Stack {
 
     // ─── 10. API Gateway ───────────────────────────────────────────────────────
     const api = new apigw.RestApi(this, "IcafApi", {
-      restApiName: "icaf-api",
+      restApiName: resourceName("api"),
       endpointConfiguration: { types: [apigw.EndpointType.REGIONAL] },
       deployOptions: { stageName: "v1" },
       defaultCorsPreflightOptions: {
-        allowOrigins: ["https://revise.icaf.org", "http://localhost:5173"],
+        allowOrigins: deployment.allowedOrigins,
         allowMethods: apigw.Cors.ALL_METHODS,
         allowHeaders: ["Content-Type", "Authorization"],
         allowCredentials: true,
@@ -651,12 +666,17 @@ export class InfraStack extends Stack {
       defaultIntegration: apiIntegration,
     });
 
+    new CfnOutput(this, "ApiGatewayOrigin", {
+      value: api.url,
+      description: `API Gateway stage origin for the ${deployment.environment} proxy`,
+    });
+
     // ─── 11. Emergency Shutdown — Billing Alarm ───────────────────────────────
     // NOTE: AWS billing metrics are only published to us-east-1.
     // If this stack is deployed to a different region, create the alarm
     // in a separate us-east-1 stack and point it at a cross-region SNS topic.
     const shutdownTopic = new sns.Topic(this, "EmergencyShutdownTopic", {
-      topicName: "icaf-emergency-shutdown",
+      topicName: resourceName("emergency-shutdown"),
       displayName: "ICAF Emergency Shutdown",
     });
 
@@ -665,7 +685,7 @@ export class InfraStack extends Stack {
     );
 
     const billingAlarm = new cloudwatch.Alarm(this, "BillingAlarm", {
-      alarmName: "icaf-billing-alarm",
+      alarmName: resourceName("billing-alarm"),
       alarmDescription: `Triggers emergency API shutdown when estimated charges exceed $${BILLING_ALARM_THRESHOLD_USD}`,
       metric: new cloudwatch.Metric({
         namespace: "AWS/Billing",

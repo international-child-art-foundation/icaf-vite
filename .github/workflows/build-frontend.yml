@@ -17,6 +17,8 @@ on:
 
 env:
   SITE_NAME: icaf
+  # Public builds always use the same-origin Cloudflare/Vite proxy path.
+  VITE_API_BASE_URL: /api
 
 concurrency:
   group: build-frontend-${{ github.ref_name }}
@@ -96,9 +98,10 @@ jobs:
 
   deploy_release:
     name: Deploy release over SFTP
+    if: github.ref_name == 'main' || github.ref_name == 'staging'
     needs: build_frontend
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    environment: ${{ github.ref_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6

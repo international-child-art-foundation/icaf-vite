@@ -1,11 +1,10 @@
-const EMAIL_BACKGROUND = '#eef7ff';
+const EMAIL_BACKGROUND = '#ffffff';
 const EMAIL_CARD = '#ffffff';
 const EMAIL_TEXT = '#1f2933';
 const EMAIL_BORDER = '#cfe2f3';
 const EMAIL_BUTTON = '#134380';
 const EMAIL_LINK = '#0f5c8a';
 const EMAIL_FOOTER = '#6b7280';
-const EMAIL_BRAND = '#0f5c8a';
 
 export function escapeHtml(value: string): string {
   return value
@@ -34,15 +33,22 @@ export function renderLink(url: string, label?: string): string {
   return `<a href="${safeUrl}" style="color:${EMAIL_LINK};text-decoration:underline;word-break:break-word;">${safeLabel}</a>`;
 }
 
-export function renderButton(label: string, url: string): string {
+export function renderButton(
+  label: string,
+  url: string,
+  options: { centered?: boolean; horizontalPadding?: number } = {},
+): string {
   const safeUrl = escapeHtml(url);
   const safeLabel = escapeHtml(label);
+  const alignment = options.centered ? ' align="center"' : '';
+  const margin = options.centered ? '24px auto' : '24px 0';
+  const horizontalPadding = Math.max(0, options.horizontalPadding ?? 20);
 
   return [
-    '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;">',
+    `<table role="presentation"${alignment} cellpadding="0" cellspacing="0" border="0" style="margin:${margin};">`,
     '<tr>',
     `<td bgcolor="${EMAIL_BUTTON}" style="border-radius:10px;">`,
-    `<a href="${safeUrl}" style="display:inline-block;padding:14px 20px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;background:${EMAIL_BUTTON};border-radius:10px;">${safeLabel}</a>`,
+    `<a href="${safeUrl}" style="display:inline-block;padding:14px ${horizontalPadding}px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;background:${EMAIL_BUTTON};border-radius:10px;">${safeLabel}</a>`,
     '</td>',
     '</tr>',
     '</table>',
@@ -95,9 +101,9 @@ export function renderEmailDocument(args: {
     '<td align="center">',
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:640px;background:${EMAIL_CARD};border:1px solid ${EMAIL_BORDER};border-radius:18px;overflow:hidden;">`,
     '<tr>',
-    `<td style="padding:28px 32px 10px;border-bottom:1px solid ${EMAIL_BORDER};background:#f8fcff;">`,
-    `<div style="font-size:12px;line-height:1.4;letter-spacing:0.16em;text-transform:uppercase;color:${EMAIL_BRAND};font-weight:700;">International Child Art Foundation</div>`,
-    `<h1 style="margin:14px 0 0;font-size:28px;line-height:1.2;color:${EMAIL_TEXT};">${safeHeadline}</h1>`,
+    `<td style="padding:28px 32px 10px;background:${EMAIL_BUTTON};">`,
+    '<div style="font-size:14px;line-height:1.5;color:#ffffff;font-weight:700;">International Child Art Foundation</div>',
+    `<h1 style="margin:14px 0 0;font-size:28px;line-height:1.2;color:#ffffff;">${safeHeadline}</h1>`,
     '</td>',
     '</tr>',
     '<tr>',

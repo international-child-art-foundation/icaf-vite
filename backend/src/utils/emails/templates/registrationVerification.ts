@@ -33,7 +33,10 @@ export function buildRegistrationVerificationEmail(args: {
         'Thanks for registering for an ICAF account.',
         'Use the secure link below to verify your email address and activate your account.',
       ]),
-      renderButton('Verify account', link),
+      renderButton('Verify account', link, {
+        centered: true,
+        horizontalPadding: 28,
+      }),
       renderInfoBox('Verification link', [
         'This link expires in 7 days.',
         `If the button does not work, open this URL: ${link}`,

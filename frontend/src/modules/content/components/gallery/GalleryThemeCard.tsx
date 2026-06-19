@@ -90,8 +90,8 @@ function ThemeColorRibbons({
   isActive: boolean;
 }) {
   const palette = getThemeVisualPalette(family);
-  const startOpacity = isActive ? '95%' : '85%';
-  const endOpacity = isActive ? '100%' : '90%';
+  const startOpacity = isActive ? '0%' : '85%';
+  const endOpacity = isActive ? '0%' : '90%';
 
   return (
     <div>
@@ -117,7 +117,7 @@ function ThemeColorRibbons({
           return (
             <span
               key={index}
-              className={`absolute bottom-12 h-2 w-48 origin-right ${ribbonColor === null ? '' : 'shadow-[0_1px_2px_rgba(0,0,0,0.16)]'}`}
+              className={`absolute bottom-12 h-2 w-48 origin-right ${ribbonColor === null || isActive ? '' : 'shadow-[0_1px_2px_rgba(0,0,0,0.16)]'}`}
               style={stripeStyle}
             />
           );

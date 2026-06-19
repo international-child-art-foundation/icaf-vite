@@ -22,6 +22,7 @@ export const customThemeVisuals: ThemeVisualDefinition[] = [
   {
     aliases: ['ARTS_OLYMPIAD'],
     decorated: false,
+    videoSrc: largeMedia.artsOlympiad,
     palette: {
       primary: '#fec342',
     },

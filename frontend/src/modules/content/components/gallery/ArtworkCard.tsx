@@ -55,7 +55,7 @@ const ArtworkCard = ({ artwork, openModal, actionSlot }: ArtworkCardProps) => {
           )} */}
         </section>
 
-        <section className="relative flex h-48 w-full flex-col gap-2 rounded-b-lg p-4 sm:h-40">
+        <section className="relative flex h-40 w-full flex-col gap-2 rounded-b-lg p-4">
           <GalleryArtworkInfo
             artwork={artwork}
             variant="card"

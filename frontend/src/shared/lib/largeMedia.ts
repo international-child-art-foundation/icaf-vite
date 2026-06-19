@@ -20,6 +20,7 @@ export const largeMedia = {
   ),
   artAsSourceOfHealing: largeMediaUrl('art-as-a-source-of-healing.mp4'),
   fourthOfJuly: largeMediaUrl('4th-of-July.mp4'),
+  artsOlympiad: largeMediaUrl('Arts-olympiad-styleB.mp4'),
 } as const;
 
 export type LargeMediaKey = keyof typeof largeMedia;

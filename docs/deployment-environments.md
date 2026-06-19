@@ -47,29 +47,42 @@ global API key.
 
 ## Deployment order
 
-The **Deploy Backend and API Proxy** workflow encodes the dependency order:
+The **Deploy Application** workflow is the only remote deployment workflow and
+encodes the dependency order:
 
 1. CDK deploys the environment-specific AWS backend.
-2. The workflow reads and validates `ApiGatewayOrigin` from the CDK outputs.
-3. The Cloudflare deployment step receives that URL and deploys the matching
-   Worker environment.
+2. The workflow reads and validates `ApiGatewayOrigin` and
+   `ArtworkDistributionDomainName` from the CDK outputs.
+3. The Cloudflare deployment receives `ApiGatewayOrigin` as
+   `TARGET_API_ORIGIN` and deploys the matching Worker environment.
+4. Vite builds the frontend with `/api` as `VITE_API_BASE_URL` and the derived
+   CloudFront HTTPS origin as `VITE_ARTWORK_ASSET_BASE_URL`.
+5. The workflow uploads the build to a unique release directory.
+6. Uploading `.htaccess` activates that release as the final step.
 
 This works on the first deployment and requires no manually configured API
 Gateway URL. GitHub Actions shows explicit CDK and Worker deployment steps and
 writes the resolved target to the workflow summary. The Worker deployment
 cannot start unless CDK succeeds and exports exactly one valid API Gateway
-origin. Both deployments share one environment approval.
+origin and exactly one valid CloudFront artwork domain. All deployments share
+one environment approval.
 
-Changes to either the AWS backend or Worker package run this ordered pipeline.
-A Worker-only change therefore performs a no-op CDK deployment first; this is
-intentional so the Worker target always comes from current AWS state.
+Changes to the AWS backend, Worker, shared package, or frontend run this ordered
+pipeline. A frontend-only or Worker-only change therefore performs a no-op CDK
+deployment first; this is intentional so build-time and Worker configuration
+always comes from current AWS state. The previous frontend remains active if
+the build or versioned-directory upload fails. AWS, Cloudflare, and SFTP cannot
+participate in one atomic transaction, so backend changes must remain
+compatible with the previously active frontend until the final activation.
 
 Protect the `main` GitHub Environment with required reviewers. The
 backend workflow runs `cdk diff` before each deployment. Production never
 includes localhost in API Gateway, Lambda, or S3 CORS configuration.
 
-The frontend build always sets `VITE_API_BASE_URL=/api`. Application code calls
-`/api` in every environment. For local development, copy
+The frontend build always sets `VITE_API_BASE_URL=/api`. `API_PROXY_TARGET` is
+only a local Vite development-server setting and is not passed to production
+builds. Application code calls `/api` in every environment. For local
+development, copy
 `frontend/.env.example` to `frontend/.env.local` and set `API_PROXY_TARGET` to
 the staging `ApiGatewayOrigin`; Vite forwards local `/api` requests there.
 

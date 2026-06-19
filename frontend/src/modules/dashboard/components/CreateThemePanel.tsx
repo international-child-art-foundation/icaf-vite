@@ -9,6 +9,7 @@ import { DashboardModule, ModuleState } from './DashboardModule';
 type ThemeDraft = {
   description: string;
   featuredGallery: boolean;
+  featuredSubmissions: boolean;
   kind: 'family' | 'instance';
   instance_type: string;
   retired_at: string;
@@ -22,8 +23,9 @@ const today = new Date().toISOString().slice(0, 10);
 const initialDraft: ThemeDraft = {
   description: '',
   featuredGallery: true,
+  featuredSubmissions: false,
   kind: 'family',
-  instance_type: 'year',
+  instance_type: '',
   retired_at: '',
   start_date: today,
   theme_family: '',
@@ -90,8 +92,12 @@ export function CreateThemePanel() {
       return;
     }
 
+    const featured_on = [
+      ...(draft.featuredGallery ? ['gallery'] : []),
+      ...(draft.featuredSubmissions ? ['submit-artwork'] : []),
+    ];
     const baseTheme = {
-      featured_on: draft.featuredGallery ? ['gallery'] : [],
+      featured_on,
       description: draft.description.trim() || undefined,
       start_date,
       ...(retired_at !== undefined && { retired_at }),
@@ -132,6 +138,17 @@ export function CreateThemePanel() {
           <h3 className="font-montserrat text-lg font-bold text-neutral-950">
             Theme details
           </h3>
+          <div className="rounded-md border border-black/10 bg-neutral-50 px-4 py-3 text-sm leading-6 text-neutral-700">
+            <p>
+              A <strong>theme family</strong> (the Theme collection field) is the
+              main collection that groups related themes together. A{' '}
+              <strong>theme instance</strong> is one specific edition within
+              that family, such as its 2026 edition.
+              For <strong>instance type</strong>, enter the lowercase category
+              used to identify editions—usually <code>year</code>, or{' '}
+              <code>count</code> for numbered editions.
+            </p>
+          </div>
           <Field label="Theme type">
             <select
               value={draft.kind}
@@ -166,7 +183,7 @@ export function CreateThemePanel() {
               <Field label="Instance type">
                 <Input
                   value={draft.instance_type}
-                  placeholder="year"
+                  placeholder="e.g. year or count"
                   onBlur={() =>
                     updateDraft(
                       'instance_type',
@@ -254,6 +271,18 @@ export function CreateThemePanel() {
               disabled={busy}
             />
             Feature in gallery theme list
+          </label>
+          <label className="flex items-center gap-3 rounded-md bg-neutral-50 px-3 py-2 text-sm font-semibold text-neutral-700">
+            <input
+              checked={draft.featuredSubmissions}
+              className="accent-primary h-4 w-4"
+              type="checkbox"
+              onChange={(event) =>
+                updateDraft('featuredSubmissions', event.target.checked)
+              }
+              disabled={busy}
+            />
+            Feature on artwork submission pages
           </label>
         </section>
 

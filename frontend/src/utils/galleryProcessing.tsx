@@ -58,12 +58,17 @@ export function artworkAssetUrl(
 ): string {
   const path = `/${artId}/${variant}.avif`;
   const remoteArtworkBaseUrl = getRemoteArtworkBaseUrl();
+  const browserOrigin = window.location.origin;
 
   if (remoteArtworkBaseUrl) {
-    return new URL(path, remoteArtworkBaseUrl).toString();
+    // VITE_API_BASE_URL is intentionally relative in deployed builds. Resolve
+    // any configured base against the browser origin before using it as a URL
+    // base so a missing asset-specific setting cannot crash artwork lists.
+    const resolvedBaseUrl = new URL(remoteArtworkBaseUrl, browserOrigin);
+    return new URL(path, resolvedBaseUrl).toString();
   }
 
-  return new URL(path, window.location.origin).toString();
+  return new URL(path, browserOrigin).toString();
 }
 
 export function resolveApiArtwork(

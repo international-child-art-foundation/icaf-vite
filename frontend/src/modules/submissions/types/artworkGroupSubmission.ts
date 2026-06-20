@@ -4,7 +4,6 @@ export type ArtworkGroupInfo = {
   class_name: string;
   country: string;
   description: string;
-  group_type: string;
   notifications: boolean;
   region: string;
   theme: string;

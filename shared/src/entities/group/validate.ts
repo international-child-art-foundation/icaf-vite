@@ -22,10 +22,12 @@ export function validateSubmitGroupRequest(data: SubmitGroupRequest): string[] {
         errors.push(`title must be ${GROUP_MAX_TITLE_LEN} characters or less`);
     }
 
-    if (!data.group_type?.trim()) {
-        errors.push('group_type is required');
-    } else if (data.group_type.length > GROUP_MAX_STRING_LEN) {
-        errors.push(`group_type must be ${GROUP_MAX_STRING_LEN} characters or less`);
+    if (data.group_type !== undefined) {
+        if (typeof data.group_type !== 'string' || !data.group_type.trim()) {
+            errors.push('group_type, if provided, must be a non-empty string');
+        } else if (data.group_type.length > GROUP_MAX_STRING_LEN) {
+            errors.push(`group_type must be ${GROUP_MAX_STRING_LEN} characters or less`);
+        }
     }
 
     if (!data.country?.trim()) {

@@ -28,7 +28,6 @@ export const initialArtworkGroupInfo: ArtworkGroupInfo = {
   class_name: '',
   country: '',
   description: '',
-  group_type: 'classroom',
   notifications: true,
   region: '',
   theme: '',

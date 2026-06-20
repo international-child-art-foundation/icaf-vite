@@ -132,7 +132,7 @@ export const handler = async (
                 SK: "-",
                 group_id: groupId,
                 user_id: ownerUserId,
-                group_type: body.group_type,
+                ...(body.group_type !== undefined && { group_type: body.group_type }),
                 status: Status.Pending,
                 member_art_ids: memberArtIds,
                 ts: nowSeconds,

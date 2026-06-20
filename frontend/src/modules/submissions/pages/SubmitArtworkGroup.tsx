@@ -132,12 +132,6 @@ function readString(value: unknown, fallback: string): string {
   return typeof value === 'string' ? value : fallback;
 }
 
-function readStoredGroupType(value: unknown): ArtworkGroupInfo['group_type'] {
-  return typeof value === 'string'
-    ? value
-    : initialPersistedDraft.group.group_type;
-}
-
 function readStoredGroup(value: unknown): ArtworkGroupInfo {
   const group = isRecord(value) ? value : {};
 
@@ -151,7 +145,6 @@ function readStoredGroup(value: unknown): ArtworkGroupInfo {
       group.description,
       initialPersistedDraft.group.description,
     ),
-    group_type: readStoredGroupType(group.group_type),
     submitter_display_name: readString(
       group.submitter_display_name,
       initialPersistedDraft.group.submitter_display_name,
@@ -224,9 +217,7 @@ function readPersistedDraft(): StoredArtworkGroupSubmissionDraft {
 }
 
 function getSubmitterFlow(value: string | undefined): SubmitterFlow {
-  return value === 'legal_guardian'
-    ? 'legal_guardian'
-    : 'adult_facilitator';
+  return value === 'legal_guardian' ? 'legal_guardian' : 'adult_facilitator';
 }
 
 function getFlowPath(flow: SubmitterFlow, nested = false) {
@@ -637,7 +628,6 @@ export function SubmitArtworkGroup({
         class_name: effectiveGroup.class_name.trim() || undefined,
         country: effectiveGroup.country.trim(),
         description: effectiveGroup.description.trim() || undefined,
-        group_type: effectiveGroup.group_type,
         notifications: effectiveGroup.notifications,
         region: effectiveGroup.region.trim() || undefined,
         submitter_display_name:

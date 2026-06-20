@@ -14,6 +14,7 @@ type GalleryGroupCardProps = {
 };
 
 function groupLabel(group: GroupListItem): string {
+  if (!group.group_type) return '';
   return group.group_type === 'classroom'
     ? 'Classroom'
     : group.group_type
@@ -36,6 +37,7 @@ export function GalleryGroupCard({
   const owner = group.submitter_display_name || 'Group submission';
   const title = group.class_name || group.title;
   const theme = groupThemeLabel(group);
+  const type = groupLabel(group);
   const isWholeCardInteractive = !actionSlot;
   const openGroup = () => onOpen(group);
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
@@ -83,10 +85,12 @@ export function GalleryGroupCard({
       <div className="relative flex min-h-[230px] flex-col justify-between gap-6 p-5 sm:p-7 lg:min-h-[260px]">
         <div>
           <div className="flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold leading-tight text-amber-800">
-              <UsersRound size={12} strokeWidth={2.2} />
-              {groupLabel(group)}
-            </span>
+            {type && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold leading-tight text-amber-800">
+                <UsersRound size={12} strokeWidth={2.2} />
+                {type}
+              </span>
+            )}
             {theme && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-semibold leading-tight text-sky-800">
                 <Palette size={12} strokeWidth={2.2} />

@@ -38,7 +38,7 @@ export interface GroupEntity {
     // ── Required ───────────────────────────────────────────────────────────
     group_id: string;
     user_id: string;                // USER#<user_id> of the submitting user
-    group_type: GroupType;
+    group_type?: GroupType;
     status: GroupStatus;
     member_art_ids: string[];       // ordered list of art_ids (max ~50)
     ts: number;              // Unix ts (seconds)
@@ -58,7 +58,7 @@ export interface GroupEntity {
 // Request body to create a new group (POST /user/groups)
 export interface SubmitGroupRequest {
     theme?: string;
-    group_type: GroupType;
+    group_type?: GroupType;
     title: string;
     class_name?: string;
     submitter_display_name?: string;
@@ -102,7 +102,7 @@ export interface GetGroupResponse {
 export interface GroupListItem {
     group_id: string;
     theme?: string;
-    group_type: GroupType;
+    group_type?: GroupType;
     title: string;
     class_name?: string;
     submitter_display_name?: string;

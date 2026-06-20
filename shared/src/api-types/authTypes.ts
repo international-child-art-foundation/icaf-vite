@@ -24,6 +24,8 @@ export interface AuthenticatedUserSummary {
     user_id: string;
     email: string;
     role: Role;
+    f_name?: string;
+    l_name?: string;
 }
 
 export interface LoginResponse extends MessageResponse, AuthenticatedUserSummary {}

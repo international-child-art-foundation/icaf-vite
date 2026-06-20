@@ -12,10 +12,6 @@ export function sanitizeSubmissionData(data: SubmitArtworkRequest): SubmitArtwor
         region: cleanOptionalString(data.region),
         theme: cleanOptionalString(data.theme),
         group_id: cleanOptionalString(data.group_id),
-        release_hash:
-            typeof data.release_hash === 'string'
-                ? data.release_hash.trim().toLowerCase()
-                : data.release_hash,
         digital_signature:
             typeof data.digital_signature === 'string'
                 ? data.digital_signature.trim()

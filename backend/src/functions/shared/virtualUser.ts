@@ -34,6 +34,8 @@ async function getUserByEmail(email: string): Promise<UserEntity | undefined> {
 export async function getOrCreateVirtualUser(
   email: string,
   nowSeconds: number,
+  firstName: string,
+  lastName: string,
 ): Promise<VirtualUserResult> {
   const normalizedEmail = normalizeEmail(email);
   let user = await getUserByEmail(normalizedEmail);
@@ -45,6 +47,8 @@ export async function getOrCreateVirtualUser(
       SK: "PROFILE",
       user_id: userId,
       email: normalizedEmail,
+      f_name: firstName.trim(),
+      l_name: lastName.trim(),
       is_virtual: true,
       ts: nowSeconds,
       banned: false,
@@ -70,6 +74,25 @@ export async function getOrCreateVirtualUser(
         "This account already exists. Please log in to submit artwork.",
       ),
     };
+  }
+
+  if (!user.f_name || !user.l_name) {
+    const fName = firstName.trim();
+    const lName = lastName.trim();
+    await dynamodb.send(
+      new UpdateCommand({
+        TableName: TABLE_NAME,
+        Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
+        UpdateExpression:
+          "SET f_name = if_not_exists(f_name, :fName), l_name = if_not_exists(l_name, :lName)",
+        ExpressionAttributeValues: {
+          ":fName": fName,
+          ":lName": lName,
+        },
+      }),
+    );
+    user.f_name ??= fName;
+    user.l_name ??= lName;
   }
 
   if (shouldSuppressArtworkEmail(user)) {

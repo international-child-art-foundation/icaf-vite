@@ -5,6 +5,7 @@ import {
   GROUP_MAX_TITLE_LEN,
   MAX_ARTIST_AGE,
   MAX_DESCRIPTION_LEN,
+  MAX_NAME_LEN,
   MAX_STRING_LEN,
   MAX_TITLE_LEN,
   S3_MAX_FILE_SIZE_BYTES,
@@ -20,8 +21,6 @@ import type {
 } from '@/modules/submissions/types/artworkGroupSubmission';
 
 export const ARTWORK_GROUP_DRAFT_KEY = 'icaf.submitArtworkGroupDraft.v1';
-export const RELEASE_TEXT =
-  'ICAF artwork group submission release accepted by the submitter.';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_EMAIL_LEN = 254;
 
@@ -51,7 +50,7 @@ export function createArtworkDraft(): ArtworkDraft {
     description: '',
     f_name: '',
     id: createDraftId(),
-    submitter_relationship: 'teacher',
+    submitter_relationship: 'adult_facilitator',
     title: '',
   };
 }
@@ -61,8 +60,9 @@ export const initialArtworkGroupSubmissionDraft: ArtworkGroupSubmissionDraft = {
   certificationAccepted: false,
   digitalSignature: '',
   group: initialArtworkGroupInfo,
-  promotionalUse: false,
   submitterEmail: '',
+  submitterFirstName: '',
+  submitterLastName: '',
 };
 
 const allowedFileTypes = new Set<string>(UPLOAD_FILE_TYPES);
@@ -101,6 +101,18 @@ export function validateArtworkGroupSubmission(
     errors.submitterEmail = `Use ${MAX_EMAIL_LEN} characters or less.`;
   } else if (!EMAIL_PATTERN.test(submitterEmail)) {
     errors.submitterEmail = 'Enter a valid email address.';
+  }
+
+  for (const [field, label] of [
+    ['submitterFirstName', 'First name'],
+    ['submitterLastName', 'Last name'],
+  ] as const) {
+    const value = draft[field].trim();
+    if (!value) {
+      errors[field] = `${label} is required.`;
+    } else if (value.length > MAX_NAME_LEN) {
+      errors[field] = `Use ${MAX_NAME_LEN} characters or less.`;
+    }
   }
 
   if (!draft.group.title.trim()) {
@@ -196,7 +208,8 @@ export function validateArtworkGroupSubmission(
   });
 
   if (!draft.certificationAccepted) {
-    errors.certificationAccepted = 'Certification is required.';
+    errors.certificationAccepted =
+      'Permissions and acknowledgements checkbox must be checked.';
   }
   if (requiresDigitalSignature) {
     if (!draft.digitalSignature.trim()) {
@@ -216,22 +229,13 @@ export function hasSubmissionErrors(errors: ArtworkGroupSubmissionErrors) {
   return Boolean(
     errors.root ||
     errors.submitterEmail ||
+    errors.submitterFirstName ||
+    errors.submitterLastName ||
     errors.certificationAccepted ||
     errors.digitalSignature ||
     (errors.group && Object.keys(errors.group).length > 0) ||
     (errors.artworks && Object.keys(errors.artworks).length > 0),
   );
-}
-
-// TODO: Replace with PDF parser when release form is created,
-// uncomment digest/encodedRelease (done for local testing)
-export async function createReleaseHash() {
-  // const encodedRelease = new TextEncoder().encode(RELEASE_TEXT);
-  // const digest = await crypto.subtle.digest('SHA-256', encodedRelease);
-  await Promise.resolve();
-  return Array.from(new Uint8Array(32))
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('');
 }
 
 export function createDigitalSignature(signature: string) {
@@ -242,8 +246,7 @@ export function toArtworkRequest(
   artwork: ArtworkDraft,
   file: File,
   artId: string,
-  releaseHash: string,
-  digitalSignature: string | undefined,
+  digitalSignature: string,
   group: ArtworkGroupInfo,
   promotionalUse: boolean,
   options: {
@@ -272,7 +275,6 @@ export function toArtworkRequest(
     notifications: group.notifications,
     promotional_use: promotionalUse,
     region: group.region.trim() || undefined,
-    release_hash: releaseHash,
     submitter_relationship:
       options.submitterRelationship ?? artwork.submitter_relationship,
     theme: group.theme.trim() || undefined,

@@ -34,7 +34,7 @@ export type ArtworkStatus =
     | 'deleted_by_user';
 
 // How the artwork was submitted relative to the submitter's account
-export type SubmitterRelationship = 'parent' | 'guardian' | 'teacher';
+export type SubmitterRelationship = 'legal_guardian' | 'adult_facilitator';
 
 // Full ART entity as stored in DynamoDB
 export interface ArtworkEntity {
@@ -44,7 +44,6 @@ export interface ArtworkEntity {
     status: ArtworkStatus;
     kudos_count: number;
     ts: number;          // Unix ts (seconds)
-    release_hash: string;       // SHA-256 hash of the legal release PDF text accepted at submission
     digital_signature?: string; // Submitter's typed signature captured at submission
     promotional_use: boolean;   // submitter opted into promotional/commercial use
     type: 'ART';
@@ -68,8 +67,7 @@ export interface ArtworkEntity {
 interface ArtworkSubmissionFields {
     art_id: string;
     file_type: UploadFileType;
-    release_hash: string;
-    digital_signature?: string;
+    digital_signature: string;
     promotional_use?: boolean;
     title?: string;
     description?: string;
@@ -84,6 +82,11 @@ interface ArtworkSubmissionFields {
     notifications?: boolean;
 }
 
+interface SubmitterIdentityFields {
+    submitter_first_name: string;
+    submitter_last_name: string;
+}
+
 // Request body for authenticated artwork submission (POST /user/artworks)
 // Identity comes from the auth token — no email/user_id needed in the body
 export type SubmitArtworkRequest = ArtworkSubmissionFields;
@@ -91,7 +94,7 @@ export type SubmitArtworkRequest = ArtworkSubmissionFields;
 // Request body for guest artwork submission (POST /anyone/artworks)
 // Caller provides either email (new guest or email lookup) or user_id (returning guest
 // who already has a virtual account saved locally). Exactly one must be present.
-export type GuestSubmitArtworkRequest = ArtworkSubmissionFields & (
+export type GuestSubmitArtworkRequest = ArtworkSubmissionFields & SubmitterIdentityFields & (
     | { email: string; user_id?: never }
     | { user_id: string; email?: never }
 );
@@ -172,8 +175,7 @@ export interface UpdateArtworkRequest {
 export interface SubmitArtworkToGroupRequest {
     art_id: string;
     file_type: UploadFileType;
-    release_hash: string;
-    digital_signature?: string;
+    digital_signature: string;
     promotional_use?: boolean;
     f_name?: string;
     l_name?: string;

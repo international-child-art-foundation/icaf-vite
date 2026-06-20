@@ -8,6 +8,7 @@ import { uploadToPresignedUrl } from '@/api/uploads';
 import { submitArtwork } from '@/api/user';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { ArtworkMuralWindow } from '@/modules/submissions/components/ArtworkMuralWindow';
+import { ArtworkConsent } from '@/modules/submissions/components/ArtworkConsent';
 import { ThemePicker } from '@/modules/submissions/components/ThemePicker';
 import {
   getSubmitArtworkPageCopy,
@@ -20,7 +21,6 @@ import type {
 import {
   createArtworkDraft,
   createDigitalSignature,
-  createReleaseHash,
   formatFileSize,
   getUploadFileType,
 } from '@/modules/submissions/utils/artworkGroupDraft';
@@ -32,6 +32,7 @@ import { Button } from '@/shared/components/ui/button';
 import {
   MAX_DESCRIPTION_LEN,
   MAX_ARTIST_AGE,
+  MAX_NAME_LEN,
   MAX_STRING_LEN,
   MAX_TITLE_LEN,
   S3_MAX_FILE_SIZE_BYTES,
@@ -43,9 +44,9 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   buildLoginRedirectPath,
   clearLastKnownUser,
+  getLastKnownUser,
   saveLastKnownUser,
 } from '@/shared/utils/authSession';
-import { ArtworkDisclaimer } from '@/modules/submissions/components/ArtworkDisclaimer';
 import type { SubmitArtworkSuccessState } from './SubmitArtworkSuccess';
 
 type SubmissionStatus = 'idle' | 'submitting';
@@ -57,9 +58,10 @@ type SubmitArtworkDraft = {
   country: string;
   digitalSignature: string;
   notifications: boolean;
-  promotionalUse: boolean;
   region: string;
   submitterEmail: string;
+  submitterFirstName: string;
+  submitterLastName: string;
 };
 
 type SubmitArtworkErrors = ArtworkGroupSubmissionErrors & {
@@ -78,15 +80,16 @@ const initialSubmitArtworkDraft: SubmitArtworkDraft = {
   country: '',
   digitalSignature: '',
   notifications: true,
-  promotionalUse: false,
   region: '',
   submitterEmail: '',
+  submitterFirstName: '',
+  submitterLastName: '',
 };
 
 function createDefaultArtworkDraft(): ArtworkDraft {
   return {
     ...createArtworkDraft(),
-    submitter_relationship: 'guardian',
+    submitter_relationship: 'legal_guardian',
   };
 }
 
@@ -125,6 +128,7 @@ function readPersistedDraft(): SubmitArtworkDraft {
   if (typeof window === 'undefined') return initialSubmitArtworkDraft;
 
   try {
+    const lastKnownUser = getLastKnownUser();
     const storedValue = window.localStorage.getItem(SUBMIT_ARTWORK_DRAFT_KEY);
     const parsedDraft: unknown = storedValue ? JSON.parse(storedValue) : {};
     const storedDraft = isRecord(parsedDraft) ? parsedDraft : {};
@@ -136,7 +140,7 @@ function readPersistedDraft(): SubmitArtworkDraft {
         description: readString(artwork.description),
         f_name: readString(artwork.f_name),
         id: createDefaultArtworkDraft().id,
-        submitter_relationship: 'guardian',
+        submitter_relationship: 'legal_guardian',
         title: readString(artwork.title),
       },
       certificationAccepted:
@@ -149,12 +153,16 @@ function readPersistedDraft(): SubmitArtworkDraft {
         typeof storedDraft.notifications === 'boolean'
           ? storedDraft.notifications
           : initialSubmitArtworkDraft.notifications,
-      promotionalUse:
-        typeof storedDraft.promotionalUse === 'boolean'
-          ? storedDraft.promotionalUse
-          : initialSubmitArtworkDraft.promotionalUse,
       region: readString(storedDraft.region),
       submitterEmail: readString(storedDraft.submitterEmail),
+      submitterFirstName: readString(
+        storedDraft.submitterFirstName,
+        lastKnownUser?.f_name ?? '',
+      ),
+      submitterLastName: readString(
+        storedDraft.submitterLastName,
+        lastKnownUser?.l_name ?? '',
+      ),
     };
   } catch {
     return initialSubmitArtworkDraft;
@@ -165,6 +173,8 @@ function hasSubmissionErrors(errors: SubmitArtworkErrors) {
   return Boolean(
     errors.root ||
     errors.submitterEmail ||
+    errors.submitterFirstName ||
+    errors.submitterLastName ||
     errors.certificationAccepted ||
     errors.digitalSignature ||
     errors.country ||
@@ -192,6 +202,18 @@ function validateSubmitArtwork(
     errors.submitterEmail = `Use ${MAX_EMAIL_LEN} characters or less.`;
   } else if (!EMAIL_PATTERN.test(submitterEmail)) {
     errors.submitterEmail = 'Enter a valid email address.';
+  }
+
+  for (const [field, label] of [
+    ['submitterFirstName', 'First name'],
+    ['submitterLastName', 'Last name'],
+  ] as const) {
+    const value = draft[field].trim();
+    if (!value) {
+      errors[field] = `${label} is required.`;
+    } else if (value.length > MAX_NAME_LEN) {
+      errors[field] = `Use ${MAX_NAME_LEN} characters or less.`;
+    }
   }
 
   if (!draft.country.trim()) {
@@ -240,7 +262,8 @@ function validateSubmitArtwork(
   }
 
   if (!draft.certificationAccepted) {
-    errors.certificationAccepted = 'Certification is required.';
+    errors.certificationAccepted =
+      'Permissions and acknowledgements checkbox must be checked.';
   }
   if (options.requiresDigitalSignature) {
     if (!draft.digitalSignature.trim()) {
@@ -259,7 +282,7 @@ function validateSubmitArtwork(
 }
 
 function getSubmitterFlow(value: string | undefined): SubmitterFlow {
-  return value === 'educator' ? 'educator' : 'parent';
+  return value === 'adult_facilitator' ? 'adult_facilitator' : 'legal_guardian';
 }
 
 function getFlowPath(flow: SubmitterFlow, nested = false) {
@@ -282,12 +305,12 @@ export function SubmitArtwork() {
   const navigate = useNavigate();
   const params = useParams();
   const submitterFlow = getSubmitterFlow(params.submitterFlow);
-  const isEducatorFlow = submitterFlow === 'educator';
+  const isAdultFacilitatorFlow = submitterFlow === 'adult_facilitator';
   const copy = getSubmitArtworkPageCopy(submitterFlow, 'single');
-  const artworkDetailsMode = isEducatorFlow ? 'basic' : 'full';
-  const submitterRelationship: SubmitterRelationship = isEducatorFlow
-    ? 'teacher'
-    : 'guardian';
+  const artworkDetailsMode = isAdultFacilitatorFlow ? 'basic' : 'full';
+  const submitterRelationship: SubmitterRelationship = isAdultFacilitatorFlow
+    ? 'adult_facilitator'
+    : 'legal_guardian';
   const artworkSectionRef = useRef<HTMLElement | null>(null);
   const [draft, setDraft] = useState(readPersistedDraft);
   const [file, setFile] = useState<File | undefined>();
@@ -397,7 +420,7 @@ export function SubmitArtwork() {
 
     const nextErrors = validateSubmitArtwork(draft, file, {
       artworkDetailsMode,
-      requiresDigitalSignature: !isEducatorFlow,
+      requiresDigitalSignature: true,
     });
     setErrors(nextErrors);
 
@@ -418,10 +441,7 @@ export function SubmitArtwork() {
     try {
       if (!file) throw new Error('A selected image is missing.');
 
-      const releaseHash = await createReleaseHash();
-      const digitalSignature = isEducatorFlow
-        ? undefined
-        : createDigitalSignature(draft.digitalSignature);
+      const digitalSignature = createDigitalSignature(draft.digitalSignature);
       const uploadFile = await createRotatedImageFile(file, imageRotation);
       const fileType = getUploadFileType(uploadFile);
       if (!fileType) throw new Error(`${uploadFile.name} is not supported.`);
@@ -448,9 +468,8 @@ export function SubmitArtwork() {
             : undefined,
         file_type: fileType,
         notifications: draft.notifications,
-        promotional_use: isEducatorFlow ? false : draft.promotionalUse,
+        promotional_use: !isAdultFacilitatorFlow,
         region: draft.region.trim() || undefined,
-        release_hash: releaseHash,
         digital_signature: digitalSignature,
         submitter_relationship: submitterRelationship,
         theme: themeParams.theme || undefined,
@@ -463,6 +482,8 @@ export function SubmitArtwork() {
         await submitGuestArtwork({
           ...artworkRequest,
           email: draft.submitterEmail.trim(),
+          submitter_first_name: draft.submitterFirstName.trim(),
+          submitter_last_name: draft.submitterLastName.trim(),
         });
       }
 
@@ -516,6 +537,8 @@ export function SubmitArtwork() {
           setDraft((current) => ({
             ...current,
             submitterEmail: auth.email,
+            submitterFirstName: auth.f_name ?? '',
+            submitterLastName: auth.l_name ?? '',
           }));
           return;
         }
@@ -588,6 +611,44 @@ export function SubmitArtwork() {
             </div>
 
             <section className="grid gap-4 sm:grid-cols-2">
+              <AccountTextField
+                error={errors.submitterFirstName}
+                label="Your first name"
+                maxLength={MAX_NAME_LEN}
+                name="submitterFirstName"
+                value={draft.submitterFirstName}
+                disabled={Boolean(authenticatedUser)}
+                className={
+                  authenticatedUser
+                    ? 'border-slate-300 bg-slate-100 text-slate-700 opacity-100'
+                    : undefined
+                }
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    submitterFirstName: event.target.value,
+                  }))
+                }
+              />
+              <AccountTextField
+                error={errors.submitterLastName}
+                label="Your last name"
+                maxLength={MAX_NAME_LEN}
+                name="submitterLastName"
+                value={draft.submitterLastName}
+                disabled={Boolean(authenticatedUser)}
+                className={
+                  authenticatedUser
+                    ? 'border-slate-300 bg-slate-100 text-slate-700 opacity-100'
+                    : undefined
+                }
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    submitterLastName: event.target.value,
+                  }))
+                }
+              />
               <div className="sm:col-span-2">
                 <AccountTextField
                   error={errors.submitterEmail}
@@ -704,70 +765,32 @@ export function SubmitArtwork() {
               />
             </section>
 
-            {!isEducatorFlow && <ArtworkDisclaimer />}
+            <ArtworkConsent
+              checked={draft.certificationAccepted}
+              error={errors.certificationAccepted}
+              flow={submitterFlow}
+              onChange={(event) =>
+                setDraft((current) => ({
+                  ...current,
+                  certificationAccepted: event.target.checked,
+                }))
+              }
+            />
 
-            <label className="flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-              <input
-                checked={draft.certificationAccepted}
-                className="accent-secondary-blue mt-1 h-4 w-4"
-                name="certificationAccepted"
-                type="checkbox"
-                onChange={(event) =>
-                  setDraft((current) => ({
-                    ...current,
-                    certificationAccepted: event.target.checked,
-                  }))
-                }
-              />
-              <span>
-                I certify that I have the right to submit this artwork to ICAF
-                on behalf of its creator.
-                {errors.certificationAccepted && (
-                  <span className="text-tertiary-red block text-xs font-semibold">
-                    {errors.certificationAccepted}
-                  </span>
-                )}
-              </span>
-            </label>
-
-            {!isEducatorFlow && (
-              <>
-                <div className="">
-                  <AccountTextField
-                    error={errors.digitalSignature}
-                    label="Digital signature"
-                    placeholder="Your full legal name"
-                    maxLength={200}
-                    name="digitalSignature"
-                    value={draft.digitalSignature}
-                    onChange={(event) =>
-                      setDraft((current) => ({
-                        ...current,
-                        digitalSignature: event.target.value,
-                      }))
-                    }
-                  />
-                </div>
-
-                <label className="flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-                  <input
-                    checked={draft.promotionalUse}
-                    className="accent-secondary-blue mt-1 h-4 w-4"
-                    name="promotionalUse"
-                    type="checkbox"
-                    onChange={(event) =>
-                      setDraft((current) => ({
-                        ...current,
-                        promotionalUse: event.target.checked,
-                      }))
-                    }
-                  />
-                  <span>
-                    I allow ICAF to use this artwork for promotional purposes.
-                  </span>
-                </label>
-              </>
-            )}
+            <AccountTextField
+              error={errors.digitalSignature}
+              label="Digital signature"
+              placeholder="Your full legal name"
+              maxLength={200}
+              name="digitalSignature"
+              value={draft.digitalSignature}
+              onChange={(event) =>
+                setDraft((current) => ({
+                  ...current,
+                  digitalSignature: event.target.value,
+                }))
+              }
+            />
 
             {hasOverageArtwork && (
               <div

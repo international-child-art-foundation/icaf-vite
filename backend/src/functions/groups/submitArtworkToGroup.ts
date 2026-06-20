@@ -10,7 +10,6 @@ import {
   SubmitterRelationship,
   UPLOAD_FILE_TYPES,
   validateOptionalArtworkFields,
-  SHA256_HEX,
   isValidUUID,
 } from "@icaf/shared";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
@@ -25,7 +24,6 @@ import { hasUploadedArtworkImage } from "../shared/artworkUpload";
 interface SubmitArtworkToGroupBody {
   art_id: string;
   file_type: string;
-  release_hash: string;
   digital_signature?: string;
   promotional_use?: boolean;
   f_name?: string;
@@ -88,9 +86,6 @@ export const handler = async (
     if (typeof body.art_id !== "string" || !isValidUUID(body.art_id)) {
       return CommonErrors.badRequest("art_id must be a valid UUID");
     }
-    if (!body.release_hash?.trim() || !SHA256_HEX.test(body.release_hash)) {
-      return CommonErrors.badRequest("release_hash must be a valid SHA-256 hex string");
-    }
     if (body.digital_signature !== undefined) {
       if (typeof body.digital_signature !== "string" || !body.digital_signature.trim()) {
         return CommonErrors.badRequest("digital_signature, if provided, must be a non-empty string");
@@ -132,11 +127,10 @@ export const handler = async (
                 status: "pending_review" as const,
                 kudos_count: 0,
                 ts: nowSeconds,
-                release_hash: body.release_hash.trim(),
                 ...(body.digital_signature && {
                   digital_signature: body.digital_signature.trim(),
                 }),
-                promotional_use: body.promotional_use ?? false,
+                promotional_use: body.submitter_relationship === "legal_guardian",
                 type: "ART",
                 notifications: false,
                 ...(body.f_name && { f_name: body.f_name }),

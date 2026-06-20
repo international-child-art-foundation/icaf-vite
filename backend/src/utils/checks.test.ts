@@ -19,7 +19,6 @@ const baseArtwork: ArtworkEntity = {
   status: 'approved',
   kudos_count: 0,
   ts: 1000,
-  release_hash: 'a'.repeat(64),
   promotional_use: false,
   type: 'ART',
 };

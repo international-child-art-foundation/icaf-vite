@@ -66,11 +66,10 @@ export const handler = async (
           status: "pending_review" as const,
           kudos_count: 0,
           ts: nowSeconds,
-          release_hash: body.release_hash.trim(),
           ...(body.digital_signature && {
             digital_signature: body.digital_signature.trim(),
           }),
-          promotional_use: body.promotional_use ?? false,
+          promotional_use: body.submitter_relationship === "legal_guardian",
           type: "ART",
           notifications: body.group_id ? false : body.notifications ?? false,
           // optional fields

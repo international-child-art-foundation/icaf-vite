@@ -83,6 +83,8 @@ export type CreateGroupBaseRequest = SubmitGroupRequest & {
 
 export type GuestCreateGroupRequest = CreateGroupBaseRequest & {
     email: string;
+    submitter_first_name: string;
+    submitter_last_name: string;
 };
 
 // Identity comes from auth cookies.

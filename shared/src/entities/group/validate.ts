@@ -6,9 +6,10 @@ import {
     GROUP_MAX_MEMBERS,
 } from './constants.js';
 import { isValidEmail, isValidUUID } from '../../utils/string.js';
-import { SHA256_HEX, UPLOAD_FILE_TYPES } from '../art/constants.js';
+import { UPLOAD_FILE_TYPES } from '../art/constants.js';
 import { validateOptionalArtworkFields } from '../art/validate.js';
 import { isValidThemeSk } from '../theme/validate.js';
+import { MAX_NAME_LEN } from '../user/constants.js';
 
 const MAX_EMAIL_LEN = 254;
 
@@ -74,6 +75,19 @@ export function validateCreateGroupRequest(data: CreateGroupRequest, identityReq
         if (!hasEmail) {
             errors.push('email is required');
         }
+
+        const identityData = data as {
+            submitter_first_name?: unknown;
+            submitter_last_name?: unknown;
+        };
+        for (const field of ['submitter_first_name', 'submitter_last_name'] as const) {
+            const value = identityData[field];
+            if (typeof value !== 'string' || !value.trim()) {
+                errors.push(`${field} is required`);
+            } else if (value.length > MAX_NAME_LEN) {
+                errors.push(`${field} must be ${MAX_NAME_LEN} characters or less`);
+            }
+        }
     }
 
     if (hasEmail) {
@@ -106,13 +120,10 @@ export function validateCreateGroupRequest(data: CreateGroupRequest, identityReq
             errors.push(`artworks[${index}].file_type must be one of: ${UPLOAD_FILE_TYPES.join(', ')}`);
         }
 
-        if (!artwork.release_hash?.trim() || !SHA256_HEX.test(artwork.release_hash)) {
-            errors.push(`artworks[${index}].release_hash must be a valid SHA-256 hex string`);
-        }
-        if (artwork.digital_signature !== undefined) {
-            if (typeof artwork.digital_signature !== 'string' || !artwork.digital_signature.trim()) {
-                errors.push(`artworks[${index}].digital_signature, if provided, must be a non-empty string`);
-            } else if (artwork.digital_signature.length > GROUP_MAX_STRING_LEN) {
+        if (typeof artwork.digital_signature !== 'string' || !artwork.digital_signature.trim()) {
+            errors.push(`artworks[${index}].digital_signature is required`);
+        } else {
+            if (artwork.digital_signature.length > GROUP_MAX_STRING_LEN) {
                 errors.push(`artworks[${index}].digital_signature must be ${GROUP_MAX_STRING_LEN} characters or less`);
             }
         }

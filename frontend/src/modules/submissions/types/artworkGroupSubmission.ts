@@ -26,8 +26,9 @@ export type ArtworkGroupSubmissionDraft = {
   certificationAccepted: boolean;
   digitalSignature: string;
   group: ArtworkGroupInfo;
-  promotionalUse: boolean;
   submitterEmail: string;
+  submitterFirstName: string;
+  submitterLastName: string;
 };
 
 export type StoredArtworkGroupSubmissionDraft = Pick<
@@ -35,8 +36,9 @@ export type StoredArtworkGroupSubmissionDraft = Pick<
   | 'certificationAccepted'
   | 'digitalSignature'
   | 'group'
-  | 'promotionalUse'
   | 'submitterEmail'
+  | 'submitterFirstName'
+  | 'submitterLastName'
 >;
 
 export type ArtworkGroupSubmissionErrors = {
@@ -49,4 +51,6 @@ export type ArtworkGroupSubmissionErrors = {
   group?: Partial<Record<keyof ArtworkGroupInfo, string>>;
   root?: string;
   submitterEmail?: string;
+  submitterFirstName?: string;
+  submitterLastName?: string;
 };

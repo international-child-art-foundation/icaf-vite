@@ -5,7 +5,7 @@ import { Button } from '@/shared/components/ui/button';
 import { cn } from '@/utils/utils';
 import { PageBottomSpacer } from '@/modules/content/components/shared/PageBottomSpacer';
 
-type SubmitterRole = 'educator' | 'parent';
+type SubmitterRole = 'adult_facilitator' | 'legal_guardian';
 type SubmissionQuantity = 'solo' | 'group';
 
 type ChoiceCardProps<Value extends string> = {
@@ -26,7 +26,7 @@ const roleChoices = [
       'I am a teacher, program leader, coach, or another adult submitting artwork for children in my care.',
     icon: <BookOpen aria-hidden="true" className="h-9 w-9" />,
     label: 'I work with children',
-    value: 'educator',
+    value: 'adult_facilitator',
   },
   {
     colorClassName: 'bg-rose-50 text-rose-700 ring-rose-200',
@@ -34,7 +34,7 @@ const roleChoices = [
       'I am submitting artwork for my own children as their parent or legal guardian.',
     icon: <ShieldCheck aria-hidden="true" className="h-9 w-9" />,
     label: 'I am a parent or guardian',
-    value: 'parent',
+    value: 'legal_guardian',
   },
 ] as const;
 
@@ -58,16 +58,8 @@ const quantityChoices = [
 
 function normalizeRole(value: string | null): SubmitterRole | null {
   const normalizedValue = value?.toLowerCase();
-  if (
-    normalizedValue === 'educator' ||
-    normalizedValue === 'teacher' ||
-    normalizedValue === 'leader'
-  ) {
-    return 'educator';
-  }
-  if (normalizedValue === 'parent' || normalizedValue === 'guardian') {
-    return 'parent';
-  }
+  if (normalizedValue === 'adult_facilitator') return 'adult_facilitator';
+  if (normalizedValue === 'legal_guardian') return 'legal_guardian';
   return null;
 }
 

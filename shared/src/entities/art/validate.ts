@@ -5,12 +5,12 @@ import {
     MAX_ARTIST_AGE,
     MAX_DESCRIPTION_LEN,
     MAX_STRING_LEN,
-    SHA256_HEX,
     FORBIDDEN_CHARS_SINGLELINE,
     FORBIDDEN_CHARS_MULTILINE,
 } from './constants.js';
 import { isValidEmail, isValidUUID } from '../../utils/string.js';
 import { isValidThemeSk } from '../theme/validate.js';
+import { MAX_NAME_LEN } from '../user/constants.js';
 
 const MAX_EMAIL_LEN = 254;
 
@@ -93,7 +93,7 @@ export function validateOptionalArtworkFields(data: {
     }
 
     if (data.submitter_relationship !== undefined) {
-        const valid: SubmitterRelationship[] = ['parent', 'guardian', 'teacher'];
+        const valid: SubmitterRelationship[] = ['legal_guardian', 'adult_facilitator'];
         if (!valid.includes(data.submitter_relationship)) {
             errors.push(`submitter_relationship must be one of: ${valid.join(', ')}`);
         }
@@ -139,14 +139,10 @@ export function validateSubmissionData(data: SubmitArtworkRequest): string[] {
         errors.push('promotional_use, if provided, must be a boolean');
     }
 
-    if (!data.release_hash || !SHA256_HEX.test(data.release_hash)) {
-        errors.push('release_hash must be a valid SHA-256 hex string');
-    }
-
-    if (data.digital_signature !== undefined) {
-        if (typeof data.digital_signature !== 'string' || !data.digital_signature.trim()) {
-            errors.push('digital_signature, if provided, must be a non-empty string');
-        } else if (data.digital_signature.length > MAX_STRING_LEN) {
+    if (typeof data.digital_signature !== 'string' || !data.digital_signature.trim()) {
+        errors.push('digital_signature is required');
+    } else {
+        if (data.digital_signature.length > MAX_STRING_LEN) {
             errors.push(`digital_signature must be ${MAX_STRING_LEN} characters or less`);
         } else if (FORBIDDEN_CHARS_SINGLELINE.test(data.digital_signature)) {
             errors.push('digital_signature contains invalid characters');
@@ -163,6 +159,17 @@ export function validateUpdateArtworkRequest(data: UpdateArtworkRequest): string
 // Guest artwork submission — requires either email or user_id (not both)
 export function validateGuestSubmitArtworkRequest(data: GuestSubmitArtworkRequest): string[] {
     const errors: string[] = [];
+
+    for (const field of ['submitter_first_name', 'submitter_last_name'] as const) {
+        const value = data[field];
+        if (typeof value !== 'string' || !value.trim()) {
+            errors.push(`${field} is required`);
+        } else if (value.length > MAX_NAME_LEN) {
+            errors.push(`${field} must be ${MAX_NAME_LEN} characters or less`);
+        } else if (FORBIDDEN_CHARS_SINGLELINE.test(value)) {
+            errors.push(`${field} contains invalid characters`);
+        }
+    }
 
     const hasEmail = data.email !== undefined;
     const hasUserId = data.user_id !== undefined;

@@ -1,6 +1,6 @@
 import { GROUP_MAX_MEMBERS } from '@icaf/shared';
 
-export type SubmitterFlow = 'educator' | 'parent';
+export type SubmitterFlow = 'adult_facilitator' | 'legal_guardian';
 export type SubmissionQuantity = 'single' | 'group';
 
 export type SubmitArtworkHeaderCopy = {
@@ -15,8 +15,8 @@ export type SubmitArtworkPageCopy = SubmitArtworkHeaderCopy & {
 };
 
 const submitterKickers = {
-  educator: 'Educators and group leaders',
-  parent: 'Parents and legal guardians',
+  adult_facilitator: 'Educators and group leaders',
+  legal_guardian: 'Parents and legal guardians',
 } as const satisfies Record<SubmitterFlow, string>;
 
 const quantityTitles = {
@@ -26,13 +26,13 @@ const quantityTitles = {
 
 const submitArtworkDescriptions = {
   single: {
-    educator: 'Submit one artwork for a child in your care.',
-    parent: 'Submit one artwork for your child.',
+    adult_facilitator: 'Submit one artwork for a child in your care.',
+    legal_guardian: 'Submit one artwork for your child.',
   },
   group: {
-    educator:
+    adult_facilitator:
       'Submit several artworks together for a class, program, or group in your care.',
-    parent:
+    legal_guardian:
       'Submit several artworks together for children in your family or care.',
   },
 } as const satisfies Record<SubmissionQuantity, Record<SubmitterFlow, string>>;

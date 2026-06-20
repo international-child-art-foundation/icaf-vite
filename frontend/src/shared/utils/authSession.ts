@@ -39,6 +39,8 @@ export function getLastKnownUser(): LastKnownUser | null {
       user_id: parsed.user_id,
       email: parsed.email,
       role: parsed.role,
+      f_name: typeof parsed.f_name === 'string' ? parsed.f_name : undefined,
+      l_name: typeof parsed.l_name === 'string' ? parsed.l_name : undefined,
       savedAt: parsed.savedAt,
     };
   } catch {

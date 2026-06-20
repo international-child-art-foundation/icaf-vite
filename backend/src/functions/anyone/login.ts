@@ -64,6 +64,8 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
         user_id: user?.user_id ?? payload["sub"],
         email: user?.email ?? payloadEmail,
         role: user?.role ?? payload["custom:role"] ?? "user",
+        f_name: user?.f_name,
+        l_name: user?.l_name,
       }),
       headers: {
         ...COMMON_HEADERS,

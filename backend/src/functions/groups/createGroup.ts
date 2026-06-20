@@ -61,7 +61,12 @@ export const handler = async (
         return CommonErrors.badRequest("email is required");
       }
 
-      const userResult = await getOrCreateVirtualUser(body.email, nowSeconds);
+      const userResult = await getOrCreateVirtualUser(
+        body.email,
+        nowSeconds,
+        body.submitter_first_name,
+        body.submitter_last_name,
+      );
 
       if (!userResult.ok) return userResult.response;
       userId = userResult.user.user_id;
@@ -96,11 +101,10 @@ export const handler = async (
                 status: Status.Pending,
                 kudos_count: 0,
                 ts: nowSeconds,
-                release_hash: artwork.release_hash.trim(),
                 ...(artwork.digital_signature && {
                   digital_signature: artwork.digital_signature.trim(),
                 }),
-                promotional_use: artwork.promotional_use ?? false,
+                promotional_use: artwork.submitter_relationship === "legal_guardian",
                 type: "ART",
                 notifications: false,
                 ...(artwork.f_name && { f_name: artwork.f_name }),

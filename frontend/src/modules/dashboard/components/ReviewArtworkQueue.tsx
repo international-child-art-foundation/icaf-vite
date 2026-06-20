@@ -34,9 +34,8 @@ type ArtworkEdits = {
 };
 
 const RELATIONSHIPS: SubmitterRelationship[] = [
-  'parent',
-  'guardian',
-  'teacher',
+  'legal_guardian',
+  'adult_facilitator',
 ];
 
 function modeToStatus(mode: QueueMode): ArtworkStatus {

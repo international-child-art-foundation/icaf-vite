@@ -4,20 +4,22 @@ import {
   COMMON_HEADERS,
   HTTP_STATUS,
 } from "@icaf/shared";
-import { getOptionalAuth } from "../../utils/auth";
+import { getCurrentUser } from "../../utils/auth";
 
 export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayResponse> => {
-  const auth = await getOptionalAuth(event);
+  const currentUser = await getCurrentUser(event);
 
   return {
     statusCode: HTTP_STATUS.OK,
     body: JSON.stringify(
-      auth
+      currentUser.ok
         ? {
             authenticated: true,
-            user_id: auth.user_id,
-            email: auth.email,
-            role: auth.role,
+            user_id: currentUser.user.user_id,
+            email: currentUser.user.email,
+            role: currentUser.auth.role,
+            f_name: currentUser.user.f_name,
+            l_name: currentUser.user.l_name,
           }
         : { authenticated: false },
     ),

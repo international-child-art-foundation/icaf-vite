@@ -31,7 +31,10 @@ const ALLOWED_UPDATE_FIELDS = new Set([
   "theme",
   "notifications",
 ]);
-const RELATIONSHIPS: SubmitterRelationship[] = ["parent", "guardian", "teacher"];
+const RELATIONSHIPS: SubmitterRelationship[] = [
+  "legal_guardian",
+  "adult_facilitator",
+];
 type AdminArtworkUpdateRequest = Record<string, unknown>;
 
 function isRemoval(value: unknown) {

@@ -117,6 +117,8 @@ export const handler = async (
           SK: "PROFILE",
           user_id: userId,
           email,
+          f_name: body.submitter_first_name.trim(),
+          l_name: body.submitter_last_name.trim(),
           is_virtual: true,
           ts: nowSeconds,
           banned: false,
@@ -152,6 +154,23 @@ export const handler = async (
           ConditionExpression: "attribute_not_exists(PK)",
         }),
       );
+    } else if (!user.f_name || !user.l_name) {
+      const fName = body.submitter_first_name.trim();
+      const lName = body.submitter_last_name.trim();
+      await dynamodb.send(
+        new UpdateCommand({
+          TableName: TABLE_NAME,
+          Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
+          UpdateExpression:
+            "SET f_name = if_not_exists(f_name, :fName), l_name = if_not_exists(l_name, :lName)",
+          ExpressionAttributeValues: {
+            ":fName": fName,
+            ":lName": lName,
+          },
+        }),
+      );
+      user.f_name ??= fName;
+      user.l_name ??= lName;
     }
 
     await dynamodb.send(
@@ -166,11 +185,10 @@ export const handler = async (
           status: "pending_review" as const,
           kudos_count: 0,
           ts: nowSeconds,
-          release_hash: body.release_hash.trim(),
           ...(body.digital_signature && {
             digital_signature: body.digital_signature.trim(),
           }),
-          promotional_use: body.promotional_use ?? false,
+          promotional_use: body.submitter_relationship === "legal_guardian",
           type: "ART",
           notifications: body.group_id ? false : body.notifications ?? false,
           // optional fields

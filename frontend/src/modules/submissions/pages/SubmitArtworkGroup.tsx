@@ -20,6 +20,7 @@ import {
 import { uploadToPresignedUrl } from '@/api/uploads';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { ArtworkMuralWindow } from '@/modules/submissions/components/ArtworkMuralWindow';
+import { ArtworkConsent } from '@/modules/submissions/components/ArtworkConsent';
 import { CompactTextarea } from '@/modules/submissions/components/CompactTextarea';
 import { ThemePicker } from '@/modules/submissions/components/ThemePicker';
 import {
@@ -37,7 +38,6 @@ import {
   ARTWORK_GROUP_DRAFT_KEY,
   createArtworkDraft,
   createDigitalSignature,
-  createReleaseHash,
   getUploadFileType,
   hasSubmissionErrors,
   initialArtworkGroupSubmissionDraft,
@@ -52,6 +52,7 @@ import { Button } from '@/shared/components/ui/button';
 import {
   GROUP_MAX_MEMBERS,
   MAX_ARTIST_AGE,
+  MAX_NAME_LEN,
   isValidThemeSk,
   type SubmitterRelationship,
 } from '@icaf/shared';
@@ -59,9 +60,9 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   buildLoginRedirectPath,
   clearLastKnownUser,
+  getLastKnownUser,
   saveLastKnownUser,
 } from '@/shared/utils/authSession';
-import { ArtworkDisclaimer } from '@/modules/submissions/components/ArtworkDisclaimer';
 import type { SubmitArtworkSuccessState } from './SubmitArtworkSuccess';
 
 type SubmissionStatus = 'idle' | 'submitting';
@@ -98,8 +99,9 @@ const initialPersistedDraft: StoredArtworkGroupSubmissionDraft = {
     initialArtworkGroupSubmissionDraft.certificationAccepted,
   digitalSignature: initialArtworkGroupSubmissionDraft.digitalSignature,
   group: initialArtworkGroupSubmissionDraft.group,
-  promotionalUse: initialArtworkGroupSubmissionDraft.promotionalUse,
   submitterEmail: initialArtworkGroupSubmissionDraft.submitterEmail,
+  submitterFirstName: initialArtworkGroupSubmissionDraft.submitterFirstName,
+  submitterLastName: initialArtworkGroupSubmissionDraft.submitterLastName,
 };
 
 function getSubmitError(error: unknown): string {
@@ -191,6 +193,7 @@ function readPersistedDraft(): StoredArtworkGroupSubmissionDraft {
   if (typeof window === 'undefined') return initialPersistedDraft;
 
   try {
+    const lastKnownUser = getLastKnownUser();
     const storedValue = window.localStorage.getItem(ARTWORK_GROUP_DRAFT_KEY);
     const parsedDraft: unknown = storedValue ? JSON.parse(storedValue) : {};
     const storedDraft = isRecord(parsedDraft) ? parsedDraft : {};
@@ -202,13 +205,17 @@ function readPersistedDraft(): StoredArtworkGroupSubmissionDraft {
           : initialPersistedDraft.certificationAccepted,
       digitalSignature: '',
       group: readStoredGroup(storedDraft.group),
-      promotionalUse:
-        typeof storedDraft.promotionalUse === 'boolean'
-          ? storedDraft.promotionalUse
-          : initialPersistedDraft.promotionalUse,
       submitterEmail: readString(
         storedDraft.submitterEmail,
         initialPersistedDraft.submitterEmail,
+      ),
+      submitterFirstName: readString(
+        storedDraft.submitterFirstName,
+        lastKnownUser?.f_name ?? initialPersistedDraft.submitterFirstName,
+      ),
+      submitterLastName: readString(
+        storedDraft.submitterLastName,
+        lastKnownUser?.l_name ?? initialPersistedDraft.submitterLastName,
       ),
     };
   } catch {
@@ -217,7 +224,9 @@ function readPersistedDraft(): StoredArtworkGroupSubmissionDraft {
 }
 
 function getSubmitterFlow(value: string | undefined): SubmitterFlow {
-  return value === 'parent' ? 'parent' : 'educator';
+  return value === 'legal_guardian'
+    ? 'legal_guardian'
+    : 'adult_facilitator';
 }
 
 function getFlowPath(flow: SubmitterFlow, nested = false) {
@@ -244,15 +253,15 @@ export function SubmitArtworkGroup({
   const navigate = useNavigate();
   const params = useParams();
   const submitterFlow = getSubmitterFlow(params.submitterFlow);
-  const isEducatorFlow = submitterFlow === 'educator';
+  const isAdultFacilitatorFlow = submitterFlow === 'adult_facilitator';
   const copy = {
     ...getSubmitArtworkPageCopy(submitterFlow, 'group'),
     ...copyOverrides,
   };
-  const artworkDetailsMode = isEducatorFlow ? 'basic' : 'full';
-  const submitterRelationship: SubmitterRelationship = isEducatorFlow
-    ? 'teacher'
-    : 'guardian';
+  const artworkDetailsMode = isAdultFacilitatorFlow ? 'basic' : 'full';
+  const submitterRelationship: SubmitterRelationship = isAdultFacilitatorFlow
+    ? 'adult_facilitator'
+    : 'legal_guardian';
   const artworkSectionRef = useRef<HTMLElement | null>(null);
   const [draft, setDraft] = useState(readPersistedDraft);
   const [artworks, setArtworks] = useState<ArtworkDraft[]>([
@@ -383,8 +392,9 @@ export function SubmitArtworkGroup({
         ...current.group,
         [name]: value,
       },
-      promotionalUse: current.promotionalUse,
       submitterEmail: current.submitterEmail,
+      submitterFirstName: current.submitterFirstName,
+      submitterLastName: current.submitterLastName,
     }));
   }
 
@@ -555,7 +565,7 @@ export function SubmitArtworkGroup({
 
     const nextErrors = validateArtworkGroupSubmission(submissionDraft, files, {
       artworkDetailsMode,
-      requiresDigitalSignature: !isEducatorFlow,
+      requiresDigitalSignature: true,
     });
     setErrors(nextErrors);
 
@@ -567,10 +577,7 @@ export function SubmitArtworkGroup({
 
   async function handleAsyncSubmit() {
     try {
-      const releaseHash = await createReleaseHash();
-      const digitalSignature = isEducatorFlow
-        ? undefined
-        : createDigitalSignature(draft.digitalSignature);
+      const digitalSignature = createDigitalSignature(draft.digitalSignature);
       const uploadFiles = await Promise.all(
         artworks.map((artwork) => {
           const file = files[artwork.id];
@@ -616,10 +623,9 @@ export function SubmitArtworkGroup({
           artwork,
           file,
           upload.art_id,
-          releaseHash,
           digitalSignature,
           effectiveGroup,
-          isEducatorFlow ? false : draft.promotionalUse,
+          !isAdultFacilitatorFlow,
           {
             artworkDetailsMode,
             submitterRelationship,
@@ -646,6 +652,8 @@ export function SubmitArtworkGroup({
         await createGuestGroup({
           ...groupRequest,
           email: draft.submitterEmail.trim(),
+          submitter_first_name: draft.submitterFirstName.trim(),
+          submitter_last_name: draft.submitterLastName.trim(),
         });
       }
 
@@ -697,6 +705,8 @@ export function SubmitArtworkGroup({
           setDraft((current) => ({
             ...current,
             submitterEmail: auth.email,
+            submitterFirstName: auth.f_name ?? '',
+            submitterLastName: auth.l_name ?? '',
           }));
           return;
         }
@@ -768,6 +778,44 @@ export function SubmitArtworkGroup({
             </div>
 
             <section className="grid gap-4 sm:grid-cols-2">
+              <AccountTextField
+                error={errors.submitterFirstName}
+                label="Your first name"
+                maxLength={MAX_NAME_LEN}
+                name="submitterFirstName"
+                value={draft.submitterFirstName}
+                disabled={Boolean(authenticatedUser)}
+                className={
+                  authenticatedUser
+                    ? 'border-slate-300 bg-slate-100 text-slate-700 opacity-100'
+                    : undefined
+                }
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    submitterFirstName: event.target.value,
+                  }))
+                }
+              />
+              <AccountTextField
+                error={errors.submitterLastName}
+                label="Your last name"
+                maxLength={MAX_NAME_LEN}
+                name="submitterLastName"
+                value={draft.submitterLastName}
+                disabled={Boolean(authenticatedUser)}
+                className={
+                  authenticatedUser
+                    ? 'border-slate-300 bg-slate-100 text-slate-700 opacity-100'
+                    : undefined
+                }
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    submitterLastName: event.target.value,
+                  }))
+                }
+              />
               <div className="sm:col-span-2">
                 <AccountTextField
                   error={errors.submitterEmail}
@@ -900,72 +948,36 @@ export function SubmitArtworkGroup({
                 onRotateArtwork={(artworkId) => void rotateArtwork(artworkId)}
               />
             </section>
-            {!isEducatorFlow && <ArtworkDisclaimer />}
-
-            <label className="mt-5 flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-              <input
+            <div className="mt-5">
+              <ArtworkConsent
                 checked={draft.certificationAccepted}
-                className="accent-secondary-blue mt-1 h-4 w-4"
-                name="certificationAccepted"
-                type="checkbox"
+                error={errors.certificationAccepted}
+                flow={submitterFlow}
                 onChange={(event) =>
                   setDraft((current) => ({
+                    ...current,
                     certificationAccepted: event.target.checked,
-                    digitalSignature: current.digitalSignature,
-                    group: current.group,
-                    promotionalUse: current.promotionalUse,
-                    submitterEmail: current.submitterEmail,
                   }))
                 }
               />
-              <span>
-                I certify that I have the right to submit these artworks to ICAF
-                on behalf of their creators.
-                {errors.certificationAccepted && (
-                  <span className="text-tertiary-red mt-1 block text-xs font-semibold">
-                    {errors.certificationAccepted}
-                  </span>
-                )}
-              </span>
-            </label>
+            </div>
 
-            {!isEducatorFlow && (
-              <>
-                <div className="mt-3">
-                  <AccountTextField
-                    error={errors.digitalSignature}
-                    label="Digital signature"
-                    maxLength={200}
-                    name="digitalSignature"
-                    value={draft.digitalSignature}
-                    onChange={(event) =>
-                      setDraft((current) => ({
-                        ...current,
-                        digitalSignature: event.target.value,
-                      }))
-                    }
-                  />
-                </div>
-
-                <label className="mt-3 flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-                  <input
-                    checked={draft.promotionalUse}
-                    className="accent-secondary-blue mt-1 h-4 w-4"
-                    name="promotionalUse"
-                    type="checkbox"
-                    onChange={(event) =>
-                      setDraft((current) => ({
-                        ...current,
-                        promotionalUse: event.target.checked,
-                      }))
-                    }
-                  />
-                  <span>
-                    I allow ICAF to use these artworks for promotional purposes.
-                  </span>
-                </label>
-              </>
-            )}
+            <div className="mt-3">
+              <AccountTextField
+                error={errors.digitalSignature}
+                label="Digital signature"
+                placeholder="Your full legal name"
+                maxLength={200}
+                name="digitalSignature"
+                value={draft.digitalSignature}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    digitalSignature: event.target.value,
+                  }))
+                }
+              />
+            </div>
 
             <label className="mt-3 flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
               <input

@@ -20,6 +20,7 @@ import type {
 } from '@icaf/shared';
 
 import {
+  ApiError,
   apiRequest,
   hasApiMessage,
   hasStringProperty,
@@ -86,10 +87,29 @@ export function logout(): Promise<LogoutResponse> {
   });
 }
 
-export function getAuthStatus(): Promise<AuthStatusResponse> {
+function requestAuthStatus(): Promise<AuthStatusResponse> {
   return apiRequest<AuthStatusResponse>(apiEndpoints.auth.status, {
     validate: isAuthStatusResponse,
   });
+}
+
+export async function getAuthStatus(): Promise<AuthStatusResponse> {
+  const auth = await requestAuthStatus();
+  if (auth.authenticated) return auth;
+
+  try {
+    await apiRequest<{ message: string }>(apiEndpoints.auth.refresh, {
+      method: 'POST',
+      validate: isMessageResponse,
+    });
+  } catch (error) {
+    // A missing, expired, or revoked refresh token means the user is simply
+    // signed out. Surface other failures so an outage is not mistaken for one.
+    if (error instanceof ApiError && error.status === 401) return auth;
+    throw error;
+  }
+
+  return requestAuthStatus();
 }
 
 export function defaultRegistration(

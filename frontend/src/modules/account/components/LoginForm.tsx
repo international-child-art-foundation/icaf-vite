@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { LockKeyhole, Mail } from 'lucide-react';
 import type { LoginResponse } from '@icaf/shared';
 import { login } from '@/api/auth';
-import { getApiErrorMessage } from '@/api/client';
+import { ApiError, getApiErrorMessage } from '@/api/client';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { loginTextFields } from '@/modules/account/data/loginFields';
 import type {
@@ -31,8 +31,23 @@ const fieldIcons: Record<LoginFieldName, ReactNode> = {
   password: <LockKeyhole aria-hidden="true" className="h-4 w-4" />,
 };
 
-function getSubmitError(error: unknown): string {
-  return getApiErrorMessage(error, 'Login failed. Please try again.');
+type SubmitError = {
+  message: string;
+  showPasswordReset: boolean;
+};
+
+function getSubmitError(error: unknown): SubmitError {
+  if (error instanceof ApiError && error.status === 401) {
+    return {
+      message: "We couldn't sign you in. Check your email and password, or",
+      showPasswordReset: true,
+    };
+  }
+
+  return {
+    message: getApiErrorMessage(error, 'Login failed. Please try again.'),
+    showPasswordReset: false,
+  };
 }
 
 export const LoginForm = ({ initialEmail = '', onSuccess }: LoginFormProps) => {
@@ -47,7 +62,7 @@ export const LoginForm = ({ initialEmail = '', onSuccess }: LoginFormProps) => {
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>(
     'idle',
   );
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<SubmitError | null>(null);
 
   const isSubmitting = status === 'submitting';
 
@@ -125,10 +140,22 @@ export const LoginForm = ({ initialEmail = '', onSuccess }: LoginFormProps) => {
 
         {submitError && (
           <div
-            className="text-tertiary-red mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold"
+            className={`mb-6 rounded-lg border px-4 py-3 text-sm font-semibold ${
+              submitError.showPasswordReset
+                ? 'border-amber-200 bg-amber-50 text-amber-950'
+                : 'text-tertiary-red border-red-200 bg-red-50'
+            }`}
             role="alert"
           >
-            {submitError}
+            {submitError.message}{' '}
+            {submitError.showPasswordReset && (
+              <Link
+                className="text-secondary-blue whitespace-nowrap underline underline-offset-4"
+                to="/forgot-password"
+              >
+                reset your password.
+              </Link>
+            )}
           </div>
         )}
 

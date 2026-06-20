@@ -51,14 +51,6 @@ type FilterCategory = ReturnType<
   typeof useFilters
 >['filterableOptions'][number];
 
-function isBrowserReload() {
-  const navigationEntry = performance.getEntriesByType('navigation')[0];
-  return (
-    navigationEntry instanceof PerformanceNavigationTiming &&
-    navigationEntry.type === 'reload'
-  );
-}
-
 function getInitialViewMode(): GalleryViewMode {
   if (typeof window === 'undefined') return 'individual';
   return new URLSearchParams(window.location.search).get('view') === 'group'
@@ -220,6 +212,9 @@ const GalleryCoreInner = () => {
     TResolvedArtwork[]
   >([]);
   const [slideshowPreserveOrder, setSlideshowPreserveOrder] = useState(false);
+  const [slideshowInitialArtworkId, setSlideshowInitialArtworkId] = useState<
+    string | undefined
+  >();
   const [groupSlideshowLoading, setGroupSlideshowLoading] = useState(false);
   const [groupSlideshowError, setGroupSlideshowError] = useState<string | null>(
     null,
@@ -232,6 +227,8 @@ const GalleryCoreInner = () => {
   const didInitialLoad = useRef(false);
   const [didReadInitialUrlState, setDidReadInitialUrlState] = useState(false);
   const wasInSlideshowRef = useRef(false);
+  const slideshowNavigationPendingRef = useRef(false);
+  const reconstructedSlideshowRef = useRef<string | null>(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const {
     pageNumber,
@@ -256,17 +253,15 @@ const GalleryCoreInner = () => {
     if (!selectedThemeFamily) return null;
 
     if (selectedThemeInstanceType && selectedThemeInstance) {
-      const selectedTheme = themes.find(
-        (theme) => {
-          const parsed = parseThemeSK(theme.theme_sk);
-          return (
-            parsed?.kind === 'instance' &&
-            parsed.theme_family === selectedThemeFamily &&
-            parsed.instance_type === selectedThemeInstanceType &&
-            parsed.theme_instance === selectedThemeInstance
-          );
-        },
-      );
+      const selectedTheme = themes.find((theme) => {
+        const parsed = parseThemeSK(theme.theme_sk);
+        return (
+          parsed?.kind === 'instance' &&
+          parsed.theme_family === selectedThemeFamily &&
+          parsed.instance_type === selectedThemeInstanceType &&
+          parsed.theme_instance === selectedThemeInstance
+        );
+      });
 
       if (selectedTheme) return formatThemeDisplayName(selectedTheme);
     }
@@ -276,8 +271,7 @@ const GalleryCoreInner = () => {
     );
 
     return (
-      selectedFamily?.display_name ??
-      formatThemeFamilyName(selectedThemeFamily)
+      selectedFamily?.display_name ?? formatThemeFamilyName(selectedThemeFamily)
     );
   }, [
     selectedThemeFamily,
@@ -334,7 +328,6 @@ const GalleryCoreInner = () => {
       .then((data) => {
         if (cancelled) return;
         setArtworks(data);
-        setPageNumber(1);
       })
       .catch((error: unknown) => {
         if (cancelled) return;
@@ -354,7 +347,6 @@ const GalleryCoreInner = () => {
     selectedThemeFamily,
     selectedThemeInstance,
     selectedThemeInstanceType,
-    setPageNumber,
     sortValue,
     themesLoading,
   ]);
@@ -375,7 +367,6 @@ const GalleryCoreInner = () => {
       .then((data) => {
         if (cancelled) return;
         setGroups(data);
-        setPageNumber(1);
       })
       .catch((error: unknown) => {
         if (cancelled) return;
@@ -395,7 +386,6 @@ const GalleryCoreInner = () => {
     selectedThemeFamily,
     selectedThemeInstance,
     selectedThemeInstanceType,
-    setPageNumber,
     sortValue,
     themesLoading,
   ]);
@@ -428,15 +418,23 @@ const GalleryCoreInner = () => {
 
   useEffect(() => {
     const isInSlideshow = location.pathname.includes('/slideshow');
+    if (isInSlideshow) {
+      slideshowNavigationPendingRef.current = false;
+      setSlideshowInitialArtworkId(
+        new URLSearchParams(location.search).get('id') ?? undefined,
+      );
+    }
     if (!isInSlideshow && wasInSlideshowRef.current) {
       setSlideshowArtworks([]);
       setSlideshowPreserveOrder(false);
+      setSlideshowInitialArtworkId(undefined);
     }
     wasInSlideshowRef.current = isInSlideshow;
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     if (!didReadInitialUrlState) return;
+    if (slideshowNavigationPendingRef.current) return;
     if (location.pathname.includes('/slideshow')) return;
     const currentParams = new URLSearchParams();
     if (selectedThemeFamily) currentParams.set('theme', selectedThemeFamily);
@@ -465,21 +463,36 @@ const GalleryCoreInner = () => {
   ]);
 
   useEffect(() => {
-    const isReload = isBrowserReload();
     const themeFromUrl = searchParams.get('theme');
     const instanceTypeFromUrl = searchParams.get('type');
     const instanceFromUrl = searchParams.get('instance');
     const idFromUrl = searchParams.get('id');
     const viewFromUrl = searchParams.get('view');
-    if (!isReload) {
-      if (themeFromUrl) setSelectedThemeFamily(themeFromUrl);
-      if (instanceTypeFromUrl) setSelectedThemeInstanceType(instanceTypeFromUrl);
-      if (instanceFromUrl) setSelectedThemeInstance(instanceFromUrl);
+    const pageFromUrl = Number.parseInt(searchParams.get('page') ?? '', 10);
+    const sortFromUrl = searchParams.get('sort');
+    const isSlideshow = location.pathname.includes('/slideshow');
+
+    if (themeFromUrl) setSelectedThemeFamily(themeFromUrl);
+    if (instanceTypeFromUrl) setSelectedThemeInstanceType(instanceTypeFromUrl);
+    if (instanceFromUrl) setSelectedThemeInstance(instanceFromUrl);
+    if (Number.isInteger(pageFromUrl) && pageFromUrl > 0) {
+      setPageNumber(pageFromUrl);
     }
-    setViewMode(viewFromUrl === 'group' ? 'group' : 'individual');
+    if (sortFromUrl === 'Oldest Event' || sortFromUrl === 'oldest') {
+      setSortValue('Oldest Event');
+    }
+    setViewMode(
+      viewFromUrl === 'group' || searchParams.has('group')
+        ? 'group'
+        : 'individual',
+    );
     if (idFromUrl) {
-      setActiveEntryId(idFromUrl);
-      setModalOpen(true);
+      if (isSlideshow) {
+        setSlideshowInitialArtworkId(idFromUrl);
+      } else {
+        setActiveEntryId(idFromUrl);
+        setModalOpen(true);
+      }
     }
     setDidReadInitialUrlState(true);
   }, []);
@@ -493,11 +506,11 @@ const GalleryCoreInner = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeSlideshow();
+      if (e.key === 'Escape' && isModalOpen) closeSlideshow();
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [closeSlideshow]);
+  }, [closeSlideshow, isModalOpen]);
 
   useEffect(() => {
     return () => {
@@ -539,7 +552,97 @@ const GalleryCoreInner = () => {
     return groupedArtworks;
   };
 
-  const openSlideshow = () => {
+  useEffect(() => {
+    if (!didReadInitialUrlState || groupsLoading) return;
+    if (!location.pathname.includes('/slideshow')) return;
+    if (slideshowArtworks.length > 0) return;
+
+    const groupId = searchParams.get('group');
+    const isGroupSlideshow =
+      searchParams.get('view') === 'group' || Boolean(groupId);
+    if (!isGroupSlideshow) return;
+
+    const reconstructionKey = `${groupId ?? 'all'}:${groups
+      .map((group) => group.group_id)
+      .join('|')}`;
+    if (reconstructedSlideshowRef.current === reconstructionKey) return;
+    reconstructedSlideshowRef.current = reconstructionKey;
+
+    const requestedGroups = groupId
+      ? groups.filter((group) => group.group_id === groupId)
+      : groups;
+    if (requestedGroups.length === 0) {
+      setGroupSlideshowError('This slideshow is no longer available.');
+      return;
+    }
+
+    setGroupSlideshowLoading(true);
+    setGroupSlideshowError(null);
+    fetchGroupsForSlideshow(requestedGroups)
+      .then((data) => {
+        if (data.length === 0) {
+          setGroupSlideshowError('This slideshow has no approved artworks.');
+          return;
+        }
+        setSlideshowPreserveOrder(true);
+        setSlideshowArtworks(data);
+      })
+      .catch((error: unknown) => {
+        setGroupSlideshowError(
+          error instanceof Error
+            ? error.message
+            : 'Failed to reconstruct slideshow',
+        );
+      })
+      .finally(() => setGroupSlideshowLoading(false));
+  }, [
+    didReadInitialUrlState,
+    groups,
+    groupsLoading,
+    location.pathname,
+    searchParams,
+    slideshowArtworks.length,
+  ]);
+
+  const buildSlideshowPath = ({
+    initialArtworkId,
+    scope,
+    groupId,
+  }: {
+    initialArtworkId?: string;
+    scope: 'all' | 'page' | 'group';
+    groupId?: string;
+  }) => {
+    const params = new URLSearchParams();
+    params.set(
+      'view',
+      groupId || viewMode === 'group' ? 'group' : 'individual',
+    );
+    params.set('scope', scope);
+    params.set('page', pageNumber.toString());
+    params.set('sort', sortValue);
+    if (selectedThemeFamily) params.set('theme', selectedThemeFamily);
+    if (selectedThemeInstanceType && selectedThemeInstance) {
+      params.set('type', selectedThemeInstanceType);
+      params.set('instance', selectedThemeInstance);
+    }
+    if (groupId) params.set('group', groupId);
+    if (initialArtworkId) params.set('id', initialArtworkId);
+    return `/gallery/slideshow?${params.toString()}`;
+  };
+
+  const navigateToSlideshow = (to: string) => {
+    // Closing an artwork modal triggers the gallery URL-sync effect. Mark this
+    // transition so that effect cannot overwrite the slideshow destination.
+    slideshowNavigationPendingRef.current = true;
+    setModalOpen(false);
+    void navigate(to);
+  };
+
+  const openSlideshow = (
+    initialArtworkId?: string,
+    scopedArtworks?: TResolvedArtwork[],
+  ) => {
     if (viewMode === 'group') {
       if (groupsLoading || groups.length === 0) {
         setSlideshowArtworks([]);
@@ -560,9 +663,15 @@ const GalleryCoreInner = () => {
           }
 
           setSlideshowPreserveOrder(true);
+          const firstArtworkId = initialArtworkId ?? data[0]?.id;
+          setSlideshowInitialArtworkId(firstArtworkId);
           setSlideshowArtworks(data);
-          void navigate('/gallery/slideshow?view=group');
-          setModalOpen(false);
+          navigateToSlideshow(
+            buildSlideshowPath({
+              initialArtworkId: firstArtworkId,
+              scope: 'all',
+            }),
+          );
         })
         .catch((error: unknown) => {
           setGroupSlideshowError(
@@ -575,7 +684,9 @@ const GalleryCoreInner = () => {
       return;
     }
 
-    if (artworksLoading || slideshowAvailableArtworks.length === 0) {
+    const artworksForSlideshow = scopedArtworks ?? slideshowAvailableArtworks;
+
+    if (artworksLoading || artworksForSlideshow.length === 0) {
       setSlideshowArtworks([]);
       setGroupSlideshowError(null);
       showNoArtworksUnavailableTooltip();
@@ -586,16 +697,22 @@ const GalleryCoreInner = () => {
     setGroupSlideshowError(null);
     hideNoArtworksTooltip();
 
-    fetchArtworkGroupMetadata(slideshowAvailableArtworks)
+    fetchArtworkGroupMetadata(artworksForSlideshow)
       .then((enrichedArtworks) => {
         if (enrichedArtworks.length === 0) {
           showNoArtworksUnavailableTooltip();
           return;
         }
         setSlideshowPreserveOrder(false);
+        const firstArtworkId = initialArtworkId ?? enrichedArtworks[0]?.id;
+        setSlideshowInitialArtworkId(firstArtworkId);
         setSlideshowArtworks(enrichedArtworks);
-        void navigate('/gallery/slideshow');
-        setModalOpen(false);
+        navigateToSlideshow(
+          buildSlideshowPath({
+            initialArtworkId: firstArtworkId,
+            scope: scopedArtworks ? 'page' : 'all',
+          }),
+        );
       })
       .catch((error: unknown) => {
         setGroupSlideshowError(
@@ -617,8 +734,16 @@ const GalleryCoreInner = () => {
           return;
         }
         setSlideshowPreserveOrder(true);
+        const firstArtworkId = data[0]?.id;
+        setSlideshowInitialArtworkId(firstArtworkId);
         setSlideshowArtworks(data);
-        void navigate(`/gallery/slideshow?group=${group.group_id}`);
+        navigateToSlideshow(
+          buildSlideshowPath({
+            initialArtworkId: firstArtworkId,
+            scope: 'group',
+            groupId: group.group_id,
+          }),
+        );
       })
       .catch((error: unknown) => {
         setGroupSlideshowError(
@@ -728,20 +853,44 @@ const GalleryCoreInner = () => {
     (viewMode === 'group'
       ? showGroupLoadingOverlay
       : showArtworkLoadingOverlay);
+  const isSlideshowRoute = location.pathname.includes('/slideshow');
+  const isGroupSlideshowRoute =
+    isSlideshowRoute &&
+    (searchParams.get('view') === 'group' || searchParams.has('group'));
+  const requestedSlideshowArtworkId = searchParams.get('id');
+  const requestedArtwork = requestedSlideshowArtworkId
+    ? artworks.find((artwork) => artwork.id === requestedSlideshowArtworkId)
+    : undefined;
+  const pageScopedArtworks =
+    requestedArtwork &&
+    !pageData.some((artwork) => artwork.id === requestedArtwork.id)
+      ? [
+          requestedArtwork,
+          ...pageData
+            .filter((artwork) => artwork.id !== requestedArtwork.id)
+            .slice(0, ARTWORKS_PER_PAGE - 1),
+        ]
+      : pageData;
+  const routeScopedArtworks =
+    isSlideshowRoute && searchParams.get('scope') === 'page'
+      ? pageScopedArtworks
+      : slideshowAvailableArtworks;
+  const outletArtworks =
+    slideshowArtworks.length > 0 ? slideshowArtworks : routeScopedArtworks;
+  const canRenderSlideshow = isGroupSlideshowRoute
+    ? slideshowArtworks.length > 0
+    : outletArtworks.length > 0;
 
   return (
     <div className="transition-all duration-300">
-      {(slideshowArtworks.length > 0 ||
-        slideshowAvailableArtworks.length > 0) && (
+      {canRenderSlideshow && (
         <Outlet
           context={
             {
-              artworks:
-                slideshowArtworks.length > 0
-                  ? slideshowArtworks
-                  : slideshowAvailableArtworks,
+              artworks: outletArtworks,
               onArtworkKudos: applyArtworkKudos,
               preserveOrder: slideshowPreserveOrder,
+              initialArtworkId: slideshowInitialArtworkId,
             } satisfies IGalleryContext
           }
         />
@@ -755,6 +904,7 @@ const GalleryCoreInner = () => {
         isHorizontal={isHorizontal}
         modalState={isModalOpen}
         getShareUrl={getShareUrl}
+        onEnterExhibition={(id) => openSlideshow(id, pageData)}
         onKudosApplied={applyArtworkKudos}
       />
 
@@ -780,14 +930,24 @@ const GalleryCoreInner = () => {
                   No artworks available
                 </button>
               )}
+              <div className="hidden md:block">
+                <Pagination
+                  totalItems={activeItems.length}
+                  currentPage={pageNumber}
+                  itemsPerPage={activeItemsPerPage}
+                  updatePageNumber={updatePageNumber}
+                />
+              </div>
+
               <div className="relative ml-auto">
                 <select
                   id="gallery-sort"
                   name="gallery-sort"
                   value={sortValue}
-                  onChange={(event) =>
-                    setSortValue(event.target.value as SortValue)
-                  }
+                  onChange={(event) => {
+                    setSortValue(event.target.value as SortValue);
+                    setPageNumber(1);
+                  }}
                   className="h-[50px] appearance-none rounded-md border border-gray-600 bg-white px-4 pr-12 text-sm font-medium"
                   aria-label="Sort artworks"
                 >
@@ -799,14 +959,6 @@ const GalleryCoreInner = () => {
                   className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-700"
                 />
               </div>
-            </div>
-            <div className="hidden lg:block">
-              <Pagination
-                totalItems={activeItems.length}
-                currentPage={pageNumber}
-                itemsPerPage={activeItemsPerPage}
-                updatePageNumber={updatePageNumber}
-              />
             </div>
           </div>
           <div className="relative">
@@ -887,7 +1039,9 @@ const GalleryCoreInner = () => {
                       onSelectVirtualItem={selectVirtualThemeItem}
                       onSelectInstance={(theme) => {
                         setSelectedThemeFamily(theme.theme_family);
-                        setSelectedThemeInstanceType(theme.instance_type ?? null);
+                        setSelectedThemeInstanceType(
+                          theme.instance_type ?? null,
+                        );
                         setSelectedThemeInstance(theme.theme_instance ?? null);
                         setPageNumber(1);
                       }}

@@ -14,6 +14,7 @@ import { GallerySlideshowShare } from './GallerySlideshowShare';
 import { useGallerySlideshowState } from './useGallerySlideshowState';
 import { renderSlot } from './RenderSlot';
 import { galleryNametag } from './GalleryNametag';
+import type { IGalleryContext } from '@/modules/content/types/Gallery';
 
 const INTERVALS_S = [5, 8, 12, 20, 30];
 const DEFAULT_INTERVAL_IDX = 4;
@@ -49,7 +50,13 @@ const KB_STYLES = `
   }
 `;
 
-export const GallerySlideshow = () => {
+export const GallerySlideshow = ({
+  context,
+  onClose: closeOverride,
+}: {
+  context?: IGalleryContext;
+  onClose?: () => void;
+}) => {
   const {
     artworks,
     currentIdx,
@@ -66,7 +73,7 @@ export const GallerySlideshow = () => {
     applyArtworkKudos,
     artworkShareUrl,
     onClose,
-  } = useGallerySlideshowState();
+  } = useGallerySlideshowState(context, closeOverride);
 
   const intervalIdx = DEFAULT_INTERVAL_IDX;
   const intervalMs = INTERVALS_S[intervalIdx] * 1000;

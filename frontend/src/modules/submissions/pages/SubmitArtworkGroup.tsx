@@ -20,6 +20,10 @@ import { uploadToPresignedUrl } from '@/api/uploads';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { ArtworkMuralWindow } from '@/modules/submissions/components/ArtworkMuralWindow';
 import { ArtworkConsent } from '@/modules/submissions/components/ArtworkConsent';
+import {
+  SubmissionProgress,
+  type SubmissionProgressState,
+} from '@/modules/submissions/components/SubmissionProgress';
 import { CompactTextarea } from '@/modules/submissions/components/CompactTextarea';
 import { CountryPicker } from '@/modules/submissions/components/CountryPicker';
 import { ThemePicker } from '@/modules/submissions/components/ThemePicker';
@@ -269,6 +273,8 @@ export function SubmitArtworkGroup({
   >({});
   const [errors, setErrors] = useState<ArtworkGroupSubmissionErrors>({});
   const [status, setStatus] = useState<SubmissionStatus>('idle');
+  const [submissionProgress, setSubmissionProgress] =
+    useState<SubmissionProgressState | null>(null);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [authenticatedUser, setAuthenticatedUser] =
     useState<AuthenticatedSubmissionUser | null>(null);
@@ -562,6 +568,11 @@ export function SubmitArtworkGroup({
     if (hasSubmissionErrors(nextErrors)) return;
 
     setStatus('submitting');
+    setSubmissionProgress({
+      completed: 0,
+      phase: 'preparing',
+      total: artworks.length,
+    });
     void handleAsyncSubmit();
   }
 
@@ -583,9 +594,22 @@ export function SubmitArtworkGroup({
 
       const artworkUploads = await Promise.all(
         uploadFileTypes.map((fileType) =>
-          createArtworkUpload({ file_type: fileType }),
+          createArtworkUpload({ file_type: fileType }).then((upload) => {
+            setSubmissionProgress((current) =>
+              current
+                ? { ...current, completed: current.completed + 1 }
+                : current,
+            );
+            return upload;
+          }),
         ),
       );
+
+      setSubmissionProgress({
+        completed: 0,
+        phase: 'uploading',
+        total: artworks.length,
+      });
 
       for (const [index, upload] of artworkUploads.entries()) {
         const file = uploadFiles[index];
@@ -597,7 +621,18 @@ export function SubmitArtworkGroup({
           fileType,
           url: upload.presigned_url,
         });
+        setSubmissionProgress({
+          completed: index + 1,
+          phase: 'uploading',
+          total: artworks.length,
+        });
       }
+
+      setSubmissionProgress({
+        completed: 0,
+        phase: 'finalizing',
+        total: artworks.length,
+      });
 
       const artworkRequests = artworks.map((artwork, index) => {
         const file = uploadFiles[index];
@@ -670,6 +705,7 @@ export function SubmitArtworkGroup({
       });
     } catch (error) {
       setStatus('idle');
+      setSubmissionProgress(null);
       setSubmitMessage(getSubmitError(error));
     }
   }
@@ -1028,6 +1064,9 @@ export function SubmitArtworkGroup({
               <Send aria-hidden="true" className="h-4 w-4" />
               {isSubmitting ? 'Submitting...' : copy.submitLabel}
             </Button>
+            {isSubmitting && submissionProgress && (
+              <SubmissionProgress {...submissionProgress} />
+            )}
             {viewerError && (
               <p className="text-tertiary-red mt-2 text-xs font-semibold">
                 {viewerError}

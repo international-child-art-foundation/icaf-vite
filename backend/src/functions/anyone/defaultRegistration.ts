@@ -28,8 +28,8 @@ import { EntityType, GSI } from "../../dynamo/ddbSchemaConsts";
 import { emailGsiSk, emailPk } from "../../dynamo/emailGsi";
 import { parseJsonBody } from "../../utils/request";
 import { sendRegistrationVerificationEmail } from "../../utils/emails/registrationVerification";
+import { ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS } from "../../utils/authActionToken";
 
-const AUTH_ACTION_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60;
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -68,7 +68,7 @@ export const handler = async (
     const hasNewsletterSubscription = body.has_newsletter_subscription ?? false;
     const nowSeconds = Math.floor(Date.now() / 1000);
     const authActionToken = randomUUID();
-    const authActionTokenExp = nowSeconds + AUTH_ACTION_TOKEN_TTL_SECONDS;
+    const authActionTokenExp = nowSeconds + ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS;
 
     const existingUser = await dynamodb.send(
       new QueryCommand({

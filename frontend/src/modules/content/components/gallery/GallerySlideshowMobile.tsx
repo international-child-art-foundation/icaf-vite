@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { MobileImageSwiper } from './MobileImageSwiper';
 import { MobileLip, LIP_COLLAPSED_H } from './MobileLip';
 import { useGallerySlideshowState } from './useGallerySlideshowState';
+import type { IGalleryContext } from '@/modules/content/types/Gallery';
 
 const MOBILE_STYLES = `
   @keyframes mob-fade-in {
@@ -47,7 +48,13 @@ function computeVel(hist: VelSample[], now: number): number {
   return dt > 0 ? (last.v - first.v) / dt : 0;
 }
 
-export const GallerySlideshowMobile = () => {
+export const GallerySlideshowMobile = ({
+  context,
+  onClose: closeOverride,
+}: {
+  context?: IGalleryContext;
+  onClose?: () => void;
+}) => {
   const {
     artworks,
     currentIdx,
@@ -58,7 +65,7 @@ export const GallerySlideshowMobile = () => {
     applyArtworkKudos,
     artworkShareUrl,
     onClose,
-  } = useGallerySlideshowState();
+  } = useGallerySlideshowState(context, closeOverride);
 
   const [screenW, setScreenW] = useState(() => window.innerWidth);
   useEffect(() => {
@@ -416,7 +423,12 @@ export const GallerySlideshowMobile = () => {
 
   const lipDisplayArtwork = deferredArtwork ?? artworks[currentIdx];
   const shareUrl = shareArtwork
-    ? `${window.location.protocol}//${window.location.host}/gallery?id=${shareArtwork.id}`
+    ? (() => {
+        const url = new URL(artworkShareUrl || window.location.href);
+        url.pathname = '/gallery/slideshow';
+        url.searchParams.set('id', shareArtwork.id);
+        return url.toString();
+      })()
     : artworkShareUrl;
 
   return (

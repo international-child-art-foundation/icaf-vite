@@ -13,8 +13,8 @@ import { emailPk, emailGsiSk } from "../../dynamo/emailGsi";
 import { sendCreateAndVerifyEmail } from "../../utils/emails/createAndVerify";
 import { parseJsonBody } from "../../utils/request";
 import { randomUUID } from "crypto";
+import { ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS } from "../../utils/authActionToken";
 
-const AUTH_ACTION_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -65,7 +65,7 @@ export const handler = async (
 
     const nowSeconds = Math.floor(Date.now() / 1000);
     const authActionToken = randomUUID();
-    const authActionTokenExp = nowSeconds + AUTH_ACTION_TOKEN_TTL_SECONDS;
+    const authActionTokenExp = nowSeconds + ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS;
 
     await dynamodb.send(
       new UpdateCommand({

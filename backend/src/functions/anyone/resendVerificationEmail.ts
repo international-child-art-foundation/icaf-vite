@@ -14,8 +14,8 @@ import { emailGsiSk, emailPk } from "../../dynamo/emailGsi";
 import { sendCreateAndVerifyEmail } from "../../utils/emails/createAndVerify";
 import { sendRegistrationVerificationEmail } from "../../utils/emails/registrationVerification";
 import { parseJsonBody } from "../../utils/request";
+import { ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS } from "../../utils/authActionToken";
 
-const AUTH_ACTION_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60;
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -63,7 +63,7 @@ export const handler = async (
         UpdateExpression: "SET auth_action_token = :token, auth_action_token_exp = :exp",
         ExpressionAttributeValues: {
           ":token": authActionToken,
-          ":exp": nowSeconds + AUTH_ACTION_TOKEN_TTL_SECONDS,
+          ":exp": nowSeconds + ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS,
         },
       }),
     );

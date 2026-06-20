@@ -112,6 +112,36 @@ const LinkedInGlyph = () => (
 
 const ICON_COLORS = LIP_GRADIENT_STOPS.map((s) => s.color);
 
+const copyText = async (text: string) => {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Some mobile and in-app browsers expose the API but deny access.
+    }
+  }
+
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.readOnly = true;
+  textArea.style.position = 'fixed';
+  textArea.style.left = '-9999px';
+  textArea.style.fontSize = '16px';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  textArea.setSelectionRange(0, text.length);
+
+  try {
+    return document.execCommand('copy');
+  } catch {
+    return false;
+  } finally {
+    textArea.remove();
+  }
+};
+
 const MobileShareRow = ({ shareUrl }: { shareUrl: string }) => {
   const [copied, setCopied] = useState(false);
   const enc = encodeURIComponent(shareUrl);
@@ -126,12 +156,9 @@ const MobileShareRow = ({ shareUrl }: { shareUrl: string }) => {
     );
   };
   const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
+    if (await copyText(shareUrl)) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch {
-      /* ignore */
     }
   };
 

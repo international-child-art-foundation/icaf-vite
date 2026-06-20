@@ -20,7 +20,7 @@ export function buildRegistrationVerificationEmail(args: {
     'Thanks for registering for an ICAF account.',
     'Use the link below to verify your email address and activate your account:',
     link,
-    'This link expires in 7 days. If you did not create an account, you can safely ignore this email.',
+    'This link expires in 30 days. If you did not create an account, you can safely ignore this email.',
     'The International Child Art Foundation',
   ]);
 
@@ -38,7 +38,7 @@ export function buildRegistrationVerificationEmail(args: {
         horizontalPadding: 28,
       }),
       renderInfoBox('Verification link', [
-        'This link expires in 7 days.',
+        'This link expires in 30 days.',
         `If the button does not work, open this URL: ${link}`,
       ]),
       htmlParagraphs([

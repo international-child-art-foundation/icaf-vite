@@ -14,6 +14,7 @@ import {
 import { listGalleryArtworks } from '@/api/public';
 import ArtworkCard from '@/modules/content/components/gallery/ArtworkCard';
 import ArtworkModal from '@/modules/content/components/gallery/ArtworkModal';
+import { GallerySlideshowEntry } from '@/modules/content/components/gallery/GallerySlideshowEntry';
 import { resolveApiArtwork } from '@/utils/galleryProcessing';
 import { artworkLabel, formatDate } from '../utils/dashboardFormat';
 import { DashboardModule, ModuleState } from './DashboardModule';
@@ -104,6 +105,7 @@ export function ReviewArtworkQueue({
   const [message, setMessage] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [activeArtworkId, setActiveArtworkId] = useState('');
+  const [exhibitionArtworkId, setExhibitionArtworkId] = useState('');
   const isHorizontal = useMediaQuery('(orientation: landscape)', true);
 
   const selectedIds = useMemo(() => [...selected], [selected]);
@@ -281,6 +283,15 @@ export function ReviewArtworkQueue({
         </div>
       }
     >
+      {exhibitionArtworkId && (
+        <GallerySlideshowEntry
+          context={{
+            artworks: resolvedArtworks,
+            initialArtworkId: exhibitionArtworkId,
+          }}
+          onClose={() => setExhibitionArtworkId('')}
+        />
+      )}
       <ArtworkModal
         id={activeArtworkId}
         artworks={resolvedArtworks}
@@ -290,6 +301,10 @@ export function ReviewArtworkQueue({
         isHorizontal={isHorizontal}
         modalState={Boolean(activeArtworkId)}
         getShareUrl={() => window.location.href}
+        onEnterExhibition={(id) => {
+          setExhibitionArtworkId(id);
+          setActiveArtworkId('');
+        }}
       />
       <div className="mb-4 flex flex-wrap gap-2">
         <button

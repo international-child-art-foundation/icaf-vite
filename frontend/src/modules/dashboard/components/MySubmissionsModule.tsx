@@ -6,6 +6,7 @@ import { listArtworkSubmissions } from '@/api/user';
 import { getArtwork, getGroup } from '@/api/public';
 import ArtworkCard from '@/modules/content/components/gallery/ArtworkCard';
 import ArtworkModal from '@/modules/content/components/gallery/ArtworkModal';
+import { GallerySlideshowEntry } from '@/modules/content/components/gallery/GallerySlideshowEntry';
 import { GalleryGroupCard } from '@/modules/content/components/gallery/GalleryGroupCard';
 import { resolveApiArtwork } from '@/utils/galleryProcessing';
 import { formatDate, groupTitle } from '../utils/dashboardFormat';
@@ -37,6 +38,7 @@ export function MySubmissionsModule() {
   const [artworks, setArtworks] = useState<ArtworkListItem[]>([]);
   const [groups, setGroups] = useState<GroupListItem[]>([]);
   const [activeArtworkId, setActiveArtworkId] = useState('');
+  const [exhibitionArtworkId, setExhibitionArtworkId] = useState('');
   const [activeGroupArtworks, setActiveGroupArtworks] = useState<
     ReturnType<typeof resolveApiArtwork>[]
   >([]);
@@ -110,6 +112,19 @@ export function MySubmissionsModule() {
       title="My submissions"
       description="See your published and pending artwork submissions."
     >
+      {exhibitionArtworkId && (
+        <GallerySlideshowEntry
+          context={{
+            artworks: modalArtworks,
+            preserveOrder: activeGroupArtworks.length > 0,
+            initialArtworkId: exhibitionArtworkId,
+          }}
+          onClose={() => {
+            setExhibitionArtworkId('');
+            setActiveGroupArtworks([]);
+          }}
+        />
+      )}
       <ArtworkModal
         id={activeArtworkId}
         artworks={modalArtworks}
@@ -122,6 +137,10 @@ export function MySubmissionsModule() {
         isHorizontal={isHorizontal}
         modalState={isModalOpen}
         getShareUrl={() => window.location.href}
+        onEnterExhibition={(id) => {
+          setExhibitionArtworkId(id);
+          setActiveArtworkId('');
+        }}
       />
       {error && <ModuleState tone="error">{error}</ModuleState>}
       {groupSlideshowLoading && (

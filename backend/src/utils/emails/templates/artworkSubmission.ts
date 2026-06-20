@@ -25,7 +25,7 @@ export function buildArtworkSubmissionEmail(args: {
     'After a short approval process, your artwork will be displayed in our gallery.',
     'If you would like to create an ICAF account to view and manage your artwork submissions under this email address, use the link below:',
     link,
-    'Account creation is optional and can be completed at any time. This link expires in 7 days, but you can always request a new one later.',
+    'Account creation is optional and can be completed at any time. This link expires in 30 days, but you can always request a new one later.',
     'Thank you for participating in ICAF!',
     'To stop receiving ICAF artwork notification emails, use this link:',
     unsubscribeUrl,

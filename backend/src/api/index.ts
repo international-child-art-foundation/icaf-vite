@@ -48,6 +48,7 @@ import { handler as galleryGroups } from "../functions/anyone/gallery/galleryGro
 import { handler as galleryThemes } from "../functions/anyone/gallery/galleryThemes";
 import { handler as getArtwork } from "../functions/anyone/getArtwork";
 import { handler as getAuthStatus } from "../functions/anyone/getAuthStatus";
+import { handler as getCreateAndVerifyStatus } from "../functions/anyone/getCreateAndVerifyStatus";
 import { handler as getGroup } from "../functions/anyone/getGroup";
 import { handler as getMagazines } from "../functions/anyone/getMagazines";
 import { handler as getNews } from "../functions/anyone/getNews";
@@ -55,6 +56,7 @@ import { handler as initiateTakedown } from "../functions/anyone/initiateTakedow
 import { handler as login } from "../functions/anyone/login";
 import { handler as logout } from "../functions/anyone/logout";
 import { handler as refresh } from "../functions/anyone/refresh";
+import { handler as recoverCreateAndVerify } from "../functions/anyone/recoverCreateAndVerify";
 import {
   everyWebhookHandler,
   stripeWebhookHandler,
@@ -175,6 +177,8 @@ const routes: Route[] = [
   { method: "POST", path: "/api/auth/logout", handler: logout },
   { method: "POST", path: "/api/auth/refresh", handler: refresh },
   { method: "POST", path: "/api/auth/create-and-verify", handler: createAndVerify },
+  { method: "GET", path: "/api/auth/create-and-verify/status", handler: getCreateAndVerifyStatus },
+  { method: "POST", path: "/api/auth/create-and-verify/recover", handler: recoverCreateAndVerify },
   { method: "POST", path: "/api/auth/forgot-password", handler: forgotPassword },
   { method: "POST", path: "/api/auth/confirm-forgot-password", handler: confirmForgotPassword },
   { method: "POST", path: "/api/auth/resend-verification", handler: resendVerification },

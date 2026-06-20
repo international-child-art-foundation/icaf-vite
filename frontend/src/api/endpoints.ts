@@ -46,6 +46,8 @@ export const apiEndpoints = {
     changePassword: '/auth/change-password',
     confirmForgotPassword: '/auth/confirm-forgot-password',
     createAndVerify: '/auth/create-and-verify',
+    createAndVerifyRecovery: '/auth/create-and-verify/recover',
+    createAndVerifyStatus: '/auth/create-and-verify/status',
     defaultRegistration: '/auth/default-registration',
     forgotPassword: '/auth/forgot-password',
     login: '/auth/login',

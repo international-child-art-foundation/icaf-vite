@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { GallerySlideshow } from './GallerySlideshow';
 import { GallerySlideshowMobile } from './GallerySlideshowMobile';
+import type { IGalleryContext } from '@/modules/content/types/Gallery';
 
 const MOBILE_MQ = '(pointer: coarse) and (max-width: 768px)';
 
@@ -17,7 +18,17 @@ const useMobileSlideshow = () => {
   return isMobile;
 };
 
-export const GallerySlideshowEntry = () => {
+export const GallerySlideshowEntry = ({
+  context,
+  onClose,
+}: {
+  context?: IGalleryContext;
+  onClose?: () => void;
+}) => {
   const isMobile = useMobileSlideshow();
-  return isMobile ? <GallerySlideshowMobile /> : <GallerySlideshow />;
+  return isMobile ? (
+    <GallerySlideshowMobile context={context} onClose={onClose} />
+  ) : (
+    <GallerySlideshow context={context} onClose={onClose} />
+  );
 };

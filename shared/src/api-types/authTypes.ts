@@ -64,6 +64,24 @@ export interface RequestCreateAndVerifyRequest {
 
 export type RequestCreateAndVerifyResponse = MessageResponse;
 
+export type CreateAndVerifyLinkStatus =
+    | "valid"
+    | "expired"
+    | "invalid"
+    | "already_verified";
+
+export interface CreateAndVerifyStatusResponse {
+    status: CreateAndVerifyLinkStatus;
+    expires_at?: number;
+}
+
+export interface RecoverCreateAndVerifyRequest {
+    user_id: string;
+    auth_action_token: string;
+}
+
+export type RecoverCreateAndVerifyResponse = DeliveryMessageResponse;
+
 export type CreateAndVerifyResponse = MessageResponse & {
     already_verified?: boolean;
 };

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { gsap } from 'gsap';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
@@ -16,6 +17,7 @@ type ArtworkModalProps = {
   isHorizontal: boolean;
   closeModal: () => void;
   getShareUrl: () => string;
+  onEnterExhibition: (id: string) => void;
   onKudosApplied?: (artId: string, amount: number) => void;
 };
 
@@ -28,6 +30,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
   isHorizontal,
   closeModal,
   getShareUrl,
+  onEnterExhibition,
   onKudosApplied,
 }) => {
   const [artworkData, setArtworkData] = useState<TResolvedArtwork | undefined>(
@@ -149,14 +152,13 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
             <p className="text-xl font-semibold">Share this post</p>
             <SocialShare shareUrl={getShareUrl()} />
             <div className="mt-4 grid grid-cols-1 gap-2 xl:grid-cols-2">
-              <a
-                href={artworkData.url}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
+                onClick={() => onEnterExhibition(artworkData.id)}
                 className="bg-primary text-text-inverse flex min-h-11 items-center justify-center rounded px-4 py-2.5 text-center text-base"
               >
-                View full image
-              </a>
+                Mural View
+              </button>
               <KudosControls
                 artwork={artworkData}
                 onKudosApplied={onKudosApplied}
@@ -212,14 +214,13 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
           <p className="text-xl font-semibold">Share this post</p>
           <SocialShare shareUrl={getShareUrl()} />
           <div className="mt-4 grid grid-cols-2 gap-2">
-            <a
-              href={artworkData.url}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={() => onEnterExhibition(artworkData.id)}
               className="bg-primary text-text-inverse flex min-h-9 items-center justify-center rounded px-3 py-1.5 text-center text-sm"
             >
-              View full image
-            </a>
+              Mural View
+            </button>
             <KudosControls
               artwork={artworkData}
               compact
@@ -238,9 +239,9 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
   const navBtnClass =
     'hidden lg:flex items-center justify-center w-12 h-12 flex-shrink-0 rounded-full bg-black/70 hover:bg-black/30 text-white transition-colors mx-4';
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden bg-[rgba(0,0,0,0.5)]"
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-x-hidden bg-[rgba(0,0,0,0.5)]"
       onClick={handleBackdropClick}
     >
       <button
@@ -295,7 +296,8 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
       >
         <ChevronRight size={24} />
       </button>
-    </div>
+    </div>,
+    document.body,
   );
 };
 

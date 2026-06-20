@@ -6,6 +6,7 @@ import type {
   ConfirmForgotPasswordResponse,
   CreateAndVerifyRequest,
   CreateAndVerifyResponse,
+  CreateAndVerifyStatusResponse,
   DefaultRegistrationRequest,
   DefaultRegistrationResponse,
   ForgotPasswordRequest,
@@ -15,6 +16,8 @@ import type {
   LogoutResponse,
   RequestCreateAndVerifyRequest,
   RequestCreateAndVerifyResponse,
+  RecoverCreateAndVerifyRequest,
+  RecoverCreateAndVerifyResponse,
   ResendVerificationEmailRequest,
   ResendVerificationEmailResponse,
 } from '@icaf/shared';
@@ -46,6 +49,19 @@ function isCreateAndVerifyResponse(
     isMessageResponse(response) &&
     (!('already_verified' in response) ||
       typeof response.already_verified === 'boolean')
+  );
+}
+
+function isCreateAndVerifyStatusResponse(
+  response: unknown,
+): response is CreateAndVerifyStatusResponse {
+  return (
+    isApiObject(response) &&
+    typeof response.status === 'string' &&
+    ['valid', 'expired', 'invalid', 'already_verified'].includes(
+      response.status,
+    ) &&
+    (!('expires_at' in response) || typeof response.expires_at === 'number')
   );
 }
 
@@ -136,6 +152,32 @@ export function createAndVerify(
   return apiRequest<CreateAndVerifyResponse, CreateAndVerifyRequest>(
     apiEndpoints.auth.createAndVerify,
     { body: request, method: 'POST', validate: isCreateAndVerifyResponse },
+  );
+}
+
+export function getCreateAndVerifyStatus(
+  userId: string,
+  authActionToken: string,
+): Promise<CreateAndVerifyStatusResponse> {
+  return apiRequest<CreateAndVerifyStatusResponse>(
+    apiEndpoints.auth.createAndVerifyStatus,
+    {
+      cacheTtlMs: 2 * 60 * 1000,
+      query: {
+        user_id: userId,
+        auth_action_token: authActionToken,
+      },
+      validate: isCreateAndVerifyStatusResponse,
+    },
+  );
+}
+
+export function recoverCreateAndVerify(
+  request: RecoverCreateAndVerifyRequest,
+): Promise<RecoverCreateAndVerifyResponse> {
+  return apiRequest<RecoverCreateAndVerifyResponse, RecoverCreateAndVerifyRequest>(
+    apiEndpoints.auth.createAndVerifyRecovery,
+    { body: request, method: 'POST', validate: isDeliveryMessageResponse },
   );
 }
 

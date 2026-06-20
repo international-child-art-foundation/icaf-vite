@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import type {
   IGalleryContext,
   TResolvedArtwork,
@@ -15,7 +15,27 @@ const HIDE_MS = 5000;
  * Each component adds its own presentation logic on top (auto-advance,
  * keyboard shortcuts, touch gestures, etc.).
  */
-export const useGallerySlideshowState = () => {
+function arrangeArtworks(
+  artworks: TResolvedArtwork[],
+  _preserveOrder: boolean,
+  initialArtworkId?: string,
+) {
+  const arranged = [...artworks];
+  if (!initialArtworkId) return arranged;
+
+  const initialIdx = arranged.findIndex(
+    (artwork) => artwork.id === initialArtworkId,
+  );
+  if (initialIdx <= 0) return arranged;
+  const [initialArtwork] = arranged.splice(initialIdx, 1);
+  arranged.unshift(initialArtwork);
+  return arranged;
+}
+
+export const useGallerySlideshowState = (
+  context?: IGalleryContext,
+  closeOverride?: () => void,
+) => {
   const [slotA, setSlotA] = useState<SlotState>({ artworkIdx: 0, animKey: 0 });
   const [slotB, setSlotB] = useState<SlotState>({ artworkIdx: 0, animKey: 0 });
   const [topSlot, setTopSlot] = useState<'a' | 'b'>('a');
@@ -27,28 +47,41 @@ export const useGallerySlideshowState = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [uiState, setUiState] = useState<'full' | 'dim' | 'hidden'>('full');
 
+  const outletContext = useOutletContext<IGalleryContext | null>();
   const {
     artworks: rawArtworks,
     onArtworkKudos,
     preserveOrder = false,
-  } = useOutletContext<IGalleryContext>();
+    initialArtworkId,
+  } = context ?? outletContext!;
   const [artworks, setArtworks] = useState<TResolvedArtwork[]>(() =>
-    preserveOrder
-      ? [...rawArtworks]
-      : [...rawArtworks].sort(() => Math.random() - 0.5),
+    arrangeArtworks(rawArtworks, preserveOrder, initialArtworkId),
   );
   const rawArtworksSignatureRef = useRef(
-    `${preserveOrder}:${rawArtworks.map((artwork) => artwork.id).join('|')}`,
+    `${preserveOrder}:${initialArtworkId ?? ''}:${rawArtworks.map((artwork) => artwork.id).join('|')}`,
   );
   const navigate = useNavigate();
+  const location = useLocation();
 
   const dimTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
-  const onClose = useCallback(() => void navigate('/gallery'), [navigate]);
+  const onClose = useCallback(() => {
+    if (closeOverride) {
+      closeOverride();
+      return;
+    }
+
+    const galleryParams = new URLSearchParams(location.search);
+    galleryParams.delete('id');
+    galleryParams.delete('scope');
+    galleryParams.delete('group');
+    const query = galleryParams.toString();
+    void navigate(`/gallery${query ? `?${query}` : ''}`);
+  }, [closeOverride, location.search, navigate]);
 
   useEffect(() => {
-    const nextSignature = `${preserveOrder}:${rawArtworks
+    const nextSignature = `${preserveOrder}:${initialArtworkId ?? ''}:${rawArtworks
       .map((artwork) => artwork.id)
       .join('|')}`;
 
@@ -65,9 +98,11 @@ export const useGallerySlideshowState = () => {
     }
 
     rawArtworksSignatureRef.current = nextSignature;
-    const nextArtworks = preserveOrder
-      ? [...rawArtworks]
-      : [...rawArtworks].sort(() => Math.random() - 0.5);
+    const nextArtworks = arrangeArtworks(
+      rawArtworks,
+      preserveOrder,
+      initialArtworkId,
+    );
     setArtworks(nextArtworks);
     setSlotA({ artworkIdx: 0, animKey: 0 });
     setSlotB({ artworkIdx: 0, animKey: 0 });
@@ -76,7 +111,7 @@ export const useGallerySlideshowState = () => {
     advanceCountRef.current = 0;
     currentIdxRef.current = 0;
     setCurrentIdx(0);
-  }, [preserveOrder, rawArtworks]);
+  }, [initialArtworkId, preserveOrder, rawArtworks]);
 
   const advanceTo = useCallback((nextIdx: number) => {
     advanceCountRef.current++;
@@ -150,9 +185,21 @@ export const useGallerySlideshowState = () => {
   }, []);
 
   const currentArtwork = artworks[currentIdx] ?? null;
-  const artworkShareUrl = currentArtwork
-    ? `${window.location.protocol}//${window.location.host}/gallery?id=${currentArtwork.id}`
-    : '';
+  const artworkShareUrl = (() => {
+    if (!currentArtwork) return '';
+    const url = new URL(window.location.href);
+    url.pathname = '/gallery/slideshow';
+    url.searchParams.set('id', currentArtwork.id);
+    return url.toString();
+  })();
+
+  useEffect(() => {
+    if (!currentArtwork || location.pathname !== '/gallery/slideshow') return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('id') === currentArtwork.id) return;
+    url.searchParams.set('id', currentArtwork.id);
+    window.history.replaceState(window.history.state, '', url);
+  }, [currentArtwork, location.pathname]);
 
   return {
     artworks,

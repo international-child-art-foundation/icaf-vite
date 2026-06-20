@@ -67,4 +67,5 @@ export interface IGalleryContext {
   artworks: TResolvedArtwork[];
   onArtworkKudos?: (artId: string, amount: number) => void;
   preserveOrder?: boolean;
+  initialArtworkId?: string;
 }

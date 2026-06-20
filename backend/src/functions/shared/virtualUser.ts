@@ -7,8 +7,8 @@ import { EntityType, GSI } from "../../dynamo/ddbSchemaConsts";
 import { emailGsiSk, emailPk } from "../../dynamo/emailGsi";
 import { sendArtworkSubmissionEmail } from "../../utils/emails/artworkSubmission";
 import { ensureArtworkUnsubscribeToken, shouldSuppressArtworkEmail } from "../../utils/emails/unsubscribe";
+import { ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS } from "../../utils/authActionToken";
 
-const AUTH_ACTION_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
 export type VirtualUserResult =
   | { ok: true; user: UserEntity; sentSignupEmail: boolean }
@@ -104,7 +104,7 @@ export async function getOrCreateVirtualUser(
   }
 
   const authActionToken = randomUUID();
-  const authActionTokenExp = nowSeconds + AUTH_ACTION_TOKEN_TTL_SECONDS;
+  const authActionTokenExp = nowSeconds + ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS;
 
   await dynamodb.send(
     new UpdateCommand({

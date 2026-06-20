@@ -20,7 +20,7 @@ export function buildCreateAndVerifyEmail(args: {
     'You requested to create an ICAF account associated with this email address.',
     'Use the link below to set your password and complete account creation:',
     link,
-    'This link expires in 7 days. If you did not request this, you can safely ignore this email.',
+    'This link expires in 30 days. If you did not request this, you can safely ignore this email.',
     'The International Child Art Foundation',
   ]);
 
@@ -35,7 +35,7 @@ export function buildCreateAndVerifyEmail(args: {
       ]),
       renderButton('Create your account', link),
       renderInfoBox('Account link', [
-        'This link expires in 7 days.',
+        'This link expires in 30 days.',
         `If the button does not work, open this URL: ${link}`,
       ]),
       htmlParagraphs([

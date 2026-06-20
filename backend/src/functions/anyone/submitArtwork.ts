@@ -21,9 +21,9 @@ import { ensureArtworkUnsubscribeToken, shouldSuppressArtworkEmail } from "../..
 import { parseJsonBody } from "../../utils/request";
 import { ensureThemeEntity } from "../shared/themeUtils";
 import { hasUploadedArtworkImage } from "../shared/artworkUpload";
+import { ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS } from "../../utils/authActionToken";
 import { randomUUID } from "crypto";
 
-const AUTH_ACTION_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -245,7 +245,7 @@ export const handler = async (
     }
 
     const authActionToken = randomUUID();
-    const authActionTokenExp = nowSeconds + AUTH_ACTION_TOKEN_TTL_SECONDS;
+    const authActionTokenExp = nowSeconds + ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS;
 
     await dynamodb.send(
       new UpdateCommand({

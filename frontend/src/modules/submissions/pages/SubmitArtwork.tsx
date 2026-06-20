@@ -9,6 +9,10 @@ import { submitArtwork } from '@/api/user';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { ArtworkMuralWindow } from '@/modules/submissions/components/ArtworkMuralWindow';
 import { ArtworkConsent } from '@/modules/submissions/components/ArtworkConsent';
+import {
+  SubmissionProgress,
+  type SubmissionProgressState,
+} from '@/modules/submissions/components/SubmissionProgress';
 import { CountryPicker } from '@/modules/submissions/components/CountryPicker';
 import { ThemePicker } from '@/modules/submissions/components/ThemePicker';
 import {
@@ -319,6 +323,8 @@ export function SubmitArtwork() {
   const [imageRotation, setImageRotation] = useState(0);
   const [errors, setErrors] = useState<SubmitArtworkErrors>({});
   const [status, setStatus] = useState<SubmissionStatus>('idle');
+  const [submissionProgress, setSubmissionProgress] =
+    useState<SubmissionProgressState | null>(null);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [authenticatedUser, setAuthenticatedUser] =
     useState<AuthenticatedSubmissionUser | null>(null);
@@ -428,6 +434,7 @@ export function SubmitArtwork() {
     if (hasSubmissionErrors(nextErrors)) return;
 
     setStatus('submitting');
+    setSubmissionProgress({ completed: 0, phase: 'preparing', total: 1 });
     void handleAsyncSubmit();
   }
 
@@ -448,12 +455,14 @@ export function SubmitArtwork() {
       if (!fileType) throw new Error(`${uploadFile.name} is not supported.`);
 
       const upload = await createArtworkUpload({ file_type: fileType });
+      setSubmissionProgress({ completed: 0, phase: 'uploading', total: 1 });
 
       await uploadToPresignedUrl({
         file: uploadFile,
         fileType,
         url: upload.presigned_url,
       });
+      setSubmissionProgress({ completed: 0, phase: 'finalizing', total: 1 });
 
       const artworkRequest = {
         art_id: upload.art_id,
@@ -514,6 +523,7 @@ export function SubmitArtwork() {
       });
     } catch (error) {
       setStatus('idle');
+      setSubmissionProgress(null);
       setSubmitMessage(getSubmitError(error));
     }
   }
@@ -838,6 +848,9 @@ export function SubmitArtwork() {
               <Send aria-hidden="true" className="h-4 w-4" />
               {isSubmitting ? 'Submitting...' : copy.submitLabel}
             </Button>
+            {isSubmitting && submissionProgress && (
+              <SubmissionProgress {...submissionProgress} />
+            )}
             {viewerError && (
               <p className="text-tertiary-red text-xs font-semibold">
                 {viewerError}

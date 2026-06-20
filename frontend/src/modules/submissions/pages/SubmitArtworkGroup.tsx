@@ -4,7 +4,6 @@ import {
   Bell,
   BookOpen,
   ChevronLeft,
-  Globe2,
   LogOut,
   Mail,
   Send,
@@ -22,6 +21,7 @@ import { AccountTextField } from '@/modules/account/components/AccountTextField'
 import { ArtworkMuralWindow } from '@/modules/submissions/components/ArtworkMuralWindow';
 import { ArtworkConsent } from '@/modules/submissions/components/ArtworkConsent';
 import { CompactTextarea } from '@/modules/submissions/components/CompactTextarea';
+import { CountryPicker } from '@/modules/submissions/components/CountryPicker';
 import { ThemePicker } from '@/modules/submissions/components/ThemePicker';
 import {
   getSubmitArtworkPageCopy,
@@ -68,7 +68,7 @@ import type { SubmitArtworkSuccessState } from './SubmitArtworkSuccess';
 type SubmissionStatus = 'idle' | 'submitting';
 type AuthenticatedSubmissionUser = AuthStatusResponse & { authenticated: true };
 
-type GroupIconField = 'class_name' | 'country' | 'submitter_display_name';
+type GroupIconField = 'class_name' | 'submitter_display_name';
 
 export type SubmitArtworkGroupCopy = SubmitArtworkPageCopy;
 
@@ -90,7 +90,6 @@ type TextArtworkGroupField = (typeof textArtworkGroupFields)[number];
 
 const groupFieldIcons: Record<GroupIconField, ReactNode> = {
   class_name: <BookOpen aria-hidden="true" className="h-4 w-4" />,
-  country: <Globe2 aria-hidden="true" className="h-4 w-4" />,
   submitter_display_name: <UserRound aria-hidden="true" className="h-4 w-4" />,
 };
 
@@ -653,6 +652,7 @@ export function SubmitArtworkGroup({
           artworks: displayArtworks.filter((artwork) => artwork.previewDataUrl),
           email: draft.submitterEmail.trim(),
           kind: 'group',
+          requiresAccountSetup: !authenticatedUser,
         },
       };
       setFiles({});
@@ -876,14 +876,13 @@ export function SubmitArtworkGroup({
                 value={draft.group.submitter_display_name}
                 onChange={handleGroupTextChange}
               />
-              <AccountTextField
+              <CountryPicker
                 error={errors.group?.country}
                 label="Country"
-                leadingIcon={groupFieldIcons.country}
-                maxLength={200}
                 name="country"
                 value={draft.group.country}
-                onChange={handleGroupTextChange}
+                required
+                onChange={(country) => updateGroupField('country', country)}
               />
               <AccountTextField
                 error={errors.group?.region}

@@ -1,3 +1,4 @@
+import { parseThemeSK } from '@icaf/shared';
 import { APP_URL } from '../../../config/aws-clients';
 import { htmlParagraphs, renderButton, renderEmailDocument, renderInfoBox, renderLink, textParagraphs } from '../templateUtils';
 import { buildArtworkUnsubscribeUrl } from '../unsubscribe';
@@ -8,12 +9,23 @@ export function buildApprovalEmail(args: {
   type: 'art' | 'group';
   id: string;
   title?: string;
+  theme?: string;
 }): { subject: string; text: string; html: string } {
   const isGroup = args.type === 'group';
   const label = isGroup ? 'group submission' : 'artwork';
-  const galleryUrl = isGroup
-    ? `${APP_URL}/gallery/group/${encodeURIComponent(args.id)}`
-    : `${APP_URL}/gallery/artwork/${encodeURIComponent(args.id)}`;
+  const themeFamily = args.theme ? parseThemeSK(args.theme)?.theme_family : undefined;
+  const galleryParams = new URLSearchParams();
+  if (isGroup) galleryParams.set('view', 'group');
+  if (themeFamily) galleryParams.set('theme', themeFamily);
+  const galleryQuery = galleryParams.toString();
+  const galleryUrl = `${APP_URL}/gallery${galleryQuery ? `?${galleryQuery}` : ''}`;
+  const submissionUrl = isGroup
+    ? `${APP_URL}/gallery/slideshow?group=${encodeURIComponent(args.id)}`
+    : `${APP_URL}/gallery?id=${encodeURIComponent(args.id)}`;
+  const submissionLinkLabel = isGroup ? 'View group slideshow' : 'View artwork';
+  const galleryLinkLabel = themeFamily
+    ? `Browse this theme in the ${isGroup ? 'Group' : 'Art'} view`
+    : `Browse the ${isGroup ? 'Group' : 'Art'} gallery`;
   const unsubscribeUrl = buildArtworkUnsubscribeUrl(args.userId, args.unsubscribeToken);
   const titleLine = args.title ? `"${args.title}"` : `Your ${label}`;
 
@@ -21,6 +33,8 @@ export function buildApprovalEmail(args: {
   const text = textParagraphs([
     `Great news! ${titleLine} has been reviewed and approved by the ICAF team.`,
     `It is now visible in the ICAF gallery:`,
+    submissionUrl,
+    galleryLinkLabel + ':',
     galleryUrl,
     'Thank you for your contribution to ICAF!',
     'To stop receiving ICAF artwork notification emails, use this link:',
@@ -36,10 +50,12 @@ export function buildApprovalEmail(args: {
         `Great news! ${titleLine} has been reviewed and approved by the ICAF team.`,
         'It is now visible in the ICAF gallery.',
       ]),
-      renderButton('View in the gallery', galleryUrl),
+      renderButton(submissionLinkLabel, submissionUrl),
+      `<p style="margin:0 0 16px;">${renderLink(galleryUrl, galleryLinkLabel)}</p>`,
       renderInfoBox('Approval details', [
         `Item: ${args.title ?? `Your ${label}`}`,
-        `Gallery link: ${galleryUrl}`,
+        `Submission link: ${submissionUrl}`,
+        `Gallery view: ${galleryUrl}`,
         'Status: approved',
       ]),
       htmlParagraphs(['Thank you for your contribution to ICAF.']),

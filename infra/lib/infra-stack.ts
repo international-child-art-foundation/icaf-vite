@@ -380,7 +380,6 @@ export class InfraStack extends Stack {
     );
 
     // ─── 6. Sharp Lambda Layer ────────────────────────────────────────────────
-    // TODO: build sharp layer before each deploy in CI.
     const sharpLayer = new lambda.LayerVersion(this, "SharpLayer", {
       code: lambda.Code.fromAsset("layers/sharp"),
       compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],

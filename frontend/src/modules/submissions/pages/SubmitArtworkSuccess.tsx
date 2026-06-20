@@ -12,6 +12,7 @@ export type SubmitArtworkSuccessState = {
     artworks: ArtworkWithPreview[];
     email?: string;
     kind: 'single' | 'group';
+    requiresAccountSetup: boolean;
   };
 };
 
@@ -51,6 +52,9 @@ function readSubmissionState(value: unknown) {
         : undefined,
     kind:
       'kind' in submission && submission.kind === 'group' ? 'group' : 'single',
+    requiresAccountSetup:
+      !('requiresAccountSetup' in submission) ||
+      submission.requiresAccountSetup !== false,
   } satisfies NonNullable<SubmitArtworkSuccessState['submission']>;
 }
 
@@ -83,22 +87,24 @@ export function SubmitArtworkSuccess() {
               ICAF has your submission for review. You do not need an account
               for this submission to continue.
             </p>
-            <div className="mt-5 rounded-lg border border-green-200 bg-green-50 p-4 text-sm leading-6 text-slate-700">
-              <div className="flex gap-3">
-                <MailCheck
-                  aria-hidden="true"
-                  className="text-secondary-green mt-0.5 h-5 w-5 shrink-0"
-                />
-                <p>
-                  To update the {artworkLabel} later or receive notifications,
-                  create an account by checking
-                  {submission?.email
-                    ? ` ${submission.email}`
-                    : ' your inbox'}{' '}
-                  and finishing setup from the email we sent.
-                </p>
+            {submission?.requiresAccountSetup && (
+              <div className="mt-5 rounded-lg border border-green-200 bg-green-50 p-4 text-sm leading-6 text-slate-700">
+                <div className="flex gap-3">
+                  <MailCheck
+                    aria-hidden="true"
+                    className="text-secondary-green mt-0.5 h-5 w-5 shrink-0"
+                  />
+                  <p>
+                    To update the {artworkLabel} later or receive notifications,
+                    create an account by checking
+                    {submission.email
+                      ? ` ${submission.email}`
+                      : ' your inbox'}{' '}
+                    and finishing setup from the email we sent.
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
             <Button asChild className="mt-5 rounded-full">
               <Link to="/gallery">Return to the gallery</Link>
             </Button>

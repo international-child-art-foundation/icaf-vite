@@ -113,6 +113,7 @@ export const handler = async (
             type: "art",
             id: artId,
             title: art.title,
+            theme: art.theme,
           }).catch((err) => console.error("Approval email failed:", err));
         }
       }).catch((err) => console.error("User lookup for approval email failed:", err));

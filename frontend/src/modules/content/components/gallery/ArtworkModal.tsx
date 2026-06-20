@@ -35,6 +35,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
   );
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null);
+  const scrollContentRef = useRef<HTMLDivElement>(null);
   const isFirstOpenRef = useRef(true);
 
   const currentNavIdx = navigationList.findIndex((a) => a.id === id);
@@ -79,7 +80,15 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
           modalContentRef.current,
           { opacity: 1, duration: 0.2, ease: 'power4.out' },
           '-=0.1',
-        );
+        )
+        .call(() => {
+          if (gridContainerRef.current) {
+            gridContainerRef.current.style.overflowY = 'auto';
+          }
+          if (scrollContentRef.current) {
+            scrollContentRef.current.style.overflowY = 'auto';
+          }
+        });
       return;
     }
 
@@ -124,8 +133,12 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
   function renderDefault() {
     if (!artworkData) return renderError();
     return (
-      <div className="mx-auto grid max-h-full grid-cols-2 gap-5 overflow-hidden px-6 md:gap-10">
-        <div className="flex flex-col overflow-auto">
+      <div className="mx-auto grid max-h-full min-w-0 grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-5 overflow-hidden px-6 md:gap-10">
+        <div
+          ref={scrollContentRef}
+          className="flex min-h-0 min-w-0 flex-col overflow-x-hidden"
+          style={{ overflowY: 'hidden' }}
+        >
           <GalleryArtworkInfo
             artwork={artworkData}
             variant="modal"
@@ -135,7 +148,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
           <div className="mt-auto pt-6">
             <p className="text-xl font-semibold">Share this post</p>
             <SocialShare shareUrl={getShareUrl()} />
-            <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="mt-4 grid grid-cols-1 gap-2 xl:grid-cols-2">
               <a
                 href={artworkData.url}
                 target="_blank"
@@ -151,7 +164,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
             </div>
           </div>
         </div>
-        <div className="relative flex min-h-[400px] flex-shrink items-center justify-center overflow-hidden rounded-xl">
+        <div className="relative flex min-h-[400px] flex-shrink select-none items-center justify-center overflow-hidden rounded-xl">
           <img
             src={artworkData.displayUrl}
             alt={artworkData.alt || artistText || 'Artwork'}
@@ -171,8 +184,12 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
   function renderDefaultMobile() {
     if (!artworkData) return renderError();
     return (
-      <div className="grid max-h-full gap-y-2 overflow-auto">
-        <div className="relative flex min-h-[300px] flex-shrink items-center justify-center overflow-hidden rounded-xl">
+      <div
+        ref={scrollContentRef}
+        className="grid max-h-full min-w-0 gap-y-2 overflow-x-hidden"
+        style={{ overflowY: 'hidden' }}
+      >
+        <div className="relative flex min-h-[300px] flex-shrink select-none items-center justify-center overflow-hidden rounded-xl">
           <img
             src={artworkData.displayUrl}
             alt={artworkData.alt || artistText || 'Artwork'}
@@ -223,7 +240,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.5)]"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden bg-[rgba(0,0,0,0.5)]"
       onClick={handleBackdropClick}
     >
       <button
@@ -239,7 +256,11 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
         <ChevronLeft size={24} />
       </button>
       <div
-        className={`relative flex flex-col overflow-hidden rounded-3xl bg-white ${isHorizontal ? 'w-[88%] max-w-[1100px] lg:w-[80%]' : 'w-[92%] max-w-[700px]'} max-h-[93%]`}
+        className={`relative flex min-w-0 flex-col overflow-hidden rounded-3xl bg-white ${
+          isHorizontal
+            ? 'max-h-[95dvh] w-[calc(100%-1rem)] max-w-[1500px] lg:w-[calc(100%-10rem)]'
+            : 'max-h-[90dvh] w-[calc(100%-1rem)] max-w-[800px]'
+        }`}
       >
         <div className="flex flex-shrink-0 justify-end px-4 pt-3">
           <span
@@ -251,12 +272,12 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
         </div>
         <div
           ref={gridContainerRef}
-          className="no-scrollbar grid overflow-scroll"
-          style={{ gridTemplateRows: '0.2fr' }}
+          className="no-scrollbar grid min-w-0 overflow-x-hidden"
+          style={{ gridTemplateRows: '0.2fr', overflowY: 'hidden' }}
         >
           <div
             ref={modalContentRef}
-            className={`min-h-[300px] ${isHorizontal ? 'px-16 pb-16 [@media(max-height:600px)]:px-8 [@media(max-height:600px)]:pb-8' : 'px-8 pb-8'}`}
+            className={`min-h-[300px] min-w-0 ${isHorizontal ? 'px-8 pb-8 xl:px-16 xl:pb-16 [@media(max-height:600px)]:px-8 [@media(max-height:600px)]:pb-8' : 'px-8 pb-8'}`}
           >
             {isHorizontal ? renderDefault() : renderDefaultMobile()}
           </div>

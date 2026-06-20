@@ -11,6 +11,7 @@ type GalleryGroupCardProps = {
   group: GroupListItem;
   onOpen: (group: GroupListItem) => void;
   actionSlot?: ReactNode;
+  interactiveWithActionSlot?: boolean;
 };
 
 function groupLabel(group: GroupListItem): string {
@@ -31,6 +32,7 @@ export function GalleryGroupCard({
   group,
   onOpen,
   actionSlot,
+  interactiveWithActionSlot = false,
 }: GalleryGroupCardProps) {
   const coverIds = group.preview_art_ids.slice(0, 4);
   const location = [group.region, group.country].filter(Boolean).join(', ');
@@ -38,7 +40,7 @@ export function GalleryGroupCard({
   const title = group.class_name || group.title;
   const theme = groupThemeLabel(group);
   const type = groupLabel(group);
-  const isWholeCardInteractive = !actionSlot;
+  const isWholeCardInteractive = !actionSlot || interactiveWithActionSlot;
   const openGroup = () => onOpen(group);
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (!isWholeCardInteractive) return;

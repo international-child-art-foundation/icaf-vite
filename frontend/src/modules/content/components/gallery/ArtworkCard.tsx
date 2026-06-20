@@ -55,13 +55,13 @@ const ArtworkCard = ({ artwork, openModal, actionSlot }: ArtworkCardProps) => {
           )} */}
         </section>
 
-        <section className="relative flex h-40 w-full flex-col gap-2 rounded-b-lg p-4">
+        <section className="relative flex h-40 w-full flex-col gap-1 rounded-b-lg p-4">
           <GalleryArtworkInfo
             artwork={artwork}
             variant="card"
             descriptionMode="none"
             maxTags={4}
-            className="max-h-20 overflow-hidden"
+            className="max-h-[84px] overflow-hidden"
           />
           <div className="mt-auto flex">
             <button

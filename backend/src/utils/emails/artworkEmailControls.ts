@@ -7,6 +7,7 @@ export async function sendApprovalEmailToUser(args: {
   type: "art" | "group";
   id: string;
   title?: string;
+  theme?: string;
 }): Promise<void> {
   if (shouldSuppressArtworkEmail(args.user)) {
     return;
@@ -21,5 +22,6 @@ export async function sendApprovalEmailToUser(args: {
     type: args.type,
     id: args.id,
     title: args.title,
+    theme: args.theme,
   });
 }

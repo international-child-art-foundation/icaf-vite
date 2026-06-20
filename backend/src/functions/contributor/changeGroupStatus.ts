@@ -1,10 +1,16 @@
-import { GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  BatchGetCommand,
+  GetCommand,
+  TransactWriteCommand,
+  UpdateCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
 import {
   ApiGatewayEvent,
   HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
+  ArtworkEntity,
   GroupEntity,
   GroupStatus,
   UserEntity,
@@ -12,6 +18,7 @@ import {
 } from "@icaf/shared";
 import { sendApprovalEmailToUser } from "../../utils/emails/artworkEmailControls";
 import { buildApprovedGroupGsiAttrs, GROUP_GSI_ATTRS_TO_REMOVE } from "../../dynamo/groupGsis";
+import { buildApprovedArtworkGsiAttrs } from "../../dynamo/artGsis";
 import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
 import { Status } from "../../dynamo/shared";
@@ -19,6 +26,36 @@ import { parseJsonBody } from "../../utils/request";
 import { getCurrentUser } from "../../utils/auth";
 
 const VALID_STATUSES: GroupStatus[] = ["approved", "hidden", "rejected"];
+
+async function getPendingGroupArtworks(group: GroupEntity): Promise<ArtworkEntity[]> {
+  if (group.member_art_ids.length === 0) return [];
+
+  let keys = group.member_art_ids.map((artId) => ({ PK: `ART#${artId}`, SK: "-" }));
+  const artworks: ArtworkEntity[] = [];
+
+  while (keys.length > 0) {
+    const result = await dynamodb.send(
+      new BatchGetCommand({
+        RequestItems: {
+          [TABLE_NAME]: {
+            Keys: keys,
+            ConsistentRead: true,
+          },
+        },
+      }),
+    );
+
+    artworks.push(...((result.Responses?.[TABLE_NAME] ?? []) as ArtworkEntity[]));
+    keys = (result.UnprocessedKeys?.[TABLE_NAME]?.Keys ?? []).map((key) => ({
+      PK: key.PK as string,
+      SK: key.SK as string,
+    }));
+  }
+
+  return artworks.filter(
+    (artwork) => artwork.status === "pending_review" && artwork.group_id === group.group_id,
+  );
+}
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -62,6 +99,9 @@ export const handler = async (
 
     const group = groupResult.Item as GroupEntity;
     const nowMs = Date.now();
+    const pendingArtworks = newStatus === "approved"
+      ? await getPendingGroupArtworks(group)
+      : [];
 
     let updateExpr: string;
     const exprValues: Record<string, unknown> = { ":status": newStatus };
@@ -87,16 +127,55 @@ export const handler = async (
       updateExpr = `SET #status = :status, REV_PK = :revPk, REV_SK = :revSk REMOVE ${GROUP_GSI_ATTRS_TO_REMOVE.join(", ")}`;
     }
 
-    await dynamodb.send(
-      new UpdateCommand({
-        TableName: TABLE_NAME,
-        Key: { PK: `GROUP#${groupId}`, SK: "-" },
-        UpdateExpression: updateExpr,
-        ExpressionAttributeNames: exprNames,
-        ExpressionAttributeValues: exprValues,
-        ConditionExpression: "attribute_exists(PK)",
-      }),
-    );
+    const groupUpdate = {
+      TableName: TABLE_NAME,
+      Key: { PK: `GROUP#${groupId}`, SK: "-" },
+      UpdateExpression: updateExpr,
+      ExpressionAttributeNames: exprNames,
+      ExpressionAttributeValues: exprValues,
+      ConditionExpression: "attribute_exists(PK)",
+    };
+
+    if (newStatus === "approved" && pendingArtworks.length > 0) {
+      await dynamodb.send(
+        new TransactWriteCommand({
+          TransactItems: [
+            { Update: groupUpdate },
+            ...pendingArtworks.map((artwork) => {
+              const artworkGsiAttrs = buildApprovedArtworkGsiAttrs({
+                tsMs: artwork.ts * 1000,
+                artId: artwork.art_id,
+                theme: artwork.theme,
+              });
+              const artworkValues: Record<string, unknown> = {
+                ":approved": "approved",
+                ":pending": "pending_review",
+                ":groupId": groupId,
+              };
+              const setAttrs = Object.entries(artworkGsiAttrs)
+                .map(([key, value], index) => {
+                  artworkValues[`:gsi${index}`] = value;
+                  return `${key} = :gsi${index}`;
+                })
+                .join(", ");
+
+              return {
+                Update: {
+                  TableName: TABLE_NAME,
+                  Key: { PK: `ART#${artwork.art_id}`, SK: "-" },
+                  UpdateExpression: `SET #status = :approved, ${setAttrs} REMOVE REV_PK, REV_SK`,
+                  ExpressionAttributeNames: { "#status": "status" },
+                  ExpressionAttributeValues: artworkValues,
+                  ConditionExpression: "#status = :pending AND group_id = :groupId",
+                },
+              };
+            }),
+          ],
+        }),
+      );
+    } else {
+      await dynamodb.send(new UpdateCommand(groupUpdate));
+    }
 
     // ── Send approval email (non-blocking) ────────────────────────────────
     if (newStatus === "approved" && group.notifications === true) {
@@ -113,6 +192,7 @@ export const handler = async (
             type: "group",
             id: groupId,
             title: group.title,
+            theme: group.theme,
           }).catch((err) => console.error("Approval email failed:", err));
         }
       }).catch((err) => console.error("User lookup for approval email failed:", err));

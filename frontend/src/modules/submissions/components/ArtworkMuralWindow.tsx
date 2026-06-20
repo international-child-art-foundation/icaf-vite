@@ -609,11 +609,13 @@ export function ArtworkSubmissionPreview({
   }
 
   return (
-    <div className="flex h-[clamp(520px,65vh,720px)] min-w-0 flex-col gap-3 rounded-lg border border-slate-200 bg-slate-100/80 p-3 shadow-sm">
+    <div className="flex h-[clamp(520px,65vh,720px)] min-w-0 flex-col gap-3 overflow-y-scroll rounded-lg border border-slate-200 bg-slate-100/80 p-3 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-slate-950">
-            {uploadedArtworkCount === 1 ? 'Artwork preview' : 'Artwork previews'}
+            {uploadedArtworkCount === 1
+              ? 'Artwork preview'
+              : 'Artwork previews'}
           </p>
           <p className="text-xs leading-5 text-slate-500">
             {uploadedArtworkCount} submitted
@@ -783,8 +785,16 @@ export function ArtworkMuralWindow({
             type="button"
             onClick={chooseFiles}
           >
-            <Upload aria-hidden="true" className="h-4 w-4" />
-            Upload
+            {uploadedArtworkCount > 0 &&
+            uploadedArtworkCount < maxCount &&
+            !isSingleArtwork ? (
+              '+ Add More'
+            ) : (
+              <>
+                <Upload aria-hidden="true" className="h-4 w-4" />
+                Upload
+              </>
+            )}
           </button>
         </div>
       </div>

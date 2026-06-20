@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ArtworkListItem, GroupListItem } from '@icaf/shared';
+import { Link } from 'react-router-dom';
 import { listGroupSubmissions } from '@/api/groups';
 import { listArtworkSubmissions } from '@/api/user';
+import { getArtwork, getGroup } from '@/api/public';
 import ArtworkCard from '@/modules/content/components/gallery/ArtworkCard';
 import ArtworkModal from '@/modules/content/components/gallery/ArtworkModal';
 import { GalleryGroupCard } from '@/modules/content/components/gallery/GalleryGroupCard';
@@ -35,6 +37,10 @@ export function MySubmissionsModule() {
   const [artworks, setArtworks] = useState<ArtworkListItem[]>([]);
   const [groups, setGroups] = useState<GroupListItem[]>([]);
   const [activeArtworkId, setActiveArtworkId] = useState('');
+  const [activeGroupArtworks, setActiveGroupArtworks] = useState<
+    ReturnType<typeof resolveApiArtwork>[]
+  >([]);
+  const [groupSlideshowLoading, setGroupSlideshowLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const isHorizontal = useMediaQuery('(orientation: landscape)', true);
@@ -43,6 +49,40 @@ export function MySubmissionsModule() {
     [artworks],
   );
   const isModalOpen = Boolean(activeArtworkId);
+  const modalArtworks =
+    activeGroupArtworks.length > 0 ? activeGroupArtworks : resolvedArtworks;
+
+  const openGroupSlideshow = (group: GroupListItem) => {
+    setGroupSlideshowLoading(true);
+    setError(null);
+    getGroup(group.group_id)
+      .then(async ({ group: groupEntity }) => {
+        const responses = await Promise.all(
+          groupEntity.member_art_ids.map((artId) => getArtwork(artId)),
+        );
+        const metadata = {
+          groupTitle: groupEntity.class_name || groupEntity.title,
+          groupOwnerName: groupEntity.submitter_display_name,
+          groupType: groupEntity.group_type,
+          groupCountry: groupEntity.country,
+          groupRegion: groupEntity.region,
+        };
+        const groupArtworks = responses.map(({ artwork }) =>
+          resolveApiArtwork(artwork, metadata),
+        );
+        if (!groupArtworks.length) throw new Error('This group has no artworks.');
+        setActiveGroupArtworks(groupArtworks);
+        setActiveArtworkId(groupArtworks[0].id);
+      })
+      .catch((err: unknown) => {
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Failed to load group slideshow',
+        );
+      })
+      .finally(() => setGroupSlideshowLoading(false));
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -72,19 +112,35 @@ export function MySubmissionsModule() {
     >
       <ArtworkModal
         id={activeArtworkId}
-        artworks={resolvedArtworks}
-        navigationList={resolvedArtworks}
+        artworks={modalArtworks}
+        navigationList={modalArtworks}
         onNavigate={setActiveArtworkId}
-        closeModal={() => setActiveArtworkId('')}
+        closeModal={() => {
+          setActiveArtworkId('');
+          setActiveGroupArtworks([]);
+        }}
         isHorizontal={isHorizontal}
         modalState={isModalOpen}
         getShareUrl={() => window.location.href}
       />
       {error && <ModuleState tone="error">{error}</ModuleState>}
+      {groupSlideshowLoading && (
+        <ModuleState>Loading group slideshow...</ModuleState>
+      )}
       {loading ? (
         <ModuleState>Loading your submissions...</ModuleState>
       ) : (
         <div className="flex flex-col gap-8">
+          <p className="rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm leading-6 text-slate-700">
+            Need to update information about an artwork?{' '}
+            <Link
+              className="text-secondary-blue font-semibold underline-offset-4 hover:underline"
+              to="/contact"
+            >
+              Contact us
+            </Link>{' '}
+            and include the artwork title in your message.
+          </p>
           <section>
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-neutral-500">
               Artwork
@@ -128,7 +184,8 @@ export function MySubmissionsModule() {
                   <GalleryGroupCard
                     key={group.group_id}
                     group={group}
-                    onOpen={() => undefined}
+                    onOpen={openGroupSlideshow}
+                    interactiveWithActionSlot
                     actionSlot={
                       <p className="text-xs text-neutral-500">
                         {groupTitle(group)} · {group.status} ·{' '}

@@ -69,8 +69,10 @@ export function getGalleryInfoTags(
 
 const textStyles = {
   modal: {
-    title: 'text-2xl font-semibold leading-tight text-neutral-950',
-    secondary: 'text-base font-medium text-neutral-600',
+    title:
+      'line-clamp-[6] max-h-[200px] text-2xl font-semibold leading-tight break-words [overflow-wrap:anywhere] text-neutral-950',
+    secondary:
+      'break-words [overflow-wrap:anywhere] text-base font-medium text-neutral-600',
     meta: 'text-sm font-medium text-neutral-500',
     description: 'text-base leading-7 text-neutral-700',
     tag: 'px-2.5 py-1 text-xs',
@@ -83,7 +85,8 @@ const textStyles = {
     tag: 'px-2.5 py-1 text-[11px]',
   },
   card: {
-    title: 'truncate text-base font-semibold leading-snug text-neutral-950 xl:text-lg',
+    title:
+      'truncate text-base font-semibold leading-snug text-neutral-950 xl:text-lg',
     secondary: 'truncate text-sm font-medium text-neutral-600',
     meta: 'text-xs font-medium text-neutral-500',
     description: 'text-sm text-neutral-600',
@@ -107,14 +110,14 @@ export const GalleryArtworkTags = ({
   if (tags.length === 0) return null;
 
   return (
-    <div className={`flex flex-wrap gap-1.5 ${className}`}>
+    <div className={`flex min-w-0 flex-wrap gap-1.5 ${className}`}>
       {tags.map(({ label, icon: Icon, tone }) => (
         <span
           key={`${tone}-${label}`}
-          className={`inline-flex max-w-full items-center gap-1 rounded-full border font-semibold leading-tight ${tagToneClasses[tone]} ${styles.tag}`}
+          className={`inline-flex min-w-0 max-w-full items-center gap-1 overflow-hidden rounded-full border font-semibold leading-tight ${tagToneClasses[tone]} ${styles.tag}`}
         >
           <Icon size={12} strokeWidth={2.2} className="shrink-0" />
-          <span className="truncate">{label}</span>
+          <span className="min-w-0 truncate">{label}</span>
         </span>
       ))}
     </div>
@@ -134,7 +137,7 @@ export const GalleryArtworkInfo = ({
   const hasTitle = !!artwork.title?.trim();
 
   return (
-    <div className={className}>
+    <div className={`min-w-0 ${className}`}>
       <p className={`${styles.title} ${hasTitle ? 'italic' : ''}`}>
         {hasTitle ? <>&ldquo;{primaryText}&rdquo;</> : primaryText}
       </p>
@@ -155,7 +158,15 @@ export const GalleryArtworkInfo = ({
               description={artwork.description}
             />
           ) : (
-            <p className={styles.description}>{artwork.description}</p>
+            <p
+              className={`${styles.description} ${
+                variant === 'modal'
+                  ? 'max-h-[min(300px,25dvh)] overflow-y-auto overflow-x-hidden break-words pr-2 [overflow-wrap:anywhere]'
+                  : ''
+              }`}
+            >
+              {artwork.description}
+            </p>
           )}
         </div>
       )}

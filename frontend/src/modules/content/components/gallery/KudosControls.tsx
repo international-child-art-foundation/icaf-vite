@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Sparkles } from 'lucide-react';
+import { Star } from 'lucide-react';
 import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
 import { giveArtworkKudos } from '@/api/public';
 import { cn } from '@/utils/utils';
@@ -302,7 +302,7 @@ export const KudosControls = ({
           >
             +{KUDOS_AMOUNT}
           </span>
-          <Sparkles
+          <Star
             aria-hidden="true"
             className="pointer-events-none absolute right-1 top-0 h-4 w-4 text-[#FBB22E]"
             style={{ animation: 'icaf-kudos-spark 760ms ease-out both' }}
@@ -345,7 +345,7 @@ export const KudosControls = ({
           >
             +{KUDOS_AMOUNT}
           </span>
-          <Sparkles
+          <Star
             aria-hidden="true"
             className="pointer-events-none absolute right-1 top-1 h-3.5 w-3.5 text-[#FBB22E]"
             style={{ animation: 'icaf-kudos-spark 760ms ease-out both' }}
@@ -409,7 +409,7 @@ export const KudosControls = ({
             compact && 'gap-1 px-2 py-1',
           )}
         >
-          <Sparkles
+          <Star
             className={cn(
               'h-4 w-4 shrink-0 transition-opacity duration-700',
               usedDisabled && 'opacity-55',
@@ -421,8 +421,8 @@ export const KudosControls = ({
               : failureCooldownUntil > Date.now()
                 ? 'Try again soon'
                 : status.remaining < KUDOS_AMOUNT
-                ? 'Out of kudos'
-                : 'Give kudos!'}
+                  ? 'Out of kudos'
+                  : 'Give kudos!'}
           </span>
         </span>
         {buttonCounter}

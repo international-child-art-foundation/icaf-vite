@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
-import { ChevronLeft, Globe2, LogOut, Mail, Send } from 'lucide-react';
+import { Bell, ChevronLeft, LogOut, Mail, Send } from 'lucide-react';
 import type { AuthStatusResponse } from '@icaf/shared';
 import { getAuthStatus, logout } from '@/api/auth';
 import { createArtworkUpload, submitGuestArtwork } from '@/api/public';
@@ -9,6 +9,7 @@ import { submitArtwork } from '@/api/user';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { ArtworkMuralWindow } from '@/modules/submissions/components/ArtworkMuralWindow';
 import { ArtworkConsent } from '@/modules/submissions/components/ArtworkConsent';
+import { CountryPicker } from '@/modules/submissions/components/CountryPicker';
 import { ThemePicker } from '@/modules/submissions/components/ThemePicker';
 import {
   getSubmitArtworkPageCopy,
@@ -499,6 +500,7 @@ export function SubmitArtwork() {
           ],
           email: draft.submitterEmail.trim(),
           kind: 'single',
+          requiresAccountSetup: !authenticatedUser,
         },
       };
       setDraft(initialSubmitArtworkDraft);
@@ -696,17 +698,16 @@ export function SubmitArtwork() {
                   </p>
                 )}
               </div>
-              <AccountTextField
+              <CountryPicker
                 error={errors.country}
                 label="Artwork country"
-                leadingIcon={<Globe2 aria-hidden="true" className="h-4 w-4" />}
-                maxLength={200}
                 name="country"
                 value={draft.country}
-                onChange={(event) =>
+                required
+                onChange={(country) =>
                   setDraft((current) => ({
                     ...current,
-                    country: event.target.value,
+                    country,
                   }))
                 }
               />
@@ -791,6 +792,25 @@ export function SubmitArtwork() {
                 }))
               }
             />
+
+            <label className="flex items-start gap-3 rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+              <input
+                checked={draft.notifications}
+                className="accent-secondary-blue mt-1 h-4 w-4"
+                name="notifications"
+                type="checkbox"
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    notifications: event.target.checked,
+                  }))
+                }
+              />
+              <span className="flex gap-2">
+                <Bell aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-slate-500" />
+                Send submission notifications for this artwork.
+              </span>
+            </label>
 
             {hasOverageArtwork && (
               <div

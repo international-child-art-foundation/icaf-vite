@@ -6,7 +6,6 @@ import { buildApprovalEmail } from "./templates/approvalNotification";
 /**
  * Sent to the submitter when their artwork or group submission is approved.
  * For group submissions: one email per group approval (not per constituent artwork).
- * TODO: The gallery URL format should be updated when the frontend routes are finalized.
  */
 export async function sendApprovalEmail(args: {
   toEmail: string;
@@ -15,6 +14,7 @@ export async function sendApprovalEmail(args: {
   type: "art" | "group";
   id: string;
   title?: string;
+  theme?: string;
 }): Promise<void> {
   const email = buildApprovalEmail(args);
 

@@ -295,6 +295,7 @@ export function ReviewArtworkQueue({
       <ArtworkModal
         id={activeArtworkId}
         artworks={resolvedArtworks}
+        artworksLoading={loading}
         navigationList={resolvedArtworks}
         onNavigate={setActiveArtworkId}
         closeModal={() => setActiveArtworkId('')}

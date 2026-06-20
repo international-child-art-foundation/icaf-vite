@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Star } from 'lucide-react';
 import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
 import { giveArtworkKudos } from '@/api/public';
+import { Button } from '@/shared/components/ui/button';
 import { cn } from '@/utils/utils';
 import {
   consumeDailyKudos,
@@ -356,9 +357,11 @@ export const KudosControls = ({
   );
 
   const button = showButton ? (
-    <button
+    <Button
       ref={buttonRef}
       type="button"
+      variant="ghost"
+      size={compact ? 'sm' : 'default'}
       aria-disabled={disabled}
       title={disabledReason ?? `${status.remaining} kudos left today`}
       onClick={(e) => {
@@ -366,9 +369,9 @@ export const KudosControls = ({
         void handleGiveKudos();
       }}
       className={cn(
-        'icaf-kudos-outline-surface group relative isolate inline-flex min-h-11 w-full items-stretch justify-center overflow-hidden rounded-md p-[3px] text-center text-sm font-bold text-black shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]',
+        'icaf-kudos-outline-surface group relative isolate h-full w-full items-stretch justify-center gap-0 overflow-hidden rounded-md bg-transparent p-[3px] text-center text-sm font-bold text-black shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-transparent hover:shadow-md active:scale-[0.98]',
         layout === 'nametag' &&
-          'border border-neutral-200 bg-white p-0 text-neutral-900 shadow-sm hover:shadow-lg',
+          'border border-neutral-200 bg-white p-0 text-neutral-900 shadow-sm hover:bg-white hover:shadow-lg',
         usedDisabled &&
           'cursor-default text-neutral-600 shadow-sm duration-700 hover:translate-y-0 hover:shadow-sm active:scale-100',
         layout === 'nametag' &&
@@ -376,7 +379,7 @@ export const KudosControls = ({
           'border-neutral-200/60 bg-white/90 shadow-sm hover:shadow-sm',
         unavailableDisabled &&
           'cursor-not-allowed text-neutral-500 shadow-none hover:translate-y-0 hover:shadow-none',
-        compact && 'min-h-9 text-xs',
+        compact && 'text-xs',
       )}
     >
       {layout !== 'nametag' && (
@@ -392,21 +395,19 @@ export const KudosControls = ({
       )}
       <span
         className={cn(
-          'font-open-sans relative grid min-h-[calc(2.75rem-6px)] w-full grid-cols-[3fr_1fr] overflow-hidden rounded-[5px] bg-white text-neutral-950 transition-colors duration-700',
+          'font-open-sans relative grid h-full min-h-0 w-full grid-cols-[3fr_1fr] overflow-hidden rounded-[5px] bg-white text-neutral-950 transition-colors duration-700',
           layout === 'nametag' &&
-            'min-h-[calc(2.75rem-2px)] rounded-[5px] bg-white text-neutral-900 group-hover:bg-neutral-50',
-          compact && 'min-h-[calc(2.25rem-6px)]',
-          layout === 'nametag' && compact && 'min-h-[calc(2.25rem-2px)]',
+            'rounded-[5px] bg-white text-neutral-900 group-hover:bg-neutral-50',
         )}
       >
         <span
           className={cn(
-            'flex min-w-0 items-center justify-center gap-1.5 bg-white px-3 py-2 transition-colors duration-300 group-hover:bg-white/90',
+            'flex min-h-0 min-w-0 items-center justify-center gap-1.5 bg-white px-3 transition-colors duration-300 group-hover:bg-white/90',
             usedDisabled &&
               'bg-neutral-100/80 text-neutral-500 duration-700 group-hover:bg-neutral-100/80',
             unavailableDisabled &&
               'bg-neutral-200/80 text-neutral-500 group-hover:bg-neutral-200/80',
-            compact && 'gap-1 px-2 py-1',
+            compact && 'gap-1 px-2',
           )}
         >
           <Star
@@ -421,13 +422,13 @@ export const KudosControls = ({
               : failureCooldownUntil > Date.now()
                 ? 'Try again soon'
                 : status.remaining < KUDOS_AMOUNT
-                  ? 'Out of kudos'
+                  ? 'More tomorrow'
                   : 'Give kudos!'}
           </span>
         </span>
         {buttonCounter}
       </span>
-    </button>
+    </Button>
   ) : null;
 
   const tooltip =
@@ -449,7 +450,7 @@ export const KudosControls = ({
       : null;
 
   return (
-    <div className={className}>
+    <div className={cn('h-full', className)}>
       {button}
       {!showButton && counter}
       {tooltip}

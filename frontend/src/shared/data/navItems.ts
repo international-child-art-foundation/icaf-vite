@@ -12,7 +12,7 @@ import professional from '@/shared/assets/images/navigation/getInvolved/professi
 import student from '@/shared/assets/images/navigation/getInvolved/student_small.webp';
 import volunteer from '@/shared/assets/images/navigation/getInvolved/volunteer.webp';
 import latest from '@/shared/assets/images/navigation/news/latestNews_small.webp';
-import upcoming from '@/shared/assets/images/navigation/news/upcomingEvents.webp';
+// import upcoming from '@/shared/assets/images/navigation/news/upcomingEvents.webp';
 import board from '@/shared/assets/images/icafGroupPhoto.webp';
 import wca from '@/shared/assets/images/navigation/programs/worldChildrensAward.webp';
 import researchAndPublications from '@/shared/assets/images/UnitedStatesSLKorth.webp';
@@ -166,13 +166,13 @@ export const navItems: NavItem[] = [
         imageSrc: submitArtwork,
         hoverDescription: "Feature your child's artwork in the ICAF gallery.",
       },
-      {
-        label: 'Upcoming Events',
-        href: 'https://worldchildrensfestival.org/',
-        external: true,
-        imageSrc: upcoming,
-        hoverDescription: 'See what ICAF has planned for the future.',
-      },
+      // {
+      //   label: 'Upcoming Events',
+      //   href: 'https://worldchildrensfestival.org/',
+      //   external: true,
+      //   imageSrc: upcoming,
+      //   hoverDescription: 'See what ICAF has planned for the future.',
+      // },
 
       // {
       //   label: 'Corporate Partnerships',

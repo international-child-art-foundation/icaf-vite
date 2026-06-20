@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 const SCROLL_BASE_PX_S = 10;
-const SCROLL_START_DELAY_S = 6;
-const SCROLLBAR_W = 4;
-const SCROLLBAR_GAP = 5;
+const SCROLL_START_DELAY_MS = 6000;
 
 const getCap = (vh: number) => {
   if (vh <= 768) return 96;
@@ -12,21 +10,22 @@ const getCap = (vh: number) => {
 };
 
 export const DescriptionScroll = ({ description }: { description: string }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const pRef = useRef<HTMLParagraphElement>(null);
-  const rafRef = useRef<number | null>(null);
+  const resizeRafRef = useRef<number | null>(null);
+  const animationRafRef = useRef<number | null>(null);
+  const pausedRef = useRef(false);
 
   const [cap, setCap] = useState(() =>
     typeof window !== 'undefined' ? getCap(window.innerHeight) : 96,
   );
   const [naturalH, setNaturalH] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [manualOffset, setManualOffset] = useState<number | null>(null);
 
   useEffect(() => {
     const onResize = () => {
-      if (rafRef.current !== null) return;
-      rafRef.current = requestAnimationFrame(() => {
-        rafRef.current = null;
+      if (resizeRafRef.current !== null) return;
+      resizeRafRef.current = requestAnimationFrame(() => {
+        resizeRafRef.current = null;
         setCap((current) => {
           const next = getCap(window.innerHeight);
           return current === next ? current : next;
@@ -36,13 +35,14 @@ export const DescriptionScroll = ({ description }: { description: string }) => {
     window.addEventListener('resize', onResize);
     return () => {
       window.removeEventListener('resize', onResize);
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      if (resizeRafRef.current !== null) {
+        cancelAnimationFrame(resizeRafRef.current);
+      }
     };
   }, []);
 
   useEffect(() => {
     if (!pRef.current) return;
-    setManualOffset(null);
     const el = pRef.current;
     const measure = () => {
       setNaturalH((current) => {
@@ -56,121 +56,78 @@ export const DescriptionScroll = ({ description }: { description: string }) => {
     return () => ro.disconnect();
   }, [description]);
 
-  const descOuterH = Math.min(naturalH || cap, cap);
-  const scrollDist = Math.max(0, naturalH - descOuterH);
+  const containerH = Math.min(naturalH || cap, cap);
+  const scrollDist = Math.max(0, naturalH - containerH);
 
   useEffect(() => {
-    setManualOffset((prev) =>
-      prev !== null ? Math.min(prev, scrollDist) : null,
-    );
-  }, [scrollDist]);
+    const container = containerRef.current;
+    if (!container || scrollDist === 0) return;
 
-  const handleWheel = (e: React.WheelEvent) => {
-    if (scrollDist === 0) return;
-    e.preventDefault();
-    e.stopPropagation();
-    let current: number;
-    if (manualOffset !== null) {
-      current = manualOffset;
-    } else if (pRef.current) {
-      const t = getComputedStyle(pRef.current).transform;
-      current = t === 'none' ? 0 : -new DOMMatrix(t).m42;
-    } else {
-      current = 0;
-    }
-    setManualOffset(
-      Math.max(0, Math.min(scrollDist, current + e.deltaY * 0.5)),
-    );
-  };
+    container.scrollTop = 0;
+    let previousTime: number | null = null;
+    let delayRemaining = SCROLL_START_DELAY_MS;
 
-  const inManual = manualOffset !== null;
-  const duration = scrollDist > 0 ? scrollDist / SCROLL_BASE_PX_S : 0;
-  const thumbH =
-    scrollDist > 0 ? Math.max(12, (descOuterH / naturalH) * descOuterH) : 0;
-  const thumbDist = descOuterH - thumbH;
-  const manualThumbY =
-    manualOffset !== null && scrollDist > 0
-      ? (manualOffset / scrollDist) * thumbDist
-      : 0;
+    const animate = (time: number) => {
+      if (previousTime === null) previousTime = time;
+      const elapsed = time - previousTime;
+      previousTime = time;
+
+      if (!pausedRef.current) {
+        if (delayRemaining > 0) {
+          delayRemaining = Math.max(0, delayRemaining - elapsed);
+        } else if (container.scrollTop < scrollDist) {
+          container.scrollTop = Math.min(
+            scrollDist,
+            container.scrollTop + (elapsed * SCROLL_BASE_PX_S) / 1000,
+          );
+        }
+      }
+
+      animationRafRef.current = requestAnimationFrame(animate);
+    };
+
+    animationRafRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (animationRafRef.current !== null) {
+        cancelAnimationFrame(animationRafRef.current);
+        animationRafRef.current = null;
+      }
+    };
+  }, [description, scrollDist]);
 
   return (
     <div
+      ref={containerRef}
+      className="description-scrollbar"
       style={{
-        display: 'flex',
-        gap: scrollDist > 0 ? SCROLLBAR_GAP : 0,
-        height: descOuterH,
+        height: containerH,
         marginTop: 6,
+        overflowX: 'hidden',
+        overflowY: scrollDist > 0 ? 'auto' : 'hidden',
+        scrollbarColor: '#a3a3a3 #e5e5e5',
+        scrollbarWidth: 'thin',
       }}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onWheel={handleWheel}
+      onMouseEnter={() => {
+        pausedRef.current = true;
+      }}
+      onMouseLeave={() => {
+        pausedRef.current = false;
+      }}
+      onWheel={(event) => event.stopPropagation()}
     >
-      <div style={{ flex: 1, overflow: 'hidden', height: descOuterH }}>
-        <p
-          ref={pRef}
-          className="neutral-500"
-          style={{
-            fontSize: 14,
-            lineHeight: '20px',
-            fontFamily: "'Open Sans Variable', 'Open Sans', sans-serif",
-            userSelect: 'text',
-            cursor: 'text',
-            willChange: scrollDist > 0 ? 'transform' : 'auto',
-            ...(scrollDist > 0
-              ? inManual
-                ? { transform: `translateY(-${manualOffset}px)` }
-                : {
-                    '--desc-dist': `-${scrollDist}px`,
-                    animationName: 'desc-scroll',
-                    animationDuration: `${duration}s`,
-                    animationTimingFunction: 'linear',
-                    animationDelay: `${SCROLL_START_DELAY_S}s`,
-                    animationFillMode: 'forwards',
-                    animationPlayState: paused ? 'paused' : 'running',
-                  }
-              : {}),
-          }}
-        >
-          {description}
-        </p>
-      </div>
-      {scrollDist > 0 && (
-        <div
-          style={{ width: SCROLLBAR_W, flexShrink: 0, position: 'relative' }}
-        >
-          <div
-            className="bg-neutral-200"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              borderRadius: SCROLLBAR_W / 2,
-            }}
-          />
-          <div
-            className="bg-neutral-400"
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: thumbH,
-              borderRadius: SCROLLBAR_W / 2,
-              willChange: 'transform',
-              ...(inManual
-                ? { transform: `translateY(${manualThumbY}px)` }
-                : {
-                    '--thumb-dist': `${thumbDist}px`,
-                    animationName: 'thumb-scroll',
-                    animationDuration: `${duration}s`,
-                    animationTimingFunction: 'linear',
-                    animationDelay: `${SCROLL_START_DELAY_S}s`,
-                    animationFillMode: 'forwards',
-                    animationPlayState: paused ? 'paused' : 'running',
-                  }),
-            }}
-          />
-        </div>
-      )}
+      <p
+        ref={pRef}
+        className="neutral-500 pr-1"
+        style={{
+          fontSize: 14,
+          lineHeight: '20px',
+          fontFamily: "'Open Sans Variable', 'Open Sans', sans-serif",
+          userSelect: 'text',
+          cursor: 'text',
+        }}
+      >
+        {description}
+      </p>
     </div>
   );
 };

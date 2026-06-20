@@ -147,6 +147,8 @@ export interface ReviewGroupQueueResponse {
 
 export interface ChangeGroupStatusRequest {
     status: Extract<GroupStatus, 'approved' | 'hidden' | 'rejected'>;
+    /** When approving a group, also approve each pending artwork in the group. */
+    approve_all?: boolean;
 }
 
 export interface ChangeGroupStatusResponse {

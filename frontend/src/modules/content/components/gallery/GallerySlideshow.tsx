@@ -24,13 +24,14 @@ const KB_STYLES = `
     from { opacity: 0; }
     to { opacity: 1; }
   }
-  @keyframes desc-scroll {
-    from { transform: translateY(0); }
-    to   { transform: translateY(var(--desc-dist)); }
+  .description-scrollbar::-webkit-scrollbar { width: 6px; }
+  .description-scrollbar::-webkit-scrollbar-track {
+    background: #e5e5e5;
+    border-radius: 3px;
   }
-  @keyframes thumb-scroll {
-    from { transform: translateY(0); }
-    to   { transform: translateY(var(--thumb-dist)); }
+  .description-scrollbar::-webkit-scrollbar-thumb {
+    background: #a3a3a3;
+    border-radius: 3px;
   }
   @keyframes kb-zoom-in {
     from { transform: scale(1.0) translate(0%, 0%); }

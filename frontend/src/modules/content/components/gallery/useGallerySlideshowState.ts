@@ -10,6 +10,11 @@ export type SlotState = { artworkIdx: number; animKey: number };
 const DIM_MS = 2000;
 const HIDE_MS = 5000;
 
+function getInitialPausedState() {
+  if (typeof window === 'undefined') return false;
+  return new URLSearchParams(window.location.search).get('paused') === 'true';
+}
+
 /**
  * Shared state for both desktop and mobile gallery slideshow variants.
  * Each component adds its own presentation logic on top (auto-advance,
@@ -44,7 +49,7 @@ export const useGallerySlideshowState = (
   const currentIdxRef = useRef(0);
 
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused, setIsPaused] = useState(getInitialPausedState);
   const [uiState, setUiState] = useState<'full' | 'dim' | 'hidden'>('full');
 
   const outletContext = useOutletContext<IGalleryContext | null>();
@@ -76,6 +81,7 @@ export const useGallerySlideshowState = (
     galleryParams.delete('id');
     galleryParams.delete('scope');
     galleryParams.delete('group');
+    galleryParams.delete('paused');
     const query = galleryParams.toString();
     void navigate(`/gallery${query ? `?${query}` : ''}`);
   }, [closeOverride, location.search, navigate]);
@@ -133,6 +139,17 @@ export const useGallerySlideshowState = (
   const advance = useCallback(
     (dir: 1 | -1 = 1) => {
       if (artworks.length <= 1) return;
+
+      // A spotlight/share link pauses only the artwork it opened on. Once the
+      // visitor navigates in either direction, resume the slideshow and make
+      // the live URL reflect that it is no longer pinned to the initial art.
+      setIsPaused(false);
+      const url = new URL(window.location.href);
+      if (url.searchParams.has('paused')) {
+        url.searchParams.delete('paused');
+        window.history.replaceState(window.history.state, '', url);
+      }
+
       const nextIdx =
         (currentIdxRef.current + dir + artworks.length) % artworks.length;
       advanceTo(nextIdx);
@@ -190,6 +207,7 @@ export const useGallerySlideshowState = (
     const url = new URL(window.location.href);
     url.pathname = '/gallery/slideshow';
     url.searchParams.set('id', currentArtwork.id);
+    url.searchParams.set('paused', 'true');
     return url.toString();
   })();
 

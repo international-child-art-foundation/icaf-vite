@@ -22,7 +22,7 @@ export const galleryNametag = (
         />
         <KudosControls
           artwork={artwork}
-          className="mt-3"
+          className="mt-3 h-9"
           compact
           layout="nametag"
           onKudosApplied={onKudosApplied}

@@ -361,7 +361,13 @@ export const MobileLip = ({
         )}
       </div>
 
-      <div style={{ opacity: t, padding: '0 16px 28px' }}>
+      <div
+        style={{
+          opacity: textVisible ? t : 0,
+          transition: textVisible ? 'opacity 0.2s ease' : 'opacity 0.1s ease',
+          padding: '0 16px 28px',
+        }}
+      >
         <div
           style={{
             height: 1,
@@ -487,7 +493,7 @@ export const MobileLip = ({
         >
           <KudosControls
             artwork={artwork}
-            className="mb-3"
+            className="mb-3 h-9"
             compact
             layout="nametag"
             onKudosApplied={onKudosApplied}

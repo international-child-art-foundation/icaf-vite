@@ -7,10 +7,12 @@ import { getArtistDisplayNameWithAge } from '@/utils/galleryProcessing';
 import { GalleryArtworkInfo } from './GalleryArtworkInfo';
 import { KudosControls } from './KudosControls';
 import { SocialShare } from './SocialShare';
+import { Button } from '@/shared/components/ui/button';
 
 type ArtworkModalProps = {
   id: string;
   artworks: TResolvedArtwork[];
+  artworksLoading: boolean;
   navigationList: TResolvedArtwork[];
   onNavigate: (id: string) => void;
   modalState: boolean;
@@ -24,6 +26,7 @@ type ArtworkModalProps = {
 const ArtworkModal: React.FC<ArtworkModalProps> = ({
   id,
   artworks,
+  artworksLoading,
   navigationList,
   onNavigate,
   modalState,
@@ -36,6 +39,10 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
   const [artworkData, setArtworkData] = useState<TResolvedArtwork | undefined>(
     undefined,
   );
+  const [unavailableGrace, setUnavailableGrace] = useState({
+    id: '',
+    elapsed: false,
+  });
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null);
   const scrollContentRef = useRef<HTMLDivElement>(null);
@@ -48,6 +55,24 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
     currentNavIdx < navigationList.length - 1
       ? navigationList[currentNavIdx + 1].id
       : null;
+
+  const requestedArtworkExists = artworks.some((artwork) => artwork.id === id);
+  const canShowUnavailable =
+    !artworksLoading &&
+    !requestedArtworkExists &&
+    unavailableGrace.id === id &&
+    unavailableGrace.elapsed;
+
+  useEffect(() => {
+    if (!modalState) return;
+
+    setUnavailableGrace({ id, elapsed: false });
+    const timeout = window.setTimeout(() => {
+      setUnavailableGrace({ id, elapsed: true });
+    }, 1000);
+
+    return () => window.clearTimeout(timeout);
+  }, [id, modalState]);
 
   useEffect(() => {
     if (!modalState) return;
@@ -116,7 +141,9 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
     ? getArtistDisplayNameWithAge(artworkData)
     : '';
 
-  function renderError() {
+  function renderUnavailable() {
+    if (!canShowUnavailable) return null;
+
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4">
         <p className="font-montserrat text-xl font-semibold">
@@ -134,7 +161,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
   }
 
   function renderDefault() {
-    if (!artworkData) return renderError();
+    if (artworkData?.id !== id) return renderUnavailable();
     return (
       <div className="mx-auto grid max-h-full min-w-0 grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-5 overflow-hidden px-6 md:gap-10">
         <div
@@ -151,16 +178,17 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
           <div className="mt-auto pt-6">
             <p className="text-xl font-semibold">Share this post</p>
             <SocialShare shareUrl={getShareUrl()} />
-            <div className="mt-4 grid grid-cols-1 gap-2 xl:grid-cols-2">
-              <button
+            <div className="mt-4 grid grid-cols-1 items-stretch gap-2 xl:grid-cols-2">
+              <Button
                 type="button"
                 onClick={() => onEnterExhibition(artworkData.id)}
-                className="bg-primary text-text-inverse flex min-h-11 items-center justify-center rounded px-4 py-2.5 text-center text-base"
+                className="text-text-inverse flex items-center justify-center rounded"
               >
-                Mural View
-              </button>
+                Spotlight View
+              </Button>
               <KudosControls
                 artwork={artworkData}
+                className="h-full"
                 onKudosApplied={onKudosApplied}
               />
             </div>
@@ -184,7 +212,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
   }
 
   function renderDefaultMobile() {
-    if (!artworkData) return renderError();
+    if (artworkData?.id !== id) return renderUnavailable();
     return (
       <div
         ref={scrollContentRef}
@@ -213,16 +241,17 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
         <div className="mt-4">
           <p className="text-xl font-semibold">Share this post</p>
           <SocialShare shareUrl={getShareUrl()} />
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <button
+          <div className="mt-4 grid grid-cols-2 items-stretch gap-2">
+            <Button
               type="button"
               onClick={() => onEnterExhibition(artworkData.id)}
-              className="bg-primary text-text-inverse flex min-h-9 items-center justify-center rounded px-3 py-1.5 text-center text-sm"
+              size="sm"
             >
-              Mural View
-            </button>
+              Spotlight View
+            </Button>
             <KudosControls
               artwork={artworkData}
+              className="h-full"
               compact
               onKudosApplied={onKudosApplied}
             />

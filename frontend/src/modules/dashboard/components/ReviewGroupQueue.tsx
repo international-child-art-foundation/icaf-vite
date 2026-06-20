@@ -62,14 +62,29 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
 
   useEffect(loadQueue, [loadQueue]);
 
-  const mutateStatus = async (ids: string[], status: ReviewStatus) => {
+  const mutateStatus = async (
+    ids: string[],
+    status: ReviewStatus,
+    approveAll = false,
+  ) => {
     if (ids.length === 0) return;
     setBusy(true);
     setError(null);
     setMessage(null);
     try {
-      await Promise.all(ids.map((id) => changeGroupStatus(id, { status })));
-      setMessage(`${ids.length} group${ids.length === 1 ? '' : 's'} updated.`);
+      await Promise.all(
+        ids.map((id) =>
+          changeGroupStatus(id, {
+            status,
+            ...(status === 'approved' ? { approve_all: approveAll } : {}),
+          }),
+        ),
+      );
+      setMessage(
+        status === 'approved'
+          ? `${ids.length} group${ids.length === 1 ? '' : 's'} approved${approveAll ? ' with all pending artwork' : ' without changing artwork status'}.`
+          : `${ids.length} group${ids.length === 1 ? '' : 's'} updated.`,
+      );
       loadQueue();
     } catch (err) {
       setError(
@@ -145,15 +160,35 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
         </div>
       }
     >
-      <div className="mb-4 flex flex-wrap gap-2">
-        <button
-          type="button"
-          disabled={busy || selectedIds.length === 0}
-          onClick={() => void mutateStatus(selectedIds, 'approved')}
-          className="rounded-md bg-green-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
-        >
-          Approve selected
-        </button>
+      <p className="mb-2 text-xs text-neutral-600">
+        <strong>Approve groups only</strong> publishes the group scaffold and
+        leaves its artwork pending. <strong>Approve all</strong> also publishes
+        every pending artwork in the group.
+      </p>
+      <div className="mb-4 flex flex-wrap items-stretch gap-2">
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-green-200 bg-green-50 p-2">
+          <span className="px-1 text-xs font-semibold text-green-900">
+            Selected groups
+          </span>
+          <button
+            type="button"
+            disabled={busy || selectedIds.length === 0}
+            onClick={() => void mutateStatus(selectedIds, 'approved')}
+            className="rounded-md border border-green-700 bg-white px-3 py-2 text-sm font-semibold text-green-800 disabled:opacity-40"
+            title="Approve only the group scaffold; artwork statuses remain unchanged"
+          >
+            Approve groups only
+          </button>
+          <button
+            type="button"
+            disabled={busy || selectedIds.length === 0}
+            onClick={() => void mutateStatus(selectedIds, 'approved', true)}
+            className="rounded-md bg-green-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
+            title="Approve each group and all pending artwork in it"
+          >
+            Approve all
+          </button>
+        </div>
         <button
           type="button"
           disabled={busy || selectedIds.length === 0}
@@ -261,17 +296,35 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
                     {groupTitle(group)} · {group.status} ·{' '}
                     {formatDate(group.ts)}
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() =>
-                        void mutateStatus([group.group_id], 'approved')
-                      }
-                      className="rounded bg-green-700 px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
-                    >
-                      Approve
-                    </button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap gap-2 rounded border border-green-200 bg-green-50 p-2">
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() =>
+                          void mutateStatus([group.group_id], 'approved')
+                        }
+                        className="rounded border border-green-700 bg-white px-3 py-2 text-xs font-semibold text-green-800 disabled:opacity-40"
+                        title="Approve only the group scaffold; artwork statuses remain unchanged"
+                      >
+                        Approve group
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() =>
+                          void mutateStatus(
+                            [group.group_id],
+                            'approved',
+                            true,
+                          )
+                        }
+                        className="rounded bg-green-700 px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
+                        title="Approve the group and all pending artwork in it"
+                      >
+                        Approve all
+                      </button>
+                    </div>
                     <button
                       type="button"
                       disabled={busy}

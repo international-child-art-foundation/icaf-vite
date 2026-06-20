@@ -128,6 +128,7 @@ export function MySubmissionsModule() {
       <ArtworkModal
         id={activeArtworkId}
         artworks={modalArtworks}
+        artworksLoading={loading || groupSlideshowLoading}
         navigationList={modalArtworks}
         onNavigate={setActiveArtworkId}
         closeModal={() => {

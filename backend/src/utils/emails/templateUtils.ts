@@ -101,7 +101,7 @@ export function renderEmailDocument(args: {
     '<td align="center">',
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:640px;background:${EMAIL_CARD};border:1px solid ${EMAIL_BORDER};border-radius:18px;overflow:hidden;">`,
     '<tr>',
-    `<td style="padding:28px 32px 10px;background:${EMAIL_BUTTON};">`,
+    `<td style="padding:28px 32px;background:${EMAIL_BUTTON};">`,
     '<div style="font-size:14px;line-height:1.5;color:#ffffff;font-weight:700;">International Child Art Foundation</div>',
     `<h1 style="margin:14px 0 0;font-size:28px;line-height:1.2;color:#ffffff;">${safeHeadline}</h1>`,
     '</td>',

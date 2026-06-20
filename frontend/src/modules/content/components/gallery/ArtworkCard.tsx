@@ -3,6 +3,7 @@ import type { KeyboardEvent, ReactNode } from 'react';
 import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
 import { getArtistDisplayNameWithAge } from '@/utils/galleryProcessing';
 import { GalleryArtworkInfo } from './GalleryArtworkInfo';
+import { Button } from '@/shared/components/ui/button';
 
 type ArtworkCardProps = {
   artwork: TResolvedArtwork;
@@ -64,16 +65,15 @@ const ArtworkCard = ({ artwork, openModal, actionSlot }: ArtworkCardProps) => {
             className="max-h-[84px] overflow-hidden"
           />
           <div className="mt-auto flex">
-            <button
-              type="button"
+            <Button
               onClick={(event) => {
                 event.stopPropagation();
                 handleOpen();
               }}
-              className="bg-primary text-text-inverse mt-auto w-full cursor-pointer rounded py-2 text-center text-sm tracking-wide"
+              className="text-text-inverse mt-auto w-full"
             >
               View
-            </button>
+            </Button>
           </div>
         </section>
       </div>

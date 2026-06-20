@@ -145,22 +145,20 @@ function GalleryViewToggle({ viewMode, onToggle }: GalleryViewToggleProps) {
       <span
         className={`absolute inset-0 transition-opacity duration-500 ${
           isGroup ? 'opacity-0' : 'opacity-100'
-        } from-secondary-blue/80 to-primary/100 bg-gradient-to-br`}
+        } from-primary/100 to-primary/100 bg-gradient-to-br`}
       />
       <span
         className={`absolute inset-0 transition-opacity duration-500 ${
           isGroup ? 'opacity-100' : 'opacity-0'
-        } from-secondary-yellow via-tertiary-yellow to-primary-alt bg-gradient-to-br`}
+        } from-primary-alt/95 to-primary-alt bg-gradient-to-br`}
       />
       <span className="relative z-10 flex h-full items-center gap-3">
         <span
-          className={`relative h-10 w-10 flex-none overflow-hidden rounded-full shadow-sm transition-colors duration-300 ${
-            isGroup ? 'bg-white/60 text-neutral-950' : 'bg-white/20 text-white'
-          }`}
+          className={`relative h-10 w-10 flex-none overflow-hidden rounded-sm transition-colors duration-300`}
         >
           <Image
             aria-hidden="true"
-            className={`absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 transition duration-300 ${
+            className={`absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 transition duration-300 ${
               isGroup
                 ? 'translate-y-[115%] opacity-0'
                 : '-translate-y-1/2 opacity-100'
@@ -168,20 +166,18 @@ function GalleryViewToggle({ viewMode, onToggle }: GalleryViewToggleProps) {
           />
           <Users
             aria-hidden="true"
-            className={`absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 transition duration-300 ${
+            className={`absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 transition duration-300 ${
               isGroup
                 ? '-translate-y-1/2 opacity-100'
                 : '-translate-y-[165%] opacity-0'
             }`}
           />
         </span>
-        <span className="min-w-0">
-          <span className="block text-[11px] font-bold uppercase tracking-[0.18em] opacity-80">
-            View
-          </span>
-          <span className="font-montserrat block text-lg font-bold leading-tight">
+        <span className="flex min-w-0 flex-col gap-0">
+          <span className="font-montserrat text-lg font-bold">
             {isGroup ? 'Group' : 'Artwork'}
           </span>
+          <span className="ml-[1px] text-xs font-bold opacity-90">View</span>
         </span>
       </span>
     </button>
@@ -608,10 +604,14 @@ const GalleryCoreInner = () => {
     initialArtworkId,
     scope,
     groupId,
+    sourcePage = pageNumber,
+    paused = false,
   }: {
     initialArtworkId?: string;
     scope: 'all' | 'page' | 'group';
     groupId?: string;
+    sourcePage?: number;
+    paused?: boolean;
   }) => {
     const params = new URLSearchParams();
     params.set(
@@ -619,7 +619,7 @@ const GalleryCoreInner = () => {
       groupId || viewMode === 'group' ? 'group' : 'individual',
     );
     params.set('scope', scope);
-    params.set('page', pageNumber.toString());
+    params.set('page', sourcePage.toString());
     params.set('sort', sortValue);
     if (selectedThemeFamily) params.set('theme', selectedThemeFamily);
     if (selectedThemeInstanceType && selectedThemeInstance) {
@@ -628,6 +628,7 @@ const GalleryCoreInner = () => {
     }
     if (groupId) params.set('group', groupId);
     if (initialArtworkId) params.set('id', initialArtworkId);
+    if (paused) params.set('paused', 'true');
     return `/gallery/slideshow?${params.toString()}`;
   };
 
@@ -642,6 +643,8 @@ const GalleryCoreInner = () => {
   const openSlideshow = (
     initialArtworkId?: string,
     scopedArtworks?: TResolvedArtwork[],
+    sourcePage?: number,
+    paused = false,
   ) => {
     if (viewMode === 'group') {
       if (groupsLoading || groups.length === 0) {
@@ -670,6 +673,7 @@ const GalleryCoreInner = () => {
             buildSlideshowPath({
               initialArtworkId: firstArtworkId,
               scope: 'all',
+              paused,
             }),
           );
         })
@@ -711,6 +715,8 @@ const GalleryCoreInner = () => {
           buildSlideshowPath({
             initialArtworkId: firstArtworkId,
             scope: scopedArtworks ? 'page' : 'all',
+            sourcePage,
+            paused,
           }),
         );
       })
@@ -834,6 +840,29 @@ const GalleryCoreInner = () => {
   const startIndex = (pageNumber - 1) * ARTWORKS_PER_PAGE;
   const groupStartIndex = (pageNumber - 1) * GROUPS_PER_PAGE;
   const pageData = artworks.slice(startIndex, startIndex + ARTWORKS_PER_PAGE);
+
+  const openModalSlideshow = (artworkId: string) => {
+    const artworkIndex = artworks.findIndex(
+      (artwork) => artwork.id === artworkId,
+    );
+
+    if (artworkIndex < 0) {
+      openSlideshow(artworkId, pageData, pageNumber, true);
+      return;
+    }
+
+    // Modal navigation spans the complete result set without changing the grid
+    // page. Derive both the mural's page slice and its URL page from the active
+    // artwork, rather than from the page still visible behind the modal.
+    const artworkPage = Math.floor(artworkIndex / ARTWORKS_PER_PAGE) + 1;
+    const artworkPageStart = (artworkPage - 1) * ARTWORKS_PER_PAGE;
+    const artworkPageData = artworks.slice(
+      artworkPageStart,
+      artworkPageStart + ARTWORKS_PER_PAGE,
+    );
+
+    openSlideshow(artworkId, artworkPageData, artworkPage, true);
+  };
   const groupPageData = groups.slice(
     groupStartIndex,
     groupStartIndex + GROUPS_PER_PAGE,
@@ -898,29 +927,30 @@ const GalleryCoreInner = () => {
       <ArtworkModal
         id={activeEntryId}
         artworks={artworks}
+        artworksLoading={artworksLoading}
         navigationList={artworks}
         onNavigate={setActiveEntryId}
         closeModal={closeSlideshow}
         isHorizontal={isHorizontal}
         modalState={isModalOpen}
         getShareUrl={getShareUrl}
-        onEnterExhibition={(id) => openSlideshow(id, pageData)}
+        onEnterExhibition={openModalSlideshow}
         onKudosApplied={applyArtworkKudos}
       />
 
       <div className="breakout-w m-pad relative z-0 m-auto flex flex-col gap-2 sm:gap-4">
         <div className="relative flex flex-col gap-6 sm:gap-8">
           <div className="hidden items-center justify-between gap-3 sm:flex">
-            <div className="hidden w-full sm:flex">
-              <button
+            <div className="hidden w-full sm:grid sm:grid-cols-2 md:grid-cols-3">
+              <Button
                 type="button"
                 onClick={() => openSlideshow()}
                 data-gallery-control
-                className="mr-auto inline-flex items-center gap-2 rounded-md border border-gray-600 p-4 text-sm font-medium transition-colors hover:bg-gray-100"
+                className="mr-auto inline-flex items-center gap-2"
               >
                 <Play size={16} />
-                Slideshow
-              </button>
+                Spotlight Reel
+              </Button>
               {showNoArtworksTooltip && (
                 <button
                   type="button"
@@ -948,7 +978,7 @@ const GalleryCoreInner = () => {
                     setSortValue(event.target.value as SortValue);
                     setPageNumber(1);
                   }}
-                  className="h-[50px] appearance-none rounded-md border border-gray-600 bg-white px-4 pr-12 text-sm font-medium"
+                  className="h-10 appearance-none rounded-md border border-gray-600 bg-white px-4 pr-12 text-sm font-medium"
                   aria-label="Sort artworks"
                 >
                   <option value="Newest Event">Newest</option>
@@ -966,7 +996,7 @@ const GalleryCoreInner = () => {
               <button
                 type="button"
                 onClick={deselectTheme}
-                className="absolute -top-7 left-1 z-30 inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-sm transition hover:bg-neutral-50"
+                className="absolute -top-[27px] left-1 z-30 inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-sm transition hover:bg-neutral-50"
               >
                 <X aria-hidden="true" className="h-3.5 w-3.5" />
                 <span>Clear filter</span>
@@ -977,7 +1007,7 @@ const GalleryCoreInner = () => {
             ) : themesError ? (
               <p className="text-center text-red-500">{themesError}</p>
             ) : (
-              <div className="overflow-x-auto px-1 py-2">
+              <div className="-mx-0.5 overflow-x-auto px-0.5 py-2">
                 <div className="flex w-max items-stretch gap-3">
                   <GalleryViewToggle
                     viewMode={viewMode}
@@ -988,15 +1018,16 @@ const GalleryCoreInner = () => {
                       setPageNumber(1);
                     }}
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant={'outline'}
                     onClick={() => openSlideshow()}
                     data-gallery-control
                     aria-label="Open slideshow"
-                    className="border-neutral/50 flex h-[80px] w-[80px] flex-none items-center justify-center rounded-md border text-neutral-900 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-neutral-50 hover:shadow-md active:translate-y-0 active:scale-[0.98] sm:hidden"
+                    className="h-[80px] w-[80px] flex-none items-center justify-center rounded-md border transition hover:shadow-md active:translate-y-0 active:scale-[0.98] sm:hidden"
                   >
-                    <Play aria-hidden="true" className="h-6 w-6" />
-                  </button>
+                    <Play aria-hidden="true" className="h-14 w-14" />
+                  </Button>
                   {showNoArtworksTooltip && (
                     <button
                       type="button"

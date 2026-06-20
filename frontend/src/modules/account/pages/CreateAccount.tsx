@@ -171,13 +171,11 @@ export const CreateAccount = () => {
               <MailWarning aria-hidden="true" className="h-6 w-6" />
             </div>
             <h1 className="font-montserrat text-3xl font-semibold text-slate-950">
-              Create your account
+              Your invite link expired!
             </h1>
-            <p className="mt-3 text-lg font-semibold text-slate-800">
-              Your invite email expired.
-            </p>
-            <p className="mt-2 text-base leading-7 text-slate-600">
-              Send another email to activate your account.
+            <p className="mt-3 text-base leading-7 text-slate-600">
+              Click the button below to receive a new email with an updated
+              account activation link.
             </p>
 
             {submitError && (
@@ -204,13 +202,10 @@ export const CreateAccount = () => {
                 type="button"
               >
                 {recoveryStatus === 'submitting'
-                  ? 'Sending activation email...'
-                  : 'Activate Account'}
+                  ? 'Sending New Invite...'
+                  : 'Send New Invite'}
               </Button>
             )}
-            <p className="mt-3 text-center text-sm text-slate-500">
-              Check your email again for next steps.
-            </p>
           </div>
         </div>
       </div>

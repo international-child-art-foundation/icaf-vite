@@ -1,5 +1,5 @@
 const KUDOS_STORAGE_KEY = 'icaf.gallery.kudos.v1';
-const DAILY_KUDOS = 50;
+const DAILY_KUDOS = 100;
 const KUDOS_AMOUNT = 10;
 export const KUDOS_STORAGE_EVENT = 'icaf:kudos-storage';
 
@@ -81,7 +81,9 @@ export function getKudosStatus(artId?: string): KudosStatus {
   };
 }
 
-export function consumeDailyKudos(artId: string): KudosStatus & { ok: boolean } {
+export function consumeDailyKudos(
+  artId: string,
+): KudosStatus & { ok: boolean } {
   const state = readState();
   const alreadyGiven = state.givenArtIds.includes(artId);
 

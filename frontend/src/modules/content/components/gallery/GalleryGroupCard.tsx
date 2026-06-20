@@ -6,6 +6,7 @@ import {
 import { Images, MapPin, Palette, Play, Users, UsersRound } from 'lucide-react';
 import type { KeyboardEvent, ReactNode } from 'react';
 import { artworkAssetUrl } from '@/utils/galleryProcessing';
+import { Button } from '@/shared/components/ui/button';
 
 type GalleryGroupCardProps = {
   group: GroupListItem;
@@ -121,9 +122,10 @@ export function GalleryGroupCard({
 
         <div className="flex items-center justify-between gap-4 text-left">
           <p className="text-sm text-neutral-500"></p>
-          <span className="bg-primary group-hover:bg-secondary-blue inline-flex h-11 w-11 flex-none items-center justify-center rounded-full text-white transition">
-            <Play size={18} fill="currentColor" />
-          </span>
+          <Button className="inline-flex flex-none items-center justify-center">
+            <Play />
+            Spotlight View
+          </Button>
         </div>
         {actionSlot && <div className="border-t pt-5">{actionSlot}</div>}
       </div>

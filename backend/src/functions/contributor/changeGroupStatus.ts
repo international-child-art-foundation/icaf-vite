@@ -73,7 +73,10 @@ export const handler = async (
       return CommonErrors.badRequest("group_id path parameter is required");
     }
 
-    const parsedBody = parseJsonBody<{ status?: string }>(event);
+    const parsedBody = parseJsonBody<{
+      status?: string;
+      approve_all?: unknown;
+    }>(event);
     if (!parsedBody.ok) {
       return parsedBody.response;
     }
@@ -83,6 +86,13 @@ export const handler = async (
 
     if (!newStatus || !VALID_STATUSES.includes(newStatus)) {
       return CommonErrors.badRequest(`status must be one of: ${VALID_STATUSES.join(", ")}`);
+    }
+
+    if (
+      body.approve_all !== undefined &&
+      typeof body.approve_all !== "boolean"
+    ) {
+      return CommonErrors.badRequest("approve_all must be a boolean");
     }
 
     // ── Read GROUP entity to get theme attrs for gallery GSI construction ──
@@ -99,9 +109,10 @@ export const handler = async (
 
     const group = groupResult.Item as GroupEntity;
     const nowMs = Date.now();
-    const pendingArtworks = newStatus === "approved"
-      ? await getPendingGroupArtworks(group)
-      : [];
+    const pendingArtworks =
+      newStatus === "approved" && body.approve_all === true
+        ? await getPendingGroupArtworks(group)
+        : [];
 
     let updateExpr: string;
     const exprValues: Record<string, unknown> = { ":status": newStatus };

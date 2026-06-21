@@ -454,7 +454,15 @@ export function SubmitArtwork() {
       const fileType = getUploadFileType(uploadFile);
       if (!fileType) throw new Error(`${uploadFile.name} is not supported.`);
 
-      const upload = await createArtworkUpload({ file_type: fileType });
+      if (uploadFile.size > S3_MAX_FILE_SIZE_BYTES) {
+        throw new Error(
+          `File must be ${formatFileSize(S3_MAX_FILE_SIZE_BYTES)} or less after rotation.`,
+        );
+      }
+      const upload = await createArtworkUpload({
+        file_size_bytes: uploadFile.size,
+        file_type: fileType,
+      });
       setSubmissionProgress({ completed: 0, phase: 'uploading', total: 1 });
 
       await uploadToPresignedUrl({

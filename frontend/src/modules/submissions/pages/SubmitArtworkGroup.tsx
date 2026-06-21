@@ -15,6 +15,7 @@ import {
   createArtworkUpload,
   createAuthenticatedGroup,
   createGuestGroup,
+  preflightGroup,
 } from '@/api/public';
 import { uploadToPresignedUrl } from '@/api/uploads';
 import { mapWithConcurrency } from '@/shared/utils/concurrency';
@@ -43,6 +44,7 @@ import {
   ARTWORK_GROUP_DRAFT_KEY,
   createArtworkDraft,
   createDigitalSignature,
+  formatFileSize,
   getUploadFileType,
   hasSubmissionErrors,
   initialArtworkGroupSubmissionDraft,
@@ -58,6 +60,7 @@ import {
   GROUP_MAX_MEMBERS,
   MAX_ARTIST_AGE,
   MAX_NAME_LEN,
+  S3_MAX_FILE_SIZE_BYTES,
   isValidThemeSk,
   type SubmitterRelationship,
 } from '@icaf/shared';
@@ -582,6 +585,47 @@ export function SubmitArtworkGroup({
   async function handleAsyncSubmit() {
     try {
       const digitalSignature = createDigitalSignature(draft.digitalSignature);
+      const groupDetails = {
+        class_name: effectiveGroup.class_name.trim() || undefined,
+        country: effectiveGroup.country.trim(),
+        description: effectiveGroup.description.trim() || undefined,
+        notifications: effectiveGroup.notifications,
+        region: effectiveGroup.region.trim() || undefined,
+        submitter_display_name:
+          effectiveGroup.submitter_display_name.trim() || undefined,
+        theme: effectiveGroup.theme.trim() || undefined,
+        title: effectiveGroup.title.trim(),
+      };
+      const preflightArtworks = artworks.map((artwork) => {
+        const file = files[artwork.id];
+        if (!file) throw new Error('A selected image is missing.');
+        const request = toArtworkRequest(
+          artwork,
+          file,
+          artwork.id,
+          digitalSignature,
+          effectiveGroup,
+          !isAdultFacilitatorFlow,
+          { artworkDetailsMode, submitterRelationship },
+        );
+        const { art_id: artId, file_type: fileType, ...metadata } = request;
+        void artId;
+        void fileType;
+        return metadata;
+      });
+
+      await preflightGroup(
+        authenticatedUser
+          ? { ...groupDetails, artworks: preflightArtworks }
+          : {
+              ...groupDetails,
+              artworks: preflightArtworks,
+              email: draft.submitterEmail.trim(),
+              submitter_first_name: draft.submitterFirstName.trim(),
+              submitter_last_name: draft.submitterLastName.trim(),
+            },
+      );
+
       const uploadFiles = await mapWithConcurrency(
         artworks,
         2,
@@ -600,8 +644,18 @@ export function SubmitArtworkGroup({
       const artworkUploads = await mapWithConcurrency(
         uploadFileTypes,
         3,
-        async (fileType) => {
-          const upload = await createArtworkUpload({ file_type: fileType });
+        async (fileType, index) => {
+          const file = uploadFiles[index];
+          if (!file) throw new Error('A selected image is missing.');
+          if (file.size > S3_MAX_FILE_SIZE_BYTES) {
+            throw new Error(
+              `${file.name} must be ${formatFileSize(S3_MAX_FILE_SIZE_BYTES)} or less after rotation.`,
+            );
+          }
+          const upload = await createArtworkUpload({
+            file_size_bytes: file.size,
+            file_type: fileType,
+          });
           setSubmissionProgress((current) =>
             current
               ? { ...current, completed: current.completed + 1 }
@@ -664,16 +718,8 @@ export function SubmitArtworkGroup({
         );
       });
       const groupRequest = {
+        ...groupDetails,
         artworks: artworkRequests,
-        class_name: effectiveGroup.class_name.trim() || undefined,
-        country: effectiveGroup.country.trim(),
-        description: effectiveGroup.description.trim() || undefined,
-        notifications: effectiveGroup.notifications,
-        region: effectiveGroup.region.trim() || undefined,
-        submitter_display_name:
-          effectiveGroup.submitter_display_name.trim() || undefined,
-        theme: effectiveGroup.theme.trim() || undefined,
-        title: effectiveGroup.title.trim(),
       };
 
       if (authenticatedUser) {

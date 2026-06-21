@@ -16,6 +16,8 @@ import type {
   AuthenticatedCreateGroupRequest,
   CreateGroupRequest,
   GuestCreateGroupRequest,
+  PreflightGroupRequest,
+  PreflightGroupResponse,
   SubmitGroupResponse,
   VoteArtworkResponse,
 } from '@icaf/shared';
@@ -59,6 +61,9 @@ const isSuccessfulArtworkUploadResponse = (response: unknown): boolean =>
 
 const isSuccessfulGroupSubmitResponse = (response: unknown): boolean =>
   hasApiSuccess(response) && hasStringProperty(response, 'group_id');
+
+const isSuccessfulGroupPreflightResponse = (response: unknown): boolean =>
+  hasApiSuccess(response);
 
 const isArtworkResponse = (response: unknown): boolean =>
   typeof response === 'object' &&
@@ -180,6 +185,19 @@ export function createGuestGroup(request: GuestCreateGroupRequest): Promise<Subm
     method: 'POST',
     validate: isSuccessfulGroupSubmitResponse,
   });
+}
+
+export function preflightGroup(
+  request: PreflightGroupRequest,
+): Promise<PreflightGroupResponse> {
+  return apiRequest<PreflightGroupResponse, PreflightGroupRequest>(
+    apiEndpoints.public.groupPreflight,
+    {
+      body: request,
+      method: 'POST',
+      validate: isSuccessfulGroupPreflightResponse,
+    },
+  );
 }
 
 export function createAuthenticatedGroup(

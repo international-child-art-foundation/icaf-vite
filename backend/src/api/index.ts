@@ -80,6 +80,7 @@ import { handler as createGroup } from "../functions/groups/createGroup";
 import { handler as deleteArtworkFromGroup } from "../functions/groups/deleteArtworkFromGroup";
 import { handler as deleteGroup } from "../functions/groups/deleteGroup";
 import { handler as listGroupSubmissions } from "../functions/groups/listGroupSubmissions";
+import { handler as preflightGroup } from "../functions/groups/preflightGroup";
 import { handler as submitArtworkToGroup } from "../functions/groups/submitArtworkToGroup";
 import { handler as updateConstituentArtwork } from "../functions/groups/updateConstituentArtwork";
 import { handler as updateGroup } from "../functions/groups/updateGroup";
@@ -155,6 +156,7 @@ const routes: Route[] = [
   { method: "POST", path: "/api/artwork-uploads", handler: createArtworkUpload },
   { method: "POST", path: "/api/artworks", handler: guestSubmitArtwork },
   { method: "POST", path: "/api/groups", handler: createGroup },
+  { method: "POST", path: "/api/groups/preflight", handler: preflightGroup },
   { method: "GET", path: "/api/artworks/{art_id}", handler: getArtwork },
   { method: "GET", path: "/api/groups/{group_id}", handler: getGroup },
   { method: "POST", path: "/api/takedown", handler: initiateTakedown },

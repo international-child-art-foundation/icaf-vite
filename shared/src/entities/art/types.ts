@@ -107,6 +107,7 @@ export interface SubmitArtworkResponse {
 
 export interface CreateArtworkUploadRequest {
     file_type: UploadFileType;
+    file_size_bytes: number;
 }
 
 export interface CreateArtworkUploadResponse {

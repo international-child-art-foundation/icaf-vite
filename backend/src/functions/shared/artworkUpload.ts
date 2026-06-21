@@ -48,20 +48,26 @@ export async function createArtworkUpload(fileType: string): Promise<CreateArtwo
 }
 
 export async function hasUploadedArtworkImage(artId: string): Promise<boolean> {
-  try {
-    const result = await s3Client.send(
-      new HeadObjectCommand({
-        Bucket: S3_BUCKET_NAME,
-        Key: artworkInitialKey(artId),
-      }),
-    );
-
-    return typeof result.ContentLength === "number" && result.ContentLength > 0;
-  } catch (error) {
-    const maybeError = error as { name?: string; $metadata?: { httpStatusCode?: number } };
-    if (maybeError.name === "NotFound" || maybeError.$metadata?.httpStatusCode === 404) {
-      return false;
+  const objectExists = async (key: string): Promise<boolean> => {
+    try {
+      const result = await s3Client.send(
+        new HeadObjectCommand({ Bucket: S3_BUCKET_NAME, Key: key }),
+      );
+      return typeof result.ContentLength === "number" && result.ContentLength > 0;
+    } catch (error) {
+      const maybeError = error as { name?: string; $metadata?: { httpStatusCode?: number } };
+      if (maybeError.name === "NotFound" || maybeError.$metadata?.httpStatusCode === 404) {
+        return false;
+      }
+      throw error;
     }
-    throw error;
-  }
+  };
+
+  // ProcessImage deletes /initial after creating the AVIF variants. Accept either
+  // state so submission does not race successful background processing.
+  const [initialExists, processedExists] = await Promise.all([
+    objectExists(artworkInitialKey(artId)),
+    objectExists(`${artId}/original.avif`),
+  ]);
+  return initialExists || processedExists;
 }

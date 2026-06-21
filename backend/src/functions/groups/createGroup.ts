@@ -49,11 +49,11 @@ export const handler = async (
       return CommonErrors.badRequest("artworks must use distinct art_id values");
     }
 
-    for (const artId of memberArtIds) {
-      const imageUploaded = await hasUploadedArtworkImage(artId);
-      if (!imageUploaded) {
-        return CommonErrors.badRequest("All artwork images must be uploaded before group submission");
-      }
+    const imageUploadResults = await Promise.all(
+      memberArtIds.map((artId) => hasUploadedArtworkImage(artId)),
+    );
+    if (imageUploadResults.some((imageUploaded) => !imageUploaded)) {
+      return CommonErrors.badRequest("All artwork images must be uploaded before group submission");
     }
 
     if (!userId) {
@@ -80,9 +80,15 @@ export const handler = async (
     const groupThemeCheck = await ensureThemeEntity({ theme: body.theme, nowMs });
     if (!groupThemeCheck.ok) return groupThemeCheck.response;
 
-    for (const artwork of body.artworks) {
-      const artworkThemeCheck = await ensureThemeEntity({ theme: artwork.theme, nowMs });
-      if (!artworkThemeCheck.ok) return artworkThemeCheck.response;
+    const artworkThemes = [
+      ...new Set(body.artworks.map((artwork) => artwork.theme).filter(Boolean)),
+    ];
+    const artworkThemeChecks = await Promise.all(
+      artworkThemes.map((theme) => ensureThemeEntity({ theme, nowMs })),
+    );
+    const failedArtworkThemeCheck = artworkThemeChecks.find((result) => !result.ok);
+    if (failedArtworkThemeCheck && !failedArtworkThemeCheck.ok) {
+      return failedArtworkThemeCheck.response;
     }
 
     await dynamodb.send(
@@ -171,7 +177,27 @@ export const handler = async (
       headers: COMMON_HEADERS,
     };
   } catch (error) {
-    console.error("Error creating group:", error);
+    const maybeError = error as {
+      name?: string;
+      message?: string;
+      stack?: string;
+      $metadata?: { httpStatusCode?: number; requestId?: string };
+    };
+    console.error("Error creating group", {
+      artwork_count: (() => {
+        try {
+          const body = JSON.parse(event.body ?? "{}") as { artworks?: unknown[] };
+          return Array.isArray(body.artworks) ? body.artworks.length : undefined;
+        } catch {
+          return undefined;
+        }
+      })(),
+      error_message: maybeError.message,
+      error_name: maybeError.name,
+      request_id: maybeError.$metadata?.requestId,
+      stack: maybeError.stack,
+      upstream_status: maybeError.$metadata?.httpStatusCode,
+    });
     return CommonErrors.internalServerError();
   }
 };

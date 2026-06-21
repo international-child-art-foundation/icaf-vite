@@ -94,6 +94,33 @@ export type AuthenticatedCreateGroupRequest = CreateGroupBaseRequest & {
 
 export type CreateGroupRequest = GuestCreateGroupRequest | AuthenticatedCreateGroupRequest;
 
+export type PreflightGroupArtworkRequest = Omit<
+    CreateGroupArtworkRequest,
+    'art_id' | 'file_type'
+>;
+
+export type PreflightGroupBaseRequest = SubmitGroupRequest & {
+    artworks: PreflightGroupArtworkRequest[];
+};
+
+export type GuestPreflightGroupRequest = PreflightGroupBaseRequest & {
+    email: string;
+    submitter_first_name: string;
+    submitter_last_name: string;
+};
+
+export type AuthenticatedPreflightGroupRequest = PreflightGroupBaseRequest & {
+    email?: never;
+};
+
+export type PreflightGroupRequest =
+    | GuestPreflightGroupRequest
+    | AuthenticatedPreflightGroupRequest;
+
+export interface PreflightGroupResponse {
+    success: true;
+}
+
 export interface GetGroupResponse {
     group: GroupEntity;
 }

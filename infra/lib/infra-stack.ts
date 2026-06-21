@@ -458,6 +458,7 @@ export class InfraStack extends Stack {
       runtime: Runtime.NODEJS_20_X,
       timeout: Duration.seconds(60),
       memorySize: 512,
+      tracing: lambda.Tracing.ACTIVE,
       environment: commonEnv,
       entry: "../backend/src/api/index.ts",
       logGroup: lambdaLogGroup("ApiFn"),
@@ -617,10 +618,30 @@ export class InfraStack extends Stack {
     );
 
     // ─── 10. API Gateway ───────────────────────────────────────────────────────
+    const apiAccessLogGroup = new logs.LogGroup(this, "ApiAccessLogGroup", {
+      retention: defaultLogRetention,
+      removalPolicy: RemovalPolicy.DESTROY,
+    });
     const api = new apigw.RestApi(this, "IcafApi", {
       restApiName: resourceName("api"),
       endpointConfiguration: { types: [apigw.EndpointType.REGIONAL] },
-      deployOptions: { stageName: "v1" },
+      deployOptions: {
+        stageName: "v1",
+        accessLogDestination: new apigw.LogGroupLogDestination(apiAccessLogGroup),
+        accessLogFormat: apigw.AccessLogFormat.jsonWithStandardFields({
+          caller: false,
+          httpMethod: true,
+          ip: true,
+          protocol: true,
+          requestTime: true,
+          resourcePath: true,
+          responseLength: true,
+          status: true,
+          user: false,
+        }),
+        metricsEnabled: true,
+        tracingEnabled: true,
+      },
       defaultCorsPreflightOptions: {
         allowOrigins: deployment.allowedOrigins,
         allowMethods: apigw.Cors.ALL_METHODS,

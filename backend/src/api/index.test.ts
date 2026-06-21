@@ -72,6 +72,16 @@ describe("api router", () => {
     expect(authMocks.requireAuth).toHaveBeenCalledOnce();
   });
 
+  it("routes group preflight requests before uploads", async () => {
+    const response = await handler(event("POST", "/api/groups/preflight", "{"));
+
+    expect(response.statusCode).toBe(400);
+    expect(responseBody(response)).toMatchObject({
+      code: "BAD_REQUEST",
+      message: "Invalid JSON body",
+    });
+  });
+
   it("does not treat the literal artworks segment as a group id", async () => {
     const response = await handler(event("POST", "/api/user/groups/artworks", "{}"));
 

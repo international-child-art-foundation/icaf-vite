@@ -113,6 +113,7 @@ export const apiEndpoints = {
     artworks: '/artworks',
     group: (groupId: PathParam) => `/groups/${encodePathParam(groupId)}`,
     groups: '/groups',
+    groupPreflight: '/groups/preflight',
     magazines: '/magazines',
     news: '/news',
     takedown: '/takedown',

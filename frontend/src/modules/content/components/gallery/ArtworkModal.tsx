@@ -297,7 +297,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
   };
 
   const navBtnClass =
-    'hidden lg:flex items-center justify-center w-12 h-12 flex-shrink-0 rounded-full bg-black/70 hover:bg-black/30 text-white transition-colors mx-4';
+    'hidden lg:flex items-center active:scale-[95%] justify-center w-12 h-12 flex-shrink-0 rounded-full bg-black/70 hover:bg-black/30 text-white transition-colors mx-4';
 
   return createPortal(
     <div

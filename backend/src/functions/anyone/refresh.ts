@@ -10,10 +10,28 @@ import {
   HTTP_STATUS,
 } from "@icaf/shared";
 import { cognitoClient, USER_POOL_CLIENT_ID } from "../../config/aws-clients";
-import { createCookie, parseCookies } from "../../utils/cookies";
+import { createCookie, deleteCookie, parseCookies } from "../../utils/cookies";
 
 const ACCESS_TOKEN_MAX_AGE = 60 * 60;
 const REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 30;
+
+function unauthorizedWithClearedCookies(): ApiGatewayResponse {
+  const response = CommonErrors.unauthorized();
+  return {
+    ...response,
+    headers: {
+      ...response.headers,
+      "Access-Control-Allow-Credentials": "true",
+    },
+    multiValueHeaders: {
+      "Set-Cookie": [
+        deleteCookie("accessToken"),
+        deleteCookie("idToken"),
+        deleteCookie("refreshToken"),
+      ],
+    },
+  };
+}
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -25,7 +43,7 @@ export const handler = async (
     const refreshToken = cookies.refreshToken;
 
     if (!refreshToken) {
-      return CommonErrors.unauthorized();
+      return unauthorizedWithClearedCookies();
     }
 
     const authResult = await cognitoClient.send(
@@ -42,7 +60,7 @@ export const handler = async (
       authResult.AuthenticationResult ?? {};
 
     if (!AccessToken || !IdToken) {
-      return CommonErrors.unauthorized();
+      return unauthorizedWithClearedCookies();
     }
 
     const setCookies = [
@@ -69,7 +87,7 @@ export const handler = async (
     };
   } catch (error: any) {
     if (error.name === "NotAuthorizedException") {
-      return CommonErrors.unauthorized();
+      return unauthorizedWithClearedCookies();
     }
 
     console.error("Refresh error:", error);

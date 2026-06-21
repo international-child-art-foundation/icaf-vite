@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { gsap } from 'gsap';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -36,17 +36,17 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
   onEnterExhibition,
   onKudosApplied,
 }) => {
-  const [artworkData, setArtworkData] = useState<TResolvedArtwork | undefined>(
-    undefined,
-  );
   const [unavailableGrace, setUnavailableGrace] = useState({
     id: '',
     elapsed: false,
   });
-  const gridContainerRef = useRef<HTMLDivElement>(null);
+  const modalShellRef = useRef<HTMLDivElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null);
   const scrollContentRef = useRef<HTMLDivElement>(null);
   const isFirstOpenRef = useRef(true);
+  const activeArtworkIdRef = useRef(id);
+  const [imageReady, setImageReady] = useState(false);
+  activeArtworkIdRef.current = id;
 
   const currentNavIdx = navigationList.findIndex((a) => a.id === id);
   const prevId =
@@ -62,6 +62,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
     !requestedArtworkExists &&
     unavailableGrace.id === id &&
     unavailableGrace.elapsed;
+  const artworkData = artworks.find((artwork) => artwork.id === id);
 
   useEffect(() => {
     if (!modalState) return;
@@ -84,56 +85,70 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
     return () => window.removeEventListener('keydown', handler);
   }, [modalState, prevId, nextId, onNavigate]);
 
-  useEffect(() => {
-    const data = artworks.find((a) => a.id === id);
-
+  useLayoutEffect(() => {
     if (!modalState) {
-      setArtworkData(data);
       isFirstOpenRef.current = true;
       return;
     }
 
-    if (isFirstOpenRef.current) {
-      isFirstOpenRef.current = false;
-      setArtworkData(data);
-      gsap
-        .timeline()
-        .set(modalContentRef.current, { opacity: 0 })
-        .to(gridContainerRef.current, {
-          gridTemplateRows: '1fr',
-          duration: 0.4,
-          ease: 'power4.out',
-        })
-        .to(
-          modalContentRef.current,
-          { opacity: 1, duration: 0.2, ease: 'power4.out' },
-          '-=0.1',
-        )
-        .call(() => {
-          if (gridContainerRef.current) {
-            gridContainerRef.current.style.overflowY = 'auto';
-          }
-          if (scrollContentRef.current) {
-            scrollContentRef.current.style.overflowY = 'auto';
-          }
-        });
-      return;
-    }
+    setImageReady(false);
 
-    if (artworkData?.id === data?.id) {
-      setArtworkData(data);
-      return;
-    }
-
+    const shell = modalShellRef.current;
     const content = modalContentRef.current;
-    gsap.set(content, { opacity: 0 });
-    setArtworkData(data);
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() => {
-        gsap.to(content, { opacity: 1, duration: 0.2, ease: 'power2.out' });
-      }),
+    if (!shell || !content) return;
+
+    const maxHeightRatio = isHorizontal ? 0.95 : 0.9;
+    const placeholderHeight = Math.min(
+      window.innerHeight * maxHeightRatio,
+      Math.max(360, window.innerHeight * 0.7),
     );
-  }, [id, modalState, artworks, artworkData?.id]);
+
+    gsap.killTweensOf([shell, content]);
+    gsap.set(content, { opacity: artworkData ? 0 : 1 });
+    if (isFirstOpenRef.current) {
+      gsap.set(shell, { height: 0 });
+      isFirstOpenRef.current = false;
+    }
+    gsap.to(shell, {
+      height: placeholderHeight,
+      duration: 1,
+      ease: 'power3.out',
+    });
+
+    return () => gsap.killTweensOf([shell, content]);
+  }, [id, modalState, isHorizontal, artworkData?.displayUrl]);
+
+  const handleArtworkLoad = (loadedArtworkId: string) => {
+    if (loadedArtworkId !== activeArtworkIdRef.current) return;
+
+    const shell = modalShellRef.current;
+    const content = modalContentRef.current;
+    if (!shell || !content) return;
+
+    setImageReady(true);
+    requestAnimationFrame(() => {
+      if (loadedArtworkId !== activeArtworkIdRef.current) return;
+
+      const maxHeight = window.innerHeight * (isHorizontal ? 0.95 : 0.9);
+      const currentHeight = shell.getBoundingClientRect().height;
+
+      // Measure outside the placeholder constraint so load timing does not
+      // influence the artwork's final modal height.
+      gsap.set(shell, { height: 'auto' });
+      const targetHeight = Math.min(maxHeight, shell.scrollHeight);
+      gsap.set(shell, { height: currentHeight });
+
+      // Retargeting the shell interrupts and speeds up the placeholder tween.
+      gsap.killTweensOf(shell);
+      gsap.to(shell, {
+        height: targetHeight,
+        duration: 0.4,
+        ease: 'power3.out',
+        onComplete: () => gsap.set(shell, { height: 'auto' }),
+      });
+      gsap.to(content, { opacity: 1, duration: 0.2, ease: 'power2.out' });
+    });
+  };
 
   if (!modalState) return null;
 
@@ -166,8 +181,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
       <div className="mx-auto grid max-h-full min-w-0 grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-5 overflow-hidden px-6 md:gap-10">
         <div
           ref={scrollContentRef}
-          className="flex min-h-0 min-w-0 flex-col overflow-x-hidden"
-          style={{ overflowY: 'hidden' }}
+          className="flex min-h-0 min-w-0 flex-col overflow-x-hidden overflow-y-auto"
         >
           <GalleryArtworkInfo
             artwork={artworkData}
@@ -198,7 +212,8 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
           <img
             src={artworkData.displayUrl}
             alt={artworkData.alt || artistText || 'Artwork'}
-            className="relative z-20 max-h-full max-w-full object-contain"
+            onLoad={() => handleArtworkLoad(artworkData.id)}
+            className={`relative z-20 max-h-full max-w-full object-contain ${imageReady ? '' : 'invisible'}`}
           />
           <img
             src={artworkData.displayUrl}
@@ -216,14 +231,14 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
     return (
       <div
         ref={scrollContentRef}
-        className="grid max-h-full min-w-0 gap-y-2 overflow-x-hidden"
-        style={{ overflowY: 'hidden' }}
+        className="grid max-h-full min-w-0 gap-y-2 overflow-x-hidden overflow-y-auto"
       >
         <div className="relative flex min-h-[300px] flex-shrink select-none items-center justify-center overflow-hidden rounded-xl">
           <img
             src={artworkData.displayUrl}
             alt={artworkData.alt || artistText || 'Artwork'}
-            className="relative z-20 max-h-[420px] max-w-full object-contain"
+            onLoad={() => handleArtworkLoad(artworkData.id)}
+            className={`relative z-20 max-h-[420px] max-w-full object-contain ${imageReady ? '' : 'invisible'}`}
           />
           <img
             src={artworkData.displayUrl}
@@ -286,6 +301,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
         <ChevronLeft size={24} />
       </button>
       <div
+        ref={modalShellRef}
         className={`relative flex min-w-0 flex-col overflow-hidden rounded-3xl bg-white ${
           isHorizontal
             ? 'max-h-[95dvh] w-[calc(100%-1rem)] max-w-[1500px] lg:w-[calc(100%-10rem)]'
@@ -300,11 +316,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
             &times;
           </span>
         </div>
-        <div
-          ref={gridContainerRef}
-          className="no-scrollbar grid min-w-0 overflow-x-hidden"
-          style={{ gridTemplateRows: '0.2fr', overflowY: 'hidden' }}
-        >
+        <div className="no-scrollbar grid min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div
             ref={modalContentRef}
             className={`min-h-[300px] min-w-0 ${isHorizontal ? 'px-8 pb-8 xl:px-16 xl:pb-16 [@media(max-height:600px)]:px-8 [@media(max-height:600px)]:pb-8' : 'px-8 pb-8'}`}

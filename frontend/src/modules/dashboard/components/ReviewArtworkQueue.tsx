@@ -105,6 +105,8 @@ export function ReviewArtworkQueue({
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
+  const [lastKey, setLastKey] = useState<string | undefined>();
+  const [loadingMore, setLoadingMore] = useState(false);
   const [activeArtworkId, setActiveArtworkId] = useState('');
   const [exhibitionArtworkId, setExhibitionArtworkId] = useState('');
   const isHorizontal = useMediaQuery('(orientation: landscape)', true);
@@ -119,44 +121,64 @@ export function ReviewArtworkQueue({
     [artworks, editingId],
   );
 
-  const loadQueue = useCallback(() => {
-    setLoading(true);
+  const loadQueue = useCallback((cursor?: string) => {
+    const append = Boolean(cursor);
+    if (append) setLoadingMore(true);
+    else setLoading(true);
     setError(null);
+
+    const query = {
+      limit: 48,
+      ...(cursor ? { last_key: cursor } : {}),
+    };
 
     const request =
       mode === 'approved'
         ? listGalleryArtworks(
-            { limit: 48, sort: 'newest' },
+            { ...query, sort: 'newest' },
             { bypassCache: true },
           )
         : mode === 'pending'
-          ? fetchPendingArtworks({ limit: 48 })
+          ? fetchPendingArtworks(query)
           : mode === 'hidden'
-            ? fetchHiddenArtworks({ limit: 48 })
-            : fetchRejectedArtworks({ limit: 48 });
+            ? fetchHiddenArtworks(query)
+            : fetchRejectedArtworks(query);
 
     request
       .then((response) => {
-        setArtworks(response.artworks);
-        setHasMore(response.has_more);
-        setSelected(new Set());
-        setEditingId((current) =>
-          current && response.artworks.some((art) => art.art_id === current)
-            ? current
-            : null,
+        setArtworks((current) =>
+          append ? [...current, ...response.artworks] : response.artworks,
         );
+        setHasMore(Boolean(response.has_more && response.last_key));
+        setLastKey(response.last_key);
+        if (!append) {
+          setSelected(new Set());
+          setEditingId((current) =>
+            current && response.artworks.some((art) => art.art_id === current)
+              ? current
+              : null,
+          );
+        }
       })
       .catch((err: unknown) => {
-        setArtworks([]);
-        setHasMore(false);
+        if (!append) {
+          setArtworks([]);
+          setHasMore(false);
+          setLastKey(undefined);
+        }
         setError(
           err instanceof Error ? err.message : 'Failed to load artworks',
         );
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        setLoadingMore(false);
+      });
   }, [mode]);
 
-  useEffect(loadQueue, [loadQueue]);
+  useEffect(() => {
+    loadQueue();
+  }, [loadQueue]);
 
   useEffect(() => {
     setEdits(editingArtwork ? toEdits(editingArtwork) : null);
@@ -339,12 +361,6 @@ export function ReviewArtworkQueue({
 
       {message && <ModuleState tone="success">{message}</ModuleState>}
       {error && <ModuleState tone="error">{error}</ModuleState>}
-      {hasMore && (
-        <ModuleState>
-          Showing the newest {statusLabel} artwork. Pagination can be added if
-          older artwork needs to be managed here.
-        </ModuleState>
-      )}
       {loading ? (
         <ModuleState>Loading artwork...</ModuleState>
       ) : artworks.length === 0 ? (
@@ -364,7 +380,7 @@ export function ReviewArtworkQueue({
                   key={artwork.art_id}
                   className={
                     isEditing
-                      ? 'rounded-lg ring-2 ring-primary ring-offset-2'
+                      ? 'ring-primary rounded-lg ring-2 ring-offset-2'
                       : 'rounded-lg'
                   }
                 >
@@ -395,7 +411,7 @@ export function ReviewArtworkQueue({
                           <button
                             type="button"
                             onClick={() => setEditingId(artwork.art_id)}
-                            className="w-full rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white"
+                            className="bg-primary w-full rounded-md px-3 py-2 text-sm font-semibold text-white"
                           >
                             {isEditing ? 'Editing' : 'Edit details'}
                           </button>
@@ -458,18 +474,42 @@ export function ReviewArtworkQueue({
                       {editingArtwork.art_id}
                     </p>
                     <p className="mt-1 text-xs text-neutral-500">
-                      {editingArtwork.status} ·{' '}
-                      {formatDate(editingArtwork.ts)}
+                      {editingArtwork.status} · {formatDate(editingArtwork.ts)}
                     </p>
                   </div>
 
                   <div className="grid gap-3">
-                    <EditInput label="Title" value={edits.title} onChange={(title) => setEdits({ ...edits, title })} />
-                    <EditInput label="Artist first name" value={edits.f_name} onChange={(f_name) => setEdits({ ...edits, f_name })} />
-                    <EditInput label="Age" inputMode="numeric" value={edits.age} onChange={(age) => setEdits({ ...edits, age })} />
-                    <EditInput label="Country" value={edits.country} onChange={(country) => setEdits({ ...edits, country })} />
-                    <EditInput label="Region" value={edits.region} onChange={(region) => setEdits({ ...edits, region })} />
-                    <EditInput label="Theme SK" value={edits.theme} onChange={(theme) => setEdits({ ...edits, theme })} />
+                    <EditInput
+                      label="Title"
+                      value={edits.title}
+                      onChange={(title) => setEdits({ ...edits, title })}
+                    />
+                    <EditInput
+                      label="Artist first name"
+                      value={edits.f_name}
+                      onChange={(f_name) => setEdits({ ...edits, f_name })}
+                    />
+                    <EditInput
+                      label="Age"
+                      inputMode="numeric"
+                      value={edits.age}
+                      onChange={(age) => setEdits({ ...edits, age })}
+                    />
+                    <EditInput
+                      label="Country"
+                      value={edits.country}
+                      onChange={(country) => setEdits({ ...edits, country })}
+                    />
+                    <EditInput
+                      label="Region"
+                      value={edits.region}
+                      onChange={(region) => setEdits({ ...edits, region })}
+                    />
+                    <EditInput
+                      label="Theme SK"
+                      value={edits.theme}
+                      onChange={(theme) => setEdits({ ...edits, theme })}
+                    />
                     <label className="text-xs font-semibold uppercase text-neutral-600">
                       Relationship
                       <select
@@ -527,7 +567,7 @@ export function ReviewArtworkQueue({
                     type="button"
                     disabled={busy}
                     onClick={() => void saveArtworkEdits()}
-                    className="mt-4 w-full rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
+                    className="bg-primary mt-4 w-full rounded-md px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
                   >
                     {busy ? 'Saving...' : 'Save artwork details'}
                   </button>
@@ -535,6 +575,18 @@ export function ReviewArtworkQueue({
               )}
             </aside>
           )}
+        </div>
+      )}
+      {hasMore && !loading && (
+        <div className="mt-6 flex justify-center">
+          <button
+            type="button"
+            disabled={busy || loadingMore}
+            onClick={() => loadQueue(lastKey)}
+            className="rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-40"
+          >
+            {loadingMore ? 'Loading more...' : `Load more ${statusLabel} artwork`}
+          </button>
         </div>
       )}
     </DashboardModule>

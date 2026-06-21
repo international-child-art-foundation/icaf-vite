@@ -45,6 +45,10 @@ export function MySubmissionsModule() {
   >([]);
   const [groupSlideshowLoading, setGroupSlideshowLoading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadingMoreArtworks, setLoadingMoreArtworks] = useState(false);
+  const [loadingMoreGroups, setLoadingMoreGroups] = useState(false);
+  const [artworkLastKey, setArtworkLastKey] = useState<string | undefined>();
+  const [groupLastKey, setGroupLastKey] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
   const isHorizontal = useMediaQuery('(orientation: landscape)', true);
   const resolvedArtworks = useMemo(
@@ -99,6 +103,16 @@ export function MySubmissionsModule() {
       .then(([artResponse, groupResponse]) => {
         setArtworks(artResponse.artworks);
         setGroups(groupResponse.groups);
+        setArtworkLastKey(
+          artResponse.has_more && artResponse.last_key
+            ? artResponse.last_key
+            : undefined,
+        );
+        setGroupLastKey(
+          groupResponse.has_more && groupResponse.last_key
+            ? groupResponse.last_key
+            : undefined,
+        );
       })
       .catch((err: unknown) => {
         setError(
@@ -109,6 +123,52 @@ export function MySubmissionsModule() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const loadMoreArtworks = () => {
+    if (!artworkLastKey) return;
+    setLoadingMoreArtworks(true);
+    setError(null);
+    listArtworkSubmissions({ limit: 12, last_key: artworkLastKey })
+      .then((response) => {
+        setArtworks((current) => [...current, ...response.artworks]);
+        setArtworkLastKey(
+          response.has_more && response.last_key
+            ? response.last_key
+            : undefined,
+        );
+      })
+      .catch((err: unknown) => {
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Failed to load more artwork submissions',
+        );
+      })
+      .finally(() => setLoadingMoreArtworks(false));
+  };
+
+  const loadMoreGroups = () => {
+    if (!groupLastKey) return;
+    setLoadingMoreGroups(true);
+    setError(null);
+    listGroupSubmissions({ limit: 8, last_key: groupLastKey })
+      .then((response) => {
+        setGroups((current) => [...current, ...response.groups]);
+        setGroupLastKey(
+          response.has_more && response.last_key
+            ? response.last_key
+            : undefined,
+        );
+      })
+      .catch((err: unknown) => {
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Failed to load more group submissions',
+        );
+      })
+      .finally(() => setLoadingMoreGroups(false));
+  };
 
   return (
     <DashboardModule
@@ -193,6 +253,20 @@ export function MySubmissionsModule() {
                 })}
               </div>
             )}
+            {artworkLastKey && (
+              <div className="mt-4 flex justify-center">
+                <button
+                  type="button"
+                  disabled={loadingMoreArtworks}
+                  onClick={loadMoreArtworks}
+                  className="rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-40"
+                >
+                  {loadingMoreArtworks
+                    ? 'Loading more...'
+                    : 'Load more artwork'}
+                </button>
+              </div>
+            )}
           </section>
 
           <section>
@@ -217,6 +291,18 @@ export function MySubmissionsModule() {
                     }
                   />
                 ))}
+              </div>
+            )}
+            {groupLastKey && (
+              <div className="mt-4 flex justify-center">
+                <button
+                  type="button"
+                  disabled={loadingMoreGroups}
+                  onClick={loadMoreGroups}
+                  className="rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-40"
+                >
+                  {loadingMoreGroups ? 'Loading more...' : 'Load more groups'}
+                </button>
               </div>
             )}
           </section>

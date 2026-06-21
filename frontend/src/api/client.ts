@@ -31,6 +31,7 @@ type ApiCacheMatch = {
 const apiResponseCache = new Map<string, CachedApiResponse>();
 const pendingApiResponseCache = new Map<string, Promise<unknown>>();
 const apiCacheInvalidationVersions = new Map<string, number>();
+let pendingAuthRefresh: Promise<boolean> | null = null;
 
 function resolveApiBaseUrl(config?: ApiClientConfig): string {
   const configuredBaseUrl =
@@ -180,15 +181,26 @@ async function fetchApiResponse<TBody>(
 }
 
 async function refreshAuthSession(config?: ApiClientConfig): Promise<boolean> {
+  if (pendingAuthRefresh) return pendingAuthRefresh;
+
   const refreshUrl = buildApiUrl('/auth/refresh', undefined, config);
   const headers = new Headers();
   headers.set('Content-Type', 'application/json');
 
+  const refreshRequest = fetchApiResponse(
+    refreshUrl,
+    { method: 'POST' },
+    headers,
+  ).then(
+    () => true,
+    () => false,
+  );
+  pendingAuthRefresh = refreshRequest;
+
   try {
-    await fetchApiResponse(refreshUrl, { method: 'POST' }, headers);
-    return true;
-  } catch {
-    return false;
+    return await refreshRequest;
+  } finally {
+    if (pendingAuthRefresh === refreshRequest) pendingAuthRefresh = null;
   }
 }
 

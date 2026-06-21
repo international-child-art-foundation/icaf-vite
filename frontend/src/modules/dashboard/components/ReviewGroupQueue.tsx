@@ -43,25 +43,47 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [edits, setEdits] = useState<UpdateGroupRequest>({});
+  const [lastKey, setLastKey] = useState<string | undefined>();
+  const [loadingMore, setLoadingMore] = useState(false);
   const selectedIds = useMemo(() => [...selected], [selected]);
 
-  const loadQueue = useCallback(() => {
-    setLoading(true);
+  const loadQueue = useCallback((cursor?: string) => {
+    const append = Boolean(cursor);
+    if (append) setLoadingMore(true);
+    else setLoading(true);
     setError(null);
     const request = mode === 'pending' ? fetchPendingGroups : fetchHiddenGroups;
-    request({ limit: 24 })
+    request({
+      limit: 24,
+      ...(cursor ? { last_key: cursor } : {}),
+    })
       .then((response) => {
-        setGroups(response.groups);
-        setSelected(new Set());
+        setGroups((current) =>
+          append ? [...current, ...response.groups] : response.groups,
+        );
+        setLastKey(
+          response.has_more && response.last_key
+            ? response.last_key
+            : undefined,
+        );
+        if (!append) setSelected(new Set());
       })
       .catch((err: unknown) => {
-        setGroups([]);
+        if (!append) {
+          setGroups([]);
+          setLastKey(undefined);
+        }
         setError(err instanceof Error ? err.message : 'Failed to load groups');
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        setLoadingMore(false);
+      });
   }, [mode]);
 
-  useEffect(loadQueue, [loadQueue]);
+  useEffect(() => {
+    loadQueue();
+  }, [loadQueue]);
 
   const mutateStatus = async (
     ids: string[],
@@ -350,6 +372,18 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
               }
             />
           ))}
+        </div>
+      )}
+      {lastKey && !loading && (
+        <div className="mt-6 flex justify-center">
+          <button
+            type="button"
+            disabled={busy || loadingMore}
+            onClick={() => loadQueue(lastKey)}
+            className="rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-40"
+          >
+            {loadingMore ? 'Loading more...' : 'Load more groups'}
+          </button>
         </div>
       )}
     </DashboardModule>

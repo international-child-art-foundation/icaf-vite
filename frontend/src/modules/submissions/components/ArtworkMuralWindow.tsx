@@ -705,11 +705,7 @@ export function ArtworkMuralWindow({
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'ArrowLeft') {
-        step(-1);
-      } else if (event.key === 'ArrowRight') {
-        step(1);
-      } else if (event.key === 'Escape') {
+      if (event.key === 'Escape') {
         if (isSingleArtwork) return;
         setSelectedIndex(null);
       }

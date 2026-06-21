@@ -17,6 +17,7 @@ import {
   createGuestGroup,
 } from '@/api/public';
 import { uploadToPresignedUrl } from '@/api/uploads';
+import { mapWithConcurrency } from '@/shared/utils/concurrency';
 import { AccountTextField } from '@/modules/account/components/AccountTextField';
 import { ArtworkMuralWindow } from '@/modules/submissions/components/ArtworkMuralWindow';
 import { ArtworkConsent } from '@/modules/submissions/components/ArtworkConsent';
@@ -548,8 +549,10 @@ export function SubmitArtworkGroup({
 
     if (nextArtworks !== artworks) setArtworks(nextArtworks);
     setFileFingerprints(nextFingerprints);
-    await Promise.all(
-      assignments.map(({ artworkId, file }) => attachFile(artworkId, file)),
+    await mapWithConcurrency(
+      assignments,
+      2,
+      ({ artworkId, file }) => attachFile(artworkId, file),
     );
   }
 
@@ -579,12 +582,14 @@ export function SubmitArtworkGroup({
   async function handleAsyncSubmit() {
     try {
       const digitalSignature = createDigitalSignature(draft.digitalSignature);
-      const uploadFiles = await Promise.all(
-        artworks.map((artwork) => {
+      const uploadFiles = await mapWithConcurrency(
+        artworks,
+        2,
+        (artwork) => {
           const file = files[artwork.id];
           if (!file) throw new Error('A selected image is missing.');
           return createRotatedImageFile(file, imageRotations[artwork.id] ?? 0);
-        }),
+        },
       );
       const uploadFileTypes = uploadFiles.map((file) => {
         const fileType = getUploadFileType(file);
@@ -592,17 +597,18 @@ export function SubmitArtworkGroup({
         return fileType;
       });
 
-      const artworkUploads = await Promise.all(
-        uploadFileTypes.map((fileType) =>
-          createArtworkUpload({ file_type: fileType }).then((upload) => {
-            setSubmissionProgress((current) =>
-              current
-                ? { ...current, completed: current.completed + 1 }
-                : current,
-            );
-            return upload;
-          }),
-        ),
+      const artworkUploads = await mapWithConcurrency(
+        uploadFileTypes,
+        3,
+        async (fileType) => {
+          const upload = await createArtworkUpload({ file_type: fileType });
+          setSubmissionProgress((current) =>
+            current
+              ? { ...current, completed: current.completed + 1 }
+              : current,
+          );
+          return upload;
+        },
       );
 
       setSubmissionProgress({

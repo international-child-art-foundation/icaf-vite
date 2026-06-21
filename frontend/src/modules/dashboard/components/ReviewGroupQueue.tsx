@@ -11,6 +11,7 @@ import {
   fetchPendingGroups,
 } from '@/api/contributor';
 import { GalleryGroupCard } from '@/modules/content/components/gallery/GalleryGroupCard';
+import { mapWithConcurrency } from '@/shared/utils/concurrency';
 import { formatDate, groupTitle } from '../utils/dashboardFormat';
 import { DashboardModule, ModuleState } from './DashboardModule';
 
@@ -72,13 +73,14 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
     setError(null);
     setMessage(null);
     try {
-      await Promise.all(
-        ids.map((id) =>
+      await mapWithConcurrency(
+        ids,
+        2,
+        (id) =>
           changeGroupStatus(id, {
             status,
             ...(status === 'approved' ? { approve_all: approveAll } : {}),
           }),
-        ),
       );
       setMessage(
         status === 'approved'
@@ -116,11 +118,9 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
     setError(null);
     setMessage(null);
     try {
-      await Promise.all(
-        selectedIds.map(async (id): Promise<void> => {
-          await adminUpdateGroup(id, payload);
-        }),
-      );
+      await mapWithConcurrency(selectedIds, 3, async (id): Promise<void> => {
+        await adminUpdateGroup(id, payload);
+      });
       setMessage(`${selectedIds.length} group attribute set updated.`);
       setEdits({});
       setConfirmed(false);

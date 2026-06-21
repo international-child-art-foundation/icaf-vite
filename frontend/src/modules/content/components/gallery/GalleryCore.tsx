@@ -37,7 +37,7 @@ import {
   fetchAllGalleryArtworks,
   fetchAllGalleryGroups,
   fetchArtworkGroupMetadata,
-  fetchGroupArtworks,
+  fetchGroupArtworksLazily,
   toSortOrder,
 } from './galleryData';
 import Pagination from './Pagination';
@@ -208,6 +208,9 @@ const GalleryCoreInner = () => {
     TResolvedArtwork[]
   >([]);
   const [slideshowPreserveOrder, setSlideshowPreserveOrder] = useState(false);
+  const [slideshowArtworkLoader, setSlideshowArtworkLoader] = useState<
+    IGalleryContext['loadArtwork']
+  >();
   const [slideshowInitialArtworkId, setSlideshowInitialArtworkId] = useState<
     string | undefined
   >();
@@ -423,6 +426,7 @@ const GalleryCoreInner = () => {
     if (!isInSlideshow && wasInSlideshowRef.current) {
       setSlideshowArtworks([]);
       setSlideshowPreserveOrder(false);
+      setSlideshowArtworkLoader(undefined);
       setSlideshowInitialArtworkId(undefined);
     }
     wasInSlideshowRef.current = isInSlideshow;
@@ -537,15 +541,47 @@ const GalleryCoreInner = () => {
 
   const fetchGroupsForSlideshow = async (
     groupsForSlideshow: GroupListItem[],
+    initialArtworkId?: string,
   ) => {
     const groupedArtworks: TResolvedArtwork[] = [];
+    const loaders = new Map<
+      string,
+      NonNullable<IGalleryContext['loadArtwork']>
+    >();
 
     for (const group of groupsForSlideshow) {
-      const groupArtworks = await fetchGroupArtworks(group);
-      groupedArtworks.push(...groupArtworks);
+      const groupData = await fetchGroupArtworksLazily(
+        group,
+        undefined,
+        false,
+      );
+      groupedArtworks.push(...groupData.artworks);
+      groupData.artworks.forEach((artwork) => {
+        loaders.set(artwork.id, groupData.loadArtwork);
+      });
     }
 
-    return groupedArtworks;
+    const loadArtwork: NonNullable<IGalleryContext['loadArtwork']> =
+      (artworkId) => loaders.get(artworkId)?.(artworkId) ?? Promise.resolve(null);
+    const selectedId =
+      initialArtworkId && loaders.has(initialArtworkId)
+        ? initialArtworkId
+        : groupedArtworks[0]?.id;
+    if (selectedId) {
+      try {
+        const selectedArtwork = await loadArtwork(selectedId);
+        if (selectedArtwork) {
+          const selectedIndex = groupedArtworks.findIndex(
+            (artwork) => artwork.id === selectedId,
+          );
+          groupedArtworks[selectedIndex] = selectedArtwork;
+        }
+      } catch {
+        // Open using the deterministic asset URL; the slideshow will retry.
+      }
+    }
+
+    return { artworks: groupedArtworks, loadArtwork };
   };
 
   useEffect(() => {
@@ -574,14 +610,20 @@ const GalleryCoreInner = () => {
 
     setGroupSlideshowLoading(true);
     setGroupSlideshowError(null);
-    fetchGroupsForSlideshow(requestedGroups)
+    const requestedArtworkId = searchParams.get('id') ?? undefined;
+    const loadGroup =
+      requestedGroups.length === 1
+        ? fetchGroupArtworksLazily(requestedGroups[0], requestedArtworkId)
+        : fetchGroupsForSlideshow(requestedGroups, requestedArtworkId);
+    loadGroup
       .then((data) => {
-        if (data.length === 0) {
+        if (data.artworks.length === 0) {
           setGroupSlideshowError('This slideshow has no approved artworks.');
           return;
         }
         setSlideshowPreserveOrder(true);
-        setSlideshowArtworks(data);
+        setSlideshowArtworkLoader(() => data.loadArtwork);
+        setSlideshowArtworks(data.artworks);
       })
       .catch((error: unknown) => {
         setGroupSlideshowError(
@@ -658,17 +700,18 @@ const GalleryCoreInner = () => {
       setGroupSlideshowError(null);
       hideNoArtworksTooltip();
 
-      fetchGroupsForSlideshow(groups)
+      fetchGroupsForSlideshow(groups, initialArtworkId)
         .then((data) => {
-          if (data.length === 0) {
+          if (data.artworks.length === 0) {
             showNoArtworksUnavailableTooltip();
             return;
           }
 
           setSlideshowPreserveOrder(true);
-          const firstArtworkId = initialArtworkId ?? data[0]?.id;
+          setSlideshowArtworkLoader(() => data.loadArtwork);
+          const firstArtworkId = initialArtworkId ?? data.artworks[0]?.id;
           setSlideshowInitialArtworkId(firstArtworkId);
-          setSlideshowArtworks(data);
+          setSlideshowArtworks(data.artworks);
           navigateToSlideshow(
             buildSlideshowPath({
               initialArtworkId: firstArtworkId,
@@ -700,6 +743,7 @@ const GalleryCoreInner = () => {
     setGroupSlideshowLoading(true);
     setGroupSlideshowError(null);
     hideNoArtworksTooltip();
+    setSlideshowArtworkLoader(undefined);
 
     fetchArtworkGroupMetadata(artworksForSlideshow)
       .then((enrichedArtworks) => {
@@ -733,16 +777,17 @@ const GalleryCoreInner = () => {
   const openGroupSlideshow = (group: GroupListItem) => {
     setGroupSlideshowLoading(true);
     setGroupSlideshowError(null);
-    fetchGroupArtworks(group)
+    fetchGroupArtworksLazily(group)
       .then((data) => {
-        if (data.length === 0) {
+        if (data.artworks.length === 0) {
           setGroupSlideshowError('This group has no approved artworks yet.');
           return;
         }
         setSlideshowPreserveOrder(true);
-        const firstArtworkId = data[0]?.id;
+        const firstArtworkId = data.artworks[0]?.id;
         setSlideshowInitialArtworkId(firstArtworkId);
-        setSlideshowArtworks(data);
+        setSlideshowArtworkLoader(() => data.loadArtwork);
+        setSlideshowArtworks(data.artworks);
         navigateToSlideshow(
           buildSlideshowPath({
             initialArtworkId: firstArtworkId,
@@ -917,6 +962,7 @@ const GalleryCoreInner = () => {
           context={
             {
               artworks: outletArtworks,
+              loadArtwork: slideshowArtworkLoader,
               onArtworkKudos: applyArtworkKudos,
               preserveOrder: slideshowPreserveOrder,
               initialArtworkId: slideshowInitialArtworkId,

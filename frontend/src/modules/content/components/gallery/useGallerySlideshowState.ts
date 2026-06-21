@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import type {
   IGalleryContext,
@@ -55,12 +55,20 @@ export const useGallerySlideshowState = (
   const outletContext = useOutletContext<IGalleryContext | null>();
   const {
     artworks: rawArtworks,
+    loadArtwork,
     onArtworkKudos,
     preserveOrder = false,
     initialArtworkId,
   } = context ?? outletContext!;
   const [artworks, setArtworks] = useState<TResolvedArtwork[]>(() =>
     arrangeArtworks(rawArtworks, preserveOrder, initialArtworkId),
+  );
+  const slideshowArtworkIds = useMemo(
+    () =>
+      arrangeArtworks(rawArtworks, preserveOrder, initialArtworkId).map(
+        (artwork) => artwork.id,
+      ),
+    [initialArtworkId, preserveOrder, rawArtworks],
   );
   const rawArtworksSignatureRef = useRef(
     `${preserveOrder}:${initialArtworkId ?? ''}:${rawArtworks.map((artwork) => artwork.id).join('|')}`,
@@ -70,6 +78,40 @@ export const useGallerySlideshowState = (
 
   const dimTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  useEffect(() => {
+    if (!loadArtwork || slideshowArtworkIds.length === 0) return;
+    let cancelled = false;
+    const indexes = [
+      currentIdx,
+      (currentIdx + 1) % slideshowArtworkIds.length,
+      (currentIdx - 1 + slideshowArtworkIds.length) %
+        slideshowArtworkIds.length,
+    ];
+
+    void (async () => {
+      for (const index of new Set(indexes)) {
+        const artworkId = slideshowArtworkIds[index];
+        if (!artworkId) continue;
+        try {
+          const resolved = await loadArtwork(artworkId);
+          if (cancelled || !resolved) continue;
+          setArtworks((current) =>
+            current.map((artwork) =>
+              artwork.id === artworkId ? resolved : artwork,
+            ),
+          );
+        } catch {
+          // Keep the asset-backed placeholder and retry if it becomes adjacent
+          // again. A metadata failure must not take down the slideshow.
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentIdx, loadArtwork, slideshowArtworkIds]);
 
   const onClose = useCallback(() => {
     if (closeOverride) {

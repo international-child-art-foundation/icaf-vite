@@ -9,6 +9,7 @@ import ArtworkModal from '@/modules/content/components/gallery/ArtworkModal';
 import { GallerySlideshowEntry } from '@/modules/content/components/gallery/GallerySlideshowEntry';
 import { GalleryGroupCard } from '@/modules/content/components/gallery/GalleryGroupCard';
 import { resolveApiArtwork } from '@/utils/galleryProcessing';
+import { mapWithConcurrency } from '@/shared/utils/concurrency';
 import { formatDate, groupTitle } from '../utils/dashboardFormat';
 import { DashboardModule, ModuleState } from './DashboardModule';
 
@@ -59,8 +60,10 @@ export function MySubmissionsModule() {
     setError(null);
     getGroup(group.group_id)
       .then(async ({ group: groupEntity }) => {
-        const responses = await Promise.all(
-          groupEntity.member_art_ids.map((artId) => getArtwork(artId)),
+        const responses = await mapWithConcurrency(
+          groupEntity.member_art_ids,
+          3,
+          (artId) => getArtwork(artId),
         );
         const metadata = {
           groupTitle: groupEntity.class_name || groupEntity.title,

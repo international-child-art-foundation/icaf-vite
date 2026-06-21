@@ -16,6 +16,7 @@ import ArtworkCard from '@/modules/content/components/gallery/ArtworkCard';
 import ArtworkModal from '@/modules/content/components/gallery/ArtworkModal';
 import { GallerySlideshowEntry } from '@/modules/content/components/gallery/GallerySlideshowEntry';
 import { resolveApiArtwork } from '@/utils/galleryProcessing';
+import { mapWithConcurrency } from '@/shared/utils/concurrency';
 import { artworkLabel, formatDate } from '../utils/dashboardFormat';
 import { DashboardModule, ModuleState } from './DashboardModule';
 
@@ -167,7 +168,9 @@ export function ReviewArtworkQueue({
     setError(null);
     setMessage(null);
     try {
-      await Promise.all(ids.map((id) => changeArtworkStatus(id, { status })));
+      await mapWithConcurrency(ids, 3, (id) =>
+        changeArtworkStatus(id, { status }),
+      );
       setMessage(
         `${ids.length} artwork${ids.length === 1 ? '' : 's'} updated.`,
       );

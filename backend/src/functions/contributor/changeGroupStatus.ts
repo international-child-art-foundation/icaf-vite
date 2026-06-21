@@ -32,6 +32,7 @@ async function getPendingGroupArtworks(group: GroupEntity): Promise<ArtworkEntit
 
   let keys = group.member_art_ids.map((artId) => ({ PK: `ART#${artId}`, SK: "-" }));
   const artworks: ArtworkEntity[] = [];
+  let retryCount = 0;
 
   while (keys.length > 0) {
     const result = await dynamodb.send(
@@ -50,6 +51,14 @@ async function getPendingGroupArtworks(group: GroupEntity): Promise<ArtworkEntit
       PK: key.PK as string,
       SK: key.SK as string,
     }));
+    if (keys.length > 0) {
+      retryCount += 1;
+      if (retryCount > 8) {
+        throw new Error("DynamoDB repeatedly throttled the group artwork read");
+      }
+      const delayMs = Math.min(1000, 25 * 2 ** (retryCount - 1));
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
   }
 
   return artworks.filter(

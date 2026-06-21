@@ -65,6 +65,8 @@ export type TResolvedArtwork = TArtwork & {
 
 export interface IGalleryContext {
   artworks: TResolvedArtwork[];
+  /** Lazily resolves full metadata for a slideshow artwork. */
+  loadArtwork?: (artworkId: string) => Promise<TResolvedArtwork | null>;
   onArtworkKudos?: (artId: string, amount: number) => void;
   preserveOrder?: boolean;
   initialArtworkId?: string;

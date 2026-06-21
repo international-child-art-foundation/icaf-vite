@@ -177,27 +177,7 @@ export const handler = async (
       headers: COMMON_HEADERS,
     };
   } catch (error) {
-    const maybeError = error as {
-      name?: string;
-      message?: string;
-      stack?: string;
-      $metadata?: { httpStatusCode?: number; requestId?: string };
-    };
-    console.error("Error creating group", {
-      artwork_count: (() => {
-        try {
-          const body = JSON.parse(event.body ?? "{}") as { artworks?: unknown[] };
-          return Array.isArray(body.artworks) ? body.artworks.length : undefined;
-        } catch {
-          return undefined;
-        }
-      })(),
-      error_message: maybeError.message,
-      error_name: maybeError.name,
-      request_id: maybeError.$metadata?.requestId,
-      stack: maybeError.stack,
-      upstream_status: maybeError.$metadata?.httpStatusCode,
-    });
+    console.error("Error creating group:", error);
     return CommonErrors.internalServerError();
   }
 };

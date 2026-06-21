@@ -8,6 +8,7 @@ import { GalleryArtworkInfo } from './GalleryArtworkInfo';
 import { KudosControls } from './KudosControls';
 import { SocialShare } from './SocialShare';
 import { Button } from '@/shared/components/ui/button';
+import { useAnimationPerformanceGate } from '@/utils/useAnimationPerformanceGate';
 
 type ArtworkModalProps = {
   id: string;
@@ -40,12 +41,13 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
     id: '',
     elapsed: false,
   });
+  const scrollContentRef = useRef<HTMLDivElement>(null);
   const modalShellRef = useRef<HTMLDivElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null);
-  const scrollContentRef = useRef<HTMLDivElement>(null);
   const isFirstOpenRef = useRef(true);
   const activeArtworkIdRef = useRef(id);
   const [imageReady, setImageReady] = useState(false);
+  const animationsEnabled = useAnimationPerformanceGate();
   activeArtworkIdRef.current = id;
 
   const currentNavIdx = navigationList.findIndex((a) => a.id === id);
@@ -97,13 +99,19 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
     const content = modalContentRef.current;
     if (!shell || !content) return;
 
+    gsap.killTweensOf([shell, content]);
+    if (!animationsEnabled) {
+      gsap.set(shell, { clearProps: 'height' });
+      gsap.set(content, { opacity: 1 });
+      return;
+    }
+
     const maxHeightRatio = isHorizontal ? 0.95 : 0.9;
     const placeholderHeight = Math.min(
       window.innerHeight * maxHeightRatio,
       Math.max(360, window.innerHeight * 0.7),
     );
 
-    gsap.killTweensOf([shell, content]);
     gsap.set(content, { opacity: artworkData ? 0 : 1 });
     if (isFirstOpenRef.current) {
       gsap.set(shell, { height: 0 });
@@ -116,7 +124,13 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
     });
 
     return () => gsap.killTweensOf([shell, content]);
-  }, [id, modalState, isHorizontal, artworkData?.displayUrl]);
+  }, [
+    id,
+    modalState,
+    isHorizontal,
+    artworkData?.displayUrl,
+    animationsEnabled,
+  ]);
 
   const handleArtworkLoad = (loadedArtworkId: string) => {
     if (loadedArtworkId !== activeArtworkIdRef.current) return;
@@ -124,8 +138,10 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
     const shell = modalShellRef.current;
     const content = modalContentRef.current;
     if (!shell || !content) return;
-
     setImageReady(true);
+
+    if (!animationsEnabled) return;
+
     requestAnimationFrame(() => {
       if (loadedArtworkId !== activeArtworkIdRef.current) return;
 
@@ -181,7 +197,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
       <div className="mx-auto grid max-h-full min-w-0 grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-5 overflow-hidden px-6 md:gap-10">
         <div
           ref={scrollContentRef}
-          className="flex min-h-0 min-w-0 flex-col overflow-x-hidden overflow-y-auto"
+          className="flex min-h-0 min-w-0 flex-col overflow-y-auto overflow-x-hidden"
         >
           <GalleryArtworkInfo
             artwork={artworkData}
@@ -192,7 +208,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
           <div className="mt-auto pt-6">
             <p className="text-xl font-semibold">Share this post</p>
             <SocialShare shareUrl={getShareUrl()} />
-            <div className="mt-4 grid grid-cols-1 items-stretch gap-2 xl:grid-cols-2">
+            <div className="mt-4 grid grid-cols-1 grid-rows-2 items-stretch gap-2 xl:grid-cols-2 xl:grid-rows-1">
               <Button
                 type="button"
                 onClick={() => onEnterExhibition(artworkData.id)}
@@ -231,7 +247,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
     return (
       <div
         ref={scrollContentRef}
-        className="grid max-h-full min-w-0 gap-y-2 overflow-x-hidden overflow-y-auto"
+        className="grid max-h-full min-w-0 gap-y-2 overflow-y-auto overflow-x-hidden"
       >
         <div className="relative flex min-h-[300px] flex-shrink select-none items-center justify-center overflow-hidden rounded-xl">
           <img
@@ -316,7 +332,7 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
             &times;
           </span>
         </div>
-        <div className="no-scrollbar grid min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+        <div className="no-scrollbar grid min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div
             ref={modalContentRef}
             className={`min-h-[300px] min-w-0 ${isHorizontal ? 'px-8 pb-8 xl:px-16 xl:pb-16 [@media(max-height:600px)]:px-8 [@media(max-height:600px)]:pb-8' : 'px-8 pb-8'}`}

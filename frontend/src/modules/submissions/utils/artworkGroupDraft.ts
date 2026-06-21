@@ -1,7 +1,9 @@
 import {
   GROUP_MAX_DESCRIPTION_LEN,
   GROUP_MAX_MEMBERS,
+  GROUP_MAX_REGION_LEN,
   GROUP_MAX_STRING_LEN,
+  GROUP_MAX_SUBMITTER_DISPLAY_NAME_LEN,
   GROUP_MAX_TITLE_LEN,
   MAX_ARTIST_AGE,
   MAX_DESCRIPTION_LEN,
@@ -128,9 +130,9 @@ export function validateArtworkGroupSubmission(
 
   if (
     draft.group.region.trim() &&
-    draft.group.region.length > GROUP_MAX_STRING_LEN
+    draft.group.region.length > GROUP_MAX_REGION_LEN
   ) {
-    groupErrors.region = `Use ${GROUP_MAX_STRING_LEN} characters or less.`;
+    groupErrors.region = `Use ${GROUP_MAX_REGION_LEN} characters or less.`;
   }
 
   if (
@@ -142,9 +144,10 @@ export function validateArtworkGroupSubmission(
 
   if (
     draft.group.submitter_display_name.trim() &&
-    draft.group.submitter_display_name.length > GROUP_MAX_STRING_LEN
+    draft.group.submitter_display_name.length >
+      GROUP_MAX_SUBMITTER_DISPLAY_NAME_LEN
   ) {
-    groupErrors.submitter_display_name = `Use ${GROUP_MAX_STRING_LEN} characters or less.`;
+    groupErrors.submitter_display_name = `Use ${GROUP_MAX_SUBMITTER_DISPLAY_NAME_LEN} characters or less.`;
   }
 
   if (

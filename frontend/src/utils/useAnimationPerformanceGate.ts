@@ -61,6 +61,13 @@ export function useAnimationPerformanceGate() {
     let idleCallbackId: number | undefined;
     let timeoutId: number | undefined;
 
+    // Keep the runtime feature check even though current DOM typings declare
+    // requestIdleCallback as universally available. Narrowing `window` itself
+    // would otherwise make the fallback branch `never`.
+    const idleWindow: {
+      requestIdleCallback?: Window['requestIdleCallback'];
+    } = window;
+
     const benchmark = () => {
       if (cancelled || document.visibilityState !== 'visible') return;
 
@@ -100,8 +107,8 @@ export function useAnimationPerformanceGate() {
       if (document.visibilityState !== 'visible') return;
       document.removeEventListener('visibilitychange', scheduleBenchmark);
 
-      if ('requestIdleCallback' in window) {
-        idleCallbackId = window.requestIdleCallback(benchmark, {
+      if (idleWindow.requestIdleCallback) {
+        idleCallbackId = idleWindow.requestIdleCallback(benchmark, {
           timeout: 2_000,
         });
       } else {

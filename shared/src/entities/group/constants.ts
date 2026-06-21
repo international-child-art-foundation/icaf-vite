@@ -1,4 +1,6 @@
 export const GROUP_MAX_MEMBERS = 40;
-export const GROUP_MAX_TITLE_LEN = 200;
+export const GROUP_MAX_TITLE_LEN = 150;
 export const GROUP_MAX_STRING_LEN = 200;
-export const GROUP_MAX_DESCRIPTION_LEN = 2000;
+export const GROUP_MAX_REGION_LEN = 80;
+export const GROUP_MAX_SUBMITTER_DISPLAY_NAME_LEN = 80;
+export const GROUP_MAX_DESCRIPTION_LEN = 600;

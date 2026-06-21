@@ -57,7 +57,10 @@ import {
 } from '@/modules/submissions/utils/imagePreview';
 import { Button } from '@/shared/components/ui/button';
 import {
+  GROUP_MAX_DESCRIPTION_LEN,
   GROUP_MAX_MEMBERS,
+  GROUP_MAX_REGION_LEN,
+  GROUP_MAX_SUBMITTER_DISPLAY_NAME_LEN,
   MAX_ARTIST_AGE,
   MAX_NAME_LEN,
   S3_MAX_FILE_SIZE_BYTES,
@@ -959,7 +962,7 @@ export function SubmitArtworkGroup({
                 error={errors.group?.submitter_display_name}
                 label="Submitter display name"
                 leadingIcon={groupFieldIcons.submitter_display_name}
-                maxLength={200}
+                maxLength={GROUP_MAX_SUBMITTER_DISPLAY_NAME_LEN}
                 name="submitter_display_name"
                 value={draft.group.submitter_display_name}
                 onChange={handleGroupTextChange}
@@ -975,7 +978,7 @@ export function SubmitArtworkGroup({
               <AccountTextField
                 error={errors.group?.region}
                 label="State, province, or region"
-                maxLength={200}
+                maxLength={GROUP_MAX_REGION_LEN}
                 name="region"
                 value={draft.group.region}
                 onChange={handleGroupTextChange}
@@ -984,7 +987,7 @@ export function SubmitArtworkGroup({
                 <CompactTextarea
                   error={errors.group?.description}
                   label="Describe your group!"
-                  maxLength={2000}
+                  maxLength={GROUP_MAX_DESCRIPTION_LEN}
                   name="description"
                   value={draft.group.description}
                   onChange={(event) =>

@@ -2,6 +2,8 @@ import type { CreateGroupRequest, SubmitGroupRequest, UpdateGroupRequest } from 
 import {
     GROUP_MAX_TITLE_LEN,
     GROUP_MAX_STRING_LEN,
+    GROUP_MAX_REGION_LEN,
+    GROUP_MAX_SUBMITTER_DISPLAY_NAME_LEN,
     GROUP_MAX_DESCRIPTION_LEN,
     GROUP_MAX_MEMBERS,
 } from './constants.js';
@@ -36,8 +38,8 @@ export function validateSubmitGroupRequest(data: SubmitGroupRequest): string[] {
         errors.push(`country must be ${GROUP_MAX_STRING_LEN} characters or less`);
     }
 
-    if (data.region !== undefined && typeof data.region === 'string' && data.region.length > GROUP_MAX_STRING_LEN) {
-        errors.push(`region must be ${GROUP_MAX_STRING_LEN} characters or less`);
+    if (data.region !== undefined && typeof data.region === 'string' && data.region.length > GROUP_MAX_REGION_LEN) {
+        errors.push(`region must be ${GROUP_MAX_REGION_LEN} characters or less`);
     }
 
     if (data.description !== undefined && typeof data.description === 'string' && data.description.length > GROUP_MAX_DESCRIPTION_LEN) {
@@ -48,8 +50,8 @@ export function validateSubmitGroupRequest(data: SubmitGroupRequest): string[] {
         errors.push(`class_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
     }
 
-    if (data.submitter_display_name !== undefined && typeof data.submitter_display_name === 'string' && data.submitter_display_name.length > GROUP_MAX_STRING_LEN) {
-        errors.push(`submitter_display_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
+    if (data.submitter_display_name !== undefined && typeof data.submitter_display_name === 'string' && data.submitter_display_name.length > GROUP_MAX_SUBMITTER_DISPLAY_NAME_LEN) {
+        errors.push(`submitter_display_name must be ${GROUP_MAX_SUBMITTER_DISPLAY_NAME_LEN} characters or less`);
     }
 
     if (data.theme !== undefined) {
@@ -159,8 +161,8 @@ export function validateUpdateGroupRequest(data: UpdateGroupRequest): string[] {
         errors.push(`class_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
     }
 
-    if (data.submitter_display_name !== undefined && typeof data.submitter_display_name === 'string' && data.submitter_display_name.length > GROUP_MAX_STRING_LEN) {
-        errors.push(`submitter_display_name must be ${GROUP_MAX_STRING_LEN} characters or less`);
+    if (data.submitter_display_name !== undefined && typeof data.submitter_display_name === 'string' && data.submitter_display_name.length > GROUP_MAX_SUBMITTER_DISPLAY_NAME_LEN) {
+        errors.push(`submitter_display_name must be ${GROUP_MAX_SUBMITTER_DISPLAY_NAME_LEN} characters or less`);
     }
 
     if (data.country !== undefined) {
@@ -171,8 +173,8 @@ export function validateUpdateGroupRequest(data: UpdateGroupRequest): string[] {
         }
     }
 
-    if (data.region !== undefined && typeof data.region === 'string' && data.region.length > GROUP_MAX_STRING_LEN) {
-        errors.push(`region must be ${GROUP_MAX_STRING_LEN} characters or less`);
+    if (data.region !== undefined && typeof data.region === 'string' && data.region.length > GROUP_MAX_REGION_LEN) {
+        errors.push(`region must be ${GROUP_MAX_REGION_LEN} characters or less`);
     }
 
     if (data.theme !== undefined) {

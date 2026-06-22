@@ -89,7 +89,7 @@ export function MyIcafAccessGate() {
   if (state.status === 'error') {
     return (
       <div className="site-w m-pad py-16">
-        <section className="mx-auto max-w-2xl rounded-lg border border-primary/10 bg-white p-6 shadow-sm shadow-primary/5 md:p-8">
+        <section className="border-primary/10 shadow-primary/5 mx-auto max-w-2xl rounded-lg border bg-white p-6 shadow-sm md:p-8">
           <p className="text-primary text-sm font-semibold uppercase tracking-wide">
             My ICAF
           </p>

@@ -315,18 +315,6 @@ export class InfraStack extends Stack {
 
     // ─── 5. SQS — Background Queues ──────────────────────────────────────────
 
-    const cleanupDLQ = new sqs.Queue(this, "IcafCleanupDLQ", {
-      queueName: resourceName("cleanup-dlq"),
-      retentionPeriod: Duration.days(14),
-    });
-
-    const cleanupQueue = new sqs.Queue(this, "IcafCleanupQueue", {
-      queueName: resourceName("cleanup-queue"),
-      visibilityTimeout: Duration.seconds(300),
-      retentionPeriod: Duration.days(14),
-      deadLetterQueue: { queue: cleanupDLQ, maxReceiveCount: 3 },
-    });
-
     // processImage queue — fed by S3 ObjectCreated on artwork uploads
     const processImageDLQ = new sqs.Queue(this, "IcafProcessImageDLQ", {
       queueName: resourceName("process-image-dlq"),
@@ -428,7 +416,6 @@ export class InfraStack extends Stack {
       USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
       S3_BUCKET_NAME: artworkBucket.bucketName,
       MAGAZINES_BUCKET_NAME: magazinesBucket.bucketName,
-      CLEANUP_QUEUE_URL: cleanupQueue.queueUrl,
       APP_URL: deployment.appUrl,
       ALLOWED_ORIGINS: deployment.allowedOrigins.join(","),
       SES_FROM_EMAIL,
@@ -492,27 +479,6 @@ export class InfraStack extends Stack {
       }),
     );
 
-    // Account deletion is a retryable cross-service workflow. The USER profile
-    // remains as its durable marker until DynamoDB, S3, and Cognito cleanup succeeds.
-    const processAccountDeletionFn = new NodejsFunction(this, "ProcessAccountDeletionFn", {
-      runtime: Runtime.NODEJS_20_X,
-      timeout: Duration.seconds(240),
-      memorySize: 512,
-      environment: {
-        TABLE_NAME: icafTable.tableName,
-        S3_BUCKET_NAME: artworkBucket.bucketName,
-        USER_POOL_ID: userPool.userPoolId,
-      },
-      entry: src("processAccountDeletion.ts"),
-      logGroup: lambdaLogGroup("ProcessAccountDeletionFn"),
-    });
-
-    processAccountDeletionFn.addEventSource(
-      new SqsEventSource(cleanupQueue, {
-        batchSize: 1,
-      }),
-    );
-
     // ProcessZip: magazine zip → extracted files in magazines bucket
     // Triggered via SQS ← S3 ObjectCreated on staging/<slug>.zip
     const processZipFn = new NodejsFunction(this, "ProcessZipFn", {
@@ -565,7 +531,6 @@ export class InfraStack extends Stack {
 
     // processImage, processZip, and SES feedback processing also need DDB access
     icafTable.grantReadWriteData(processImageFn);
-    icafTable.grantReadWriteData(processAccountDeletionFn);
     icafTable.grantReadWriteData(processZipFn);
     icafTable.grantReadWriteData(processSesFeedbackFn);
 
@@ -575,9 +540,6 @@ export class InfraStack extends Stack {
     // processImageFn reads {art_id}/initial, writes the three AVIF variants,
     // and deletes the initial. grantReadWrite already includes delete.
     artworkBucket.grantReadWrite(processImageFn);
-    artworkBucket.grantReadWrite(processAccountDeletionFn);
-
-    cleanupQueue.grantSendMessages(apiFn);
 
     // S3 magazines bucket
     // ApiFn generates magazine upload URLs and handles magazine deletion.
@@ -590,12 +552,6 @@ export class InfraStack extends Stack {
       effect: iam.Effect.ALLOW,
       actions: ["ses:SendEmail", "ses:SendRawEmail"],
       resources: ["*"],
-    }));
-
-    processAccountDeletionFn.addToRolePolicy(new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: ["cognito-idp:AdminDeleteUser"],
-      resources: [userPool.userPoolArn],
     }));
 
     apiFn.addToRolePolicy(new iam.PolicyStatement({

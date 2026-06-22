@@ -44,6 +44,7 @@ export interface ArtworkEntity {
     status: ArtworkStatus;
     kudos_count: number;
     ts: number;          // Unix ts (seconds)
+    rev_num: number;     // Optimistic-lock revision; starts at 1
     digital_signature?: string; // Submitter's typed signature captured at submission
     promotional_use: boolean;   // submitter opted into promotional/commercial use
     type: 'ART';
@@ -78,7 +79,6 @@ interface ArtworkSubmissionFields {
     region?: string;
     submitter_relationship?: SubmitterRelationship;
     theme?: string;
-    group_id?: string;
     notifications?: boolean;
 }
 
@@ -134,6 +134,7 @@ export interface ArtworkListItem {
     status: ArtworkStatus;
     kudos_count: number;
     ts: number;
+    rev_num: number;
     promotional_use: boolean;
     notifications?: boolean;
     submitter_relationship?: SubmitterRelationship;
@@ -216,6 +217,7 @@ export interface ReviewArtworkQueueResponse {
 
 export interface ChangeArtworkStatusRequest {
     status: Extract<ArtworkStatus, 'approved' | 'hidden' | 'rejected'>;
+    rev_num: number;
 }
 
 export interface ChangeArtworkStatusResponse {

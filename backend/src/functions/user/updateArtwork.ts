@@ -66,6 +66,7 @@ export const handler = async (
       "#status = :status",
       "REV_PK = :revPk",
       "REV_SK = :revSk",
+      "rev_num = if_not_exists(rev_num, :one) + :one",
     ];
 
     const exprNames: Record<string, string> = { "#status": "status" };
@@ -73,6 +74,7 @@ export const handler = async (
       ":status": "pending_review",
       ":revPk": reviewPk(),
       ":revSk": reviewGsiSk(Status.Pending, EntityType.Art, nowMs, artId),
+      ":one": 1,
     };
 
     if (body.title !== undefined) { setExprParts.push("title = :title"); exprValues[":title"] = body.title; }

@@ -62,6 +62,7 @@ export async function fetchArtworkReviewPage(
     status: item.status as ArtworkListItem["status"],
     kudos_count: (item.kudos_count as number) ?? 0,
     ts: item.ts as number,
+    rev_num: (item.rev_num as number | undefined) ?? 1,
     promotional_use: (item.promotional_use as boolean | undefined) ?? false,
     notifications: item.notifications as boolean | undefined,
     submitter_relationship: item.submitter_relationship as ArtworkListItem["submitter_relationship"],
@@ -99,6 +100,7 @@ export async function fetchGroupReviewPage(
     member_count: ((item.member_art_ids as string[]) ?? []).length,
     status: item.status as GroupListItem["status"],
     ts: item.ts as number,
+    rev_num: (item.rev_num as number | undefined) ?? 1,
     notifications: item.notifications as boolean | undefined,
   }));
 

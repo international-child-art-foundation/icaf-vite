@@ -148,15 +148,31 @@ export async function getCurrentUser(event: ApiGatewayEvent): Promise<CurrentUse
     auth: resolved.auth,
   };
 }
-
-export async function requireAuth(event: ApiGatewayEvent): Promise<AuthContext | ApiGatewayResponse> {
+export async function requireAuth(
+  event: ApiGatewayEvent,
+): Promise<AuthContext | ApiGatewayResponse> {
   const currentUser = await getCurrentUser(event);
-  return currentUser.ok ? currentUser.auth : currentUser.response;
+  if (!currentUser.ok) return currentUser.response;
+
+  if (currentUser.auth.role === "deleting") {
+      return CommonErrors.forbidden(
+      "Account deletion is pending. Contact us if you need assistance.",
+    );
+  }
+
+  return currentUser.auth;
 }
 
 export async function getOptionalAuth(event: ApiGatewayEvent): Promise<AuthContext | null> {
   try {
-    return (await resolveAuth(event))?.auth ?? null;
+    const resolved = await resolveAuth(event);
+    if (!resolved) return null;
+
+    if (resolved.auth.role === "deleting") {
+      return null;
+    }
+
+    return resolved.auth;
   } catch {
     return null;
   }

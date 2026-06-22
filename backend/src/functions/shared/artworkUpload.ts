@@ -1,6 +1,6 @@
 import { HeadObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { CreateArtworkUploadResponse, UploadFileType, isValidUploadFileType } from "@icaf/shared";
+import { CreateArtworkUploadResponse, S3_MAX_FILE_SIZE_BYTES, UploadFileType, isValidUploadFileType } from "@icaf/shared";
 import { randomUUID } from "crypto";
 import { s3Client, S3_BUCKET_NAME } from "../../config/aws-clients";
 
@@ -23,7 +23,10 @@ export function contentTypeForUpload(fileType: UploadFileType): string {
   return CONTENT_TYPES[fileType];
 }
 
-export async function createArtworkUpload(fileType: string): Promise<CreateArtworkUploadResponse> {
+export async function createArtworkUpload(
+  fileType: string,
+  fileSizeBytes: number,
+): Promise<CreateArtworkUploadResponse> {
   if (!isValidUploadFileType(fileType)) {
     throw new Error("INVALID_FILE_TYPE");
   }
@@ -35,6 +38,7 @@ export async function createArtworkUpload(fileType: string): Promise<CreateArtwo
       Bucket: S3_BUCKET_NAME,
       Key: artworkInitialKey(artId),
       ContentType: contentTypeForUpload(fileType),
+      ContentLength: fileSizeBytes,
     }),
     { expiresIn: PRESIGNED_URL_EXPIRES_SECONDS },
   );
@@ -53,7 +57,11 @@ export async function hasUploadedArtworkImage(artId: string): Promise<boolean> {
       const result = await s3Client.send(
         new HeadObjectCommand({ Bucket: S3_BUCKET_NAME, Key: key }),
       );
-      return typeof result.ContentLength === "number" && result.ContentLength > 0;
+      return (
+        typeof result.ContentLength === "number" &&
+        result.ContentLength > 0 &&
+        result.ContentLength <= S3_MAX_FILE_SIZE_BYTES
+      );
     } catch (error) {
       const maybeError = error as { name?: string; $metadata?: { httpStatusCode?: number } };
       if (maybeError.name === "NotFound" || maybeError.$metadata?.httpStatusCode === 404) {

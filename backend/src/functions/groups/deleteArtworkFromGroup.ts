@@ -1,4 +1,4 @@
-import { GetCommand, DeleteCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
 import {
   ApiGatewayEvent,
@@ -9,6 +9,10 @@ import {
   GroupEntity,
 } from "@icaf/shared";
 import { getCurrentUser } from "../../utils/auth";
+import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
+import { EntityType } from "../../dynamo/ddbSchemaConsts";
+import { Status } from "../../dynamo/shared";
+import { GROUP_GSI_ATTRS_TO_REMOVE } from "../../dynamo/groupGsis";
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -61,25 +65,43 @@ export const handler = async (
       return CommonErrors.badRequest("Artwork does not belong to this group");
     }
 
-    // ── Delete ART entity ─────────────────────────────────────────────────
-    await dynamodb.send(
-      new DeleteCommand({
-        TableName: TABLE_NAME,
-        Key: { PK: `ART#${artId}`, SK: "-" },
-      }),
-    );
-
-    // ── Update GROUP: remove art_id ───────────────────────────────────────
     const newMemberIds = group.member_art_ids.filter((id) => id !== artId);
+    const nowMs = Date.now();
 
     await dynamodb.send(
-      new UpdateCommand({
-        TableName: TABLE_NAME,
-        Key: { PK: `GROUP#${groupId}`, SK: "-" },
-        UpdateExpression: "SET member_art_ids = :members",
-        ExpressionAttributeValues: {
-          ":members": newMemberIds,
-        },
+      new TransactWriteCommand({
+        TransactItems: [
+          {
+            Delete: {
+              TableName: TABLE_NAME,
+              Key: { PK: `ART#${artId}`, SK: "-" },
+              ConditionExpression: "group_id = :groupId AND user_id = :userId",
+              ExpressionAttributeValues: { ":groupId": groupId, ":userId": userId },
+            },
+          },
+          {
+            Update: {
+              TableName: TABLE_NAME,
+              Key: { PK: `GROUP#${groupId}`, SK: "-" },
+              UpdateExpression:
+                "SET member_art_ids = :members, #status = :pending, REV_PK = :revPk, " +
+                "REV_SK = :revSk, rev_num = if_not_exists(rev_num, :one) + :one " +
+                `REMOVE ${GROUP_GSI_ATTRS_TO_REMOVE.join(", ")}`,
+              ConditionExpression:
+                "user_id = :userId AND (rev_num = :revision OR (attribute_not_exists(rev_num) AND :revision = :one))",
+              ExpressionAttributeNames: { "#status": "status" },
+              ExpressionAttributeValues: {
+                ":members": newMemberIds,
+                ":pending": Status.Pending,
+                ":revPk": reviewPk(),
+                ":revSk": reviewGsiSk(Status.Pending, EntityType.Group, nowMs, groupId),
+                ":userId": userId,
+                ":revision": group.rev_num ?? 1,
+                ":one": 1,
+              },
+            },
+          },
+        ],
       }),
     );
 
@@ -88,7 +110,10 @@ export const handler = async (
       body: "",
       headers: COMMON_HEADERS,
     };
-  } catch (error) {
+  } catch (error: unknown) {
+    if ((error as { name?: string }).name === "TransactionCanceledException") {
+      return CommonErrors.conflict("The group changed while the artwork was being removed. Refresh and try again.");
+    }
     console.error("Error deleting artwork from group:", error);
     return CommonErrors.internalServerError();
   }

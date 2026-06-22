@@ -21,6 +21,7 @@ import { byOwnerPk } from "../../dynamo/ownerGsi";
 import { randomUUID } from "crypto";
 import { parseJsonBody } from "../../utils/request";
 import { getCurrentUser } from "../../utils/auth";
+import { deleteArtworkObjects, invalidateArtworkPaths } from "../shared/artworkObjects";
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -66,7 +67,7 @@ export const handler = async (
     const target = userResult.Items[0] as UserEntity;
 
     // ── Step 1: Find and delete ART + GROUP entities ───────────────────────
-    const ownedItems: { pk: string; sk: string }[] = [];
+    const ownedItems: { pk: string; sk: string; artId?: string }[] = [];
     let ownerLastKey: Record<string, unknown> | undefined;
 
     do {
@@ -82,7 +83,7 @@ export const handler = async (
 
       for (const item of ownerResult.Items ?? []) {
         const type = item.type as string;
-        if (type === "ART") ownedItems.push({ pk: `ART#${item.art_id}`, sk: "-" });
+        if (type === "ART") ownedItems.push({ pk: `ART#${item.art_id}`, sk: "-", artId: item.art_id as string });
         else if (type === "GROUP") ownedItems.push({ pk: `GROUP#${item.group_id}`, sk: "-" });
       }
 
@@ -90,9 +91,17 @@ export const handler = async (
     } while (ownerLastKey);
 
     let artworksDeleted = 0;
-    for (const { pk, sk } of ownedItems) {
+    const deletedArtIds: string[] = [];
+    for (const { pk, sk, artId } of ownedItems) {
+      if (artId) await deleteArtworkObjects(artId);
       await dynamodb.send(new DeleteCommand({ TableName: TABLE_NAME, Key: { PK: pk, SK: sk } }));
       artworksDeleted++;
+      if (artId) deletedArtIds.push(artId);
+    }
+    try {
+      await invalidateArtworkPaths(deletedArtIds);
+    } catch (error) {
+      console.error("Artwork CloudFront invalidation failed:", error);
     }
 
     // ── Step 2: Delete Cognito entry ──────────────────────────────────────

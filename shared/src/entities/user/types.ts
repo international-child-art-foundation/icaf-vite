@@ -16,7 +16,7 @@
  * flows resolve to the same user.
  */
 
-export const ROLES = ['admin', 'contributor', 'user'] as const;
+export const ROLES = ['deleting', 'user', 'contributor', 'admin'] as const;
 export type Role = typeof ROLES[number];
 
 // Full USER entity as stored in DynamoDB
@@ -44,8 +44,6 @@ export interface UserEntity {
     unsub_token?: string;               // Permanent token for user-level email unsubscribe links
     artwork_emails_off?: boolean;       // User opted out of artwork/group notification emails
     email_blocked?: true;                   // Address should not be emailed after bounce/complaint
-    deletion_pending?: boolean;         // Account cleanup has been queued and is retryable
-    deletion_requested_at?: number;     // Unix ts when account deletion was requested
 }
 
 // Safe API response shape — never exposes dob or auth action tokens

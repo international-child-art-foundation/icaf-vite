@@ -33,6 +33,10 @@ export const handler = async (
     if (!parsedBody.ok) return parsedBody.response;
     const body = parsedBody.value;
 
+    if ("group_id" in body) {
+      return CommonErrors.badRequest("group_id can only be assigned through a group submission");
+    }
+
     // ── Validate artwork fields ────────────────────────────────────────────
     const artErrors = validateGuestSubmitArtworkRequest(body);
     if (artErrors.length > 0) {
@@ -146,13 +150,13 @@ export const handler = async (
           status: "pending_review" as const,
           kudos_count: 0,
           ts: nowSeconds,
+          rev_num: 1,
           ...(body.digital_signature && {
             digital_signature: body.digital_signature.trim(),
           }),
           promotional_use: body.submitter_relationship === "legal_guardian",
           type: "ART",
-          notifications: body.group_id ? false : body.notifications ?? false,
-          // optional fields
+          notifications: body.notifications ?? false,
           ...(body.title && { title: body.title }),
           ...(body.description && { description: body.description }),
           ...(body.f_name && { f_name: body.f_name }),
@@ -164,17 +168,13 @@ export const handler = async (
             submitter_relationship: body.submitter_relationship,
           }),
           ...(body.theme && { theme: body.theme }),
-          ...(body.group_id && { group_id: body.group_id }),
-          // Owner GSI (always written)
           OWN_PK: byOwnerPk(user.user_id),
           OWN_SK: byOwnerGsiSk(EntityType.Art, nowMs, artId),
-          // Review GSI (always written; removed on approval)
           REV_PK: reviewPk(),
           REV_SK: reviewGsiSk(Status.Pending, EntityType.Art, nowMs, artId),
         },
       }),
     );
-
     // ── Step 3: Refresh auth-action token and email virtual users ─────────
     let sentSignupEmail = false;
     if (shouldSuppressArtworkEmail(user)) {

@@ -35,7 +35,7 @@ export const handler = async (
       return CommonErrors.badRequest("art_id path parameter is required");
     }
 
-    const parsedBody = parseJsonBody<{ status?: string }>(event);
+    const parsedBody = parseJsonBody<{ status?: string; rev_num?: unknown }>(event);
     if (!parsedBody.ok) {
       return parsedBody.response;
     }
@@ -46,6 +46,10 @@ export const handler = async (
     if (!newStatus || !VALID_STATUSES.includes(newStatus)) {
       return CommonErrors.badRequest(`status must be one of: ${VALID_STATUSES.join(", ")}`);
     }
+    if (!Number.isInteger(body.rev_num) || (body.rev_num as number) < 1) {
+      return CommonErrors.badRequest("rev_num must be a positive integer");
+    }
+    const expectedRevision = body.rev_num as number;
 
     // ── Read ART entity to get theme attrs for gallery GSI construction ────
     const artResult = await dynamodb.send(
@@ -63,7 +67,11 @@ export const handler = async (
     const nowMs = Date.now();
 
     let updateExpr: string;
-    const exprValues: Record<string, unknown> = { ":status": newStatus };
+    const exprValues: Record<string, unknown> = {
+      ":status": newStatus,
+      ":expectedRevision": expectedRevision,
+      ":one": 1,
+    };
     const exprNames: Record<string, string> = { "#status": "status" };
     if (newStatus === "approved") {
       // Write gallery GSI attrs, remove review GSI attrs
@@ -94,7 +102,8 @@ export const handler = async (
         UpdateExpression: updateExpr,
         ExpressionAttributeNames: exprNames,
         ExpressionAttributeValues: exprValues,
-        ConditionExpression: "attribute_exists(PK)",
+        ConditionExpression:
+          "attribute_exists(PK) AND (rev_num = :expectedRevision OR (attribute_not_exists(rev_num) AND :expectedRevision = :one))",
       }),
     );
 
@@ -127,7 +136,7 @@ export const handler = async (
   } catch (error: unknown) {
     const ddbErr = error as { name?: string };
     if (ddbErr.name === "ConditionalCheckFailedException") {
-      return CommonErrors.notFound("Artwork not found");
+      return CommonErrors.conflict("Artwork changed after it was loaded. Refresh the review queue and try again.");
     }
     console.error("Error changing artwork status:", error);
     return CommonErrors.internalServerError();

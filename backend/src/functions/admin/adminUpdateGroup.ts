@@ -86,6 +86,9 @@ export const handler = async (
     const exprNames: Record<string, string> = {};
     const exprValues: Record<string, unknown> = {};
 
+    setExprParts.push("rev_num = if_not_exists(rev_num, :one) + :one");
+    exprValues[":one"] = 1;
+
     if (body.title !== undefined) { setExprParts.push("title = :title"); exprValues[":title"] = body.title; }
     if (body.description !== undefined) { setExprParts.push("description = :desc"); exprValues[":desc"] = body.description; }
     if (body.class_name !== undefined) { setExprParts.push("class_name = :cn"); exprValues[":cn"] = body.class_name; }

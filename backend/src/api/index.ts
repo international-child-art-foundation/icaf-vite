@@ -147,7 +147,6 @@ const pathParamValidators: Record<string, (value: string) => boolean> = {
 function authenticated(route: Omit<Route, "auth">): Route {
   return { ...route, auth: {} };
 }
-
 function roleProtected(route: Omit<Route, "auth">, roles: Role[]): Route {
   return { ...route, auth: { roles } };
 }
@@ -189,7 +188,7 @@ const routes: Route[] = [
   authenticated({ method: "POST", path: "/api/auth/change-password", handler: changePassword }),
 
   authenticated({ method: "GET", path: "/api/user/profile", handler: getUser }),
-  authenticated({ method: "DELETE", path: "/api/user/account", handler: deleteAccount }),
+  authenticated({ method: "DELETE", path: "/api/user/account", handler: deleteAccount }),  
   authenticated({ method: "GET", path: "/api/user/payments", handler: listDonations }),
   authenticated({ method: "GET", path: "/api/user/artworks", handler: listArtworkSubmissions }),
   authenticated({ method: "POST", path: "/api/user/artworks", handler: submitArtwork }),
@@ -368,10 +367,10 @@ async function authorizeRoute(
 ): Promise<ApiGatewayResponse | null> {
   if (!route.auth) return null;
 
-  const auth = route.auth.roles
-    ? await requireRole(event, route.auth.roles)
-    : await requireAuth(event);
-
+const auth = route.auth.roles
+  ? await requireRole(event, route.auth.roles)
+  : await requireAuth(event);
+  
   return isApiGatewayResponse(auth) ? auth : null;
 }
 

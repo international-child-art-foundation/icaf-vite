@@ -10,6 +10,7 @@ const roleLabels: Record<Role, string> = {
   admin: 'Admin',
   contributor: 'Contributor',
   user: 'User',
+  deleting: 'Deleting',
 };
 
 export function AdminUserRolePanel() {

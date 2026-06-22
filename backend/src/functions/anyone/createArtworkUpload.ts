@@ -30,7 +30,7 @@ export const handler = async (
       );
     }
 
-    const response = await createArtworkUpload(fileType);
+    const response = await createArtworkUpload(fileType, fileSizeBytes);
 
     return {
       statusCode: HTTP_STATUS.CREATED,

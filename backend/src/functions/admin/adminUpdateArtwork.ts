@@ -138,6 +138,9 @@ export const handler = async (
     const exprNames: Record<string, string> = {};
     const exprValues: Record<string, unknown> = {};
 
+    setExprParts.push("rev_num = if_not_exists(rev_num, :one) + :one");
+    exprValues[":one"] = 1;
+
     function setOrRemove(field: string, placeholder: string, value: unknown, namePlaceholder?: string) {
       if (isRemoval(value)) {
         removeExprParts.push(namePlaceholder ?? field);

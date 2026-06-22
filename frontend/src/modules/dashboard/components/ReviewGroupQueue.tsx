@@ -47,39 +47,45 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
   const [loadingMore, setLoadingMore] = useState(false);
   const selectedIds = useMemo(() => [...selected], [selected]);
 
-  const loadQueue = useCallback((cursor?: string) => {
-    const append = Boolean(cursor);
-    if (append) setLoadingMore(true);
-    else setLoading(true);
-    setError(null);
-    const request = mode === 'pending' ? fetchPendingGroups : fetchHiddenGroups;
-    request({
-      limit: 24,
-      ...(cursor ? { last_key: cursor } : {}),
-    })
-      .then((response) => {
-        setGroups((current) =>
-          append ? [...current, ...response.groups] : response.groups,
-        );
-        setLastKey(
-          response.has_more && response.last_key
-            ? response.last_key
-            : undefined,
-        );
-        if (!append) setSelected(new Set());
+  const loadQueue = useCallback(
+    (cursor?: string) => {
+      const append = Boolean(cursor);
+      if (append) setLoadingMore(true);
+      else setLoading(true);
+      setError(null);
+      const request =
+        mode === 'pending' ? fetchPendingGroups : fetchHiddenGroups;
+      request({
+        limit: 24,
+        ...(cursor ? { last_key: cursor } : {}),
       })
-      .catch((err: unknown) => {
-        if (!append) {
-          setGroups([]);
-          setLastKey(undefined);
-        }
-        setError(err instanceof Error ? err.message : 'Failed to load groups');
-      })
-      .finally(() => {
-        setLoading(false);
-        setLoadingMore(false);
-      });
-  }, [mode]);
+        .then((response) => {
+          setGroups((current) =>
+            append ? [...current, ...response.groups] : response.groups,
+          );
+          setLastKey(
+            response.has_more && response.last_key
+              ? response.last_key
+              : undefined,
+          );
+          if (!append) setSelected(new Set());
+        })
+        .catch((err: unknown) => {
+          if (!append) {
+            setGroups([]);
+            setLastKey(undefined);
+          }
+          setError(
+            err instanceof Error ? err.message : 'Failed to load groups',
+          );
+        })
+        .finally(() => {
+          setLoading(false);
+          setLoadingMore(false);
+        });
+    },
+    [mode],
+  );
 
   useEffect(() => {
     loadQueue();
@@ -95,14 +101,12 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
     setError(null);
     setMessage(null);
     try {
-      await mapWithConcurrency(
-        ids,
-        2,
-        (id) =>
-          changeGroupStatus(id, {
-            status,
-            ...(status === 'approved' ? { approve_all: approveAll } : {}),
-          }),
+      await mapWithConcurrency(ids, 2, (id) =>
+        changeGroupStatus(id, {
+          status,
+          rev_num: groups.find((group) => group.group_id === id)?.rev_num ?? 1,
+          ...(status === 'approved' ? { approve_all: approveAll } : {}),
+        }),
       );
       setMessage(
         status === 'approved'
@@ -150,7 +154,9 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
       loadQueue();
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Failed to update group attributes',
+        err instanceof Error
+          ? err.message
+          : 'Failed to update group attributes',
       );
     } finally {
       setBusy(false);
@@ -232,7 +238,7 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
             type="button"
             disabled={selectedIds.length === 0}
             onClick={() => setBulkEditOpen((value) => !value)}
-            className="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
+            className="bg-primary rounded-md px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
           >
             Edit selected attributes
           </button>
@@ -240,8 +246,8 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
       </div>
 
       {bulkEditOpen && admin && (
-        <div className="mb-5 rounded-md border border-primary/20 bg-primary/5 p-4">
-          <p className="text-sm font-semibold text-primary">
+        <div className="border-primary/20 bg-primary/5 mb-5 rounded-md border p-4">
+          <p className="text-primary text-sm font-semibold">
             Attribute editing is a last-resort correction tool.
           </p>
           <div className="mt-3 grid gap-3 md:grid-cols-3">
@@ -264,7 +270,7 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
               </label>
             ))}
           </div>
-          <label className="mt-3 flex items-center gap-2 text-sm text-primary">
+          <label className="text-primary mt-3 flex items-center gap-2 text-sm">
             <input
               type="checkbox"
               checked={confirmed}
@@ -278,7 +284,7 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
             type="button"
             disabled={busy || !confirmed}
             onClick={() => void applyBulkEdits()}
-            className="mt-3 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
+            className="bg-primary mt-3 rounded-md px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
           >
             Apply attribute changes
           </button>
@@ -335,11 +341,7 @@ export function ReviewGroupQueue({ admin = false }: { admin?: boolean }) {
                         type="button"
                         disabled={busy}
                         onClick={() =>
-                          void mutateStatus(
-                            [group.group_id],
-                            'approved',
-                            true,
-                          )
+                          void mutateStatus([group.group_id], 'approved', true)
                         }
                         className="rounded bg-green-700 px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
                         title="Approve the group and all pending artwork in it"

@@ -29,6 +29,7 @@ function mapArtwork(item: Record<string, unknown>): ArtworkListItem {
     status: item.status as ArtworkStatus,
     kudos_count: item.kudos_count as number,
     ts: item.ts as number,
+    rev_num: (item.rev_num as number | undefined) ?? 1,
     promotional_use: (item.promotional_use as boolean | undefined) ?? false,
   };
 }

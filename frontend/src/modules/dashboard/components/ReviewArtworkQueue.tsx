@@ -191,7 +191,10 @@ export function ReviewArtworkQueue({
     setMessage(null);
     try {
       await mapWithConcurrency(ids, 3, (id) =>
-        changeArtworkStatus(id, { status }),
+        changeArtworkStatus(id, {
+          status,
+          rev_num: artworks.find((artwork) => artwork.art_id === id)?.rev_num ?? 1,
+        }),
       );
       setMessage(
         `${ids.length} artwork${ids.length === 1 ? '' : 's'} updated.`,

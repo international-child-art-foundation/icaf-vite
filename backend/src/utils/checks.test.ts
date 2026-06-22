@@ -19,6 +19,7 @@ const baseArtwork: ArtworkEntity = {
   status: 'approved',
   kudos_count: 0,
   ts: 1000,
+  rev_num: 1,
   promotional_use: false,
   type: 'ART',
 };

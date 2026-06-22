@@ -85,6 +85,7 @@ export const handler = async (
     const parsedBody = parseJsonBody<{
       status?: string;
       approve_all?: unknown;
+      rev_num?: unknown;
     }>(event);
     if (!parsedBody.ok) {
       return parsedBody.response;
@@ -103,6 +104,10 @@ export const handler = async (
     ) {
       return CommonErrors.badRequest("approve_all must be a boolean");
     }
+    if (!Number.isInteger(body.rev_num) || (body.rev_num as number) < 1) {
+      return CommonErrors.badRequest("rev_num must be a positive integer");
+    }
+    const expectedRevision = body.rev_num as number;
 
     // ── Read GROUP entity to get theme attrs for gallery GSI construction ──
     const groupResult = await dynamodb.send(
@@ -124,7 +129,11 @@ export const handler = async (
         : [];
 
     let updateExpr: string;
-    const exprValues: Record<string, unknown> = { ":status": newStatus };
+    const exprValues: Record<string, unknown> = {
+      ":status": newStatus,
+      ":expectedRevision": expectedRevision,
+      ":one": 1,
+    };
     const exprNames: Record<string, string> = { "#status": "status" };
 
     if (newStatus === "approved") {
@@ -153,7 +162,8 @@ export const handler = async (
       UpdateExpression: updateExpr,
       ExpressionAttributeNames: exprNames,
       ExpressionAttributeValues: exprValues,
-      ConditionExpression: "attribute_exists(PK)",
+      ConditionExpression:
+        "attribute_exists(PK) AND (rev_num = :expectedRevision OR (attribute_not_exists(rev_num) AND :expectedRevision = :one))",
     };
 
     if (newStatus === "approved" && pendingArtworks.length > 0) {
@@ -226,7 +236,7 @@ export const handler = async (
   } catch (error: unknown) {
     const ddbErr = error as { name?: string };
     if (ddbErr.name === "ConditionalCheckFailedException") {
-      return CommonErrors.notFound("Group not found");
+      return CommonErrors.conflict("Group changed after it was loaded. Refresh the review queue and try again.");
     }
     console.error("Error changing group status:", error);
     return CommonErrors.internalServerError();

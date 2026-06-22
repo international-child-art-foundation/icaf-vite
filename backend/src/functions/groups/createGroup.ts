@@ -7,6 +7,7 @@ import {
   validateCreateGroupRequest,
 } from "@icaf/shared";
 import type { ApiGatewayEvent, CreateGroupRequest, SubmitGroupResponse } from "@icaf/shared";
+import type { UserEntity } from "@icaf/shared";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
 import { byOwnerPk, byOwnerGsiSk } from "../../dynamo/ownerGsi";
 import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
@@ -15,7 +16,7 @@ import { randomUUID } from "crypto";
 import { parseJsonBody } from "../../utils/request";
 import { getOptionalAuth } from "../../utils/auth";
 import { ensureThemeEntity } from "../shared/themeUtils";
-import { getOrCreateVirtualUser } from "../shared/virtualUser";
+import { getOrCreateVirtualUser, sendVirtualUserSignupEmail } from "../shared/virtualUser";
 import { hasUploadedArtworkImage } from "../shared/artworkUpload";
 
 export const handler = async (
@@ -39,9 +40,13 @@ export const handler = async (
     const nowSeconds = Math.floor(nowMs / 1000);
     let userId = auth?.user_id;
     let sentSignupEmail = false;
+    let virtualUserForEmail: UserEntity | undefined;
 
     if (auth?.banned) {
       return CommonErrors.forbidden("This account is banned");
+    }
+    if (auth?.role === "deleting") {
+      return CommonErrors.forbidden("Account deletion is pending. Contact us if you need assistance.");
     }
 
     const memberArtIds = body.artworks.map((artwork) => artwork.art_id.trim());
@@ -66,11 +71,12 @@ export const handler = async (
         nowSeconds,
         body.submitter_first_name,
         body.submitter_last_name,
+        false,
       );
 
       if (!userResult.ok) return userResult.response;
       userId = userResult.user.user_id;
-      sentSignupEmail = userResult.sentSignupEmail;
+      virtualUserForEmail = userResult.user;
     }
     const ownerUserId = userId;
     if (!ownerUserId) {
@@ -94,6 +100,14 @@ export const handler = async (
     await dynamodb.send(
       new TransactWriteCommand({
         TransactItems: [
+          {
+            ConditionCheck: {
+              TableName: TABLE_NAME,
+              Key: { PK: `USER#${ownerUserId}`, SK: "PROFILE" },
+              ConditionExpression:
+                "attribute_exists(PK)",
+            },
+          },
           ...body.artworks.map((artwork) => ({
             Put: {
               TableName: TABLE_NAME,
@@ -107,6 +121,7 @@ export const handler = async (
                 status: Status.Pending,
                 kudos_count: 0,
                 ts: nowSeconds,
+                rev_num: 1,
                 ...(artwork.digital_signature && {
                   digital_signature: artwork.digital_signature.trim(),
                 }),
@@ -142,6 +157,7 @@ export const handler = async (
                 status: Status.Pending,
                 member_art_ids: memberArtIds,
                 ts: nowSeconds,
+                rev_num: 1,
                 type: "GROUP",
                 notifications: body.notifications ?? false,
                 ...(body.theme !== undefined && { theme: body.theme }),
@@ -161,6 +177,14 @@ export const handler = async (
         ],
       }),
     );
+
+    if (virtualUserForEmail) {
+      try {
+        sentSignupEmail = await sendVirtualUserSignupEmail(virtualUserForEmail, nowSeconds);
+      } catch (error) {
+        console.error("Post-submission signup email setup failed:", error);
+      }
+    }
 
     const response: SubmitGroupResponse = {
       success: true,

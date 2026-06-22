@@ -40,8 +40,9 @@ export interface GroupEntity {
     user_id: string;                // USER#<user_id> of the submitting user
     group_type?: GroupType;
     status: GroupStatus;
-    member_art_ids: string[];       // ordered list of art_ids (max ~50)
+    member_art_ids: string[];       // ordered list of art_ids (max 40)
     ts: number;              // Unix ts (seconds)
+    rev_num: number;         // Optimistic-lock revision; starts at 1
     type: 'GROUP';
     notifications?: boolean;        // true when owner opted into group submission notifications
 
@@ -139,6 +140,7 @@ export interface GroupListItem {
     member_count: number;
     status: GroupStatus;
     ts: number;
+    rev_num: number;
     notifications?: boolean;
 }
 
@@ -174,6 +176,7 @@ export interface ReviewGroupQueueResponse {
 
 export interface ChangeGroupStatusRequest {
     status: Extract<GroupStatus, 'approved' | 'hidden' | 'rejected'>;
+    rev_num: number;
     /** When approving a group, also approve each pending artwork in the group. */
     approve_all?: boolean;
 }
@@ -181,6 +184,7 @@ export interface ChangeGroupStatusRequest {
 export interface ChangeGroupStatusResponse {
     success: true;
     group_id: string;
+    rev_num: number;
     status: Extract<GroupStatus, 'approved' | 'hidden' | 'rejected'>;
 }
 

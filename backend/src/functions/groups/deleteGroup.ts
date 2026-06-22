@@ -1,4 +1,4 @@
-import { GetCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
 import {
   ApiGatewayEvent,
@@ -39,21 +39,33 @@ export const handler = async (
       return CommonErrors.forbidden("Not authorized to delete this group");
     }
 
-    // ── Delete each member ART entity ─────────────────────────────────────
-    for (const artId of group.member_art_ids) {
-      await dynamodb.send(
-        new DeleteCommand({
-          TableName: TABLE_NAME,
-          Key: { PK: `ART#${artId}`, SK: "-" },
-        }),
-      );
-    }
-
-    // ── Delete GROUP entity ───────────────────────────────────────────────
+    // Delete the group and its current membership atomically. Missing artwork
+    // is tolerated, but an artwork that now belongs elsewhere aborts the delete.
     await dynamodb.send(
-      new DeleteCommand({
-        TableName: TABLE_NAME,
-        Key: { PK: `GROUP#${groupId}`, SK: "-" },
+      new TransactWriteCommand({
+        TransactItems: [
+          ...group.member_art_ids.map((artId) => ({
+            Delete: {
+              TableName: TABLE_NAME,
+              Key: { PK: `ART#${artId}`, SK: "-" },
+              ConditionExpression: "attribute_not_exists(PK) OR group_id = :groupId",
+              ExpressionAttributeValues: { ":groupId": groupId },
+            },
+          })),
+          {
+            Delete: {
+              TableName: TABLE_NAME,
+              Key: { PK: `GROUP#${groupId}`, SK: "-" },
+              ConditionExpression:
+                "attribute_exists(PK) AND user_id = :userId AND (rev_num = :revision OR (attribute_not_exists(rev_num) AND :revision = :one))",
+              ExpressionAttributeValues: {
+                ":userId": userId,
+                ":revision": group.rev_num ?? 1,
+                ":one": 1,
+              },
+            },
+          },
+        ],
       }),
     );
 
@@ -62,7 +74,10 @@ export const handler = async (
       body: "",
       headers: COMMON_HEADERS,
     };
-  } catch (error) {
+  } catch (error: unknown) {
+    if ((error as { name?: string }).name === "TransactionCanceledException") {
+      return CommonErrors.conflict("The group changed while it was being deleted. Refresh and try again.");
+    }
     console.error("Error deleting group:", error);
     return CommonErrors.internalServerError();
   }

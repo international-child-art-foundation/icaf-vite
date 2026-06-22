@@ -40,6 +40,9 @@ export const handler = async (
     if (auth?.banned) {
       return CommonErrors.forbidden("This account is banned");
     }
+    if (auth?.role === "deleting") {
+      return CommonErrors.forbidden("Account deletion is pending. Contact us if you need assistance.");
+    }
 
     if (!auth && "email" in body && body.email) {
       const existingUser = await getUserByEmail(body.email);

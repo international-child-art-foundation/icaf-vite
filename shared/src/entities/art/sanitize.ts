@@ -11,7 +11,6 @@ export function sanitizeSubmissionData(data: SubmitArtworkRequest): SubmitArtwor
         country: cleanOptionalString(data.country),
         region: cleanOptionalString(data.region),
         theme: cleanOptionalString(data.theme),
-        group_id: cleanOptionalString(data.group_id),
         digital_signature:
             typeof data.digital_signature === 'string'
                 ? data.digital_signature.trim()

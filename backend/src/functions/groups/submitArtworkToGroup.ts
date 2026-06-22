@@ -9,6 +9,7 @@ import {
   SubmitArtworkResponse,
   SubmitterRelationship,
   UPLOAD_FILE_TYPES,
+  GROUP_MAX_MEMBERS,
   validateOptionalArtworkFields,
   isValidUUID,
 } from "@icaf/shared";
@@ -20,11 +21,12 @@ import { parseJsonBody } from "../../utils/request";
 import { getCurrentUser } from "../../utils/auth";
 import { ensureThemeEntity } from "../shared/themeUtils";
 import { hasUploadedArtworkImage } from "../shared/artworkUpload";
+import { GROUP_GSI_ATTRS_TO_REMOVE } from "../../dynamo/groupGsis";
 
 interface SubmitArtworkToGroupBody {
   art_id: string;
   file_type: string;
-  digital_signature?: string;
+  digital_signature: string;
   promotional_use?: boolean;
   f_name?: string;
   l_name?: string;
@@ -86,13 +88,11 @@ export const handler = async (
     if (typeof body.art_id !== "string" || !isValidUUID(body.art_id)) {
       return CommonErrors.badRequest("art_id must be a valid UUID");
     }
-    if (body.digital_signature !== undefined) {
-      if (typeof body.digital_signature !== "string" || !body.digital_signature.trim()) {
-        return CommonErrors.badRequest("digital_signature, if provided, must be a non-empty string");
-      }
-      if (body.digital_signature.length > 200) {
-        return CommonErrors.badRequest("digital_signature must be 200 characters or less");
-      }
+    if (typeof body.digital_signature !== "string" || !body.digital_signature.trim()) {
+      return CommonErrors.badRequest("digital_signature is required");
+    }
+    if (body.digital_signature.length > 200) {
+      return CommonErrors.badRequest("digital_signature must be 200 characters or less");
     }
     const fieldErrors = validateOptionalArtworkFields(body);
     if (fieldErrors.length > 0) {
@@ -127,6 +127,7 @@ export const handler = async (
                 status: "pending_review" as const,
                 kudos_count: 0,
                 ts: nowSeconds,
+                rev_num: 1,
                 ...(body.digital_signature && {
                   digital_signature: body.digital_signature.trim(),
                 }),
@@ -153,8 +154,23 @@ export const handler = async (
             Update: {
               TableName: TABLE_NAME,
               Key: { PK: `GROUP#${groupId}`, SK: "-" },
-              UpdateExpression: "SET member_art_ids = list_append(member_art_ids, :newArt)",
-              ExpressionAttributeValues: { ":newArt": [artId] },
+              UpdateExpression:
+                "SET member_art_ids = list_append(member_art_ids, :newArt), " +
+                "#status = :pending, REV_PK = :revPk, REV_SK = :revSk, " +
+                "rev_num = if_not_exists(rev_num, :one) + :one " +
+                `REMOVE ${GROUP_GSI_ATTRS_TO_REMOVE.join(", ")}`,
+              ConditionExpression:
+                "attribute_exists(PK) AND user_id = :userId AND size(member_art_ids) < :maxMembers",
+              ExpressionAttributeNames: { "#status": "status" },
+              ExpressionAttributeValues: {
+                ":newArt": [artId],
+                ":userId": userId,
+                ":maxMembers": GROUP_MAX_MEMBERS,
+                ":pending": Status.Pending,
+                ":revPk": reviewPk(),
+                ":revSk": reviewGsiSk(Status.Pending, EntityType.Group, nowMs, groupId),
+                ":one": 1,
+              },
             },
           },
         ],
@@ -172,7 +188,10 @@ export const handler = async (
       body: JSON.stringify(response),
       headers: COMMON_HEADERS,
     };
-  } catch (error) {
+  } catch (error: unknown) {
+    if ((error as { name?: string }).name === "TransactionCanceledException") {
+      return CommonErrors.conflict("The group changed or already has the maximum number of artworks");
+    }
     console.error("Error submitting artwork to group:", error);
     return CommonErrors.internalServerError();
   }

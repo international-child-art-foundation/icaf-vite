@@ -29,6 +29,7 @@ function mapGroup(item: Record<string, unknown>): GroupListItem {
     member_count: ((item.member_art_ids as string[]) ?? []).length,
     status: item.status as GroupStatus,
     ts: item.ts as number,
+    rev_num: (item.rev_num as number | undefined) ?? 1,
   };
 }
 

@@ -67,6 +67,7 @@ export const handler = async (
       status: item.status as ArtworkListItem["status"],
       kudos_count: (item.kudos_count as number) ?? 0,
       ts: item.ts as number,
+      rev_num: (item.rev_num as number | undefined) ?? 1,
       promotional_use: (item.promotional_use as boolean | undefined) ?? false,
       notifications: item.notifications as boolean | undefined,
     }));

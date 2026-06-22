@@ -36,6 +36,7 @@ export async function getOrCreateVirtualUser(
   nowSeconds: number,
   firstName: string,
   lastName: string,
+  sendSignupEmail = true,
 ): Promise<VirtualUserResult> {
   const normalizedEmail = normalizeEmail(email);
   let user = await getUserByEmail(normalizedEmail);
@@ -95,13 +96,17 @@ export async function getOrCreateVirtualUser(
     user.l_name ??= lName;
   }
 
-  if (shouldSuppressArtworkEmail(user)) {
-    return { ok: true, user, sentSignupEmail: false };
-  }
+  const sentSignupEmail = sendSignupEmail
+    ? await sendVirtualUserSignupEmail(user, nowSeconds)
+    : false;
+  return { ok: true, user, sentSignupEmail };
+}
 
-  if (user.emailed_signup_at) {
-    return { ok: true, user, sentSignupEmail: false };
-  }
+export async function sendVirtualUserSignupEmail(
+  user: UserEntity,
+  nowSeconds: number,
+): Promise<boolean> {
+  if (shouldSuppressArtworkEmail(user) || user.emailed_signup_at) return false;
 
   const authActionToken = randomUUID();
   const authActionTokenExp = nowSeconds + ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS;
@@ -130,7 +135,7 @@ export async function getOrCreateVirtualUser(
     });
   } catch (error) {
     console.error("Artwork submission signup email failed:", error);
-    return { ok: true, user, sentSignupEmail: false };
+    return false;
   }
 
   try {
@@ -148,5 +153,5 @@ export async function getOrCreateVirtualUser(
     console.error("Failed to mark artwork signup email as sent:", error);
   }
 
-  return { ok: true, user, sentSignupEmail: true };
+  return true;
 }

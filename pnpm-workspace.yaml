@@ -2,8 +2,6 @@ allowBuilds:
   esbuild: true
   sharp: true
   workerd: true
-ignoredBuiltDependencies:
-  - esbuild
 packages:
   - "frontend"
   - "backend"
@@ -11,3 +9,23 @@ packages:
   - "shared"
   - "cloudflare/api-proxy"
 minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - diff@4.0.4
+  - flatted@3.4.0
+  - flatted@3.4.2
+  - picomatch@2.3.2
+  - yaml@2.8.3
+  - fast-xml-builder@1.1.7
+  - react-router@7.15.0
+  - react-router@7.15.1
+  - react-router-dom@7.15.1
+  - brace-expansion@5.0.6
+  - esbuild@0.28.1
+  - ws@8.21.0
+  - vite@6.4.3
+  - js-yaml@4.1.2
+  - "@babel/core@7.29.1"
+  - aws-cdk-lib@2.246.0
+  - undici@7.28.0
+overrides:
+  "yaml@>=2.0.0 <2.8.3": "2.8.3"

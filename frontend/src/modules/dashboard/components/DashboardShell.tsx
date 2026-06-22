@@ -21,6 +21,7 @@ import { Button } from '@/shared/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import { logout } from '@/api/auth';
 import { clearLastKnownUser } from '@/shared/utils/authSession';
+import { clearSubmissionDrafts } from '@/modules/submissions/utils/submissionDraftStorage';
 
 type DashboardShellProps = {
   role: Role | null;
@@ -71,6 +72,7 @@ export function DashboardShell({
     void logout()
       .then(() => {
         void clearLastKnownUser();
+        clearSubmissionDrafts();
         void navigate('/login', { replace: true });
       })
       .catch((error: unknown) => {

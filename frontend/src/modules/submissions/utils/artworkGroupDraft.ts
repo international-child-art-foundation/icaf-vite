@@ -21,8 +21,8 @@ import type {
   ArtworkGroupSubmissionDraft,
   ArtworkGroupSubmissionErrors,
 } from '@/modules/submissions/types/artworkGroupSubmission';
+export { ARTWORK_GROUP_DRAFT_KEY } from './submissionDraftStorage';
 
-export const ARTWORK_GROUP_DRAFT_KEY = 'icaf.submitArtworkGroupDraft.v1';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_EMAIL_LEN = 254;
 

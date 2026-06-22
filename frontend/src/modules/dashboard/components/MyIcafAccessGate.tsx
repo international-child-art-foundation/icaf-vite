@@ -9,6 +9,7 @@ import {
   saveLastKnownUser,
 } from '@/shared/utils/authSession';
 import { Button } from '@/shared/components/ui/button';
+import { clearSubmissionDrafts } from '@/modules/submissions/utils/submissionDraftStorage';
 import { LogOut } from 'lucide-react';
 import { ModuleState } from './DashboardModule';
 import { Dashboard } from '../pages/Dashboard';
@@ -69,6 +70,7 @@ export function MyIcafAccessGate() {
     try {
       await logout();
       clearLastKnownUser();
+      clearSubmissionDrafts();
       void navigate('/login', { replace: true });
     } catch {
       setLogoutError(true);

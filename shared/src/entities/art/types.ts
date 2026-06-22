@@ -91,13 +91,11 @@ interface SubmitterIdentityFields {
 // Identity comes from the auth token — no email/user_id needed in the body
 export type SubmitArtworkRequest = ArtworkSubmissionFields;
 
-// Request body for guest artwork submission (POST /anyone/artworks)
-// Caller provides either email (new guest or email lookup) or user_id (returning guest
-// who already has a virtual account saved locally). Exactly one must be present.
-export type GuestSubmitArtworkRequest = ArtworkSubmissionFields & SubmitterIdentityFields & (
-    | { email: string; user_id?: never }
-    | { user_id: string; email?: never }
-);
+// Request body for guest artwork submission (POST /anyone/artworks).
+// The server resolves an existing virtual user or creates one from the email.
+export type GuestSubmitArtworkRequest = ArtworkSubmissionFields & SubmitterIdentityFields & {
+    email: string;
+};
 
 export interface SubmitArtworkResponse {
     success: boolean;

@@ -74,6 +74,11 @@ import {
   getLastKnownUser,
   saveLastKnownUser,
 } from '@/shared/utils/authSession';
+import {
+  clearSubmissionDrafts,
+  readSubmissionDraft,
+  writeSubmissionDraft,
+} from '@/modules/submissions/utils/submissionDraftStorage';
 import type { SubmitArtworkSuccessState } from './SubmitArtworkSuccess';
 
 type SubmissionStatus = 'idle' | 'submitting';
@@ -197,8 +202,7 @@ function readPersistedDraft(): StoredArtworkGroupSubmissionDraft {
 
   try {
     const lastKnownUser = getLastKnownUser();
-    const storedValue = window.localStorage.getItem(ARTWORK_GROUP_DRAFT_KEY);
-    const parsedDraft: unknown = storedValue ? JSON.parse(storedValue) : {};
+    const parsedDraft = readSubmissionDraft(ARTWORK_GROUP_DRAFT_KEY);
     const storedDraft = isRecord(parsedDraft) ? parsedDraft : {};
 
     return {
@@ -767,10 +771,10 @@ export function SubmitArtworkGroup({
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    window.localStorage.setItem(
-      ARTWORK_GROUP_DRAFT_KEY,
-      JSON.stringify({ ...draft, digitalSignature: '' }),
-    );
+    writeSubmissionDraft(ARTWORK_GROUP_DRAFT_KEY, {
+      ...draft,
+      digitalSignature: '',
+    });
   }, [draft]);
 
   useEffect(() => {
@@ -809,6 +813,13 @@ export function SubmitArtworkGroup({
       await logout();
     } finally {
       clearLastKnownUser();
+      clearSubmissionDrafts();
+      setDraft((current) => ({
+        ...current,
+        submitterEmail: '',
+        submitterFirstName: '',
+        submitterLastName: '',
+      }));
       setAuthenticatedUser(null);
     }
   }

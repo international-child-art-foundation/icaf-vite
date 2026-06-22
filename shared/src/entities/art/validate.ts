@@ -156,7 +156,7 @@ export function validateUpdateArtworkRequest(data: UpdateArtworkRequest): string
     return validateOptionalArtworkFields(data);
 }
 
-// Guest artwork submission — requires either email or user_id (not both)
+// Guest artwork submission — the server resolves identity from email.
 export function validateGuestSubmitArtworkRequest(data: GuestSubmitArtworkRequest): string[] {
     const errors: string[] = [];
 
@@ -171,25 +171,10 @@ export function validateGuestSubmitArtworkRequest(data: GuestSubmitArtworkReques
         }
     }
 
-    const hasEmail = data.email !== undefined;
-    const hasUserId = data.user_id !== undefined;
-
-    if (!hasEmail && !hasUserId) {
-        errors.push('either email or user_id is required');
-    } else if (hasEmail && hasUserId) {
-        errors.push('only one of email or user_id may be provided');
-    } else if (hasEmail) {
-        if (!isValidEmail(data.email!)) {
-            errors.push('email must be a valid email address');
-        } else if (data.email!.length > MAX_EMAIL_LEN) {
-            errors.push(`email must be ${MAX_EMAIL_LEN} characters or less`);
-        }
-    } else if (hasUserId) {
-        if (!data.user_id!.trim()) {
-            errors.push('user_id, if provided, must be non-empty');
-        } else if (!isValidUUID(data.user_id!)) {
-            errors.push('user_id must be a valid UUID');
-        }
+    if (!isValidEmail(data.email)) {
+        errors.push('email must be a valid email address');
+    } else if (data.email.length > MAX_EMAIL_LEN) {
+        errors.push(`email must be ${MAX_EMAIL_LEN} characters or less`);
     }
 
     return [...errors, ...validateSubmissionData(data)];

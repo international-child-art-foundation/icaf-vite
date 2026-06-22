@@ -53,6 +53,12 @@ import {
   saveLastKnownUser,
 } from '@/shared/utils/authSession';
 import type { SubmitArtworkSuccessState } from './SubmitArtworkSuccess';
+import {
+  clearSubmissionDrafts,
+  readSubmissionDraft,
+  SINGLE_ARTWORK_DRAFT_KEY,
+  writeSubmissionDraft,
+} from '@/modules/submissions/utils/submissionDraftStorage';
 
 type SubmissionStatus = 'idle' | 'submitting';
 type AuthenticatedSubmissionUser = AuthStatusResponse & { authenticated: true };
@@ -75,7 +81,6 @@ type SubmitArtworkErrors = ArtworkGroupSubmissionErrors & {
   region?: string;
 };
 
-const SUBMIT_ARTWORK_DRAFT_KEY = 'icaf.submitArtworkDraft.v1';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_EMAIL_LEN = 254;
 
@@ -134,8 +139,7 @@ function readPersistedDraft(): SubmitArtworkDraft {
 
   try {
     const lastKnownUser = getLastKnownUser();
-    const storedValue = window.localStorage.getItem(SUBMIT_ARTWORK_DRAFT_KEY);
-    const parsedDraft: unknown = storedValue ? JSON.parse(storedValue) : {};
+    const parsedDraft = readSubmissionDraft(SINGLE_ARTWORK_DRAFT_KEY);
     const storedDraft = isRecord(parsedDraft) ? parsedDraft : {};
     const artwork = isRecord(storedDraft.artwork) ? storedDraft.artwork : {};
 
@@ -523,7 +527,7 @@ export function SubmitArtwork() {
       setDraft(initialSubmitArtworkDraft);
       deleteArtwork();
       if (typeof window !== 'undefined') {
-        window.localStorage.removeItem(SUBMIT_ARTWORK_DRAFT_KEY);
+        window.localStorage.removeItem(SINGLE_ARTWORK_DRAFT_KEY);
       }
       void navigate('/submit-artwork/success', {
         replace: true,
@@ -538,10 +542,10 @@ export function SubmitArtwork() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    window.localStorage.setItem(
-      SUBMIT_ARTWORK_DRAFT_KEY,
-      JSON.stringify({ ...draft, digitalSignature: '' }),
-    );
+    writeSubmissionDraft(SINGLE_ARTWORK_DRAFT_KEY, {
+      ...draft,
+      digitalSignature: '',
+    });
   }, [draft]);
 
   useEffect(() => {
@@ -580,6 +584,13 @@ export function SubmitArtwork() {
       await logout();
     } finally {
       clearLastKnownUser();
+      clearSubmissionDrafts();
+      setDraft((current) => ({
+        ...current,
+        submitterEmail: '',
+        submitterFirstName: '',
+        submitterLastName: '',
+      }));
       setAuthenticatedUser(null);
     }
   }

@@ -33,17 +33,6 @@ export const handler = async (
     if (!parsedBody.ok) return parsedBody.response;
     const body = parsedBody.value;
 
-    // ── Validate identity ──────────────────────────────────────────────────
-    const hasEmail = typeof body.email === "string" && body.email.trim().length > 0;
-    const hasUserId = typeof body.user_id === "string" && body.user_id.trim().length > 0;
-
-    if (!hasEmail && !hasUserId) {
-      return CommonErrors.badRequest("Either email or user_id is required");
-    }
-    if (hasEmail && hasUserId) {
-      return CommonErrors.badRequest("Provide either email or user_id, not both");
-    }
-
     // ── Validate artwork fields ────────────────────────────────────────────
     const artErrors = validateGuestSubmitArtworkRequest(body);
     if (artErrors.length > 0) {
@@ -56,84 +45,56 @@ export const handler = async (
     let user: UserEntity;
     let userToCreate: UserEntity | null = null;
 
-    if (hasUserId) {
-      // Returning guest — look up by user_id directly
-      const result = await dynamodb.send(
-        new QueryCommand({
-          TableName: TABLE_NAME,
-          KeyConditionExpression: "PK = :pk AND SK = :sk",
-          ExpressionAttributeValues: {
-            ":pk": `USER#${body.user_id!.trim()}`,
-            ":sk": "PROFILE",
-          },
-          Limit: 1,
-        }),
-      );
-      if (!result.Items?.length) {
-        return CommonErrors.notFound("User not found");
-      }
-      user = result.Items[0] as UserEntity;
+    // New or returning email-based guest — query Email GSI
+    const email = normalizeEmail(body.email);
+    const emailResult = await dynamodb.send(
+      new QueryCommand({
+        TableName: TABLE_NAME,
+        IndexName: GSI.Email,
+        KeyConditionExpression: "EMAIL_PK = :pk AND EMAIL_SK = :sk",
+        ExpressionAttributeValues: {
+          ":pk": emailPk(email),
+          ":sk": emailGsiSk(EntityType.User),
+        },
+        Limit: 1,
+      }),
+    );
 
-      if (user.banned) {
+    if (emailResult.Items?.length) {
+      const existing = emailResult.Items[0] as UserEntity;
+      if (existing.banned) {
         return CommonErrors.forbidden("This account is banned");
       }
-      if (!user.is_virtual) {
+      if (!existing.is_virtual) {
         return CommonErrors.conflict(
-          "This account already exists. Please log in to submit artwork.",
+          "An account with this email already exists. Please log in to submit artwork.",
         );
       }
+      user = existing;
     } else {
-      // New or returning email-based guest — query Email GSI
-      const email = normalizeEmail(body.email!);
-      const emailResult = await dynamodb.send(
-        new QueryCommand({
-          TableName: TABLE_NAME,
-          IndexName: GSI.Email,
-          KeyConditionExpression: "EMAIL_PK = :pk AND EMAIL_SK = :sk",
-          ExpressionAttributeValues: {
-            ":pk": emailPk(email),
-            ":sk": emailGsiSk(EntityType.User),
-          },
-          Limit: 1,
-        }),
-      );
+      // Prepare the virtual USER entity, but do not write it until S3 is verified.
+      const userId = randomUUID();
+      const newUser = {
+        PK: `USER#${userId}`,
+        SK: "PROFILE",
+        user_id: userId,
+        email,
+        f_name: body.submitter_first_name.trim(),
+        l_name: body.submitter_last_name.trim(),
+        is_virtual: true,
+        ts: nowSeconds,
+        banned: false,
+        has_magazine_subscription: false,
+        has_newsletter_subscription: false,
+        artwork_emails_off: false,
+        type: "USER" as const,
+        // Email GSI
+        EMAIL_PK: emailPk(email),
+        EMAIL_SK: emailGsiSk(EntityType.User),
+      };
 
-      if (emailResult.Items?.length) {
-        const existing = emailResult.Items[0] as UserEntity;
-        if (existing.banned) {
-          return CommonErrors.forbidden("This account is banned");
-        }
-        if (!existing.is_virtual) {
-          return CommonErrors.conflict(
-            "An account with this email already exists. Please log in to submit artwork.",
-          );
-        }
-        user = existing;
-      } else {
-        // Prepare the virtual USER entity, but do not write it until S3 is verified.
-        const userId = randomUUID();
-        const newUser = {
-          PK: `USER#${userId}`,
-          SK: "PROFILE",
-          user_id: userId,
-          email,
-          f_name: body.submitter_first_name.trim(),
-          l_name: body.submitter_last_name.trim(),
-          is_virtual: true,
-          ts: nowSeconds,
-          banned: false,
-          has_magazine_subscription: false,
-          has_newsletter_subscription: false,
-          artwork_emails_off: false,
-          type: "USER" as const,
-          // Email GSI
-          EMAIL_PK: emailPk(email),
-          EMAIL_SK: emailGsiSk(EntityType.User),
-        };
-
-        user = newUser as unknown as UserEntity;
-        userToCreate = user;
-      }
+      user = newUser as unknown as UserEntity;
+      userToCreate = user;
     }
 
     // ── Step 2: Verify the browser upload before any submission writes ─────

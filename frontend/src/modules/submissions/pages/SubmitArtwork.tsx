@@ -453,6 +453,17 @@ export function SubmitArtwork() {
     try {
       if (!file) throw new Error('A selected image is missing.');
 
+      if (authenticatedUser) {
+        const auth = await getAuthStatus();
+        if (!auth.authenticated) {
+          setAuthenticatedUser(null);
+          throw new Error(
+            'Your session expired. Please log in again before submitting.',
+          );
+        }
+        setAuthenticatedUser(auth);
+      }
+
       const digitalSignature = createDigitalSignature(draft.digitalSignature);
       const uploadFile = await createRotatedImageFile(file, imageRotation);
       const fileType = getUploadFileType(uploadFile);

@@ -589,6 +589,17 @@ export function SubmitArtworkGroup({
 
   async function handleAsyncSubmit() {
     try {
+      if (authenticatedUser) {
+        const auth = await getAuthStatus();
+        if (!auth.authenticated) {
+          setAuthenticatedUser(null);
+          throw new Error(
+            'Your session expired. Please log in again before submitting.',
+          );
+        }
+        setAuthenticatedUser(auth);
+      }
+
       const digitalSignature = createDigitalSignature(draft.digitalSignature);
       const groupDetails = {
         class_name: effectiveGroup.class_name.trim() || undefined,

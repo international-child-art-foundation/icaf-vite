@@ -12,14 +12,17 @@ import {
 import { parseBase64JsonObject } from "../../utils/request";
 
 const DEFAULT_LIMIT = 50;
-const MAX_LIMIT = 100;
+const MAX_LIMIT = 50;
+
+type NewsDynamoItem = NewsEntity & { PK: string; SK: string };
 
 export const handler = async (
     event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
     try {
         const rawLimit = event.queryStringParameters?.limit;
-        const limit = rawLimit ? Math.min(parseInt(rawLimit, 10) || DEFAULT_LIMIT, MAX_LIMIT) : DEFAULT_LIMIT;
+        const parsedLimit = rawLimit ? parseInt(rawLimit, 10) : DEFAULT_LIMIT;
+        const limit = Math.min(Math.max(parsedLimit || DEFAULT_LIMIT, 1), MAX_LIMIT);
         const lastKey = event.queryStringParameters?.last_key;
         const parsedLastKey = lastKey ? parseBase64JsonObject(lastKey, "last_key is invalid") : undefined;
         if (parsedLastKey && !parsedLastKey.ok) {
@@ -32,23 +35,27 @@ export const handler = async (
                 TableName: TABLE_NAME,
                 KeyConditionExpression: "PK = :pk",
                 ExpressionAttributeValues: { ":pk": "NEWS" },
-                // SK = 'ID#<uuid>' — sort alphabetically by SK, client sorts by timestamp
                 Limit: limit + 1,
                 ExclusiveStartKey: exclusiveStartKey,
+                ScanIndexForward: false,
             }),
         );
 
-        const items = (result.Items ?? []) as NewsEntity[];
+        const items = (result.Items ?? []) as NewsDynamoItem[];
         const has_more = items.length > limit;
         const page = has_more ? items.slice(0, limit) : items;
 
         const news: NewsListItem[] = page
-            .map(({ type: _type, ...rest }) => rest as NewsListItem)
-            // Newest first by timestamp
-            .sort((a, b) => b.timestamp - a.timestamp);
+            .map(({ PK: _pk, SK, type: _type, ...rest }) => ({
+                ...rest,
+                news_sk: SK,
+            }));
 
-        const last_key_out = has_more && result.LastEvaluatedKey
-            ? Buffer.from(JSON.stringify(result.LastEvaluatedKey)).toString("base64")
+        const nextStartKey = has_more && page.length > 0
+            ? { PK: page[page.length - 1].PK, SK: page[page.length - 1].SK }
+            : undefined;
+        const last_key_out = nextStartKey
+            ? Buffer.from(JSON.stringify(nextStartKey)).toString("base64")
             : undefined;
 
         const response: ListNewsResponse = {

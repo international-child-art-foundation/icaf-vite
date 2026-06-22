@@ -1,16 +1,24 @@
-import { GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  BatchGetCommand,
+  GetCommand,
+  TransactWriteCommand,
+  UpdateCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
 import {
   ApiGatewayEvent,
   HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
+  ArtworkEntity,
   GroupEntity,
   GroupStatus,
   UserEntity,
+  hasMinimumRole,
 } from "@icaf/shared";
 import { sendApprovalEmailToUser } from "../../utils/emails/artworkEmailControls";
 import { buildApprovedGroupGsiAttrs, GROUP_GSI_ATTRS_TO_REMOVE } from "../../dynamo/groupGsis";
+import { buildApprovedArtworkGsiAttrs } from "../../dynamo/artGsis";
 import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { EntityType } from "../../dynamo/ddbSchemaConsts";
 import { Status } from "../../dynamo/shared";
@@ -19,19 +27,66 @@ import { getCurrentUser } from "../../utils/auth";
 
 const VALID_STATUSES: GroupStatus[] = ["approved", "hidden", "rejected"];
 
+async function getPendingGroupArtworks(group: GroupEntity): Promise<ArtworkEntity[]> {
+  if (group.member_art_ids.length === 0) return [];
+
+  let keys = group.member_art_ids.map((artId) => ({ PK: `ART#${artId}`, SK: "-" }));
+  const artworks: ArtworkEntity[] = [];
+  let retryCount = 0;
+
+  while (keys.length > 0) {
+    const result = await dynamodb.send(
+      new BatchGetCommand({
+        RequestItems: {
+          [TABLE_NAME]: {
+            Keys: keys,
+            ConsistentRead: true,
+          },
+        },
+      }),
+    );
+
+    artworks.push(...((result.Responses?.[TABLE_NAME] ?? []) as ArtworkEntity[]));
+    keys = (result.UnprocessedKeys?.[TABLE_NAME]?.Keys ?? []).map((key) => ({
+      PK: key.PK as string,
+      SK: key.SK as string,
+    }));
+    if (keys.length > 0) {
+      retryCount += 1;
+      if (retryCount > 8) {
+        throw new Error("DynamoDB repeatedly throttled the group artwork read");
+      }
+      const delayMs = Math.min(1000, 25 * 2 ** (retryCount - 1));
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+
+  return artworks.filter(
+    (artwork) => artwork.status === "pending_review" && artwork.group_id === group.group_id,
+  );
+}
+
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
+    if (!hasMinimumRole(currentUser.user.role, "contributor")) {
+        return CommonErrors.forbidden("Contributor access required");
+    }
+    
 
     const groupId = event.pathParameters?.group_id;
     if (!groupId) {
       return CommonErrors.badRequest("group_id path parameter is required");
     }
 
-    const parsedBody = parseJsonBody<{ status?: string }>(event);
+    const parsedBody = parseJsonBody<{
+      status?: string;
+      approve_all?: unknown;
+      rev_num?: unknown;
+    }>(event);
     if (!parsedBody.ok) {
       return parsedBody.response;
     }
@@ -42,6 +97,17 @@ export const handler = async (
     if (!newStatus || !VALID_STATUSES.includes(newStatus)) {
       return CommonErrors.badRequest(`status must be one of: ${VALID_STATUSES.join(", ")}`);
     }
+
+    if (
+      body.approve_all !== undefined &&
+      typeof body.approve_all !== "boolean"
+    ) {
+      return CommonErrors.badRequest("approve_all must be a boolean");
+    }
+    if (!Number.isInteger(body.rev_num) || (body.rev_num as number) < 1) {
+      return CommonErrors.badRequest("rev_num must be a positive integer");
+    }
+    const expectedRevision = body.rev_num as number;
 
     // ── Read GROUP entity to get theme attrs for gallery GSI construction ──
     const groupResult = await dynamodb.send(
@@ -57,17 +123,24 @@ export const handler = async (
 
     const group = groupResult.Item as GroupEntity;
     const nowMs = Date.now();
+    const pendingArtworks =
+      newStatus === "approved" && body.approve_all === true
+        ? await getPendingGroupArtworks(group)
+        : [];
 
     let updateExpr: string;
-    const exprValues: Record<string, unknown> = { ":status": newStatus };
+    const exprValues: Record<string, unknown> = {
+      ":status": newStatus,
+      ":expectedRevision": expectedRevision,
+      ":one": 1,
+    };
     const exprNames: Record<string, string> = { "#status": "status" };
 
     if (newStatus === "approved") {
       const gsiAttrs = buildApprovedGroupGsiAttrs({
-        timestampMs: group.timestamp * 1000,
+        tsMs: group.ts * 1000,
         groupId,
-        family: group.theme_family,
-        instance: group.theme_instance,
+        theme: group.theme,
       });
 
       const setAttrs = Object.entries(gsiAttrs)
@@ -83,16 +156,56 @@ export const handler = async (
       updateExpr = `SET #status = :status, REV_PK = :revPk, REV_SK = :revSk REMOVE ${GROUP_GSI_ATTRS_TO_REMOVE.join(", ")}`;
     }
 
-    await dynamodb.send(
-      new UpdateCommand({
-        TableName: TABLE_NAME,
-        Key: { PK: `GROUP#${groupId}`, SK: "-" },
-        UpdateExpression: updateExpr,
-        ExpressionAttributeNames: exprNames,
-        ExpressionAttributeValues: exprValues,
-        ConditionExpression: "attribute_exists(PK)",
-      }),
-    );
+    const groupUpdate = {
+      TableName: TABLE_NAME,
+      Key: { PK: `GROUP#${groupId}`, SK: "-" },
+      UpdateExpression: updateExpr,
+      ExpressionAttributeNames: exprNames,
+      ExpressionAttributeValues: exprValues,
+      ConditionExpression:
+        "attribute_exists(PK) AND (rev_num = :expectedRevision OR (attribute_not_exists(rev_num) AND :expectedRevision = :one))",
+    };
+
+    if (newStatus === "approved" && pendingArtworks.length > 0) {
+      await dynamodb.send(
+        new TransactWriteCommand({
+          TransactItems: [
+            { Update: groupUpdate },
+            ...pendingArtworks.map((artwork) => {
+              const artworkGsiAttrs = buildApprovedArtworkGsiAttrs({
+                tsMs: artwork.ts * 1000,
+                artId: artwork.art_id,
+                theme: artwork.theme,
+              });
+              const artworkValues: Record<string, unknown> = {
+                ":approved": "approved",
+                ":pending": "pending_review",
+                ":groupId": groupId,
+              };
+              const setAttrs = Object.entries(artworkGsiAttrs)
+                .map(([key, value], index) => {
+                  artworkValues[`:gsi${index}`] = value;
+                  return `${key} = :gsi${index}`;
+                })
+                .join(", ");
+
+              return {
+                Update: {
+                  TableName: TABLE_NAME,
+                  Key: { PK: `ART#${artwork.art_id}`, SK: "-" },
+                  UpdateExpression: `SET #status = :approved, ${setAttrs} REMOVE REV_PK, REV_SK`,
+                  ExpressionAttributeNames: { "#status": "status" },
+                  ExpressionAttributeValues: artworkValues,
+                  ConditionExpression: "#status = :pending AND group_id = :groupId",
+                },
+              };
+            }),
+          ],
+        }),
+      );
+    } else {
+      await dynamodb.send(new UpdateCommand(groupUpdate));
+    }
 
     // ── Send approval email (non-blocking) ────────────────────────────────
     if (newStatus === "approved" && group.notifications === true) {
@@ -109,6 +222,7 @@ export const handler = async (
             type: "group",
             id: groupId,
             title: group.title,
+            theme: group.theme,
           }).catch((err) => console.error("Approval email failed:", err));
         }
       }).catch((err) => console.error("User lookup for approval email failed:", err));
@@ -122,7 +236,7 @@ export const handler = async (
   } catch (error: unknown) {
     const ddbErr = error as { name?: string };
     if (ddbErr.name === "ConditionalCheckFailedException") {
-      return CommonErrors.notFound("Group not found");
+      return CommonErrors.conflict("Group changed after it was loaded. Refresh the review queue and try again.");
     }
     console.error("Error changing group status:", error);
     return CommonErrors.internalServerError();

@@ -2,28 +2,53 @@ export type ApiQueryParams = object | undefined;
 
 export type ApiRequestOptions<TBody> = {
   body?: TBody;
+  bypassCache?: boolean;
+  cacheTtlMs?: number;
   headers?: HeadersInit;
   method?: string;
   query?: ApiQueryParams;
   signal?: AbortSignal;
+  validate?: (body: unknown) => boolean;
 };
 
 export type ApiClientConfig = {
   baseUrl?: string;
 };
 
-const DEFAULT_API_BASE_URL = '/';
+const DEFAULT_API_BASE_URL = '/api';
+export const DEFAULT_API_CACHE_TTL_MS = 5 * 60 * 1000;
+
+type CachedApiResponse = {
+  expiresAt: number;
+  value: unknown;
+};
+
+type ApiCacheMatch = {
+  method?: string;
+  pathPrefix?: string;
+};
+
+const apiResponseCache = new Map<string, CachedApiResponse>();
+const pendingApiResponseCache = new Map<string, Promise<unknown>>();
+const apiCacheInvalidationVersions = new Map<string, number>();
+let pendingAuthRefresh: Promise<boolean> | null = null;
 
 function resolveApiBaseUrl(config?: ApiClientConfig): string {
   const configuredBaseUrl =
-    config?.baseUrl ?? import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL;
+    config?.baseUrl ??
+    import.meta.env.VITE_API_BASE_URL ??
+    DEFAULT_API_BASE_URL;
 
   return configuredBaseUrl.endsWith('/')
     ? configuredBaseUrl.slice(0, -1)
     : configuredBaseUrl;
 }
 
-function buildUrl(path: string, query?: ApiQueryParams, config?: ApiClientConfig): string {
+export function buildApiUrl(
+  path: string,
+  query?: ApiQueryParams,
+  config?: ApiClientConfig,
+): string {
   const apiBaseUrl = resolveApiBaseUrl(config);
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   const url = new URL(`${apiBaseUrl}${normalizedPath}`, window.location.origin);
@@ -41,6 +66,187 @@ function buildUrl(path: string, query?: ApiQueryParams, config?: ApiClientConfig
   return url.toString();
 }
 
+function buildApiCacheKey(method: string, url: string): string {
+  return `${method.toUpperCase()} ${url}`;
+}
+
+function parseApiCacheKey(
+  cacheKey: string,
+): { method: string; url: URL } | null {
+  const separatorIndex = cacheKey.indexOf(' ');
+  if (separatorIndex === -1) return null;
+
+  try {
+    return {
+      method: cacheKey.slice(0, separatorIndex),
+      url: new URL(cacheKey.slice(separatorIndex + 1)),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function normalizeCachePath(path: string): string {
+  const pathWithLeadingSlash = path.startsWith('/') ? path : `/${path}`;
+  return pathWithLeadingSlash.replace(/\/+$/, '');
+}
+
+function cachePathMatches(pathname: string, pathPrefix: string): boolean {
+  const normalizedPath = normalizeCachePath(pathPrefix);
+  return pathname.endsWith(normalizedPath) || pathname.includes(`${normalizedPath}/`);
+}
+
+function apiCacheKeyMatches(cacheKey: string, match: ApiCacheMatch): boolean {
+  const parsedKey = parseApiCacheKey(cacheKey);
+  if (!parsedKey) return false;
+
+  if (
+    match.method &&
+    parsedKey.method !== match.method.toUpperCase()
+  ) {
+    return false;
+  }
+
+  if (match.pathPrefix && !cachePathMatches(parsedKey.url.pathname, match.pathPrefix)) {
+    return false;
+  }
+
+  return true;
+}
+
+function getCacheInvalidationVersion(cacheKey: string): number {
+  return apiCacheInvalidationVersions.get(cacheKey) ?? 0;
+}
+
+function invalidateApiCacheKey(cacheKey: string): void {
+  apiResponseCache.delete(cacheKey);
+  pendingApiResponseCache.delete(cacheKey);
+  apiCacheInvalidationVersions.set(
+    cacheKey,
+    getCacheInvalidationVersion(cacheKey) + 1,
+  );
+}
+
+export function clearApiResponseCache(match: ApiCacheMatch = {}): void {
+  const cacheKeys = new Set([
+    ...apiResponseCache.keys(),
+    ...pendingApiResponseCache.keys(),
+  ]);
+
+  cacheKeys.forEach((cacheKey) => {
+    if (apiCacheKeyMatches(cacheKey, match)) {
+      invalidateApiCacheKey(cacheKey);
+    }
+  });
+}
+
+function getCachedApiResponse(cacheKey: string): unknown {
+  const cached = apiResponseCache.get(cacheKey);
+
+  if (!cached) return undefined;
+  if (cached.expiresAt > Date.now()) return cached.value;
+
+  apiResponseCache.delete(cacheKey);
+  return undefined;
+}
+
+async function fetchApiResponse<TBody>(
+  url: string,
+  options: ApiRequestOptions<TBody>,
+  headers: Headers,
+): Promise<{ response: Response; responseBody: unknown }> {
+  const response = await fetch(url, {
+    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    credentials: 'include',
+    headers,
+    method: options.method ?? (options.body === undefined ? 'GET' : 'POST'),
+    signal: options.signal,
+  });
+
+  const responseBody = await parseResponseBody(response);
+
+  if (!response.ok) {
+    throw new ApiError(response, responseBody);
+  }
+
+  if (responseBody !== undefined && !isJsonResponse(response)) {
+    throw new InvalidApiResponseError(response, responseBody);
+  }
+
+  if (typeof responseBody === 'string') {
+    throw new InvalidApiResponseError(response, responseBody);
+  }
+
+  return { response, responseBody };
+}
+
+async function refreshAuthSession(config?: ApiClientConfig): Promise<boolean> {
+  if (pendingAuthRefresh) return pendingAuthRefresh;
+
+  const refreshUrl = buildApiUrl('/auth/refresh', undefined, config);
+  const headers = new Headers();
+  headers.set('Content-Type', 'application/json');
+
+  const refreshRequest = fetchApiResponse(
+    refreshUrl,
+    { method: 'POST' },
+    headers,
+  ).then(
+    () => true,
+    () => false,
+  );
+  pendingAuthRefresh = refreshRequest;
+
+  try {
+    return await refreshRequest;
+  } finally {
+    if (pendingAuthRefresh === refreshRequest) pendingAuthRefresh = null;
+  }
+}
+
+async function fetchApiResponseWithAuthRefresh<TBody>(
+  url: string,
+  options: ApiRequestOptions<TBody>,
+  headers: Headers,
+  config?: ApiClientConfig,
+): Promise<{ response: Response; responseBody: unknown }> {
+  try {
+    return await fetchApiResponse(url, options, headers);
+  } catch (error) {
+    const isRefreshRequest = new URL(url).pathname.endsWith('/auth/refresh');
+    if (
+      error instanceof ApiError &&
+      error.status === 401 &&
+      !isRefreshRequest &&
+      (await refreshAuthSession(config))
+    ) {
+      return fetchApiResponse(url, options, headers);
+    }
+
+    throw error;
+  }
+}
+
+function validateApiResponse(
+  response: Response,
+  responseBody: unknown,
+  validate?: (body: unknown) => boolean,
+): void {
+  if (responseBody !== undefined) {
+    if (!isApiObject(responseBody)) {
+      throw new InvalidApiResponseError(response, responseBody);
+    }
+
+    if ('success' in responseBody && responseBody.success !== true) {
+      throw new InvalidApiResponseError(response, responseBody);
+    }
+  }
+
+  if (validate && !validate(responseBody)) {
+    throw new UnexpectedApiResponseError();
+  }
+}
+
 async function parseResponseBody(response: Response): Promise<unknown> {
   if (response.status === 204) return undefined;
 
@@ -52,6 +258,12 @@ async function parseResponseBody(response: Response): Promise<unknown> {
   } catch {
     return text;
   }
+}
+
+function isJsonResponse(response: Response): boolean {
+  return (
+    response.headers.get('Content-Type')?.includes('application/json') ?? false
+  );
 }
 
 export class ApiError extends Error {
@@ -71,12 +283,70 @@ export class ApiError extends Error {
   }
 
   get code(): string | undefined {
-    if (typeof this.body === 'object' && this.body !== null && 'code' in this.body) {
+    if (
+      typeof this.body === 'object' &&
+      this.body !== null &&
+      'code' in this.body
+    ) {
       return String(this.body.code);
     }
 
     return undefined;
   }
+}
+
+export class InvalidApiResponseError extends Error {
+  readonly body: unknown;
+  readonly status: number;
+
+  constructor(response: Response, body: unknown) {
+    super('The site could not reach the ICAF account service.');
+    this.name = 'InvalidApiResponseError';
+    this.body = body;
+    this.status = response.status;
+  }
+}
+
+export class UnexpectedApiResponseError extends Error {
+  constructor() {
+    super('The site could not reach the ICAF account service.');
+    this.name = 'UnexpectedApiResponseError';
+  }
+}
+
+export function isApiObject(body: unknown): body is Record<string, unknown> {
+  return typeof body === 'object' && body !== null && !Array.isArray(body);
+}
+
+export function hasApiSuccess(body: unknown): body is { success: true } {
+  return isApiObject(body) && body.success === true;
+}
+
+export function hasApiMessage(body: unknown): body is { message: string } {
+  return isApiObject(body) && typeof body.message === 'string';
+}
+
+export function hasStringProperty(body: unknown, property: string): boolean {
+  return isApiObject(body) && typeof body[property] === 'string';
+}
+
+export function hasBooleanProperty(body: unknown, property: string): boolean {
+  return isApiObject(body) && typeof body[property] === 'boolean';
+}
+
+export function hasArrayProperty(body: unknown, property: string): boolean {
+  return isApiObject(body) && Array.isArray(body[property]);
+}
+
+export function hasNumberProperty(body: unknown, property: string): boolean {
+  return isApiObject(body) && typeof body[property] === 'number';
+}
+
+export function getApiErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof ApiError) return error.message;
+  if (error instanceof InvalidApiResponseError) return error.message;
+  if (error instanceof UnexpectedApiResponseError) return error.message;
+  return fallback;
 }
 
 export async function apiRequest<TResponse, TBody = never>(
@@ -90,19 +360,59 @@ export async function apiRequest<TResponse, TBody = never>(
     headers.set('Content-Type', 'application/json');
   }
 
-  const response = await fetch(buildUrl(path, options.query, config), {
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
-    credentials: 'include',
-    headers,
-    method: options.method ?? (options.body === undefined ? 'GET' : 'POST'),
-    signal: options.signal,
-  });
+  const method =
+    options.method ?? (options.body === undefined ? 'GET' : 'POST');
+  const url = buildApiUrl(path, options.query, config);
+  const cacheEnabled =
+    method.toUpperCase() === 'GET' &&
+    options.body === undefined &&
+    !options.bypassCache &&
+    options.cacheTtlMs !== undefined &&
+    options.cacheTtlMs > 0;
+  const cacheKey = cacheEnabled ? buildApiCacheKey(method, url) : undefined;
+  const cacheInvalidationVersion =
+    cacheKey === undefined ? undefined : getCacheInvalidationVersion(cacheKey);
 
-  const responseBody = await parseResponseBody(response);
+  if (cacheKey) {
+    const cached = getCachedApiResponse(cacheKey);
+    if (cached !== undefined) return cached as TResponse;
 
-  if (!response.ok) {
-    throw new ApiError(response, responseBody);
+    const pending = pendingApiResponseCache.get(cacheKey);
+    if (pending) return (await pending) as TResponse;
   }
 
-  return responseBody as TResponse;
+  const request = fetchApiResponseWithAuthRefresh(
+    url,
+    options,
+    headers,
+    config,
+  ).then(({ response, responseBody }) => {
+      validateApiResponse(response, responseBody, options.validate);
+
+      if (
+        cacheKey &&
+        cacheInvalidationVersion === getCacheInvalidationVersion(cacheKey)
+      ) {
+        apiResponseCache.set(cacheKey, {
+          expiresAt:
+            Date.now() + (options.cacheTtlMs ?? DEFAULT_API_CACHE_TTL_MS),
+          value: responseBody,
+        });
+      }
+
+      return responseBody;
+    },
+  );
+
+  if (cacheKey) {
+    pendingApiResponseCache.set(cacheKey, request);
+  }
+
+  try {
+    return (await request) as TResponse;
+  } finally {
+    if (cacheKey) {
+      pendingApiResponseCache.delete(cacheKey);
+    }
+  }
 }

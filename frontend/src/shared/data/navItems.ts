@@ -12,10 +12,11 @@ import professional from '@/shared/assets/images/navigation/getInvolved/professi
 import student from '@/shared/assets/images/navigation/getInvolved/student_small.webp';
 import volunteer from '@/shared/assets/images/navigation/getInvolved/volunteer.webp';
 import latest from '@/shared/assets/images/navigation/news/latestNews_small.webp';
-import upcoming from '@/shared/assets/images/navigation/news/upcomingEvents.webp';
+// import upcoming from '@/shared/assets/images/navigation/news/upcomingEvents.webp';
 import board from '@/shared/assets/images/icafGroupPhoto.webp';
 import wca from '@/shared/assets/images/navigation/programs/worldChildrensAward.webp';
 import researchAndPublications from '@/shared/assets/images/UnitedStatesSLKorth.webp';
+import submitArtwork from '@/shared/assets/images/navigation/getInvolved/submitArtwork.webp';
 
 export interface NavChild {
   label: string;
@@ -153,20 +154,6 @@ export const navItems: NavItem[] = [
         imageSrc: student,
         hoverDescription: 'Express your creativity through ICAF initiatives.',
       },
-      // {
-      //   label: 'Corporate Partnerships',
-      //   href: '/get-involved/corporation',
-      //   imageSrc: corporate,
-      //   alt: 'Make a donation',
-      //   hoverDescription: '',
-      // },
-    ],
-  },
-  {
-    key: 'news-events',
-    label: 'News & Events',
-    navLabel: 'News & Events',
-    children: [
       {
         label: 'Latest News',
         href: '/news-events/news',
@@ -174,12 +161,26 @@ export const navItems: NavItem[] = [
         hoverDescription: "See ICAF's recent activity.",
       },
       {
-        label: 'Upcoming Events',
-        href: 'https://worldchildrensfestival.org/',
-        external: true,
-        imageSrc: upcoming,
-        hoverDescription: 'See what ICAF has planned for the future.',
+        label: 'Submit Artwork',
+        href: '/submit-artwork',
+        imageSrc: submitArtwork,
+        hoverDescription: "Feature your child's artwork in the ICAF gallery.",
       },
+      // {
+      //   label: 'Upcoming Events',
+      //   href: 'https://worldchildrensfestival.org/',
+      //   external: true,
+      //   imageSrc: upcoming,
+      //   hoverDescription: 'See what ICAF has planned for the future.',
+      // },
+
+      // {
+      //   label: 'Corporate Partnerships',
+      //   href: '/get-involved/corporation',
+      //   imageSrc: corporate,
+      //   alt: 'Make a donation',
+      //   hoverDescription: '',
+      // },
     ],
   },
   {
@@ -194,6 +195,13 @@ export const navItems: NavItem[] = [
     label: 'Gallery',
     navLabel: 'Gallery',
     href: '/gallery',
+    children: [],
+  },
+  {
+    key: 'my-icaf',
+    label: 'My ICAF',
+    navLabel: 'My ICAF',
+    href: '/my-icaf',
     children: [],
   },
 ];

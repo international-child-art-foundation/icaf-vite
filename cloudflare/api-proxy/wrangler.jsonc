@@ -1,0 +1,37 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "icaf-api-proxy",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-19",
+  "workers_dev": false,
+
+  "env": {
+    "staging": {
+      "name": "icaf-api-proxy-staging",
+      "workers_dev": false,
+      "routes": [
+        {
+          "pattern": "staging.icaf.org/api/*",
+          "zone_name": "icaf.org"
+        }
+      ],
+      "vars": {
+        "ENVIRONMENT": "staging"
+      }
+    },
+
+    "production": {
+      "name": "icaf-api-proxy-production",
+      "workers_dev": false,
+      "routes": [
+        {
+          "pattern": "icaf.org/api/*",
+          "zone_name": "icaf.org"
+        }
+      ],
+      "vars": {
+        "ENVIRONMENT": "production"
+      }
+    }
+  }
+}

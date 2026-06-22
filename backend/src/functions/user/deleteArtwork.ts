@@ -9,7 +9,6 @@ import {
   ArtworkEntity,
   GroupEntity,
 } from "@icaf/shared";
-import { repopulateCovers } from "../shared/groupUtils";
 import { getCurrentUser } from "../../utils/auth";
 
 export const handler = async (
@@ -50,7 +49,7 @@ export const handler = async (
       }),
     );
 
-    // ── Remove from GROUP member/cover lists if grouped ───────────────────
+    // ── Remove from GROUP member list if grouped ──────────────────────────
     if (art.group_id) {
       const groupResult = await dynamodb.send(
         new GetCommand({
@@ -62,17 +61,14 @@ export const handler = async (
       if (groupResult.Item) {
         const group = groupResult.Item as GroupEntity;
         const newMemberIds = group.member_art_ids.filter((id) => id !== artId);
-        const filteredCoverIds = group.cover_art_ids.filter((id) => id !== artId);
-        const newCoverIds = repopulateCovers(newMemberIds, filteredCoverIds);
 
         await dynamodb.send(
           new UpdateCommand({
             TableName: TABLE_NAME,
             Key: { PK: `GROUP#${art.group_id}`, SK: "-" },
-            UpdateExpression: "SET member_art_ids = :members, cover_art_ids = :covers",
+            UpdateExpression: "SET member_art_ids = :members",
             ExpressionAttributeValues: {
               ":members": newMemberIds,
-              ":covers": newCoverIds,
             },
           }),
         );

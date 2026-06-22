@@ -7,6 +7,7 @@ import {
   CommonErrors,
   ArtworkEntity,
   GroupEntity,
+  hasMinimumRole,
 } from "@icaf/shared";
 import { buildApprovedArtworkGsiAttrs } from "../../dynamo/artGsis";
 import { buildApprovedGroupGsiAttrs } from "../../dynamo/groupGsis";
@@ -15,17 +16,16 @@ import { byOwnerPk } from "../../dynamo/ownerGsi";
 import { randomUUID } from "crypto";
 import { getCurrentUser } from "../../utils/auth";
 
-// NOTE: The access patterns CSV says "Unhide all artwork/groups" but the Loop step
-// says "Delete them" — which appears to be a copy-paste error. This implementation
-// sets all items back to 'approved' and restores their gallery GSI attributes.
-// Flagged in todo for review.
-
 export const handler = async (
   event: ApiGatewayEvent,
 ): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
   try {
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
+    if (!hasMinimumRole(currentUser.user.role, "admin")) {
+        return CommonErrors.forbidden("Admin access required");
+    }
+    
     const adminId = currentUser.user.user_id;
 
     const targetUserId = event.pathParameters?.user_id;
@@ -76,10 +76,9 @@ export const handler = async (
       if (type === "ART") {
         const art = entityResult.Item as ArtworkEntity;
         const gsiAttrs = buildApprovedArtworkGsiAttrs({
-          timestampMs: art.timestamp * 1000,
+          tsMs: art.ts * 1000,
           artId: id,
-          family: art.theme_family,
-          instance: art.theme_instance,
+          theme: art.theme,
         });
         const gsiParts = Object.entries(gsiAttrs).map(([k, v], i) => {
           exprValues[`:gsi${i}`] = v;
@@ -89,10 +88,9 @@ export const handler = async (
       } else {
         const group = entityResult.Item as GroupEntity;
         const gsiAttrs = buildApprovedGroupGsiAttrs({
-          timestampMs: group.timestamp * 1000,
+          tsMs: group.ts * 1000,
           groupId: id,
-          family: group.theme_family,
-          instance: group.theme_instance,
+          theme: group.theme,
         });
         const gsiParts = Object.entries(gsiAttrs).map(([k, v], i) => {
           exprValues[`:gsi${i}`] = v;
@@ -122,7 +120,7 @@ export const handler = async (
           PK: `USER#${targetUserId}`,
           SK: `AA#${nowSeconds}`,
           user_id: targetUserId,
-          timestamp: nowSeconds,
+          ts: nowSeconds,
           initiator_id: adminId,
           action: "unhide_all",
           type: "ACCOUNT_ACTION",

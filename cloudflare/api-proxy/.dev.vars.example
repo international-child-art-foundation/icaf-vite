@@ -1,0 +1,3 @@
+# Only used when developing the Worker itself with `pnpm dev:staging`.
+# Remote deployments get this value from the preceding CDK deployment job.
+TARGET_API_ORIGIN=https://REPLACE_WITH_STAGING_API_ID.execute-api.us-east-1.amazonaws.com/v1

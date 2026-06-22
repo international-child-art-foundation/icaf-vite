@@ -28,7 +28,7 @@ export const handler = async (
       artwork_emails_off: user.artwork_emails_off === true,
       verified_at: user.verified_at,
       emailed_signup_at: user.emailed_signup_at,
-      timestamp: user.timestamp,
+      ts: user.ts,
     };
 
     return {

@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="referrer" content="strict-origin" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link
@@ -34,6 +35,7 @@
       gtag('js', new Date());
 
       gtag('config', '%VITE_GA_MEASUREMENT_ID%', {
+        send_page_view: false,
         tag_for_child_directed_treatment: true,
       });
     </script>

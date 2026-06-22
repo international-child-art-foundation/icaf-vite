@@ -71,7 +71,7 @@ export const handler = async (
           PK: `USER#${userId}`,
           SK: `AA#${nowSeconds}`,
           user_id: userId,
-          timestamp: nowSeconds,
+          ts: nowSeconds,
           action: "change_password",
           type: "ACCOUNT_ACTION",
         },

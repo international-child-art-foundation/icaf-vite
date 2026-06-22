@@ -35,10 +35,6 @@ export function validateDefaultRegistrationRequest(data: DefaultRegistrationRequ
         errors.push('dob must be a date in YYYY-MM-DD format');
     }
 
-    if (data.role !== 'guardian' && data.role !== 'user') {
-        errors.push('role must be one of: guardian, user');
-    }
-
     if (data.has_newsletter_subscription !== undefined && typeof data.has_newsletter_subscription !== 'boolean') {
         errors.push('has_newsletter_subscription, if provided, must be a boolean');
     }

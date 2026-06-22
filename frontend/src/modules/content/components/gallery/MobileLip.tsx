@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, Link } from 'lucide-react';
-import { TResolvedArtwork } from '@/modules/content/types/Gallery';
-import { formatArtistName } from '@/utils/galleryProcessing';
+import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
+import {
+  getArtworkDisplayTitle,
+  getArtworkSecondaryTitle,
+} from '@/utils/galleryProcessing';
+import { getGalleryInfoTags } from './GalleryArtworkInfo';
+import { KudosControls } from './KudosControls';
 
 export const LIP_COLLAPSED_H = 76; // px — used by parent for gesture hit-testing
 
@@ -107,6 +112,36 @@ const LinkedInGlyph = () => (
 
 const ICON_COLORS = LIP_GRADIENT_STOPS.map((s) => s.color);
 
+const copyText = async (text: string) => {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Some mobile and in-app browsers expose the API but deny access.
+    }
+  }
+
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.readOnly = true;
+  textArea.style.position = 'fixed';
+  textArea.style.left = '-9999px';
+  textArea.style.fontSize = '16px';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  textArea.setSelectionRange(0, text.length);
+
+  try {
+    return document.execCommand('copy');
+  } catch {
+    return false;
+  } finally {
+    textArea.remove();
+  }
+};
+
 const MobileShareRow = ({ shareUrl }: { shareUrl: string }) => {
   const [copied, setCopied] = useState(false);
   const enc = encodeURIComponent(shareUrl);
@@ -121,12 +156,9 @@ const MobileShareRow = ({ shareUrl }: { shareUrl: string }) => {
     );
   };
   const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
+    if (await copyText(shareUrl)) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch {
-      /* ignore */
     }
   };
 
@@ -215,6 +247,7 @@ interface Props {
   shareVisible: boolean;
   textVisible: boolean; // parent fades this on artwork change
   descExpanded: boolean; // false while collapsing for artwork swap, then true to expand
+  onKudosApplied?: (artId: string, amount: number) => void;
 }
 
 const FONT: React.CSSProperties = {
@@ -229,6 +262,7 @@ export const MobileLip = ({
   shareVisible,
   textVisible,
   descExpanded,
+  onKudosApplied,
 }: Props) => {
   const descRef = useRef<HTMLDivElement>(null);
 
@@ -243,17 +277,13 @@ export const MobileLip = ({
     return () => el.removeEventListener('touchmove', onMove);
   }, [artwork]);
 
-  const name =
-    (artwork.artists?.length ?? 0) > 0
-      ? formatArtistName(artwork.artists ?? [], artwork.lastInitial)
-      : null;
-  const location = [artwork.region, artwork.country].filter(Boolean).join(', ');
+  const tags = getGalleryInfoTags(artwork);
 
   const t = maxLipY > 0 ? Math.min(lipY / maxLipY, 1) : 0;
 
   const hasTitle = !!artwork.title;
-  const primaryText = hasTitle ? `\u201c${artwork.title}\u201d` : name;
-  const secondaryText = hasTitle ? name : null;
+  const primaryText = getArtworkDisplayTitle(artwork);
+  const secondaryText = getArtworkSecondaryTitle(artwork);
 
   const maxDescH = Math.floor(window.innerHeight * 0.6 * 0.4);
 
@@ -309,7 +339,7 @@ export const MobileLip = ({
               textOverflow: t > 0.05 ? 'clip' : 'ellipsis',
             }}
           >
-            {primaryText}
+            {hasTitle ? <>&ldquo;{primaryText}&rdquo;</> : primaryText}
           </p>
         )}
         {secondaryText && (
@@ -331,7 +361,13 @@ export const MobileLip = ({
         )}
       </div>
 
-      <div style={{ opacity: t, padding: '0 16px 28px' }}>
+      <div
+        style={{
+          opacity: textVisible ? t : 0,
+          transition: textVisible ? 'opacity 0.2s ease' : 'opacity 0.1s ease',
+          padding: '0 16px 28px',
+        }}
+      >
         <div
           style={{
             height: 1,
@@ -340,42 +376,65 @@ export const MobileLip = ({
           }}
         />
 
-        {artwork.age !== undefined && (
-          <p
+        {tags.length > 0 && (
+          <div
             style={{
-              ...FONT,
-              fontSize: 13,
-              color: '#555',
-              marginBottom: 3,
-              textAlign: 'center',
-              opacity: textVisible ? 1 : 0,
-              transition: textVisible
-                ? 'opacity 0.2s ease'
-                : 'opacity 0.1s ease',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 6,
+              justifyContent: 'center',
+              marginBottom: 12,
             }}
           >
-            {artwork.age}
-            {location && <span style={{ color: '#888' }}> · {location}</span>}
-          </p>
+            {tags.map(({ label, icon: Icon, tone }) => (
+              <span
+                key={`${tone}-${label}`}
+                style={{
+                  ...FONT,
+                  borderRadius: 999,
+                  background:
+                    tone === 'location'
+                      ? 'rgba(16,185,129,0.10)'
+                      : tone === 'group'
+                        ? 'rgba(251,178,46,0.22)'
+                        : 'rgba(2,134,195,0.10)',
+                  border:
+                    tone === 'location'
+                      ? '1px solid rgba(16,185,129,0.22)'
+                      : tone === 'group'
+                        ? '1px solid rgba(251,178,46,0.35)'
+                        : '1px solid rgba(2,134,195,0.18)',
+                  color:
+                    tone === 'location'
+                      ? '#047857'
+                      : tone === 'group'
+                        ? '#775000'
+                        : '#026997',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: 0,
+                  padding: '4px 8px',
+                  maxWidth: '100%',
+                }}
+              >
+                <Icon size={12} strokeWidth={2.2} />
+                <span
+                  style={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {label}
+                </span>
+              </span>
+            ))}
+          </div>
         )}
-        {artwork.event && (
-          <p
-            style={{
-              ...FONT,
-              fontSize: 11,
-              color: '#aaa',
-              textTransform: 'capitalize',
-              marginBottom: 14,
-              textAlign: 'center',
-              opacity: textVisible ? 1 : 0,
-              transition: textVisible
-                ? 'opacity 0.2s ease'
-                : 'opacity 0.1s ease',
-            }}
-          >
-            {artwork.event}
-          </p>
-        )}
+
         <div
           style={{
             display: 'grid',
@@ -386,18 +445,16 @@ export const MobileLip = ({
           <div style={{ overflow: 'hidden' }}>
             {artwork.description && (
               <>
-                {artwork.artists?.[0] && (
-                  <p
-                    style={{
-                      ...FONT,
-                      fontSize: 13,
-                      color: '#666',
-                      marginBottom: 6,
-                    }}
-                  >
-                    {artwork.artists[0]} says:
-                  </p>
-                )}
+                <p
+                  style={{
+                    ...FONT,
+                    fontSize: 13,
+                    color: '#666',
+                    marginBottom: 6,
+                  }}
+                >
+                  Description
+                </p>
                 <div
                   ref={descRef}
                   style={{
@@ -434,6 +491,13 @@ export const MobileLip = ({
             transition: shareVisible ? 'opacity 300ms ease' : 'opacity 0ms',
           }}
         >
+          <KudosControls
+            artwork={artwork}
+            className="mb-3 h-9"
+            compact
+            layout="nametag"
+            onKudosApplied={onKudosApplied}
+          />
           <MobileShareRow shareUrl={shareUrl} />
         </div>
       </div>

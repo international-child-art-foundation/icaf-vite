@@ -7,22 +7,22 @@
  * Gallery GSI query shapes:
  *   All artworks:            PK='GALLERY',                              SK begins_with ''
  *   Artworks by family:      PK='FAMILY#<family>',                      SK begins_with ''
- *   Artworks by instance:    PK='FAMILY#<family>#INSTANCE#<instance>',  SK begins_with ''
+ *   Artworks by instance:    PK='FAMILY#<family>#<type>#<instance>',    SK begins_with ''
  *   All groups:              PK='GROUPS',                               SK begins_with ''
  *   Groups by family:        PK='GROUPS#FAMILY#<family>',               SK begins_with ''
- *   Groups by instance:      PK='GROUPS#FAMILY#<family>#INSTANCE#<i>',  SK begins_with ''
+ *   Groups by instance:      PK='GROUPS#FAMILY#<family>#<type>#<i>',    SK begins_with ''
  */
 
 import { ArtworkListItem } from '../entities/art/types.js';
 import { GroupListItem } from '../entities/group/types.js';
 
-// Gallery supports newest/oldest only — the SK encodes timestamp
+// Gallery supports newest/oldest only — the SK encodes ts
 export type SortOrder = 'newest' | 'oldest';
 
-// Query parameters accepted by gallery endpoints (theme_family/instance are path params, not query params)
+// Query parameters accepted by gallery endpoints (theme family/type/instance are path params, not query params)
 export interface GalleryQueryParams {
     sort?: SortOrder;       // default: 'newest'
-    limit?: number;         // default: 20, max: 100
+    limit?: number;         // default: 24, max: 100
     last_key?: string;      // base64-encoded pagination cursor
 }
 
@@ -32,6 +32,7 @@ export interface GalleryArtworksResponse {
     count: number;
     sort: SortOrder;
     theme_family?: string;
+    instance_type?: string;
     theme_instance?: string;
     has_more: boolean;
     last_key?: string;
@@ -43,6 +44,7 @@ export interface GalleryGroupsResponse {
     count: number;
     sort: SortOrder;
     theme_family?: string;
+    instance_type?: string;
     theme_instance?: string;
     has_more: boolean;
     last_key?: string;

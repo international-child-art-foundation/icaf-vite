@@ -3,6 +3,8 @@ import { dynamodb, TABLE_NAME } from "../../../config/aws-clients";
 import { ApiGatewayResponse, SortOrder } from "@icaf/shared";
 import { parseBase64JsonObject } from "../../../utils/request";
 
+const DEFAULT_GALLERY_LIMIT = 24;
+
 export interface GsiConfig {
   IndexName: string;
   pkAttr: string;
@@ -66,7 +68,7 @@ export function parseGalleryParams(
   const rawLimit = parseInt(raw.limit ?? "", 10);
   const limit = Number.isFinite(rawLimit)
     ? Math.min(Math.max(rawLimit, 1), 100)
-    : 20;
+    : DEFAULT_GALLERY_LIMIT;
 
   const parsedLastKey = raw.last_key
     ? parseBase64JsonObject(raw.last_key, "last_key is invalid")

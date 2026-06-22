@@ -7,12 +7,14 @@ import {
   CommonErrors,
   RemoveAllUserArtworkRequest,
   RemoveAllUserArtworkResponse,
+  hasMinimumRole,
 } from "@icaf/shared";
 import { GSI } from "../../dynamo/ddbSchemaConsts";
 import { byOwnerPk } from "../../dynamo/ownerGsi";
 import { randomUUID } from "crypto";
 import { parseJsonBody } from "../../utils/request";
 import { getCurrentUser } from "../../utils/auth";
+import { deleteArtworkObjects, invalidateArtworkPaths } from "../shared/artworkObjects";
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -20,6 +22,10 @@ export const handler = async (
   try {
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
+    if (!hasMinimumRole(currentUser.user.role, "admin")) {
+        return CommonErrors.forbidden("Admin access required");
+    }
+    
     const adminId = currentUser.user.user_id;
 
     const targetUserId = event.pathParameters?.user_id;
@@ -38,7 +44,7 @@ export const handler = async (
     }
 
     // ── Find all ART and GROUP entities via ByOwner GSI ───────────────────
-    const ownedItems: { pk: string; sk: string }[] = [];
+    const ownedItems: { pk: string; sk: string; artId?: string }[] = [];
     let ownerLastKey: Record<string, unknown> | undefined;
 
     do {
@@ -55,7 +61,7 @@ export const handler = async (
       for (const item of ownerResult.Items ?? []) {
         const type = item.type as string;
         if (type === "ART") {
-          ownedItems.push({ pk: `ART#${item.art_id}`, sk: "-" });
+          ownedItems.push({ pk: `ART#${item.art_id}`, sk: "-", artId: item.art_id as string });
         } else if (type === "GROUP") {
           ownedItems.push({ pk: `GROUP#${item.group_id}`, sk: "-" });
         }
@@ -68,14 +74,22 @@ export const handler = async (
     const failedDeletions: { art_id: string; reason: string }[] = [];
     let deletedCount = 0;
 
-    for (const { pk, sk } of ownedItems) {
+    const deletedArtIds: string[] = [];
+    for (const { pk, sk, artId } of ownedItems) {
       try {
+        if (artId) await deleteArtworkObjects(artId);
         await dynamodb.send(new DeleteCommand({ TableName: TABLE_NAME, Key: { PK: pk, SK: sk } }));
         deletedCount++;
+        if (artId) deletedArtIds.push(artId);
       } catch (err: unknown) {
         const errObj = err as { message?: string };
         failedDeletions.push({ art_id: pk, reason: errObj.message ?? "Unknown error" });
       }
+    }
+    try {
+      await invalidateArtworkPaths(deletedArtIds);
+    } catch (error) {
+      console.error("Artwork CloudFront invalidation failed:", error);
     }
 
     // ── Write ACCOUNT_ACTION audit record ─────────────────────────────────
@@ -89,7 +103,7 @@ export const handler = async (
           PK: `USER#${targetUserId}`,
           SK: `AA#${nowSeconds}`,
           user_id: targetUserId,
-          timestamp: nowSeconds,
+          ts: nowSeconds,
           initiator_id: adminId,
           action: "delete_artwork",
           reason: body.reason.trim(),
@@ -104,7 +118,7 @@ export const handler = async (
       artworks_removed: deletedCount,
       failed_deletions: failedDeletions,
       admin_action_id: actionId,
-      timestamp: nowSeconds,
+      ts: nowSeconds,
     };
 
     return {

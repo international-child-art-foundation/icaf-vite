@@ -1,6 +1,7 @@
 allowBuilds:
   esbuild: true
   sharp: true
+  workerd: true
 ignoredBuiltDependencies:
   - esbuild
 packages:
@@ -8,3 +9,5 @@ packages:
   - "backend"
   - "infra"
   - "shared"
+  - "cloudflare/api-proxy"
+minimumReleaseAge: 10080

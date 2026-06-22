@@ -22,4 +22,3 @@ export const EntityType = {
   News: "NEWS",
 } as const;
 export type EntityType = (typeof EntityType)[keyof typeof EntityType];
-

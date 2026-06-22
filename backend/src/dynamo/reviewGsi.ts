@@ -6,6 +6,6 @@ export const reviewPk = () => "REVIEW" as const;
 export const reviewGsiSk = (
   status: Status,
   type: EntityType,
-  timestampMs: number,
+  tsMs: number,
   id: string,
-) => `STATUS#${status}#TYPE#${type}#TS#${timestampMs}#ID#${id}` as const;
+) => `STATUS#${status}#TYPE#${type}#TS#${tsMs}#ID#${id}` as const;

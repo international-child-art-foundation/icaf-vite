@@ -73,6 +73,12 @@ const routePreloaders: Partial<Record<string, Preloader>> = {
   '/gallery/slideshow': () => {
     void import('./modules/content/components/gallery/GallerySlideshowEntry');
   },
+  '/submit-artwork': () => {
+    void import('./modules/submissions/pages/SubmitArtworkRouter');
+  },
+  '/takedown-request': () => {
+    void import('./modules/submissions/pages/TakedownRequest');
+  },
 };
 
 const preloadedRoutes = new Set<string>();

@@ -5,7 +5,7 @@ import {
   COMMON_HEADERS,
   HTTP_STATUS,
 } from "@icaf/shared";
-import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
+import { APP_URL, dynamodb, TABLE_NAME } from "../../config/aws-clients";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -15,31 +15,50 @@ export const handler = async (event: ApiGatewayEvent): Promise<ApiGatewayRespons
     const token = event.queryStringParameters?.t?.trim();
 
     if (!userId || !UUID_PATTERN.test(userId) || !token) {
-      return htmlResponse(HTTP_STATUS.BAD_REQUEST, "Invalid unsubscribe link", "This unsubscribe link is missing required information.");
+      return htmlResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        "We could not unsubscribe you",
+        "This unsubscribe link is missing required information. Please contact us so we can help update your email preferences.",
+      );
     }
+
+    const nowSeconds = Math.floor(Date.now() / 1000);
 
     await dynamodb.send(
       new UpdateCommand({
         TableName: TABLE_NAME,
         Key: { PK: `USER#${userId}`, SK: "PROFILE" },
-        UpdateExpression: "SET artwork_emails_off = :off",
+        UpdateExpression: "SET artwork_emails_off = :off, artwork_email_unsub_at = :unsubAt",
         ConditionExpression: "attribute_exists(PK) AND unsub_token = :token",
         ExpressionAttributeValues: {
           ":off": true,
+          ":unsubAt": nowSeconds,
           ":token": token,
         },
       }),
     );
 
-    return htmlResponse(HTTP_STATUS.OK, "You are unsubscribed", "You will no longer receive artwork or group notification emails from ICAF.");
+    return htmlResponse(
+      HTTP_STATUS.OK,
+      "You have been unsubscribed",
+      "You have been unsubscribed from all notification emails.",
+    );
   } catch (error: unknown) {
     const ddbErr = error as { name?: string };
     if (ddbErr.name === "ConditionalCheckFailedException") {
-      return htmlResponse(HTTP_STATUS.BAD_REQUEST, "Invalid unsubscribe link", "This unsubscribe link is invalid or has already been replaced.");
+      return htmlResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        "We could not unsubscribe you",
+        "This unsubscribe link is invalid. Please contact us so we can help update your email preferences.",
+      );
     }
 
     console.error("Error unsubscribing from artwork emails:", error);
-    return htmlResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, "Something went wrong", "We could not update your email preferences. Please try again later.");
+    return htmlResponse(
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      "We could not unsubscribe you",
+      "We could not update your email preferences. Please contact us so we can help.",
+    );
   }
 };
 
@@ -57,6 +76,7 @@ function htmlResponse(statusCode: number, title: string, message: string): ApiGa
       "<body style=\"font-family:Arial,sans-serif;line-height:1.5;color:#202020;margin:40px;max-width:680px;\">",
       `<h1>${escapeHtml(title)}</h1>`,
       `<p>${escapeHtml(message)}</p>`,
+      `<p><a href="${escapeHtml(APP_URL)}" style="color:#0f5c8a;">Return to the ICAF homepage</a></p>`,
       "</body>",
       "</html>",
     ].join(""),

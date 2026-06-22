@@ -1,25 +1,5 @@
 /**
  * Artwork data for the ICAF gallery.
- *
- * All metadata lives in data/galleryData.json, hand-edited.
- * The build script (generateGalleryData.js) reads this file,
- * generates thumbnails + display-size images, and validates
- * that every referenced image file exists on disk.
- *
- * Image files live in gallery-arts/{event-folder}/:
- *   gallery-arts/
- *     7th-Arts-Olympiad/
- *       anwita-k.jpg
- *       nicolas.jpg
- *       thumbs/              ← generated
- *       display/             ← generated
- *
- * Filename convention (human-readable slug, not parsed for data):
- *   {artist-slug}.jpg          — e.g. anwita-k.jpg
- *   {artist-slug}-2.jpg        — duplicate from same artist
- *   anon-001.jpg               — anonymous work
- *
- * Event folder names use kebab-case: 7th-Arts-Olympiad, etc.
  */
 
 export type TArtwork = {
@@ -55,16 +35,39 @@ export type TResolvedArtwork = TArtwork & {
   eventSlug: string;
   /** Full-size original: /gallery-arts/{eventSlug}/{file} */
   url: string;
-  /** 350px-wide thumbnail: /gallery-arts/{eventSlug}/thumbs/{base}.webp */
+  /** 350px-wide thumbnail: /gallery-arts/{eventSlug}/thumbs/{base}.avif */
   thumbUrl: string;
-  /** 800px-max display image: /gallery-arts/{eventSlug}/display/{base}.webp */
+  /** 800px-max display image: /gallery-arts/{eventSlug}/medium/{base}.avif */
   displayUrl: string;
-  /** 1920px-max high-res image: /gallery-arts/{eventSlug}/feature/{base}.webp */
+  /** 1920px-max high-res image: /gallery-arts/{eventSlug}/original/{base}.avif */
   featureUrl: string;
   /** Alt text for accessibility */
   alt: string;
+  /** API artwork id for remote artworks. */
+  art_id?: string;
+  /** Approved group id this artwork belongs to, when submitted through a group. */
+  group_id?: string;
+  /** Theme SK used by remote gallery filtering/display. */
+  theme?: string;
+  /** Display name of the classroom/group this artwork belongs to. */
+  groupTitle?: string;
+  /** Display name for the adult facilitator/group submitter. */
+  groupOwnerName?: string;
+  /** Group type label, e.g. classroom. */
+  groupType?: string;
+  /** Country associated with the group submission. */
+  groupCountry?: string;
+  /** Region associated with the group submission. */
+  groupRegion?: string;
+  /** Number of kudos recorded for this artwork. */
+  kudos_count?: number;
 };
 
 export interface IGalleryContext {
   artworks: TResolvedArtwork[];
+  /** Lazily resolves full metadata for a slideshow artwork. */
+  loadArtwork?: (artworkId: string) => Promise<TResolvedArtwork | null>;
+  onArtworkKudos?: (artId: string, amount: number) => void;
+  preserveOrder?: boolean;
+  initialArtworkId?: string;
 }

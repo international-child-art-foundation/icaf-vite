@@ -61,13 +61,14 @@ export const handler = async (
       region: item.region as string | undefined,
       title: item.title as string | undefined,
       description: item.description as string | undefined,
-      theme_family: item.theme_family as string | undefined,
-      theme_instance: item.theme_instance as string | undefined,
+      l_name: item.l_name as string | undefined,
+      theme: item.theme as string | undefined,
       group_id: item.group_id as string | undefined,
       status: item.status as ArtworkListItem["status"],
       kudos_count: (item.kudos_count as number) ?? 0,
-      timestamp: item.timestamp as number,
-      is_virtual: item.is_virtual as boolean,
+      ts: item.ts as number,
+      rev_num: (item.rev_num as number | undefined) ?? 1,
+      promotional_use: (item.promotional_use as boolean | undefined) ?? false,
       notifications: item.notifications as boolean | undefined,
     }));
 

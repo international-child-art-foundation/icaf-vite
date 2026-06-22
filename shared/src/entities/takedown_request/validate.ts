@@ -1,6 +1,6 @@
 import { InitiateTakedownRequest, TakedownStatus } from './types.js';
 import { TDR_MAX_REASON_LEN, TDR_MAX_NAME_LEN, TDR_MAX_EMAIL_LEN, TDR_MAX_REVIEW_NOTES_LEN } from './constants.js';
-import { isValidEmail } from '../../utils/string.js';
+import { isValidEmail, isValidUUID } from '../../utils/string.js';
 
 export const TAKEDOWN_STATUSES: TakedownStatus[] = ['requesting', 'disputing', 'executed', 'canceled'];
 
@@ -13,6 +13,14 @@ export function validateInitiateTakedownRequest(data: InitiateTakedownRequest): 
 
     if (!data.art_id && !data.group_id) {
         errors.push('at least one of art_id or group_id is required');
+    }
+
+    if (data.art_id !== undefined && !isValidUUID(data.art_id)) {
+        errors.push('art_id must be a valid UUID');
+    }
+
+    if (data.group_id !== undefined && !isValidUUID(data.group_id)) {
+        errors.push('group_id must be a valid UUID');
     }
 
     if (!data.requester_email?.trim() || !isValidEmail(data.requester_email)) {
@@ -41,6 +49,27 @@ export function validateReviewTakedownRequest(data: { review_notes?: string }): 
 
     if (data.review_notes !== undefined && data.review_notes.length > TDR_MAX_REVIEW_NOTES_LEN) {
         errors.push(`review_notes must be ${TDR_MAX_REVIEW_NOTES_LEN} characters or less`);
+    }
+
+    return errors;
+}
+
+export function isValidTdrSk(tdrSk: string): boolean {
+  const match = /^TS#([1-9]\d*)#TDR_ID#(.+)$/.exec(tdrSk);
+  if (!match) return false;
+
+  const [, , tdrId] = match;
+
+  return isValidUUID(tdrId);
+}
+
+export function validateTdrSk(tdrSk: string): string[] {
+    const errors: string[] = [];
+
+    if (typeof tdrSk !== 'string' || !tdrSk.trim()) {
+        errors.push('tdr_sk path parameter is required');
+    } else if (!isValidTdrSk(tdrSk)) {
+        errors.push('tdr_sk is invalid');
     }
 
     return errors;

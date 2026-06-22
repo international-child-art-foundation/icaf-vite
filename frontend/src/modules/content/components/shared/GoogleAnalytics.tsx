@@ -6,6 +6,18 @@ type GoogleAnalyticsProps = {
   GA_MEASUREMENT_ID: string | undefined;
 };
 
+const tokenLinkPaths = new Set([
+  '/verify-account',
+  '/create-account',
+  '/confirm-forgot-password',
+  '/unsubscribe',
+  '/unsubscribe/artwork',
+]);
+
+function analyticsPath(pathname: string, search: string): string {
+  return tokenLinkPaths.has(pathname) ? pathname : `${pathname}${search}`;
+}
+
 export default function GoogleAnalytics({
   GA_MEASUREMENT_ID,
 }: GoogleAnalyticsProps) {
@@ -28,10 +40,8 @@ export default function GoogleAnalytics({
     if (GA_MEASUREMENT_ID === undefined) return;
     if (!isCookieConsentAcquired) return;
 
-    const path = location.pathname + location.search;
-
     window.gtag('config', GA_MEASUREMENT_ID, {
-      page_path: path,
+      page_path: analyticsPath(location.pathname, location.search),
     });
   }, [
     GA_MEASUREMENT_ID,

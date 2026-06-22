@@ -16,10 +16,12 @@
  *
  * GSI attributes written on approval (sparse — remove when hiding/rejecting):
  *   GRP_PK     = 'GROUPS'
- *   FGRP_PK    = 'GROUPS#FAMILY#<theme_family>'                    (if themed)
- *   IGRP_PK    = 'GROUPS#FAMILY#<family>#INSTANCE#<instance>'      (if has instance)
+ *   FGRP_PK    = 'GROUPS#FAMILY#<theme_family>'                   (if themed)
+ *   IGRP_PK    = 'GROUPS#FAMILY#<family>#<instance_type>#<instance>' (if has instance)
  *   GRP_GSI_SK = 'TS#<unix_ts>#ID#<group_id>'                     (shared by all 3 group GSIs)
  */
+
+import type { SubmitArtworkToGroupRequest } from '../art/types.js';
 
 export type GroupStatus =
     | 'pending_review'
@@ -36,20 +38,19 @@ export interface GroupEntity {
     // ── Required ───────────────────────────────────────────────────────────
     group_id: string;
     user_id: string;                // USER#<user_id> of the submitting user
-    group_type: GroupType;
+    group_type?: GroupType;
     status: GroupStatus;
-    member_art_ids: string[];       // ordered list of art_ids (max ~50)
-    cover_art_ids: string[];        // 3–4 art_ids for gallery card thumbnails; may be []
-    timestamp: number;              // Unix timestamp (seconds)
+    member_art_ids: string[];       // ordered list of art_ids (max 40)
+    ts: number;              // Unix ts (seconds)
+    rev_num: number;         // Optimistic-lock revision; starts at 1
     type: 'GROUP';
     notifications?: boolean;        // true when owner opted into group submission notifications
 
     // ── Optional ───────────────────────────────────────────────────────────
-    theme_family?: string;          // e.g. 'CHERRYBLOSSOM'
-    theme_instance?: string;        // zero-padded 4-digit string, e.g. '2025'
+    theme?: string;                 // THEME SK, e.g. FAMILY#CHERRY_BLOSSOM#year#2026
     title?: string;
     class_name?: string;            // e.g. 'BIO 1017'
-    teacher_display_name?: string;  // may differ from owner's account name
+    submitter_display_name?: string; // may differ from owner's account name
     country?: string;
     region?: string;
     description?: string;
@@ -57,13 +58,12 @@ export interface GroupEntity {
 
 // Request body to create a new group (POST /user/groups)
 export interface SubmitGroupRequest {
-    theme_family?: string;
-    theme_instance?: string;
-    group_type: GroupType;
+    theme?: string;
+    group_type?: GroupType;
     title: string;
     class_name?: string;
-    teacher_display_name?: string;
-    country: string;
+    submitter_display_name?: string;
+    country?: string;
     region?: string;
     description?: string;
     notifications?: boolean;
@@ -73,7 +73,53 @@ export interface SubmitGroupResponse {
     success: boolean;
     group_id: string;
     message: string;
-    timestamp: number;
+    ts: number;
+}
+
+export type CreateGroupArtworkRequest = SubmitArtworkToGroupRequest;
+
+export type CreateGroupBaseRequest = SubmitGroupRequest & {
+    artworks: CreateGroupArtworkRequest[];
+};
+
+export type GuestCreateGroupRequest = CreateGroupBaseRequest & {
+    email: string;
+    submitter_first_name: string;
+    submitter_last_name: string;
+};
+
+// Identity comes from auth cookies.
+export type AuthenticatedCreateGroupRequest = CreateGroupBaseRequest & {
+    email?: never;
+};
+
+export type CreateGroupRequest = GuestCreateGroupRequest | AuthenticatedCreateGroupRequest;
+
+export type PreflightGroupArtworkRequest = Omit<
+    CreateGroupArtworkRequest,
+    'art_id' | 'file_type'
+>;
+
+export type PreflightGroupBaseRequest = SubmitGroupRequest & {
+    artworks: PreflightGroupArtworkRequest[];
+};
+
+export type GuestPreflightGroupRequest = PreflightGroupBaseRequest & {
+    email: string;
+    submitter_first_name: string;
+    submitter_last_name: string;
+};
+
+export type AuthenticatedPreflightGroupRequest = PreflightGroupBaseRequest & {
+    email?: never;
+};
+
+export type PreflightGroupRequest =
+    | GuestPreflightGroupRequest
+    | AuthenticatedPreflightGroupRequest;
+
+export interface PreflightGroupResponse {
+    success: true;
 }
 
 export interface GetGroupResponse {
@@ -83,18 +129,18 @@ export interface GetGroupResponse {
 // Shape used in list and gallery responses
 export interface GroupListItem {
     group_id: string;
-    theme_family?: string;
-    theme_instance?: string;
-    group_type: GroupType;
+    theme?: string;
+    group_type?: GroupType;
     title: string;
     class_name?: string;
-    teacher_display_name?: string;
+    submitter_display_name?: string;
     country: string;
     region?: string;
-    cover_art_ids: string[];
+    preview_art_ids: string[];
     member_count: number;
     status: GroupStatus;
-    timestamp: number;
+    ts: number;
+    rev_num: number;
     notifications?: boolean;
 }
 
@@ -109,10 +155,10 @@ export interface UpdateGroupRequest {
     title?: string;
     description?: string;
     class_name?: string;
-    teacher_display_name?: string;
-    theme_family?: string;
-    theme_instance?: string;
-    cover_art_ids?: string[];
+    submitter_display_name?: string;
+    country?: string;
+    region?: string;
+    theme?: string;
     notifications?: boolean;
 }
 
@@ -130,10 +176,20 @@ export interface ReviewGroupQueueResponse {
 
 export interface ChangeGroupStatusRequest {
     status: Extract<GroupStatus, 'approved' | 'hidden' | 'rejected'>;
+    rev_num: number;
+    /** When approving a group, also approve each pending artwork in the group. */
+    approve_all?: boolean;
 }
 
 export interface ChangeGroupStatusResponse {
     success: true;
     group_id: string;
+    rev_num: number;
     status: Extract<GroupStatus, 'approved' | 'hidden' | 'rejected'>;
+}
+
+export interface AdminUpdateGroupResponse {
+    success: true;
+    group_id: string;
+    status: GroupStatus;
 }

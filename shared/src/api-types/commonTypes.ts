@@ -16,6 +16,8 @@ export interface ApiGatewayEvent {
         }
     };
     body?: string;
+    rawBody?: string;
+    isBase64Encoded?: boolean;
     pathParameters?: Record<string, string>;
     queryStringParameters?: Record<string, string> | null;
     httpMethod: string;
@@ -40,6 +42,7 @@ export const HTTP_STATUS = {
     FORBIDDEN: 403,
     NOT_FOUND: 404,
     METHOD_NOT_ALLOWED: 405,
+    CONFLICT: 409,
     INTERNAL_SERVER_ERROR: 500
 } as const;
 

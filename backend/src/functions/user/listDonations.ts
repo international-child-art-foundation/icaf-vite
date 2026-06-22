@@ -55,9 +55,10 @@ export const handler = async (
       const p = item as PaymentEntity;
       return {
         payment_id: p.payment_id,
+        purpose: p.purpose,
         amount_cents: p.amount_cents,
         currency: p.currency,
-        timestamp: p.timestamp,
+        ts: p.ts,
       };
     });
 

@@ -11,6 +11,7 @@ import './index.css';
 import { GlobalContextProvider } from './modules/content/components/shared/GlobalContext';
 import GoogleAnalytics from './modules/content/components/shared/GoogleAnalytics';
 import CookieBanner from './modules/content/components/shared/CookieBanner';
+import { MyIcafAccessGate } from './modules/dashboard/components/MyIcafAccessGate';
 
 export const metadata = {
   title: 'Home | ICAF',
@@ -125,6 +126,66 @@ const GallerySlideshowEntry = lazy(() =>
     }),
   ),
 );
+const Register = lazy(() =>
+  import('./modules/account/pages/Register').then((m) => ({
+    default: m.Register,
+  })),
+);
+const Login = lazy(() =>
+  import('./modules/account/pages/Login').then((m) => ({
+    default: m.Login,
+  })),
+);
+const VerifyAccount = lazy(() =>
+  import('./modules/account/pages/VerifyAccount').then((m) => ({
+    default: m.VerifyAccount,
+  })),
+);
+const CreateAccount = lazy(() =>
+  import('./modules/account/pages/CreateAccount').then((m) => ({
+    default: m.CreateAccount,
+  })),
+);
+const ForgotPassword = lazy(() =>
+  import('./modules/account/pages/ForgotPassword').then((m) => ({
+    default: m.ForgotPassword,
+  })),
+);
+const ConfirmForgotPassword = lazy(() =>
+  import('./modules/account/pages/ConfirmForgotPassword').then((m) => ({
+    default: m.ConfirmForgotPassword,
+  })),
+);
+const Unsubscribe = lazy(() =>
+  import('./modules/account/pages/Unsubscribe').then((m) => ({
+    default: m.Unsubscribe,
+  })),
+);
+const SubmitArtworkGroup = lazy(() =>
+  import('./modules/submissions/pages/SubmitArtworkGroup').then((m) => ({
+    default: m.SubmitArtworkGroup,
+  })),
+);
+const SubmitArtwork = lazy(() =>
+  import('./modules/submissions/pages/SubmitArtwork').then((m) => ({
+    default: m.SubmitArtwork,
+  })),
+);
+const SubmitArtworkRouter = lazy(() =>
+  import('./modules/submissions/pages/SubmitArtworkRouter').then((m) => ({
+    default: m.SubmitArtworkRouter,
+  })),
+);
+const SubmitArtworkSuccess = lazy(() =>
+  import('./modules/submissions/pages/SubmitArtworkSuccess').then((m) => ({
+    default: m.SubmitArtworkSuccess,
+  })),
+);
+const TakedownRequest = lazy(() =>
+  import('./modules/submissions/pages/TakedownRequest').then((m) => ({
+    default: m.TakedownRequest,
+  })),
+);
 
 export default function App() {
   return (
@@ -193,6 +254,44 @@ export default function App() {
                   element={<GallerySlideshowEntry />}
                 />
               </Route>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/verify-account" element={<VerifyAccount />} />
+              <Route path="/create-account" element={<CreateAccount />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route
+                path="/confirm-forgot-password"
+                element={<ConfirmForgotPassword />}
+              />
+              <Route path="/unsubscribe" element={<Unsubscribe />} />
+              <Route path="/unsubscribe/artwork" element={<Unsubscribe />} />
+              <Route path="/my-icaf" element={<MyIcafAccessGate />} />
+              <Route
+                path="/dashboard"
+                element={<Navigate to="/my-icaf" replace />}
+              />
+              <Route path="/submit-artwork" element={<SubmitArtworkRouter />} />
+              <Route
+                path="/submit-artwork/success"
+                element={<SubmitArtworkSuccess />}
+              />
+              <Route
+                path="/submit-artwork/single/:submitterFlow"
+                element={<SubmitArtwork />}
+              />
+              <Route
+                path="/submit-artwork/single/:submitterFlow/artworks"
+                element={<SubmitArtwork />}
+              />
+              <Route
+                path="/submit-artwork/group/:submitterFlow"
+                element={<SubmitArtworkGroup />}
+              />
+              <Route
+                path="/submit-artwork/group/:submitterFlow/artworks"
+                element={<SubmitArtworkGroup />}
+              />
+              <Route path="/takedown-request" element={<TakedownRequest />} />
 
               {routes.map(({ main, aliases }) =>
                 aliases.map((alias) => (

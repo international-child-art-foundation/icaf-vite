@@ -16,6 +16,8 @@ export const ACCOUNT_ACTION_TYPES: AccountActionType[] = [
     'unhide_group',
     'hide_all',
     'unhide_all',
+    'execute_takedown',
+    'delete_account_admin',
 ];
 
 export function isValidAccountActionType(action: string): action is AccountActionType {

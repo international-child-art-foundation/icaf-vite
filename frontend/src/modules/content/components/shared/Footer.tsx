@@ -52,7 +52,7 @@ function Footer() {
     'idle',
   );
 
-  async function onSubscribe(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubscribe(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!email.trim()) return;
 
@@ -168,12 +168,6 @@ function Footer() {
         </div>
         <div className="footer-inverse w-full text-base lg:order-2 lg:w-auto lg:text-base xl:col-span-2 xl:col-start-6">
           <ol className="grid grid-cols-2 gap-x-8 gap-y-5 lg:grid-cols-1 lg:gap-y-4 lg:pl-0 lg:pr-14">
-            {/* <div className="break-words">
-              <a href="/faq">FAQs</a>
-            </div> */}
-            <li className="break-words">
-              <Link to="/contact">Contact Us</Link>
-            </li>
             <li className="break-words">
               <a
                 href="/documents/ICAF_Website_Terms_of_Use.pdf"
@@ -197,6 +191,15 @@ function Footer() {
               onClick={() => setCookieBannerVisible(true)}
             >
               Cookie Settings
+            </li>
+            <li className="break-words">
+              <Link
+                to={'/takedown-request'}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Takedown Request
+              </Link>
             </li>
           </ol>
         </div>

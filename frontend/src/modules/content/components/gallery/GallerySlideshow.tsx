@@ -14,6 +14,7 @@ import { GallerySlideshowShare } from './GallerySlideshowShare';
 import { useGallerySlideshowState } from './useGallerySlideshowState';
 import { renderSlot } from './RenderSlot';
 import { galleryNametag } from './GalleryNametag';
+import type { IGalleryContext } from '@/modules/content/types/Gallery';
 
 const INTERVALS_S = [5, 8, 12, 20, 30];
 const DEFAULT_INTERVAL_IDX = 4;
@@ -23,13 +24,14 @@ const KB_STYLES = `
     from { opacity: 0; }
     to { opacity: 1; }
   }
-  @keyframes desc-scroll {
-    from { transform: translateY(0); }
-    to   { transform: translateY(var(--desc-dist)); }
+  .description-scrollbar::-webkit-scrollbar { width: 6px; }
+  .description-scrollbar::-webkit-scrollbar-track {
+    background: #e5e5e5;
+    border-radius: 3px;
   }
-  @keyframes thumb-scroll {
-    from { transform: translateY(0); }
-    to   { transform: translateY(var(--thumb-dist)); }
+  .description-scrollbar::-webkit-scrollbar-thumb {
+    background: #a3a3a3;
+    border-radius: 3px;
   }
   @keyframes kb-zoom-in {
     from { transform: scale(1.0) translate(0%, 0%); }
@@ -49,7 +51,13 @@ const KB_STYLES = `
   }
 `;
 
-export const GallerySlideshow = () => {
+export const GallerySlideshow = ({
+  context,
+  onClose: closeOverride,
+}: {
+  context?: IGalleryContext;
+  onClose?: () => void;
+}) => {
   const {
     artworks,
     currentIdx,
@@ -63,9 +71,10 @@ export const GallerySlideshow = () => {
     setIsPaused,
     uiState,
     resetUiTimer,
+    applyArtworkKudos,
     artworkShareUrl,
     onClose,
-  } = useGallerySlideshowState();
+  } = useGallerySlideshowState(context, closeOverride);
 
   const intervalIdx = DEFAULT_INTERVAL_IDX;
   const intervalMs = INTERVALS_S[intervalIdx] * 1000;
@@ -205,7 +214,7 @@ export const GallerySlideshow = () => {
                 aria-hidden="true"
                 style={{ visibility: 'hidden', pointerEvents: 'none' }}
               >
-                {galleryNametag(artworks[deferredIdx])}{' '}
+                {galleryNametag(artworks[deferredIdx], applyArtworkKudos)}{' '}
               </div>
               <div
                 style={{
@@ -220,7 +229,10 @@ export const GallerySlideshow = () => {
                       : 'opacity 0ms',
                 }}
               >
-                {galleryNametag(artworks[slotA.artworkIdx])}
+                {galleryNametag(
+                  artworks[slotA.artworkIdx],
+                  applyArtworkKudos,
+                )}
               </div>
               <div
                 style={{
@@ -235,7 +247,10 @@ export const GallerySlideshow = () => {
                       : 'opacity 0ms',
                 }}
               >
-                {galleryNametag(artworks[slotB.artworkIdx])}
+                {galleryNametag(
+                  artworks[slotB.artworkIdx],
+                  applyArtworkKudos,
+                )}
               </div>
             </div>
 

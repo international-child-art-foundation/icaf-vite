@@ -1,6 +1,7 @@
 import { SendEmailCommand } from "@aws-sdk/client-ses";
-import { sesClient, SES_FROM_EMAIL, APP_URL } from "../../config/aws-clients";
+import { sesClient, SES_CONFIGURATION_SET, SES_FROM_EMAIL } from "../../config/aws-clients";
 import { emailTags } from "./tags";
+import { buildCreateAndVerifyEmail } from "./templates/createAndVerify";
 
 /**
  * Sent when an existing app-side user requests a login account.
@@ -9,30 +10,27 @@ import { emailTags } from "./tags";
 export async function sendCreateAndVerifyEmail(args: {
   toEmail: string;
   userId: string;
-  verifyToken: string;
+  authActionToken: string;
 }): Promise<void> {
-  const link = `${APP_URL}/create-account?id=${encodeURIComponent(args.userId)}&token=${encodeURIComponent(args.verifyToken)}`;
+  const email = buildCreateAndVerifyEmail({
+    userId: args.userId,
+    authActionToken: args.authActionToken,
+  });
 
   await sesClient.send(
     new SendEmailCommand({
       Source: SES_FROM_EMAIL,
+      ...(SES_CONFIGURATION_SET ? { ConfigurationSetName: SES_CONFIGURATION_SET } : {}),
       Destination: { ToAddresses: [args.toEmail] },
       Tags: emailTags("create_and_verify"),
       Message: {
-        Subject: { Data: "Create your ICAF account" },
+        Subject: { Data: email.subject },
         Body: {
           Text: {
-            Data: [
-              "You requested to create an ICAF account associated with this email address.",
-              "",
-              "Click the link below to set your password and complete account creation:",
-              "",
-              link,
-              "",
-              "This link expires in 7 days. If you did not request this, you can safely ignore this email.",
-              "",
-              "The International Child Art Foundation",
-            ].join("\n"),
+            Data: email.text,
+          },
+          Html: {
+            Data: email.html,
           },
         },
       },

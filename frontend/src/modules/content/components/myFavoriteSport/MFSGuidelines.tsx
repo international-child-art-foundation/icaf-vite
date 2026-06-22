@@ -25,7 +25,7 @@ const cardData = [
     className: 'border-[#0286C3]',
     heading: 'How to Upload',
     description: [
-      'Create an account with us, go to your dashboard and upload your work.',
+      'Create an account with us, go to My ICAF and upload your work.',
     ],
     button: ['Learn more', 'https://www.myfavoritesport.org/register'],
     gradientStrength: 0.4,

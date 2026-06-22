@@ -13,6 +13,9 @@ import type {
   InitiateMagazineUploadRequest,
   InitiateMagazineUploadResponse,
   ListTakedownRequestsResponse,
+  BulkCreateNewsRequest,
+  BulkCreateNewsResponse,
+  CreateNewsRequest,
   NewsMutationResponse,
   RemoveAllUserArtworkRequest,
   RemoveAllUserArtworkResponse,
@@ -21,13 +24,93 @@ import type {
   UnhideAllUserArtworkResponse,
   UpdateMagazineStatusRequest,
   UpdateMagazineStatusResponse,
-  CreateNewsRequest,
   UpdateNewsRequest,
+  UpdateArtworkRequest,
+  UpdateGroupRequest,
+  ArtworkStatus,
+  AdminUpdateGroupResponse,
 } from '@icaf/shared';
 
-import { apiRequest } from './client';
+import {
+  apiRequest,
+  clearApiResponseCache,
+  hasApiSuccess,
+  hasArrayProperty,
+  hasBooleanProperty,
+  hasNumberProperty,
+  hasStringProperty,
+} from './client';
 import { apiEndpoints } from './endpoints';
 import type { PaginationQuery } from './types';
+
+export const TAKEDOWN_ACTIVITY_CACHE_MS = 30 * 60 * 1000;
+
+const hasMessageAndUserId = (response: unknown): boolean =>
+  hasStringProperty(response, 'message') && hasStringProperty(response, 'user_id');
+
+const isRoleMutationResponse = (response: unknown): boolean =>
+  hasMessageAndUserId(response) && hasStringProperty(response, 'new_role');
+
+const isBanUserResponse = (response: unknown): boolean =>
+  hasMessageAndUserId(response) && hasBooleanProperty(response, 'banned');
+
+const isCognitoInfoResponse = (response: unknown): boolean =>
+  hasStringProperty(response, 'user_id') &&
+  hasStringProperty(response, 'email') &&
+  hasStringProperty(response, 'cognito_username');
+
+const isUserEmailResponse = (response: unknown): boolean =>
+  hasStringProperty(response, 'user_id') && hasStringProperty(response, 'email');
+
+const isDeleteUserAccountResponse = (response: unknown): boolean =>
+  hasMessageAndUserId(response) && hasNumberProperty(response, 'entries_deleted');
+
+const isRemoveAllUserArtworkResponse = (response: unknown): boolean =>
+  hasMessageAndUserId(response) && hasArrayProperty(response, 'failed_deletions');
+
+const isBulkArtworkUserResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) && hasStringProperty(response, 'user_id');
+
+const isArtworkSubmitterEmailResponse = (response: unknown): boolean =>
+  hasStringProperty(response, 'art_id') &&
+  hasStringProperty(response, 'user_id') &&
+  hasStringProperty(response, 'email');
+
+const isTakedownListResponse = (response: unknown): boolean =>
+  hasArrayProperty(response, 'requests');
+
+const isTakedownMutationResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) &&
+  hasStringProperty(response, 'tdr_sk') &&
+  hasStringProperty(response, 'status');
+
+const isMagazineUploadResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) &&
+  hasStringProperty(response, 'slug') &&
+  hasStringProperty(response, 'presigned_url');
+
+const isMagazineMutationResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) && hasStringProperty(response, 'slug');
+
+const isNewsMutationResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) &&
+  hasStringProperty(response, 'news_id') &&
+  hasStringProperty(response, 'news_sk');
+
+const isBulkNewsResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) &&
+  hasNumberProperty(response, 'count') &&
+  hasArrayProperty(response, 'news_ids');
+
+const isArtworkMutationResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) &&
+  hasStringProperty(response, 'art_id') &&
+  hasStringProperty(response, 'status');
+
+const isGroupMutationResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) &&
+  hasStringProperty(response, 'group_id') &&
+  hasStringProperty(response, 'status');
 
 export function banUser(
   userId: string,
@@ -38,6 +121,7 @@ export function banUser(
     {
       body: request,
       method: 'POST',
+      validate: isBanUserResponse,
     },
   );
 }
@@ -47,6 +131,7 @@ export function unbanUser(userId: string): Promise<BanUnbanUserResponse> {
     apiEndpoints.admin.unbanUser(userId),
     {
       method: 'POST',
+      validate: isBanUserResponse,
     },
   );
 }
@@ -57,7 +142,7 @@ export function alterUserRole(
 ): Promise<AlterUserRoleResponse> {
   return apiRequest<AlterUserRoleResponse, AlterUserRoleRequest>(
     apiEndpoints.admin.alterUserRole(userId),
-    { body: request, method: 'PATCH' },
+    { body: request, method: 'PATCH', validate: isRoleMutationResponse },
   );
 }
 
@@ -66,6 +151,7 @@ export function getUserCognitoInfo(
 ): Promise<GetUserCognitoInfoResponse> {
   return apiRequest<GetUserCognitoInfoResponse>(
     apiEndpoints.admin.getUserCognitoInfo(userId),
+    { validate: isCognitoInfoResponse },
   );
 }
 
@@ -74,6 +160,7 @@ export function getEmailByUserId(
 ): Promise<GetEmailByUserIdResponse> {
   return apiRequest<GetEmailByUserIdResponse>(
     apiEndpoints.admin.getEmailByUserId(userId),
+    { validate: isUserEmailResponse },
   );
 }
 
@@ -83,7 +170,7 @@ export function deleteUserAccount(
 ): Promise<DeleteUserAccountResponse> {
   return apiRequest<DeleteUserAccountResponse, DeleteUserAccountRequest>(
     apiEndpoints.admin.deleteUserAccount(userId),
-    { body: request, method: 'DELETE' },
+    { body: request, method: 'DELETE', validate: isDeleteUserAccountResponse },
   );
 }
 
@@ -93,7 +180,7 @@ export function removeAllUserArtwork(
 ): Promise<RemoveAllUserArtworkResponse> {
   return apiRequest<RemoveAllUserArtworkResponse, RemoveAllUserArtworkRequest>(
     apiEndpoints.admin.removeAllUserArtwork(userId),
-    { body: request, method: 'DELETE' },
+    { body: request, method: 'DELETE', validate: isRemoveAllUserArtworkResponse },
   );
 }
 
@@ -104,6 +191,7 @@ export function hideAllUserArtwork(
     apiEndpoints.admin.hideAllUserArtwork(userId),
     {
       method: 'POST',
+      validate: isBulkArtworkUserResponse,
     },
   );
 }
@@ -113,7 +201,7 @@ export function unhideAllUserArtwork(
 ): Promise<UnhideAllUserArtworkResponse> {
   return apiRequest<UnhideAllUserArtworkResponse>(
     apiEndpoints.admin.unhideAllUserArtwork(userId),
-    { method: 'POST' },
+    { method: 'POST', validate: isBulkArtworkUserResponse },
   );
 }
 
@@ -122,17 +210,36 @@ export function getArtworkSubmitterEmail(
 ): Promise<GetArtworkSubmitterEmailResponse> {
   return apiRequest<GetArtworkSubmitterEmailResponse>(
     apiEndpoints.admin.getArtworkSubmitterEmail(artId),
+    { validate: isArtworkSubmitterEmailResponse },
   );
 }
 
 export function listTakedownRequests(
   query?: PaginationQuery,
+  options: { bypassCache?: boolean; cacheTtlMs?: number } = {},
 ): Promise<ListTakedownRequestsResponse> {
   return apiRequest<ListTakedownRequestsResponse>(
     apiEndpoints.admin.getTakedownRequests,
     {
+      bypassCache: options.bypassCache,
+      cacheTtlMs: options.cacheTtlMs,
       query,
+      validate: isTakedownListResponse,
     },
+  );
+}
+
+export async function hasActiveTakedownRequests(
+  options: { bypassCache?: boolean; cacheTtlMs?: number } = {},
+): Promise<boolean> {
+  const response = await listTakedownRequests(
+    { active_only: true, limit: 1 },
+    options,
+  );
+
+  return response.requests.some(
+    (request) =>
+      request.status === 'requesting' || request.status === 'disputing',
   );
 }
 
@@ -142,7 +249,7 @@ export function reviewTakedownRequest(
 ): Promise<ReviewTakedownResponse> {
   return apiRequest<ReviewTakedownResponse, ReviewTakedownRequest>(
     apiEndpoints.admin.takedown(takedownSortKey),
-    { body: request, method: 'PATCH' },
+    { body: request, method: 'PATCH', validate: isTakedownMutationResponse },
   );
 }
 
@@ -152,7 +259,17 @@ export function publishMagazine(
   return apiRequest<
     InitiateMagazineUploadResponse,
     InitiateMagazineUploadRequest
-  >(apiEndpoints.admin.magazines, { body: request, method: 'POST' });
+  >(apiEndpoints.admin.magazines, {
+    body: request,
+    method: 'POST',
+    validate: isMagazineUploadResponse,
+  }).then((response) => {
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.public.magazines,
+    });
+    return response;
+  });
 }
 
 export function updateMagazineStatus(
@@ -161,8 +278,14 @@ export function updateMagazineStatus(
 ): Promise<UpdateMagazineStatusResponse> {
   return apiRequest<UpdateMagazineStatusResponse, UpdateMagazineStatusRequest>(
     apiEndpoints.admin.updateMagazineStatus(slug),
-    { body: request, method: 'PATCH' },
-  );
+    { body: request, method: 'PATCH', validate: isMagazineMutationResponse },
+  ).then((response) => {
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.public.magazines,
+    });
+    return response;
+  });
 }
 
 export function deleteMagazine(slug: string): Promise<DeleteMagazineResponse> {
@@ -170,8 +293,15 @@ export function deleteMagazine(slug: string): Promise<DeleteMagazineResponse> {
     apiEndpoints.admin.deleteMagazine(slug),
     {
       method: 'DELETE',
+      validate: isMagazineMutationResponse,
     },
-  );
+  ).then((response) => {
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.public.magazines,
+    });
+    return response;
+  });
 }
 
 export function createNews(
@@ -182,25 +312,94 @@ export function createNews(
     {
       body: request,
       method: 'POST',
+      validate: isNewsMutationResponse,
     },
-  );
+  ).then((response) => {
+    clearApiResponseCache({ method: 'GET', pathPrefix: apiEndpoints.public.news });
+    return response;
+  });
+}
+
+export function bulkCreateNews(
+  request: BulkCreateNewsRequest,
+): Promise<BulkCreateNewsResponse> {
+  return apiRequest<BulkCreateNewsResponse, BulkCreateNewsRequest>(
+    apiEndpoints.admin.newsBulk,
+    {
+      body: request,
+      method: 'POST',
+      validate: isBulkNewsResponse,
+    },
+  ).then((response) => {
+    clearApiResponseCache({ method: 'GET', pathPrefix: apiEndpoints.public.news });
+    return response;
+  });
 }
 
 export function updateNews(
-  newsId: string,
+  newsSk: string,
   request: UpdateNewsRequest,
 ): Promise<NewsMutationResponse> {
   return apiRequest<NewsMutationResponse, UpdateNewsRequest>(
-    apiEndpoints.admin.updateNews(newsId),
-    { body: request, method: 'PATCH' },
-  );
+    apiEndpoints.admin.updateNews(newsSk),
+    { body: request, method: 'PATCH', validate: isNewsMutationResponse },
+  ).then((response) => {
+    clearApiResponseCache({ method: 'GET', pathPrefix: apiEndpoints.public.news });
+    return response;
+  });
 }
 
-export function deleteNews(newsId: string): Promise<NewsMutationResponse> {
+export function deleteNews(newsSk: string): Promise<NewsMutationResponse> {
   return apiRequest<NewsMutationResponse>(
-    apiEndpoints.admin.deleteNews(newsId),
+    apiEndpoints.admin.deleteNews(newsSk),
     {
       method: 'DELETE',
+      validate: isNewsMutationResponse,
     },
-  );
+  ).then((response) => {
+    clearApiResponseCache({ method: 'GET', pathPrefix: apiEndpoints.public.news });
+    return response;
+  });
+}
+
+export function adminUpdateArtwork(
+  art_id: string,
+  request: UpdateArtworkRequest | Record<string, unknown>,
+): Promise<{ success: true; art_id: string; status: ArtworkStatus }> {
+  return apiRequest<
+    { success: true; art_id: string; status: ArtworkStatus },
+    UpdateArtworkRequest | Record<string, unknown>
+  >(apiEndpoints.admin.adminUpdateArtwork(art_id), {
+    body: request,
+    method: 'PATCH',
+    validate: isArtworkMutationResponse,
+  }).then((response) => {
+    clearApiResponseCache({ method: 'GET', pathPrefix: apiEndpoints.gallery.artworks });
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.public.artwork(art_id),
+    });
+    return response;
+  });
+}
+
+export function adminUpdateGroup(
+  groupId: string,
+  request: UpdateGroupRequest,
+): Promise<AdminUpdateGroupResponse> {
+  return apiRequest<AdminUpdateGroupResponse, UpdateGroupRequest>(
+    apiEndpoints.admin.adminUpdateGroup(groupId),
+    {
+      body: request,
+      method: 'PATCH',
+      validate: isGroupMutationResponse,
+    },
+  ).then((response) => {
+    clearApiResponseCache({ method: 'GET', pathPrefix: apiEndpoints.gallery.groups });
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.public.group(groupId),
+    });
+    return response;
+  });
 }

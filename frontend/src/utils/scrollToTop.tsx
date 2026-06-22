@@ -6,12 +6,19 @@ export function ScrollToTop() {
   const prevPath = useRef(pathname);
 
   useEffect(() => {
+    const blockedRoutes = ['/artwork-upload'];
+
+    const isBlockedRoute = blockedRoutes.some((route) =>
+      pathname.startsWith(route),
+    );
+
     const isOpeningSlideshow =
       prevPath.current === '/gallery' && pathname === '/gallery/slideshow';
+
     const isClosingSlideshow =
       prevPath.current === '/gallery/slideshow' && pathname === '/gallery';
 
-    if (!isOpeningSlideshow && !isClosingSlideshow) {
+    if (!isBlockedRoute && !isOpeningSlideshow && !isClosingSlideshow) {
       window.scrollTo(0, 0);
     }
 

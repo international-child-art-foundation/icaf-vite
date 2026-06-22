@@ -1,0 +1,1 @@
+export const ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60;

@@ -13,9 +13,9 @@
  *
  * No GSI needed — magazines are always listed as a full collection (few dozen items).
  *
- * Note: created_at is stored as a number (Unix seconds) even though the entity
+ * Note: ts is stored as a number (Unix seconds) even though the entity
  * CSV lists the type as 'string' — this is consistent with the index.csv convention
- * that all timestamps are Unix numbers.
+ * that all ts values are Unix numbers.
  *
  * Every field on this entity is required. Zips that contain no root-level image
  * file will be rejected by processZip rather than stored without a thumbnail_key.
@@ -30,7 +30,7 @@ export interface MagazineEntity {
     volume: string;         // e.g. 'Volume 26, Issue 01, Number 81'
     status: MagazineStatus;
     uploaded_by: string;    // user_id of the uploader
-    created_at: number;     // Unix timestamp (seconds) of upload initiation
+    ts: number;     // Unix ts (seconds) of upload initiation
     thumbnail_key: string;  // filename of the root-level image in the zip, e.g. 'cover.jpg'
                             // Set by processZip; record is in 'processing' status until this is written
     type: 'MAGAZINE';
@@ -60,7 +60,7 @@ export interface MagazineListItem {
     volume: string;
     status: MagazineStatus;
     thumbnail_url: string;  // Full CloudFront URL, e.g. https://magazines.icaf.org/<slug>/cover.jpg
-    created_at: number;
+    ts: number;
 }
 
 export interface ListMagazinesResponse {

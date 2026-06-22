@@ -1,8 +1,14 @@
-const PAYMENT_SERVICES = ['stripe'] as const;
+import { PAYMENT_PURPOSES, PaymentPurpose } from './types.js';
+
+const PAYMENT_SERVICES = ['stripe', 'every'] as const;
 export type PaymentService = typeof PAYMENT_SERVICES[number];
 
 export function isValidPaymentService(s: string): s is PaymentService {
     return PAYMENT_SERVICES.includes(s as PaymentService);
+}
+
+export function isValidPaymentPurpose(s: string): s is PaymentPurpose {
+    return PAYMENT_PURPOSES.includes(s as PaymentPurpose);
 }
 
 export function validatePaymentEntity(data: any): string[] {
@@ -18,6 +24,10 @@ export function validatePaymentEntity(data: any): string[] {
 
     if (!isValidPaymentService(data.payment_service)) {
         errors.push(`payment_service must be one of: ${PAYMENT_SERVICES.join(', ')}`);
+    }
+
+    if (!isValidPaymentPurpose(data.purpose)) {
+        errors.push(`purpose must be one of: ${PAYMENT_PURPOSES.join(', ')}`);
     }
 
     if (!Number.isInteger(data.amount_cents) || data.amount_cents < 0) {

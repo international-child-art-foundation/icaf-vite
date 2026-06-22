@@ -11,12 +11,44 @@ import type {
   VoteArtworkResponse,
 } from '@icaf/shared';
 
-import { apiRequest } from './client';
+import {
+  apiRequest,
+  hasApiSuccess,
+  hasArrayProperty,
+  hasNumberProperty,
+  hasStringProperty,
+  isApiObject,
+} from './client';
 import { apiEndpoints } from './endpoints';
 import type { PaginationQuery } from './types';
 
+const isUserProfileResponse = (response: unknown): boolean =>
+  isApiObject(response) &&
+  hasStringProperty(response, 'user_id') &&
+  hasStringProperty(response, 'email') &&
+  hasStringProperty(response, 'role');
+
+const isPaymentsResponse = (response: unknown): boolean =>
+  hasArrayProperty(response, 'payments');
+
+const isArtworkListResponse = (response: unknown): boolean =>
+  hasArrayProperty(response, 'artworks');
+
+const isSubmitArtworkResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) && hasStringProperty(response, 'art_id');
+
+const isArtworkMutationResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) && hasStringProperty(response, 'art_id');
+
+const isDeleteAllArtworksResponse = (response: unknown): boolean =>
+  hasApiSuccess(response) &&
+  hasNumberProperty(response, 'artworks_deleted') &&
+  hasNumberProperty(response, 'total_deleted');
+
 export function getUserProfile(): Promise<UserProfileResponse> {
-  return apiRequest<UserProfileResponse>(apiEndpoints.user.profile);
+  return apiRequest<UserProfileResponse>(apiEndpoints.user.profile, {
+    validate: isUserProfileResponse,
+  });
 }
 
 export function deleteAccount(request: DeleteAccountRequest): Promise<void> {
@@ -29,6 +61,7 @@ export function deleteAccount(request: DeleteAccountRequest): Promise<void> {
 export function listDonations(query?: PaginationQuery): Promise<ListUserPaymentsResponse> {
   return apiRequest<ListUserPaymentsResponse>(apiEndpoints.user.payments, {
     query,
+    validate: isPaymentsResponse,
   });
 }
 
@@ -37,6 +70,7 @@ export function listArtworkSubmissions(
 ): Promise<ListArtworkSubmissionsResponse> {
   return apiRequest<ListArtworkSubmissionsResponse>(apiEndpoints.user.artworks, {
     query,
+    validate: isArtworkListResponse,
   });
 }
 
@@ -44,6 +78,7 @@ export function submitArtwork(request: SubmitArtworkRequest): Promise<SubmitArtw
   return apiRequest<SubmitArtworkResponse, SubmitArtworkRequest>(apiEndpoints.user.artworks, {
     body: request,
     method: 'POST',
+    validate: isSubmitArtworkResponse,
   });
 }
 
@@ -53,7 +88,7 @@ export function updateArtwork(
 ): Promise<UpdateArtworkResponse> {
   return apiRequest<UpdateArtworkResponse, UpdateArtworkRequest>(
     apiEndpoints.user.artwork(artId),
-    { body: request, method: 'PATCH' },
+    { body: request, method: 'PATCH', validate: isArtworkMutationResponse },
   );
 }
 
@@ -62,11 +97,15 @@ export function deleteArtwork(artId: string): Promise<void> {
 }
 
 export function deleteAllArtworks(): Promise<DeleteAllArtworksResponse> {
-  return apiRequest<DeleteAllArtworksResponse>(apiEndpoints.user.artworks, { method: 'DELETE' });
+  return apiRequest<DeleteAllArtworksResponse>(apiEndpoints.user.artworks, {
+    method: 'DELETE',
+    validate: isDeleteAllArtworksResponse,
+  });
 }
 
 export function voteArtwork(artId: string): Promise<VoteArtworkResponse> {
   return apiRequest<VoteArtworkResponse>(apiEndpoints.user.artworkKudos(artId), {
     method: 'POST',
+    validate: isArtworkMutationResponse,
   });
 }

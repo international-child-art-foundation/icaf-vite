@@ -1,0 +1,157 @@
+import { QueryCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { randomUUID } from "crypto";
+import { CommonErrors, normalizeEmail } from "@icaf/shared";
+import type { ApiGatewayResponse, UserEntity } from "@icaf/shared";
+import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
+import { EntityType, GSI } from "../../dynamo/ddbSchemaConsts";
+import { emailGsiSk, emailPk } from "../../dynamo/emailGsi";
+import { sendArtworkSubmissionEmail } from "../../utils/emails/artworkSubmission";
+import { ensureArtworkUnsubscribeToken, shouldSuppressArtworkEmail } from "../../utils/emails/unsubscribe";
+import { ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS } from "../../utils/authActionToken";
+
+
+export type VirtualUserResult =
+  | { ok: true; user: UserEntity; sentSignupEmail: boolean }
+  | { ok: false; response: ApiGatewayResponse };
+
+async function getUserByEmail(email: string): Promise<UserEntity | undefined> {
+  const result = await dynamodb.send(
+    new QueryCommand({
+      TableName: TABLE_NAME,
+      IndexName: GSI.Email,
+      KeyConditionExpression: "EMAIL_PK = :pk AND EMAIL_SK = :sk",
+      ExpressionAttributeValues: {
+        ":pk": emailPk(email),
+        ":sk": emailGsiSk(EntityType.User),
+      },
+      Limit: 1,
+    }),
+  );
+
+  return result.Items?.[0] as UserEntity | undefined;
+}
+
+export async function getOrCreateVirtualUser(
+  email: string,
+  nowSeconds: number,
+  firstName: string,
+  lastName: string,
+  sendSignupEmail = true,
+): Promise<VirtualUserResult> {
+  const normalizedEmail = normalizeEmail(email);
+  let user = await getUserByEmail(normalizedEmail);
+
+  if (!user) {
+    const userId = randomUUID();
+    user = {
+      PK: `USER#${userId}`,
+      SK: "PROFILE",
+      user_id: userId,
+      email: normalizedEmail,
+      f_name: firstName.trim(),
+      l_name: lastName.trim(),
+      is_virtual: true,
+      ts: nowSeconds,
+      banned: false,
+      has_magazine_subscription: false,
+      has_newsletter_subscription: false,
+      artwork_emails_off: false,
+      type: "USER",
+      EMAIL_PK: emailPk(normalizedEmail),
+      EMAIL_SK: emailGsiSk(EntityType.User),
+    } as unknown as UserEntity;
+
+    await dynamodb.send(new PutCommand({ TableName: TABLE_NAME, Item: user }));
+  }
+
+  if (user.banned) {
+    return { ok: false, response: CommonErrors.forbidden("This account is banned") };
+  }
+
+  if (!user.is_virtual) {
+    return {
+      ok: false,
+      response: CommonErrors.conflict(
+        "This account already exists. Please log in to submit artwork.",
+      ),
+    };
+  }
+
+  if (!user.f_name || !user.l_name) {
+    const fName = firstName.trim();
+    const lName = lastName.trim();
+    await dynamodb.send(
+      new UpdateCommand({
+        TableName: TABLE_NAME,
+        Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
+        UpdateExpression:
+          "SET f_name = if_not_exists(f_name, :fName), l_name = if_not_exists(l_name, :lName)",
+        ExpressionAttributeValues: {
+          ":fName": fName,
+          ":lName": lName,
+        },
+      }),
+    );
+    user.f_name ??= fName;
+    user.l_name ??= lName;
+  }
+
+  const sentSignupEmail = sendSignupEmail
+    ? await sendVirtualUserSignupEmail(user, nowSeconds)
+    : false;
+  return { ok: true, user, sentSignupEmail };
+}
+
+export async function sendVirtualUserSignupEmail(
+  user: UserEntity,
+  nowSeconds: number,
+): Promise<boolean> {
+  if (shouldSuppressArtworkEmail(user) || user.emailed_signup_at) return false;
+
+  const authActionToken = randomUUID();
+  const authActionTokenExp = nowSeconds + ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS;
+
+  await dynamodb.send(
+    new UpdateCommand({
+      TableName: TABLE_NAME,
+      Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
+      UpdateExpression:
+        "SET auth_action_token = :token, auth_action_token_exp = :exp",
+      ExpressionAttributeValues: {
+        ":token": authActionToken,
+        ":exp": authActionTokenExp,
+      },
+    }),
+  );
+
+  try {
+    const unsubscribeToken = await ensureArtworkUnsubscribeToken(user);
+
+    await sendArtworkSubmissionEmail({
+      toEmail: user.email,
+      userId: user.user_id,
+      authActionToken,
+      unsubscribeToken,
+    });
+  } catch (error) {
+    console.error("Artwork submission signup email failed:", error);
+    return false;
+  }
+
+  try {
+    await dynamodb.send(
+      new UpdateCommand({
+        TableName: TABLE_NAME,
+        Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
+        UpdateExpression: "SET emailed_signup_at = :emailSignupAt",
+        ExpressionAttributeValues: {
+          ":emailSignupAt": nowSeconds,
+        },
+      }),
+    );
+  } catch (error) {
+    console.error("Failed to mark artwork signup email as sent:", error);
+  }
+
+  return true;
+}

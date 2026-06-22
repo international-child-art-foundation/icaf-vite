@@ -24,6 +24,8 @@ export interface AuthenticatedUserSummary {
     user_id: string;
     email: string;
     role: Role;
+    f_name?: string;
+    l_name?: string;
 }
 
 export interface LoginResponse extends MessageResponse, AuthenticatedUserSummary {}
@@ -38,11 +40,13 @@ export interface ForgotPasswordRequest {
     email: string;
 }
 
-export type ForgotPasswordResponse = DeliveryMessageResponse | MessageResponse;
+export type ForgotPasswordResponse =
+    | (DeliveryMessageResponse & { account_status: "email_sent" })
+    | (MessageResponse & { account_status: "virtual" });
 
 export interface ConfirmForgotPasswordRequest {
-    email: string;
-    code: string;
+    user_id: string;
+    auth_action_token: string;
     new_password: string;
 }
 
@@ -60,13 +64,31 @@ export interface RequestCreateAndVerifyRequest {
 
 export type RequestCreateAndVerifyResponse = MessageResponse;
 
-export type CreateAndVerifyResponse = MessageResponse;
+export type CreateAndVerifyLinkStatus =
+    | "valid"
+    | "expired"
+    | "invalid"
+    | "already_verified";
+
+export interface CreateAndVerifyStatusResponse {
+    status: CreateAndVerifyLinkStatus;
+    expires_at?: number;
+}
+
+export interface RecoverCreateAndVerifyRequest {
+    user_id: string;
+    auth_action_token: string;
+}
+
+export type RecoverCreateAndVerifyResponse = DeliveryMessageResponse;
+
+export type CreateAndVerifyResponse = MessageResponse & {
+    already_verified?: boolean;
+};
 
 export interface DefaultRegistrationResponse extends DeliveryMessageResponse {
     user_id?: string;
 }
-
-export type ConfirmDefaultRegistrationResponse = MessageResponse;
 
 export interface ChangePasswordRequest {
     old_password: string;

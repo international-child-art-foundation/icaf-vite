@@ -1,3 +1,4 @@
+import { isValidUUID } from '../../utils/string.js';
 import { CreateNewsRequest, UpdateNewsRequest, NewsKind } from './types.js';
 
 const MAX_SOURCE_LEN = 200;
@@ -34,10 +35,8 @@ function validateNewsFields(data: Partial<CreateNewsRequest>): string[] {
         }
     }
 
-    if (data.timestamp !== undefined) {
-        if (!Number.isInteger(data.timestamp) || data.timestamp < 0) {
-            errors.push('timestamp must be a non-negative integer (Unix seconds)');
-        }
+    if (data.ts !== undefined && (!Number.isInteger(data.ts) || data.ts < 0)) {
+        errors.push('ts must be a non-negative integer (Unix seconds)');
     }
 
     if (data.kind !== undefined && !VALID_KINDS.includes(data.kind)) {
@@ -77,10 +76,6 @@ export function validateCreateNewsRequest(data: CreateNewsRequest): string[] {
     if (!data.source || typeof data.source !== 'string' || !data.source.trim()) {
         errors.push('source is required');
     }
-    if (data.timestamp === undefined || data.timestamp === null) {
-        errors.push('timestamp is required');
-    }
-
     return [...errors, ...validateNewsFields(data)];
 }
 
@@ -89,4 +84,29 @@ export function validateUpdateNewsRequest(data: UpdateNewsRequest): string[] {
         return ['at least one field must be provided'];
     }
     return validateNewsFields(data);
+}
+
+export function isValidNewsId(newsId: string): boolean {
+    return isValidUUID(newsId);
+}
+
+export function newsSk(ts: number, newsId: string): string {
+    return `TS#${ts}#ID#${newsId}`;
+}
+
+export function isValidNewsSk(newsSkValue: string): boolean {
+    const match = /^TS#(\d+)#ID#(.+)$/.exec(newsSkValue);
+    if (!match) return false;
+
+    return isValidNewsId(match[2]);
+}
+
+export function validateNewsId(newsId: string): string[] {
+    const errors: string[] = [];
+    if (typeof newsId !== 'string' || !newsId.trim()) {
+        errors.push('news_id path parameter is required');
+    } else if (!isValidNewsId(newsId)) {
+        errors.push('news_id is invalid');
+    }
+    return errors;
 }

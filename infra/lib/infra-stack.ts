@@ -1,4 +1,4 @@
-import { Duration, Stack, StackProps, RemovalPolicy } from "aws-cdk-lib";
+import { CfnOutput, Duration, Stack, StackProps, RemovalPolicy } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
@@ -14,47 +14,42 @@ import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as snsSubscriptions from "aws-cdk-lib/aws-sns-subscriptions";
+import * as ses from "aws-cdk-lib/aws-ses";
 import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
 import * as cloudwatchActions from "aws-cdk-lib/aws-cloudwatch-actions";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as cloudfrontOrigins from "aws-cdk-lib/aws-cloudfront-origins";
+import type { DeploymentConfig } from "./deployment-config.js";
 
 // Spend threshold (USD) that triggers emergencyShutdown
-const BILLING_ALARM_THRESHOLD_USD = 50;
+const BILLING_ALARM_THRESHOLD_USD = 20;
+
+interface InfraStackProps extends StackProps {
+  deployment: DeploymentConfig;
+}
 
 export class InfraStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props: InfraStackProps) {
     super(scope, id, props);
 
-    /**
-     * Stateful resources are retained by default so normal deploys/destroys do
-     * not delete user data, uploaded files, or auth state.
-     *
-     * To intentionally delete absolutely everything, run:
-     *
-     *   pnpm cdk destroy \
-     *     -c destroyEverything=true \
-     *     -c confirmDestroyEverything=YES_DELETE_STATEFUL_DATA
-     *
-     * Without both context values, DynamoDB, Cognito, and the S3 buckets are retained.
-     */
-    const destroyEverything =
-      this.node.tryGetContext("destroyEverything") === "true" &&
-      this.node.tryGetContext("confirmDestroyEverything") === "YES_DELETE_STATEFUL_DATA";
+    const { deployment } = props;
+    const resourceName = (name: string) => `${deployment.resourcePrefix}-${name}`;
+    const requiredEnvironmentValue = (name: string): string => {
+      const value = process.env[name];
+      if (!value) {
+        throw new Error(`${name} must be configured for the deployment environment.`);
+      }
+      return value;
+    };
 
-    const statefulRemovalPolicy = destroyEverything
-      ? RemovalPolicy.DESTROY
-      : RemovalPolicy.RETAIN;
-
-    if (destroyEverything) {
-      console.warn(
-        "DESTROY EVERYTHING ENABLED: DynamoDB, Cognito, and S3 stateful resources will be deleted.",
-      );
-    }
+    // Stateful resources survive stack deletion in every environment. Cleanup
+    // is intentionally manual so an accidental stack deletion cannot erase
+    // user records, authentication state, or uploaded files.
+    const statefulRemovalPolicy = RemovalPolicy.RETAIN;
 
     // ─── 1. DynamoDB Table — Single Table Design ──────────────────────────────
     const icafTable = new dynamodb.Table(this, "IcafTable", {
-      tableName: "icaf-main-table",
+      tableName: resourceName("main-table"),
       partitionKey: { name: "PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "SK", type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
@@ -133,14 +128,14 @@ export class InfraStack extends Stack {
 
     // Artwork bucket — private, CloudFront via existing setup
     const artworkBucket = new s3.Bucket(this, "IcafArtworkBucket", {
-      bucketName: "icaf-artwork-bucket",
+      bucketName: resourceName("artwork-bucket"),
       removalPolicy: statefulRemovalPolicy,
-      autoDeleteObjects: destroyEverything,
+      autoDeleteObjects: false,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       cors: [
         {
           allowedMethods: [s3.HttpMethods.PUT],
-          allowedOrigins: ["https://revise.icaf.org", "http://localhost:5173"],
+          allowedOrigins: deployment.allowedOrigins,
           allowedHeaders: ["*"],
           maxAge: 3000,
         },
@@ -152,15 +147,15 @@ export class InfraStack extends Stack {
     //   staging/<slug>.zip  — temporary upload landing zone (deleted after processing)
     //   <slug>/             — extracted magazine HTML, assets, and thumbnail
     const magazinesBucket = new s3.Bucket(this, "IcafMagazinesBucket", {
-      bucketName: "icaf-magazines-bucket",
+      bucketName: resourceName("magazines-bucket"),
       removalPolicy: statefulRemovalPolicy,
-      autoDeleteObjects: destroyEverything,
+      autoDeleteObjects: false,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       cors: [
         {
           // Volunteers upload zips via presigned PUT URLs from the browser
           allowedMethods: [s3.HttpMethods.PUT],
-          allowedOrigins: ["https://revise.icaf.org", "http://localhost:5173"],
+          allowedOrigins: deployment.allowedOrigins,
           allowedHeaders: ["*"],
           maxAge: 3000,
         },
@@ -180,7 +175,7 @@ export class InfraStack extends Stack {
     //      distribution domain name output by this stack
 
     const indexRewriteFn = new cloudfront.Function(this, "MagazineIndexRewriteFn", {
-      functionName: "icaf-magazine-index-rewrite",
+      functionName: resourceName("magazine-index-rewrite"),
       code: cloudfront.FunctionCode.fromInline(`
         function handler(event) {
           var uri = event.request.uri;
@@ -219,16 +214,70 @@ export class InfraStack extends Stack {
       // domainNames: ['magazines.icaf.org'],
     });
 
+    // Artwork image variants served from the private artwork bucket.
+    // Expected paths are /{art_id}/thumb.avif, /{art_id}/medium.avif, and
+    // /{art_id}/original.avif.
+    const artworkVariantGuardFn = new cloudfront.Function(this, "ArtworkVariantGuardFn", {
+      functionName: resourceName("artwork-variant-guard"),
+      code: cloudfront.FunctionCode.fromInline(`
+        function handler(event) {
+          var request = event.request;
+          var uri = request.uri;
+          if (/^\\/[^/]+\\/(thumb|medium|original)\\.avif$/.test(uri)) {
+            return request;
+          }
+          return {
+            statusCode: 403,
+            statusDescription: 'Forbidden'
+          };
+        }
+      `),
+    });
+
+    const artworkOac = new cloudfront.S3OriginAccessControl(this, "ArtworkOAC", {
+      description: "OAC for ICAF Artwork bucket",
+    });
+
+    const artworkDistribution = new cloudfront.Distribution(this, "ArtworkDistribution", {
+      comment: "ICAF Artwork image variants",
+      defaultBehavior: {
+        origin: cloudfrontOrigins.S3BucketOrigin.withOriginAccessControl(
+          artworkBucket,
+          { originAccessControl: artworkOac },
+        ),
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+        allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+        cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD_OPTIONS,
+        functionAssociations: [
+          {
+            function: artworkVariantGuardFn,
+            eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+          },
+        ],
+      },
+    });
+
+    new CfnOutput(this, "ArtworkDistributionDomainName", {
+      value: artworkDistribution.distributionDomainName,
+      description: "CloudFront domain for artwork AVIF variants",
+    });
+
+    new CfnOutput(this, "MagazinesDistributionDomainName", {
+      value: magazinesDistribution.distributionDomainName,
+      description: "CloudFront domain for magazines",
+    });
+
     // ─── 4. Cognito User Pool ─────────────────────────────────────────────────
     const userPool = new cognito.UserPool(this, "IcafUserPool", {
-      userPoolName: "icaf-user-pool",
+      userPoolName: resourceName("user-pool"),
       selfSignUpEnabled: true,
       signInAliases: { email: true },
       autoVerify: { email: true },
       userVerification: {
         emailSubject: "Verify your ICAF account",
-        emailBody: "Your ICAF verification code is {####}",
-        emailStyle: cognito.VerificationEmailStyle.CODE,
+        emailBody: "Verify your ICAF account by clicking this link: {##Verify Email##}",
+        emailStyle: cognito.VerificationEmailStyle.LINK,
       },
       standardAttributes: {
         email: { required: true, mutable: true },
@@ -252,37 +301,28 @@ export class InfraStack extends Stack {
 
     const userPoolClient = new cognito.UserPoolClient(this, "IcafUserPoolClient", {
       userPool,
-      userPoolClientName: "icaf-web-client",
+      userPoolClientName: resourceName("web-client"),
       generateSecret: false,
       authFlows: {
         adminUserPassword: true,
         userPassword: true,
         userSrp: true,
       },
+      accessTokenValidity: Duration.hours(1),
+      idTokenValidity: Duration.hours(1),
+      refreshTokenValidity: Duration.days(30),
     });
 
     // ─── 5. SQS — Background Queues ──────────────────────────────────────────
 
-    const cleanupDLQ = new sqs.Queue(this, "IcafCleanupDLQ", {
-      queueName: "icaf-cleanup-dlq",
-      retentionPeriod: Duration.days(14),
-    });
-
-    const cleanupQueue = new sqs.Queue(this, "IcafCleanupQueue", {
-      queueName: "icaf-cleanup-queue",
-      visibilityTimeout: Duration.seconds(300),
-      retentionPeriod: Duration.days(14),
-      deadLetterQueue: { queue: cleanupDLQ, maxReceiveCount: 3 },
-    });
-
     // processImage queue — fed by S3 ObjectCreated on artwork uploads
     const processImageDLQ = new sqs.Queue(this, "IcafProcessImageDLQ", {
-      queueName: "icaf-process-image-dlq",
+      queueName: resourceName("process-image-dlq"),
       retentionPeriod: Duration.days(14),
     });
 
     const processImageQueue = new sqs.Queue(this, "IcafProcessImageQueue", {
-      queueName: "icaf-process-image-queue",
+      queueName: resourceName("process-image-queue"),
       // Must be ≥ 6× Lambda timeout (AWS recommendation). Lambda timeout is 120s, so 720s.
       visibilityTimeout: Duration.seconds(720),
       retentionPeriod: Duration.days(7),
@@ -303,12 +343,12 @@ export class InfraStack extends Stack {
 
     // processZip queue — fed by S3 ObjectCreated on staging/<slug>.zip uploads
     const processZipDLQ = new sqs.Queue(this, "IcafProcessZipDLQ", {
-      queueName: "icaf-process-zip-dlq",
+      queueName: resourceName("process-zip-dlq"),
       retentionPeriod: Duration.days(14),
     });
 
     const processZipQueue = new sqs.Queue(this, "IcafProcessZipQueue", {
-      queueName: "icaf-process-zip-queue",
+      queueName: resourceName("process-zip-queue"),
       // Must be ≥ Lambda timeout — large zips may take a while to unpack + re-upload
       visibilityTimeout: Duration.seconds(600),
       retentionPeriod: Duration.days(7),
@@ -328,7 +368,6 @@ export class InfraStack extends Stack {
     );
 
     // ─── 6. Sharp Lambda Layer ────────────────────────────────────────────────
-    // TODO: build sharp layer before each deploy in CI.
     const sharpLayer = new lambda.LayerVersion(this, "SharpLayer", {
       code: lambda.Code.fromAsset("layers/sharp"),
       compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
@@ -337,17 +376,58 @@ export class InfraStack extends Stack {
     });
 
     // ─── 7. Lambda Functions ──────────────────────────────────────────────────
-    // TODO: Update APP_URL, SES_FROM_EMAIL, and MAGAZINES_CLOUDFRONT_DOMAIN before deployment
+    const SES_FROM_EMAIL = "ICAF <no-reply@icaf.org>";
+    const TAKEDOWN_NOTIFICATION_EMAILS = [
+      "childart@icaf.org",
+      "noah.zaranka@icaf.org",
+    ];
+    const sesConfigurationSet = new ses.CfnConfigurationSet(this, "IcafSesConfigurationSet", {
+      name: resourceName("transactional"),
+    });
+
+    const sesFeedbackTopic = new sns.Topic(this, "SesFeedbackTopic", {
+      topicName: resourceName("ses-feedback"),
+      displayName: "ICAF SES Bounce and Complaint Feedback",
+    });
+
+    sesFeedbackTopic.addToResourcePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        principals: [new iam.ServicePrincipal("ses.amazonaws.com")],
+        actions: ["sns:Publish"],
+        resources: [sesFeedbackTopic.topicArn],
+      }),
+    );
+
+    new ses.CfnConfigurationSetEventDestination(this, "IcafSesFeedbackEventDestination", {
+      configurationSetName: sesConfigurationSet.ref,
+      eventDestination: {
+        enabled: true,
+        matchingEventTypes: ["bounce", "complaint"],
+        snsDestination: {
+          topicArn: sesFeedbackTopic.topicArn,
+        },
+      },
+    });
+
     const commonEnv = {
       TABLE_NAME: icafTable.tableName,
       USER_POOL_ID: userPool.userPoolId,
       USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
       S3_BUCKET_NAME: artworkBucket.bucketName,
       MAGAZINES_BUCKET_NAME: magazinesBucket.bucketName,
-      CLEANUP_QUEUE_URL: cleanupQueue.queueUrl,
-      APP_URL: "https://revise.icaf.org",
-      SES_FROM_EMAIL: "",             // TODO: set to verified SES sender address before email features go live
-      MAGAZINES_CLOUDFRONT_DOMAIN: "", // TODO: set after first deploy (CloudFront domain not known until then)
+      APP_URL: deployment.appUrl,
+      ALLOWED_ORIGINS: deployment.allowedOrigins.join(","),
+      SES_FROM_EMAIL,
+      SES_CONFIGURATION_SET: sesConfigurationSet.ref,
+      TAKEDOWN_NOTIFICATION_EMAILS: JSON.stringify(TAKEDOWN_NOTIFICATION_EMAILS),
+      ARTWORK_CLOUDFRONT_DISTRIBUTION_ID: artworkDistribution.distributionId,
+      MAGAZINES_CLOUDFRONT_DOMAIN: magazinesDistribution.distributionDomainName,
+      STRIPE_WEBHOOK_SECRET: requiredEnvironmentValue("STRIPE_WEBHOOK_SECRET"),
+      EVERY_WEBHOOK_ENABLED: String(deployment.everyWebhookEnabled),
+      EVERY_WEBHOOK_SECRET: deployment.everyWebhookEnabled
+        ? requiredEnvironmentValue("EVERY_WEBHOOK_SECRET")
+        : "",
     };
 
     // Default log retention for all NodejsFunctions in this stack.
@@ -419,6 +499,21 @@ export class InfraStack extends Stack {
       }),
     );
 
+    const processSesFeedbackFn = new NodejsFunction(this, "ProcessSesFeedbackFn", {
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(30),
+      memorySize: 256,
+      environment: {
+        TABLE_NAME: icafTable.tableName,
+      },
+      entry: src("processSesFeedback.ts"),
+      logGroup: lambdaLogGroup("ProcessSesFeedbackFn"),
+    });
+
+    sesFeedbackTopic.addSubscription(
+      new snsSubscriptions.LambdaSubscription(processSesFeedbackFn),
+    );
+
     // EmergencyShutdown: throttles API Gateway to 0 req/s
     const emergencyShutdownFn = new NodejsFunction(this, "EmergencyShutdownFn", {
       runtime: Runtime.NODEJS_20_X,
@@ -434,9 +529,10 @@ export class InfraStack extends Stack {
     // DynamoDB — HTTP handlers share one router Lambda.
     icafTable.grantReadWriteData(apiFn);
 
-    // processImage and processZip also need DDB access
+    // processImage, processZip, and SES feedback processing also need DDB access
     icafTable.grantReadWriteData(processImageFn);
     icafTable.grantReadWriteData(processZipFn);
+    icafTable.grantReadWriteData(processSesFeedbackFn);
 
     // S3 artwork bucket — presigned PUT or delete
     artworkBucket.grantReadWrite(apiFn);
@@ -458,9 +554,16 @@ export class InfraStack extends Stack {
       resources: ["*"],
     }));
 
+    apiFn.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ["cloudfront:CreateInvalidation"],
+      resources: [
+        `arn:aws:cloudfront::${this.account}:distribution/${artworkDistribution.distributionId}`,
+      ],
+    }));
+
     // Cognito admin operations
     const cognitoAdminActions = [
-      "cognito-idp:AdminInitiateAuth",
       "cognito-idp:AdminGetUser",
       "cognito-idp:AdminUpdateUserAttributes",
       "cognito-idp:AdminDeleteUser",
@@ -473,13 +576,8 @@ export class InfraStack extends Stack {
 
     const cognitoClientActions = [
       "cognito-idp:InitiateAuth",
-      "cognito-idp:ForgotPassword",
-      "cognito-idp:ConfirmForgotPassword",
       "cognito-idp:ChangePassword",
-      "cognito-idp:ResendConfirmationCode",
       "cognito-idp:GetUser",
-      "cognito-idp:SignUp",
-      "cognito-idp:ConfirmSignUp",
     ];
 
     apiFn.addToRolePolicy(new iam.PolicyStatement({
@@ -507,11 +605,11 @@ export class InfraStack extends Stack {
 
     // ─── 10. API Gateway ───────────────────────────────────────────────────────
     const api = new apigw.RestApi(this, "IcafApi", {
-      restApiName: "icaf-api",
+      restApiName: resourceName("api"),
       endpointConfiguration: { types: [apigw.EndpointType.REGIONAL] },
       deployOptions: { stageName: "v1" },
       defaultCorsPreflightOptions: {
-        allowOrigins: ["https://revise.icaf.org", "http://localhost:5173"],
+        allowOrigins: deployment.allowedOrigins,
         allowMethods: apigw.Cors.ALL_METHODS,
         allowHeaders: ["Content-Type", "Authorization"],
         allowCredentials: true,
@@ -536,12 +634,17 @@ export class InfraStack extends Stack {
       defaultIntegration: apiIntegration,
     });
 
+    new CfnOutput(this, "ApiGatewayOrigin", {
+      value: api.url,
+      description: `API Gateway stage origin for the ${deployment.environment} proxy`,
+    });
+
     // ─── 11. Emergency Shutdown — Billing Alarm ───────────────────────────────
     // NOTE: AWS billing metrics are only published to us-east-1.
     // If this stack is deployed to a different region, create the alarm
     // in a separate us-east-1 stack and point it at a cross-region SNS topic.
     const shutdownTopic = new sns.Topic(this, "EmergencyShutdownTopic", {
-      topicName: "icaf-emergency-shutdown",
+      topicName: resourceName("emergency-shutdown"),
       displayName: "ICAF Emergency Shutdown",
     });
 
@@ -550,7 +653,7 @@ export class InfraStack extends Stack {
     );
 
     const billingAlarm = new cloudwatch.Alarm(this, "BillingAlarm", {
-      alarmName: "icaf-billing-alarm",
+      alarmName: resourceName("billing-alarm"),
       alarmDescription: `Triggers emergency API shutdown when estimated charges exceed $${BILLING_ALARM_THRESHOLD_USD}`,
       metric: new cloudwatch.Metric({
         namespace: "AWS/Billing",

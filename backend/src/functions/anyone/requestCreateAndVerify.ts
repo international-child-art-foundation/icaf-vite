@@ -5,6 +5,7 @@ import {
   HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
+  normalizeEmail,
   UserEntity,
 } from "@icaf/shared";
 import { GSI, EntityType } from "../../dynamo/ddbSchemaConsts";
@@ -12,8 +13,8 @@ import { emailPk, emailGsiSk } from "../../dynamo/emailGsi";
 import { sendCreateAndVerifyEmail } from "../../utils/emails/createAndVerify";
 import { parseJsonBody } from "../../utils/request";
 import { randomUUID } from "crypto";
+import { ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS } from "../../utils/authActionToken";
 
-const VERIFY_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -22,7 +23,7 @@ export const handler = async (
     const parsedBody = parseJsonBody<{ email?: string }>(event);
     if (!parsedBody.ok) return parsedBody.response;
     const body = parsedBody.value;
-    const email = body.email?.trim();
+    const email = body.email ? normalizeEmail(body.email) : undefined;
 
     if (!email) {
       return CommonErrors.badRequest("email is required");
@@ -55,23 +56,26 @@ export const handler = async (
 
     const user = emailResult.Items[0] as UserEntity;
 
-    if (!user.is_virtual || user.emailed_signup_at) {
+    if (!user.is_virtual) {
+      return okResponse;
+    }
+    if (user.email_blocked === true) {
       return okResponse;
     }
 
     const nowSeconds = Math.floor(Date.now() / 1000);
-    const verifyToken = randomUUID();
-    const verifyTokenExpiration = nowSeconds + VERIFY_TOKEN_TTL_SECONDS;
+    const authActionToken = randomUUID();
+    const authActionTokenExp = nowSeconds + ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS;
 
     await dynamodb.send(
       new UpdateCommand({
         TableName: TABLE_NAME,
         Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
         UpdateExpression:
-          "SET verify_token = :token, verify_token_expiration = :exp, emailed_signup_at = :emailSignupAt",
+          "SET auth_action_token = :token, auth_action_token_exp = :exp, emailed_signup_at = :emailSignupAt",
         ExpressionAttributeValues: {
-          ":token": verifyToken,
-          ":exp": verifyTokenExpiration,
+          ":token": authActionToken,
+          ":exp": authActionTokenExp,
           ":emailSignupAt": nowSeconds,
         },
       }),
@@ -80,7 +84,7 @@ export const handler = async (
     await sendCreateAndVerifyEmail({
       toEmail: user.email,
       userId: user.user_id,
-      verifyToken,
+      authActionToken,
     });
 
     return okResponse;

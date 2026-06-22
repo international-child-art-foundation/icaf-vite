@@ -1,23 +1,27 @@
 /**
  * Payment Types
  *
- * Types for PAYMENT entities. Payments are processed externally (Stripe) and
+ * Types for PAYMENT entities. Payments are processed externally (Stripe/Every) and
  * recorded here via webhook. The backend does not initiate charges.
  *
  * DynamoDB PAYMENT entity key structure:
  *   PK = USER#<user_id>   (USER#ANON for anonymous/unlinked donations)
- *   SK = PAYMENT#<payment_id>   (payment_id = Stripe charge/payment_intent ID)
+ *   SK = PAYMENT#<payment_id>   (payment_id = processor event/payment ID)
  */
+
+export const PAYMENT_PURPOSES = ['contest-entry', 'donation', 'childart-magazine', 'other'] as const;
+export type PaymentPurpose = typeof PAYMENT_PURPOSES[number];
 
 // Full PAYMENT entity as stored in DynamoDB
 export interface PaymentEntity {
     user_id: string;            // USER#<user_id> or USER#ANON
     payment_id: string;         // Stripe ID (payment_intent or charge ID)
-    payment_service: 'stripe';
+    payment_service: 'stripe' | 'every';
+    purpose: PaymentPurpose;
     email?: string;             // stored to allow future account linking
     amount_cents: number;
     currency: string;           // e.g. 'USD', 'EUR'
-    timestamp: number;          // Unix timestamp (seconds)
+    ts: number;          // Unix ts (seconds)
     type: 'PAYMENT';
 }
 
@@ -25,11 +29,12 @@ export interface PaymentEntity {
 export interface PaymentListItem {
     user_id: string;
     payment_id: string;
-    payment_service: 'stripe';
+    payment_service: 'stripe' | 'every';
+    purpose: PaymentPurpose;
     email?: string;
     amount_cents: number;
     currency: string;
-    timestamp: number;
+    ts: number;
 }
 
 export interface ListPaymentsResponse {
@@ -43,9 +48,10 @@ export interface ListPaymentsResponse {
 // User-facing view of their own payments
 export interface UserPaymentItem {
     payment_id: string;
+    purpose: PaymentPurpose;
     amount_cents: number;
     currency: string;
-    timestamp: number;
+    ts: number;
 }
 
 export interface ListUserPaymentsResponse {

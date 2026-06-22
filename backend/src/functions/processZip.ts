@@ -28,6 +28,7 @@ import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { Readable } from "stream";
 import { unzipSync } from "fflate";
 import type { SQSEvent, SQSRecord } from "aws-lambda";
+import { isValidMagazineSlug } from "@icaf/shared";
 
 const s3 = new S3Client({ region: process.env.AWS_REGION });
 const dynamodb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: process.env.AWS_REGION }));
@@ -36,6 +37,9 @@ const MAGAZINES_BUCKET = process.env.MAGAZINES_BUCKET_NAME!;
 const TABLE_NAME = process.env.TABLE_NAME!;
 
 const IMAGE_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp", "avif", "bmp", "tiff", "svg"]);
+const MAX_ZIP_FILE_COUNT = 5_000;
+const MAX_UNCOMPRESSED_BYTES = 500 * 1024 * 1024;
+const MAX_ZIP_ENTRY_PATH_LEN = 1024;
 
 const MIME_MAP: Record<string, string> = {
     html: "text/html",
@@ -79,6 +83,24 @@ function getExtension(filename: string): string {
 
 function isImageFile(filename: string): boolean {
     return IMAGE_EXTENSIONS.has(getExtension(filename));
+}
+
+function validateZipEntryPath(path: string): string | null {
+    if (!path) return "path is empty";
+    if (path.length > MAX_ZIP_ENTRY_PATH_LEN) return "path is too long";
+    if (path.includes("\0")) return "path contains a null byte";
+    if (path.includes("\\")) return "backslash paths are not allowed";
+    if (path.startsWith("/")) return "absolute paths are not allowed";
+
+    const segments = path.split("/");
+    if (segments.some((segment) => segment === "")) {
+        return "empty path segments are not allowed";
+    }
+    if (segments.some((segment) => segment === "." || segment === "..")) {
+        return "relative path segments are not allowed";
+    }
+
+    return null;
 }
 
 async function streamToBuffer(stream: Readable): Promise<Buffer> {
@@ -130,6 +152,10 @@ async function processRecord(record: SQSRecord): Promise<void> {
         return;
     }
     const slug = match[1];
+    if (!isValidMagazineSlug(slug)) {
+        console.warn(`Unexpected key "${srcKey}" — invalid magazine slug. Skipping.`);
+        return;
+    }
 
     console.log(`Processing magazine zip: slug=${slug}, bucket=${bucket}`);
 
@@ -150,9 +176,34 @@ async function processRecord(record: SQSRecord): Promise<void> {
     if (fileEntries.length === 0) {
         throw new Error(`Zip for slug "${slug}" contained no files after extraction.`);
     }
+    if (fileEntries.length > MAX_ZIP_FILE_COUNT) {
+        throw new Error(
+            `Zip for slug "${slug}" contains ${fileEntries.length} files; maximum is ${MAX_ZIP_FILE_COUNT}.`,
+        );
+    }
+
+    let uncompressedBytes = 0;
+    for (const [path, data] of fileEntries) {
+        const pathError = validateZipEntryPath(path);
+        if (pathError) {
+            throw new Error(`Unsafe zip entry path "${path}": ${pathError}.`);
+        }
+        uncompressedBytes += data.length;
+    }
+    if (uncompressedBytes > MAX_UNCOMPRESSED_BYTES) {
+        throw new Error(
+            `Zip for slug "${slug}" is too large after extraction; maximum is ${MAX_UNCOMPRESSED_BYTES} bytes.`,
+        );
+    }
 
     // Strip common top-level prefix
     const pathMap = stripCommonPrefix(fileEntries.map(([p]) => p));
+    for (const strippedPath of pathMap.values()) {
+        const pathError = validateZipEntryPath(strippedPath);
+        if (pathError) {
+            throw new Error(`Unsafe stripped zip entry path "${strippedPath}": ${pathError}.`);
+        }
+    }
 
     // ── 3. Find thumbnail (first root-level image file) ───────────────────
     let thumbnailKey: string | undefined;

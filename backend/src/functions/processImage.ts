@@ -23,6 +23,7 @@ import { S3Client, GetObjectCommand, PutObjectCommand, DeleteObjectCommand } fro
 import { Readable } from "stream";
 import sharp from "sharp";
 import type { SQSEvent, SQSRecord } from "aws-lambda";
+import { S3_MAX_FILE_SIZE_BYTES } from "@icaf/shared";
 
 const s3 = new S3Client({ region: process.env.AWS_REGION });
 
@@ -65,6 +66,15 @@ async function processRecord(record: SQSRecord): Promise<void> {
 
   // ── Download source ────────────────────────────────────────────────────
   const getRes = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: srcKey }));
+  if (
+    typeof getRes.ContentLength !== "number" ||
+    getRes.ContentLength < 1 ||
+    getRes.ContentLength > S3_MAX_FILE_SIZE_BYTES
+  ) {
+    await s3.send(new DeleteObjectCommand({ Bucket: bucket, Key: srcKey }));
+    console.warn(`Deleted invalid-size upload ${srcKey} (${getRes.ContentLength ?? "unknown"} bytes)`);
+    return;
+  }
   if (!(getRes.Body instanceof Readable)) {
     throw new Error(`S3 body for key "${srcKey}" is not a readable stream`);
   }

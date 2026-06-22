@@ -5,7 +5,7 @@ export const byOwnerPk = (userId: string) => `OWNER#${userId}` as const;
 
 export const byOwnerGsiSk = (
   type: EntityType,
-  timestampMs: number,
+  tsMs: number,
   id: string,
-) => `TYPE#${type}#TS#${timestampMs}#ID#${id}` as const;
+) => `TYPE#${type}#TS#${tsMs}#ID#${id}` as const;
 

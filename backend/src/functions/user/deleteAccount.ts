@@ -1,26 +1,104 @@
 import { AdminDeleteUserCommand, InitiateAuthCommand } from "@aws-sdk/client-cognito-identity-provider";
-import { QueryCommand, DeleteCommand, UpdateCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
-import { ListObjectsV2Command, DeleteObjectsCommand } from "@aws-sdk/client-s3";
-import {
-  cognitoClient,
-  dynamodb,
-  s3Client,
-  TABLE_NAME,
-  USER_POOL_ID,
-  USER_POOL_CLIENT_ID,
-  S3_BUCKET_NAME,
-} from "../../config/aws-clients";
+import { DeleteCommand, QueryCommand, ScanCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import {
   ApiGatewayEvent,
-  HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
   DeleteAccountRequest,
 } from "@icaf/shared";
+import {
+  cognitoClient,
+  dynamodb,
+  TABLE_NAME,
+  USER_POOL_CLIENT_ID,
+  USER_POOL_ID,
+} from "../../config/aws-clients";
+import { getCurrentUser } from "../../utils/auth";
+import { parseJsonBody } from "../../utils/request";
 import { GSI } from "../../dynamo/ddbSchemaConsts";
 import { byOwnerPk } from "../../dynamo/ownerGsi";
-import { parseJsonBody } from "../../utils/request";
-import { getCurrentUser } from "../../utils/auth";
+import { deleteArtworkObjects, invalidateArtworkPaths } from "../shared/artworkObjects";
+
+async function deleteOwnedContent(userId: string): Promise<void> {
+  let lastKey: Record<string, unknown> | undefined;
+  const deletedArtIds: string[] = [];
+
+  do {
+    const result = await dynamodb.send(
+      new QueryCommand({
+        TableName: TABLE_NAME,
+        IndexName: GSI.ByOwner,
+        KeyConditionExpression: "OWN_PK = :pk",
+        ExpressionAttributeValues: { ":pk": byOwnerPk(userId) },
+        ...(lastKey && { ExclusiveStartKey: lastKey }),
+      }),
+    );
+
+    for (const item of result.Items ?? []) {
+      if (item.type === "ART" && typeof item.art_id === "string") {
+        await deleteArtworkObjects(item.art_id);
+        await dynamodb.send(new DeleteCommand({
+          TableName: TABLE_NAME,
+          Key: { PK: `ART#${item.art_id}`, SK: "-" },
+        }));
+        deletedArtIds.push(item.art_id);
+      } else if (item.type === "GROUP" && typeof item.group_id === "string") {
+        await dynamodb.send(new DeleteCommand({
+          TableName: TABLE_NAME,
+          Key: { PK: `GROUP#${item.group_id}`, SK: "-" },
+        }));
+      }
+    }
+    lastKey = result.LastEvaluatedKey as Record<string, unknown> | undefined;
+  } while (lastKey);
+
+  try {
+    await invalidateArtworkPaths(deletedArtIds);
+  } catch (error) {
+    console.error("Account deletion CloudFront invalidation failed:", error);
+  }
+}
+
+async function deleteUserItemsExceptProfile(userId: string): Promise<void> {
+  let lastKey: Record<string, unknown> | undefined;
+  do {
+    const result = await dynamodb.send(new QueryCommand({
+      TableName: TABLE_NAME,
+      KeyConditionExpression: "PK = :pk",
+      ExpressionAttributeValues: { ":pk": `USER#${userId}` },
+      ...(lastKey && { ExclusiveStartKey: lastKey }),
+    }));
+    for (const item of result.Items ?? []) {
+      if (item.SK === "PROFILE") continue;
+      await dynamodb.send(new DeleteCommand({
+        TableName: TABLE_NAME,
+        Key: { PK: item.PK, SK: item.SK },
+      }));
+    }
+    lastKey = result.LastEvaluatedKey as Record<string, unknown> | undefined;
+  } while (lastKey);
+}
+
+async function anonymizeTakedownRequests(email: string): Promise<void> {
+  let lastKey: Record<string, unknown> | undefined;
+  do {
+    const result = await dynamodb.send(new ScanCommand({
+      TableName: TABLE_NAME,
+      FilterExpression: "PK = :tdrPk AND requester_email = :email",
+      ExpressionAttributeValues: { ":tdrPk": "TDR", ":email": email },
+      ...(lastKey && { ExclusiveStartKey: lastKey }),
+    }));
+    for (const item of result.Items ?? []) {
+      await dynamodb.send(new UpdateCommand({
+        TableName: TABLE_NAME,
+        Key: { PK: item.PK, SK: item.SK },
+        UpdateExpression: "SET requester_email = :removed, requester_name = :removed",
+        ExpressionAttributeValues: { ":removed": "[removed]" },
+      }));
+    }
+    lastKey = result.LastEvaluatedKey as Record<string, unknown> | undefined;
+  } while (lastKey);
+}
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -29,7 +107,6 @@ export const handler = async (
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
     const user = currentUser.user;
-    const userId = user.user_id;
 
     const parsedBody = parseJsonBody<DeleteAccountRequest>(event);
     if (!parsedBody.ok) return parsedBody.response;
@@ -38,7 +115,6 @@ export const handler = async (
       return CommonErrors.badRequest("password is required");
     }
 
-    // ── Verify password via Cognito ────────────────────────────────────────
     try {
       await cognitoClient.send(
         new InitiateAuthCommand({
@@ -50,146 +126,62 @@ export const handler = async (
           },
         }),
       );
-    } catch (err: unknown) {
-      const cognitoErr = err as { name?: string };
-      if (
-        cognitoErr.name === "NotAuthorizedException" ||
-        cognitoErr.name === "UserNotFoundException"
-      ) {
+    } catch (error: unknown) {
+      const name = (error as { name?: string }).name;
+      if (name === "NotAuthorizedException" || name === "UserNotFoundException") {
         return CommonErrors.unauthorized();
       }
-      throw err;
+      throw error;
     }
 
-    // ── Step 1: Find all ART and GROUP entities owned by user ─────────────
-    const artIds: string[] = [];
-    const ownedKeys: { pk: string; sk: string }[] = [];
-    let ownerLastKey: Record<string, unknown> | undefined;
+    const requestedAt = Math.floor(Date.now() / 1000);
 
-    do {
-      const ownerResult = await dynamodb.send(
-        new QueryCommand({
-          TableName: TABLE_NAME,
-          IndexName: GSI.ByOwner,
-          KeyConditionExpression: "OWN_PK = :pk",
-          ExpressionAttributeValues: { ":pk": byOwnerPk(userId) },
-          ...(ownerLastKey && { ExclusiveStartKey: ownerLastKey }),
-        }),
-      );
-
-      for (const item of ownerResult.Items ?? []) {
-        const type = item.type as string;
-        if (type === "ART") {
-          const artId = item.art_id as string;
-          artIds.push(artId);
-          ownedKeys.push({ pk: `ART#${artId}`, sk: "-" });
-        } else if (type === "GROUP") {
-          ownedKeys.push({ pk: `GROUP#${item.group_id}`, sk: "-" });
-        }
-      }
-
-      ownerLastKey = ownerResult.LastEvaluatedKey as Record<string, unknown> | undefined;
-    } while (ownerLastKey);
-
-    // ── Step 2: Delete ART and GROUP entities from DynamoDB ───────────────
-    for (const { pk, sk } of ownedKeys) {
-      await dynamodb.send(
-        new DeleteCommand({ TableName: TABLE_NAME, Key: { PK: pk, SK: sk } }),
-      );
-    }
-
-    // ── Step 3: Delete S3 objects for each artwork (<art_id>/ prefix) ─────
-    for (const artId of artIds) {
-      try {
-        const listed = await s3Client.send(
-          new ListObjectsV2Command({ Bucket: S3_BUCKET_NAME, Prefix: `${artId}/` }),
-        );
-        const objects = listed.Contents ?? [];
-        if (objects.length > 0) {
-          await s3Client.send(
-            new DeleteObjectsCommand({
-              Bucket: S3_BUCKET_NAME,
-              Delete: { Objects: objects.map((o) => ({ Key: o.Key! })) },
-            }),
-          );
-        }
-      } catch (s3Err) {
-        // Non-fatal: log and continue — DDB record is already gone
-        console.error(`S3 cleanup failed for art ${artId}:`, s3Err);
-      }
-    }
-
-    // ── Step 4: Delete Cognito entry ──────────────────────────────────────
-    await cognitoClient.send(
-      new AdminDeleteUserCommand({
-        UserPoolId: USER_POOL_ID,
-        Username: user.email,
+    await dynamodb.send(
+      new UpdateCommand({
+        TableName: TABLE_NAME,
+        Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
+        UpdateExpression:
+          "SET #role = :deleting, deletion_requested_at = if_not_exists(deletion_requested_at, :requestedAt)",
+        ConditionExpression:
+          "attribute_exists(PK) AND (attribute_not_exists(#role) OR #role <> :deleting)",
+        ExpressionAttributeNames: {
+          "#role": "role",
+        },
+        ExpressionAttributeValues: {
+          ":deleting": "deleting",
+          ":requestedAt": requestedAt,
+        },
       }),
     );
 
-    // ── Step 5: Delete all USER#<userId> items (PROFILE, PAYMENT#*, AA#*) ─
-    let userLastKey: Record<string, unknown> | undefined;
-    const userKeysToDelete: { PK: string; SK: string }[] = [];
+    await deleteOwnedContent(user.user_id);
+    await deleteUserItemsExceptProfile(user.user_id);
+    await anonymizeTakedownRequests(user.email);
 
-    do {
-      const userItemsResult = await dynamodb.send(
-        new QueryCommand({
-          TableName: TABLE_NAME,
-          KeyConditionExpression: "PK = :pk",
-          ExpressionAttributeValues: { ":pk": `USER#${userId}` },
-          ...(userLastKey && { ExclusiveStartKey: userLastKey }),
-        }),
-      );
-
-      for (const item of userItemsResult.Items ?? []) {
-        userKeysToDelete.push({ PK: item.PK as string, SK: item.SK as string });
-      }
-
-      userLastKey = userItemsResult.LastEvaluatedKey as Record<string, unknown> | undefined;
-    } while (userLastKey);
-
-    for (const key of userKeysToDelete) {
-      await dynamodb.send(new DeleteCommand({ TableName: TABLE_NAME, Key: key }));
+    try {
+      await cognitoClient.send(new AdminDeleteUserCommand({
+        UserPoolId: USER_POOL_ID,
+        Username: user.email,
+      }));
+    } catch (error: unknown) {
+      if ((error as { name?: string }).name !== "UserNotFoundException") throw error;
     }
 
-    // ── Step 6: Anonymize TDR entities with matching requester_email ───────
-    let tdrLastKey: Record<string, unknown> | undefined;
-
-    do {
-      const scanResult = await dynamodb.send(
-        new ScanCommand({
-          TableName: TABLE_NAME,
-          FilterExpression: "PK = :tdrPk AND requester_email = :email",
-          ExpressionAttributeValues: {
-            ":tdrPk": "TDR",
-            ":email": user.email,
-          },
-          ...(tdrLastKey && { ExclusiveStartKey: tdrLastKey }),
-        }),
-      );
-
-      for (const item of scanResult.Items ?? []) {
-        await dynamodb.send(
-          new UpdateCommand({
-            TableName: TABLE_NAME,
-            Key: { PK: item.PK, SK: item.SK },
-            UpdateExpression:
-              "SET requester_email = :anon, requester_name = :anon",
-            ExpressionAttributeValues: { ":anon": "[removed]" },
-          }),
-        );
-      }
-
-      tdrLastKey = scanResult.LastEvaluatedKey as Record<string, unknown> | undefined;
-    } while (tdrLastKey);
+    await dynamodb.send(new DeleteCommand({
+      TableName: TABLE_NAME,
+      Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
+      ConditionExpression: "attribute_exists(PK)",
+    }));
 
     return {
-      statusCode: HTTP_STATUS.NO_CONTENT,
+      statusCode: 204,
       body: "",
       headers: COMMON_HEADERS,
     };
   } catch (error) {
-    console.error("Error deleting account:", error);
-    return CommonErrors.internalServerError();
+    console.error("Error requesting account deletion:", error);
+    return CommonErrors.internalServerError(
+      "Account deletion could not be completed. Please contact us for assistance.",
+    );
   }
 };

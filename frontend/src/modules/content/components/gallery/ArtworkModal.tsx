@@ -1,37 +1,54 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { gsap } from 'gsap';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
-import { formatArtistName } from '@/utils/galleryProcessing';
+import { getArtistDisplayNameWithAge } from '@/utils/galleryProcessing';
+import { GalleryArtworkInfo } from './GalleryArtworkInfo';
+import { KudosControls } from './KudosControls';
 import { SocialShare } from './SocialShare';
+import { Button } from '@/shared/components/ui/button';
+import { useAnimationPerformanceGate } from '@/utils/useAnimationPerformanceGate';
 
 type ArtworkModalProps = {
   id: string;
   artworks: TResolvedArtwork[];
+  artworksLoading: boolean;
   navigationList: TResolvedArtwork[];
   onNavigate: (id: string) => void;
   modalState: boolean;
   isHorizontal: boolean;
   closeModal: () => void;
   getShareUrl: () => string;
+  onEnterExhibition: (id: string) => void;
+  onKudosApplied?: (artId: string, amount: number) => void;
 };
 
 const ArtworkModal: React.FC<ArtworkModalProps> = ({
   id,
   artworks,
+  artworksLoading,
   navigationList,
   onNavigate,
   modalState,
   isHorizontal,
   closeModal,
   getShareUrl,
+  onEnterExhibition,
+  onKudosApplied,
 }) => {
-  const [artworkData, setArtworkData] = useState<TResolvedArtwork | undefined>(
-    undefined,
-  );
-  const gridContainerRef = useRef<HTMLDivElement>(null);
+  const [unavailableGrace, setUnavailableGrace] = useState({
+    id: '',
+    elapsed: false,
+  });
+  const scrollContentRef = useRef<HTMLDivElement>(null);
+  const modalShellRef = useRef<HTMLDivElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null);
   const isFirstOpenRef = useRef(true);
+  const activeArtworkIdRef = useRef(id);
+  const [imageReady, setImageReady] = useState(false);
+  const animationsEnabled = useAnimationPerformanceGate();
+  activeArtworkIdRef.current = id;
 
   const currentNavIdx = navigationList.findIndex((a) => a.id === id);
   const prevId =
@@ -40,6 +57,25 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
     currentNavIdx < navigationList.length - 1
       ? navigationList[currentNavIdx + 1].id
       : null;
+
+  const requestedArtworkExists = artworks.some((artwork) => artwork.id === id);
+  const canShowUnavailable =
+    !artworksLoading &&
+    !requestedArtworkExists &&
+    unavailableGrace.id === id &&
+    unavailableGrace.elapsed;
+  const artworkData = artworks.find((artwork) => artwork.id === id);
+
+  useEffect(() => {
+    if (!modalState) return;
+
+    setUnavailableGrace({ id, elapsed: false });
+    const timeout = window.setTimeout(() => {
+      setUnavailableGrace({ id, elapsed: true });
+    }, 1000);
+
+    return () => window.clearTimeout(timeout);
+  }, [id, modalState]);
 
   useEffect(() => {
     if (!modalState) return;
@@ -51,54 +87,94 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
     return () => window.removeEventListener('keydown', handler);
   }, [modalState, prevId, nextId, onNavigate]);
 
-  useEffect(() => {
-    const data = artworks.find((a) => a.id === id);
-
+  useLayoutEffect(() => {
     if (!modalState) {
-      setArtworkData(data);
       isFirstOpenRef.current = true;
       return;
     }
 
-    if (isFirstOpenRef.current) {
-      isFirstOpenRef.current = false;
-      setArtworkData(data);
-      gsap
-        .timeline()
-        .set(modalContentRef.current, { opacity: 0 })
-        .to(gridContainerRef.current, {
-          gridTemplateRows: '1fr',
-          duration: 0.4,
-          ease: 'power4.out',
-        })
-        .to(
-          modalContentRef.current,
-          { opacity: 1, duration: 0.2, ease: 'power4.out' },
-          '-=0.1',
-        );
+    setImageReady(false);
+
+    const shell = modalShellRef.current;
+    const content = modalContentRef.current;
+    if (!shell || !content) return;
+
+    gsap.killTweensOf([shell, content]);
+    if (!animationsEnabled) {
+      gsap.set(shell, { clearProps: 'height' });
+      gsap.set(content, { opacity: 1 });
       return;
     }
 
-    const content = modalContentRef.current;
-    gsap.set(content, { opacity: 0 });
-    setArtworkData(data);
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() => {
-        gsap.to(content, { opacity: 1, duration: 0.2, ease: 'power2.out' });
-      }),
+    const maxHeightRatio = isHorizontal ? 0.95 : 0.9;
+    const placeholderHeight = Math.min(
+      window.innerHeight * maxHeightRatio,
+      Math.max(360, window.innerHeight * 0.7),
     );
-  }, [id, modalState, artworks]);
+
+    gsap.set(content, { opacity: artworkData ? 0 : 1 });
+    if (isFirstOpenRef.current) {
+      gsap.set(shell, { height: 0 });
+      isFirstOpenRef.current = false;
+    }
+    gsap.to(shell, {
+      height: placeholderHeight,
+      duration: 1,
+      ease: 'power3.out',
+    });
+
+    return () => gsap.killTweensOf([shell, content]);
+  }, [
+    id,
+    modalState,
+    isHorizontal,
+    artworkData?.displayUrl,
+    animationsEnabled,
+  ]);
+
+  const handleArtworkLoad = (loadedArtworkId: string) => {
+    if (loadedArtworkId !== activeArtworkIdRef.current) return;
+
+    const shell = modalShellRef.current;
+    const content = modalContentRef.current;
+    if (!shell || !content) return;
+    setImageReady(true);
+
+    if (!animationsEnabled) return;
+
+    requestAnimationFrame(() => {
+      if (loadedArtworkId !== activeArtworkIdRef.current) return;
+
+      const maxHeight = window.innerHeight * (isHorizontal ? 0.95 : 0.9);
+      const currentHeight = shell.getBoundingClientRect().height;
+
+      // Measure outside the placeholder constraint so load timing does not
+      // influence the artwork's final modal height.
+      gsap.set(shell, { height: 'auto' });
+      const targetHeight = Math.min(maxHeight, shell.scrollHeight);
+      gsap.set(shell, { height: currentHeight });
+
+      // Retargeting the shell interrupts and speeds up the placeholder tween.
+      gsap.killTweensOf(shell);
+      gsap.to(shell, {
+        height: targetHeight,
+        duration: 0.4,
+        ease: 'power3.out',
+        onComplete: () => gsap.set(shell, { height: 'auto' }),
+      });
+      gsap.to(content, { opacity: 1, duration: 0.2, ease: 'power2.out' });
+    });
+  };
 
   if (!modalState) return null;
 
   const artistText = artworkData
-    ? formatArtistName(artworkData.artists ?? [], artworkData.lastInitial)
+    ? getArtistDisplayNameWithAge(artworkData)
     : '';
-  const locationText = [artworkData?.region, artworkData?.country]
-    .filter(Boolean)
-    .join(', ');
 
-  function renderError() {
+  function renderUnavailable() {
+    if (!canShowUnavailable) return null;
+
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4">
         <p className="font-montserrat text-xl font-semibold">
@@ -116,52 +192,44 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
   }
 
   function renderDefault() {
-    if (!artworkData) return renderError();
+    if (artworkData?.id !== id) return renderUnavailable();
     return (
-      <div className="mx-auto grid max-h-full grid-cols-2 gap-5 overflow-hidden px-6 md:gap-10">
-        <div className="flex flex-col overflow-auto">
-          {artistText && <p className="mt-5 text-xl font-bold">{artistText}</p>}
-          {artworkData.title && (
-            <p className="mt-0.5 text-lg font-medium italic text-gray-700">
-              &ldquo;{artworkData.title}&rdquo;
-            </p>
-          )}
-          <div className="mt-1 space-y-0.5 text-gray-500">
-            {(artworkData.age != null || locationText) && (
-              <p>
-                {[
-                  artworkData.age != null ? `${artworkData.age}` : null,
-                  locationText,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </p>
-            )}
-            {artworkData.event && <p>{artworkData.event}</p>}
-          </div>
-          {artworkData.description && (
-            <p className="mt-3 text-base text-gray-600">
-              {artworkData.description}
-            </p>
-          )}
+      <div className="mx-auto grid max-h-full min-w-0 grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-5 overflow-hidden px-6 md:gap-10">
+        <div
+          ref={scrollContentRef}
+          className="flex min-h-0 min-w-0 flex-col overflow-y-auto overflow-x-hidden"
+        >
+          <GalleryArtworkInfo
+            artwork={artworkData}
+            variant="modal"
+            descriptionMode="plain"
+            className="mt-5"
+          />
           <div className="mt-auto pt-6">
             <p className="text-xl font-semibold">Share this post</p>
             <SocialShare shareUrl={getShareUrl()} />
-            <a
-              href={artworkData.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-primary text-text-inverse mt-4 block w-full rounded p-4 text-center text-base"
-            >
-              View full image
-            </a>
+            <div className="mt-4 grid grid-cols-1 grid-rows-2 items-stretch gap-2 xl:grid-cols-2 xl:grid-rows-1">
+              <Button
+                type="button"
+                onClick={() => onEnterExhibition(artworkData.id)}
+                className="text-text-inverse flex items-center justify-center rounded"
+              >
+                Spotlight View
+              </Button>
+              <KudosControls
+                artwork={artworkData}
+                className="h-full"
+                onKudosApplied={onKudosApplied}
+              />
+            </div>
           </div>
         </div>
-        <div className="relative flex min-h-[400px] flex-shrink items-center justify-center overflow-hidden rounded-xl">
+        <div className="relative flex min-h-[400px] flex-shrink select-none items-center justify-center overflow-hidden rounded-xl">
           <img
             src={artworkData.displayUrl}
             alt={artworkData.alt || artistText || 'Artwork'}
-            className="relative z-20 max-h-full max-w-full object-contain"
+            onLoad={() => handleArtworkLoad(artworkData.id)}
+            className={`relative z-20 max-h-full max-w-full object-contain ${imageReady ? '' : 'invisible'}`}
           />
           <img
             src={artworkData.displayUrl}
@@ -175,14 +243,18 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
   }
 
   function renderDefaultMobile() {
-    if (!artworkData) return renderError();
+    if (artworkData?.id !== id) return renderUnavailable();
     return (
-      <div className="grid max-h-full gap-y-2 overflow-auto">
-        <div className="relative flex min-h-[300px] flex-shrink items-center justify-center overflow-hidden rounded-xl">
+      <div
+        ref={scrollContentRef}
+        className="grid max-h-full min-w-0 gap-y-2 overflow-y-auto overflow-x-hidden"
+      >
+        <div className="relative flex min-h-[300px] flex-shrink select-none items-center justify-center overflow-hidden rounded-xl">
           <img
             src={artworkData.displayUrl}
             alt={artworkData.alt || artistText || 'Artwork'}
-            className="relative z-20 max-h-[420px] max-w-full object-contain"
+            onLoad={() => handleArtworkLoad(artworkData.id)}
+            className={`relative z-20 max-h-[420px] max-w-full object-contain ${imageReady ? '' : 'invisible'}`}
           />
           <img
             src={artworkData.displayUrl}
@@ -191,41 +263,30 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
             className="absolute inset-0 z-10 h-full w-full rounded-xl object-cover opacity-50 blur-3xl"
           />
         </div>
-        {artistText && <p className="mt-5 text-xl font-bold">{artistText}</p>}
-        {artworkData.title && (
-          <p className="mt-0.5 text-lg font-medium italic text-gray-700">
-            &ldquo;{artworkData.title}&rdquo;
-          </p>
-        )}
-        <div className="mt-1 space-y-0.5 text-gray-500">
-          {(artworkData.age != null || locationText) && (
-            <p>
-              {[
-                artworkData.age != null ? `${artworkData.age}` : null,
-                locationText,
-              ]
-                .filter(Boolean)
-                .join(' · ')}
-            </p>
-          )}
-          {artworkData.event && <p>{artworkData.event}</p>}
-        </div>
-        {artworkData.description && (
-          <p className="mt-3 text-sm text-gray-600">
-            {artworkData.description}
-          </p>
-        )}
+        <GalleryArtworkInfo
+          artwork={artworkData}
+          variant="modal"
+          descriptionMode="plain"
+          className="mt-5"
+        />
         <div className="mt-4">
           <p className="text-xl font-semibold">Share this post</p>
           <SocialShare shareUrl={getShareUrl()} />
-          <a
-            href={artworkData.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-primary text-text-inverse mt-4 block w-full rounded p-4 text-center text-base"
-          >
-            View full image
-          </a>
+          <div className="mt-4 grid grid-cols-2 items-stretch gap-2">
+            <Button
+              type="button"
+              onClick={() => onEnterExhibition(artworkData.id)}
+              size="sm"
+            >
+              Spotlight View
+            </Button>
+            <KudosControls
+              artwork={artworkData}
+              className="h-full"
+              compact
+              onKudosApplied={onKudosApplied}
+            />
+          </div>
         </div>
       </div>
     );
@@ -236,11 +297,11 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
   };
 
   const navBtnClass =
-    'hidden lg:flex items-center justify-center w-12 h-12 flex-shrink-0 rounded-full bg-black/70 hover:bg-black/30 text-white transition-colors mx-4';
+    'hidden lg:flex items-center active:scale-[95%] justify-center w-12 h-12 flex-shrink-0 rounded-full bg-black/70 hover:bg-black/30 text-white transition-colors mx-4';
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.5)]"
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-x-hidden bg-[rgba(0,0,0,0.5)]"
       onClick={handleBackdropClick}
     >
       <button
@@ -256,7 +317,12 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
         <ChevronLeft size={24} />
       </button>
       <div
-        className={`relative flex flex-col overflow-hidden rounded-3xl bg-white ${isHorizontal ? 'w-[88%] max-w-[1100px] lg:w-[80%]' : 'w-[92%] max-w-[700px]'} max-h-[93%]`}
+        ref={modalShellRef}
+        className={`relative flex min-w-0 flex-col overflow-hidden rounded-3xl bg-white ${
+          isHorizontal
+            ? 'max-h-[95dvh] w-[calc(100%-1rem)] max-w-[1500px] lg:w-[calc(100%-10rem)]'
+            : 'max-h-[90dvh] w-[calc(100%-1rem)] max-w-[800px]'
+        }`}
       >
         <div className="flex flex-shrink-0 justify-end px-4 pt-3">
           <span
@@ -266,14 +332,10 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
             &times;
           </span>
         </div>
-        <div
-          ref={gridContainerRef}
-          className="no-scrollbar grid overflow-scroll"
-          style={{ gridTemplateRows: '0.2fr' }}
-        >
+        <div className="no-scrollbar grid min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div
             ref={modalContentRef}
-            className={`min-h-[300px] ${isHorizontal ? 'px-16 pb-16 [@media(max-height:600px)]:px-8 [@media(max-height:600px)]:pb-8' : 'px-8 pb-8'}`}
+            className={`min-h-[300px] min-w-0 ${isHorizontal ? 'px-8 pb-8 xl:px-16 xl:pb-16 [@media(max-height:600px)]:px-8 [@media(max-height:600px)]:pb-8' : 'px-8 pb-8'}`}
           >
             {isHorizontal ? renderDefault() : renderDefaultMobile()}
           </div>
@@ -291,7 +353,8 @@ const ArtworkModal: React.FC<ArtworkModalProps> = ({
       >
         <ChevronRight size={24} />
       </button>
-    </div>
+    </div>,
+    document.body,
   );
 };
 

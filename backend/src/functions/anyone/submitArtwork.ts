@@ -1,7 +1,5 @@
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { QueryCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { dynamodb, s3Client, TABLE_NAME, S3_BUCKET_NAME } from "../../config/aws-clients";
+import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
 import {
   ApiGatewayEvent,
   HTTP_STATUS,
@@ -10,6 +8,7 @@ import {
   GuestSubmitArtworkRequest,
   SubmitArtworkResponse,
   UserEntity,
+  normalizeEmail,
   validateGuestSubmitArtworkRequest,
 } from "@icaf/shared";
 import { GSI, EntityType } from "../../dynamo/ddbSchemaConsts";
@@ -18,21 +17,13 @@ import { byOwnerPk, byOwnerGsiSk } from "../../dynamo/ownerGsi";
 import { reviewPk, reviewGsiSk } from "../../dynamo/reviewGsi";
 import { Status } from "../../dynamo/shared";
 import { sendArtworkSubmissionEmail } from "../../utils/emails/artworkSubmission";
+import { ensureArtworkUnsubscribeToken, shouldSuppressArtworkEmail } from "../../utils/emails/unsubscribe";
 import { parseJsonBody } from "../../utils/request";
 import { ensureThemeEntity } from "../shared/themeUtils";
+import { hasUploadedArtworkImage } from "../shared/artworkUpload";
+import { ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS } from "../../utils/authActionToken";
 import { randomUUID } from "crypto";
 
-const PRESIGNED_URL_EXPIRES_SECONDS = 15 * 60; // 15 minutes
-const VERIFY_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 days
-
-const CONTENT_TYPES: Record<string, string> = {
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  png: "image/png",
-  gif: "image/gif",
-  webp: "image/webp",
-  avif: "image/avif",
-};
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -42,15 +33,8 @@ export const handler = async (
     if (!parsedBody.ok) return parsedBody.response;
     const body = parsedBody.value;
 
-    // ── Validate identity ──────────────────────────────────────────────────
-    const hasEmail = typeof body.email === "string" && body.email.trim().length > 0;
-    const hasUserId = typeof body.user_id === "string" && body.user_id.trim().length > 0;
-
-    if (!hasEmail && !hasUserId) {
-      return CommonErrors.badRequest("Either email or user_id is required");
-    }
-    if (hasEmail && hasUserId) {
-      return CommonErrors.badRequest("Provide either email or user_id, not both");
+    if ("group_id" in body) {
+      return CommonErrors.badRequest("group_id can only be assigned through a group submission");
     }
 
     // ── Validate artwork fields ────────────────────────────────────────────
@@ -61,182 +45,213 @@ export const handler = async (
 
     const nowMs = Date.now();
     const nowSeconds = Math.floor(nowMs / 1000);
-
-    // ── Step 1: Find or create virtual USER entity ─────────────────────────
+    // ── Step 1: Find or prepare virtual USER entity ────────────────────────
     let user: UserEntity;
+    let userToCreate: UserEntity | null = null;
 
-    if (hasUserId) {
-      // Returning guest — look up by user_id directly
-      const result = await dynamodb.send(
-        new QueryCommand({
-          TableName: TABLE_NAME,
-          KeyConditionExpression: "PK = :pk AND SK = :sk",
-          ExpressionAttributeValues: {
-            ":pk": `USER#${body.user_id!.trim()}`,
-            ":sk": "PROFILE",
-          },
-          Limit: 1,
-        }),
-      );
-      if (!result.Items?.length) {
-        return CommonErrors.notFound("User not found");
-      }
-      user = result.Items[0] as UserEntity;
+    // New or returning email-based guest — query Email GSI
+    const email = normalizeEmail(body.email);
+    const emailResult = await dynamodb.send(
+      new QueryCommand({
+        TableName: TABLE_NAME,
+        IndexName: GSI.Email,
+        KeyConditionExpression: "EMAIL_PK = :pk AND EMAIL_SK = :sk",
+        ExpressionAttributeValues: {
+          ":pk": emailPk(email),
+          ":sk": emailGsiSk(EntityType.User),
+        },
+        Limit: 1,
+      }),
+    );
 
-      if (user.banned) {
+    if (emailResult.Items?.length) {
+      const existing = emailResult.Items[0] as UserEntity;
+      if (existing.banned) {
         return CommonErrors.forbidden("This account is banned");
       }
-      if (!user.is_virtual) {
+      if (!existing.is_virtual) {
         return CommonErrors.conflict(
-          "This account already exists. Please log in to submit artwork.",
+          "An account with this email already exists. Please log in to submit artwork.",
         );
       }
+      user = existing;
     } else {
-      // New or returning email-based guest — query Email GSI
-      const email = body.email!.trim();
-      const emailResult = await dynamodb.send(
-        new QueryCommand({
-          TableName: TABLE_NAME,
-          IndexName: GSI.Email,
-          KeyConditionExpression: "EMAIL_PK = :pk AND EMAIL_SK = :sk",
-          ExpressionAttributeValues: {
-            ":pk": emailPk(email),
-            ":sk": emailGsiSk(EntityType.User),
-          },
-          Limit: 1,
-        }),
-      );
+      // Prepare the virtual USER entity, but do not write it until S3 is verified.
+      const userId = randomUUID();
+      const newUser = {
+        PK: `USER#${userId}`,
+        SK: "PROFILE",
+        user_id: userId,
+        email,
+        f_name: body.submitter_first_name.trim(),
+        l_name: body.submitter_last_name.trim(),
+        is_virtual: true,
+        ts: nowSeconds,
+        banned: false,
+        has_magazine_subscription: false,
+        has_newsletter_subscription: false,
+        artwork_emails_off: false,
+        type: "USER" as const,
+        // Email GSI
+        EMAIL_PK: emailPk(email),
+        EMAIL_SK: emailGsiSk(EntityType.User),
+      };
 
-      if (emailResult.Items?.length) {
-        const existing = emailResult.Items[0] as UserEntity;
-        if (existing.banned) {
-          return CommonErrors.forbidden("This account is banned");
-        }
-        if (!existing.is_virtual) {
-          return CommonErrors.conflict(
-            "An account with this email already exists. Please log in to submit artwork.",
-          );
-        }
-        user = existing;
-      } else {
-        // Create new virtual USER entity
-        const userId = randomUUID();
-        const newUser = {
-          PK: `USER#${userId}`,
-          SK: "PROFILE",
-          user_id: userId,
-          email,
-          is_virtual: true,
-          timestamp: nowSeconds,
-          banned: false,
-          has_magazine_subscription: false,
-          has_newsletter_subscription: false,
-          type: "USER" as const,
-          // Email GSI
-          EMAIL_PK: emailPk(email),
-          EMAIL_SK: emailGsiSk(EntityType.User),
-        };
-
-        await dynamodb.send(new PutCommand({ TableName: TABLE_NAME, Item: newUser }));
-        user = newUser as unknown as UserEntity;
-      }
+      user = newUser as unknown as UserEntity;
+      userToCreate = user;
     }
 
-    // ── Step 2: Create ART entity ──────────────────────────────────────────
-    const artId = randomUUID();
+    // ── Step 2: Verify the browser upload before any submission writes ─────
+    const artId = body.art_id.trim();
+    const imageUploaded = await hasUploadedArtworkImage(artId);
+    if (!imageUploaded) {
+      return CommonErrors.badRequest("Artwork image must be uploaded before submission");
+    }
 
-    await ensureThemeEntity({
-      family: body.theme_family,
-      instance: body.theme_instance,
-    });
+    const themeCheck = await ensureThemeEntity({ theme: body.theme, nowMs });
+    if (!themeCheck.ok) return themeCheck.response;
+
+    if (userToCreate) {
+      await dynamodb.send(
+        new PutCommand({
+          TableName: TABLE_NAME,
+          Item: userToCreate,
+          ConditionExpression: "attribute_not_exists(PK)",
+        }),
+      );
+    } else if (!user.f_name || !user.l_name) {
+      const fName = body.submitter_first_name.trim();
+      const lName = body.submitter_last_name.trim();
+      await dynamodb.send(
+        new UpdateCommand({
+          TableName: TABLE_NAME,
+          Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
+          UpdateExpression:
+            "SET f_name = if_not_exists(f_name, :fName), l_name = if_not_exists(l_name, :lName)",
+          ExpressionAttributeValues: {
+            ":fName": fName,
+            ":lName": lName,
+          },
+        }),
+      );
+      user.f_name ??= fName;
+      user.l_name ??= lName;
+    }
 
     await dynamodb.send(
       new PutCommand({
         TableName: TABLE_NAME,
+        ConditionExpression: "attribute_not_exists(PK)",
         Item: {
           PK: `ART#${artId}`,
           SK: "-",
           art_id: artId,
           user_id: user.user_id,
-          is_virtual: body.is_virtual,
           status: "pending_review" as const,
           kudos_count: 0,
-          timestamp: nowSeconds,
-          release_hash: body.release_hash.trim(),
+          ts: nowSeconds,
+          rev_num: 1,
+          ...(body.digital_signature && {
+            digital_signature: body.digital_signature.trim(),
+          }),
+          promotional_use: body.submitter_relationship === "legal_guardian",
           type: "ART",
-          notifications: body.group_id ? false : body.notifications ?? false,
-          // optional fields
+          notifications: body.notifications ?? false,
           ...(body.title && { title: body.title }),
           ...(body.description && { description: body.description }),
           ...(body.f_name && { f_name: body.f_name }),
+          ...(body.l_name && { l_name: body.l_name }),
           ...(body.age !== undefined && { age: body.age }),
           ...(body.country && { country: body.country }),
           ...(body.region && { region: body.region }),
           ...(body.submitter_relationship && {
             submitter_relationship: body.submitter_relationship,
           }),
-          ...(body.theme_family && { theme_family: body.theme_family }),
-          ...(body.theme_instance && { theme_instance: body.theme_instance }),
-          ...(body.group_id && { group_id: body.group_id }),
-          // Owner GSI (always written)
+          ...(body.theme && { theme: body.theme }),
           OWN_PK: byOwnerPk(user.user_id),
           OWN_SK: byOwnerGsiSk(EntityType.Art, nowMs, artId),
-          // Review GSI (always written; removed on approval)
           REV_PK: reviewPk(),
           REV_SK: reviewGsiSk(Status.Pending, EntityType.Art, nowMs, artId),
         },
       }),
     );
+    // ── Step 3: Refresh auth-action token and email virtual users ─────────
+    let sentSignupEmail = false;
+    if (shouldSuppressArtworkEmail(user)) {
+      const response: SubmitArtworkResponse = {
+        success: true,
+        art_id: artId,
+        message: "Artwork submitted.",
+      };
 
-    // ── Step 3: Generate presigned S3 upload URL ───────────────────────────
-    // Key is always {art_id}/initial (no extension). ProcessImage is triggered
-    // by the S3 ObjectCreated event on this key and auto-detects the format via Sharp.
-    const s3Key = `${artId}/initial`;
-    const presignedUrl = await getSignedUrl(
-      s3Client,
-      new PutObjectCommand({
-        Bucket: S3_BUCKET_NAME,
-        Key: s3Key,
-        ContentType: CONTENT_TYPES[body.file_type],
+      return {
+        statusCode: HTTP_STATUS.CREATED,
+        body: JSON.stringify(response),
+        headers: COMMON_HEADERS,
+      };
+    }
+
+    if (user.emailed_signup_at) {
+      const response: SubmitArtworkResponse = {
+        success: true,
+        art_id: artId,
+        message: "Artwork submitted.",
+      };
+
+      return {
+        statusCode: HTTP_STATUS.CREATED,
+        body: JSON.stringify(response),
+        headers: COMMON_HEADERS,
+      };
+    }
+
+    const authActionToken = randomUUID();
+    const authActionTokenExp = nowSeconds + ACCOUNT_ACTIVATION_TOKEN_TTL_SECONDS;
+
+    await dynamodb.send(
+      new UpdateCommand({
+        TableName: TABLE_NAME,
+        Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
+        UpdateExpression:
+          "SET auth_action_token = :token, auth_action_token_exp = :exp",
+        ExpressionAttributeValues: {
+          ":token": authActionToken,
+          ":exp": authActionTokenExp,
+        },
       }),
-      { expiresIn: PRESIGNED_URL_EXPIRES_SECONDS },
     );
 
-    // ── Step 4: Send one-time create-and-verify email for virtual users ───
-    let sentSignupEmail = false;
-    if (!user.emailed_signup_at) {
-      const verifyToken = randomUUID();
-      const verifyTokenExpiration = nowSeconds + VERIFY_TOKEN_TTL_SECONDS;
+    try {
+      const unsubscribeToken = await ensureArtworkUnsubscribeToken(user);
+
+      await sendArtworkSubmissionEmail({
+        toEmail: user.email,
+        userId: user.user_id,
+        authActionToken,
+        unsubscribeToken,
+      });
+      sentSignupEmail = true;
 
       await dynamodb.send(
         new UpdateCommand({
           TableName: TABLE_NAME,
           Key: { PK: `USER#${user.user_id}`, SK: "PROFILE" },
-          UpdateExpression:
-            "SET verify_token = :token, verify_token_expiration = :exp, emailed_signup_at = :emailSignupAt",
+          UpdateExpression: "SET emailed_signup_at = :emailSignupAt",
           ExpressionAttributeValues: {
-            ":token": verifyToken,
-            ":exp": verifyTokenExpiration,
             ":emailSignupAt": nowSeconds,
           },
         }),
       );
-
-      await sendArtworkSubmissionEmail({
-        toEmail: user.email,
-        userId: user.user_id,
-        verifyToken,
-      });
-      sentSignupEmail = true;
+    } catch (error) {
+      console.error("Artwork submission signup email failed:", error);
     }
 
     const response: SubmitArtworkResponse = {
       success: true,
       art_id: artId,
-      presigned_url: presignedUrl,
       message: sentSignupEmail
-        ? "Artwork submitted. Upload your image using the presigned URL. Check your email to verify your account."
-        : "Artwork submitted. Upload your image using the presigned URL.",
+        ? "Artwork submitted. Check your email to verify your account."
+        : "Artwork submitted.",
     };
 
     return {

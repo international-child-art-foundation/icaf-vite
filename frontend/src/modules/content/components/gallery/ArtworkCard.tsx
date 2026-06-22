@@ -1,48 +1,48 @@
-import { gsap } from 'gsap';
+import { memo } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
-import { formatArtistName } from '@/utils/galleryProcessing';
+import { getArtistDisplayNameWithAge } from '@/utils/galleryProcessing';
+import { GalleryArtworkInfo } from './GalleryArtworkInfo';
+import { Button } from '@/shared/components/ui/button';
 
 type ArtworkCardProps = {
   artwork: TResolvedArtwork;
   openModal: (id: string) => void;
+  actionSlot?: ReactNode;
 };
 
-const ArtworkCard = ({ artwork, openModal }: ArtworkCardProps) => {
-  const { id, artists, lastInitial, age, country, region, event, thumbUrl } =
-    artwork;
-  const artistText = formatArtistName(artists ?? [], lastInitial);
-
-  const manageEnter = (e: React.MouseEvent<HTMLImageElement>) => {
-    gsap.to(e.target, {
-      scaleX: 1.1,
-      scaleY: 1.1,
-      duration: 0.3,
-      ease: 'power3.inOut',
-    });
+const ArtworkCard = ({ artwork, openModal, actionSlot }: ArtworkCardProps) => {
+  const { id, thumbUrl } = artwork;
+  const artistText = getArtistDisplayNameWithAge(artwork);
+  const isWholeCardInteractive = !actionSlot;
+  const handleOpen = () => openModal(id);
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (!isWholeCardInteractive) return;
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    handleOpen();
   };
-
-  const manageLeave = (e: React.MouseEvent<HTMLImageElement>) => {
-    gsap.to(e.target, {
-      scaleX: 1,
-      scaleY: 1,
-      duration: 0.3,
-      ease: 'power3.inOut',
-    });
-  };
-
-  const locationText = [region, country].filter(Boolean).join(', ');
 
   return (
-    <div id={id} className="relative h-full w-full rounded-lg">
+    <div
+      id={id}
+      role={isWholeCardInteractive ? 'button' : undefined}
+      tabIndex={isWholeCardInteractive ? 0 : undefined}
+      onClick={isWholeCardInteractive ? handleOpen : undefined}
+      onKeyDown={handleKeyDown}
+      className={`focus-visible:ring-primary relative flex h-full w-full flex-col gap-3 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+        isWholeCardInteractive ? 'cursor-pointer' : ''
+      }`}
+    >
       <div className="rounded-lg shadow-md shadow-gray-400">
-        <section className="relative h-32 w-full select-none overflow-hidden rounded-t-lg sm:h-52 md:h-60 xl:h-52">
+        <section className="relative h-48 w-full select-none overflow-hidden rounded-t-lg sm:h-60 md:h-72">
           <img
             src={thumbUrl}
             alt={artistText || 'Artwork'}
-            onMouseEnter={manageEnter}
-            onMouseLeave={manageLeave}
-            onClick={() => openModal(id)}
-            className="absolute inset-0 h-full w-full cursor-pointer object-cover object-center"
+            onClick={isWholeCardInteractive ? undefined : handleOpen}
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 h-full w-full cursor-pointer object-cover object-center transition-transform duration-300 ease-in-out hover:scale-110"
           />
           {/* {locationText && (
             <div
@@ -56,35 +56,34 @@ const ArtworkCard = ({ artwork, openModal }: ArtworkCardProps) => {
           )} */}
         </section>
 
-        <section className="relative flex w-full flex-col gap-4 rounded-b-lg p-4 py-6">
-          <div>
-            {artistText && (
-              <p className="truncate text-base font-semibold xl:text-xl">
-                {artistText}
-              </p>
-            )}
-            <p className="truncate text-sm text-gray-500">
-              {[age != null ? `${age}` : null, locationText]
-                .filter(Boolean)
-                .join(' · ') || '\u00A0'}
-            </p>
-            <p className="truncate text-sm text-gray-400">
-              {event || '\u00A0'}
-            </p>
-          </div>
-          <div className="flex">
-            <button
-              type="button"
-              onClick={() => openModal(id)}
-              className="bg-primary text-text-inverse w-full cursor-pointer rounded py-3 text-center text-sm tracking-wide"
+        <section className="relative flex h-40 w-full flex-col gap-1 rounded-b-lg p-4">
+          <GalleryArtworkInfo
+            artwork={artwork}
+            variant="card"
+            descriptionMode="none"
+            maxTags={4}
+            className="max-h-[84px] overflow-hidden"
+          />
+          <div className="mt-auto flex">
+            <Button
+              onClick={(event) => {
+                event.stopPropagation();
+                handleOpen();
+              }}
+              className="text-text-inverse mt-auto w-full"
             >
               View
-            </button>
+            </Button>
           </div>
         </section>
       </div>
+      {actionSlot && (
+        <div className="rounded-lg border border-neutral-200 bg-white p-3 shadow-sm">
+          {actionSlot}
+        </div>
+      )}
     </div>
   );
 };
 
-export default ArtworkCard;
+export default memo(ArtworkCard);

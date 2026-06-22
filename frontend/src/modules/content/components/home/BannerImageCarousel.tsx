@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BannerItem } from '@/modules/content/types/BannerItem';
 import { BannerImage } from './BannerImage';
 import { useWindowSize } from 'usehooks-ts';
@@ -24,15 +24,12 @@ export function BannerImageCarousel({
     current: number;
     previous: number | null;
   }>({ current: 0, previous: null });
-
   const [isNearViewport, setIsNearViewport] = useState(false);
   const [hasEverBeenNearViewport, setHasEverBeenNearViewport] = useState(false);
-
   const containerRef = useRef<HTMLDivElement | null>(null);
   const itemCount = items?.length ?? 0;
 
   let carousel_height: number;
-
   switch (true) {
     case size.width >= 1024:
       carousel_height = 800;
@@ -51,7 +48,6 @@ export function BannerImageCarousel({
   useEffect(() => {
     if (itemCount === 0) return;
     if (slideState.current < itemCount) return;
-
     setSlideState({ current: 0, previous: null });
   }, [itemCount, slideState.current]);
 
@@ -68,7 +64,6 @@ export function BannerImageCarousel({
     const observer = new IntersectionObserver(
       ([entry]) => {
         const nearViewport = entry.isIntersecting;
-
         setIsNearViewport(nearViewport);
 
         if (nearViewport) {
@@ -99,7 +94,6 @@ export function BannerImageCarousel({
     };
 
     let intervalId: ReturnType<typeof setInterval> | undefined;
-
     const timeoutId = setTimeout(
       () => {
         advanceSlide();

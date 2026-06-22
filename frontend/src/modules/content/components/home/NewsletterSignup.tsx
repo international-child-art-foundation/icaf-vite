@@ -10,7 +10,7 @@ export const NewsletterSignup = () => {
     'idle',
   );
 
-  async function onSubscribe(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubscribe(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!email.trim()) return;
 

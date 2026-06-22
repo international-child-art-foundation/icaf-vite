@@ -1,7 +1,5 @@
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { PutCommand } from "@aws-sdk/lib-dynamodb";
-import { dynamodb, s3Client, TABLE_NAME, S3_BUCKET_NAME } from "../../config/aws-clients";
+import { TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
+import { dynamodb, TABLE_NAME } from "../../config/aws-clients";
 import {
   ApiGatewayEvent,
   HTTP_STATUS,
@@ -18,18 +16,7 @@ import { Status } from "../../dynamo/shared";
 import { parseJsonBody } from "../../utils/request";
 import { getCurrentUser } from "../../utils/auth";
 import { ensureThemeEntity } from "../shared/themeUtils";
-import { randomUUID } from "crypto";
-
-const PRESIGNED_URL_EXPIRES_SECONDS = 20 * 60; // 20 minutes
-
-const CONTENT_TYPES: Record<string, string> = {
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  png: "image/png",
-  gif: "image/gif",
-  webp: "image/webp",
-  avif: "image/avif",
-};
+import { hasUploadedArtworkImage } from "../shared/artworkUpload";
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -42,6 +29,14 @@ export const handler = async (
     const parsedBody = parseJsonBody<SubmitArtworkRequest>(event);
     if (!parsedBody.ok) return parsedBody.response;
     const body = parsedBody.value;
+
+    if ("group_id" in body) {
+      return CommonErrors.badRequest("group_id can only be assigned through a group submission");
+    }
+    if (currentUser.user.role === "deleting") {
+      return CommonErrors.forbidden("Account deletion is pending. Contact us if you need assistance.");
+    }
+
 
     // ── Validate artwork fields ────────────────────────────────────────────
     const artErrors = validateSubmissionData(body);
@@ -58,70 +53,71 @@ export const handler = async (
     const nowMs = Date.now();
     const nowSeconds = Math.floor(nowMs / 1000);
 
-    // ── Create ART entity ──────────────────────────────────────────────────
-    const artId = randomUUID();
+    const artId = body.art_id.trim();
+    const imageUploaded = await hasUploadedArtworkImage(artId);
+    if (!imageUploaded) {
+      return CommonErrors.badRequest("Artwork image must be uploaded before submission");
+    }
 
-    await ensureThemeEntity({
-      family: body.theme_family,
-      instance: body.theme_instance,
-    });
+    const themeCheck = await ensureThemeEntity({ theme: body.theme, nowMs });
+    if (!themeCheck.ok) return themeCheck.response;
 
     await dynamodb.send(
-      new PutCommand({
-        TableName: TABLE_NAME,
-        Item: {
-          PK: `ART#${artId}`,
-          SK: "-",
-          art_id: artId,
-          user_id: userId,
-          is_virtual: body.is_virtual,
-          status: "pending_review" as const,
-          kudos_count: 0,
-          timestamp: nowSeconds,
-          release_hash: body.release_hash.trim(),
-          type: "ART",
-          notifications: body.group_id ? false : body.notifications ?? false,
-          // optional fields
-          ...(body.title && { title: body.title }),
-          ...(body.description && { description: body.description }),
-          ...(body.f_name && { f_name: body.f_name }),
-          ...(body.age !== undefined && { age: body.age }),
-          ...(body.country && { country: body.country }),
-          ...(body.region && { region: body.region }),
-          ...(body.submitter_relationship && {
-            submitter_relationship: body.submitter_relationship,
-          }),
-          ...(body.theme_family && { theme_family: body.theme_family }),
-          ...(body.theme_instance && { theme_instance: body.theme_instance }),
-          ...(body.group_id && { group_id: body.group_id }),
-          // Owner GSI (always written)
-          OWN_PK: byOwnerPk(userId),
-          OWN_SK: byOwnerGsiSk(EntityType.Art, nowMs, artId),
-          // Review GSI (always written; removed on approval)
-          REV_PK: reviewPk(),
-          REV_SK: reviewGsiSk(Status.Pending, EntityType.Art, nowMs, artId),
-        },
+      new TransactWriteCommand({
+        TransactItems: [
+          {
+            ConditionCheck: {
+              TableName: TABLE_NAME,
+              Key: { PK: `USER#${userId}`, SK: "PROFILE" },
+              ConditionExpression:
+                "attribute_exists(PK)",
+            },
+          },
+          {
+            Put: {
+              TableName: TABLE_NAME,
+              ConditionExpression: "attribute_not_exists(PK)",
+              Item: {
+                PK: `ART#${artId}`,
+                SK: "-",
+                art_id: artId,
+                user_id: userId,
+                status: "pending_review" as const,
+                kudos_count: 0,
+                ts: nowSeconds,
+                rev_num: 1,
+                ...(body.digital_signature && {
+                  digital_signature: body.digital_signature.trim(),
+                }),
+                promotional_use: body.submitter_relationship === "legal_guardian",
+                type: "ART",
+                notifications: body.notifications ?? false,
+                ...(body.title && { title: body.title }),
+                ...(body.description && { description: body.description }),
+                ...(body.f_name && { f_name: body.f_name }),
+                ...(body.l_name && { l_name: body.l_name }),
+                ...(body.age !== undefined && { age: body.age }),
+                ...(body.country && { country: body.country }),
+                ...(body.region && { region: body.region }),
+                ...(body.submitter_relationship && {
+                  submitter_relationship: body.submitter_relationship,
+                }),
+                ...(body.theme && { theme: body.theme }),
+                OWN_PK: byOwnerPk(userId),
+                OWN_SK: byOwnerGsiSk(EntityType.Art, nowMs, artId),
+                REV_PK: reviewPk(),
+                REV_SK: reviewGsiSk(Status.Pending, EntityType.Art, nowMs, artId),
+              },
+            },
+          },
+        ],
       }),
-    );
-
-    // ── Generate presigned S3 upload URL ──────────────────────────────────
-    // Key is always {art_id}/initial (no extension). ProcessImage auto-detects format.
-    const s3Key = `${artId}/initial`;
-    const presignedUrl = await getSignedUrl(
-      s3Client,
-      new PutObjectCommand({
-        Bucket: S3_BUCKET_NAME,
-        Key: s3Key,
-        ContentType: CONTENT_TYPES[body.file_type],
-      }),
-      { expiresIn: PRESIGNED_URL_EXPIRES_SECONDS },
     );
 
     const response: SubmitArtworkResponse = {
       success: true,
       art_id: artId,
-      presigned_url: presignedUrl,
-      message: "Artwork submitted. Upload your image using the presigned URL.",
+      message: "Artwork submitted.",
     };
 
     return {

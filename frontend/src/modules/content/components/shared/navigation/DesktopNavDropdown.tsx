@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { type CSSProperties, type FC, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { CircleArrowRight } from 'lucide-react';
+
 import { NavItem, NavChild } from '@/shared/data/navItems';
 import { NavGraphic } from '@/shared/assets/images/navigation/navGraphic';
-import { CircleArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { preloadRoute } from '@/preloadRoutes';
 
 interface DesktopNavDropdownProps {
@@ -17,7 +18,7 @@ interface DesktopNavDropdownProps {
 
 const MAX_DROPDOWN_HEIGHT = 330;
 
-const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
+const DesktopNavDropdown: FC<DesktopNavDropdownProps> = ({
   item,
   progress,
   zIndex,
@@ -43,7 +44,7 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
       : 'cubic-bezier(0.25, 0.1, 0.25, 1)'
     : 'cubic-bezier(0.25, 0.1, 0.25, 1)';
 
-  const containerStyle: React.CSSProperties = {
+  const containerStyle: CSSProperties = {
     height: `${MAX_DROPDOWN_HEIGHT}px`,
     zIndex,
     position: 'fixed',
@@ -91,11 +92,18 @@ const DesktopNavDropdown: React.FC<DesktopNavDropdownProps> = ({
 
                   <div className="col-start-1 row-start-1 flex flex-col justify-end overflow-hidden p-8">
                     <div
-                      className={`flex flex-col transition-transform duration-300 ease-out group-hover:translate-y-0 ${item.key === 'programs' ? 'translate-y-[calc(100%-5rem)]' : 'translate-y-[calc(100%-3rem)]'}`}
+                      className={`flex flex-col transition-transform duration-300 ease-out group-hover:translate-y-0 ${
+                        item.key === 'programs'
+                          ? 'translate-y-[calc(100%-5rem)]'
+                          : 'translate-y-[calc(100%-3rem)]'
+                      }`}
                     >
                       <h3
                         className={`text-text-inverse flex items-center text-2xl font-bold leading-[1.4] tracking-wide ${
-                          (item.children?.length ?? 0) > 3 ? 'xl:max-w-48' : ''
+                          item.children?.length != undefined &&
+                          item.children?.length > 3
+                            ? 'xl:max-w-48'
+                            : ''
                         }`}
                       >
                         {child.label}

@@ -3,8 +3,9 @@ import {
   HTTP_STATUS,
   COMMON_HEADERS,
   CommonErrors,
+  hasMinimumRole,
 } from "@icaf/shared";
-import { fetchGroupReviewPage, parseReviewParams } from "./reviewShared";
+import { fetchGroupReviewPage, parseReviewParams } from "../shared/contributorUtils";
 import { getCurrentUser } from "../../utils/auth";
 
 export const handler = async (
@@ -13,6 +14,10 @@ export const handler = async (
   try {
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
+    if (!hasMinimumRole(currentUser.user.role, "contributor")) {
+        return CommonErrors.forbidden("Contributor access required");
+    }
+    
 
     const params = parseReviewParams(event);
     if (!params.ok) {

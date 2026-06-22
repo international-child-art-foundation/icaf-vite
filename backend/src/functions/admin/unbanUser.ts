@@ -6,6 +6,7 @@ import {
   COMMON_HEADERS,
   CommonErrors,
   BanUnbanUserResponse,
+  hasMinimumRole,
 } from "@icaf/shared";
 import { randomUUID } from "crypto";
 import { getCurrentUser } from "../../utils/auth";
@@ -16,6 +17,10 @@ export const handler = async (
   try {
     const currentUser = await getCurrentUser(event);
     if (!currentUser.ok) return currentUser.response;
+    if (!hasMinimumRole(currentUser.user.role, "admin")) {
+        return CommonErrors.forbidden("Admin access required");
+    }
+    
     const adminId = currentUser.user.user_id;
 
     const targetUserId = event.pathParameters?.user_id;
@@ -53,7 +58,7 @@ export const handler = async (
           PK: `USER#${targetUserId}`,
           SK: `AA#${nowSeconds}`,
           user_id: targetUserId,
-          timestamp: nowSeconds,
+          ts: nowSeconds,
           initiator_id: adminId,
           action: "unban",
           type: "ACCOUNT_ACTION",
@@ -66,7 +71,7 @@ export const handler = async (
       user_id: targetUserId,
       banned: false,
       admin_action_id: actionId,
-      timestamp: nowSeconds,
+      ts: nowSeconds,
     };
 
     return {

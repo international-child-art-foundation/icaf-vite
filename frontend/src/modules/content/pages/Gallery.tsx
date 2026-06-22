@@ -5,6 +5,8 @@ import { Seo } from '@/modules/content/components/shared/Seo';
 // import { OpinionatedGradients } from '@/data/gradientDefinition';
 // import { useWindowSize } from 'usehooks-ts';
 import { PageBottomSpacer } from '@/modules/content/components/shared/PageBottomSpacer';
+import { Button } from '@/shared/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const galleryMetadata = {
   title: 'Gallery | ICAF',
@@ -25,6 +27,10 @@ export const Gallery = () => {
   // } else {
   //   gradientDefinition = OpinionatedGradients.sm;
   // }
+  const blurb1 =
+    'ICAF is proud to host the artworks of young artists from all over the world.';
+  const blurb2 =
+    "Add your child's dream to our ever growing gallery of marvels and murals, free of charge.";
 
   return (
     <>
@@ -57,14 +63,26 @@ export const Gallery = () => {
 
         <div
           id="gallery-section"
-          className="mt-24 flex flex-col gap-8 md:gap-4"
+          className="mt-12 flex flex-col gap-4 sm:mt-24 md:gap-2"
         >
-          <div className="text-center">
-            <p className="font-montserrat text-5xl font-bold">Gallery</p>
-            <p className="m-pad mt-4 text-lg text-gray-600">
-              Children's art is the most honest and pure form of human creative
-              expression.
+          <div className="sm:text-center">
+            <p className="font-montserrat text-center text-5xl font-bold">
+              Gallery
             </p>
+            <div className="my-4 flex flex-col gap-4">
+              <p className="m-pad flex flex-col gap-0 text-lg text-gray-800">
+                <span className="hidden sm:block">{blurb1}</span>
+                <span className="hidden sm:block">{blurb2}</span>
+                <span className="block sm:hidden">
+                  {blurb1} {blurb2}
+                </span>
+              </p>
+              <div className="mx-auto block">
+                <Link to={'/submit-artwork'}>
+                  <Button className="text-base">Add your Masterpiece</Button>
+                </Link>
+              </div>
+            </div>
           </div>
           <GalleryCore />
         </div>

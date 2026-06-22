@@ -15,6 +15,8 @@ type DropdownAnimationState = {
 
 type DropdownStateMap = Record<string, DropdownAnimationState>;
 
+const VIEWPORT_EDGE_CLOSE_THRESHOLD_PX = 2;
+
 const createInitialDropdownState = (): DropdownStateMap => {
   const state: DropdownStateMap = {};
   navItems.forEach((item) => {
@@ -166,18 +168,51 @@ const DesktopNav: React.FC = () => {
       return;
     }
 
-    const handleMouseMove = (event: MouseEvent) => {
-      const target = event.target as Node;
-      const inHeader = headerRef.current && headerRef.current.contains(target);
+    const targetIsWithinNav = (target: EventTarget | null) => {
+      return (
+        target instanceof Node &&
+        !!headerRef.current &&
+        headerRef.current.contains(target)
+      );
+    };
 
-      if (!inHeader) {
+    const closeIfAtViewportEscape = (clientX: number, clientY: number) => {
+      const leftEdge = clientX <= VIEWPORT_EDGE_CLOSE_THRESHOLD_PX;
+      const rightEdge =
+        clientX >= window.innerWidth - VIEWPORT_EDGE_CLOSE_THRESHOLD_PX;
+      const topEdge = clientY <= VIEWPORT_EDGE_CLOSE_THRESHOLD_PX;
+
+      if (leftEdge || rightEdge || topEdge) {
+        collapseDropdowns();
+        return true;
+      }
+
+      return false;
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (closeIfAtViewportEscape(event.clientX, event.clientY)) {
+        return;
+      }
+
+      if (!targetIsWithinNav(event.target)) {
         collapseDropdowns();
       }
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
+    const handlePointerOut = (event: PointerEvent) => {
+      if (event.relatedTarget !== null) {
+        return;
+      }
+
+      collapseDropdowns();
+    };
+
+    document.addEventListener('pointermove', handlePointerMove);
+    document.addEventListener('pointerout', handlePointerOut);
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('pointermove', handlePointerMove);
+      document.removeEventListener('pointerout', handlePointerOut);
     };
   }, [dropdownState, collapseDropdowns]);
 

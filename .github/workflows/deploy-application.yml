@@ -1,0 +1,295 @@
+name: Deploy Application
+
+on:
+  push:
+    branches: ["staging", "main"]
+    paths:
+      - "backend/**"
+      - "infra/**"
+      - "shared/**"
+      - "cloudflare/api-proxy/**"
+      - "frontend/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "package.json"
+      - "tsconfig.json"
+      - "tsconfig.*.json"
+      - ".github/frontend.htaccess"
+      - ".github/workflows/deploy-application.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-application-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy AWS, API proxy, and frontend
+    if: github.ref_name == 'main' || github.ref_name == 'staging'
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+    env:
+      DEPLOY_ENV: ${{ github.ref_name }}
+      CDK_DEFAULT_REGION: ${{ vars.AWS_REGION }}
+      SITE_NAME: icaf
+      VITE_API_BASE_URL: /api
+      VITE_GA_MEASUREMENT_ID: G-CX1QXSQK8B
+
+    permissions:
+      id-token: write # required for OIDC credential federation
+      contents: read
+
+    steps:
+      - name: Validate deployment configuration
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          AWS_DEPLOY_ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          EVERY_WEBHOOK_SECRET: ${{ secrets.EVERY_WEBHOOK_SECRET }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_USER: ${{ secrets.SFTP_USER }}
+          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+        run: |
+          missing=()
+          for name in \
+            AWS_REGION \
+            AWS_DEPLOY_ROLE_ARN \
+            STRIPE_WEBHOOK_SECRET \
+            CLOUDFLARE_ACCOUNT_ID \
+            CLOUDFLARE_API_TOKEN \
+            SFTP_HOST \
+            SFTP_USER \
+            SFTP_PASSWORD
+          do
+            if [ -z "${!name}" ]; then
+              missing+=("$name")
+            fi
+          done
+
+          if [ "$GITHUB_REF_NAME" = "main" ] && [ -z "$EVERY_WEBHOOK_SECRET" ]; then
+            missing+=("EVERY_WEBHOOK_SECRET")
+          fi
+
+          if [ "${#missing[@]}" -ne 0 ]; then
+            printf 'Missing values in the %s GitHub Environment:\n' "$GITHUB_REF_NAME" >&2
+            printf ' - %s\n' "${missing[@]}" >&2
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Guard debug flags
+        run: node scripts/ensureDebugFlagsDisabled.mjs
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.5.2
+          run_install: false
+
+      - name: Setup Node 22 with pnpm cache
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: "pnpm"
+          cache-dependency-path: "pnpm-lock.yaml"
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ── Shared package ──────────────────────────────────────────────────────
+      - name: Build shared package
+        run: pnpm --filter @icaf/shared build
+
+      # ── Sharp Lambda layer ──────────────────────────────────────────────────
+      - name: Build Sharp Lambda layer (linux-x64-glibc)
+        run: pnpm --dir infra layer:build
+
+      # ── Build CDK app ───────────────────────────────────────────────────────
+      - name: Build CDK app
+        run: pnpm --dir infra build
+
+      - name: Typecheck Worker
+        run: pnpm --filter @icaf/cloudflare-api-proxy typecheck
+
+      - name: Test Worker
+        run: pnpm --filter @icaf/cloudflare-api-proxy test
+
+      # ── AWS credentials (OIDC) ──────────────────────────────────────────────
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      # ── CDK deploy ───────────────────────────────────────────────────────────
+      - name: CDK deploy
+        working-directory: infra
+        env:
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          EVERY_WEBHOOK_SECRET: ${{ secrets.EVERY_WEBHOOK_SECRET }}
+        run: |
+          pnpm exec cdk diff --all
+          pnpm exec cdk deploy --all --require-approval never --outputs-file cdk-outputs.json
+
+      - name: Export deployment outputs
+        id: cdk-outputs
+        working-directory: infra
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE' >> "$GITHUB_OUTPUT"
+          import { readFileSync } from "node:fs";
+
+          const stacks = Object.values(JSON.parse(readFileSync("cdk-outputs.json", "utf8")));
+          if (stacks.length !== 1) {
+            throw new Error(`Expected exactly one CDK stack; found ${stacks.length}.`);
+          }
+
+          const outputs = stacks[0];
+          if (typeof outputs?.ApiGatewayOrigin !== "string") {
+            throw new Error("ApiGatewayOrigin is missing from the CDK outputs.");
+          }
+          if (typeof outputs?.ArtworkDistributionDomainName !== "string") {
+            throw new Error("ArtworkDistributionDomainName is missing from the CDK outputs.");
+          }
+
+          const target = new URL(outputs.ApiGatewayOrigin);
+          if (
+            target.protocol !== "https:" ||
+            !target.hostname.includes(".execute-api.") ||
+            !target.hostname.endsWith(".amazonaws.com")
+          ) {
+            throw new Error("ApiGatewayOrigin is not an HTTPS API Gateway URL.");
+          }
+
+          const artwork = new URL(`https://${outputs.ArtworkDistributionDomainName}`);
+          if (
+            artwork.protocol !== "https:" ||
+            !artwork.hostname.endsWith(".cloudfront.net")
+          ) {
+            throw new Error("ArtworkDistributionDomainName is not a CloudFront domain.");
+          }
+
+          console.log(`target_api_origin=${target.toString().replace(/\/$/, "")}`);
+          console.log(`artwork_asset_base_url=${artwork.toString().replace(/\/$/, "")}`);
+          NODE
+
+      - name: Select Worker environment
+        id: worker-env
+        shell: bash
+        run: |
+          if [ "$GITHUB_REF_NAME" = "main" ]; then
+            echo "name=production" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=staging" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: cloudflare/api-proxy
+          command: >-
+            deploy --env ${{ steps.worker-env.outputs.name }}
+            --var
+            "ENVIRONMENT:${{ steps.worker-env.outputs.name }}"
+            "TARGET_API_ORIGIN:${{ steps.cdk-outputs.outputs.target_api_origin }}"
+
+      - name: Record deployment summary
+        shell: bash
+        run: |
+          {
+            echo "### Cloudflare API proxy deployed"
+            echo
+            echo "Worker environment: \`${{ steps.worker-env.outputs.name }}\`"
+            echo "API target: \`${{ steps.cdk-outputs.outputs.target_api_origin }}\`"
+            echo "Artwork assets: \`${{ steps.cdk-outputs.outputs.artwork_asset_base_url }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Set release id
+        id: release
+        shell: bash
+        run: |
+          DATE_UTC="$(date -u +%Y%m%d-%H%M)"
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "id=${DATE_UTC}-${SHORT_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          VITE_ARTWORK_ASSET_BASE_URL: ${{ steps.cdk-outputs.outputs.artwork_asset_base_url }}
+        run: pnpm build
+
+      - name: Write frontend version
+        working-directory: frontend
+        run: |
+          {
+            echo "site=${SITE_NAME}"
+            echo "release=${{ steps.release.outputs.id }}"
+            echo "repo=${GITHUB_REPOSITORY}"
+            echo "commit=${GITHUB_SHA}"
+            echo "run_url=https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo "node=$(node -v)"
+            echo "pnpm=$(pnpm -v)"
+          } > dist/version.txt
+
+      - name: Assemble frontend release
+        run: |
+          mkdir -p release
+          cp -R frontend/dist/* release/
+          if [ -d "frontend/php-api" ]; then
+            mkdir -p release/php-api
+            cp -R frontend/php-api/* release/php-api/
+          fi
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: frontend-${{ env.SITE_NAME }}-${{ steps.release.outputs.id }}
+          path: release
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload frontend release over SFTP
+        uses: milanmk/actions-file-deployer@1.18
+        with:
+          remote-protocol: "sftp"
+          remote-host: ${{ secrets.SFTP_HOST }}
+          remote-user: ${{ secrets.SFTP_USER }}
+          remote-password: ${{ secrets.SFTP_PASSWORD }}
+          local-path: "release"
+          remote-path: "/releases/${{ steps.release.outputs.id }}"
+          sync: "full"
+          debug: "false"
+
+      - name: Generate frontend release pointer
+        run: |
+          mkdir -p htaccess_out
+          sed 's|__RELEASE_ID__|${{ steps.release.outputs.id }}|g' .github/frontend.htaccess > htaccess_out/.htaccess
+
+      # This is the frontend activation step. Until it succeeds, the previous
+      # immutable release remains active.
+      - name: Activate frontend release
+        uses: milanmk/actions-file-deployer@1.18
+        with:
+          remote-protocol: "sftp"
+          remote-host: ${{ secrets.SFTP_HOST }}
+          remote-user: ${{ secrets.SFTP_USER }}
+          remote-password: ${{ secrets.SFTP_PASSWORD }}
+          local-path: "htaccess_out"
+          remote-path: "/"
+          sync: "full"
+          debug: "false"
+
+      - name: Record frontend deployment summary
+        run: |
+          {
+            echo "### Frontend deployed"
+            echo
+            echo "Release: \`${{ steps.release.outputs.id }}\`"
+            echo "Artwork assets: \`${{ steps.cdk-outputs.outputs.artwork_asset_base_url }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

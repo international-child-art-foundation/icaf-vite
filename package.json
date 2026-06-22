@@ -6,11 +6,13 @@
     "frontend",
     "backend",
     "infra",
-    "shared"
+    "shared",
+    "cloudflare/api-proxy"
   ],
   "packageManager": "pnpm@11.5.2",
   "scripts": {
     "dev": "pnpm --filter @icaf/frontend dev",
+    "guard:debug-flags": "node scripts/ensureDebugFlagsDisabled.mjs",
     "clean": "tsc -b --clean",
     "check": "tsc -b && pnpm --filter @icaf/frontend lint",
     "build": "pnpm run build:shared && pnpm run build:backend && pnpm --filter @icaf/frontend build",
@@ -26,6 +28,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.1037.0",
+    "@aws-sdk/client-cloudfront": "^3.1045.0",
     "@aws-sdk/client-lambda": "^3.1037.0",
     "@aws-sdk/client-s3": "^3.1037.0",
     "@aws-sdk/client-ses": "^3.1037.0",

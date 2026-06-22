@@ -37,7 +37,7 @@ export function GalleryGroupCard({
 }: GalleryGroupCardProps) {
   const coverIds = group.preview_art_ids.slice(0, 4);
   const location = [group.region, group.country].filter(Boolean).join(', ');
-  const owner = group.submitter_display_name || 'Group submission';
+  const owner = group.submitter_display_name;
   const title = group.class_name || group.title;
   const theme = groupThemeLabel(group);
   const type = groupLabel(group);
@@ -115,9 +115,11 @@ export function GalleryGroupCard({
               {group.title}
             </p>
           )}
-          <p className="mt-4 text-sm leading-6 text-neutral-600">
-            Submitted by {owner}
-          </p>
+          {owner && (
+            <p className="mt-4 text-sm leading-6 text-neutral-600">
+              Submitted by {owner}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center justify-between gap-4 text-left">

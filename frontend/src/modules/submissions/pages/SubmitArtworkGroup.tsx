@@ -559,10 +559,8 @@ export function SubmitArtworkGroup({
 
     if (nextArtworks !== artworks) setArtworks(nextArtworks);
     setFileFingerprints(nextFingerprints);
-    await mapWithConcurrency(
-      assignments,
-      2,
-      ({ artworkId, file }) => attachFile(artworkId, file),
+    await mapWithConcurrency(assignments, 2, ({ artworkId, file }) =>
+      attachFile(artworkId, file),
     );
   }
 
@@ -633,15 +631,11 @@ export function SubmitArtworkGroup({
             },
       );
 
-      const uploadFiles = await mapWithConcurrency(
-        artworks,
-        2,
-        (artwork) => {
-          const file = files[artwork.id];
-          if (!file) throw new Error('A selected image is missing.');
-          return createRotatedImageFile(file, imageRotations[artwork.id] ?? 0);
-        },
-      );
+      const uploadFiles = await mapWithConcurrency(artworks, 2, (artwork) => {
+        const file = files[artwork.id];
+        if (!file) throw new Error('A selected image is missing.');
+        return createRotatedImageFile(file, imageRotations[artwork.id] ?? 0);
+      });
       const uploadFileTypes = uploadFiles.map((file) => {
         const fileType = getUploadFileType(file);
         if (!fileType) throw new Error(`${file.name} is not supported.`);
@@ -962,7 +956,7 @@ export function SubmitArtworkGroup({
               </div>
               <AccountTextField
                 error={errors.group?.class_name}
-                label="Class or group name"
+                label="Class, school, or group name"
                 leadingIcon={groupFieldIcons.class_name}
                 maxLength={200}
                 name="class_name"

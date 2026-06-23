@@ -540,6 +540,7 @@ export const GallerySlideshowMobile = ({
     targetLipHeight,
     swipeProgress,
   );
+  const lipContentOffsetY = visibleLipHeight - currentLipHeight;
 
   return (
     <>
@@ -637,6 +638,8 @@ export const GallerySlideshowMobile = ({
               maxLipY={maxLipY}
               contentOpacity={lipContentOpacity}
               height="100%"
+              contentHeight={currentLipHeight}
+              contentOffsetY={lipContentOffsetY}
               shareUrl={shareUrl}
               onKudosApplied={applyArtworkKudos}
             />

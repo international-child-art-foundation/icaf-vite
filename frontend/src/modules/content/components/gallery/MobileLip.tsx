@@ -245,6 +245,8 @@ interface Props {
   maxLipY: number;
   contentOpacity: number;
   height?: number | string;
+  contentHeight?: number;
+  contentOffsetY?: number;
   shareUrl: string;
   onKudosApplied?: (artId: string, amount: number) => void;
 }
@@ -259,6 +261,8 @@ export const MobileLip = ({
   maxLipY,
   contentOpacity,
   height,
+  contentHeight,
+  contentOffsetY = 0,
   shareUrl,
   onKudosApplied,
 }: Props) => {
@@ -305,10 +309,15 @@ export const MobileLip = ({
         style={{
           opacity: lipContentOpacity,
           display: 'flex',
-          flex: '1 1 auto',
+          flex: contentHeight === undefined ? '1 1 auto' : '0 0 auto',
+          height:
+            contentHeight === undefined
+              ? undefined
+              : Math.max(0, contentHeight - BORDER_PX),
           minHeight: 0,
           flexDirection: 'column',
           pointerEvents: lipContentOpacity < 0.2 ? 'none' : 'auto',
+          transform: `translateY(${contentOffsetY}px)`,
         }}
       >
         <div

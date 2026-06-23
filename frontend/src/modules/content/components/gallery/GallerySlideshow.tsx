@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { GallerySlideshowShare } from './GallerySlideshowShare';
 import { useGallerySlideshowState } from './useGallerySlideshowState';
-import { renderSlot } from './RenderSlot';
+import { DESKTOP_SLIDE_TRANSITION_MS, renderSlot } from './RenderSlot';
 import { galleryNametag } from './GalleryNametag';
 import type { IGalleryContext } from '@/modules/content/types/Gallery';
 
@@ -223,10 +223,9 @@ export const GallerySlideshow = ({
                   left: 0,
                   width: '100%',
                   opacity: topSlot === 'a' ? 1 : 0,
-                  transition:
-                    topSlot === 'a'
-                      ? 'opacity 300ms ease-in 150ms'
-                      : 'opacity 0ms',
+                  transition: `opacity ${DESKTOP_SLIDE_TRANSITION_MS}ms ease-in-out`,
+                  zIndex: topSlot === 'a' ? 1 : 0,
+                  pointerEvents: topSlot === 'a' ? 'auto' : 'none',
                 }}
               >
                 {galleryNametag(
@@ -241,10 +240,9 @@ export const GallerySlideshow = ({
                   left: 0,
                   width: '100%',
                   opacity: topSlot === 'b' ? 1 : 0,
-                  transition:
-                    topSlot === 'b'
-                      ? 'opacity 300ms ease-in 150ms'
-                      : 'opacity 0ms',
+                  transition: `opacity ${DESKTOP_SLIDE_TRANSITION_MS}ms ease-in-out`,
+                  zIndex: topSlot === 'b' ? 1 : 0,
+                  pointerEvents: topSlot === 'b' ? 'auto' : 'none',
                 }}
               >
                 {galleryNametag(

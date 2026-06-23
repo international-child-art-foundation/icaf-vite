@@ -1,6 +1,8 @@
 import { TResolvedArtwork } from '@/modules/content/types/Gallery';
 import { SlotState } from './useGallerySlideshowState';
 
+export const DESKTOP_SLIDE_TRANSITION_MS = 700;
+
 export const renderSlot = (
   artworks: TResolvedArtwork[],
   slot: SlotState,
@@ -14,7 +16,6 @@ export const renderSlot = (
     'kb-zoom-in-pan',
     'kb-zoom-out-pan',
   ] as const;
-  const TRANSITION_MS = 700;
 
   const artwork = artworks[slot.artworkIdx];
   if (!artwork) return null;
@@ -24,7 +25,7 @@ export const renderSlot = (
       className="absolute inset-0 overflow-hidden"
       style={{
         opacity: isTop ? 1 : 0,
-        transition: `opacity ${TRANSITION_MS}ms ease-in-out`,
+        transition: `opacity ${DESKTOP_SLIDE_TRANSITION_MS}ms ease-in-out`,
         zIndex: isTop ? 1 : 0,
       }}
     >
@@ -35,7 +36,7 @@ export const renderSlot = (
         className="h-full w-full object-contain"
         style={{
           animationName: kbAnim,
-          animationDuration: `${intervalMs + TRANSITION_MS * 2}ms`,
+          animationDuration: `${intervalMs + DESKTOP_SLIDE_TRANSITION_MS * 2}ms`,
           animationTimingFunction: 'ease-in-out',
           animationFillMode: 'both',
           animationPlayState: isPaused ? 'paused' : 'running',

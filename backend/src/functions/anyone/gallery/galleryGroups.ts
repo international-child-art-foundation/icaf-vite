@@ -20,7 +20,7 @@ function mapGroup(item: Record<string, unknown>): GroupListItem {
     group_id: item.group_id as string,
     theme: item.theme as string | undefined,
     group_type: item.group_type as GroupType,
-    title: item.title as string,
+    title: item.title as string | undefined,
     class_name: item.class_name as string | undefined,
     submitter_display_name: item.submitter_display_name as string | undefined,
     country: item.country as string | undefined,

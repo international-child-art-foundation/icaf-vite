@@ -38,7 +38,7 @@ export function GalleryGroupCard({
   const coverIds = group.preview_art_ids.slice(0, 4);
   const location = [group.region, group.country].filter(Boolean).join(', ');
   const owner = group.submitter_display_name;
-  const title = group.class_name || group.title;
+  const title = group.class_name || group.title || 'Artwork group';
   const theme = groupThemeLabel(group);
   const type = groupLabel(group);
   const isWholeCardInteractive = !actionSlot || interactiveWithActionSlot;
@@ -110,11 +110,13 @@ export function GalleryGroupCard({
           <h3 className="font-montserrat mt-4 text-2xl font-bold leading-tight text-neutral-950 sm:text-3xl">
             {title}
           </h3>
-          {group.class_name && group.title !== group.class_name && (
-            <p className="mt-1 text-base font-medium text-neutral-600">
-              {group.title}
-            </p>
-          )}
+          {group.class_name &&
+            group.title &&
+            group.title !== group.class_name && (
+              <p className="mt-1 text-base font-medium text-neutral-600">
+                {group.title}
+              </p>
+            )}
           {owner && (
             <p className="mt-4 text-sm leading-6 text-neutral-600">
               Submitted by {owner}

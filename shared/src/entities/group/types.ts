@@ -60,7 +60,7 @@ export interface GroupEntity {
 export interface SubmitGroupRequest {
     theme?: string;
     group_type?: GroupType;
-    title: string;
+    title?: string;
     class_name?: string;
     submitter_display_name?: string;
     country?: string;
@@ -131,7 +131,7 @@ export interface GroupListItem {
     group_id: string;
     theme?: string;
     group_type?: GroupType;
-    title: string;
+    title?: string;
     class_name?: string;
     submitter_display_name?: string;
     country?: string;

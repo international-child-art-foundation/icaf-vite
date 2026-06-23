@@ -4,7 +4,7 @@ import { cleanOptionalString } from '../../utils/string.js';
 export function sanitizeSubmitGroupRequest(data: SubmitGroupRequest): SubmitGroupRequest {
     return {
         ...data,
-        title: data.title.normalize('NFC').trim(),
+        title: cleanOptionalString(data.title),
         group_type: cleanOptionalString(data.group_type),
         class_name: cleanOptionalString(data.class_name),
         submitter_display_name: cleanOptionalString(data.submitter_display_name),

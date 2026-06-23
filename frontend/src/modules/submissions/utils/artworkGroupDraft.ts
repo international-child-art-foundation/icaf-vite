@@ -116,9 +116,10 @@ export function validateArtworkGroupSubmission(
     }
   }
 
-  if (!draft.group.title.trim()) {
-    groupErrors.title = 'Group title is required.';
-  } else if (draft.group.title.length > GROUP_MAX_TITLE_LEN) {
+  if (
+    draft.group.title.trim() &&
+    draft.group.title.length > GROUP_MAX_TITLE_LEN
+  ) {
     groupErrors.title = `Use ${GROUP_MAX_TITLE_LEN} characters or less.`;
   }
 

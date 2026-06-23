@@ -18,10 +18,12 @@ const MAX_EMAIL_LEN = 254;
 export function validateSubmitGroupRequest(data: SubmitGroupRequest): string[] {
     const errors: string[] = [];
 
-    if (!data.title?.trim()) {
-        errors.push('title is required');
-    } else if (data.title.length > GROUP_MAX_TITLE_LEN) {
-        errors.push(`title must be ${GROUP_MAX_TITLE_LEN} characters or less`);
+    if (data.title !== undefined) {
+        if (typeof data.title !== 'string' || !data.title.trim()) {
+            errors.push('title, if provided, must be a non-empty string');
+        } else if (data.title.length > GROUP_MAX_TITLE_LEN) {
+            errors.push(`title must be ${GROUP_MAX_TITLE_LEN} characters or less`);
+        }
     }
 
     if (data.group_type !== undefined) {

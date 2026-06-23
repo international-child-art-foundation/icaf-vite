@@ -610,7 +610,7 @@ export function SubmitArtworkGroup({
         submitter_display_name:
           effectiveGroup.submitter_display_name.trim() || undefined,
         theme: effectiveGroup.theme.trim() || undefined,
-        title: effectiveGroup.title.trim(),
+        title: effectiveGroup.title.trim() || undefined,
       };
       const preflightArtworks = artworks.map((artwork) => {
         const file = files[artwork.id];

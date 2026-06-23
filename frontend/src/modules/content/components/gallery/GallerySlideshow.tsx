@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -82,11 +82,6 @@ export const GallerySlideshow = ({
   const [namePinned, setNamePinned] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Share crossfade state (desktop-specific: accounts for share bar visibility)
-  const [shareVisible, setShareVisible] = useState(true);
-  const [deferredIdx, setDeferredIdx] = useState(0);
-  const shareBarVisibleRef = useRef(false);
-
   // Preload next featureUrl (desktop shows full-res images)
   useEffect(() => {
     if (artworks.length > 1) {
@@ -145,20 +140,6 @@ export const GallerySlideshow = ({
     };
   }, []);
 
-  // Share crossfade: fade out on advance, fade back in after 150ms with new artwork
-  useEffect(() => {
-    if (!shareBarVisibleRef.current) {
-      setShareVisible(true);
-      setDeferredIdx(currentIdx);
-    }
-    setShareVisible(false);
-    const t = setTimeout(() => {
-      setShareVisible(true);
-      setDeferredIdx(currentIdx);
-    }, 150);
-    return () => clearTimeout(t);
-  }, [currentIdx]);
-
   if (artworks.length === 0) return null;
 
   const toggleFullscreen = () => {
@@ -175,8 +156,14 @@ export const GallerySlideshow = ({
   const nametagOpacity = namePinned ? 1 : uiOpacity;
   const shareBarOpacity = namePinned && uiState !== 'full' ? 0 : uiOpacity;
   const shareBarVisible = shareBarOpacity > 0;
-  shareBarVisibleRef.current = shareBarVisible;
   const shareBarPointerEvents = !shareBarVisible ? 'none' : ('auto' as const);
+  const createShareUrl = (artworkId: string) => {
+    const url = new URL(window.location.href);
+    url.pathname = '/gallery/slideshow';
+    url.searchParams.set('id', artworkId);
+    url.searchParams.set('paused', 'true');
+    return url.toString();
+  };
 
   return (
     <>
@@ -202,21 +189,24 @@ export const GallerySlideshow = ({
             }}
           >
             <div
-              className="rounded-xl shadow-md"
               style={{
                 opacity: nametagOpacity,
                 transition: 'opacity 0.12s ease-out',
                 position: 'relative',
-                overflow: 'hidden',
               }}
             >
               <div
                 aria-hidden="true"
                 style={{ visibility: 'hidden', pointerEvents: 'none' }}
               >
-                {galleryNametag(artworks[deferredIdx], applyArtworkKudos)}{' '}
+                {galleryNametag(
+                  artworks[currentIdx],
+                  applyArtworkKudos,
+                  false,
+                )}{' '}
               </div>
               <div
+                className="rounded-xl shadow-md"
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -224,16 +214,21 @@ export const GallerySlideshow = ({
                   width: '100%',
                   opacity: topSlot === 'a' ? 1 : 0,
                   transition: `opacity ${DESKTOP_SLIDE_TRANSITION_MS}ms ease-in-out`,
-                  zIndex: topSlot === 'a' ? 1 : 0,
+                  zIndex: topSlot === 'a' ? 11 : 10,
                   pointerEvents: topSlot === 'a' ? 'auto' : 'none',
                 }}
               >
                 {galleryNametag(
                   artworks[slotA.artworkIdx],
                   applyArtworkKudos,
+                  topSlot === 'a',
+                  topSlot === 'a' && slotA.animKey > 0
+                    ? DESKTOP_SLIDE_TRANSITION_MS
+                    : 0,
                 )}
               </div>
               <div
+                className="rounded-xl shadow-md"
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -241,13 +236,17 @@ export const GallerySlideshow = ({
                   width: '100%',
                   opacity: topSlot === 'b' ? 1 : 0,
                   transition: `opacity ${DESKTOP_SLIDE_TRANSITION_MS}ms ease-in-out`,
-                  zIndex: topSlot === 'b' ? 1 : 0,
+                  zIndex: topSlot === 'b' ? 11 : 10,
                   pointerEvents: topSlot === 'b' ? 'auto' : 'none',
                 }}
               >
                 {galleryNametag(
                   artworks[slotB.artworkIdx],
                   applyArtworkKudos,
+                  topSlot === 'b',
+                  topSlot === 'b' && slotB.animKey > 0
+                    ? DESKTOP_SLIDE_TRANSITION_MS
+                    : 0,
                 )}
               </div>
             </div>
@@ -284,13 +283,48 @@ export const GallerySlideshow = ({
               >
                 <div
                   style={{
-                    opacity: shareVisible ? 1 : 0,
-                    transition: shareVisible
-                      ? 'opacity 300ms ease-in 0ms'
-                      : 'opacity 0ms',
+                    position: 'relative',
+                    overflow: 'hidden',
                   }}
                 >
-                  <GallerySlideshowShare shareUrl={artworkShareUrl} />
+                  <div
+                    aria-hidden="true"
+                    style={{ visibility: 'hidden', pointerEvents: 'none' }}
+                  >
+                    <GallerySlideshowShare shareUrl={artworkShareUrl} />
+                  </div>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      opacity: topSlot === 'a' ? 1 : 0,
+                      transition: `opacity ${DESKTOP_SLIDE_TRANSITION_MS}ms ease-in-out`,
+                      zIndex: topSlot === 'a' ? 1 : 0,
+                      pointerEvents: topSlot === 'a' ? 'auto' : 'none',
+                    }}
+                  >
+                    <GallerySlideshowShare
+                      shareUrl={createShareUrl(artworks[slotA.artworkIdx].id)}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      opacity: topSlot === 'b' ? 1 : 0,
+                      transition: `opacity ${DESKTOP_SLIDE_TRANSITION_MS}ms ease-in-out`,
+                      zIndex: topSlot === 'b' ? 1 : 0,
+                      pointerEvents: topSlot === 'b' ? 'auto' : 'none',
+                    }}
+                  >
+                    <GallerySlideshowShare
+                      shareUrl={createShareUrl(artworks[slotB.artworkIdx].id)}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

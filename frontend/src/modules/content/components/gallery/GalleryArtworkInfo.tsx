@@ -25,6 +25,8 @@ type GalleryArtworkInfoProps = {
   maxTags?: number;
   tagsInDescription?: boolean;
   className?: string;
+  autoScrollActive?: boolean;
+  autoScrollResetDelayMs?: number;
 };
 
 const tagToneClasses = {
@@ -136,6 +138,8 @@ export const GalleryArtworkInfo = ({
   maxTags,
   tagsInDescription = descriptionMode !== 'none',
   className = '',
+  autoScrollActive = true,
+  autoScrollResetDelayMs = 0,
 }: GalleryArtworkInfoProps) => {
   const styles = textStyles[variant];
   const primaryText = getArtworkDisplayTitle(artwork);
@@ -179,6 +183,8 @@ export const GalleryArtworkInfo = ({
               <DescriptionScroll
                 key={`desc-${artwork.id}`}
                 description={description}
+                active={autoScrollActive}
+                resetDelayMs={autoScrollResetDelayMs}
               />
             ) : (
               <p

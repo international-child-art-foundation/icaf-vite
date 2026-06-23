@@ -58,7 +58,7 @@ export const GallerySlideshowShare: React.FC<Props> = ({ shareUrl }) => {
   const enc = encodeURIComponent(shareUrl);
 
   return (
-    <div className="flex w-full items-center overflow-hidden rounded-xl bg-white shadow-md">
+    <div className="flex w-full items-center overflow-hidden rounded-xl bg-white">
       <button
         type="button"
         className={BTN}

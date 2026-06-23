@@ -241,6 +241,10 @@ const GalleryCoreInner = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isHorizontal = useMediaQuery('(orientation: landscape)', true);
+  const shouldOpenArtworkSlideshow = useMediaQuery(
+    '(pointer: coarse) and (max-width: 768px)',
+    false,
+  );
   const [searchParams, setSearchParams] = useSearchParams();
 
   const themeFamilies = useMemo(() => buildThemeFamilies(themes), [themes]);
@@ -806,14 +810,6 @@ const GalleryCoreInner = () => {
       .finally(() => setGroupSlideshowLoading(false));
   };
 
-  const openModal = useCallback(
-    (id: string) => {
-      setModalOpen(true);
-      setActiveEntryId(id);
-    },
-    [setActiveEntryId],
-  );
-
   const applyArtworkKudos = useCallback((artId: string, amount: number) => {
     const updateArtwork = (artwork: TResolvedArtwork) =>
       artwork.art_id === artId
@@ -885,6 +881,16 @@ const GalleryCoreInner = () => {
   const startIndex = (pageNumber - 1) * ARTWORKS_PER_PAGE;
   const groupStartIndex = (pageNumber - 1) * GROUPS_PER_PAGE;
   const pageData = artworks.slice(startIndex, startIndex + ARTWORKS_PER_PAGE);
+
+  const openArtwork = (id: string) => {
+    if (shouldOpenArtworkSlideshow) {
+      openSlideshow(id, pageData, pageNumber, true);
+      return;
+    }
+
+    setModalOpen(true);
+    setActiveEntryId(id);
+  };
 
   const openModalSlideshow = (artworkId: string) => {
     const artworkIndex = artworks.findIndex(
@@ -1207,7 +1213,7 @@ const GalleryCoreInner = () => {
             >
               {pageData.map((artwork) => (
                 <div className="flex h-full" key={artwork.id}>
-                  <ArtworkCard artwork={artwork} openModal={openModal} />
+                  <ArtworkCard artwork={artwork} openModal={openArtwork} />
                 </div>
               ))}
             </div>

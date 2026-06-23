@@ -9,7 +9,15 @@ const getCap = (vh: number) => {
   return Math.min(Math.round(vh * 0.4), 300);
 };
 
-export const DescriptionScroll = ({ description }: { description: string }) => {
+export const DescriptionScroll = ({
+  description,
+  active = true,
+  resetDelayMs = 0,
+}: {
+  description: string;
+  active?: boolean;
+  resetDelayMs?: number;
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const pRef = useRef<HTMLParagraphElement>(null);
   const resizeRafRef = useRef<number | null>(null);
@@ -61,39 +69,55 @@ export const DescriptionScroll = ({ description }: { description: string }) => {
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container || scrollDist === 0) return;
+    if (!container) return;
 
-    container.scrollTop = 0;
-    let previousTime: number | null = null;
-    let delayRemaining = SCROLL_START_DELAY_MS;
+    let startTimeout: ReturnType<typeof setTimeout> | null = null;
 
-    const animate = (time: number) => {
-      if (previousTime === null) previousTime = time;
-      const elapsed = time - previousTime;
-      previousTime = time;
+    const start = () => {
+      container.scrollTop = 0;
+      if (!active || scrollDist === 0) return;
 
-      if (!pausedRef.current) {
-        if (delayRemaining > 0) {
-          delayRemaining = Math.max(0, delayRemaining - elapsed);
-        } else if (container.scrollTop < scrollDist) {
-          container.scrollTop = Math.min(
-            scrollDist,
-            container.scrollTop + (elapsed * SCROLL_BASE_PX_S) / 1000,
-          );
+      let previousTime: number | null = null;
+      let delayRemaining = SCROLL_START_DELAY_MS;
+
+      const animate = (time: number) => {
+        if (previousTime === null) previousTime = time;
+        const elapsed = time - previousTime;
+        previousTime = time;
+
+        if (!pausedRef.current) {
+          if (delayRemaining > 0) {
+            delayRemaining = Math.max(0, delayRemaining - elapsed);
+          } else if (container.scrollTop < scrollDist) {
+            container.scrollTop = Math.min(
+              scrollDist,
+              container.scrollTop + (elapsed * SCROLL_BASE_PX_S) / 1000,
+            );
+          }
         }
-      }
+
+        animationRafRef.current = requestAnimationFrame(animate);
+      };
 
       animationRafRef.current = requestAnimationFrame(animate);
     };
 
-    animationRafRef.current = requestAnimationFrame(animate);
+    if (active && resetDelayMs > 0) {
+      startTimeout = setTimeout(start, resetDelayMs);
+    } else {
+      start();
+    }
+
     return () => {
+      if (startTimeout !== null) {
+        clearTimeout(startTimeout);
+      }
       if (animationRafRef.current !== null) {
         cancelAnimationFrame(animationRafRef.current);
         animationRafRef.current = null;
       }
     };
-  }, [description, scrollDist]);
+  }, [active, description, resetDelayMs, scrollDist]);
 
   return (
     <div

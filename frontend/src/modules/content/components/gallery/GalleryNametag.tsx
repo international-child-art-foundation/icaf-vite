@@ -6,6 +6,8 @@ import { KudosControls } from './KudosControls';
 export const galleryNametag = (
   artwork: TResolvedArtwork,
   onKudosApplied?: (artId: string, amount: number) => void,
+  autoScrollActive = true,
+  autoScrollResetDelayMs = 0,
 ) => {
   return (
     <div
@@ -19,6 +21,8 @@ export const galleryNametag = (
           artwork={artwork}
           variant="nametag"
           descriptionMode="scroll"
+          autoScrollActive={autoScrollActive}
+          autoScrollResetDelayMs={autoScrollResetDelayMs}
         />
         <KudosControls
           artwork={artwork}

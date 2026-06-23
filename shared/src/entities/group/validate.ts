@@ -32,10 +32,12 @@ export function validateSubmitGroupRequest(data: SubmitGroupRequest): string[] {
         }
     }
 
-    if (!data.country?.trim()) {
-        errors.push('country is required');
-    } else if (data.country.length > GROUP_MAX_STRING_LEN) {
-        errors.push(`country must be ${GROUP_MAX_STRING_LEN} characters or less`);
+    if (data.country !== undefined) {
+        if (typeof data.country !== 'string' || !data.country.trim()) {
+            errors.push('country, if provided, must be a non-empty string');
+        } else if (data.country.length > GROUP_MAX_STRING_LEN) {
+            errors.push(`country must be ${GROUP_MAX_STRING_LEN} characters or less`);
+        }
     }
 
     if (data.region !== undefined && typeof data.region === 'string' && data.region.length > GROUP_MAX_REGION_LEN) {

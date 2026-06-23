@@ -225,9 +225,7 @@ function validateSubmitArtwork(
     }
   }
 
-  if (!draft.country.trim()) {
-    errors.country = 'Country is required.';
-  } else if (draft.country.length > MAX_STRING_LEN) {
+  if (draft.country.trim() && draft.country.length > MAX_STRING_LEN) {
     errors.country = `Use ${MAX_STRING_LEN} characters or less.`;
   }
 
@@ -493,7 +491,7 @@ export function SubmitArtwork() {
           artworkDetailsMode === 'full' && draft.artwork.age.trim()
             ? Number(draft.artwork.age)
             : undefined,
-        country: draft.country.trim(),
+        country: draft.country.trim() || undefined,
         description: draft.artwork.description.trim() || undefined,
         f_name:
           artworkDetailsMode === 'full'
@@ -743,7 +741,6 @@ export function SubmitArtwork() {
                 label="Artwork country"
                 name="country"
                 value={draft.country}
-                required
                 onChange={(country) =>
                   setDraft((current) => ({
                     ...current,

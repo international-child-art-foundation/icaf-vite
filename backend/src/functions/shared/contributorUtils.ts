@@ -94,7 +94,7 @@ export async function fetchGroupReviewPage(
     title: item.title as string,
     class_name: item.class_name as string | undefined,
     submitter_display_name: item.submitter_display_name as string | undefined,
-    country: item.country as string,
+    country: item.country as string | undefined,
     region: item.region as string | undefined,
     preview_art_ids: ((item.member_art_ids as string[]) ?? []).slice(0, 4),
     member_count: ((item.member_art_ids as string[]) ?? []).length,

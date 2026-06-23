@@ -122,9 +122,10 @@ export function validateArtworkGroupSubmission(
     groupErrors.title = `Use ${GROUP_MAX_TITLE_LEN} characters or less.`;
   }
 
-  if (!draft.group.country.trim()) {
-    groupErrors.country = 'Country is required.';
-  } else if (draft.group.country.length > GROUP_MAX_STRING_LEN) {
+  if (
+    draft.group.country.trim() &&
+    draft.group.country.length > GROUP_MAX_STRING_LEN
+  ) {
     groupErrors.country = `Use ${GROUP_MAX_STRING_LEN} characters or less.`;
   }
 
@@ -266,7 +267,7 @@ export function toArtworkRequest(
       artworkDetailsMode === 'full' && artwork.age.trim()
         ? Number(artwork.age)
         : undefined,
-    country: group.country.trim(),
+    country: group.country.trim() || undefined,
     description: artwork.description.trim() || undefined,
     f_name:
       artworkDetailsMode === 'full'

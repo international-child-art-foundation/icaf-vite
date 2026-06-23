@@ -603,7 +603,7 @@ export function SubmitArtworkGroup({
       const digitalSignature = createDigitalSignature(draft.digitalSignature);
       const groupDetails = {
         class_name: effectiveGroup.class_name.trim() || undefined,
-        country: effectiveGroup.country.trim(),
+        country: effectiveGroup.country.trim() || undefined,
         description: effectiveGroup.description.trim() || undefined,
         notifications: effectiveGroup.notifications,
         region: effectiveGroup.region.trim() || undefined,
@@ -988,7 +988,6 @@ export function SubmitArtworkGroup({
                 label="Country"
                 name="country"
                 value={draft.group.country}
-                required
                 onChange={(country) => updateGroupField('country', country)}
               />
               <AccountTextField

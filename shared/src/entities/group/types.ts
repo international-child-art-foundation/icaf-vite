@@ -134,7 +134,7 @@ export interface GroupListItem {
     title: string;
     class_name?: string;
     submitter_display_name?: string;
-    country: string;
+    country?: string;
     region?: string;
     preview_art_ids: string[];
     member_count: number;

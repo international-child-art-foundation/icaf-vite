@@ -1,9 +1,18 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { X } from 'lucide-react';
 import { MobileImageSwiper } from './MobileImageSwiper';
 import { MobileLip, LIP_COLLAPSED_H } from './MobileLip';
 import { useGallerySlideshowState } from './useGallerySlideshowState';
-import type { IGalleryContext } from '@/modules/content/types/Gallery';
+import type {
+  IGalleryContext,
+  TResolvedArtwork,
+} from '@/modules/content/types/Gallery';
 
 const MOBILE_STYLES = `
   @keyframes mob-fade-in {
@@ -22,6 +31,8 @@ const SWIPE_DIST_THRESH = 0.14;
 const LIP_MAX_HEIGHT_RATIO = 0.6;
 
 type Axis = 'none' | 'vertical' | 'horizontal';
+type LipMeasureKey = 'current' | 'prev' | 'next';
+
 interface VelSample {
   v: number;
   t: number;
@@ -48,6 +59,65 @@ function computeVel(hist: VelSample[], now: number): number {
   const dt = last.t - first.t;
   return dt > 0 ? (last.v - first.v) / dt : 0;
 }
+
+const lerp = (from: number, to: number, t: number) => from + (to - from) * t;
+
+const getWrappedIndex = (index: number, length: number) =>
+  (index + length) % length;
+
+const createArtworkShareUrl = (
+  artworkId: string,
+  fallbackShareUrl: string,
+) => {
+  const url = new URL(fallbackShareUrl || window.location.href);
+  url.pathname = '/gallery/slideshow';
+  url.searchParams.set('id', artworkId);
+  return url.toString();
+};
+
+const MeasuredLip = ({
+  artwork,
+  lipY,
+  maxLipY,
+  shareUrl,
+  measureKey,
+  onMeasure,
+}: {
+  artwork: TResolvedArtwork;
+  lipY: number;
+  maxLipY: number;
+  shareUrl: string;
+  measureKey: LipMeasureKey;
+  onMeasure: (key: LipMeasureKey, height: number) => void;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const measure = () =>
+      onMeasure(measureKey, el.getBoundingClientRect().height);
+    measure();
+
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [artwork, lipY, maxLipY, measureKey, onMeasure, shareUrl]);
+
+  return (
+    <div ref={ref}>
+      <MobileLip
+        artwork={artwork}
+        lipY={lipY}
+        maxLipY={maxLipY}
+        contentOpacity={1}
+        shareUrl={shareUrl}
+      />
+    </div>
+  );
+};
 
 export const GallerySlideshowMobile = ({
   context,
@@ -108,6 +178,18 @@ export const GallerySlideshowMobile = ({
   const maxLipY = Math.max(
     0,
     Math.max(300, stableScreenH * LIP_MAX_HEIGHT_RATIO) - LIP_COLLAPSED_H,
+  );
+  const [lipMeasurements, setLipMeasurements] = useState<
+    Partial<Record<LipMeasureKey, number>>
+  >({});
+  const handleLipMeasure = useCallback(
+    (key: LipMeasureKey, height: number) => {
+      setLipMeasurements((current) => {
+        if (Math.abs((current[key] ?? 0) - height) < 0.5) return current;
+        return { ...current, [key]: height };
+      });
+    },
+    [],
   );
 
   const lipAnimRef = useRef<number | null>(null);
@@ -435,14 +517,29 @@ export const GallerySlideshowMobile = ({
     artFocus || uiState === 'hidden' ? 'none' : ('auto' as const);
 
   const lipDisplayArtwork = currentArtwork ?? artworks[currentIdx];
+  const prevArtwork =
+    artworks.length > 0
+      ? artworks[getWrappedIndex(currentIdx - 1, artworks.length)]
+      : null;
+  const nextArtwork =
+    artworks.length > 0
+      ? artworks[getWrappedIndex(currentIdx + 1, artworks.length)]
+      : null;
+  const getShareUrl = (artwork: TResolvedArtwork) =>
+    createArtworkShareUrl(artwork.id, artworkShareUrl);
   const shareUrl = lipDisplayArtwork
-    ? (() => {
-        const url = new URL(artworkShareUrl || window.location.href);
-        url.pathname = '/gallery/slideshow';
-        url.searchParams.set('id', lipDisplayArtwork.id);
-        return url.toString();
-      })()
+    ? getShareUrl(lipDisplayArtwork)
     : artworkShareUrl;
+  const lipFallbackHeight = LIP_COLLAPSED_H + lipY;
+  const currentLipHeight = lipMeasurements.current ?? lipFallbackHeight;
+  const targetLipHeight =
+    (peekDir > 0 ? lipMeasurements.next : lipMeasurements.prev) ??
+    currentLipHeight;
+  const visibleLipHeight = lerp(
+    currentLipHeight,
+    targetLipHeight,
+    swipeProgress,
+  );
 
   return (
     <>
@@ -529,6 +626,8 @@ export const GallerySlideshowMobile = ({
             transition: 'opacity 0.25s ease',
             pointerEvents: artFocus ? 'none' : 'auto',
             flexShrink: 0,
+            height: visibleLipHeight,
+            overflow: 'hidden',
           }}
         >
           {lipDisplayArtwork && (
@@ -537,8 +636,56 @@ export const GallerySlideshowMobile = ({
               lipY={lipY}
               maxLipY={maxLipY}
               contentOpacity={lipContentOpacity}
+              height="100%"
               shareUrl={shareUrl}
               onKudosApplied={applyArtworkKudos}
+            />
+          )}
+        </div>
+
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'fixed',
+            left: 0,
+            bottom: 0,
+            width: '100%',
+            visibility: 'hidden',
+            pointerEvents: 'none',
+            zIndex: -1,
+          }}
+        >
+          {lipDisplayArtwork && (
+            <MeasuredLip
+              key={`current-${lipDisplayArtwork.id}`}
+              artwork={lipDisplayArtwork}
+              lipY={lipY}
+              maxLipY={maxLipY}
+              shareUrl={shareUrl}
+              measureKey="current"
+              onMeasure={handleLipMeasure}
+            />
+          )}
+          {prevArtwork && (
+            <MeasuredLip
+              key={`prev-${prevArtwork.id}`}
+              artwork={prevArtwork}
+              lipY={lipY}
+              maxLipY={maxLipY}
+              shareUrl={getShareUrl(prevArtwork)}
+              measureKey="prev"
+              onMeasure={handleLipMeasure}
+            />
+          )}
+          {nextArtwork && (
+            <MeasuredLip
+              key={`next-${nextArtwork.id}`}
+              artwork={nextArtwork}
+              lipY={lipY}
+              maxLipY={maxLipY}
+              shareUrl={getShareUrl(nextArtwork)}
+              measureKey="next"
+              onMeasure={handleLipMeasure}
             />
           )}
         </div>

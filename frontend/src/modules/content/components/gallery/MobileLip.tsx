@@ -244,6 +244,7 @@ interface Props {
   lipY: number; // 0 = collapsed, maxLipY = fully open
   maxLipY: number;
   contentOpacity: number;
+  height?: number | string;
   shareUrl: string;
   onKudosApplied?: (artId: string, amount: number) => void;
 }
@@ -257,6 +258,7 @@ export const MobileLip = ({
   lipY,
   maxLipY,
   contentOpacity,
+  height,
   shareUrl,
   onKudosApplied,
 }: Props) => {
@@ -291,6 +293,7 @@ export const MobileLip = ({
         borderRadius: `${CORNER_R}px ${CORNER_R}px 0 0`,
         overflow: 'hidden',
         background: 'white',
+        height,
         maxHeight: LIP_COLLAPSED_H + lipY,
         display: 'flex',
         flexDirection: 'column',

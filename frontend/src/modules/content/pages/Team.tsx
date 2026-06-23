@@ -9,9 +9,9 @@ import { Seo } from '@/modules/content/components/shared/Seo';
 import { scrollToSection } from '@/utils/utils';
 
 const teamMetadata = {
-  title: 'Team | ICAF',
+  title: 'Meet the ICAF Team — The People Behind Our Global Arts Mission',
   description:
-    'ICAF’s team is a dedicated group of creatives, educators, and professionals working together to help young artists express their imagination.',
+    "Get to know the dedicated staff and leadership behind ICAF's global arts education programs, festivals, and initiatives that empower children around the world.",
   path: '/about/team',
 };
 

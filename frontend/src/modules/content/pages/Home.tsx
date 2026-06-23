@@ -63,9 +63,10 @@ function HomeCarouselWhenVisible() {
 }
 
 const homeMetadata = {
-  title: 'Home | ICAF',
+  title:
+    'ICAF — Inspiring Creativity & Empathy in Children Through the Arts',
   description:
-    'The International Child Art Foundation (ICAF) empowers children worldwide through art, creativity, and empathy-building programs.',
+    "The International Child Art Foundation nurtures children's creativity and empathy through global art programs, festivals, and education. Discover how art changes lives.",
   path: '/',
 };
 

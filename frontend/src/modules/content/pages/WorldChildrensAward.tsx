@@ -8,9 +8,10 @@ import { Seo } from '@/modules/content/components/shared/Seo';
 import { PageBottomSpacer } from '@/modules/content/components/shared/PageBottomSpacer';
 
 const worldChildrensAwardMetadata = {
-  title: "World Children's Award | ICAF",
+  title:
+    "World Children's Award — Recognizing Outstanding Young Artists",
   description:
-    "ICAF's World Children's Award allows young people to honor their favorite businesses, philanthropies, and cultural and educational leaders.",
+    'The ICAF World Children\'s Award celebrates exceptional young artists from around the globe, honoring creativity, cultural expression, and artistic excellence.',
   path: '/programs/world-childrens-award',
 };
 

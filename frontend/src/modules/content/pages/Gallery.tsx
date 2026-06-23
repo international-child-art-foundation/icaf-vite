@@ -9,9 +9,9 @@ import { Button } from '@/shared/components/ui/button';
 import { Link } from 'react-router-dom';
 
 const galleryMetadata = {
-  title: 'Gallery | ICAF',
+  title: 'ICAF Gallery — Artwork from Children Around the World',
   description:
-    "Browse artwork from children around the world submitted to ICAF's Arts Olympiad.",
+    "Browse ICAF's gallery of artwork created by children from around the world, showcasing creativity, cultural expression, and the power of arts education.",
   path: '/gallery',
 };
 

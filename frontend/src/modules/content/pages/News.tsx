@@ -3,9 +3,9 @@ import NewsGuy from '@/modules/content/assets/news/newspaper.svg';
 import { Seo } from '@/modules/content/components/shared/Seo';
 
 const newsMetadata = {
-  title: 'News | ICAF',
+  title: 'ICAF News — Latest Updates, Stories & Announcements',
   description:
-    'Catch up on the latest news surrounding the International Child Art Foundation.',
+    'Stay up to date with the latest news, stories, and announcements from the International Child Art Foundation and our global arts education programs.',
   path: '/news-events/news',
 };
 

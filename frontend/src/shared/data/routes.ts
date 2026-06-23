@@ -97,7 +97,7 @@ export const routes: RouteAliasGroup[] = [
     aliases: ['/news', '/news-events'],
   },
   {
-    main: '/get-involved/volunteer',
+    main: '/get-involved/volunteers',
     aliases: ['/volunteer', '/volinteer', '/volunter', '/volunteering'],
   },
   {

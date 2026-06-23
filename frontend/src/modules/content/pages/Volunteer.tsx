@@ -7,9 +7,9 @@ import { contactFormConfigs } from '@/shared/data/contact';
 import { Seo } from '@/modules/content/components/shared/Seo';
 
 const volunteerMetadata = {
-  title: 'Volunteers | ICAF',
+  title: 'Volunteer with ICAF — Support Arts Education Around the World',
   description:
-    'ICAF volunteers bring their time, skills, and heart to help children express their creativity and grow through the arts.',
+    'Join ICAF as a volunteer and help bring arts education and creative programs to children worldwide. Explore volunteer opportunities and make a global impact.',
   path: '/get-involved/volunteers',
 };
 
@@ -20,7 +20,10 @@ export const Volunteer = () => {
       <div className="content-gap">
         <VolunteerHeader />
         <WhyVolunteer />
-        <ContactForm config={contactFormConfigs['volunteer']} />{' '}
+        <ContactForm
+          config={contactFormConfigs['volunteer']}
+          headingLevel="h2"
+        />{' '}
         <div className="w-screen-2xl mx-8 mb-12 grid grid-cols-1 gap-8 rounded-xl md:mx-12 md:grid-cols-10 lg:mx-16 xl:mx-20">
           <img
             src={artworkShowcase}

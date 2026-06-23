@@ -6,9 +6,9 @@ import { useWindowSize } from 'usehooks-ts';
 import { Seo } from '@/modules/content/components/shared/Seo';
 
 const historyMetadata = {
-  title: 'History | ICAF',
+  title: 'ICAF History — Empowering Children Through the Arts Since 1997',
   description:
-    'Learn about the major events that have shaped ICAF since its inception in 1997.',
+    'Explore the history of the International Child Art Foundation — from our founding in 1997 to decades of global impact through arts education and cultural exchange.',
   path: '/about/history',
 };
 

@@ -13,6 +13,7 @@ type ErrorType = 'none' | 'validation' | 'server';
 
 interface ContactFormProps {
   config: ContactFormConfig;
+  headingLevel?: 'h1' | 'h2';
 }
 
 function getLabelWithoutAsterisk(label: string): string {
@@ -198,7 +199,11 @@ function renderField(field: ContactField) {
   );
 }
 
-export const ContactForm = ({ config }: ContactFormProps) => {
+export const ContactForm = ({
+  config,
+  headingLevel = 'h1',
+}: ContactFormProps) => {
+  const HeadingTag = headingLevel;
   const size = useWindowSize();
   const [status, setStatus] = useState<Status>('idle');
   const [errorType, setErrorType] = useState<ErrorType>('none');
@@ -349,9 +354,9 @@ export const ContactForm = ({ config }: ContactFormProps) => {
     return (
       <div ref={containerRef} className="breakout-w m-pad py-12">
         <div className="content-w mb-10">
-          <h1 className="font-montserrat text-5xl font-semibold">
+          <HeadingTag className="font-montserrat text-5xl font-semibold">
             {config.title}
-          </h1>
+          </HeadingTag>
           <p className="text-2xl">{config.subtitle}</p>
         </div>
 
@@ -397,9 +402,9 @@ export const ContactForm = ({ config }: ContactFormProps) => {
       )}
 
       <div className="content-w mb-10">
-        <h1 className="font-montserrat text-4xl font-semibold">
+        <HeadingTag className="font-montserrat text-4xl font-semibold">
           {config.title}
-        </h1>
+        </HeadingTag>
         <p className="text-2xl">{config.subtitle}</p>
       </div>
 

@@ -8,8 +8,9 @@ import { SpreadCreativity } from '@/modules/content/components/student/SpreadCre
 import { Seo } from '@/modules/content/components/shared/Seo';
 
 const studentMetadata = {
-  title: 'Students | ICAF',
-  description: 'Bring your ideas to life by joining ICAF’s creative programs.',
+  title: 'Student Opportunities at ICAF — Internships & Arts Programs',
+  description:
+    "Students can get involved with ICAF through internships, volunteer programs, and arts initiatives that build skills and support children's creativity worldwide.",
   path: '/get-involved/students',
 };
 

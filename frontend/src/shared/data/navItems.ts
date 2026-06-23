@@ -143,7 +143,7 @@ export const navItems: NavItem[] = [
         hoverDescription: 'Help ICAF achieve its vision.',
       },
       {
-        label: 'Profesionals',
+        label: 'Professionals',
         href: '/get-involved/professionals',
         imageSrc: professional,
         hoverDescription: 'Collaborate professionally with ICAF.',

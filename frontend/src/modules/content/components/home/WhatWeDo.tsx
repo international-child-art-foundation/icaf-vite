@@ -38,9 +38,9 @@ const WhatWeDo = () => {
               loading="lazy"
             />
             <div className="flex flex-row gap-7 lg:flex-col lg:items-center lg:gap-2">
-              <h1 className="font-montserrat text-2xl font-semibold text-black">
+              <p className="font-montserrat text-2xl font-semibold text-black">
                 01
-              </h1>
+              </p>
               <p className="font-sans text-xl text-black lg:text-center">
                 Through free school art programs, we motivate students to
                 embrace the role of "artist-athletes," nurturing creative minds
@@ -52,9 +52,9 @@ const WhatWeDo = () => {
           <div className="flex flex-1 flex-col items-center gap-4 lg:gap-6">
             <img src={globeKids} className="h-[204px]" alt="" loading="lazy" />
             <div className="flex flex-row gap-7 lg:flex-col lg:items-center lg:gap-2">
-              <h1 className="font-montserrat text-2xl font-semibold text-black">
+              <p className="font-montserrat text-2xl font-semibold text-black">
                 02
-              </h1>
+              </p>
               <p className="font-sans text-xl text-black lg:text-center">
                 Through festivals, interactive exhibitions, and ChildArt
                 magazine, we inspire students to become "creative-empaths,"

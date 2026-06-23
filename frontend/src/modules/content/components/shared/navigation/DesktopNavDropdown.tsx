@@ -98,7 +98,7 @@ const DesktopNavDropdown: FC<DesktopNavDropdownProps> = ({
                           : 'translate-y-[calc(100%-3rem)]'
                       }`}
                     >
-                      <h3
+                      <p
                         className={`text-text-inverse flex items-center text-2xl font-bold leading-[1.4] tracking-wide ${
                           item.children?.length != undefined &&
                           item.children?.length > 3
@@ -107,7 +107,7 @@ const DesktopNavDropdown: FC<DesktopNavDropdownProps> = ({
                         }`}
                       >
                         {child.label}
-                      </h3>
+                      </p>
 
                       <div className="opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                         <p

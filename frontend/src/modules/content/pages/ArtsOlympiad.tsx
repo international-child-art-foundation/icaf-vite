@@ -7,9 +7,10 @@ import { PageBottomSpacer } from '@/modules/content/components/shared/PageBottom
 import { Seo } from '@/modules/content/components/shared/Seo';
 
 const artsOlympiadMetadata = {
-  title: 'Arts Olympaid | ICAF',
+  title:
+    "The Arts Olympiad — ICAF's Global Children's Art Competition",
   description:
-    "ICAF's Arts Olympiad is a school art program and an afterschool art program for students aged 8 to 12. ",
+    "The Arts Olympiad is ICAF's flagship school art program, inviting children worldwide to express creativity and cultural understanding through artistic competition.",
   path: '/programs/arts-olympiad',
 };
 

@@ -36,10 +36,10 @@ import YourDonations from '@/modules/content/components/shared/YourDonations';
 import { Seo } from '@/modules/content/components/shared/Seo';
 
 const partnersMetadata = {
-  title: 'Partners | ICAF',
+  title: 'ICAF Partners — Organizations Supporting Global Arts Education',
   description:
-    'ICAF partners with organizations worldwide to nurture creativity and empathy in children.',
-  path: '/partners',
+    'Meet the organizations and institutions partnering with ICAF to bring arts education, creativity, and cross-cultural connection to children around the world.',
+  path: '/about/partners',
 };
 
 const partners: IPartners = [

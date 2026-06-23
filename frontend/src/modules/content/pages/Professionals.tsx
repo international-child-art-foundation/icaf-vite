@@ -7,9 +7,10 @@ import { contactFormConfigs } from '@/shared/data/contact';
 import { Seo } from '@/modules/content/components/shared/Seo';
 
 const professionalsMetadata = {
-  title: 'Professionals | ICAF',
+  title:
+    'Professional Opportunities at ICAF — Join Our Global Arts Network',
   description:
-    'ICAF partners with professionals around the world to democratize creativity and spread empathy.',
+    'ICAF welcomes arts educators, administrators, and creative professionals to contribute their expertise to our global programs and mission-driven initiatives.',
   path: '/get-involved/professionals',
 };
 
@@ -21,7 +22,10 @@ export const Professionals = () => {
         <ProfessionalsHeader />
         <ProfessionalsIntro />
         <ProfessionalsHowTo />
-        <ContactForm config={contactFormConfigs['professionals']} />
+        <ContactForm
+          config={contactFormConfigs['professionals']}
+          headingLevel="h2"
+        />
         <div className="flex w-full justify-center overflow-hidden">
           <img src={faceCollage} className="w-full min-w-[1000px]" alt="" />
         </div>

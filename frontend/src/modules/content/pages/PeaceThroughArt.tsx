@@ -9,9 +9,9 @@ import { PTALearnMore } from '@/modules/content/components/peaceThroughArt/PTALe
 import { Seo } from '@/modules/content/components/shared/Seo';
 
 const peaceThroughArtMetadata = {
-  title: 'Peace Through Art | ICAF',
+  title: "Peace Through Art — ICAF's Program for Global Understanding",
   description:
-    "ICAF's Peace Through Art initiative deploys creativity to inspire mutual empathy and break cycles of trauma.",
+    "ICAF's Peace Through Art program uses creative expression to build empathy and cross-cultural understanding among children and communities worldwide.",
   path: '/programs/peace-through-art',
 };
 

@@ -11,9 +11,9 @@ import { Seo } from '@/modules/content/components/shared/Seo';
 import { PageBottomSpacer } from '@/modules/content/components/shared/PageBottomSpacer';
 
 const aboutMetadata = {
-  title: 'About | ICAF',
+  title: 'About ICAF — Our Mission, Vision & Global Arts Programs',
   description:
-    'The International Child Art Foundation (ICAF) fosters children’s creativity and empathy through global art programs, festivals, research, and educational initiatives.',
+    "Learn about ICAF's mission to nurture creativity and empathy in children worldwide through arts education, global festivals, and cross-cultural programs since 1997.",
   path: '/about',
 };
 

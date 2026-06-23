@@ -14,10 +14,12 @@ import CookieBanner from './modules/content/components/shared/CookieBanner';
 import { MyIcafAccessGate } from './modules/dashboard/components/MyIcafAccessGate';
 
 export const metadata = {
-  title: 'Home | ICAF',
+  title:
+    'ICAF — Inspiring Creativity & Empathy in Children Through the Arts',
   openGraph: {
     ...sharedOpenGraph,
-    title: 'Home | ICAF',
+    title:
+      'ICAF — Inspiring Creativity & Empathy in Children Through the Arts',
   },
 };
 

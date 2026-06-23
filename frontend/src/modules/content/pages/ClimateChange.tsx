@@ -6,9 +6,10 @@ import { HealthAndEnvironmentDay } from '@/modules/content/components/climateCha
 import { Seo } from '@/modules/content/components/shared/Seo';
 
 const climateChangeMetadata = {
-  title: 'Climate Change | ICAF',
+  title:
+    "Climate Change & the Arts — ICAF's Environmental Arts Program",
   description:
-    "ICAF is committed to spreading awareness about climate change and its impact on our childrens' future.",
+    "ICAF's climate change program engages young artists in exploring environmental themes through creativity, helping children understand and respond to our changing world.",
   path: '/programs/climate-change',
 };
 

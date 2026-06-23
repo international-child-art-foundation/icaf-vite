@@ -8,9 +8,10 @@ import YourDonations from '@/modules/content/components/shared/YourDonations';
 import { Seo } from '@/modules/content/components/shared/Seo';
 
 const healingArtsMetadata = {
-  title: 'Healing Arts | ICAF',
+  title:
+    "Healing Arts Program — ICAF's Arts Therapy & Wellness Initiative",
   description:
-    "Learn about ICAF's initiatives to help children heal from the effects of natural disasters.",
+    "ICAF's Healing Arts program uses creative expression to support children's emotional wellbeing, resilience, and recovery through arts therapy and education.",
   path: '/programs/healing-arts',
 };
 

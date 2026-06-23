@@ -6,9 +6,10 @@ import WCFCTA from '@/modules/content/components/worldChildrensFestival/WCFCTA';
 import { Seo } from '@/modules/content/components/shared/Seo';
 
 const WCFMetadata = {
-  title: "World Children's Festival | ICAF",
+  title:
+    "World Children's Festival — A Global Celebration of Young Artists",
   description:
-    'The World Children’s Festival brings together young creators from around the globe to celebrate imagination, share cultures, and show how creativity can shape a brighter future.',
+    "The World Children's Festival brings young artists from around the world together to celebrate creativity, cultural exchange, and the power of the arts.",
   path: '/programs/world-childrens-festival',
 };
 

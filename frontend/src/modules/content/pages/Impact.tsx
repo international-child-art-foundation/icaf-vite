@@ -11,9 +11,11 @@ import DonateButton from '@/shared/components/ui/donateButton';
 import YourDonations from '@/modules/content/components/shared/YourDonations';
 
 const impactMetadata = {
-  title: 'Impact | ICAF',
-  description: 'Learn about how ICAF has made difference in the world.',
-  path: '/impact',
+  title:
+    "ICAF Impact — How the Arts Are Changing Children's Lives Worldwide",
+  description:
+    "See the measurable impact of ICAF's global arts programs — from 5 million children reached to partnerships with educators and organizations in countries worldwide.",
+  path: '/about/impact',
 };
 
 const Impact = () => {

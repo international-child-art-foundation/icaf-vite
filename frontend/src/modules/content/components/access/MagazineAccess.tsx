@@ -2,6 +2,14 @@ import { useState, useEffect } from 'react';
 import { IMagazine } from '@/modules/content/types/Magazines';
 import { getMagazines } from '@/utils/server_asset_handlers/magazines';
 import { MagazineEntryWithLink } from './MagazineEntryWithLink';
+import { Seo } from '@/modules/content/components/shared/Seo';
+
+const magazineAccessMetadata = {
+  title: 'ChildArt Magazine Access — ICAF',
+  description: 'Access ChildArt Magazine issues from ICAF.',
+  path: '/access',
+  noIndex: true,
+};
 
 export const MagazineAccess = () => {
   const [magazines, setMagazines] = useState<IMagazine[]>([]);
@@ -11,18 +19,21 @@ export const MagazineAccess = () => {
   }, []);
 
   return (
-    <div className="content-w m-pad flex flex-col gap-12">
-      <div className="font-montserrat mx-auto text-center text-5xl font-semibold">
-        <p>ChildArt Magazine</p>
+    <>
+      <Seo {...magazineAccessMetadata} />
+      <div className="content-w m-pad flex flex-col gap-12">
+        <div className="font-montserrat mx-auto text-center text-5xl font-semibold">
+          <p>ChildArt Magazine</p>
+        </div>
+        <div className="grid grid-cols-1 gap-4 overflow-hidden rounded-lg bg-gradient-to-b from-slate-100 via-slate-50 to-slate-200 p-4 shadow-lg md:grid-cols-2 lg:grid-cols-3">
+          {magazines.map((magazine) => (
+            <MagazineEntryWithLink
+              key={magazine.name + magazine.period}
+              {...magazine}
+            />
+          ))}
+        </div>
       </div>
-      <div className="grid grid-cols-1 gap-4 overflow-hidden rounded-lg bg-gradient-to-b from-slate-100 via-slate-50 to-slate-200 p-4 shadow-lg md:grid-cols-2 lg:grid-cols-3">
-        {magazines.map((magazine) => (
-          <MagazineEntryWithLink
-            key={magazine.name + magazine.period}
-            {...magazine}
-          />
-        ))}
-      </div>
-    </div>
+    </>
   );
 };

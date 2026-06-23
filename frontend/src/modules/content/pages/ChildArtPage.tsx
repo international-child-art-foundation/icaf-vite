@@ -10,9 +10,10 @@ import DonateButton from '@/shared/components/ui/donateButton';
 import { Seo } from '@/modules/content/components/shared/Seo';
 
 const childArtMetadata = {
-  title: 'ChildArt Magazine | ICAF',
+  title:
+    "ChildArt Magazine — ICAF's Publication on Children & the Arts",
   description:
-    'ChildArt Magazine is a quarterly magazine dedicated to the impact of child art on the world.',
+    "ChildArt is ICAF's award-winning magazine exploring the intersection of children, creativity, and global culture. Browse issues and learn how art shapes young minds.",
   path: '/programs/childart-magazine',
 };
 

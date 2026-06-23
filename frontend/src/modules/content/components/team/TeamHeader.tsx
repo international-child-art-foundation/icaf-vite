@@ -28,10 +28,10 @@ const TeamHeader = ({ scrollFunction }: TeamHeaderProps) => {
   return (
     <div className="site-w grid grid-cols-1 grid-rows-1">
       <div className="hero-w font-montserrat z-10 col-start-1 row-start-1 mt-44 flex flex-col gap-4 pt-10 text-3xl font-extrabold text-white md:mt-44 md:text-4xl lg:mt-44 lg:text-6xl">
-        <div className="flex flex-col gap-0 text-left md:gap-4 md:text-center">
-          <h1 className="text-[#FFD743]">Meet the People</h1>
-          <h1>Behind ICAF's Mission</h1>
-        </div>
+        <h1 className="flex flex-col gap-0 text-left md:gap-4 md:text-center">
+          <span className="text-[#FFD743]">Meet the People</span>
+          <span>Behind ICAF's Mission</span>
+        </h1>
         <p className="font-openSans mx-auto text-left text-lg font-normal text-white md:max-w-[70%] 2xl:max-w-[50%]">
           Our leadership and team are dedicated to inspiring children through
           creativity. From strategic direction to hands-on program execution,

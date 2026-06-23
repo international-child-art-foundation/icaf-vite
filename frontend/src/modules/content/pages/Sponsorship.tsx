@@ -10,9 +10,9 @@ import YourDonations from '@/modules/content/components/shared/YourDonations';
 import { Seo } from '@/modules/content/components/shared/Seo';
 
 const sponsorshipMetadata = {
-  title: 'Sponsorship | ICAF',
+  title: 'Sponsor ICAF — Support Global Arts Education for Children',
   description:
-    'Join ICAF in uplifting children’s creativity while strengthening your organization’s presence as a champion of young people',
+    'Partner with ICAF to support arts education for children worldwide. Sponsorship opportunities connect your brand with a global mission of creativity and empathy.',
   path: '/sponsorship',
 };
 

@@ -31,9 +31,9 @@ const MissionVision = () => {
           <div className="flex flex-col gap-8 lg:grid lg:grid-cols-2 lg:grid-rows-1 lg:gap-10">
             <div className="grid grid-cols-[36px_1fr] grid-rows-[36px_1fr] items-center gap-4 gap-y-2 rounded-lg bg-gradient-to-br from-white/60 via-white/50 to-white/60 py-6 transition-colors hover:bg-white/80 lg:grid lg:flex-row">
               <ClickIcon className="col-start-1 row-start-1 lg:col-start-1 lg:row-start-1" />
-              <h1 className="font-montserrat text-tertiary-blue col-start-2 row-start-1 text-3xl font-semibold leading-6 md:text-4xl lg:col-start-2 lg:row-start-1">
+              <h2 className="font-montserrat text-tertiary-blue col-start-2 row-start-1 text-3xl font-semibold leading-6 md:text-4xl lg:col-start-2 lg:row-start-1">
                 Mission
-              </h1>
+              </h2>
               <p className="font-openSans col-span-2 col-start-1 row-start-2 self-start text-base text-black lg:col-start-2 lg:row-start-2 lg:text-2xl">
                 To serve American children as their national arts organization,
                 cultivating their{' '}
@@ -47,9 +47,9 @@ const MissionVision = () => {
             </div>
             <div className="grid grid-cols-[36px_1fr] grid-rows-[36px_1fr] items-center gap-4 gap-y-2 rounded-lg bg-gradient-to-br from-white/60 via-white/50 to-white/60 py-6 transition-colors hover:bg-white/80 lg:grid lg:flex-row">
               <VisibilityIcon className="lg:col-start-1 lg:row-start-1" />
-              <h1 className="font-montserrat text-error text-3xl font-semibold leading-6 md:text-4xl lg:col-start-2 lg:row-start-1">
+              <h2 className="font-montserrat text-error text-3xl font-semibold leading-6 md:text-4xl lg:col-start-2 lg:row-start-1">
                 Vision
-              </h1>
+              </h2>
               <p className="font-openSans col-span-2 col-start-1 row-start-2 text-base text-black lg:col-start-2 lg:row-start-2 lg:text-2xl">
                 To <span className="font-semibold">democratize creativity</span>{' '}
                 and <span className="font-semibold">mainstream empathy</span>{' '}

@@ -27,18 +27,18 @@ const HomeHeader = () => {
   return (
     <div className="site-w grid grid-cols-1 grid-rows-1">
       <div className="hero-w font-montserrat z-10 col-start-1 row-start-1 mt-8 flex flex-col gap-4 pt-10 text-3xl font-extrabold text-white md:mt-20 md:text-4xl lg:mt-28 lg:text-6xl">
-        <div className="block">
-          <h2>Welcome to ICAF</h2>
-          <h2 className="text-tertiary-yellow [text-shadow:1px_1px_5px_rgba(0,0,0,0.5)]">
+        <h1 className="block">
+          <span className="block">Welcome to ICAF</span>
+          <span className="text-tertiary-yellow block [text-shadow:1px_1px_5px_rgba(0,0,0,0.5)]">
             Inspiring Creativity,
-          </h2>
-          <h2 className="text-tertiary-yellow [text-shadow:1px_1px_5px_rgba(0,0,0,0.5)]">
+          </span>
+          <span className="text-tertiary-yellow block [text-shadow:1px_1px_5px_rgba(0,0,0,0.5)]">
             Transforming Lives
-          </h2>
-        </div>
-        <h3 className="font-openSans text-lg font-normal text-white md:max-w-[50%]">
+          </span>
+        </h1>
+        <p className="font-openSans text-lg font-normal text-white md:max-w-[50%]">
           Empowering the next generation through the arts since 1997.
-        </h3>
+        </p>
       </div>
       <div className="col-start-1 row-start-1">
         <CurvedImage

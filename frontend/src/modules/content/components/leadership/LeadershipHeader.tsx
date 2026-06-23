@@ -23,12 +23,12 @@ export const LeadershipHeader = () => {
   return (
     <div className="site-w grid grid-cols-1 grid-rows-1">
       <div className="hero-w font-montserrat sm:mt-none z-10 col-start-1 row-start-1 mt-32 flex flex-col gap-2 pt-6 text-3xl font-extrabold text-white sm:gap-4 sm:pt-10 md:mt-8 md:text-4xl lg:mt-28 lg:text-6xl">
-        <div className="font-montserrat block text-[30px] leading-[40px] sm:text-[40px] sm:leading-[50px] md:text-[60px] md:leading-[70px]">
-          <h1 className="text-tertiary-yellow">Global Leaders</h1>
-          <h1 className="lg:text-[48px] lg:leading-[58px]">
+        <h1 className="font-montserrat block text-[30px] leading-[40px] sm:text-[40px] sm:leading-[50px] md:text-[60px] md:leading-[70px]">
+          <span className="text-tertiary-yellow block">Global Leaders</span>
+          <span className="block lg:text-[48px] lg:leading-[58px]">
             Guiding Our Mission
-          </h1>
-        </div>
+          </span>
+        </h1>
       </div>
       <div className="col-start-1 row-start-1">
         <CurvedImage

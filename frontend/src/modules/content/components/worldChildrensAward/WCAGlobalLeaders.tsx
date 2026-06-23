@@ -7,9 +7,9 @@ import { linkClasses } from '@/shared/data/linkClasses';
 export const WCAGlobalLeaders = () => {
   return (
     <div className="flex flex-col gap-10">
-      <h1 className="font-montserrat m-pad mx-auto text-center text-[40px] font-extrabold">
+      <h2 className="font-montserrat m-pad mx-auto text-center text-[40px] font-extrabold">
         Honoring Global Leaders Making a Difference
-      </h1>
+      </h2>
       <div className="grid grid-cols-1 grid-rows-1">
         <div className="z-20 col-start-1 row-start-1 flex flex-col gap-10">
           {WCAGlobalLeadersData.map((data, idx) => (

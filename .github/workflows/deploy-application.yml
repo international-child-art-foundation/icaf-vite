@@ -46,6 +46,8 @@ jobs:
           AWS_DEPLOY_ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           EVERY_WEBHOOK_SECRET: ${{ secrets.EVERY_WEBHOOK_SECRET }}
+          GA4_API_SECRET: ${{ secrets.GA4_API_SECRET }}
+          GA4_MEASUREMENT_ID: ${{ env.VITE_GA_MEASUREMENT_ID }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           SFTP_HOST: ${{ secrets.SFTP_HOST }}
@@ -70,6 +72,14 @@ jobs:
 
           if [ "$GITHUB_REF_NAME" = "main" ] && [ -z "$EVERY_WEBHOOK_SECRET" ]; then
             missing+=("EVERY_WEBHOOK_SECRET")
+          fi
+
+          if [ "$GITHUB_REF_NAME" = "main" ] && [ -z "$GA4_API_SECRET" ]; then
+            missing+=("GA4_API_SECRET")
+          fi
+
+          if [ "$GITHUB_REF_NAME" = "main" ] && [ -z "$GA4_MEASUREMENT_ID" ]; then
+            missing+=("GA4_MEASUREMENT_ID")
           fi
 
           if [ "${#missing[@]}" -ne 0 ]; then
@@ -131,6 +141,8 @@ jobs:
         env:
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           EVERY_WEBHOOK_SECRET: ${{ secrets.EVERY_WEBHOOK_SECRET }}
+          GA4_API_SECRET: ${{ secrets.GA4_API_SECRET }}
+          GA4_MEASUREMENT_ID: ${{ env.VITE_GA_MEASUREMENT_ID }}
         run: |
           pnpm exec cdk diff --all
           pnpm exec cdk deploy --all --require-approval never --outputs-file cdk-outputs.json

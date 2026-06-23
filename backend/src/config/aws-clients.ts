@@ -55,3 +55,5 @@ export const MAGAZINES_CLOUDFRONT_DOMAIN = process.env.MAGAZINES_CLOUDFRONT_DOMA
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
 export const EVERY_WEBHOOK_ENABLED = process.env.EVERY_WEBHOOK_ENABLED === "true";
 export const EVERY_WEBHOOK_SECRET = process.env.EVERY_WEBHOOK_SECRET!;
+export const GA4_MEASUREMENT_ID = process.env.GA4_MEASUREMENT_ID;
+export const GA4_API_SECRET = process.env.GA4_API_SECRET;

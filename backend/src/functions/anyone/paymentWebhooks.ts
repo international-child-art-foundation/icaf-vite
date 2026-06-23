@@ -22,6 +22,7 @@ import {
 } from "../../config/aws-clients";
 import { EntityType, GSI } from "../../dynamo/ddbSchemaConsts";
 import { emailGsiSk, emailPk } from "../../dynamo/emailGsi";
+import { sendGa4Purchase } from "../../utils/ga4Purchase";
 
 type PaymentService = "stripe" | "every";
 
@@ -286,6 +287,15 @@ async function recordPayment(input: PaymentRecordInput): Promise<ApiGatewayRespo
     }
     throw error;
   }
+
+  await sendGa4Purchase({
+    transactionId: input.paymentId,
+    paymentService: input.paymentService,
+    purpose: input.purpose,
+    userId,
+    amountMinorUnits: input.amountCents,
+    currency: input.currency,
+  });
 
   return ok();
 }

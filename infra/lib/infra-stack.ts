@@ -428,6 +428,12 @@ export class InfraStack extends Stack {
       EVERY_WEBHOOK_SECRET: deployment.everyWebhookEnabled
         ? requiredEnvironmentValue("EVERY_WEBHOOK_SECRET")
         : "",
+      GA4_MEASUREMENT_ID: deployment.environment === "production"
+        ? requiredEnvironmentValue("GA4_MEASUREMENT_ID")
+        : process.env.GA4_MEASUREMENT_ID ?? "",
+      GA4_API_SECRET: deployment.environment === "production"
+        ? requiredEnvironmentValue("GA4_API_SECRET")
+        : process.env.GA4_API_SECRET ?? "",
     };
 
     // Default log retention for all NodejsFunctions in this stack.

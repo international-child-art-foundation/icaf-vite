@@ -32,6 +32,10 @@ Define these secrets in both environments:
 - `SFTP_USER`
 - `SFTP_PASSWORD`
 
+Define `GA4_API_SECRET` in `main` to enable server-side GA4 purchase events for
+production payments. It is optional in `staging`; when omitted, payment webhooks
+still record payments but skip the GA4 purchase event.
+
 Define `EVERY_WEBHOOK_SECRET` only in `main`. Every.org supports one webhook,
 so the Every webhook is disabled in staging and its staging route returns 404.
 The production deployment fails if the `main` secret is missing.
@@ -44,6 +48,10 @@ Define these variables in both environments:
 The account ID identifies a deployment target but does not grant access, so it
 is a variable rather than a secret. Use a scoped Cloudflare API token, not a
 global API key.
+
+The frontend and backend use the same GA4 web stream. The workflow sets
+`VITE_GA_MEASUREMENT_ID` and passes it to the backend as `GA4_MEASUREMENT_ID`;
+`GA4_API_SECRET` stays backend-only.
 
 ## Deployment order
 

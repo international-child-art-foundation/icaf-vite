@@ -19,6 +19,7 @@ const TAP_MAX_PX = 10;
 const LIP_VEL_THRESH = 0.35;
 const SWIPE_VEL_THRESH = 0.3;
 const SWIPE_DIST_THRESH = 0.14;
+const LIP_MAX_HEIGHT_RATIO = 0.6;
 
 type Axis = 'none' | 'vertical' | 'horizontal';
 interface VelSample {
@@ -67,9 +68,37 @@ export const GallerySlideshowMobile = ({
     onClose,
   } = useGallerySlideshowState(context, closeOverride);
 
-  const [screenW, setScreenW] = useState(() => window.innerWidth);
+  const stableViewportRef = useRef({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+  const [screenW, setScreenW] = useState(() => stableViewportRef.current.width);
+  const [stableScreenH, setStableScreenH] = useState(
+    () => stableViewportRef.current.height,
+  );
   useEffect(() => {
-    const handler = () => setScreenW(window.innerWidth);
+    const handler = () => {
+      const nextWidth = window.innerWidth;
+      const nextHeight = window.innerHeight;
+      const prev = stableViewportRef.current;
+
+      if (Math.abs(nextWidth - prev.width) > 24) {
+        stableViewportRef.current = {
+          width: nextWidth,
+          height: nextHeight,
+        };
+        setScreenW(nextWidth);
+        setStableScreenH(nextHeight);
+        return;
+      }
+
+      stableViewportRef.current = {
+        width: nextWidth,
+        height: Math.max(prev.height, nextHeight),
+      };
+      setScreenW(nextWidth);
+      setStableScreenH((current) => Math.max(current, nextHeight));
+    };
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
@@ -78,7 +107,7 @@ export const GallerySlideshowMobile = ({
   const lipYRef = useRef(0);
   const maxLipY = Math.max(
     0,
-    Math.max(300, window.innerHeight * 0.6) - LIP_COLLAPSED_H,
+    Math.max(300, stableScreenH * LIP_MAX_HEIGHT_RATIO) - LIP_COLLAPSED_H,
   );
 
   const lipAnimRef = useRef<number | null>(null);
@@ -117,6 +146,10 @@ export const GallerySlideshowMobile = ({
   const [peekDir, setPeekDir] = useState<1 | -1>(1);
   const [showPeek, setShowPeek] = useState(false);
   const [withTransition, setWithTransition] = useState(false);
+  const swipeProgress = Math.min(
+    Math.abs(dragX) / Math.max(screenW * 0.42, 1),
+    1,
+  );
 
   const imgAnimRef = useRef<number | null>(null);
   const cancelImgAnim = () => {
@@ -181,6 +214,7 @@ export const GallerySlideshowMobile = ({
   );
 
   const [artFocus, setArtFocus] = useState(false);
+  const lipContentOpacity = artFocus ? 0 : 1 - swipeProgress;
   const [showHint, setShowHint] = useState(false);
   useEffect(() => {
     if (!artFocus) {
@@ -191,34 +225,6 @@ export const GallerySlideshowMobile = ({
     const t = setTimeout(() => setShowHint(false), 2000);
     return () => clearTimeout(t);
   }, [artFocus]);
-
-  const [deferredArtwork, setDeferredArtwork] = useState(
-    () => artworks[0] ?? null,
-  );
-  const [textVisible, setTextVisible] = useState(true);
-  const [descExpanded, setDescExpanded] = useState(true);
-  useEffect(() => {
-    if (!currentArtwork) return;
-    setTextVisible(false);
-    setDescExpanded(false);
-    const swapT = setTimeout(() => {
-      setDeferredArtwork(currentArtwork);
-      setTextVisible(true);
-      setDescExpanded(true);
-    }, 125);
-    return () => clearTimeout(swapT);
-  }, [currentArtwork]);
-
-  const [shareVisible, setShareVisible] = useState(true);
-  const [shareArtwork, setShareArtwork] = useState(() => artworks[0] ?? null);
-  useEffect(() => {
-    setShareVisible(false);
-    const t = setTimeout(() => {
-      setShareVisible(true);
-      setShareArtwork(currentArtwork);
-    }, 125);
-    return () => clearTimeout(t);
-  }, [currentArtwork]);
 
   useEffect(() => {
     if (artworks.length > 1) {
@@ -407,7 +413,14 @@ export const GallerySlideshowMobile = ({
       el.removeEventListener('touchend', onTouchEnd);
       el.removeEventListener('touchcancel', onTouchCancel);
     };
-  }, [artFocus, animateLipTo, handleAdvance, animateDragXTo, resetUiTimer]);
+  }, [
+    artFocus,
+    animateLipTo,
+    handleAdvance,
+    animateDragXTo,
+    maxLipY,
+    resetUiTimer,
+  ]);
 
   if (artworks.length === 0) return null;
 
@@ -421,12 +434,12 @@ export const GallerySlideshowMobile = ({
   const uiPointerEvents =
     artFocus || uiState === 'hidden' ? 'none' : ('auto' as const);
 
-  const lipDisplayArtwork = deferredArtwork ?? artworks[currentIdx];
-  const shareUrl = shareArtwork
+  const lipDisplayArtwork = currentArtwork ?? artworks[currentIdx];
+  const shareUrl = lipDisplayArtwork
     ? (() => {
         const url = new URL(artworkShareUrl || window.location.href);
         url.pathname = '/gallery/slideshow';
-        url.searchParams.set('id', shareArtwork.id);
+        url.searchParams.set('id', lipDisplayArtwork.id);
         return url.toString();
       })()
     : artworkShareUrl;
@@ -523,10 +536,8 @@ export const GallerySlideshowMobile = ({
               artwork={lipDisplayArtwork}
               lipY={lipY}
               maxLipY={maxLipY}
+              contentOpacity={lipContentOpacity}
               shareUrl={shareUrl}
-              shareVisible={shareVisible}
-              textVisible={textVisible}
-              descExpanded={descExpanded}
               onKudosApplied={applyArtworkKudos}
             />
           )}

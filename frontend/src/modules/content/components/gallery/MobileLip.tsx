@@ -243,10 +243,8 @@ interface Props {
   artwork: TResolvedArtwork;
   lipY: number; // 0 = collapsed, maxLipY = fully open
   maxLipY: number;
+  contentOpacity: number;
   shareUrl: string;
-  shareVisible: boolean;
-  textVisible: boolean; // parent fades this on artwork change
-  descExpanded: boolean; // false while collapsing for artwork swap, then true to expand
   onKudosApplied?: (artId: string, amount: number) => void;
 }
 
@@ -258,10 +256,8 @@ export const MobileLip = ({
   artwork,
   lipY,
   maxLipY,
+  contentOpacity,
   shareUrl,
-  shareVisible,
-  textVisible,
-  descExpanded,
   onKudosApplied,
 }: Props) => {
   const descRef = useRef<HTMLDivElement>(null);
@@ -280,6 +276,7 @@ export const MobileLip = ({
   const tags = getGalleryInfoTags(artwork);
 
   const t = maxLipY > 0 ? Math.min(lipY / maxLipY, 1) : 0;
+  const lipContentOpacity = Math.max(0, Math.min(contentOpacity, 1));
 
   const hasTitle = !!artwork.title;
   const primaryText = getArtworkDisplayTitle(artwork);
@@ -303,226 +300,231 @@ export const MobileLip = ({
 
       <div
         style={{
-          paddingTop: 9,
-          paddingBottom: 7,
+          opacity: lipContentOpacity,
           display: 'flex',
-          justifyContent: 'center',
-        }}
-      >
-        <div
-          style={{
-            width: 34,
-            height: 4,
-            borderRadius: 2,
-            background: 'rgba(0,0,0,0.18)',
-          }}
-        />
-      </div>
-
-      <div
-        style={{
-          padding: '0 16px 10px',
-          textAlign: 'center',
-          opacity: textVisible ? 1 : 0,
-          transition: textVisible ? 'opacity 0.2s ease' : 'opacity 0.1s ease',
-          flex: '0 0 auto',
-        }}
-      >
-        {primaryText && (
-          <p
-            style={{
-              ...FONT,
-              fontSize: 15,
-              fontWeight: 700,
-              fontStyle: hasTitle ? 'italic' : 'normal',
-              lineHeight: '20px',
-              color: '#111',
-              whiteSpace: t > 0.05 ? 'normal' : 'nowrap',
-              overflow: 'hidden',
-              textOverflow: t > 0.05 ? 'clip' : 'ellipsis',
-            }}
-          >
-            {hasTitle ? <>&ldquo;{primaryText}&rdquo;</> : primaryText}
-          </p>
-        )}
-        {secondaryText && (
-          <p
-            style={{
-              ...FONT,
-              fontSize: 13,
-              fontWeight: 500,
-              lineHeight: '18px',
-              color: '#555',
-              marginTop: 2,
-              whiteSpace: t > 0.05 ? 'normal' : 'nowrap',
-              overflow: 'hidden',
-              textOverflow: t > 0.05 ? 'clip' : 'ellipsis',
-            }}
-          >
-            {secondaryText}
-          </p>
-        )}
-      </div>
-
-      <div
-        style={{
-          opacity: textVisible ? t : 0,
-          transition: textVisible ? 'opacity 0.2s ease' : 'opacity 0.1s ease',
           flex: '1 1 auto',
           minHeight: 0,
-          padding: '0 16px 12px',
-          display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden',
+          pointerEvents: lipContentOpacity < 0.2 ? 'none' : 'auto',
         }}
       >
         <div
           style={{
-            height: 1,
-            background: 'rgba(0,0,0,0.03)',
-            marginBottom: 12,
-            flex: '0 0 auto',
-          }}
-        />
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateRows: descExpanded ? '1fr' : '0fr',
-            transition: 'grid-template-rows 0.25s ease',
-            minHeight: 0,
-            flex: hasDescription ? '1 1 clamp(12px, 28dvh, 220px)' : '0 1 auto',
-            maxHeight: hasDescription ? 'clamp(12px, 28dvh, 220px)' : 'none',
+            paddingTop: 9,
+            paddingBottom: 7,
+            display: 'flex',
+            justifyContent: 'center',
           }}
         >
           <div
             style={{
-              minHeight: 0,
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
+              width: 34,
+              height: 4,
+              borderRadius: 2,
+              background: 'rgba(0,0,0,0.18)',
             }}
-          >
-            {(hasDescription || tags.length > 0) && (
-              <>
-                <div
-                  ref={descRef}
-                  style={{
-                    overflowY: 'auto',
-                    WebkitOverflowScrolling: 'touch',
-                    touchAction: 'pan-y',
-                    flex: '1 1 auto',
-                    minHeight: 0,
-                    paddingBottom: 12,
-                  }}
-                >
-                  {tags.length > 0 && (
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: 6,
-                        justifyContent: 'center',
-                        marginBottom: hasDescription ? 12 : 0,
-                      }}
-                    >
-                      {tags.map(({ label, icon: Icon, tone }) => (
-                        <span
-                          key={`${tone}-${label}`}
-                          style={{
-                            ...FONT,
-                            borderRadius: 999,
-                            background:
-                              tone === 'location'
-                                ? 'rgba(16,185,129,0.10)'
-                                : tone === 'group'
-                                  ? 'rgba(251,178,46,0.22)'
-                                  : 'rgba(2,134,195,0.10)',
-                            border:
-                              tone === 'location'
-                                ? '1px solid rgba(16,185,129,0.22)'
-                                : tone === 'group'
-                                  ? '1px solid rgba(251,178,46,0.35)'
-                                  : '1px solid rgba(2,134,195,0.18)',
-                            color:
-                              tone === 'location'
-                                ? '#047857'
-                                : tone === 'group'
-                                  ? '#775000'
-                                  : '#026997',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 4,
-                            fontSize: 10,
-                            fontWeight: 700,
-                            letterSpacing: 0,
-                            padding: '4px 8px',
-                            maxWidth: '100%',
-                          }}
-                        >
-                          <Icon size={12} strokeWidth={2.2} />
-                          <span
-                            style={{
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                            }}
-                          >
-                            {label}
-                          </span>
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  {hasDescription && (
-                    <>
-                      <p
-                        style={{
-                          ...FONT,
-                          fontSize: 13,
-                          color: '#666',
-                          marginBottom: 6,
-                        }}
-                      >
-                        {descriptionLabel}
-                      </p>
-                      <p
-                        style={{
-                          ...FONT,
-                          fontSize: 14,
-                          lineHeight: '22px',
-                          color: '#333',
-                          opacity: textVisible ? 1 : 0,
-                          transition: textVisible
-                            ? 'opacity 0.2s ease'
-                            : 'opacity 0.1s ease',
-                        }}
-                      >
-                        {description}
-                      </p>
-                    </>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
+          />
         </div>
 
         <div
           style={{
-            opacity: shareVisible ? 1 : 0,
-            transition: shareVisible ? 'opacity 300ms ease' : 'opacity 0ms',
+            padding: '0 16px 10px',
+            textAlign: 'center',
             flex: '0 0 auto',
           }}
         >
-          <KudosControls
-            artwork={artwork}
-            className="mb-3 h-9"
-            compact
-            layout="nametag"
-            onKudosApplied={onKudosApplied}
+          {primaryText && (
+            <p
+              style={{
+                ...FONT,
+                fontSize: 15,
+                fontWeight: 700,
+                fontStyle: hasTitle ? 'italic' : 'normal',
+                lineHeight: '20px',
+                color: '#111',
+                whiteSpace: t > 0.05 ? 'normal' : 'nowrap',
+                overflow: 'hidden',
+                textOverflow: t > 0.05 ? 'clip' : 'ellipsis',
+              }}
+            >
+              {hasTitle ? <>&ldquo;{primaryText}&rdquo;</> : primaryText}
+            </p>
+          )}
+          {secondaryText && (
+            <p
+              style={{
+                ...FONT,
+                fontSize: 13,
+                fontWeight: 500,
+                lineHeight: '18px',
+                color: '#555',
+                marginTop: 2,
+                whiteSpace: t > 0.05 ? 'normal' : 'nowrap',
+                overflow: 'hidden',
+                textOverflow: t > 0.05 ? 'clip' : 'ellipsis',
+              }}
+            >
+              {secondaryText}
+            </p>
+          )}
+        </div>
+
+        <div
+          style={{
+            opacity: t,
+            transition: 'opacity 0.2s ease',
+            flex: '1 1 auto',
+            minHeight: 0,
+            padding: '0 16px 12px',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              height: 1,
+              background: 'rgba(0,0,0,0.03)',
+              marginBottom: 12,
+              flex: '0 0 auto',
+            }}
           />
-          <MobileShareRow shareUrl={shareUrl} />
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateRows: '1fr',
+              transition: 'grid-template-rows 0.25s ease',
+              minHeight: 0,
+              flex: hasDescription
+                ? '1 1 clamp(12px, 28dvh, 220px)'
+                : '0 1 auto',
+              maxHeight: hasDescription ? 'clamp(12px, 28dvh, 220px)' : 'none',
+            }}
+          >
+            <div
+              style={{
+                minHeight: 0,
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              {(hasDescription || tags.length > 0) && (
+                <>
+                  <div
+                    ref={descRef}
+                    style={{
+                      overflowY: 'auto',
+                      WebkitOverflowScrolling: 'touch',
+                      touchAction: 'pan-y',
+                      flex: '1 1 auto',
+                      minHeight: 0,
+                      paddingBottom: 12,
+                    }}
+                  >
+                    {tags.length > 0 && (
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: 6,
+                          justifyContent: 'center',
+                          marginBottom: hasDescription ? 12 : 0,
+                        }}
+                      >
+                        {tags.map(({ label, icon: Icon, tone }) => (
+                          <span
+                            key={`${tone}-${label}`}
+                            style={{
+                              ...FONT,
+                              borderRadius: 999,
+                              background:
+                                tone === 'location'
+                                  ? 'rgba(16,185,129,0.10)'
+                                  : tone === 'group'
+                                    ? 'rgba(251,178,46,0.22)'
+                                    : 'rgba(2,134,195,0.10)',
+                              border:
+                                tone === 'location'
+                                  ? '1px solid rgba(16,185,129,0.22)'
+                                  : tone === 'group'
+                                    ? '1px solid rgba(251,178,46,0.35)'
+                                    : '1px solid rgba(2,134,195,0.18)',
+                              color:
+                                tone === 'location'
+                                  ? '#047857'
+                                  : tone === 'group'
+                                    ? '#775000'
+                                    : '#026997',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 4,
+                              fontSize: 10,
+                              fontWeight: 700,
+                              letterSpacing: 0,
+                              padding: '4px 8px',
+                              maxWidth: '100%',
+                            }}
+                          >
+                            <Icon size={12} strokeWidth={2.2} />
+                            <span
+                              style={{
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              {label}
+                            </span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {hasDescription && (
+                      <>
+                        <p
+                          style={{
+                            ...FONT,
+                            fontSize: 13,
+                            color: '#666',
+                            marginBottom: 6,
+                          }}
+                        >
+                          {descriptionLabel}
+                        </p>
+                        <p
+                          style={{
+                            ...FONT,
+                            fontSize: 14,
+                            lineHeight: '22px',
+                            color: '#333',
+                          }}
+                        >
+                          {description}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div
+            style={{
+              flex: '0 0 auto',
+            }}
+          >
+            <KudosControls
+              artwork={artwork}
+              className="mb-3 h-9"
+              compact
+              layout="nametag"
+              onKudosApplied={onKudosApplied}
+            />
+            <MobileShareRow shareUrl={shareUrl} />
+          </div>
         </div>
       </div>
     </div>

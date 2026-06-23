@@ -23,6 +23,7 @@ type GalleryArtworkInfoProps = {
   variant?: GalleryInfoVariant;
   descriptionMode?: DescriptionMode;
   maxTags?: number;
+  tagsInDescription?: boolean;
   className?: string;
 };
 
@@ -76,6 +77,8 @@ const textStyles = {
     meta: 'text-sm font-medium text-neutral-500',
     description: 'text-base leading-7 text-neutral-700',
     tag: 'px-2.5 py-1 text-xs',
+    descriptionGroup:
+      'mt-3 max-h-[clamp(32px,25dvh,300px)] overflow-y-auto overflow-x-hidden pr-2',
   },
   nametag: {
     title: 'pr-6 text-lg font-semibold leading-snug text-neutral-950',
@@ -83,6 +86,7 @@ const textStyles = {
     meta: 'text-sm font-medium text-neutral-500',
     description: 'text-sm leading-6 text-neutral-700',
     tag: 'px-2.5 py-1 text-[11px]',
+    descriptionGroup: 'mt-2',
   },
   card: {
     title:
@@ -91,6 +95,7 @@ const textStyles = {
     meta: 'text-xs font-medium text-neutral-500',
     description: 'text-sm text-neutral-600',
     tag: 'px-2 py-0.5 text-[11px]',
+    descriptionGroup: 'mt-2',
   },
 };
 
@@ -129,12 +134,18 @@ export const GalleryArtworkInfo = ({
   variant = 'modal',
   descriptionMode = 'plain',
   maxTags,
+  tagsInDescription = descriptionMode !== 'none',
   className = '',
 }: GalleryArtworkInfoProps) => {
   const styles = textStyles[variant];
   const primaryText = getArtworkDisplayTitle(artwork);
   const secondaryText = getArtworkSecondaryTitle(artwork);
   const hasTitle = !!artwork.title?.trim();
+  const description = artwork.description?.trim() ?? '';
+  const hasDescription = description.length > 0;
+  const descriptionLabel = `${artwork.f_name?.trim() || 'Artist'} says:`;
+  const showDescriptionBlock = descriptionMode !== 'none' && hasDescription;
+  const showTagsInDescription = tagsInDescription && showDescriptionBlock;
 
   return (
     <div className={`min-w-0 ${className}`}>
@@ -144,30 +155,43 @@ export const GalleryArtworkInfo = ({
       {secondaryText && (
         <p className={`mt-1 ${styles.secondary}`}>{secondaryText}</p>
       )}
-      <GalleryArtworkTags
-        artwork={artwork}
-        variant={variant}
-        maxTags={maxTags}
-        className={variant === 'card' ? 'mt-2' : 'mt-3'}
-      />
-      {descriptionMode !== 'none' && artwork.description && (
+      {!showTagsInDescription && (
+        <GalleryArtworkTags
+          artwork={artwork}
+          variant={variant}
+          maxTags={maxTags}
+          className={variant === 'card' ? 'mt-2' : 'mt-3'}
+        />
+      )}
+      {showDescriptionBlock && (
         <div className={variant === 'card' ? 'mt-2' : 'mt-4'}>
-          {descriptionMode === 'scroll' ? (
-            <DescriptionScroll
-              key={`desc-${artwork.id}`}
-              description={artwork.description}
-            />
-          ) : (
-            <p
-              className={`${styles.description} ${
-                variant === 'modal'
-                  ? 'max-h-[min(300px,25dvh)] overflow-y-auto overflow-x-hidden break-words pr-2 [overflow-wrap:anywhere]'
-                  : ''
-              }`}
-            >
-              {artwork.description}
-            </p>
-          )}
+          <div className={styles.descriptionGroup}>
+            {showTagsInDescription && (
+              <GalleryArtworkTags
+                artwork={artwork}
+                variant={variant}
+                maxTags={maxTags}
+                className="mb-2"
+              />
+            )}
+            <p className={styles.meta}>{descriptionLabel}</p>
+            {descriptionMode === 'scroll' ? (
+              <DescriptionScroll
+                key={`desc-${artwork.id}`}
+                description={description}
+              />
+            ) : (
+              <p
+                className={`${styles.description} ${
+                  variant === 'modal'
+                    ? 'break-words [overflow-wrap:anywhere]'
+                    : ''
+                }`}
+              >
+                {description}
+              </p>
+            )}
+          </div>
         </div>
       )}
     </div>

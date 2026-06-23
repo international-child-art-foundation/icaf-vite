@@ -284,17 +284,19 @@ export const MobileLip = ({
   const hasTitle = !!artwork.title;
   const primaryText = getArtworkDisplayTitle(artwork);
   const secondaryText = getArtworkSecondaryTitle(artwork);
-
-  const maxDescH = Math.floor(window.innerHeight * 0.6 * 0.4);
+  const description = artwork.description?.trim() ?? '';
+  const hasDescription = description.length > 0;
+  const descriptionLabel = `${artwork.f_name?.trim() || 'Artist'} says:`;
 
   return (
     <div
       style={{
-        position: 'relative',
         borderRadius: `${CORNER_R}px ${CORNER_R}px 0 0`,
         overflow: 'hidden',
         background: 'white',
         maxHeight: LIP_COLLAPSED_H + lipY,
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       <GradientStrip />
@@ -323,6 +325,7 @@ export const MobileLip = ({
           textAlign: 'center',
           opacity: textVisible ? 1 : 0,
           transition: textVisible ? 'opacity 0.2s ease' : 'opacity 0.1s ease',
+          flex: '0 0 auto',
         }}
       >
         {primaryText && (
@@ -365,7 +368,12 @@ export const MobileLip = ({
         style={{
           opacity: textVisible ? t : 0,
           transition: textVisible ? 'opacity 0.2s ease' : 'opacity 0.1s ease',
-          padding: '0 16px 28px',
+          flex: '1 1 auto',
+          minHeight: 0,
+          padding: '0 16px 12px',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
         }}
       >
         <div
@@ -373,112 +381,127 @@ export const MobileLip = ({
             height: 1,
             background: 'rgba(0,0,0,0.03)',
             marginBottom: 12,
+            flex: '0 0 auto',
           }}
         />
-
-        {tags.length > 0 && (
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 6,
-              justifyContent: 'center',
-              marginBottom: 12,
-            }}
-          >
-            {tags.map(({ label, icon: Icon, tone }) => (
-              <span
-                key={`${tone}-${label}`}
-                style={{
-                  ...FONT,
-                  borderRadius: 999,
-                  background:
-                    tone === 'location'
-                      ? 'rgba(16,185,129,0.10)'
-                      : tone === 'group'
-                        ? 'rgba(251,178,46,0.22)'
-                        : 'rgba(2,134,195,0.10)',
-                  border:
-                    tone === 'location'
-                      ? '1px solid rgba(16,185,129,0.22)'
-                      : tone === 'group'
-                        ? '1px solid rgba(251,178,46,0.35)'
-                        : '1px solid rgba(2,134,195,0.18)',
-                  color:
-                    tone === 'location'
-                      ? '#047857'
-                      : tone === 'group'
-                        ? '#775000'
-                        : '#026997',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 4,
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: 0,
-                  padding: '4px 8px',
-                  maxWidth: '100%',
-                }}
-              >
-                <Icon size={12} strokeWidth={2.2} />
-                <span
-                  style={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {label}
-                </span>
-              </span>
-            ))}
-          </div>
-        )}
 
         <div
           style={{
             display: 'grid',
             gridTemplateRows: descExpanded ? '1fr' : '0fr',
             transition: 'grid-template-rows 0.25s ease',
+            minHeight: 0,
+            flex: hasDescription ? '1 1 clamp(12px, 28dvh, 220px)' : '0 1 auto',
+            maxHeight: hasDescription ? 'clamp(12px, 28dvh, 220px)' : 'none',
           }}
         >
-          <div style={{ overflow: 'hidden' }}>
-            {artwork.description && (
+          <div
+            style={{
+              minHeight: 0,
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            {(hasDescription || tags.length > 0) && (
               <>
-                <p
-                  style={{
-                    ...FONT,
-                    fontSize: 13,
-                    color: '#666',
-                    marginBottom: 6,
-                  }}
-                >
-                  Description
-                </p>
                 <div
                   ref={descRef}
                   style={{
                     overflowY: 'auto',
                     WebkitOverflowScrolling: 'touch',
                     touchAction: 'pan-y',
-                    maxHeight: maxDescH,
-                    marginBottom: 22,
+                    flex: '1 1 auto',
+                    minHeight: 0,
+                    paddingBottom: 12,
                   }}
                 >
-                  <p
-                    style={{
-                      ...FONT,
-                      fontSize: 14,
-                      lineHeight: '22px',
-                      color: '#333',
-                      opacity: textVisible ? 1 : 0,
-                      transition: textVisible
-                        ? 'opacity 0.2s ease'
-                        : 'opacity 0.1s ease',
-                    }}
-                  >
-                    {artwork.description}
-                  </p>
+                  {tags.length > 0 && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: 6,
+                        justifyContent: 'center',
+                        marginBottom: hasDescription ? 12 : 0,
+                      }}
+                    >
+                      {tags.map(({ label, icon: Icon, tone }) => (
+                        <span
+                          key={`${tone}-${label}`}
+                          style={{
+                            ...FONT,
+                            borderRadius: 999,
+                            background:
+                              tone === 'location'
+                                ? 'rgba(16,185,129,0.10)'
+                                : tone === 'group'
+                                  ? 'rgba(251,178,46,0.22)'
+                                  : 'rgba(2,134,195,0.10)',
+                            border:
+                              tone === 'location'
+                                ? '1px solid rgba(16,185,129,0.22)'
+                                : tone === 'group'
+                                  ? '1px solid rgba(251,178,46,0.35)'
+                                  : '1px solid rgba(2,134,195,0.18)',
+                            color:
+                              tone === 'location'
+                                ? '#047857'
+                                : tone === 'group'
+                                  ? '#775000'
+                                  : '#026997',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
+                            fontSize: 10,
+                            fontWeight: 700,
+                            letterSpacing: 0,
+                            padding: '4px 8px',
+                            maxWidth: '100%',
+                          }}
+                        >
+                          <Icon size={12} strokeWidth={2.2} />
+                          <span
+                            style={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {label}
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {hasDescription && (
+                    <>
+                      <p
+                        style={{
+                          ...FONT,
+                          fontSize: 13,
+                          color: '#666',
+                          marginBottom: 6,
+                        }}
+                      >
+                        {descriptionLabel}
+                      </p>
+                      <p
+                        style={{
+                          ...FONT,
+                          fontSize: 14,
+                          lineHeight: '22px',
+                          color: '#333',
+                          opacity: textVisible ? 1 : 0,
+                          transition: textVisible
+                            ? 'opacity 0.2s ease'
+                            : 'opacity 0.1s ease',
+                        }}
+                      >
+                        {description}
+                      </p>
+                    </>
+                  )}
                 </div>
               </>
             )}
@@ -489,6 +512,7 @@ export const MobileLip = ({
           style={{
             opacity: shareVisible ? 1 : 0,
             transition: shareVisible ? 'opacity 300ms ease' : 'opacity 0ms',
+            flex: '0 0 auto',
           }}
         >
           <KudosControls

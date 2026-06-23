@@ -82,7 +82,6 @@ export function resolveApiArtwork(
     | 'groupType'
   >,
 ): TResolvedArtwork {
-  const artists = a.f_name?.trim() ? [a.f_name.trim()] : [];
   const parsedTheme = a.theme ? parseThemeSK(a.theme) : null;
   const themeLabel = parsedTheme
     ? formatThemeDisplayName(parsedTheme)
@@ -94,7 +93,7 @@ export function resolveApiArtwork(
     file: `${a.art_id}.avif`,
     event: themeLabel,
     eventSlug: parsedTheme?.theme_family ?? 'gallery',
-    artists,
+    f_name: a.f_name,
     age: a.age,
     country: a.country,
     region: a.region,
@@ -121,37 +120,31 @@ export function resolveApiArtwork(
 }
 
 /**
- * Formats artists with the last initial appended to the first artist's name.
- *   ["Anwita"], "K"            → "Anwita K."
- *   ["Anwita", "Nicolas"], "K" → "Anwita K. & Nicolas"
- *   ["Anwita"], undefined      → "Anwita"
- *   [], undefined              → ""
+ * Formats an artist first name with an optional last initial.
+ *   "Anwita", "K"       → "Anwita K."
+ *   "Anwita", undefined → "Anwita"
+ *   undefined           → ""
  */
 export function formatArtistName(
-  artists: string[],
+  fName?: string,
   lastInitial?: string,
 ): string {
-  if (artists.length === 0) return '';
-  const withInitial = lastInitial
-    ? [`${artists[0]} ${lastInitial}.`, ...artists.slice(1)]
-    : artists;
-  return withInitial.join(' & ');
+  const firstName = fName?.trim();
+  if (!firstName) return '';
+  return lastInitial ? `${firstName} ${lastInitial}.` : firstName;
 }
 
 export function getArtistDisplayName(
-  artists: string[],
+  fName?: string,
   lastInitial?: string,
 ): string {
-  return formatArtistName(artists, lastInitial) || MYSTERY_ARTIST_NAME;
+  return formatArtistName(fName, lastInitial) || MYSTERY_ARTIST_NAME;
 }
 
 export function getArtistDisplayNameWithAge(
-  artwork: Pick<TResolvedArtwork, 'age' | 'artists' | 'lastInitial'>,
+  artwork: Pick<TResolvedArtwork, 'age' | 'f_name' | 'lastInitial'>,
 ): string {
-  const artist = getArtistDisplayName(
-    artwork.artists ?? [],
-    artwork.lastInitial,
-  );
+  const artist = getArtistDisplayName(artwork.f_name, artwork.lastInitial);
 
   return artwork.age != null ? `${artist}, ${artwork.age}` : artist;
 }

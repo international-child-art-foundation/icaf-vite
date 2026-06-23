@@ -7,8 +7,8 @@ export type TArtwork = {
   file: string;
   /** Event folder name, e.g. "7th-Arts-Olympiad" */
   event: string;
-  /** Artist first name(s). Omit or leave empty for anonymous. */
-  artists?: string[];
+  /** Artist first name. Omit or leave empty for anonymous. */
+  f_name?: string;
   /** Last initial of the primary artist, e.g. "K" */
   lastInitial?: string;
   /** Title of the artwork; shown in modal/slideshow, not on gallery cards */

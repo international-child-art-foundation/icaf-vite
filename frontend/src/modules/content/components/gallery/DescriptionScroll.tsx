@@ -117,7 +117,7 @@ export const DescriptionScroll = ({ description }: { description: string }) => {
     >
       <p
         ref={pRef}
-        className="neutral-500 pr-1"
+        className="pr-1 text-neutral-500"
         style={{
           fontSize: 14,
           lineHeight: '20px',

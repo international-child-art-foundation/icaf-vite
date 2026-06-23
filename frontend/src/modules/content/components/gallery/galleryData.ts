@@ -147,7 +147,6 @@ export async function fetchGroupArtworksLazily(
     file: `${artworkId}.avif`,
     event: '',
     eventSlug: 'gallery',
-    artists: [],
     group_id: group.group_id,
     ...groupMetadata,
     url: artworkAssetUrl(artworkId, 'original'),

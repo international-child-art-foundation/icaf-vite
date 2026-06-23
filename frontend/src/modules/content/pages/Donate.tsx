@@ -6,11 +6,13 @@ import IntroBanner from '@/modules/content/components/donate/IntroBanner';
 import DonationUsageCards from '@/modules/content/components/donate/DonationUsageCards';
 import groupswCapitol from '@/modules/content/assets/donate/groupswCapitol.png';
 import Icaflogo from '@/modules/content/assets/donate/icafLogo.svg';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import DonationMethod from '@/modules/content/components/donate/DonationMethod';
 import { DonationHeader } from '@/modules/content/components/donate/DonationHeader';
 import DonateButton from '@/shared/components/ui/donateButton';
 import { Seo } from '@/modules/content/components/shared/Seo';
+import { useGlobalContext } from '@/modules/content/components/shared/GlobalContext';
+import { trackDonationPageView } from '@/modules/content/utils/donationAnalytics';
 
 const donateMetadata = {
   title: 'Donate | ICAF',
@@ -21,6 +23,16 @@ const donateMetadata = {
 
 export default function Donate() {
   const [showRedirectModal, setShowRedirectModal] = useState(false);
+  const { isCookieConsentAcquired } = useGlobalContext();
+  const hasTrackedDonationPageView = useRef(false);
+
+  useEffect(() => {
+    if (!isCookieConsentAcquired) return;
+    if (hasTrackedDonationPageView.current) return;
+
+    trackDonationPageView();
+    hasTrackedDonationPageView.current = true;
+  }, [isCookieConsentAcquired]);
 
   const handleDonateClick = (e: React.MouseEvent) => {
     e.preventDefault();

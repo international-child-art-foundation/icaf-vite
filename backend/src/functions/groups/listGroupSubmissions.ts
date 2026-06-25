@@ -46,17 +46,16 @@ export const handler = async (
           ":pk": byOwnerPk(userId),
           ":skPrefix": "TYPE#GROUP",
         },
-        Limit: limit + 1,
+        Limit: limit,
         ScanIndexForward: false, // newest first
         ...(lastKey && { ExclusiveStartKey: lastKey }),
       }),
     );
 
     const items = result.Items ?? [];
-    const has_more = items.length > limit;
-    const page = has_more ? items.slice(0, limit) : items;
+    const has_more = Boolean(result.LastEvaluatedKey);
 
-    const groups: GroupListItem[] = page.map((item) => ({
+    const groups: GroupListItem[] = items.map((item) => ({
       group_id: item.group_id as string,
       theme: item.theme as string | undefined,
       group_type: item.group_type as GroupListItem["group_type"],
@@ -73,12 +72,11 @@ export const handler = async (
       notifications: item.notifications as boolean | undefined,
     }));
 
-    const lastEvaluatedKey = has_more ? items[limit - 1] : result.LastEvaluatedKey;
     const response: ListGroupSubmissionsResponse = {
       groups,
       has_more,
-      ...(lastEvaluatedKey && {
-        last_key: Buffer.from(JSON.stringify(lastEvaluatedKey)).toString("base64"),
+      ...(result.LastEvaluatedKey && {
+        last_key: Buffer.from(JSON.stringify(result.LastEvaluatedKey)).toString("base64"),
       }),
     };
 

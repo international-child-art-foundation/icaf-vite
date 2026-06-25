@@ -43,17 +43,16 @@ export const handler = async (
           ":pk": byOwnerPk(userId),
           ":skPrefix": "TYPE#ART",
         },
-        Limit: limit + 1,
+        Limit: limit,
         ScanIndexForward: false, // newest first
         ...(lastKey && { ExclusiveStartKey: lastKey }),
       }),
     );
 
     const items = result.Items ?? [];
-    const has_more = items.length > limit;
-    const page = has_more ? items.slice(0, limit) : items;
+    const has_more = Boolean(result.LastEvaluatedKey);
 
-    const artworks: ArtworkListItem[] = page.map((item) => ({
+    const artworks: ArtworkListItem[] = items.map((item) => ({
       art_id: item.art_id as string,
       f_name: item.f_name as string | undefined,
       age: item.age as number | undefined,
@@ -72,12 +71,11 @@ export const handler = async (
       notifications: item.notifications as boolean | undefined,
     }));
 
-    const lastEvaluatedKey = has_more ? items[limit - 1] : result.LastEvaluatedKey;
     const response: ListArtworkSubmissionsResponse = {
       artworks,
       has_more,
-      ...(lastEvaluatedKey && {
-        last_key: Buffer.from(JSON.stringify(lastEvaluatedKey)).toString("base64"),
+      ...(result.LastEvaluatedKey && {
+        last_key: Buffer.from(JSON.stringify(result.LastEvaluatedKey)).toString("base64"),
       }),
     };
 

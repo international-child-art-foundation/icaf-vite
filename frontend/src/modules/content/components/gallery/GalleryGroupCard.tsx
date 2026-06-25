@@ -60,22 +60,22 @@ export function GalleryGroupCard({
         isWholeCardInteractive ? 'cursor-pointer' : ''
       }`}
     >
-      <div className="relative flex min-h-[230px] items-center justify-center overflow-hidden bg-neutral-100 text-left lg:min-h-[260px]">
+      <div className="relative min-h-[230px] overflow-hidden bg-neutral-100 text-left lg:min-h-[320px]">
         {coverIds.length > 0 ? (
-          <div className="flex h-full w-full items-stretch justify-center -space-x-20 sm:-space-x-24 lg:-space-x-28">
+          <div className="absolute inset-0 flex items-stretch justify-center -space-x-20 sm:-space-x-24 lg:-space-x-28">
             {coverIds.map((artId: string, index) => (
               <img
                 key={artId}
                 src={artworkAssetUrl(artId, 'thumb')}
                 alt=""
-                className="h-full min-h-[230px] w-[58%] min-w-[190px] border-y-0 border-l-4 border-r-0 border-white object-cover shadow-md transition duration-300 group-hover:scale-[1.03] sm:w-[54%] lg:min-h-[260px] lg:w-[50%]"
+                className="h-full w-[58%] min-w-[190px] border-y-0 border-l-4 border-r-0 border-white object-cover shadow-md transition duration-300 group-hover:scale-[1.03] sm:w-[54%] lg:w-[50%]"
                 style={{ zIndex: coverIds.length - index }}
                 loading="lazy"
               />
             ))}
           </div>
         ) : (
-          <div className="flex h-full min-h-40 w-full items-center justify-center rounded-md bg-[linear-gradient(135deg,#0286C3,#FBB22E,#EE2F4D)] text-white">
+          <div className="absolute inset-0 flex items-center justify-center rounded-md bg-[linear-gradient(135deg,#0286C3,#FBB22E,#EE2F4D)] text-white">
             <Images size={42} />
           </div>
         )}

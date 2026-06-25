@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, Link } from 'lucide-react';
 import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
+import { CountryFlag } from '@/shared/components/CountryFlag';
 import {
   getArtworkDisplayTitle,
   getArtworkSecondaryTitle,
@@ -445,7 +446,7 @@ export const MobileLip = ({
                           marginBottom: hasDescription ? 12 : 0,
                         }}
                       >
-                        {tags.map(({ label, icon: Icon, tone }) => (
+                        {tags.map(({ label, icon: Icon, country, tone }) => (
                           <span
                             key={`${tone}-${label}`}
                             style={{
@@ -479,7 +480,13 @@ export const MobileLip = ({
                               maxWidth: '100%',
                             }}
                           >
-                            <Icon size={12} strokeWidth={2.2} />
+                            <CountryFlag
+                              country={country}
+                              className="h-3 w-[18px] shrink-0 rounded-[1px] object-cover shadow-sm"
+                              fallback={
+                                <Icon size={12} strokeWidth={2.2} />
+                              }
+                            />
                             <span
                               style={{
                                 overflow: 'hidden',

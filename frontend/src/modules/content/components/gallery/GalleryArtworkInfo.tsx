@@ -1,5 +1,6 @@
 import { MapPin, Palette, UsersRound, type LucideIcon } from 'lucide-react';
 import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
+import { CountryFlag } from '@/shared/components/CountryFlag';
 import {
   formatGalleryGroup,
   formatGalleryLocation,
@@ -15,6 +16,7 @@ type DescriptionMode = 'none' | 'plain' | 'scroll';
 type GalleryInfoTag = {
   label: string;
   icon: LucideIcon;
+  country?: string;
   tone: 'location' | 'group' | 'theme';
 };
 
@@ -48,8 +50,12 @@ export function getGalleryInfoTags(
 ): GalleryInfoTag[] {
   return [
     {
-      label: formatGalleryLocation(artwork.region, artwork.country),
+      label: formatGalleryLocation(
+        artwork.region ?? artwork.groupRegion,
+        artwork.country ?? artwork.groupCountry,
+      ),
       icon: MapPin,
+      country: artwork.country ?? artwork.groupCountry,
       tone: 'location',
     },
     {
@@ -118,12 +124,18 @@ export const GalleryArtworkTags = ({
 
   return (
     <div className={`flex min-w-0 flex-wrap gap-1.5 ${className}`}>
-      {tags.map(({ label, icon: Icon, tone }) => (
+      {tags.map(({ label, icon: Icon, country, tone }) => (
         <span
           key={`${tone}-${label}`}
           className={`inline-flex min-w-0 max-w-full items-center gap-1 overflow-hidden rounded-full border font-semibold leading-tight ${tagToneClasses[tone]} ${styles.tag}`}
         >
-          <Icon size={12} strokeWidth={2.2} className="shrink-0" />
+          <CountryFlag
+            country={country}
+            className="h-3 w-[18px] shrink-0 rounded-[1px] object-cover shadow-sm"
+            fallback={
+              <Icon size={12} strokeWidth={2.2} className="shrink-0" />
+            }
+          />
           <span className="min-w-0 truncate">{label}</span>
         </span>
       ))}

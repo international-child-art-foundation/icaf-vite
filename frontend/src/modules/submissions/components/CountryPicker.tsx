@@ -1,19 +1,8 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { AlertCircle, Check, CheckCircle2, ChevronDown } from 'lucide-react';
+import { CountryFlag } from '@/shared/components/CountryFlag';
+import { countries } from '@/shared/data/countries';
 import { cn } from '@/utils/utils';
-
-const COUNTRY_CODES = `AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW`.split(
-  ' ',
-);
-
-const displayNames = new Intl.DisplayNames(['en'], { type: 'region' });
-const countries = COUNTRY_CODES.map((code) => ({
-  code,
-  flag: String.fromCodePoint(
-    ...code.split('').map((letter) => 127397 + letter.charCodeAt(0)),
-  ),
-  name: displayNames.of(code) ?? code,
-})).sort((a, b) => a.name.localeCompare(b.name));
 
 type CountryPickerProps = {
   error?: string;
@@ -157,9 +146,10 @@ export function CountryPicker({
                 onMouseEnter={() => setActiveIndex(index)}
                 onClick={() => selectCountry(country)}
               >
-                <span aria-hidden="true" className="text-xl">
-                  {country.flag}
-                </span>
+                <CountryFlag
+                  country={country.code}
+                  className="h-4 w-6 shrink-0 rounded-[2px] object-cover shadow-sm"
+                />
                 <span className="flex-1">{country.name}</span>
                 {country.name === value && (
                   <Check

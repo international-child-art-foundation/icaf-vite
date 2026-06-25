@@ -1,6 +1,5 @@
-import { MapPin, Palette, UsersRound, type LucideIcon } from 'lucide-react';
+import { MapPin, Palette, UsersRound } from 'lucide-react';
 import type { TResolvedArtwork } from '@/modules/content/types/Gallery';
-import { CountryFlag } from '@/shared/components/CountryFlag';
 import {
   formatGalleryGroup,
   formatGalleryLocation,
@@ -9,16 +8,10 @@ import {
   getArtworkSecondaryTitle,
 } from '@/utils/galleryProcessing';
 import { DescriptionScroll } from './DescriptionScroll';
+import { GalleryInfoTag, type GalleryInfoTagData } from './GalleryInfoTag';
 
 type GalleryInfoVariant = 'modal' | 'nametag' | 'card';
 type DescriptionMode = 'none' | 'plain' | 'scroll';
-
-type GalleryInfoTag = {
-  label: string;
-  icon: LucideIcon;
-  country?: string;
-  tone: 'location' | 'group' | 'theme';
-};
 
 type GalleryArtworkInfoProps = {
   artwork: TResolvedArtwork;
@@ -31,12 +24,6 @@ type GalleryArtworkInfoProps = {
   autoScrollResetDelayMs?: number;
 };
 
-const tagToneClasses = {
-  location: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-  group: 'border-amber-200 bg-amber-50 text-amber-800',
-  theme: 'border-sky-200 bg-sky-50 text-sky-800',
-};
-
 function formatGroupTypeLabel(groupType?: string): string {
   if (!groupType) return '';
   if (groupType === 'classroom') return 'Classroom';
@@ -47,7 +34,7 @@ function formatGroupTypeLabel(groupType?: string): string {
 
 export function getGalleryInfoTags(
   artwork: TResolvedArtwork,
-): GalleryInfoTag[] {
+): GalleryInfoTagData[] {
   return [
     {
       label: formatGalleryLocation(
@@ -73,7 +60,7 @@ export function getGalleryInfoTags(
       icon: Palette,
       tone: 'theme',
     },
-  ].filter((tag) => tag.label) as GalleryInfoTag[];
+  ].filter((tag) => tag.label) as GalleryInfoTagData[];
 }
 
 const textStyles = {
@@ -124,20 +111,12 @@ export const GalleryArtworkTags = ({
 
   return (
     <div className={`flex min-w-0 flex-wrap gap-1.5 ${className}`}>
-      {tags.map(({ label, icon: Icon, country, tone }) => (
-        <span
-          key={`${tone}-${label}`}
-          className={`inline-flex min-w-0 max-w-full items-center gap-1 overflow-hidden rounded-full border font-semibold leading-tight ${tagToneClasses[tone]} ${styles.tag}`}
-        >
-          <CountryFlag
-            country={country}
-            className="h-3 w-[18px] shrink-0 rounded-[1px] object-cover shadow-sm"
-            fallback={
-              <Icon size={12} strokeWidth={2.2} className="shrink-0" />
-            }
-          />
-          <span className="min-w-0 truncate">{label}</span>
-        </span>
+      {tags.map((tag) => (
+        <GalleryInfoTag
+          key={`${tag.tone}-${tag.label}`}
+          tag={tag}
+          className={styles.tag}
+        />
       ))}
     </div>
   );

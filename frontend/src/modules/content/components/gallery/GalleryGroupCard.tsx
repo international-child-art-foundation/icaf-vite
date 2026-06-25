@@ -5,8 +5,12 @@ import {
 } from '@icaf/shared';
 import { Images, MapPin, Palette, Play, Users, UsersRound } from 'lucide-react';
 import type { KeyboardEvent, ReactNode } from 'react';
-import { artworkAssetUrl } from '@/utils/galleryProcessing';
+import {
+  artworkAssetUrl,
+  formatGalleryLocation,
+} from '@/utils/galleryProcessing';
 import { Button } from '@/shared/components/ui/button';
+import { GalleryInfoTag, type GalleryInfoTagData } from './GalleryInfoTag';
 
 type GalleryGroupCardProps = {
   group: GroupListItem;
@@ -36,11 +40,29 @@ export function GalleryGroupCard({
   interactiveWithActionSlot = false,
 }: GalleryGroupCardProps) {
   const coverIds = group.preview_art_ids.slice(0, 4);
-  const location = [group.region, group.country].filter(Boolean).join(', ');
+  const location = formatGalleryLocation(group.region, group.country);
   const owner = group.submitter_display_name;
   const title = group.class_name || group.title || 'Artwork group';
   const theme = groupThemeLabel(group);
   const type = groupLabel(group);
+  const tags: GalleryInfoTagData[] = [
+    {
+      label: type,
+      icon: UsersRound,
+      tone: 'group',
+    },
+    {
+      label: theme,
+      icon: Palette,
+      tone: 'theme',
+    },
+    {
+      label: location,
+      icon: MapPin,
+      country: group.country,
+      tone: 'location',
+    },
+  ].filter((tag) => tag.label) as GalleryInfoTagData[];
   const isWholeCardInteractive = !actionSlot || interactiveWithActionSlot;
   const openGroup = () => onOpen(group);
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
@@ -88,24 +110,14 @@ export function GalleryGroupCard({
       <div className="relative flex min-h-[230px] flex-col justify-between gap-6 p-5 sm:p-7 lg:min-h-[260px]">
         <div>
           <div className="flex flex-wrap gap-2">
-            {type && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold leading-tight text-amber-800">
-                <UsersRound size={12} strokeWidth={2.2} />
-                {type}
-              </span>
-            )}
-            {theme && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-semibold leading-tight text-sky-800">
-                <Palette size={12} strokeWidth={2.2} />
-                {theme}
-              </span>
-            )}
-            {location && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold leading-tight text-emerald-800">
-                <MapPin size={12} strokeWidth={2.2} />
-                {location}
-              </span>
-            )}
+            {tags.map((tag) => (
+              <GalleryInfoTag
+                key={`${tag.tone}-${tag.label}`}
+                tag={tag}
+                className="px-2.5 py-1 text-xs"
+                labelOverflow="wrap"
+              />
+            ))}
           </div>
           <h3 className="font-montserrat mt-4 text-2xl font-bold leading-tight text-neutral-950 sm:text-3xl">
             {title}

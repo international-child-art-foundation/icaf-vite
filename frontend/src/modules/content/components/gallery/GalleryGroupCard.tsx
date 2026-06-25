@@ -56,7 +56,7 @@ export function GalleryGroupCard({
       tabIndex={isWholeCardInteractive ? 0 : undefined}
       onClick={isWholeCardInteractive ? openGroup : undefined}
       onKeyDown={handleKeyDown}
-      className={`focus-visible:ring-primary group relative grid w-full overflow-hidden rounded-lg border border-black/10 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 lg:grid-cols-[minmax(320px,0.95fr)_1.05fr] ${
+      className={`focus-visible:ring-primary group absolute relative grid w-full overflow-hidden rounded-lg border border-black/10 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 lg:grid-cols-[minmax(320px,0.95fr)_1.05fr] ${
         isWholeCardInteractive ? 'cursor-pointer' : ''
       }`}
     >

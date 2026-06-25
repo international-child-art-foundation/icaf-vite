@@ -1,4 +1,5 @@
 import ClimateFestivalImg from '@/modules/content/assets/climateChange/0051424-R6-049-23.webp';
+import { WCF_SITE_URL } from '@/modules/content/utils/outboundLinks';
 import { Button } from '../../../../shared/components/ui/button';
 
 const sectionTitleClasses = 'font-montserrat text-3xl font-semibold';
@@ -29,7 +30,7 @@ export const HealthAndEnvironmentDay = () => {
 
           <div className="mt-6 flex-none text-lg">
             <a
-              href="https://worldchildrensfestival.org"
+              href={WCF_SITE_URL}
               className="block text-center"
               target="_blank"
               rel="noopener noreferrer"

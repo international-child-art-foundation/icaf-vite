@@ -2,6 +2,7 @@ import {
   ICreativityItem,
   IStudentParticipationItem,
 } from '@/modules/content/types/StudentTypes';
+import { WCF_SITE_URL } from '@/modules/content/utils/outboundLinks';
 
 import artsOlympiadLogo from '@/modules/content/assets/student/7th Arts Olympiad logo.webp';
 import childArtLogo from '@/modules/content/assets/student/ChildArtLogo.webp';
@@ -73,7 +74,7 @@ export const studentParticipationItems: IStudentParticipationItem[] = [
     bodyText2: 'Want to go? Visit the website to sign up!',
     buttonText: 'Register for free',
     color: 'yellow',
-    link: 'https://worldchildrensfestival.org',
+    link: WCF_SITE_URL,
     isExternal: true,
     imgSrc: ICAFLogo,
   },

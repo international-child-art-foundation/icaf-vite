@@ -1,6 +1,7 @@
 import ribbonBackground from '@/modules/content/assets/worldChildrensAward/ribbon-background.svg';
 import ribbonFlair from '@/modules/content/assets/worldChildrensAward/ribbon-flair.svg';
 import { WCAGlobalLeadersData } from '@/modules/content/data/worldChildrensAward/WCAData';
+import { WCF_SITE_URL } from '@/modules/content/utils/outboundLinks';
 import { ImgShowcase } from './ImgShowcase';
 import { linkClasses } from '@/shared/data/linkClasses';
 
@@ -33,7 +34,7 @@ export const WCAGlobalLeaders = () => {
       <p className="content-w m-pad mx-auto">
         The 4th World Children’s Award will be presented by young people to the
         leader they select at the{' '}
-        <a className={linkClasses} href="https://worldchildrensfestival.org">
+        <a className={linkClasses} href={WCF_SITE_URL}>
           7th World Children’s Festival
         </a>{' '}
         on the National Mall from July 25 to 27, 2026.

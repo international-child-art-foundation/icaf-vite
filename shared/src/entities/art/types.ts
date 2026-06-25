@@ -88,8 +88,9 @@ interface SubmitterIdentityFields {
 }
 
 // Request body for authenticated artwork submission (POST /user/artworks)
-// Identity comes from the auth token — no email/user_id needed in the body
-export type SubmitArtworkRequest = ArtworkSubmissionFields;
+// Identity comes from the auth token. Name fields are only sent when the
+// authenticated profile is missing them and the form collected replacements.
+export type SubmitArtworkRequest = ArtworkSubmissionFields & Partial<SubmitterIdentityFields>;
 
 // Request body for guest artwork submission (POST /anyone/artworks).
 // The server resolves an existing virtual user or creates one from the email.

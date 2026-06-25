@@ -43,6 +43,8 @@ export type AuthContext = {
   email: string;
   role: Role;
   banned: boolean;
+  f_name?: string;
+  l_name?: string;
 };
 
 export type CurrentUserResult =
@@ -107,6 +109,8 @@ async function resolveAuth(event: ApiGatewayEvent): Promise<ResolvedAuth | null>
     email: user.email,
     role: normalizeRole(user.role),
     banned: Boolean(user.banned),
+    f_name: user.f_name,
+    l_name: user.l_name,
   };
   const resolved = { auth, user };
   AUTH_CACHE.set(event, resolved);

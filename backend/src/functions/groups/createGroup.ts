@@ -18,6 +18,10 @@ import { getOptionalAuth } from "../../utils/auth";
 import { ensureThemeEntity } from "../shared/themeUtils";
 import { getOrCreateVirtualUser, sendVirtualUserSignupEmail } from "../shared/virtualUser";
 import { hasUploadedArtworkImage } from "../shared/artworkUpload";
+import {
+  getMissingProfileNameUpdates,
+  validateMissingProfileNames,
+} from "../shared/profileNames";
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -33,6 +37,12 @@ export const handler = async (
     const groupErrors = validateCreateGroupRequest(body, !auth);
     if (groupErrors.length > 0) {
       return CommonErrors.badRequest(groupErrors.join("; "));
+    }
+    if (auth) {
+      const profileNameErrors = validateMissingProfileNames(auth, body);
+      if (profileNameErrors.length > 0) {
+        return CommonErrors.badRequest(profileNameErrors.join("; "));
+      }
     }
 
     const groupId = randomUUID();
@@ -82,6 +92,10 @@ export const handler = async (
     if (!ownerUserId) {
       return CommonErrors.internalServerError("Unable to resolve submission owner");
     }
+    const profileNameUpdates = auth
+      ? getMissingProfileNameUpdates(auth, body)
+      : {};
+    const profileNameUpdateEntries = Object.entries(profileNameUpdates);
 
     const groupThemeCheck = await ensureThemeEntity({ theme: body.theme, nowMs });
     if (!groupThemeCheck.ok) return groupThemeCheck.response;
@@ -100,14 +114,31 @@ export const handler = async (
     await dynamodb.send(
       new TransactWriteCommand({
         TransactItems: [
-          {
-            ConditionCheck: {
-              TableName: TABLE_NAME,
-              Key: { PK: `USER#${ownerUserId}`, SK: "PROFILE" },
-              ConditionExpression:
-                "attribute_exists(PK)",
-            },
-          },
+          profileNameUpdateEntries.length > 0
+            ? {
+                Update: {
+                  TableName: TABLE_NAME,
+                  Key: { PK: `USER#${ownerUserId}`, SK: "PROFILE" },
+                  UpdateExpression: `SET ${profileNameUpdateEntries
+                    .map(([field]) => `${field} = :${field}`)
+                    .join(", ")}`,
+                  ConditionExpression: "attribute_exists(PK)",
+                  ExpressionAttributeValues: Object.fromEntries(
+                    profileNameUpdateEntries.map(([field, value]) => [
+                      `:${field}`,
+                      value,
+                    ]),
+                  ),
+                },
+              }
+            : {
+                ConditionCheck: {
+                  TableName: TABLE_NAME,
+                  Key: { PK: `USER#${ownerUserId}`, SK: "PROFILE" },
+                  ConditionExpression:
+                    "attribute_exists(PK)",
+                },
+              },
           ...body.artworks.map((artwork) => ({
             Put: {
               TableName: TABLE_NAME,

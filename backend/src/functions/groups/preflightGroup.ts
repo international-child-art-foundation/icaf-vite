@@ -12,6 +12,7 @@ import { randomUUID } from "crypto";
 import { getOptionalAuth, getUserByEmail } from "../../utils/auth";
 import { parseJsonBody } from "../../utils/request";
 import { ensureThemeEntity } from "../shared/themeUtils";
+import { validateMissingProfileNames } from "../shared/profileNames";
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -35,6 +36,12 @@ export const handler = async (
     const errors = validateCreateGroupRequest(validationBody, !auth);
     if (errors.length > 0) {
       return CommonErrors.badRequest(errors.join("; "));
+    }
+    if (auth) {
+      const profileNameErrors = validateMissingProfileNames(auth, body);
+      if (profileNameErrors.length > 0) {
+        return CommonErrors.badRequest(profileNameErrors.join("; "));
+      }
     }
 
     if (auth?.banned) {

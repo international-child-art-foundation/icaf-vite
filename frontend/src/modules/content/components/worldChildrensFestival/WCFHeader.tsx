@@ -1,4 +1,5 @@
 import heroImage from '@/modules/content/assets/worldChildrensFestival/dancingGirl.webp';
+import { WCF_SITE_URL } from '@/modules/content/utils/outboundLinks';
 import { CurvedImage } from '@/shared/components/CurvedImage';
 import { useWindowSize } from 'usehooks-ts';
 import { Button } from '../../../../shared/components/ui/button';
@@ -6,7 +7,7 @@ import { Button } from '../../../../shared/components/ui/button';
 //notes:  Used the same gradient as on homepage.  Check the p text size
 /**
  * This component is the header/hero for the programs/world children's festival page.
- * Includes a gradient across the image, text, and a button that opens a new page for https://worldchildrensfestival.org/why.
+ * Includes a gradient across the image, text, and a button that opens the World Children's Festival website.
  */
 export default function WCFHeader() {
   const size = useWindowSize();
@@ -74,8 +75,8 @@ export default function WCFHeader() {
             The 7th WCF is coming in July 2026. Will you be there?
           </p>
           <a
-            href="https://worldchildrensfestival.org/"
-            target="blank"
+            href={WCF_SITE_URL}
+            target="_blank"
             rel="noopener noreferrer"
           >
             <Button

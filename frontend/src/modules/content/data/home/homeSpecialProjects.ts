@@ -1,4 +1,5 @@
 import { TSpecialProjectGroup } from '@/modules/content/types/SpecialProjectTypes';
+import { WCF_SITE_URL } from '@/modules/content/utils/outboundLinks';
 import Wcf from '@/modules/content/assets/home/WCF.webp';
 import Swimmer from '@/modules/content/assets/home/Swimmer.webp';
 import Phoenix from '@/modules/content/assets/home/Phoenix.webp';
@@ -10,7 +11,7 @@ export const specialProjectData: TSpecialProjectGroup = [
     title: '7th World Children’s Festival ',
     description:
       "A three-day celebration of children's creativity and America's 250th anniversary on the National Mall",
-    href: 'https://worldchildrensfestival.org/',
+    href: WCF_SITE_URL,
     color: 'red',
   },
   {

@@ -1,3 +1,7 @@
+import {
+  WCF_HEALTH_AND_ENVIRONMENT_DAY_URL,
+  WCF_SITE_URL,
+} from '@/modules/content/utils/outboundLinks';
 import { linkClasses } from '@/shared/data/linkClasses';
 
 import muralOne from '@/modules/content/assets/climateChange/AO2 Bahrain. Islam Hasan (10 Bahrain).webp';
@@ -30,7 +34,7 @@ export const ClimateChangeInfo = () => {
             Through programs like the{' '}
             <a
               className={linkClasses}
-              href="https://worldchildrensfestival.org"
+              href={WCF_SITE_URL}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -38,7 +42,7 @@ export const ClimateChangeInfo = () => {
             </a>{' '}
             ,which begins with{' '}
             <a
-              href="https://worldchildrensfestival.org/health-and-environment-day"
+              href={WCF_HEALTH_AND_ENVIRONMENT_DAY_URL}
               className={linkClasses}
               target="_blank"
               rel="noopener noreferrer"

@@ -88,10 +88,11 @@ export type GuestCreateGroupRequest = CreateGroupBaseRequest & {
     submitter_last_name: string;
 };
 
-// Identity comes from auth cookies.
+// Identity comes from auth cookies. Name fields are only sent when the
+// authenticated profile is missing them and the form collected replacements.
 export type AuthenticatedCreateGroupRequest = CreateGroupBaseRequest & {
     email?: never;
-};
+} & Partial<Pick<GuestCreateGroupRequest, 'submitter_first_name' | 'submitter_last_name'>>;
 
 export type CreateGroupRequest = GuestCreateGroupRequest | AuthenticatedCreateGroupRequest;
 
@@ -112,7 +113,7 @@ export type GuestPreflightGroupRequest = PreflightGroupBaseRequest & {
 
 export type AuthenticatedPreflightGroupRequest = PreflightGroupBaseRequest & {
     email?: never;
-};
+} & Partial<Pick<GuestPreflightGroupRequest, 'submitter_first_name' | 'submitter_last_name'>>;
 
 export type PreflightGroupRequest =
     | GuestPreflightGroupRequest

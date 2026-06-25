@@ -1,5 +1,6 @@
 import { Button } from '../../../../shared/components/ui/button';
 import Girl from '@/modules/content/assets/worldChildrensFestival/girlPaintHands.webp';
+import { WCF_SITE_URL } from '@/modules/content/utils/outboundLinks';
 
 export default function WCFCTA() {
   return (
@@ -17,8 +18,8 @@ export default function WCFCTA() {
             or support them with your donation today.
           </p>
           <a
-            href="https://worldchildrensfestival.org/"
-            target="blank"
+            href={WCF_SITE_URL}
+            target="_blank"
             rel="noopener noreferrer"
             className="mr-auto"
           >

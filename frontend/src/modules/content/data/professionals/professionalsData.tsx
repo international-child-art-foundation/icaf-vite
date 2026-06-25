@@ -1,4 +1,5 @@
 import { IProfessionalsHowToItem } from '@/modules/content/types/Professionals';
+import { WCF_SITE_URL } from '@/modules/content/utils/outboundLinks';
 import wcfLogo from '@/shared/assets/images/world-childrens-festival.webp';
 import aoLogo from '@/shared/assets/images/arts-olympiad-7-transparent.svg';
 import globe from '@/shared/assets/images/New-York-_Michael-Wong_---11.webp';
@@ -28,7 +29,7 @@ export const professionalsData: IProfessionalsHowToItem[] = [
       <p>
         You can host a workshop or volunteer at the{' '}
         <a
-          href="https://worldchildrensfestival.org/"
+          href={WCF_SITE_URL}
           target="_blank"
           rel="noopener noreferrer"
           className={linkClasses}

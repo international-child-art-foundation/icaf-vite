@@ -332,6 +332,8 @@ export function SubmitArtwork() {
     useState<AuthenticatedSubmissionUser | null>(null);
 
   const isSubmitting = status === 'submitting';
+  const lockedSubmitterFirstName = Boolean(authenticatedUser?.f_name?.trim());
+  const lockedSubmitterLastName = Boolean(authenticatedUser?.l_name?.trim());
   const currentPath = `${location.pathname}${location.search}${location.hash}`;
   const loginPath = useMemo(
     () => buildLoginRedirectPath(currentPath, 'auth-required'),
@@ -451,6 +453,7 @@ export function SubmitArtwork() {
     try {
       if (!file) throw new Error('A selected image is missing.');
 
+      let submissionAuth = authenticatedUser;
       if (authenticatedUser) {
         const auth = await getAuthStatus();
         if (!auth.authenticated) {
@@ -460,6 +463,7 @@ export function SubmitArtwork() {
           );
         }
         setAuthenticatedUser(auth);
+        submissionAuth = auth;
       }
 
       const digitalSignature = createDigitalSignature(draft.digitalSignature);
@@ -508,7 +512,15 @@ export function SubmitArtwork() {
       };
 
       if (authenticatedUser) {
-        await submitArtwork(artworkRequest);
+        await submitArtwork({
+          ...artworkRequest,
+          ...(!submissionAuth?.f_name?.trim() && {
+            submitter_first_name: draft.submitterFirstName.trim(),
+          }),
+          ...(!submissionAuth?.l_name?.trim() && {
+            submitter_last_name: draft.submitterLastName.trim(),
+          }),
+        });
       } else {
         await submitGuestArtwork({
           ...artworkRequest,
@@ -570,8 +582,12 @@ export function SubmitArtwork() {
           setDraft((current) => ({
             ...current,
             submitterEmail: auth.email,
-            submitterFirstName: auth.f_name ?? '',
-            submitterLastName: auth.l_name ?? '',
+            submitterFirstName: auth.f_name?.trim()
+              ? auth.f_name
+              : current.submitterFirstName,
+            submitterLastName: auth.l_name?.trim()
+              ? auth.l_name
+              : current.submitterLastName,
           }));
           return;
         }
@@ -657,9 +673,9 @@ export function SubmitArtwork() {
                 maxLength={MAX_NAME_LEN}
                 name="submitterFirstName"
                 value={draft.submitterFirstName}
-                disabled={Boolean(authenticatedUser)}
+                disabled={lockedSubmitterFirstName}
                 className={
-                  authenticatedUser
+                  lockedSubmitterFirstName
                     ? 'border-slate-300 bg-slate-100 text-slate-700 opacity-100'
                     : undefined
                 }
@@ -676,9 +692,9 @@ export function SubmitArtwork() {
                 maxLength={MAX_NAME_LEN}
                 name="submitterLastName"
                 value={draft.submitterLastName}
-                disabled={Boolean(authenticatedUser)}
+                disabled={lockedSubmitterLastName}
                 className={
-                  authenticatedUser
+                  lockedSubmitterLastName
                     ? 'border-slate-300 bg-slate-100 text-slate-700 opacity-100'
                     : undefined
                 }

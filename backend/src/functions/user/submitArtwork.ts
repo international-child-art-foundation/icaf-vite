@@ -17,6 +17,10 @@ import { parseJsonBody } from "../../utils/request";
 import { getCurrentUser } from "../../utils/auth";
 import { ensureThemeEntity } from "../shared/themeUtils";
 import { hasUploadedArtworkImage } from "../shared/artworkUpload";
+import {
+  getMissingProfileNameUpdates,
+  validateMissingProfileNames,
+} from "../shared/profileNames";
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -49,6 +53,10 @@ export const handler = async (
     if (user.banned) {
       return CommonErrors.forbidden("This account is banned");
     }
+    const profileNameErrors = validateMissingProfileNames(user, body);
+    if (profileNameErrors.length > 0) {
+      return CommonErrors.badRequest(profileNameErrors.join("; "));
+    }
 
     const nowMs = Date.now();
     const nowSeconds = Math.floor(nowMs / 1000);
@@ -62,17 +70,37 @@ export const handler = async (
     const themeCheck = await ensureThemeEntity({ theme: body.theme, nowMs });
     if (!themeCheck.ok) return themeCheck.response;
 
+    const profileNameUpdates = getMissingProfileNameUpdates(user, body);
+    const profileNameUpdateEntries = Object.entries(profileNameUpdates);
+
     await dynamodb.send(
       new TransactWriteCommand({
         TransactItems: [
-          {
-            ConditionCheck: {
-              TableName: TABLE_NAME,
-              Key: { PK: `USER#${userId}`, SK: "PROFILE" },
-              ConditionExpression:
-                "attribute_exists(PK)",
-            },
-          },
+          profileNameUpdateEntries.length > 0
+            ? {
+                Update: {
+                  TableName: TABLE_NAME,
+                  Key: { PK: `USER#${userId}`, SK: "PROFILE" },
+                  UpdateExpression: `SET ${profileNameUpdateEntries
+                    .map(([field]) => `${field} = :${field}`)
+                    .join(", ")}`,
+                  ConditionExpression: "attribute_exists(PK)",
+                  ExpressionAttributeValues: Object.fromEntries(
+                    profileNameUpdateEntries.map(([field, value]) => [
+                      `:${field}`,
+                      value,
+                    ]),
+                  ),
+                },
+              }
+            : {
+                ConditionCheck: {
+                  TableName: TABLE_NAME,
+                  Key: { PK: `USER#${userId}`, SK: "PROFILE" },
+                  ConditionExpression:
+                    "attribute_exists(PK)",
+                },
+              },
           {
             Put: {
               TableName: TABLE_NAME,

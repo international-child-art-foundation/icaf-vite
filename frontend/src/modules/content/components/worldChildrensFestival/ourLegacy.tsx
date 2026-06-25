@@ -1,4 +1,5 @@
 import ourLegacyImage from '@/modules/content/assets/worldChildrensFestival/ourLegacy.webp';
+import { WCF_SITE_URL } from '@/modules/content/utils/outboundLinks';
 import { CircleArrowRight } from 'lucide-react';
 import OurLegacyDecorative from './ourLegacyDecorative';
 
@@ -40,7 +41,7 @@ export default function OurLegacy() {
                 cross-cultural understanding and global competencies.
               </p>
               <a
-                href="https://worldchildrensfestival.org/"
+                href={WCF_SITE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-8 flex flex-row gap-4 text-xl"

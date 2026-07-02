@@ -48,19 +48,21 @@ const icons = [
 function Footer() {
   const { setCookieBannerVisible } = useGlobalContext();
   const [email, setEmail] = useState('');
+  const [is13OrOlder, setIs13OrOlder] = useState(false);
   const [status, setStatus] = useState<'idle' | 'sending' | 'ok' | 'err'>(
     'idle',
   );
 
   async function onSubscribe(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!email.trim() || !is13OrOlder) return;
 
     setStatus('sending');
 
     const params = new URLSearchParams();
     params.set('type', 'subscribe');
     params.set('email', email.trim());
+    params.set('age_13_or_older', '1');
 
     try {
       const res = await fetch('/php-api/send-mail.php', {
@@ -74,6 +76,7 @@ function Footer() {
       if (text === 'success') {
         setStatus('ok');
         setEmail('');
+        setIs13OrOlder(false);
 
         // Notify Google Analytics
         if (typeof window.gtag === 'function') {
@@ -100,7 +103,7 @@ function Footer() {
           <div className="flex flex-col gap-2">
             <form
               onSubmit={(e) => void onSubscribe(e)}
-              className="flex flex-wrap items-center gap-1 text-stone-700 focus-within:text-stone-900 lg:flex-nowrap lg:gap-2 xl:max-w-[85%]"
+              className="flex flex-col gap-2 text-stone-700 focus-within:text-stone-900 xl:max-w-[85%]"
             >
               <div className="flex h-11 w-full flex-auto items-center rounded-full bg-white pl-4 pr-2 lg:h-10">
                 <Mail aria-hidden="true" className="mr-2 h-5 w-5" />
@@ -117,15 +120,36 @@ function Footer() {
                 />
               </div>
               <input type="hidden" name="type" value="subscribe" />
-              <div className="w-full lg:max-w-[9.25rem] 2xl:max-w-[10.7rem]">
-                <Button
-                  type="submit"
-                  variant="secondary"
-                  className="text-sans mt-2 w-full rounded-full text-base font-normal text-black lg:mt-0 lg:text-sm"
-                  disabled={status === 'sending'}
-                >
-                  {status === 'sending' ? 'Signing up…' : 'Sign up'}
-                </Button>
+              <div className="flex w-full items-center gap-3">
+                <label className="flex min-w-0 flex-1 items-center gap-2.5 text-base leading-snug text-white lg:text-sm xl:text-base">
+                  <input
+                    type="checkbox"
+                    name="age_13_or_older"
+                    checked={is13OrOlder}
+                    onChange={(e) => {
+                      e.target.setCustomValidity('');
+                      setIs13OrOlder(e.target.checked);
+                    }}
+                    onInvalid={(e) => {
+                      e.currentTarget.setCustomValidity(
+                        'You must be 13 or older to sign up for the ICAF newsletter.',
+                      );
+                    }}
+                    className="h-5 w-5 flex-none rounded border-white/70 accent-white"
+                    required
+                  />
+                  <span>I am 13 or older</span>
+                </label>
+                <div className="w-[11rem] flex-none md:w-[22rem] lg:w-[9.25rem] 2xl:w-[10.7rem]">
+                  <Button
+                    type="submit"
+                    variant="secondary"
+                    className="text-sans w-full rounded-full text-base font-normal text-black lg:text-sm"
+                    disabled={status === 'sending'}
+                  >
+                    {status === 'sending' ? 'Signing up…' : 'Sign up'}
+                  </Button>
+                </div>
               </div>
             </form>
             {status === 'ok' && (

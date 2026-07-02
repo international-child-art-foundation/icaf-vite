@@ -1,17 +1,37 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ArtworkListItem, GroupListItem } from '@icaf/shared';
+import { Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { listGroupSubmissions } from '@/api/groups';
-import { listArtworkSubmissions } from '@/api/user';
+import { deleteGroup, listGroupSubmissions } from '@/api/groups';
+import { deleteArtwork, listArtworkSubmissions } from '@/api/user';
 import { getArtwork, getGroup } from '@/api/public';
 import ArtworkCard from '@/modules/content/components/gallery/ArtworkCard';
 import ArtworkModal from '@/modules/content/components/gallery/ArtworkModal';
 import { GallerySlideshowEntry } from '@/modules/content/components/gallery/GallerySlideshowEntry';
 import { GalleryGroupCard } from '@/modules/content/components/gallery/GalleryGroupCard';
-import { resolveApiArtwork } from '@/utils/galleryProcessing';
+import {
+  artworkAssetUrl,
+  formatGalleryLocation,
+  formatGalleryTheme,
+  getArtistDisplayNameWithAge,
+  resolveApiArtwork,
+} from '@/utils/galleryProcessing';
 import { mapWithConcurrency } from '@/shared/utils/concurrency';
+import { Button } from '@/shared/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/components/ui/dialog';
 import { formatDate, groupTitle } from '../utils/dashboardFormat';
 import { DashboardModule, ModuleState } from './DashboardModule';
+
+type PendingDelete =
+  | { kind: 'artwork'; item: ArtworkListItem }
+  | { kind: 'group'; item: GroupListItem };
 
 function useMediaQuery(query: string, fallback = false) {
   const getMatches = useCallback(() => {
@@ -50,6 +70,9 @@ export function MySubmissionsModule() {
   const [artworkLastKey, setArtworkLastKey] = useState<string | undefined>();
   const [groupLastKey, setGroupLastKey] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
+  const [deleteAcknowledged, setDeleteAcknowledged] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const isHorizontal = useMediaQuery('(orientation: landscape)', true);
   const resolvedArtworks = useMemo(
     () => artworks.map((artwork) => resolveApiArtwork(artwork)),
@@ -170,6 +193,121 @@ export function MySubmissionsModule() {
       .finally(() => setLoadingMoreGroups(false));
   };
 
+  const closeDeleteDialog = () => {
+    if (deleting) return;
+    setPendingDelete(null);
+    setDeleteAcknowledged(false);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete || !deleteAcknowledged || deleting) return;
+
+    setDeleting(true);
+    setError(null);
+
+    try {
+      if (pendingDelete.kind === 'artwork') {
+        const artId = pendingDelete.item.art_id;
+        await deleteArtwork(artId);
+        setArtworks((current) =>
+          current.filter((artwork) => artwork.art_id !== artId),
+        );
+        if (pendingDelete.item.group_id) {
+          setGroups((current) =>
+            current.map((group) =>
+              group.group_id === pendingDelete.item.group_id
+                ? {
+                    ...group,
+                    member_count: Math.max(0, group.member_count - 1),
+                    preview_art_ids: group.preview_art_ids.filter(
+                      (previewArtId) => previewArtId !== artId,
+                    ),
+                  }
+                : group,
+            ),
+          );
+        }
+        if (activeArtworkId === artId) setActiveArtworkId('');
+        if (exhibitionArtworkId === artId) setExhibitionArtworkId('');
+        setActiveGroupArtworks((current) =>
+          current.filter((artwork) => artwork.id !== artId),
+        );
+      } else {
+        const groupId = pendingDelete.item.group_id;
+        await deleteGroup(groupId);
+        setGroups((current) =>
+          current.filter((group) => group.group_id !== groupId),
+        );
+        setArtworks((current) =>
+          current.filter((artwork) => artwork.group_id !== groupId),
+        );
+        setActiveGroupArtworks([]);
+        setActiveArtworkId('');
+        setExhibitionArtworkId('');
+      }
+
+      setPendingDelete(null);
+      setDeleteAcknowledged(false);
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to delete submission',
+      );
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const deleteDialogTitle =
+    pendingDelete?.kind === 'group'
+      ? 'Delete artwork group?'
+      : 'Delete artwork?';
+  const deleteDialogDescription =
+    pendingDelete?.kind === 'group'
+      ? `This will permanently delete ${groupTitle(pendingDelete.item)} and every artwork in the group.`
+      : `This will permanently delete ${pendingDelete?.item.title || 'this artwork'}.`;
+  const pendingDeleteArtworkItem =
+    pendingDelete?.kind === 'artwork' ? pendingDelete.item : null;
+  const pendingDeleteArtwork = pendingDeleteArtworkItem
+    ? resolveApiArtwork(pendingDeleteArtworkItem)
+    : null;
+  const pendingDeleteGroup =
+    pendingDelete?.kind === 'group' ? pendingDelete.item : null;
+  const pendingDeleteArtworkDetails =
+    pendingDeleteArtwork && pendingDeleteArtworkItem
+      ? [
+          ['Title', pendingDeleteArtwork.title],
+          ['Artist', getArtistDisplayNameWithAge(pendingDeleteArtwork)],
+          ['Theme', formatGalleryTheme(pendingDeleteArtwork)],
+          [
+            'Location',
+            formatGalleryLocation(
+              pendingDeleteArtwork.region,
+              pendingDeleteArtwork.country,
+            ),
+          ],
+          ['Status', pendingDeleteArtworkItem.status],
+          ['Submitted', formatDate(pendingDeleteArtworkItem.ts)],
+        ].filter((detail): detail is [string, string] => Boolean(detail[1]))
+      : [];
+  const pendingDeleteGroupDetails = pendingDeleteGroup
+    ? [
+        ['Group', groupTitle(pendingDeleteGroup)],
+        ['Status', pendingDeleteGroup.status],
+        ['Artworks', `${pendingDeleteGroup.member_count}`],
+        [
+          'Location',
+          formatGalleryLocation(
+            pendingDeleteGroup.region,
+            pendingDeleteGroup.country,
+          ),
+        ],
+        ['Submitted', formatDate(pendingDeleteGroup.ts)],
+      ].filter((detail): detail is [string, string] => Boolean(detail[1]))
+    : [];
+  const pendingDeleteGroupThumbUrl = pendingDeleteGroup?.preview_art_ids[0]
+    ? artworkAssetUrl(pendingDeleteGroup.preview_art_ids[0], 'thumb')
+    : undefined;
+
   return (
     <DashboardModule
       title="My submissions"
@@ -206,6 +344,99 @@ export function MySubmissionsModule() {
           setActiveArtworkId('');
         }}
       />
+      <Dialog
+        open={Boolean(pendingDelete)}
+        onOpenChange={(open) => {
+          if (!open) closeDeleteDialog();
+        }}
+      >
+        {pendingDelete && (
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{deleteDialogTitle}</DialogTitle>
+              <DialogDescription>{deleteDialogDescription}</DialogDescription>
+            </DialogHeader>
+            {pendingDeleteArtwork && (
+              <div className="grid gap-4 rounded-md border border-neutral-200 bg-white p-3 sm:grid-cols-[112px_1fr]">
+                <img
+                  src={pendingDeleteArtwork.thumbUrl}
+                  alt={pendingDeleteArtwork.alt || 'Artwork thumbnail'}
+                  className="aspect-square w-full rounded-md object-cover"
+                />
+                <dl className="grid content-start gap-2 text-sm">
+                  {pendingDeleteArtworkDetails.map(([label, value]) => (
+                    <div key={label} className="grid gap-0.5">
+                      <dt className="text-xs font-semibold uppercase text-neutral-500">
+                        {label}
+                      </dt>
+                      <dd className="text-neutral-800">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            )}
+            {pendingDeleteGroup && (
+              <div className="grid gap-4 rounded-md border border-neutral-200 bg-white p-3 sm:grid-cols-[112px_1fr]">
+                {pendingDeleteGroupThumbUrl ? (
+                  <img
+                    src={pendingDeleteGroupThumbUrl}
+                    alt=""
+                    className="aspect-square w-full rounded-md object-cover"
+                  />
+                ) : (
+                  <div className="aspect-square w-full rounded-md bg-neutral-100" />
+                )}
+                <dl className="grid content-start gap-2 text-sm">
+                  {pendingDeleteGroupDetails.map(([label, value]) => (
+                    <div key={label} className="grid gap-0.5">
+                      <dt className="text-xs font-semibold uppercase text-neutral-500">
+                        {label}
+                      </dt>
+                      <dd className="text-neutral-800">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            )}
+            <label className="flex gap-3 rounded-md border border-neutral-200 bg-neutral-50 p-3 text-sm leading-6 text-neutral-700">
+              <input
+                type="checkbox"
+                checked={deleteAcknowledged}
+                onChange={(event) =>
+                  setDeleteAcknowledged(event.target.checked)
+                }
+                disabled={deleting}
+                className="mt-1 h-4 w-4 rounded border-neutral-300"
+              />
+              <span>
+                I understand this deletion cannot be undone
+                {pendingDelete.kind === 'group'
+                  ? ' and includes every artwork in this group'
+                  : ''}
+                .
+              </span>
+            </label>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={closeDeleteDialog}
+                disabled={deleting}
+              >
+                Back
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => void confirmDelete()}
+                disabled={!deleteAcknowledged || deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        )}
+      </Dialog>
       {error && <ModuleState tone="error">{error}</ModuleState>}
       {groupSlideshowLoading && (
         <ModuleState>Loading group slideshow...</ModuleState>
@@ -243,10 +474,28 @@ export function MySubmissionsModule() {
                       artwork={resolvedArtwork}
                       openModal={setActiveArtworkId}
                       actionSlot={
-                        <p className="text-xs text-neutral-500">
-                          {artwork.status} · Submitted on{' '}
-                          {formatDate(artwork.ts)}
-                        </p>
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <p className="text-xs text-neutral-500">
+                            {artwork.status} · Submitted on{' '}
+                            {formatDate(artwork.ts)}
+                          </p>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() =>
+                              setPendingDelete({
+                                kind: 'artwork',
+                                item: artwork,
+                              })
+                            }
+                            disabled={deleting}
+                            aria-label={`Delete ${artwork.title || 'artwork'}`}
+                          >
+                            <Trash2 aria-hidden="true" />
+                            Delete
+                          </Button>
+                        </div>
                       }
                     />
                   );
@@ -284,10 +533,29 @@ export function MySubmissionsModule() {
                     onOpen={openGroupSlideshow}
                     interactiveWithActionSlot
                     actionSlot={
-                      <p className="text-xs text-neutral-500">
-                        {groupTitle(group)} · {group.status} ·{' '}
-                        {formatDate(group.ts)}
-                      </p>
+                      <div
+                        className="flex flex-wrap items-center justify-between gap-3"
+                        onClick={(event) => event.stopPropagation()}
+                        onKeyDown={(event) => event.stopPropagation()}
+                      >
+                        <p className="text-xs text-neutral-500">
+                          {groupTitle(group)} · {group.status} ·{' '}
+                          {formatDate(group.ts)}
+                        </p>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() =>
+                            setPendingDelete({ kind: 'group', item: group })
+                          }
+                          disabled={deleting}
+                          aria-label={`Delete ${groupTitle(group)}`}
+                        >
+                          <Trash2 aria-hidden="true" />
+                          Delete
+                        </Button>
+                      </div>
                     }
                   />
                 ))}

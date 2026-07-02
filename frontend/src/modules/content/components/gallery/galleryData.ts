@@ -15,6 +15,10 @@ import { mapWithConcurrency } from '@/shared/utils/concurrency';
 
 const API_PAGE_LIMIT = 100;
 
+function hasGroupArtworkToShow(group: GroupListItem): boolean {
+  return group.preview_art_ids.length > 0;
+}
+
 export function toSortOrder(sortValue: string): SortOrder {
   return sortValue === 'Oldest Event' ? 'oldest' : 'newest';
 }
@@ -72,7 +76,7 @@ export async function fetchAllGalleryGroups(
           ? await listGalleryGroupsByFamily(themeFamily, query)
           : await listGalleryGroups(query);
 
-    groups.push(...response.groups);
+    groups.push(...response.groups.filter(hasGroupArtworkToShow));
     lastKey = response.last_key;
   } while (lastKey);
 

@@ -127,8 +127,9 @@ if ($type === "subscribe") {
   global $recipients, $toHeader, $from, $username, $password;
 
   $email = clamp_utf8(trim((string)($_POST["email"] ?? "")), LIMIT_EMAIL);
+  $age13OrOlder = (string)($_POST["age_13_or_older"] ?? "");
 
-  if (!is_valid_email($email)) {
+  if (!is_valid_email($email) || $age13OrOlder !== "1") {
     exit("invalid_request");
   }
 

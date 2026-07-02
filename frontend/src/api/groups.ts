@@ -10,6 +10,7 @@ import type {
 
 import {
   apiRequest,
+  clearApiResponseCache,
   hasApiSuccess,
   hasArrayProperty,
   hasStringProperty,
@@ -51,7 +52,27 @@ export function updateGroup(
 }
 
 export function deleteGroup(groupId: string): Promise<void> {
-  return apiRequest<void>(apiEndpoints.groups.group(groupId), { method: 'DELETE' });
+  return apiRequest<void>(apiEndpoints.groups.group(groupId), {
+    method: 'DELETE',
+  }).then((response) => {
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.gallery.artworks,
+    });
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.gallery.groups,
+    });
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.public.groups,
+    });
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.public.group(groupId),
+    });
+    return response;
+  });
 }
 
 export function submitArtworkToGroup(

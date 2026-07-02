@@ -358,6 +358,10 @@ export const ContactForm = ({
             {config.title}
           </HeadingTag>
           <p className="text-2xl">{config.subtitle}</p>
+          <p className="mt-4 text-xl text-slate-700">
+            If you are under the age of 13, please ask a parent to fill out
+            this form.
+          </p>
         </div>
 
         <div className="flex w-full grid-cols-1 grid-rows-2 flex-col rounded-xl lg:grid lg:grid-cols-[1fr_1fr] lg:grid-rows-[1fr_0.5fr] lg:bg-inherit">

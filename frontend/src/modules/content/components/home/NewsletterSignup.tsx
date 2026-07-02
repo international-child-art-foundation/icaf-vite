@@ -6,19 +6,21 @@ import Ribbons from '@/shared/assets/images/Ribbons.svg';
 
 export const NewsletterSignup = () => {
   const [email, setEmail] = useState('');
+  const [is13OrOlder, setIs13OrOlder] = useState(false);
   const [status, setStatus] = useState<'idle' | 'sending' | 'ok' | 'err'>(
     'idle',
   );
 
   async function onSubscribe(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!email.trim() || !is13OrOlder) return;
 
     setStatus('sending');
 
     const params = new URLSearchParams();
     params.set('type', 'subscribe');
     params.set('email', email.trim());
+    params.set('age_13_or_older', '1');
 
     try {
       const res = await fetch('/php-api/send-mail.php', {
@@ -32,6 +34,7 @@ export const NewsletterSignup = () => {
       if (text === 'success') {
         setStatus('ok');
         setEmail('');
+        setIs13OrOlder(false);
 
         // Notify Google Analytics
         if (typeof window.gtag === 'function') {
@@ -56,9 +59,9 @@ export const NewsletterSignup = () => {
             Stay Connected
           </h2>
           <p className="font-openSans mx-auto max-w-2xl text-center text-lg">
-            Join our global community. Sign up to receive the ICAF newsletter
-            for quarterly updates on child creativity, peace initiatives, and
-            upcoming festivals.
+            Adults: Join our global community. Sign up to receive the ICAF
+            newsletter for quarterly updates on child creativity, peace
+            initiatives, and upcoming festivals.
           </p>
         </div>
 
@@ -67,35 +70,58 @@ export const NewsletterSignup = () => {
             <div className="relative z-10 rounded-2xl bg-[#dfe7f8] p-8 shadow-sm md:p-12 lg:p-16">
               <form
                 onSubmit={(e) => void onSubscribe(e)}
-                className="flex flex-col items-center gap-6 md:flex-row md:gap-4"
+                className="flex flex-col gap-4"
               >
-                <div className="relative w-full flex-1">
-                  <Mail
-                    className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-500"
-                    aria-hidden="true"
-                  />
-                  <Input
-                    type="email"
-                    name="email"
-                    placeholder="Your email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="focus-visible:ring-primary h-14 w-full rounded-full border-none bg-white pl-12 text-lg outline-none ring-offset-0 focus-visible:ring-2"
-                    required
-                    maxLength={254}
-                    autoComplete="email"
+                <div className="flex flex-col items-center gap-6 md:flex-row md:gap-4">
+                  <div className="relative w-full flex-1">
+                    <Mail
+                      className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-500"
+                      aria-hidden="true"
+                    />
+                    <Input
+                      type="email"
+                      name="email"
+                      placeholder="Your email address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="focus-visible:ring-primary h-14 w-full rounded-full border-none bg-white pl-12 text-lg outline-none ring-offset-0 focus-visible:ring-2"
+                      required
+                      maxLength={254}
+                      autoComplete="email"
+                      disabled={status === 'sending'}
+                    />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="bg-secondary-yellow hover:bg-primary-alt h-14 w-full rounded-full px-10 text-lg font-bold text-black transition-all hover:shadow-lg md:w-auto"
+                    variant="secondary"
                     disabled={status === 'sending'}
-                  />
+                  >
+                    {status === 'sending' ? 'Signing up...' : 'Sign Up'}
+                  </Button>
                 </div>
 
-                <Button
-                  type="submit"
-                  className="bg-secondary-yellow hover:bg-primary-alt h-14 w-full rounded-full px-10 text-lg font-bold text-black transition-all hover:shadow-lg md:w-auto"
-                  variant="secondary"
-                  disabled={status === 'sending'}
-                >
-                  {status === 'sending' ? 'Signing up...' : 'Sign Up'}
-                </Button>
+                <label className="flex items-center gap-2.5 text-base font-semibold leading-snug text-neutral-700 md:pl-6">
+                  <input
+                    type="checkbox"
+                    name="age_13_or_older"
+                    checked={is13OrOlder}
+                    onChange={(e) => {
+                      e.target.setCustomValidity('');
+                      setIs13OrOlder(e.target.checked);
+                    }}
+                    onInvalid={(e) => {
+                      e.currentTarget.setCustomValidity(
+                        'You must be 13 or older to sign up for the ICAF newsletter.',
+                      );
+                    }}
+                    className="h-5 w-5 flex-none accent-blue-700"
+                    required
+                    disabled={status === 'sending'}
+                  />
+                  <span>I am 13 or older</span>
+                </label>
               </form>
 
               <div className="">

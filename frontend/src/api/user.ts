@@ -13,6 +13,7 @@ import type {
 
 import {
   apiRequest,
+  clearApiResponseCache,
   hasApiSuccess,
   hasArrayProperty,
   hasNumberProperty,
@@ -93,7 +94,27 @@ export function updateArtwork(
 }
 
 export function deleteArtwork(artId: string): Promise<void> {
-  return apiRequest<void>(apiEndpoints.user.artwork(artId), { method: 'DELETE' });
+  return apiRequest<void>(apiEndpoints.user.artwork(artId), {
+    method: 'DELETE',
+  }).then((response) => {
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.gallery.artworks,
+    });
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.gallery.groups,
+    });
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.public.groups,
+    });
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.public.artwork(artId),
+    });
+    return response;
+  });
 }
 
 export function deleteAllArtworks(): Promise<DeleteAllArtworksResponse> {

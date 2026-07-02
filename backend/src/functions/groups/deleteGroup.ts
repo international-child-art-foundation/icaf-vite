@@ -8,6 +8,7 @@ import {
   GroupEntity,
 } from "@icaf/shared";
 import { getCurrentUser } from "../../utils/auth";
+import { deleteArtworkObjects } from "../shared/artworkObjects";
 
 export const handler = async (
   event: ApiGatewayEvent,
@@ -68,6 +69,15 @@ export const handler = async (
         ],
       }),
     );
+
+    // ── S3 cleanup for each artwork (non-fatal) ───────────────────────────
+    for (const artId of group.member_art_ids) {
+      try {
+        await deleteArtworkObjects(artId);
+      } catch (s3Err) {
+        console.error(`S3 cleanup failed for art ${artId}:`, s3Err);
+      }
+    }
 
     return {
       statusCode: HTTP_STATUS.NO_CONTENT,

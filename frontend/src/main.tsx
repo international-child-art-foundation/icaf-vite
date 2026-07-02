@@ -6,6 +6,9 @@ import './index.css';
 import App from './App';
 import { ScrollToTop } from './utils/scrollToTop';
 import { AnalyticsListener } from './utils/AnalyticsListener';
+import { installChunkLoadRecovery } from './utils/chunkLoadRecovery';
+
+installChunkLoadRecovery();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

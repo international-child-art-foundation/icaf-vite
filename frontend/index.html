@@ -47,6 +47,50 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      (function () {
+        var RETRY_KEY = 'icaf:module-script-retried';
+
+        window.addEventListener(
+          'error',
+          function (event) {
+            var target = event.target;
+            var isAssetScriptFailure =
+              target &&
+              target.tagName === 'SCRIPT' &&
+              target.src &&
+              target.src.indexOf('/assets/') !== -1;
+
+            if (!isAssetScriptFailure) {
+              return;
+            }
+
+            try {
+              if (window.sessionStorage.getItem(RETRY_KEY) === 'true') {
+                return;
+              }
+
+              window.sessionStorage.setItem(RETRY_KEY, 'true');
+            } catch (error) {
+              return;
+            }
+
+            window.location.replace(window.location.href);
+          },
+          true
+        );
+
+        window.addEventListener('load', function () {
+          window.setTimeout(function () {
+            try {
+              window.sessionStorage.removeItem(RETRY_KEY);
+            } catch (error) {
+              // Ignore unavailable storage.
+            }
+          }, 5000);
+        });
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

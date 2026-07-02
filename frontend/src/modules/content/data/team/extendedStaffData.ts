@@ -11,93 +11,87 @@ export const designerData: IGroupsAndMembers[] = [
     members: [{ name: 'Sarita Lewis', link: 'https://sarita-lewis.com/' }],
   },
   {
-    name: 'UX Researcher',
+    name: 'Graphic Artist',
     members: [
       {
-        name: 'Florencia Gatti',
-        link: 'https://www.linkedin.com/in/mflorencia-gatti/',
+        name: 'Mark Forton',
+        link: 'https://mafmovement.com/',
       },
     ],
   },
   {
-    name: 'Graphic Artist',
-    members: [{ name: 'Shuchen Wang', link: 'https://shuchenwang.com/about' }],
+    name: 'Creative Director',
+    members: [{ name: 'Jia Yu', link: 'https://jiayu-design.com/' }],
   },
   {
-    name: 'Creative Directors',
-    members: [
-      { name: 'Mark Forton', link: 'https://mafmovement.com/' },
-      { name: 'Jia Yu', link: 'https://jiayu-design.com/' },
-    ],
+    name: 'Videographer',
+    members: [{ name: 'Sarah Golder' }],
+  },
+  {
+    name: 'Photographer',
+    members: [{ name: 'Simona Chen' }],
   },
 ];
 
 export const officerData: IGroupsAndMembers[] = [
   {
-    name: 'Social Media Officer',
-    members: [{ name: 'Ashley Bostic' }],
+    name: 'Social Media',
+    members: [{ name: 'Ashlyn Wenner' }],
   },
   {
-    name: 'Program & Event Officers',
-    members: [
-      { name: 'Camie Graves' },
-      { name: 'Sylvia Tong' },
-      { name: 'Jack Wesley Wilkerson' },
-    ],
+    name: 'Business',
+    members: [{ name: 'Louise Shen' }],
   },
   {
-    name: 'Writer & Researcher',
-    members: [{ name: 'Ava Saunders' }],
+    name: 'International',
+    members: [{ name: 'Jack Wilkerson' }],
   },
   {
-    name: 'Communications Officer',
+    name: 'Communication',
     members: [{ name: 'Faith Antonioni' }],
+  },
+  {
+    name: 'Art Contests',
+    members: [{ name: 'Bryce Pfeiffer' }],
   },
 ];
 
-export const developerData: IGroupsAndMembers[] = [
+export const planningOfficerData: IGroupsAndMembers[] = [
   {
-    name: 'Front-end Developer',
-    members: [{ name: 'Jiayun Yan' }],
-  },
-  {
-    name: 'Front-end Developer',
-    members: [{ name: 'Sam Bolton' }],
-  },
-  {
-    name: 'Front-end Developer',
-    members: [{ name: 'Yuting Shen' }],
-  },
-  {
-    name: 'Front-end Developer',
-    members: [{ name: 'Emma Wang' }],
-  },
-  {
-    name: 'Full-stack Developer',
-    members: [{ name: 'Shenqian Wen' }],
+    name: 'Planning Officers',
+    members: [
+      { name: 'Sanjana Bandaru' },
+      { name: 'Camie Graves' },
+      { name: 'Alexandre Green' },
+      { name: 'Elizabeth Hay' },
+      { name: 'Rijuta Kalantre' },
+      { name: 'Connor Tarbert' },
+      { name: 'Sebastian Zimmerman' },
+    ],
   },
 ];
 
 export const TeamCardData: ITeamCardData[] = [
   {
-    title: 'Designers',
-    subtitle: 'Bringing ICAF’s vision to life.',
+    title: 'Creative Officers',
+    subtitle: 'Bringing vision to life.',
     color: 'red',
     Icon: LightbulbIcon,
     groupsOfMembers: designerData,
   },
   {
-    title: `Program Officers`,
-    subtitle: 'Helping ICAF’s operations and activities',
+    title: `Strategic Officers`,
+    subtitle: 'Managing operations and activities.',
     color: 'green',
     Icon: SpaceshipIcon,
     groupsOfMembers: officerData,
   },
   {
-    title: 'Developers and Engineers',
-    subtitle: 'Maintaining ICAF’s digital platforms.',
+    title: 'Planning Officers',
+    subtitle: "Facilitating the 2026 World Children's Festival.",
     color: 'primaryBlue',
     Icon: SpaceshipIcon,
-    groupsOfMembers: developerData,
+    groupsOfMembers: planningOfficerData,
+    memberDisplay: 'list',
   },
 ];

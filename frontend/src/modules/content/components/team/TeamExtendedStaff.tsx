@@ -16,6 +16,7 @@ export const TeamExtendedStaff = () => {
             Icon={card.Icon}
             subtitle={card.subtitle}
             groupsOfMembers={card.groupsOfMembers}
+            memberDisplay={card.memberDisplay}
           />
         ))}
       </div>

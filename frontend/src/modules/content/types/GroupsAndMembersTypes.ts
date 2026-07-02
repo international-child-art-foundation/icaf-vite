@@ -16,4 +16,5 @@ export interface ITeamCardData {
   Icon: React.ComponentType<{ colorClass: string; className?: string }>;
   color: ColorKey;
   groupsOfMembers: IGroupsAndMembers[];
+  memberDisplay?: 'grouped' | 'list';
 }

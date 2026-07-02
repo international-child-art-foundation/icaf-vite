@@ -14,11 +14,13 @@ const accountRoutePaths = new Set([
 
 export function AnalyticsListener() {
   const location = useLocation();
+
   useEffect(() => {
-    recordHit(location.pathname);
+    recordHit(`${location.pathname}${location.search}`);
     if (!accountRoutePaths.has(location.pathname)) {
       saveLastVisitedPath(`${location.pathname}${location.search}${location.hash}`);
     }
   }, [location.hash, location.pathname, location.search]);
+
   return null;
 }

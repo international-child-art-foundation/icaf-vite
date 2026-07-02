@@ -18,8 +18,43 @@ if (!is_array($body) || !isset($body['path'])) {
     exit;
 }
 
-$path = (string)$body['path'];
-$path = parse_url($path, PHP_URL_PATH) ?? '/';
+function clean_gallery_value($value): ?string {
+    if (!is_string($value) || $value === '') {
+        return null;
+    }
+
+    $value = substr($value, 0, 120);
+    return preg_match('/^[A-Za-z0-9._~-]+$/', $value) ? $value : null;
+}
+
+function normalized_hit_path(string $rawPath): string {
+    $path = parse_url($rawPath, PHP_URL_PATH) ?? '/';
+    $query = parse_url($rawPath, PHP_URL_QUERY) ?? '';
+
+    if ($path !== '/gallery' && $path !== '/gallery/slideshow') {
+        return $path;
+    }
+
+    parse_str($query, $params);
+
+    $artworkId = clean_gallery_value($params['id'] ?? null);
+    if ($artworkId !== null) {
+        return $path . '?id=' . rawurlencode($artworkId);
+    }
+
+    $groupId = clean_gallery_value($params['group'] ?? null);
+    if ($groupId !== null) {
+        return $path . '?group=' . rawurlencode($groupId);
+    }
+
+    if (($params['view'] ?? null) === 'group') {
+        return $path . '?view=group';
+    }
+
+    return $path;
+}
+
+$path = normalized_hit_path((string)$body['path']);
 if (strlen($path) > 512) {
     http_response_code(400);
     echo json_encode(['error' => 'path too long']);

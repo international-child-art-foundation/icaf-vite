@@ -1,3 +1,4 @@
+// Keep in sync with the inline module-script retry shim in index.html.
 const CHUNK_LOAD_RETRY_KEY = 'icaf:chunk-load-retried';
 
 function getErrorMessage(value: unknown): string {

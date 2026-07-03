@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { recordHit } from './hit';
 import { saveLastVisitedPath } from '@/shared/utils/authSession';
 
 const accountRoutePaths = new Set([
@@ -12,13 +11,14 @@ const accountRoutePaths = new Set([
   '/confirm-forgot-password',
 ]);
 
-export function AnalyticsListener() {
+export function LastVisitedPathListener() {
   const location = useLocation();
 
   useEffect(() => {
-    recordHit(`${location.pathname}${location.search}`);
     if (!accountRoutePaths.has(location.pathname)) {
-      saveLastVisitedPath(`${location.pathname}${location.search}${location.hash}`);
+      saveLastVisitedPath(
+        `${location.pathname}${location.search}${location.hash}`,
+      );
     }
   }, [location.hash, location.pathname, location.search]);
 

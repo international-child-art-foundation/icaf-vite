@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 const SCROLL_BASE_PX_S = 10;
 const SCROLL_START_DELAY_MS = 6000;
@@ -49,7 +49,7 @@ export const DescriptionScroll = ({
     };
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!pRef.current) return;
     const el = pRef.current;
     const measure = () => {

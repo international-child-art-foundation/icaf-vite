@@ -39,8 +39,8 @@ export const ClimateChangeInfo = () => {
               rel="noopener noreferrer"
             >
               World Children's Festival
-            </a>{' '}
-            ,which begins with{' '}
+            </a>
+            , which begins with{' '}
             <a
               href={WCF_HEALTH_AND_ENVIRONMENT_DAY_URL}
               className={linkClasses}

@@ -40,6 +40,7 @@ import { handler as unhideAllUserArtwork } from "../functions/admin/unhideAllUse
 import { handler as updateMagazineStatus } from "../functions/admin/updateMagazineStatus";
 import { handler as updateNews } from "../functions/admin/updateNews";
 import { handler as confirmForgotPassword } from "../functions/anyone/confirmForgotPassword";
+import { handler as contact } from "../functions/anyone/contact";
 import { handler as createAndVerify } from "../functions/anyone/createAndVerify";
 import { handler as createArtworkUpload } from "../functions/anyone/createArtworkUpload";
 import { handler as forgotPassword } from "../functions/anyone/forgotPassword";
@@ -153,6 +154,7 @@ function roleProtected(route: Omit<Route, "auth">, roles: Role[]): Route {
 
 const routes: Route[] = [
   { method: "POST", path: "/api/artwork-uploads", handler: createArtworkUpload },
+  { method: "POST", path: "/api/contact", handler: contact },
   { method: "POST", path: "/api/artworks", handler: guestSubmitArtwork },
   { method: "POST", path: "/api/groups", handler: createGroup },
   { method: "POST", path: "/api/groups/preflight", handler: preflightGroup },

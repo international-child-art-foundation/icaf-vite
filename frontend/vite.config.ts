@@ -27,6 +27,6 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, './src'),
       },
     },
-    publicDir: env.VITE_PUBLIC_DIR || path.resolve(__dirname, 'public'),
+    publicDir: path.resolve(__dirname, 'public'),
   };
 });

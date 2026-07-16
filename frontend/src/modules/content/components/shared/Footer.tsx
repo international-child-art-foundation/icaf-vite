@@ -11,6 +11,7 @@ import DonateButton from '../../../../shared/components/ui/donateButton';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useGlobalContext } from './GlobalContext';
+import { submitContactMessage } from '@/api/public';
 
 const icons = [
   {
@@ -59,34 +60,23 @@ function Footer() {
 
     setStatus('sending');
 
-    const params = new URLSearchParams();
-    params.set('type', 'subscribe');
-    params.set('email', email.trim());
-    params.set('age_13_or_older', '1');
-
     try {
-      const res = await fetch('/php-api/send-mail.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params.toString(),
+      await submitContactMessage({
+        type: 'subscribe',
+        email: email.trim(),
+        age_13_or_older: true,
       });
 
-      const text = (await res.text()).trim().toLowerCase();
+      setStatus('ok');
+      setEmail('');
+      setIs13OrOlder(false);
 
-      if (text === 'success') {
-        setStatus('ok');
-        setEmail('');
-        setIs13OrOlder(false);
-
-        // Notify Google Analytics
-        if (typeof window.gtag === 'function') {
-          window.gtag('event', 'generate_lead', {
-            event_label: 'footer_newsletter',
-            method: 'newsletter_form',
-          });
-        }
-      } else {
-        setStatus('err');
+      // Notify Google Analytics
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'generate_lead', {
+          event_label: 'footer_newsletter',
+          method: 'newsletter_form',
+        });
       }
     } catch {
       setStatus('err');

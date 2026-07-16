@@ -255,6 +255,33 @@ export function initiateTakedown(
   );
 }
 
+export type ContactMessageRequest = {
+  type: 'contact-us' | 'volunteer' | 'professionals' | 'subscribe';
+  name?: string;
+  email: string;
+  subject?: string;
+  message?: string;
+  organization?: string;
+  expertise?: string;
+  contribution?: string;
+  motivation?: string;
+  age_13_or_older?: boolean;
+  website?: string;
+};
+
+export type ContactMessageResponse = {
+  success: true;
+};
+
+export function submitContactMessage(
+  request: ContactMessageRequest,
+): Promise<ContactMessageResponse> {
+  return apiRequest<ContactMessageResponse, ContactMessageRequest>(
+    apiEndpoints.public.contact,
+    { body: request, method: 'POST', validate: hasApiSuccess },
+  );
+}
+
 export function listMagazines(
   options?: PublicReadOptions,
 ): Promise<ListMagazinesResponse> {

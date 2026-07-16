@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useWindowSize } from 'usehooks-ts';
-import { clamp, parseApiResponse, isApiSuccess } from '@/utils/phpApiUtils';
+import { clamp } from '@/utils/phpApiUtils';
+import { submitContactMessage } from '@/api/public';
 import type {
   ContactFormConfig,
   ContactField,
@@ -85,31 +86,29 @@ async function postContact(
   }
 
   const values = collectFieldValues(config, fd);
-  const params = new URLSearchParams();
-  params.set('type', config.phpType);
+  const messageParts: Record<string, string> = {};
 
   Object.entries(config.params).forEach(([paramName, mapping]) => {
     if (mapping.kind === 'field') {
-      params.set(paramName, values[mapping.field] ?? '');
+      messageParts[paramName] = values[mapping.field] ?? '';
     } else if (mapping.kind === 'template') {
       const message = buildTemplateMessage(mapping.template, values, config);
-      params.set(paramName, message);
+      messageParts[paramName] = message;
     }
   });
 
-  const res = await fetch('/php-api/send-mail.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString(),
+  await submitContactMessage({
+    type: config.phpType,
+    name: messageParts.name,
+    email: messageParts.email ?? '',
+    subject: messageParts.subject,
+    message: messageParts.message,
+    organization: messageParts.organization,
+    expertise: messageParts.expertise,
+    contribution: messageParts.contribution,
+    motivation: messageParts.motivation,
+    website,
   });
-
-  const text = await res.text();
-  const data = parseApiResponse(text);
-
-  if (res.ok && data && isApiSuccess(data)) return;
-  if (res.ok && text.trim().toLowerCase() === 'success') return;
-
-  throw new Error('send_failed');
 }
 
 function validateForm(

@@ -75,7 +75,7 @@ export type ContactParamMapping =
 export interface ContactFormConfig {
   id: ContactFormId;
   layout: ContactLayout;
-  phpType: string;
+  phpType: ContactFormId;
   title: string;
   subtitle: string;
   submitLabelIdle: string;

@@ -19,12 +19,15 @@
     "build:shared": "pnpm --filter @icaf/shared build",
     "build:backend": "pnpm --filter @icaf/backend build",
     "test:backend": "pnpm --filter @icaf/backend test",
-    "dev:backend": "pnpm --filter @icaf/backend dev"
+    "dev:backend": "pnpm --filter @icaf/backend dev",
+    "pages:create": "wrangler pages project create icaf --production-branch=main",
+    "pages:deploy": "wrangler pages deploy frontend/dist --project-name=icaf"
   },
   "devDependencies": {
     "esbuild": "^0.25.12",
     "sharp": "^0.33.5",
-    "typescript": "~5.7.3"
+    "typescript": "~5.7.3",
+    "wrangler": "4.109.0"
   },
   "dependencies": {
     "@aws-sdk/client-cloudfront": "^3.1062.0",

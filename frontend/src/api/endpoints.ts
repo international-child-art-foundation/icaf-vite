@@ -111,6 +111,7 @@ export const apiEndpoints = {
     artworkKudos: (artId: PathParam) =>
       `/artworks/${encodePathParam(artId)}/kudos`,
     artworks: '/artworks',
+    contact: '/contact',
     group: (groupId: PathParam) => `/groups/${encodePathParam(groupId)}`,
     groups: '/groups',
     groupPreflight: '/groups/preflight',

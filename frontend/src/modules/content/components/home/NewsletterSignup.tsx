@@ -3,6 +3,7 @@ import { Button } from '../../../../shared/components/ui/button';
 import { Input } from '../../../../shared/components/ui/input';
 import { Mail } from 'lucide-react';
 import Ribbons from '@/shared/assets/images/Ribbons.svg';
+import { submitContactMessage } from '@/api/public';
 
 export const NewsletterSignup = () => {
   const [email, setEmail] = useState('');
@@ -17,34 +18,23 @@ export const NewsletterSignup = () => {
 
     setStatus('sending');
 
-    const params = new URLSearchParams();
-    params.set('type', 'subscribe');
-    params.set('email', email.trim());
-    params.set('age_13_or_older', '1');
-
     try {
-      const res = await fetch('/php-api/send-mail.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params.toString(),
+      await submitContactMessage({
+        type: 'subscribe',
+        email: email.trim(),
+        age_13_or_older: true,
       });
 
-      const text = (await res.text()).trim().toLowerCase();
+      setStatus('ok');
+      setEmail('');
+      setIs13OrOlder(false);
 
-      if (text === 'success') {
-        setStatus('ok');
-        setEmail('');
-        setIs13OrOlder(false);
-
-        // Notify Google Analytics
-        if (typeof window.gtag === 'function') {
-          window.gtag('event', 'generate_lead', {
-            event_label: 'homepage_newsletter',
-            method: 'newsletter_form',
-          });
-        }
-      } else {
-        setStatus('err');
+      // Notify Google Analytics
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'generate_lead', {
+          event_label: 'homepage_newsletter',
+          method: 'newsletter_form',
+        });
       }
     } catch {
       setStatus('err');

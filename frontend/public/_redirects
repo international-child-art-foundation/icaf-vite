@@ -1,0 +1,12 @@
+/2026WCF /documents/2026WCF.pdf 302
+/2026WCF/ /documents/2026WCF.pdf 302
+/culturalexposition /documents/Cultural_Exposition.pdf 302
+/culturalexposition/ /documents/Cultural_Exposition.pdf 302
+
+# Temporary static replacement for the former PHP magazine rotator.
+/daily-magazine /ChildArt/Happiness 302
+/daily-magazine/ /ChildArt/Happiness 302
+/daily-magazine/* /ChildArt/Happiness/:splat 302
+
+# React Router fallback.
+/* /index.html 200

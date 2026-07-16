@@ -381,6 +381,10 @@ export class InfraStack extends Stack {
       "childart@icaf.org",
       "noah.zaranka@icaf.org",
     ];
+    const CONTACT_NOTIFICATION_EMAILS = [
+      "childart@icaf.org",
+      "noah.zaranka@icaf.org",
+    ];
     const sesConfigurationSet = new ses.CfnConfigurationSet(this, "IcafSesConfigurationSet", {
       name: resourceName("transactional"),
     });
@@ -421,6 +425,7 @@ export class InfraStack extends Stack {
       SES_FROM_EMAIL,
       SES_CONFIGURATION_SET: sesConfigurationSet.ref,
       TAKEDOWN_NOTIFICATION_EMAILS: JSON.stringify(TAKEDOWN_NOTIFICATION_EMAILS),
+      CONTACT_NOTIFICATION_EMAILS: JSON.stringify(CONTACT_NOTIFICATION_EMAILS),
       ARTWORK_CLOUDFRONT_DISTRIBUTION_ID: artworkDistribution.distributionId,
       MAGAZINES_CLOUDFRONT_DOMAIN: magazinesDistribution.distributionDomainName,
       STRIPE_WEBHOOK_SECRET: requiredEnvironmentValue("STRIPE_WEBHOOK_SECRET"),

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Field } from '@/modules/content/types/HTMLFormTypes';
-import { clamp, getString, parseApiResponse } from '@/utils/phpApiUtils';
-import { isApiSuccess } from '@/utils/phpApiUtils';
+import { clamp, getString } from '@/utils/phpApiUtils';
+import { submitContactMessage } from '@/api/public';
 import redBlueFirework from '@/shared/assets/images/RedBlueFirework.svg';
 
 const LIMITS = {
@@ -86,28 +86,15 @@ async function postContact(form: HTMLFormElement): Promise<void> {
 
   const message = clamp(combinedMessageRaw, LIMITS.messageTotal);
 
-  const params = new URLSearchParams();
-  params.set('type', 'volunteer');
-  params.set('name', name);
-  params.set('email', email);
-  params.set('message', message);
-  params.set('expertise', expertise);
-  params.set('contribution', contribution);
-  params.set('motivation', motivation);
-
-  const res = await fetch('/php-api/send-mail.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString(),
+  await submitContactMessage({
+    type: 'volunteer',
+    name,
+    email,
+    message,
+    expertise,
+    contribution,
+    motivation,
   });
-
-  const text = await res.text();
-  const data = parseApiResponse(text);
-
-  if (res.ok && data && isApiSuccess(data)) return;
-  if (res.ok && text.trim().toLowerCase() === 'success') return;
-
-  throw new Error('send_failed');
 }
 
 export const VolunteerContact = () => {

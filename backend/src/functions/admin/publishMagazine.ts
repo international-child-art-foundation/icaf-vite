@@ -47,7 +47,7 @@ export const handler = async (
             return CommonErrors.badRequest(errors.join("; "));
         }
 
-        const { slug, name, period, volume, userId } = body;
+        const { slug, name, period, volume } = body;
         const now = Math.floor(Date.now() / 1000);
 
         // ── Write MAGAZINE record to DDB (status=processing) ───────────────
@@ -63,7 +63,7 @@ export const handler = async (
                     period,
                     volume,
                     status: "processing",
-                    uploaded_by: userId,
+                    uploaded_by: currentUser.user.user_id,
                     ts: now,
                     type: EntityType.Magazine,
                 },

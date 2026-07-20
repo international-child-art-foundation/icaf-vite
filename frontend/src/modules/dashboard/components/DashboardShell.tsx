@@ -7,6 +7,7 @@ import {
 import { MySubmissionsModule } from '../components/MySubmissionsModule';
 import { OverviewModules } from '../components/OverviewModules';
 import { NewsAdminPanel } from '../components/NewsAdminPanel';
+import { MagazineAdminPanel } from '../components/MagazineAdminPanel';
 import { ThemeAdminPanel } from '../components/ThemeAdminPanel';
 import { TakedownRequestsPanel } from '../components/TakedownRequestsPanel';
 import { ReviewArtworkQueue } from '../components/ReviewArtworkQueue';
@@ -94,6 +95,8 @@ export function DashboardShell({
     content = <ReviewArtworkQueue key="admin-artwork-queue" admin />;
   } else if (activeTab === 'news' && canAdmin(role)) {
     content = <NewsAdminPanel />;
+  } else if (activeTab === 'magazines' && canAdmin(role)) {
+    content = <MagazineAdminPanel />;
   } else if (activeTab === 'takedowns' && canAdmin(role)) {
     content = <TakedownRequestsPanel onActiveChange={setHasActiveTakedowns} />;
   } else if (activeTab === 'themes' && canReview(role)) {

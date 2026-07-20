@@ -8,10 +8,12 @@
  *   2. Download the zip from S3 into memory
  *   3. Unzip all entries using fflate
  *   4. Strip the common top-level folder prefix from paths (if present)
- *   5. Upload each file to <slug>/<path> in the magazines bucket
- *   6. Detect thumbnail: the first root-level image file found
- *   7. Update the MAGAZINE DDB record: status='published', thumbnail_key, published_at
- *   8. Delete the staging zip
+ *   5. Detect thumbnail: the first root-level image file found
+ *   6. Generate index.html when a PDF issue has no root index
+ *   7. Delete the existing <slug>/ prefix and upload the replacement files
+ *   8. Update the MAGAZINE DDB record: status='published', thumbnail_key
+ *   9. Delete the staging zip
+ *   10. Invalidate the magazine CloudFront cache for this slug
  *
  * Memory note: magazine zips are expected to be < 200MB. Lambda is configured
  * with 1024MB so in-memory unzip is safe for typical issues.
@@ -22,18 +24,23 @@ import {
     GetObjectCommand,
     PutObjectCommand,
     DeleteObjectCommand,
+    ListObjectsV2Command,
+    DeleteObjectsCommand,
 } from "@aws-sdk/client-s3";
+import { CloudFrontClient, CreateInvalidationCommand } from "@aws-sdk/client-cloudfront";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { Readable } from "stream";
+import type { Readable } from "stream";
 import { unzipSync } from "fflate";
 import type { SQSEvent, SQSRecord } from "aws-lambda";
 import { isValidMagazineSlug } from "@icaf/shared";
 
 const s3 = new S3Client({ region: process.env.AWS_REGION });
+const cloudfront = new CloudFrontClient({ region: process.env.AWS_REGION });
 const dynamodb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: process.env.AWS_REGION }));
 
 const MAGAZINES_BUCKET = process.env.MAGAZINES_BUCKET_NAME!;
+const MAGAZINES_CLOUDFRONT_DISTRIBUTION_ID = process.env.MAGAZINES_CLOUDFRONT_DISTRIBUTION_ID;
 const TABLE_NAME = process.env.TABLE_NAME!;
 
 const IMAGE_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp", "avif", "bmp", "tiff", "svg"]);
@@ -71,6 +78,11 @@ const MIME_MAP: Record<string, string> = {
     m4a: "audio/mp4",
 };
 
+type UploadEntry = {
+    path: string;
+    data: Uint8Array;
+};
+
 function getContentType(filename: string): string {
     const ext = getExtension(filename);
     return MIME_MAP[ext] ?? "application/octet-stream";
@@ -83,6 +95,51 @@ function getExtension(filename: string): string {
 
 function isImageFile(filename: string): boolean {
     return IMAGE_EXTENSIONS.has(getExtension(filename));
+}
+
+function isPdfFile(filename: string): boolean {
+    return getExtension(filename) === "pdf";
+}
+
+function escapeHtml(value: string): string {
+    return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+}
+
+function generatePdfIndex(slug: string, pdfPath: string): string {
+    const href = encodeURI(pdfPath);
+    const title = escapeHtml(slug);
+
+    return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${title}</title>
+  <style>
+    html, body { margin: 0; min-height: 100%; font-family: Arial, sans-serif; background: #f7f7f7; color: #171717; }
+    main { min-height: 100vh; display: grid; grid-template-rows: auto 1fr; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 18px; background: #ffffff; border-bottom: 1px solid #dedede; }
+    h1 { margin: 0; font-size: 18px; line-height: 1.3; }
+    a { color: #134380; font-weight: 700; }
+    iframe { width: 100%; height: 100%; min-height: calc(100vh - 58px); border: 0; background: #ffffff; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>${title}</h1>
+      <a href="${href}">Open PDF</a>
+    </header>
+    <iframe src="${href}" title="${title} PDF"></iframe>
+  </main>
+</body>
+</html>
+`;
 }
 
 function validateZipEntryPath(path: string): string | null {
@@ -109,6 +166,56 @@ async function streamToBuffer(stream: Readable): Promise<Buffer> {
         chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
     }
     return Buffer.concat(chunks);
+}
+
+async function deleteObjectsWithPrefix(bucket: string, prefix: string): Promise<void> {
+    let continuationToken: string | undefined;
+
+    do {
+        const listResp = await s3.send(
+            new ListObjectsV2Command({
+                Bucket: bucket,
+                Prefix: prefix,
+                ContinuationToken: continuationToken,
+            }),
+        );
+
+        const objects = (listResp.Contents ?? [])
+            .map((obj) => obj.Key)
+            .filter((key): key is string => Boolean(key));
+
+        for (let index = 0; index < objects.length; index += 1000) {
+            const batch = objects.slice(index, index + 1000);
+            await s3.send(
+                new DeleteObjectsCommand({
+                    Bucket: bucket,
+                    Delete: {
+                        Objects: batch.map((Key) => ({ Key })),
+                        Quiet: true,
+                    },
+                }),
+            );
+        }
+
+        continuationToken = listResp.IsTruncated ? listResp.NextContinuationToken : undefined;
+    } while (continuationToken);
+}
+
+async function invalidateMagazineCache(slug: string): Promise<void> {
+    if (!MAGAZINES_CLOUDFRONT_DISTRIBUTION_ID) return;
+
+    await cloudfront.send(
+        new CreateInvalidationCommand({
+            DistributionId: MAGAZINES_CLOUDFRONT_DISTRIBUTION_ID,
+            InvalidationBatch: {
+                CallerReference: `${slug}-${Date.now()}`,
+                Paths: {
+                    Quantity: 2,
+                    Items: [`/${slug}`, `/${slug}/*`],
+                },
+            },
+        }),
+    );
 }
 
 /**
@@ -224,11 +331,35 @@ async function processRecord(record: SQSRecord): Promise<void> {
         );
     }
 
-    // ── 4. Upload all files to magazines bucket under <slug>/ ─────────────
-    const uploads = fileEntries.map(async ([originalPath, data]) => {
-        const strippedPath = pathMap.get(originalPath)!;
-        const destKey = `${slug}/${strippedPath}`;
-        const contentType = getContentType(strippedPath);
+    // ── 4. Generate a minimal index.html for PDF-only issues ───────────────
+    const uploadEntries: UploadEntry[] = fileEntries.map(([originalPath, data]) => ({
+        path: pathMap.get(originalPath)!,
+        data,
+    }));
+
+    const hasRootIndex = uploadEntries.some((entry) => entry.path.toLowerCase() === "index.html");
+    if (!hasRootIndex) {
+        const firstPdf = uploadEntries.find((entry) => isPdfFile(entry.path));
+        if (!firstPdf) {
+            throw new Error(
+                `Zip for slug "${slug}" contains no index.html and no PDF to wrap. ` +
+                `Include an index.html file or a PDF file.`,
+            );
+        }
+
+        uploadEntries.push({
+            path: "index.html",
+            data: Buffer.from(generatePdfIndex(slug, firstPdf.path)),
+        });
+        console.log(`Generated index.html wrapper for PDF issue: slug=${slug}, pdf=${firstPdf.path}`);
+    }
+
+    // ── 5. Replace existing issue files, then upload under <slug>/ ─────────
+    await deleteObjectsWithPrefix(MAGAZINES_BUCKET, `${slug}/`);
+
+    const uploads = uploadEntries.map(async ({ path, data }) => {
+        const destKey = `${slug}/${path}`;
+        const contentType = getContentType(path);
 
         await s3.send(
             new PutObjectCommand({
@@ -243,7 +374,7 @@ async function processRecord(record: SQSRecord): Promise<void> {
 
     await Promise.all(uploads);
 
-    // ── 5. Update DDB record ───────────────────────────────────────────────
+    // ── 6. Update DDB record ───────────────────────────────────────────────
     await dynamodb.send(
         new UpdateCommand({
             TableName: TABLE_NAME,
@@ -257,12 +388,13 @@ async function processRecord(record: SQSRecord): Promise<void> {
         }),
     );
 
-    // ── 6. Delete staging zip ──────────────────────────────────────────────
+    // ── 7. Delete staging zip ──────────────────────────────────────────────
     await s3.send(new DeleteObjectCommand({ Bucket: bucket, Key: srcKey }));
+    await invalidateMagazineCache(slug);
 
     console.log(
         `Magazine "${slug}" published successfully. ` +
-        `Files: ${fileEntries.length}, Thumbnail: ${thumbnailKey}`,
+        `Files: ${uploadEntries.length}, Thumbnail: ${thumbnailKey}`,
     );
 }
 

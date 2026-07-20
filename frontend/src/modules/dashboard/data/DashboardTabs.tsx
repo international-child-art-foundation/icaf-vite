@@ -4,11 +4,12 @@ import {
   ClipboardCheck,
   GalleryHorizontal,
   Newspaper,
+  BookOpen,
   Palette,
   Scale,
 } from 'lucide-react';
 import type { Role } from '@icaf/shared';
-import { TabData } from '@/modules/dashboard/types/dashboardTypes';
+import type { TabData } from '@/modules/dashboard/types/dashboardTypes';
 import { canAdmin, canReview } from '@/modules/dashboard/utils/dashboardFormat';
 
 export const dashboardTabData = {
@@ -50,6 +51,14 @@ export const dashboardTabData = {
     description: 'Create and update news items',
     icon: <Newspaper size={18} />,
     color: 'text-secondary-blue/60',
+    roles: 'admin',
+  },
+  magazines: {
+    id: 'magazines',
+    label: 'Magazines',
+    description: 'Upload ChildArt issues',
+    icon: <BookOpen size={18} />,
+    color: 'text-secondary-yellow/40',
     roles: 'admin',
   },
   themes: {

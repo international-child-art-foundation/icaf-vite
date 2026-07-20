@@ -42,7 +42,7 @@ export interface InitiateMagazineUploadRequest {
     name: string;
     period: string;
     volume: string;
-    userId: string;
+    replace?: boolean;
 }
 
 export interface InitiateMagazineUploadResponse {
@@ -59,6 +59,7 @@ export interface MagazineListItem {
     period: string;
     volume: string;
     status: MagazineStatus;
+    link_url: string;       // Full CloudFront URL, e.g. https://magazines.icaf.org/<slug>/
     thumbnail_url: string;  // Full CloudFront URL, e.g. https://magazines.icaf.org/<slug>/cover.jpg
     ts: number;
 }

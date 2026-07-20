@@ -499,6 +499,7 @@ export class InfraStack extends Stack {
       environment: {
         TABLE_NAME: icafTable.tableName,
         MAGAZINES_BUCKET_NAME: magazinesBucket.bucketName,
+        MAGAZINES_CLOUDFRONT_DISTRIBUTION_ID: magazinesDistribution.distributionId,
       },
       entry: src("processZip.ts"),
       logGroup: lambdaLogGroup("ProcessZipFn"),
@@ -570,6 +571,14 @@ export class InfraStack extends Stack {
       actions: ["cloudfront:CreateInvalidation"],
       resources: [
         `arn:aws:cloudfront::${this.account}:distribution/${artworkDistribution.distributionId}`,
+      ],
+    }));
+
+    processZipFn.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ["cloudfront:CreateInvalidation"],
+      resources: [
+        `arn:aws:cloudfront::${this.account}:distribution/${magazinesDistribution.distributionId}`,
       ],
     }));
 

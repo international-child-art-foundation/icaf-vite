@@ -29,6 +29,7 @@ export const handler = async (): Promise<{ statusCode: number; body: string; hea
                 period: m.period,
                 volume: m.volume,
                 status: m.status,
+                link_url: `https://${MAGAZINES_CLOUDFRONT_DOMAIN}/${m.slug}/`,
                 thumbnail_url: `https://${MAGAZINES_CLOUDFRONT_DOMAIN}/${m.slug}/${m.thumbnail_key}`,
                 ts: m.ts,
             }))

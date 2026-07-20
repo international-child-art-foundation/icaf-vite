@@ -32,6 +32,7 @@ frontend/public/data/*
 frontend/public/documents/*
 frontend/public/gallery-arts/*
 frontend/public/large-media/*
+.magazine-zips/
 
 # Editor directories and files
 .vscode/*

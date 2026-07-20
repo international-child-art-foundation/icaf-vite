@@ -272,6 +272,26 @@ export function publishMagazine(
   });
 }
 
+export async function uploadMagazineZip(
+  request: InitiateMagazineUploadRequest,
+  file: File,
+): Promise<InitiateMagazineUploadResponse> {
+  const response = await publishMagazine(request);
+  const uploadResponse = await fetch(response.presigned_url, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/zip' },
+    body: file,
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error(
+      `S3 upload failed for ${request.slug}: ${uploadResponse.status} ${uploadResponse.statusText}`,
+    );
+  }
+
+  return response;
+}
+
 export function updateMagazineStatus(
   slug: string,
   request: UpdateMagazineStatusRequest,

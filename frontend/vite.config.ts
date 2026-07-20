@@ -5,10 +5,18 @@ import { defineConfig, loadEnv } from 'vite';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const apiProxyTarget = env.API_PROXY_TARGET?.trim();
+  const artworkAssetBaseUrl =
+    env.VITE_ARTWORK_ASSET_BASE_URL?.trim() ||
+    'https://d2oephvbntzgfl.cloudfront.net';
 
   return {
     root: './',
     plugins: [react()],
+    define: {
+      'import.meta.env.VITE_ARTWORK_ASSET_BASE_URL': JSON.stringify(
+        artworkAssetBaseUrl,
+      ),
+    },
     ...(apiProxyTarget
       ? {
           server: {

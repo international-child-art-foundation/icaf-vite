@@ -38,6 +38,7 @@ import { handler as removeAllUserArtwork } from "../functions/admin/removeAllUse
 import { handler as reviewTakedownRequest } from "../functions/admin/reviewTakedownRequest";
 import { handler as unbanUser } from "../functions/admin/unbanUser";
 import { handler as unhideAllUserArtwork } from "../functions/admin/unhideAllUserArtwork";
+import { handler as updateMagazine } from "../functions/admin/updateMagazine";
 import { handler as updateMagazineStatus } from "../functions/admin/updateMagazineStatus";
 import { handler as updateNews } from "../functions/admin/updateNews";
 import { handler as confirmForgotPassword } from "../functions/anyone/confirmForgotPassword";
@@ -234,6 +235,7 @@ const routes: Route[] = [
   roleProtected({ method: "PATCH", path: "/api/admin/takedowns/{tdr_sk}", handler: reviewTakedownRequest }, adminRoles),
   roleProtected({ method: "GET", path: "/api/admin/magazines", handler: listMagazines }, adminRoles),
   roleProtected({ method: "POST", path: "/api/admin/magazines", handler: publishMagazine }, adminRoles),
+  roleProtected({ method: "PATCH", path: "/api/admin/magazines/{slug}", handler: updateMagazine }, adminRoles),
   roleProtected({ method: "PATCH", path: "/api/admin/magazines/{slug}/status", handler: updateMagazineStatus }, adminRoles),
   roleProtected({ method: "DELETE", path: "/api/admin/magazines/{slug}", handler: deleteMagazine }, adminRoles),
   roleProtected({ method: "POST", path: "/api/admin/news", handler: createNews }, adminRoles),

@@ -1,4 +1,4 @@
-import { InitiateMagazineUploadRequest } from './types.js';
+import { InitiateMagazineUploadRequest, UpdateMagazineRequest } from './types.js';
 
 // Slugs must be URL-path-safe: letters, digits, &, +, -, _, .
 // Matches the historical ICAF magazine folder naming convention.
@@ -39,6 +39,36 @@ export function validateInitiateMagazineUploadRequest(data: InitiateMagazineUplo
         errors.push('volume is required');
     } else if (data.volume.length > MAX_FIELD_LEN) {
         errors.push(`volume must be ${MAX_FIELD_LEN} characters or less`);
+    }
+
+    return errors;
+}
+
+function validateMagazineTextField(
+    errors: string[],
+    data: UpdateMagazineRequest,
+    field: keyof UpdateMagazineRequest,
+    label: string,
+): void {
+    const value = data[field];
+    if (value === undefined) return;
+
+    if (typeof value !== 'string' || !value.trim()) {
+        errors.push(`${label} must be a non-empty string`);
+    } else if (value.length > MAX_FIELD_LEN) {
+        errors.push(`${label} must be ${MAX_FIELD_LEN} characters or less`);
+    }
+}
+
+export function validateUpdateMagazineRequest(data: UpdateMagazineRequest): string[] {
+    const errors: string[] = [];
+
+    validateMagazineTextField(errors, data, 'name', 'name');
+    validateMagazineTextField(errors, data, 'period', 'period');
+    validateMagazineTextField(errors, data, 'volume', 'volume');
+
+    if (data.name === undefined && data.period === undefined && data.volume === undefined) {
+        errors.push('at least one of name, period, or volume is required');
     }
 
     return errors;

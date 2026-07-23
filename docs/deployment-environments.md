@@ -49,6 +49,23 @@ The account ID identifies a deployment target but does not grant access, so it
 is a variable rather than a secret. Use a scoped Cloudflare API token, not a
 global API key.
 
+To serve remote magazines from a stable public hostname, define these optional
+variables together in the target GitHub Environment:
+
+- `MAGAZINES_DOMAIN_NAME` — for production, `magazines.icaf.org`
+- `MAGAZINES_CERTIFICATE_ARN` — ACM certificate ARN for that hostname
+
+CloudFront requires the ACM certificate to exist in `us-east-1`. If these
+variables are omitted, the backend returns the raw CloudFront distribution
+domain for magazine links. After the deployment succeeds, create or update the
+Cloudflare DNS CNAME for `magazines.icaf.org` to point at the
+`MagazinesDistributionDomainName` stack output.
+
+Do not redirect legacy `/ChildArt/<slug>/` URLs until the remote magazine set is
+fully uploaded and verified. At cutover, add redirects from `/ChildArt/<slug>/`
+to `https://magazines.icaf.org/<slug>/` so old links stay alive without serving
+magazine files from the main site deployment.
+
 The frontend and backend use the same GA4 web stream. The workflow sets
 `VITE_GA_MEASUREMENT_ID` and passes it to the backend as `GA4_MEASUREMENT_ID`;
 `GA4_API_SECRET` stays backend-only.

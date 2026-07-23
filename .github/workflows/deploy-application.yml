@@ -53,6 +53,8 @@ jobs:
           SFTP_HOST: ${{ secrets.SFTP_HOST }}
           SFTP_USER: ${{ secrets.SFTP_USER }}
           SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+          MAGAZINES_DOMAIN_NAME: ${{ vars.MAGAZINES_DOMAIN_NAME }}
+          MAGAZINES_CERTIFICATE_ARN: ${{ vars.MAGAZINES_CERTIFICATE_ARN }}
         run: |
           missing=()
           for name in \
@@ -80,6 +82,11 @@ jobs:
 
           if [ "$GITHUB_REF_NAME" = "main" ] && [ -z "$GA4_MEASUREMENT_ID" ]; then
             missing+=("GA4_MEASUREMENT_ID")
+          fi
+
+          if { [ -n "$MAGAZINES_DOMAIN_NAME" ] && [ -z "$MAGAZINES_CERTIFICATE_ARN" ]; } ||
+             { [ -z "$MAGAZINES_DOMAIN_NAME" ] && [ -n "$MAGAZINES_CERTIFICATE_ARN" ]; }; then
+            missing+=("MAGAZINES_DOMAIN_NAME and MAGAZINES_CERTIFICATE_ARN must be configured together")
           fi
 
           if [ "${#missing[@]}" -ne 0 ]; then
@@ -143,6 +150,8 @@ jobs:
           EVERY_WEBHOOK_SECRET: ${{ secrets.EVERY_WEBHOOK_SECRET }}
           GA4_API_SECRET: ${{ secrets.GA4_API_SECRET }}
           GA4_MEASUREMENT_ID: ${{ env.VITE_GA_MEASUREMENT_ID }}
+          MAGAZINES_DOMAIN_NAME: ${{ vars.MAGAZINES_DOMAIN_NAME }}
+          MAGAZINES_CERTIFICATE_ARN: ${{ vars.MAGAZINES_CERTIFICATE_ARN }}
         run: |
           pnpm exec cdk diff --all
           pnpm exec cdk deploy --all --require-approval never --outputs-file cdk-outputs.json

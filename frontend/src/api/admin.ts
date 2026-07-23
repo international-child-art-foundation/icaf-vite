@@ -46,6 +46,17 @@ import type { PaginationQuery } from './types';
 
 export const TAKEDOWN_ACTIVITY_CACHE_MS = 30 * 60 * 1000;
 
+type UpdateMagazineRequest = {
+  name?: string;
+  period?: string;
+  volume?: string;
+};
+
+type UpdateMagazineResponse = {
+  success: true;
+  slug: string;
+};
+
 const hasMessageAndUserId = (response: unknown): boolean =>
   hasStringProperty(response, 'message') && hasStringProperty(response, 'user_id');
 
@@ -272,6 +283,10 @@ export function publishMagazine(
       method: 'GET',
       pathPrefix: apiEndpoints.public.magazines,
     });
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.admin.magazines,
+    });
     return response;
   });
 }
@@ -318,6 +333,30 @@ export function updateMagazineStatus(
       method: 'GET',
       pathPrefix: apiEndpoints.public.magazines,
     });
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.admin.magazines,
+    });
+    return response;
+  });
+}
+
+export function updateMagazine(
+  slug: string,
+  request: UpdateMagazineRequest,
+): Promise<UpdateMagazineResponse> {
+  return apiRequest<UpdateMagazineResponse, UpdateMagazineRequest>(
+    apiEndpoints.admin.updateMagazine(slug),
+    { body: request, method: 'PATCH', validate: isMagazineMutationResponse },
+  ).then((response) => {
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.public.magazines,
+    });
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.admin.magazines,
+    });
     return response;
   });
 }
@@ -333,6 +372,10 @@ export function deleteMagazine(slug: string): Promise<DeleteMagazineResponse> {
     clearApiResponseCache({
       method: 'GET',
       pathPrefix: apiEndpoints.public.magazines,
+    });
+    clearApiResponseCache({
+      method: 'GET',
+      pathPrefix: apiEndpoints.admin.magazines,
     });
     return response;
   });

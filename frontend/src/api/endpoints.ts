@@ -36,6 +36,8 @@ export const apiEndpoints = {
       `/admin/users/${encodePathParam(userId)}/unhide-all`,
     updateMagazineStatus: (slug: PathParam) =>
       `/admin/magazines/${encodePathParam(slug)}/status`,
+    updateMagazine: (slug: PathParam) =>
+      `/admin/magazines/${encodePathParam(slug)}`,
     updateNews: (newsSk: PathParam) => `/admin/news/${encodePathParam(newsSk)}`,
     adminUpdateArtwork: (artId: PathParam) =>
       `/admin/artworks/${encodePathParam(artId)}`,

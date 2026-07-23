@@ -17,12 +17,13 @@ import * as snsSubscriptions from "aws-cdk-lib/aws-sns-subscriptions";
 import * as ses from "aws-cdk-lib/aws-ses";
 import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
 import * as cloudwatchActions from "aws-cdk-lib/aws-cloudwatch-actions";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as cloudfrontOrigins from "aws-cdk-lib/aws-cloudfront-origins";
 import type { DeploymentConfig } from "./deployment-config.js";
 
 // Spend threshold (USD) that triggers emergencyShutdown
-const BILLING_ALARM_THRESHOLD_USD = 20;
+const BILLING_ALARM_THRESHOLD_USD = 50;
 
 interface InfraStackProps extends StackProps {
   deployment: DeploymentConfig;
@@ -34,6 +35,10 @@ export class InfraStack extends Stack {
 
     const { deployment } = props;
     const resourceName = (name: string) => `${deployment.resourcePrefix}-${name}`;
+    const optionalEnvironmentValue = (name: string): string | undefined => {
+      const value = process.env[name]?.trim();
+      return value ? value : undefined;
+    };
     const requiredEnvironmentValue = (name: string): string => {
       const value = process.env[name];
       if (!value) {
@@ -168,11 +173,16 @@ export class InfraStack extends Stack {
     // A CloudFront Function rewrites bare directory paths to index.html so that
     // magazines.icaf.org/ArtAndHealth/ serves ArtAndHealth/index.html.
     //
-    // TODO: To enable the magazines.icaf.org custom domain:
-    //   1. Create an ACM certificate in us-east-1 for magazines.icaf.org
-    //   2. Uncomment the `certificate` and `domainNames` lines below
-    //   3. Add a CNAME record in DNS pointing magazines.icaf.org to the
-    //      distribution domain name output by this stack
+    // To enable the magazines.icaf.org custom domain, provide
+    // MAGAZINES_DOMAIN_NAME and a us-east-1 MAGAZINES_CERTIFICATE_ARN, then add
+    // a Cloudflare CNAME pointing the hostname to this distribution's domain.
+    const magazinesDomainName = optionalEnvironmentValue("MAGAZINES_DOMAIN_NAME");
+    const magazinesCertificateArn = optionalEnvironmentValue("MAGAZINES_CERTIFICATE_ARN");
+    if (Boolean(magazinesDomainName) !== Boolean(magazinesCertificateArn)) {
+      throw new Error(
+        "MAGAZINES_DOMAIN_NAME and MAGAZINES_CERTIFICATE_ARN must be configured together.",
+      );
+    }
 
     const indexRewriteFn = new cloudfront.Function(this, "MagazineIndexRewriteFn", {
       functionName: resourceName("magazine-index-rewrite"),
@@ -209,10 +219,16 @@ export class InfraStack extends Stack {
           },
         ],
       },
-      // TODO: uncomment once ACM certificate is provisioned in us-east-1
-      // certificate: acm.Certificate.fromCertificateArn(this, 'MagazinesCert', 'arn:aws:acm:us-east-1:ACCOUNT:certificate/CERT_ID'),
-      // domainNames: ['magazines.icaf.org'],
+      ...(magazinesDomainName && magazinesCertificateArn && {
+        certificate: acm.Certificate.fromCertificateArn(
+          this,
+          "MagazinesCertificate",
+          magazinesCertificateArn,
+        ),
+        domainNames: [magazinesDomainName],
+      }),
     });
+    const magazinesPublicDomainName = magazinesDomainName ?? magazinesDistribution.distributionDomainName;
 
     // Artwork image variants served from the private artwork bucket.
     // Expected paths are /{art_id}/thumb.avif, /{art_id}/medium.avif, and
@@ -266,6 +282,11 @@ export class InfraStack extends Stack {
     new CfnOutput(this, "MagazinesDistributionDomainName", {
       value: magazinesDistribution.distributionDomainName,
       description: "CloudFront domain for magazines",
+    });
+
+    new CfnOutput(this, "MagazinesPublicDomainName", {
+      value: magazinesPublicDomainName,
+      description: "Public domain used in magazine links",
     });
 
     // ─── 4. Cognito User Pool ─────────────────────────────────────────────────
@@ -427,7 +448,7 @@ export class InfraStack extends Stack {
       TAKEDOWN_NOTIFICATION_EMAILS: JSON.stringify(TAKEDOWN_NOTIFICATION_EMAILS),
       CONTACT_NOTIFICATION_EMAILS: JSON.stringify(CONTACT_NOTIFICATION_EMAILS),
       ARTWORK_CLOUDFRONT_DISTRIBUTION_ID: artworkDistribution.distributionId,
-      MAGAZINES_CLOUDFRONT_DOMAIN: magazinesDistribution.distributionDomainName,
+      MAGAZINES_CLOUDFRONT_DOMAIN: magazinesPublicDomainName,
       STRIPE_WEBHOOK_SECRET: requiredEnvironmentValue("STRIPE_WEBHOOK_SECRET"),
       EVERY_WEBHOOK_ENABLED: String(deployment.everyWebhookEnabled),
       EVERY_WEBHOOK_SECRET: deployment.everyWebhookEnabled

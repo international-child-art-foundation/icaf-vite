@@ -1,9 +1,10 @@
 import type { ChangeEvent, DragEvent } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { MagazineListItem } from '@icaf/shared';
-import { Eye, RefreshCw, UploadCloud, X } from 'lucide-react';
+import { Eye, Pencil, RefreshCw, Save, UploadCloud, X } from 'lucide-react';
 import {
   listAdminMagazines,
+  updateMagazine,
   updateMagazineStatus,
   uploadMagazineZip,
 } from '@/api/admin';
@@ -23,6 +24,13 @@ type MagazineUploadDraft = {
   volume: string;
   status: UploadStatus;
   error?: string;
+};
+
+type MagazineEditDraft = {
+  slug: string;
+  name: string;
+  period: string;
+  volume: string;
 };
 
 const slugPattern = /^[A-Za-z0-9&+\-_.]+$/;
@@ -80,12 +88,25 @@ function validateDraft(draft: MagazineUploadDraft): string | null {
   return null;
 }
 
+function validateEditDraft(draft: MagazineEditDraft): string | null {
+  if (!draft.name.trim()) return 'Title is required.';
+  if (!draft.period.trim()) return 'Period is required.';
+  if (!draft.volume.trim()) return 'Volume is required.';
+  return null;
+}
+
+function formatTimestamp(ts: number): string {
+  if (!Number.isFinite(ts)) return '-';
+  return new Date(ts * 1000).toLocaleString();
+}
+
 export function MagazineAdminPanel() {
   const [drafts, setDrafts] = useState<MagazineUploadDraft[]>([]);
   const [magazines, setMagazines] = useState<MagazineListItem[]>([]);
   const [dragActive, setDragActive] = useState(false);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [editingMagazine, setEditingMagazine] = useState<MagazineEditDraft | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -156,6 +177,55 @@ export function MagazineAdminPanel() {
 
   const removeDraft = (id: string) => {
     setDrafts((current) => current.filter((draft) => draft.id !== id));
+  };
+
+  const startEditingMagazine = (magazine: MagazineListItem) => {
+    setEditingMagazine({
+      slug: magazine.slug,
+      name: magazine.name,
+      period: magazine.period,
+      volume: magazine.volume,
+    });
+    setError(null);
+    setMessage(null);
+  };
+
+  const updateEditingMagazine = (
+    field: keyof Pick<MagazineEditDraft, 'name' | 'period' | 'volume'>,
+    value: string,
+  ) => {
+    setEditingMagazine((current) =>
+      current ? { ...current, [field]: value } : current,
+    );
+  };
+
+  const saveEditingMagazine = async () => {
+    if (!editingMagazine) return;
+
+    const validationError = validateEditDraft(editingMagazine);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+
+    try {
+      await updateMagazine(editingMagazine.slug, {
+        name: editingMagazine.name.trim(),
+        period: editingMagazine.period.trim(),
+        volume: editingMagazine.volume.trim(),
+      });
+      setMessage(`${editingMagazine.slug} updated.`);
+      setEditingMagazine(null);
+      await loadMagazines();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to update magazine.');
+    } finally {
+      setBusy(false);
+    }
   };
 
   const updateRemoteMagazine = async (
@@ -436,90 +506,179 @@ export function MagazineAdminPanel() {
             </p>
           ) : (
             <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {magazines.map((magazine) => (
-                <div
-                  key={magazine.slug}
-                  className="flex gap-3 rounded-md border border-black/10 p-3"
-                >
-                  {magazine.thumbnail_url ? (
-                    <img
-                      src={magazine.thumbnail_url}
-                      alt=""
-                      className="h-20 w-14 flex-none rounded-sm object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-20 w-14 flex-none items-center justify-center rounded-sm bg-neutral-100 text-[10px] font-semibold uppercase text-neutral-500">
-                      No cover
-                    </div>
-                  )}
-                  <div className="flex min-w-0 flex-1 flex-col gap-2">
-                    <div className="min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="min-w-0 truncate font-semibold text-neutral-950">
-                          {magazine.name}
-                        </span>
-                        <span
-                          className={`flex-none rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${magazineStatusClass(magazine)}`}
-                        >
-                          {magazine.status}
-                        </span>
+              {magazines.map((magazine) => {
+                const editDraft =
+                  editingMagazine?.slug === magazine.slug
+                    ? editingMagazine
+                    : null;
+
+                return (
+                  <div
+                    key={magazine.slug}
+                    className="flex gap-3 rounded-md border border-black/10 p-3"
+                  >
+                    {magazine.thumbnail_url ? (
+                      <img
+                        src={magazine.thumbnail_url}
+                        alt=""
+                        className="h-20 w-14 flex-none rounded-sm object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-20 w-14 flex-none items-center justify-center rounded-sm bg-neutral-100 text-[10px] font-semibold uppercase text-neutral-500">
+                        No cover
                       </div>
-                      <span className="block truncate text-xs text-neutral-600">
-                        {magazine.period}
-                      </span>
-                      <span className="block truncate text-xs text-neutral-500">
-                        {magazine.slug}
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        asChild
-                      >
-                        <a
-                          href={magazine.link_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Eye />
-                          View
-                        </a>
-                      </Button>
-                      {magazine.status === 'published' ? (
+                    )}
+                    <div className="flex min-w-0 flex-1 flex-col gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          {editDraft ? (
+                            <Input
+                              value={editDraft.name}
+                              onChange={(event) =>
+                                updateEditingMagazine('name', event.target.value)
+                              }
+                              disabled={busy}
+                              aria-label={`Title for ${magazine.slug}`}
+                            />
+                          ) : (
+                            <span className="min-w-0 truncate font-semibold text-neutral-950">
+                              {magazine.name}
+                            </span>
+                          )}
+                          <span
+                            className={`flex-none rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${magazineStatusClass(magazine)}`}
+                          >
+                            {magazine.status}
+                          </span>
+                        </div>
+                        {editDraft ? (
+                          <div className="mt-2 flex flex-col gap-2">
+                            <Input
+                              value={editDraft.period}
+                              onChange={(event) =>
+                                updateEditingMagazine('period', event.target.value)
+                              }
+                              disabled={busy}
+                              aria-label={`Period for ${magazine.slug}`}
+                            />
+                            <Input
+                              value={editDraft.volume}
+                              onChange={(event) =>
+                                updateEditingMagazine('volume', event.target.value)
+                              }
+                              disabled={busy}
+                              aria-label={`Volume for ${magazine.slug}`}
+                            />
+                          </div>
+                        ) : (
+                          <>
+                            <span className="block truncate text-xs text-neutral-600">
+                              {magazine.period}
+                            </span>
+                            <span className="block truncate text-xs text-neutral-600">
+                              {magazine.volume}
+                            </span>
+                          </>
+                        )}
+                        <span className="block truncate text-xs text-neutral-500">
+                          Slug: {magazine.slug}
+                        </span>
+                        <span className="block truncate text-xs text-neutral-500">
+                          Uploaded: {formatTimestamp(magazine.ts)}
+                        </span>
+                        <span className="block truncate text-xs text-neutral-500">
+                          URL: {magazine.link_url}
+                        </span>
+                        {magazine.thumbnail_url && (
+                          <span className="block truncate text-xs text-neutral-500">
+                            Cover: {magazine.thumbnail_url}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() =>
-                            void updateRemoteMagazine(magazine.slug, {
-                              status: 'unpublished',
-                            })
-                          }
-                          disabled={busy}
+                          asChild
                         >
-                          Unpublish
+                          <a
+                            href={magazine.link_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Eye />
+                            View
+                          </a>
                         </Button>
-                      ) : (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            void updateRemoteMagazine(magazine.slug, {
-                              status: 'published',
-                            })
-                          }
-                          disabled={busy || magazine.status === 'processing'}
-                        >
-                          Publish
-                        </Button>
-                      )}
+                        {editDraft ? (
+                          <>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => void saveEditingMagazine()}
+                              disabled={busy}
+                            >
+                              <Save />
+                              Save
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setEditingMagazine(null)}
+                              disabled={busy}
+                            >
+                              Cancel
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => startEditingMagazine(magazine)}
+                            disabled={busy}
+                          >
+                            <Pencil />
+                            Edit
+                          </Button>
+                        )}
+                        {magazine.status === 'published' ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              void updateRemoteMagazine(magazine.slug, {
+                                status: 'unpublished',
+                              })
+                            }
+                            disabled={busy}
+                          >
+                            Unpublish
+                          </Button>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              void updateRemoteMagazine(magazine.slug, {
+                                status: 'published',
+                              })
+                            }
+                            disabled={busy || magazine.status === 'processing'}
+                          >
+                            Publish
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>

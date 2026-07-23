@@ -79,6 +79,17 @@ export interface UpdateMagazineStatusResponse {
     status: UpdateMagazineStatus;
 }
 
+export interface UpdateMagazineRequest {
+    name?: string;
+    period?: string;
+    volume?: string;
+}
+
+export interface UpdateMagazineResponse {
+    success: true;
+    slug: string;
+}
+
 export interface DeleteMagazineResponse {
     success: true;
     slug: string;

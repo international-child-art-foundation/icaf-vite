@@ -83,6 +83,12 @@ type UploadEntry = {
     data: Uint8Array;
 };
 
+type ZipFileEntry = {
+    originalPath: string;
+    path: string;
+    data: Uint8Array;
+};
+
 function getContentType(filename: string): string {
     const ext = getExtension(filename);
     return MIME_MAP[ext] ?? "application/octet-stream";
@@ -146,7 +152,6 @@ function validateZipEntryPath(path: string): string | null {
     if (!path) return "path is empty";
     if (path.length > MAX_ZIP_ENTRY_PATH_LEN) return "path is too long";
     if (path.includes("\0")) return "path contains a null byte";
-    if (path.includes("\\")) return "backslash paths are not allowed";
     if (path.startsWith("/")) return "absolute paths are not allowed";
 
     const segments = path.split("/");
@@ -158,6 +163,10 @@ function validateZipEntryPath(path: string): string | null {
     }
 
     return null;
+}
+
+function normalizeZipEntryPath(path: string): string {
+    return path.replaceAll("\\", "/");
 }
 
 async function streamToBuffer(stream: Readable): Promise<Buffer> {
@@ -275,10 +284,15 @@ async function processRecord(record: SQSRecord): Promise<void> {
     // ── 2. Unzip ───────────────────────────────────────────────────────────
     const decompressed = unzipSync(new Uint8Array(zipBuffer));
 
-    // Filter out directory entries (trailing slash, zero bytes)
-    const fileEntries = Object.entries(decompressed).filter(
-        ([path, data]) => !path.endsWith("/") && data.length > 0,
-    );
+    // Filter out directory entries (trailing slash, zero bytes), and normalize
+    // Windows-created zip paths before validation and upload.
+    const fileEntries: ZipFileEntry[] = Object.entries(decompressed)
+        .map(([originalPath, data]) => ({
+            originalPath,
+            path: normalizeZipEntryPath(originalPath),
+            data,
+        }))
+        .filter((entry) => !entry.path.endsWith("/") && entry.data.length > 0);
 
     if (fileEntries.length === 0) {
         throw new Error(`Zip for slug "${slug}" contained no files after extraction.`);
@@ -290,11 +304,16 @@ async function processRecord(record: SQSRecord): Promise<void> {
     }
 
     let uncompressedBytes = 0;
-    for (const [path, data] of fileEntries) {
+    const normalizedPaths = new Set<string>();
+    for (const { originalPath, path, data } of fileEntries) {
         const pathError = validateZipEntryPath(path);
         if (pathError) {
-            throw new Error(`Unsafe zip entry path "${path}": ${pathError}.`);
+            throw new Error(`Unsafe zip entry path "${originalPath}": ${pathError}.`);
         }
+        if (normalizedPaths.has(path)) {
+            throw new Error(`Zip contains duplicate normalized path "${path}".`);
+        }
+        normalizedPaths.add(path);
         uncompressedBytes += data.length;
     }
     if (uncompressedBytes > MAX_UNCOMPRESSED_BYTES) {
@@ -304,18 +323,23 @@ async function processRecord(record: SQSRecord): Promise<void> {
     }
 
     // Strip common top-level prefix
-    const pathMap = stripCommonPrefix(fileEntries.map(([p]) => p));
+    const pathMap = stripCommonPrefix(fileEntries.map((entry) => entry.path));
+    const strippedPaths = new Set<string>();
     for (const strippedPath of pathMap.values()) {
         const pathError = validateZipEntryPath(strippedPath);
         if (pathError) {
             throw new Error(`Unsafe stripped zip entry path "${strippedPath}": ${pathError}.`);
         }
+        if (strippedPaths.has(strippedPath)) {
+            throw new Error(`Zip contains duplicate stripped path "${strippedPath}".`);
+        }
+        strippedPaths.add(strippedPath);
     }
 
     // ── 3. Find thumbnail (exactly one root-level image file) ─────────────
     const rootImagePaths: string[] = [];
-    for (const [originalPath] of fileEntries) {
-        const strippedPath = pathMap.get(originalPath)!;
+    for (const { path } of fileEntries) {
+        const strippedPath = pathMap.get(path)!;
         // Root-level = no slash in the stripped path
         if (!strippedPath.includes("/") && isImageFile(strippedPath)) {
             rootImagePaths.push(strippedPath);
@@ -338,8 +362,8 @@ async function processRecord(record: SQSRecord): Promise<void> {
     const thumbnailKey = rootImagePaths[0];
 
     // ── 4. Generate a minimal index.html for PDF-only issues ───────────────
-    const uploadEntries: UploadEntry[] = fileEntries.map(([originalPath, data]) => ({
-        path: pathMap.get(originalPath)!,
+    const uploadEntries: UploadEntry[] = fileEntries.map(({ path, data }) => ({
+        path: pathMap.get(path)!,
         data,
     }));
 

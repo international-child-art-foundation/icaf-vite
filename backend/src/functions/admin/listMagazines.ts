@@ -9,6 +9,21 @@ import {
     ListMagazinesResponse,
 } from "@icaf/shared";
 
+function toMagazineListItem(magazine: MagazineEntity): MagazineListItem {
+    return {
+        slug: magazine.slug,
+        name: magazine.name,
+        period: magazine.period,
+        volume: magazine.volume,
+        status: magazine.status,
+        link_url: `https://${MAGAZINES_CLOUDFRONT_DOMAIN}/${magazine.slug}/`,
+        ...(magazine.thumbnail_key && {
+            thumbnail_url: `https://${MAGAZINES_CLOUDFRONT_DOMAIN}/${magazine.slug}/${magazine.thumbnail_key}`,
+        }),
+        ts: magazine.ts,
+    };
+}
+
 export const handler = async (): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
     try {
         const result = await dynamodb.send(
@@ -19,22 +34,8 @@ export const handler = async (): Promise<{ statusCode: number; body: string; hea
             }),
         );
 
-        const items = (result.Items ?? []) as MagazineEntity[];
-
-        const magazines: MagazineListItem[] = items
-            .filter((m) => m.status === "published")
-            .map((m) => ({
-                slug: m.slug,
-                name: m.name,
-                period: m.period,
-                volume: m.volume,
-                status: m.status,
-                link_url: `https://${MAGAZINES_CLOUDFRONT_DOMAIN}/${m.slug}/`,
-                ...(m.thumbnail_key && {
-                    thumbnail_url: `https://${MAGAZINES_CLOUDFRONT_DOMAIN}/${m.slug}/${m.thumbnail_key}`,
-                }),
-                ts: m.ts,
-            }))
+        const magazines = ((result.Items ?? []) as MagazineEntity[])
+            .map(toMagazineListItem)
             .sort((a, b) => b.ts - a.ts);
 
         const response: ListMagazinesResponse = { magazines };
@@ -45,7 +46,7 @@ export const handler = async (): Promise<{ statusCode: number; body: string; hea
             headers: COMMON_HEADERS,
         };
     } catch (error) {
-        console.error("Error listing magazines:", error);
+        console.error("Error listing admin magazines:", error);
         return CommonErrors.internalServerError();
     }
 };

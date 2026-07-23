@@ -32,6 +32,7 @@ import { handler as getEmailByUserId } from "../functions/admin/getEmailByUserId
 import { handler as getTakedownRequests } from "../functions/admin/getTakedownRequests";
 import { handler as getUserCognitoInfo } from "../functions/admin/getUserCognitoInfo";
 import { handler as hideAllUserArtwork } from "../functions/admin/hideAllUserArtwork";
+import { handler as listMagazines } from "../functions/admin/listMagazines";
 import { handler as publishMagazine } from "../functions/admin/publishMagazine";
 import { handler as removeAllUserArtwork } from "../functions/admin/removeAllUserArtwork";
 import { handler as reviewTakedownRequest } from "../functions/admin/reviewTakedownRequest";
@@ -231,6 +232,7 @@ const routes: Route[] = [
   roleProtected({ method: "GET", path: "/api/admin/artworks/{art_id}/submitter-email", handler: getArtworkSubmitterEmail }, adminRoles),
   roleProtected({ method: "GET", path: "/api/admin/takedowns", handler: getTakedownRequests }, adminRoles),
   roleProtected({ method: "PATCH", path: "/api/admin/takedowns/{tdr_sk}", handler: reviewTakedownRequest }, adminRoles),
+  roleProtected({ method: "GET", path: "/api/admin/magazines", handler: listMagazines }, adminRoles),
   roleProtected({ method: "POST", path: "/api/admin/magazines", handler: publishMagazine }, adminRoles),
   roleProtected({ method: "PATCH", path: "/api/admin/magazines/{slug}/status", handler: updateMagazineStatus }, adminRoles),
   roleProtected({ method: "DELETE", path: "/api/admin/magazines/{slug}", handler: deleteMagazine }, adminRoles),

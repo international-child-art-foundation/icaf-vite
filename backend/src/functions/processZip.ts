@@ -8,10 +8,10 @@
  *   2. Download the zip from S3 into memory
  *   3. Unzip all entries using fflate
  *   4. Strip the common top-level folder prefix from paths (if present)
- *   5. Detect thumbnail: the first root-level image file found
+ *   5. Detect thumbnail: exactly one root-level image file must be present
  *   6. Generate index.html when a PDF issue has no root index
  *   7. Delete the existing <slug>/ prefix and upload the replacement files
- *   8. Update the MAGAZINE DDB record: status='published', thumbnail_key
+ *   8. Update the MAGAZINE DDB record: status='unpublished', thumbnail_key
  *   9. Delete the staging zip
  *   10. Invalidate the magazine CloudFront cache for this slug
  *
@@ -312,24 +312,30 @@ async function processRecord(record: SQSRecord): Promise<void> {
         }
     }
 
-    // ── 3. Find thumbnail (first root-level image file) ───────────────────
-    let thumbnailKey: string | undefined;
+    // ── 3. Find thumbnail (exactly one root-level image file) ─────────────
+    const rootImagePaths: string[] = [];
     for (const [originalPath] of fileEntries) {
         const strippedPath = pathMap.get(originalPath)!;
         // Root-level = no slash in the stripped path
         if (!strippedPath.includes("/") && isImageFile(strippedPath)) {
-            thumbnailKey = strippedPath;
-            break;
+            rootImagePaths.push(strippedPath);
         }
     }
 
-    // thumbnail_key is required — every magazine zip must include a root-level image
-    if (!thumbnailKey) {
+    if (rootImagePaths.length === 0) {
         throw new Error(
             `Zip for slug "${slug}" contains no root-level image file. ` +
             `Include a cover image (jpg, png, webp, etc.) at the top level of the zip.`,
         );
     }
+    if (rootImagePaths.length > 1) {
+        throw new Error(
+            `Zip for slug "${slug}" contains more than one root-level image file: ` +
+            `${rootImagePaths.join(", ")}. Keep exactly one cover image at the top level of the zip.`,
+        );
+    }
+
+    const thumbnailKey = rootImagePaths[0];
 
     // ── 4. Generate a minimal index.html for PDF-only issues ───────────────
     const uploadEntries: UploadEntry[] = fileEntries.map(([originalPath, data]) => ({
@@ -382,7 +388,7 @@ async function processRecord(record: SQSRecord): Promise<void> {
             UpdateExpression: "SET #status = :status, thumbnail_key = :thumb",
             ExpressionAttributeNames: { "#status": "status" },
             ExpressionAttributeValues: {
-                ":status": "published",
+                ":status": "unpublished",
                 ":thumb": thumbnailKey,
             },
         }),
@@ -393,7 +399,7 @@ async function processRecord(record: SQSRecord): Promise<void> {
     await invalidateMagazineCache(slug);
 
     console.log(
-        `Magazine "${slug}" published successfully. ` +
+        `Magazine "${slug}" processed successfully. ` +
         `Files: ${uploadEntries.length}, Thumbnail: ${thumbnailKey}`,
     );
 }

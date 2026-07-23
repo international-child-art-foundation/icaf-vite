@@ -12,6 +12,7 @@ import type {
   HideAllUserArtworkResponse,
   InitiateMagazineUploadRequest,
   InitiateMagazineUploadResponse,
+  ListMagazinesResponse,
   ListTakedownRequestsResponse,
   BulkCreateNewsRequest,
   BulkCreateNewsResponse,
@@ -91,6 +92,9 @@ const isMagazineUploadResponse = (response: unknown): boolean =>
 
 const isMagazineMutationResponse = (response: unknown): boolean =>
   hasApiSuccess(response) && hasStringProperty(response, 'slug');
+
+const isMagazinesResponse = (response: unknown): boolean =>
+  hasArrayProperty(response, 'magazines');
 
 const isNewsMutationResponse = (response: unknown): boolean =>
   hasApiSuccess(response) &&
@@ -269,6 +273,16 @@ export function publishMagazine(
       pathPrefix: apiEndpoints.public.magazines,
     });
     return response;
+  });
+}
+
+export function listAdminMagazines(
+  options: { bypassCache?: boolean; cacheTtlMs?: number } = {},
+): Promise<ListMagazinesResponse> {
+  return apiRequest<ListMagazinesResponse>(apiEndpoints.admin.magazines, {
+    bypassCache: options.bypassCache,
+    cacheTtlMs: options.cacheTtlMs,
+    validate: isMagazinesResponse,
   });
 }
 

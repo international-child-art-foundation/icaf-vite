@@ -5,13 +5,13 @@ import {
     HTTP_STATUS,
     COMMON_HEADERS,
     CommonErrors,
-    MagazineStatus,
+    UpdateMagazineStatus,
     hasMinimumRole,
 } from "@icaf/shared";
 import { parseJsonBody } from "../../utils/request";
 import { getCurrentUser } from "../../utils/auth";
 
-const VALID_STATUSES: MagazineStatus[] = ["published", "unpublished"];
+const VALID_STATUSES: UpdateMagazineStatus[] = ["published", "unpublished"];
 
 export const handler = async (
     event: ApiGatewayEvent,
@@ -28,7 +28,7 @@ export const handler = async (
             return CommonErrors.badRequest("Magazine slug is required");
         }
 
-        const parsedBody = parseJsonBody<{ status?: MagazineStatus }>(event);
+        const parsedBody = parseJsonBody<{ status?: UpdateMagazineStatus }>(event);
         if (!parsedBody.ok) {
             return parsedBody.response;
         }
@@ -49,7 +49,10 @@ export const handler = async (
         if (!existing.Item) {
             return CommonErrors.notFound("Magazine not found");
         }
-        if (existing.Item.status === "processing") {
+        if (
+            existing.Item.status === "processing" &&
+            body.status === "published"
+        ) {
             return CommonErrors.conflict("Magazine is still processing; wait for upload to complete");
         }
 

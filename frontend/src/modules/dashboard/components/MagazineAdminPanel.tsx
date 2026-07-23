@@ -1,9 +1,12 @@
 import type { ChangeEvent, DragEvent } from 'react';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { MagazineListItem } from '@icaf/shared';
-import { RefreshCw, UploadCloud, X } from 'lucide-react';
-import { uploadMagazineZip } from '@/api/admin';
-import { listMagazines } from '@/api/public';
+import { Eye, RefreshCw, UploadCloud, X } from 'lucide-react';
+import {
+  listAdminMagazines,
+  updateMagazineStatus,
+  uploadMagazineZip,
+} from '@/api/admin';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { DashboardModule, ModuleState } from './DashboardModule';
@@ -23,6 +26,12 @@ type MagazineUploadDraft = {
 };
 
 const slugPattern = /^[A-Za-z0-9&+\-_.]+$/;
+
+function magazineStatusClass(magazine: MagazineListItem): string {
+  if (magazine.status === 'processing') return 'bg-amber-100 text-amber-800';
+  if (magazine.status === 'unpublished') return 'bg-neutral-100 text-neutral-700';
+  return 'bg-green-100 text-green-800';
+}
 
 function fileId(file: File): string {
   return `${file.name}:${file.size}:${file.lastModified}`;
@@ -85,18 +94,22 @@ export function MagazineAdminPanel() {
     [drafts],
   );
 
-  const loadMagazines = async () => {
+  const loadMagazines = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await listMagazines({ bypassCache: true });
+      const response = await listAdminMagazines({ bypassCache: true });
       setMagazines(response.magazines);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load magazines.');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    void loadMagazines();
+  }, [loadMagazines]);
 
   const addFiles = (files: File[]) => {
     const zipFiles = files.filter(isZipFile);
@@ -143,6 +156,25 @@ export function MagazineAdminPanel() {
 
   const removeDraft = (id: string) => {
     setDrafts((current) => current.filter((draft) => draft.id !== id));
+  };
+
+  const updateRemoteMagazine = async (
+    slug: string,
+    request: { status: 'published' | 'unpublished' },
+  ) => {
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+
+    try {
+      await updateMagazineStatus(slug, request);
+      setMessage(`${slug} updated.`);
+      await loadMagazines();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to update magazine.');
+    } finally {
+      setBusy(false);
+    }
   };
 
   const uploadAll = async () => {
@@ -394,41 +426,99 @@ export function MagazineAdminPanel() {
 
         <section className="border-t border-black/10 pt-4">
           <h3 className="font-montserrat text-lg font-bold text-neutral-950">
-            Published magazines
+            Remote magazines
           </h3>
           {loading ? (
             <ModuleState>Loading magazines...</ModuleState>
           ) : magazines.length === 0 ? (
             <p className="mt-3 text-sm text-neutral-600">
-              No published magazines loaded yet.
+              No remote magazines loaded yet.
             </p>
           ) : (
             <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {magazines.slice(0, 12).map((magazine) => (
-                <a
+              {magazines.map((magazine) => (
+                <div
                   key={magazine.slug}
-                  href={magazine.link_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex gap-3 rounded-md border border-black/10 p-3 transition hover:bg-neutral-50"
+                  className="flex gap-3 rounded-md border border-black/10 p-3"
                 >
-                  <img
-                    src={magazine.thumbnail_url}
-                    alt=""
-                    className="h-16 w-12 flex-none rounded-sm object-cover"
-                  />
-                  <span className="min-w-0">
-                    <span className="block truncate font-semibold text-neutral-950">
-                      {magazine.name}
-                    </span>
-                    <span className="block truncate text-xs text-neutral-600">
-                      {magazine.period}
-                    </span>
-                    <span className="block truncate text-xs text-neutral-500">
-                      {magazine.slug}
-                    </span>
-                  </span>
-                </a>
+                  {magazine.thumbnail_url ? (
+                    <img
+                      src={magazine.thumbnail_url}
+                      alt=""
+                      className="h-20 w-14 flex-none rounded-sm object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-20 w-14 flex-none items-center justify-center rounded-sm bg-neutral-100 text-[10px] font-semibold uppercase text-neutral-500">
+                      No cover
+                    </div>
+                  )}
+                  <div className="flex min-w-0 flex-1 flex-col gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="min-w-0 truncate font-semibold text-neutral-950">
+                          {magazine.name}
+                        </span>
+                        <span
+                          className={`flex-none rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${magazineStatusClass(magazine)}`}
+                        >
+                          {magazine.status}
+                        </span>
+                      </div>
+                      <span className="block truncate text-xs text-neutral-600">
+                        {magazine.period}
+                      </span>
+                      <span className="block truncate text-xs text-neutral-500">
+                        {magazine.slug}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        asChild
+                      >
+                        <a
+                          href={magazine.link_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Eye />
+                          View
+                        </a>
+                      </Button>
+                      {magazine.status === 'published' ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            void updateRemoteMagazine(magazine.slug, {
+                              status: 'unpublished',
+                            })
+                          }
+                          disabled={busy}
+                        >
+                          Unpublish
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            void updateRemoteMagazine(magazine.slug, {
+                              status: 'published',
+                            })
+                          }
+                          disabled={busy || magazine.status === 'processing'}
+                        >
+                          Publish
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           )}

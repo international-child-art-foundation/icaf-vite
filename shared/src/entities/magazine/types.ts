@@ -17,8 +17,9 @@
  * CSV lists the type as 'string' — this is consistent with the index.csv convention
  * that all ts values are Unix numbers.
  *
- * Every field on this entity is required. Zips that contain no root-level image
- * file will be rejected by processZip rather than stored without a thumbnail_key.
+ * Zips that contain no root-level image file, or more than one root-level image
+ * file, will be rejected by processZip rather than stored with an ambiguous
+ * thumbnail_key.
  */
 
 export type MagazineStatus = 'processing' | 'published' | 'unpublished';
@@ -31,7 +32,7 @@ export interface MagazineEntity {
     status: MagazineStatus;
     uploaded_by: string;    // user_id of the uploader
     ts: number;     // Unix ts (seconds) of upload initiation
-    thumbnail_key: string;  // filename of the root-level image in the zip, e.g. 'cover.jpg'
+    thumbnail_key?: string; // filename of the single root-level image in the zip, e.g. 'cover.jpg'
                             // Set by processZip; record is in 'processing' status until this is written
     type: 'MAGAZINE';
 }
@@ -60,7 +61,7 @@ export interface MagazineListItem {
     volume: string;
     status: MagazineStatus;
     link_url: string;       // Full CloudFront URL, e.g. https://magazines.icaf.org/<slug>/
-    thumbnail_url: string;  // Full CloudFront URL, e.g. https://magazines.icaf.org/<slug>/cover.jpg
+    thumbnail_url?: string; // Full CloudFront URL, e.g. https://magazines.icaf.org/<slug>/cover.jpg
     ts: number;
 }
 
@@ -69,7 +70,7 @@ export interface ListMagazinesResponse {
 }
 
 export interface UpdateMagazineStatusRequest {
-  status: UpdateMagazineStatus;
+    status: UpdateMagazineStatus;
 }
 
 export interface UpdateMagazineStatusResponse {

@@ -1,8 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
-import { parseThemeSK, type ThemeListItem } from '@icaf/shared';
+import {
+  formatThemeDisplayName,
+  parseThemeSK,
+  type ThemeListItem,
+} from '@icaf/shared';
 import { listGalleryThemes } from '@/api/public';
 import { GalleryThemeCard } from '@/modules/content/components/gallery/GalleryThemeCard';
-import { buildThemeFamilies } from '@/modules/content/components/gallery/themeFamilies';
+import {
+  buildThemeFamilies,
+  themeStartDate,
+  type ThemeFamilyCardModel,
+} from '@/modules/content/components/gallery/themeFamilies';
+import { getThemeVisualPalette } from '@/modules/content/components/gallery/themeVisuals';
 import {
   filterThemesForSurface,
   THEME_SURFACES,
@@ -17,6 +26,80 @@ type ThemePickerProps = {
   value: ThemePickerValue;
 };
 
+type ThemeInstancePickerProps = {
+  family: ThemeFamilyCardModel;
+  onChange: (theme: ThemePickerValue) => void;
+  selectedThemeSk: string;
+};
+
+function ThemeInstancePicker({
+  family,
+  onChange,
+  selectedThemeSk,
+}: ThemeInstancePickerProps) {
+  const instances = useMemo(
+    () =>
+      [...family.themes].sort(
+        (first, second) => themeStartDate(second) - themeStartDate(first),
+      ),
+    [family.themes],
+  );
+  const palette = getThemeVisualPalette(family.theme_family);
+
+  if (!instances.length) return null;
+
+  return (
+    <div
+      aria-label={`${family.display_name} options`}
+      className="-mx-1 overflow-x-auto px-1 pb-2"
+      role="group"
+    >
+      <p className="text-slate-850 mb-2 px-1 text-sm font-semibold">
+        Choose your theme version
+      </p>
+      <div className="my-1 flex w-max gap-3">
+        {instances.map((theme, index) => {
+          const isSelected = theme.theme_sk === selectedThemeSk;
+          const accentColor =
+            index % 2 === 0
+              ? palette.primary
+              : (palette.secondary ?? palette.primary);
+
+          return (
+            <button
+              key={theme.theme_sk}
+              type="button"
+              aria-pressed={isSelected}
+              className={`group relative h-12 w-[320px] overflow-hidden rounded-md bg-white px-5 pl-7 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/90 ${
+                isSelected ? 'ring-2 ring-black/90' : ''
+              }`}
+              onClick={() =>
+                onChange({
+                  theme: isSelected ? family.theme_sk : theme.theme_sk,
+                })
+              }
+            >
+              <span
+                aria-hidden="true"
+                className="absolute inset-y-0 left-0 w-2"
+                style={{ backgroundColor: accentColor }}
+              />
+              <span className="font-montserrat relative z-10 block truncate pr-20 text-sm font-semibold leading-tight text-slate-950">
+                {formatThemeDisplayName(theme)}
+              </span>
+              {isSelected && (
+                <span className="font-montserrat absolute right-5 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-700">
+                  Selected
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function ThemePicker({ onChange, value }: ThemePickerProps) {
   const [themes, setThemes] = useState<ThemeListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,6 +108,13 @@ export function ThemePicker({ onChange, value }: ThemePickerProps) {
   const selectedTheme = useMemo(
     () => (value.theme ? parseThemeSK(value.theme) : null),
     [value.theme],
+  );
+  const selectedFamily = useMemo(
+    () =>
+      themeFamilies.find(
+        (family) => family.theme_family === selectedTheme?.theme_family,
+      ) ?? null,
+    [selectedTheme?.theme_family, themeFamilies],
   );
 
   useEffect(() => {
@@ -101,14 +191,13 @@ export function ThemePicker({ onChange, value }: ThemePickerProps) {
                   }
                   onChange({
                     theme:
-                      family.themes.length === 1
-                        ? family.themes[0].theme_sk
-                        : family.theme_sk,
+                      [...family.themes].sort(
+                        (first, second) =>
+                          themeStartDate(second) - themeStartDate(first),
+                      )[0]?.theme_sk ?? family.theme_sk,
                   });
                 }}
-                onDeselectThemeFamily={() =>
-                  onChange({ theme: '' })
-                }
+                onDeselectThemeFamily={() => onChange({ theme: '' })}
                 onSelectInstance={(theme) => {
                   if (theme.theme_sk === value.theme) {
                     onChange({ theme: '' });
@@ -116,13 +205,19 @@ export function ThemePicker({ onChange, value }: ThemePickerProps) {
                   }
                   onChange({ theme: theme.theme_sk });
                 }}
-                onDeselectInstance={() =>
-                  onChange({ theme: '' })
-                }
+                onDeselectInstance={() => onChange({ theme: family.theme_sk })}
               />
             ))}
           </div>
         </div>
+      )}
+
+      {selectedFamily && (
+        <ThemeInstancePicker
+          family={selectedFamily}
+          selectedThemeSk={value.theme}
+          onChange={onChange}
+        />
       )}
     </section>
   );

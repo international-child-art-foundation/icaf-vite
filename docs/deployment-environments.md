@@ -28,9 +28,6 @@ Define these secrets in both environments:
 - `AWS_DEPLOY_ROLE_ARN`
 - `STRIPE_WEBHOOK_SECRET`
 - `CLOUDFLARE_API_TOKEN`
-- `SFTP_HOST`
-- `SFTP_USER`
-- `SFTP_PASSWORD`
 
 Define `GA4_API_SECRET` in `main` to enable server-side GA4 purchase events for
 production payments. It is optional in `staging`; when omitted, payment webhooks
@@ -82,8 +79,12 @@ encodes the dependency order:
    `TARGET_API_ORIGIN` and deploys the matching Worker environment.
 4. Vite builds the frontend with `/api` as `VITE_API_BASE_URL` and the derived
    CloudFront HTTPS origin as `VITE_ARTWORK_ASSET_BASE_URL`.
-5. The workflow uploads the build to a unique release directory.
-6. Uploading `.htaccess` activates that release as the final step.
+5. The workflow writes `version.txt` into the build and retains the complete
+   build as a GitHub artifact.
+6. Wrangler deploys the build to the `icaf` Cloudflare Pages project, using the
+   current Git branch as the Pages branch.
+7. The workflow fetches `version.txt` from the immutable Pages deployment URL
+   and verifies that the deployed commit matches the workflow commit.
 
 This works on the first deployment and requires no manually configured API
 Gateway URL. GitHub Actions shows explicit CDK and Worker deployment steps and
@@ -95,10 +96,17 @@ one environment approval.
 Changes to the AWS backend, Worker, shared package, or frontend run this ordered
 pipeline. A frontend-only or Worker-only change therefore performs a no-op CDK
 deployment first; this is intentional so build-time and Worker configuration
-always comes from current AWS state. The previous frontend remains active if
-the build or versioned-directory upload fails. AWS, Cloudflare, and SFTP cannot
-participate in one atomic transaction, so backend changes must remain
-compatible with the previously active frontend until the final activation.
+always comes from current AWS state. Cloudflare Pages keeps the previous
+frontend active until the new asset upload succeeds, then atomically updates
+the target branch. AWS, the API Worker, and Pages cannot participate in one
+atomic transaction, so backend changes must remain compatible with the
+previously active frontend until the Pages deployment completes.
+
+The `icaf` Pages project is a Direct Upload project whose production branch is
+`main`. Deployments from `main` update the Pages production environment and
+`https://icaf.org`. Deployments from `staging` update the stable
+`staging.icaf.pages.dev` branch alias; the proxied `staging.icaf.org` custom
+domain targets that alias.
 
 Protect the `main` GitHub Environment with required reviewers. The
 backend workflow runs `cdk diff` before each deployment. Production never

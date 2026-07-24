@@ -288,7 +288,7 @@ export function GalleryThemeCard({
                 family={item.theme_family}
                 isActive={isThemeActive}
               />
-              <span className="relative z-10 grid h-full grid-cols-[minmax(0,1fr)_2rem] gap-3">
+              <span className="relative z-10 grid h-full grid-cols-[minmax(0,1fr)_2rem] gap-2">
                 <span className="flex min-w-0 flex-col justify-center">
                   <p className="flex">
                     <span className="font-montserrat bg-white/40 text-lg font-bold leading-tight backdrop-blur-sm">

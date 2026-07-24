@@ -20,6 +20,14 @@ export const customThemeVisuals: ThemeVisualDefinition[] = [
     },
   },
   {
+    aliases: ["WORLD_CHILDREN'S_FESTIVAL"],
+    decorated: false,
+    palette: {
+      primary: '#3C3B6E',
+      secondary: '#B22234',
+    },
+  },
+  {
     aliases: ['ARTS_OLYMPIAD'],
     decorated: false,
     videoSrc: largeMedia.artsOlympiad,

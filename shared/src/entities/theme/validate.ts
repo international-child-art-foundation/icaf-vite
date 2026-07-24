@@ -1,10 +1,10 @@
 import { PatchTheme, ThemeEntityInput } from "./types";
 
-const THEME_FAMILY_RE = /^[A-Z0-9_]+$/;
+const THEME_FAMILY_RE = /^[A-Z0-9_']+$/;
 const THEME_INSTANCE_TYPE_RE = /^[a-z][a-z0-9_]*$/;
 const THEME_INSTANCE_RE = /^[^#/\s]+$/;
-const THEME_FAMILY_SK_RE = /^FAMILY#[A-Z0-9_]+$/;
-const THEME_INSTANCE_SK_RE = /^FAMILY#[A-Z0-9_]+#[a-z][a-z0-9_]*#[^#/\s]+$/;
+const THEME_FAMILY_SK_RE = /^FAMILY#[A-Z0-9_']+$/;
+const THEME_INSTANCE_SK_RE = /^FAMILY#[A-Z0-9_']+#[a-z][a-z0-9_]*#[^#/\s]+$/;
 
 function isFiniteOptionalTimestamp(value: unknown): boolean {
     return value === undefined || (typeof value === 'number' && Number.isFinite(value));
@@ -16,7 +16,7 @@ export function validateThemeEntity(data: ThemeEntityInput): string[] {
     if (!data.theme_family?.trim()) {
         errors.push('theme_family is required');
     } else if (!THEME_FAMILY_RE.test(data.theme_family)) {
-        errors.push('theme_family must be uppercase alphanumeric (underscores allowed)');
+        errors.push('theme_family must be uppercase alphanumeric (underscores and apostrophes allowed)');
     }
 
     const hasInstanceType = 'instance_type' in data && data.instance_type !== undefined;

@@ -212,13 +212,23 @@ export class InfraStack extends Stack {
       functionName: resourceName("magazine-index-rewrite"),
       code: cloudfront.FunctionCode.fromInline(`
         function handler(event) {
-          var uri = event.request.uri;
-          if (uri.endsWith('/')) {
-            event.request.uri += 'index.html';
-          } else if (!uri.includes('.')) {
-            event.request.uri += '/index.html';
+          var request = event.request;
+          var uri = request.uri;
+          if (/^\\/[^/]+$/.test(uri)) {
+            return {
+              statusCode: 301,
+              statusDescription: 'Moved Permanently',
+              headers: {
+                location: { value: uri + '/' }
+              }
+            };
           }
-          return event.request;
+          if (uri.endsWith('/')) {
+            request.uri += 'index.html';
+          } else if (!uri.includes('.')) {
+            request.uri += '/index.html';
+          }
+          return request;
         }
       `),
     });

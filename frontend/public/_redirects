@@ -12,7 +12,13 @@
 /ChildArt/Creativity,DiversityandUnity https://magazines.icaf.org/CreativityDiversityandUnity/ 302
 /ChildArt/Creativity,DiversityandUnity/ https://magazines.icaf.org/CreativityDiversityandUnity/ 302
 /ChildArt/Creativity,DiversityandUnity/* https://magazines.icaf.org/CreativityDiversityandUnity/:splat 302
-/ChildArt/* https://magazines.icaf.org/:splat 302
+/childart/Creativity,DiversityandUnity https://magazines.icaf.org/CreativityDiversityandUnity/ 302
+/childart/Creativity,DiversityandUnity/ https://magazines.icaf.org/CreativityDiversityandUnity/ 302
+/childart/Creativity,DiversityandUnity/* https://magazines.icaf.org/CreativityDiversityandUnity/:splat 302
+/ChildArt/:slug https://magazines.icaf.org/:slug/ 302
+/ChildArt/:slug/* https://magazines.icaf.org/:slug/:splat 302
+/childart/:slug https://magazines.icaf.org/:slug/ 302
+/childart/:slug/* https://magazines.icaf.org/:slug/:splat 302
 
 # React Router fallback.
 /* /index.html 200

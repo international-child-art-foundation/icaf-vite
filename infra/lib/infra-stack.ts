@@ -26,6 +26,8 @@ import type { DeploymentConfig } from "./deployment-config.js";
 const BILLING_ALARM_THRESHOLD_USD = 50;
 const DYNAMODB_MAX_ON_DEMAND_READ_REQUEST_UNITS = 25;
 const DYNAMODB_MAX_ON_DEMAND_WRITE_REQUEST_UNITS = 25;
+const DYNAMODB_GSI_MAX_ON_DEMAND_READ_REQUEST_UNITS = 10;
+const DYNAMODB_GSI_MAX_ON_DEMAND_WRITE_REQUEST_UNITS = 10;
 
 interface InfraStackProps extends StackProps {
   deployment: DeploymentConfig;
@@ -71,6 +73,8 @@ export class InfraStack extends Stack {
       partitionKey: { name: "GALL_PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "ART_GSI_SK", type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL,
+      maxReadRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_READ_REQUEST_UNITS,
+      maxWriteRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_WRITE_REQUEST_UNITS,
     });
 
     icafTable.addGlobalSecondaryIndex({
@@ -78,6 +82,8 @@ export class InfraStack extends Stack {
       partitionKey: { name: "FAM_PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "ART_GSI_SK", type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL,
+      maxReadRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_READ_REQUEST_UNITS,
+      maxWriteRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_WRITE_REQUEST_UNITS,
     });
 
     icafTable.addGlobalSecondaryIndex({
@@ -85,6 +91,8 @@ export class InfraStack extends Stack {
       partitionKey: { name: "INST_PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "ART_GSI_SK", type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL,
+      maxReadRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_READ_REQUEST_UNITS,
+      maxWriteRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_WRITE_REQUEST_UNITS,
     });
 
     // ── Groups GSIs ──────────────────────────────────────────────────────────
@@ -93,6 +101,8 @@ export class InfraStack extends Stack {
       partitionKey: { name: "GRP_PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "GRP_GSI_SK", type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL,
+      maxReadRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_READ_REQUEST_UNITS,
+      maxWriteRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_WRITE_REQUEST_UNITS,
     });
 
     icafTable.addGlobalSecondaryIndex({
@@ -100,6 +110,8 @@ export class InfraStack extends Stack {
       partitionKey: { name: "FGRP_PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "GRP_GSI_SK", type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL,
+      maxReadRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_READ_REQUEST_UNITS,
+      maxWriteRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_WRITE_REQUEST_UNITS,
     });
 
     icafTable.addGlobalSecondaryIndex({
@@ -107,6 +119,8 @@ export class InfraStack extends Stack {
       partitionKey: { name: "IGRP_PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "GRP_GSI_SK", type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL,
+      maxReadRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_READ_REQUEST_UNITS,
+      maxWriteRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_WRITE_REQUEST_UNITS,
     });
 
     // ByOwner GSI — a user's artworks and groups
@@ -115,6 +129,8 @@ export class InfraStack extends Stack {
       partitionKey: { name: "OWN_PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "OWN_SK", type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL,
+      maxReadRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_READ_REQUEST_UNITS,
+      maxWriteRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_WRITE_REQUEST_UNITS,
     });
 
     // Email GSI — look up user account by email
@@ -123,6 +139,8 @@ export class InfraStack extends Stack {
       partitionKey: { name: "EMAIL_PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "EMAIL_SK", type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL,
+      maxReadRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_READ_REQUEST_UNITS,
+      maxWriteRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_WRITE_REQUEST_UNITS,
     });
 
     // Review GSI — contributor review workflow
@@ -131,6 +149,8 @@ export class InfraStack extends Stack {
       partitionKey: { name: "REV_PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "REV_SK", type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL,
+      maxReadRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_READ_REQUEST_UNITS,
+      maxWriteRequestUnits: DYNAMODB_GSI_MAX_ON_DEMAND_WRITE_REQUEST_UNITS,
     });
 
     // ─── 2. S3 Buckets ────────────────────────────────────────────────────────

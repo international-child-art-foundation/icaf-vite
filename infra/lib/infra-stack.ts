@@ -362,32 +362,6 @@ export class InfraStack extends Stack {
       }),
     );
 
-    // processZip queue — fed by S3 ObjectCreated on staging/<slug>.zip uploads
-    const processZipDLQ = new sqs.Queue(this, "IcafProcessZipDLQ", {
-      queueName: resourceName("process-zip-dlq"),
-      retentionPeriod: Duration.days(14),
-    });
-
-    const processZipQueue = new sqs.Queue(this, "IcafProcessZipQueue", {
-      queueName: resourceName("process-zip-queue"),
-      // Must be ≥ Lambda timeout — large zips may take a while to unpack + re-upload
-      visibilityTimeout: Duration.seconds(600),
-      retentionPeriod: Duration.days(7),
-      deadLetterQueue: { queue: processZipDLQ, maxReceiveCount: 3 },
-    });
-
-    processZipQueue.addToResourcePolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        principals: [new iam.ServicePrincipal("s3.amazonaws.com")],
-        actions: ["sqs:SendMessage"],
-        resources: [processZipQueue.queueArn],
-        conditions: {
-          ArnLike: { "aws:SourceArn": magazinesBucket.bucketArn },
-        },
-      }),
-    );
-
     // ─── 6. Sharp Lambda Layer ────────────────────────────────────────────────
     const sharpLayer = new lambda.LayerVersion(this, "SharpLayer", {
       code: lambda.Code.fromAsset("layers/sharp"),
@@ -512,7 +486,7 @@ export class InfraStack extends Stack {
     );
 
     // ProcessZip: magazine zip → extracted files in magazines bucket
-    // Triggered via SQS ← S3 ObjectCreated on staging/<slug>.zip
+    // Triggered directly by S3 ObjectCreated on staging/<slug>.zip
     const processZipFn = new NodejsFunction(this, "ProcessZipFn", {
       runtime: Runtime.NODEJS_20_X,
       timeout: Duration.seconds(600),
@@ -525,12 +499,6 @@ export class InfraStack extends Stack {
       entry: src("processZip.ts"),
       logGroup: lambdaLogGroup("ProcessZipFn"),
     });
-
-    processZipFn.addEventSource(
-      new SqsEventSource(processZipQueue, {
-        batchSize: 1,
-      }),
-    );
 
     const processSesFeedbackFn = new NodejsFunction(this, "ProcessSesFeedbackFn", {
       runtime: Runtime.NODEJS_20_X,
@@ -640,7 +608,7 @@ export class InfraStack extends Stack {
     // Only the staging/ prefix triggers — extracted files under <slug>/ never match
     magazinesBucket.addEventNotification(
       s3.EventType.OBJECT_CREATED,
-      new s3n.SqsDestination(processZipQueue),
+      new s3n.LambdaDestination(processZipFn),
       { prefix: "staging/", suffix: ".zip" },
     );
 

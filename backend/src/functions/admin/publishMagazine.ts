@@ -86,7 +86,7 @@ export const handler = async (
             success: true,
             slug,
             presigned_url: presignedUrl,
-            message: `Upload the magazine zip to the presigned URL. Processing begins automatically on upload.`,
+            message: `Upload the magazine zip to the presigned URL. Processing begins automatically and can take about a minute before the magazine is ready.`,
         };
 
         return {

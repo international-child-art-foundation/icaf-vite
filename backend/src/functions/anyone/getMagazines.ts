@@ -7,6 +7,7 @@ import {
     MagazineEntity,
     MagazineListItem,
     ListMagazinesResponse,
+    compareMagazinesByPublicationDesc,
 } from "@icaf/shared";
 
 export const handler = async (): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
@@ -35,7 +36,7 @@ export const handler = async (): Promise<{ statusCode: number; body: string; hea
                 }),
                 ts: m.ts,
             }))
-            .sort((a, b) => b.ts - a.ts);
+            .sort(compareMagazinesByPublicationDesc);
 
         const response: ListMagazinesResponse = { magazines };
 

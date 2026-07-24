@@ -4,9 +4,15 @@
 /culturalexposition/ /documents/Cultural_Exposition.pdf 302
 
 # Temporary static replacement for the former PHP magazine rotator.
-/daily-magazine /ChildArt/Happiness 302
-/daily-magazine/ /ChildArt/Happiness 302
-/daily-magazine/* /ChildArt/Happiness/:splat 302
+/daily-magazine https://magazines.icaf.org/Happiness/ 302
+/daily-magazine/ https://magazines.icaf.org/Happiness/ 302
+/daily-magazine/* https://magazines.icaf.org/Happiness/:splat 302
+
+# Legacy magazine files now live on the magazine CloudFront distribution.
+/ChildArt/Creativity,DiversityandUnity https://magazines.icaf.org/CreativityDiversityandUnity/ 302
+/ChildArt/Creativity,DiversityandUnity/ https://magazines.icaf.org/CreativityDiversityandUnity/ 302
+/ChildArt/Creativity,DiversityandUnity/* https://magazines.icaf.org/CreativityDiversityandUnity/:splat 302
+/ChildArt/* https://magazines.icaf.org/:splat 302
 
 # React Router fallback.
 /* /index.html 200

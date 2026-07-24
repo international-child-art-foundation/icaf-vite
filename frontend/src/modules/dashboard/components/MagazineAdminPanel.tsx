@@ -28,7 +28,7 @@ import {
   DialogTitle,
 } from '@/shared/components/ui/dialog';
 import { DashboardModule, ModuleState } from './DashboardModule';
-import { childArtMagazineHints } from '@/modules/content/data/childArtMagazineHints';
+import { magazineUploadHints } from '@/modules/dashboard/data/magazineUploadHints';
 
 type UploadStatus = 'ready' | 'uploading' | 'uploaded' | 'error';
 
@@ -77,7 +77,7 @@ function titleFromSlug(slug: string): string {
 
 function draftFromFile(file: File): MagazineUploadDraft {
   const slug = slugFromFilename(file.name);
-  const hint = childArtMagazineHints.find((item) => item.slug === slug);
+  const hint = magazineUploadHints.find((item) => item.slug === slug);
 
   return {
     id: fileId(file),
@@ -511,7 +511,7 @@ export function MagazineAdminPanel() {
               <div className="flex flex-wrap gap-2">
                 <Button
                   type="button"
-                  onClick={uploadAll}
+                  onClick={() => void uploadAll()}
                   disabled={busy || drafts.length === 0 || invalidCount > 0}
                 >
                   Upload queued zips

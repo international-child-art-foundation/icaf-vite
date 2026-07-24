@@ -27,7 +27,7 @@ export const artsOlympiadHelpfulLinks: ArtsOlympiadHelpfulLink[] = [
   {
     id: 'childart-magazine',
     imageSrc: HlImg3,
-    href: '/ChildArt/2021WCF/',
+    href: 'https://magazines.icaf.org/2021WCF/',
     description:
       'ChildArt Magazine on the 6th Arts Olympiad and the 6th World Children’s Festival.',
     label: 'ChildArt magazine flipbook',

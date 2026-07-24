@@ -7,6 +7,7 @@ import {
     MagazineEntity,
     MagazineListItem,
     ListMagazinesResponse,
+    compareMagazinesByPublicationDesc,
 } from "@icaf/shared";
 
 function toMagazineListItem(magazine: MagazineEntity): MagazineListItem {
@@ -36,7 +37,7 @@ export const handler = async (): Promise<{ statusCode: number; body: string; hea
 
         const magazines = ((result.Items ?? []) as MagazineEntity[])
             .map(toMagazineListItem)
-            .sort((a, b) => b.ts - a.ts);
+            .sort(compareMagazinesByPublicationDesc);
 
         const response: ListMagazinesResponse = { magazines };
 

@@ -1,13 +1,12 @@
-type ChildArtMagazineHint = {
+type MagazineUploadHint = {
   slug: string;
   name?: string;
   period?: string;
   volume?: string;
-  cover?: string;
-  link?: string;
 };
 
-export const childArtMagazineHints: ChildArtMagazineHint[] = [
+// Admin-only upload draft hints. Public magazine data comes from /api/magazines.
+export const magazineUploadHints: MagazineUploadHint[] = [
   {
     slug: '250th-2026WCF',
     name: "Children's 250th Celebration",

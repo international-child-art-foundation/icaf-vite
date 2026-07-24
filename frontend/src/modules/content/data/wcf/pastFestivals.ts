@@ -32,7 +32,7 @@ export const pastFestivalsData: PastFestivalsData[] = [
     videoSrc: largeMedia.wcf2021OpeningAddress,
     thumbSrc: openingAddressThumb,
     magazineCover: pastFestival_1,
-    magazineLink: 'https://icaf.org/ChildArt/2021WCF/',
+    magazineLink: 'https://magazines.icaf.org/2021WCF/',
   },
   {
     id: 2,
@@ -43,7 +43,7 @@ export const pastFestivalsData: PastFestivalsData[] = [
     videoSrc: largeMedia.swatchMasterWatchmaker,
     thumbSrc: watchThumb,
     magazineCover: pastFestival_2,
-    magazineLink: 'https://icaf.org/ChildArt/Creativity,DiversityandUnity/',
+    magazineLink: 'https://magazines.icaf.org/CreativityDiversityandUnity/',
   },
   {
     id: 3,
@@ -54,6 +54,6 @@ export const pastFestivalsData: PastFestivalsData[] = [
     videoSrc: largeMedia.wcfMusicalCelebration,
     thumbSrc: musicThumb,
     magazineCover: pastFestival_3,
-    magazineLink: 'https://icaf.org/ChildArt/2011WCF/',
+    magazineLink: 'https://magazines.icaf.org/2011WCF/',
   },
 ];

@@ -1,7 +1,7 @@
 /**
  * ProcessZip Lambda
  *
- * Triggered by: S3 ObjectCreated on staging/<slug>.zip in the magazines bucket → SQS → this Lambda
+ * Triggered by: S3 ObjectCreated on staging/<slug>.zip in the magazines bucket → this Lambda
  *
  * Flow:
  *   1. Extract slug from the S3 key (staging/<slug>.zip)
@@ -32,7 +32,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import type { Readable } from "stream";
 import { unzipSync } from "fflate";
-import type { SQSEvent, SQSRecord } from "aws-lambda";
+import type { S3Event, S3EventRecord } from "aws-lambda";
 import { isValidMagazineSlug } from "@icaf/shared";
 
 const s3 = new S3Client({ region: process.env.AWS_REGION });
@@ -250,26 +250,19 @@ function stripCommonPrefix(paths: string[]): Map<string, string> {
     return result;
 }
 
-async function processRecord(record: SQSRecord): Promise<void> {
-    const s3Event = JSON.parse(record.body);
-    const s3Record = s3Event.Records?.[0];
-    if (!s3Record) {
-        console.warn("No S3 record in SQS message — skipping.");
-        return;
-    }
-
+async function processS3Record(s3Record: S3EventRecord): Promise<void> {
     const bucket = s3Record.s3.bucket.name as string;
     const srcKey = decodeURIComponent((s3Record.s3.object.key as string).replace(/\+/g, " "));
 
     // Key must be staging/<slug>.zip
     const match = srcKey.match(/^staging\/(.+)\.zip$/);
     if (!match) {
-        console.warn(`Unexpected key "${srcKey}" — expected staging/<slug>.zip. Skipping.`);
+        console.warn(`Unexpected key "${srcKey}" - expected staging/<slug>.zip. Skipping.`);
         return;
     }
     const slug = match[1];
     if (!isValidMagazineSlug(slug)) {
-        console.warn(`Unexpected key "${srcKey}" — invalid magazine slug. Skipping.`);
+        console.warn(`Unexpected key "${srcKey}" - invalid magazine slug. Skipping.`);
         return;
     }
 
@@ -428,17 +421,10 @@ async function processRecord(record: SQSRecord): Promise<void> {
     );
 }
 
-export const handler = async (event: SQSEvent): Promise<{ batchItemFailures: { itemIdentifier: string }[] }> => {
-    const failures: { itemIdentifier: string }[] = [];
+export const handler = async (event: S3Event): Promise<void> => {
+    console.log(`ProcessZip received ${event.Records.length} S3 record(s)`);
 
     for (const record of event.Records) {
-        try {
-            await processRecord(record);
-        } catch (error) {
-            console.error(`Failed to process record ${record.messageId}:`, error);
-            failures.push({ itemIdentifier: record.messageId });
-        }
+        await processS3Record(record);
     }
-
-    return { batchItemFailures: failures };
 };

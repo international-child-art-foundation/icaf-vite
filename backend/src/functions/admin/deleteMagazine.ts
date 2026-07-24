@@ -2,8 +2,17 @@ import { DeleteCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 import {
     ListObjectsV2Command,
     DeleteObjectsCommand,
+    DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
-import { dynamodb, s3Client, TABLE_NAME, MAGAZINES_BUCKET_NAME } from "../../config/aws-clients";
+import { CreateInvalidationCommand } from "@aws-sdk/client-cloudfront";
+import {
+    cloudFrontClient,
+    dynamodb,
+    s3Client,
+    TABLE_NAME,
+    MAGAZINES_BUCKET_NAME,
+    MAGAZINES_CLOUDFRONT_DISTRIBUTION_ID,
+} from "../../config/aws-clients";
 import {
     ApiGatewayEvent,
     HTTP_STATUS,
@@ -12,6 +21,23 @@ import {
     hasMinimumRole,
 } from "@icaf/shared";
 import { getCurrentUser } from "../../utils/auth";
+
+async function invalidateMagazineCache(slug: string): Promise<void> {
+    if (!MAGAZINES_CLOUDFRONT_DISTRIBUTION_ID) return;
+
+    await cloudFrontClient.send(
+        new CreateInvalidationCommand({
+            DistributionId: MAGAZINES_CLOUDFRONT_DISTRIBUTION_ID,
+            InvalidationBatch: {
+                CallerReference: `delete-${slug}-${Date.now()}`,
+                Paths: {
+                    Quantity: 2,
+                    Items: [`/${slug}`, `/${slug}/*`],
+                },
+            },
+        }),
+    );
+}
 
 export const handler = async (
     event: ApiGatewayEvent,
@@ -51,20 +77,36 @@ export const handler = async (
                 }),
             );
 
-            if (listResp.Contents && listResp.Contents.length > 0) {
-                await s3Client.send(
+            const objects = (listResp.Contents ?? [])
+                .map((obj) => obj.Key)
+                .filter((key): key is string => Boolean(key));
+
+            if (objects.length > 0) {
+                const deleteResp = await s3Client.send(
                     new DeleteObjectsCommand({
                         Bucket: MAGAZINES_BUCKET_NAME,
                         Delete: {
-                            Objects: listResp.Contents.map((obj) => ({ Key: obj.Key! })),
+                            Objects: objects.map((Key) => ({ Key })),
                             Quiet: true,
                         },
                     }),
                 );
+                if (deleteResp.Errors && deleteResp.Errors.length > 0) {
+                    throw new Error(
+                        `Failed to delete ${deleteResp.Errors.length} magazine S3 object(s) for ${slug}`,
+                    );
+                }
             }
 
             continuationToken = listResp.IsTruncated ? listResp.NextContinuationToken : undefined;
         } while (continuationToken);
+
+        await s3Client.send(
+            new DeleteObjectCommand({
+                Bucket: MAGAZINES_BUCKET_NAME,
+                Key: `staging/${slug}.zip`,
+            }),
+        );
 
         // ── Delete DDB record ──────────────────────────────────────────────
         await dynamodb.send(
@@ -73,6 +115,8 @@ export const handler = async (
                 Key: { PK: "MAGAZINE", SK: slug },
             }),
         );
+
+        await invalidateMagazineCache(slug);
 
         return {
             statusCode: HTTP_STATUS.OK,

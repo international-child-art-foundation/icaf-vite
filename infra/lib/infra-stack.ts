@@ -447,6 +447,7 @@ export class InfraStack extends Stack {
       CONTACT_NOTIFICATION_EMAILS: JSON.stringify(CONTACT_NOTIFICATION_EMAILS),
       ARTWORK_CLOUDFRONT_DISTRIBUTION_ID: artworkDistribution.distributionId,
       MAGAZINES_CLOUDFRONT_DOMAIN: magazinesPublicDomainName,
+      MAGAZINES_CLOUDFRONT_DISTRIBUTION_ID: magazinesDistribution.distributionId,
       STRIPE_WEBHOOK_SECRET: requiredEnvironmentValue("STRIPE_WEBHOOK_SECRET"),
       EVERY_WEBHOOK_ENABLED: String(deployment.everyWebhookEnabled),
       EVERY_WEBHOOK_SECRET: deployment.everyWebhookEnabled
@@ -584,6 +585,7 @@ export class InfraStack extends Stack {
       actions: ["cloudfront:CreateInvalidation"],
       resources: [
         `arn:aws:cloudfront::${this.account}:distribution/${artworkDistribution.distributionId}`,
+        `arn:aws:cloudfront::${this.account}:distribution/${magazinesDistribution.distributionId}`,
       ],
     }));
 

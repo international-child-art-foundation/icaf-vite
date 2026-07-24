@@ -1,8 +1,17 @@
 import type { ChangeEvent, DragEvent } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { MagazineListItem } from '@icaf/shared';
-import { Eye, Pencil, RefreshCw, Save, UploadCloud, X } from 'lucide-react';
 import {
+  Eye,
+  Pencil,
+  RefreshCw,
+  Save,
+  Trash2,
+  UploadCloud,
+  X,
+} from 'lucide-react';
+import {
+  deleteMagazine,
   listAdminMagazines,
   updateMagazine,
   updateMagazineStatus,
@@ -10,6 +19,14 @@ import {
 } from '@/api/admin';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/components/ui/dialog';
 import { DashboardModule, ModuleState } from './DashboardModule';
 import { childArtMagazineHints } from '@/modules/content/data/childArtMagazineHints';
 
@@ -106,7 +123,12 @@ export function MagazineAdminPanel() {
   const [dragActive, setDragActive] = useState(false);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [editingMagazine, setEditingMagazine] = useState<MagazineEditDraft | null>(null);
+  const [editingMagazine, setEditingMagazine] =
+    useState<MagazineEditDraft | null>(null);
+  const [pendingDelete, setPendingDelete] =
+    useState<MagazineListItem | null>(null);
+  const [deleteAcknowledged, setDeleteAcknowledged] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -179,6 +201,12 @@ export function MagazineAdminPanel() {
     setDrafts((current) => current.filter((draft) => draft.id !== id));
   };
 
+  const closeDeleteDialog = () => {
+    if (deleting) return;
+    setPendingDelete(null);
+    setDeleteAcknowledged(false);
+  };
+
   const startEditingMagazine = (magazine: MagazineListItem) => {
     setEditingMagazine({
       slug: magazine.slug,
@@ -225,6 +253,30 @@ export function MagazineAdminPanel() {
       setError(err instanceof Error ? err.message : 'Unable to update magazine.');
     } finally {
       setBusy(false);
+    }
+  };
+
+  const confirmDeleteMagazine = async () => {
+    if (!pendingDelete || !deleteAcknowledged || deleting) return;
+
+    const slug = pendingDelete.slug;
+    setDeleting(true);
+    setError(null);
+    setMessage(null);
+
+    try {
+      await deleteMagazine(slug);
+      setMagazines((current) =>
+        current.filter((magazine) => magazine.slug !== slug),
+      );
+      if (editingMagazine?.slug === slug) setEditingMagazine(null);
+      setPendingDelete(null);
+      setDeleteAcknowledged(false);
+      setMessage(`${slug} deleted.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to delete magazine.');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -325,6 +377,88 @@ export function MagazineAdminPanel() {
       }
     >
       <div className="flex flex-col gap-5">
+        <Dialog
+          open={Boolean(pendingDelete)}
+          onOpenChange={(open) => {
+            if (!open) closeDeleteDialog();
+          }}
+        >
+          {pendingDelete && (
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Delete magazine?</DialogTitle>
+                <DialogDescription>
+                  This will permanently delete {pendingDelete.name} and its S3
+                  files.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 rounded-md border border-neutral-200 bg-white p-3 sm:grid-cols-[72px_1fr]">
+                {pendingDelete.thumbnail_url ? (
+                  <img
+                    src={pendingDelete.thumbnail_url}
+                    alt=""
+                    className="h-24 w-full rounded-sm object-cover sm:h-28"
+                  />
+                ) : (
+                  <div className="flex h-24 w-full items-center justify-center rounded-sm bg-neutral-100 text-[10px] font-semibold uppercase text-neutral-500 sm:h-28">
+                    No cover
+                  </div>
+                )}
+                <dl className="grid content-start gap-2 text-sm">
+                  {[
+                    ['Title', pendingDelete.name],
+                    ['Slug', pendingDelete.slug],
+                    ['Period', pendingDelete.period],
+                    ['Volume', pendingDelete.volume],
+                    ['Status', pendingDelete.status],
+                    ['Uploaded', formatTimestamp(pendingDelete.ts)],
+                  ].map(([label, value]) => (
+                    <div key={label} className="grid gap-0.5">
+                      <dt className="text-xs font-semibold uppercase text-neutral-500">
+                        {label}
+                      </dt>
+                      <dd className="break-words text-neutral-800">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+              <label className="flex gap-3 rounded-md border border-neutral-200 bg-neutral-50 p-3 text-sm leading-6 text-neutral-700">
+                <input
+                  type="checkbox"
+                  checked={deleteAcknowledged}
+                  onChange={(event) =>
+                    setDeleteAcknowledged(event.target.checked)
+                  }
+                  disabled={deleting}
+                  className="mt-1 h-4 w-4 rounded border-neutral-300"
+                />
+                <span>
+                  I understand this permanently deletes the magazine record and
+                  all files under its S3 folder.
+                </span>
+              </label>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={closeDeleteDialog}
+                  disabled={deleting}
+                >
+                  Back
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => void confirmDeleteMagazine()}
+                  disabled={!deleteAcknowledged || deleting}
+                >
+                  {deleting ? 'Deleting...' : 'Delete'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          )}
+        </Dialog>
+
         {error && <ModuleState tone="error">{error}</ModuleState>}
         {message && <ModuleState tone="success">{message}</ModuleState>}
 
@@ -674,6 +808,21 @@ export function MagazineAdminPanel() {
                             Publish
                           </Button>
                         )}
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            setPendingDelete(magazine);
+                            setDeleteAcknowledged(false);
+                            setError(null);
+                            setMessage(null);
+                          }}
+                          disabled={busy || deleting}
+                        >
+                          <Trash2 />
+                          Delete
+                        </Button>
                       </div>
                     </div>
                   </div>

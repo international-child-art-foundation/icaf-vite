@@ -24,6 +24,8 @@ import type { DeploymentConfig } from "./deployment-config.js";
 
 // Spend threshold (USD) that triggers emergencyShutdown
 const BILLING_ALARM_THRESHOLD_USD = 50;
+const DYNAMODB_MAX_ON_DEMAND_READ_REQUEST_UNITS = 25;
+const DYNAMODB_MAX_ON_DEMAND_WRITE_REQUEST_UNITS = 25;
 
 interface InfraStackProps extends StackProps {
   deployment: DeploymentConfig;
@@ -58,6 +60,8 @@ export class InfraStack extends Stack {
       partitionKey: { name: "PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "SK", type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      maxReadRequestUnits: DYNAMODB_MAX_ON_DEMAND_READ_REQUEST_UNITS,
+      maxWriteRequestUnits: DYNAMODB_MAX_ON_DEMAND_WRITE_REQUEST_UNITS,
       removalPolicy: statefulRemovalPolicy,
     });
 

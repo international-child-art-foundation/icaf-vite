@@ -63,9 +63,10 @@ fully uploaded and verified. At cutover, add redirects from `/ChildArt/<slug>/`
 to `https://magazines.icaf.org/<slug>/` so old links stay alive without serving
 magazine files from the main site deployment.
 
-The frontend and backend use the same GA4 web stream. The workflow sets
-`VITE_GA_MEASUREMENT_ID` and passes it to the backend as `GA4_MEASUREMENT_ID`;
-`GA4_API_SECRET` stays backend-only.
+Production frontend and backend analytics use the same GA4 web stream. The
+workflow injects `VITE_GA_MEASUREMENT_ID` and passes it to the backend as
+`GA4_MEASUREMENT_ID` only for `main`; staging does not load Google Analytics or
+send events into the production stream. `GA4_API_SECRET` stays backend-only.
 
 ## Deployment order
 
@@ -106,7 +107,9 @@ The `icaf` Pages project is a Direct Upload project whose production branch is
 `main`. Deployments from `main` update the Pages production environment and
 `https://icaf.org`. Deployments from `staging` update the stable
 `staging.icaf.pages.dev` branch alias; the proxied `staging.icaf.org` custom
-domain targets that alias.
+domain targets that alias. A hostname-specific rule in `frontend/public/_headers`
+adds `X-Robots-Tag: noindex, nofollow` to the custom staging domain; Cloudflare
+already adds `noindex` to the generated Pages preview URLs.
 
 Protect the `main` GitHub Environment with required reviewers. The
 backend workflow runs `cdk diff` before each deployment. Production never

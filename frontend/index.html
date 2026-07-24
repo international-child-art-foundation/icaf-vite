@@ -18,31 +18,43 @@
       content="The International Child Art Foundation nurtures children's creativity and empathy through global art programs, festivals, and education. Discover how art changes lives."
     />
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        window.dataLayer.push(arguments);
-      }
-      window.gtag = window.gtag || gtag;
+      (function () {
+        var measurementId = '%VITE_GA_MEASUREMENT_ID%';
 
-      gtag('consent', 'default', {
-        analytics_storage: 'denied',
-        ad_storage: 'denied',
-        ad_user_data: 'denied',
-        ad_personalization: 'denied',
-        wait_for_update: 500,
-      });
+        // Analytics is production-only. This hostname check also prevents a
+        // production build viewed through a Pages alias from sending events.
+        if (window.location.hostname !== 'icaf.org' || !measurementId) {
+          return;
+        }
 
-      gtag('js', new Date());
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+          window.dataLayer.push(arguments);
+        }
+        window.gtag = window.gtag || gtag;
 
-      gtag('config', '%VITE_GA_MEASUREMENT_ID%', {
-        send_page_view: false,
-        tag_for_child_directed_treatment: true,
-      });
+        gtag('consent', 'default', {
+          analytics_storage: 'denied',
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied',
+          wait_for_update: 500,
+        });
+
+        gtag('js', new Date());
+        gtag('config', measurementId, {
+          send_page_view: false,
+          tag_for_child_directed_treatment: true,
+        });
+
+        var analyticsScript = document.createElement('script');
+        analyticsScript.async = true;
+        analyticsScript.src =
+          'https://www.googletagmanager.com/gtag/js?id=' +
+          encodeURIComponent(measurementId);
+        document.head.appendChild(analyticsScript);
+      })();
     </script>
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%"
-    ></script>
     <meta name="theme-color" content="#0f4c81" />
   </head>
   <body>

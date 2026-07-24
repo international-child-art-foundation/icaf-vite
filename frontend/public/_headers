@@ -24,3 +24,8 @@
 
 /documents/Cultural_Exposition.pdf
   Content-Disposition: inline; filename="Cultural_Exposition.pdf"
+
+# Cloudflare automatically marks pages.dev previews as noindex, but that header
+# does not carry over to a custom domain attached to the staging branch.
+https://staging.icaf.org/*
+  X-Robots-Tag: noindex, nofollow

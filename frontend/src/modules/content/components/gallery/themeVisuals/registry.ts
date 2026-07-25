@@ -22,6 +22,8 @@ export const customThemeVisuals: ThemeVisualDefinition[] = [
   {
     aliases: ["WORLD_CHILDREN'S_FESTIVAL"],
     decorated: false,
+    videoSrc: largeMedia.worldChildrensFestival,
+    durationSeconds: 4,
     palette: {
       primary: '#3C3B6E',
       secondary: '#B22234',

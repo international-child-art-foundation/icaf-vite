@@ -23,11 +23,15 @@ import * as cloudfrontOrigins from "aws-cdk-lib/aws-cloudfront-origins";
 import type { DeploymentConfig } from "./deployment-config.js";
 
 // Spend threshold (USD) that triggers emergencyShutdown
-const BILLING_ALARM_THRESHOLD_USD = 50;
-const DYNAMODB_MAX_ON_DEMAND_READ_REQUEST_UNITS = 25;
-const DYNAMODB_MAX_ON_DEMAND_WRITE_REQUEST_UNITS = 25;
-const DYNAMODB_GSI_MAX_ON_DEMAND_READ_REQUEST_UNITS = 10;
-const DYNAMODB_GSI_MAX_ON_DEMAND_WRITE_REQUEST_UNITS = 10;
+const BILLING_ALARM_THRESHOLD_USD = 200;
+// These are on-demand ceilings, not provisioned capacity: DynamoDB charges
+// only for units actually consumed. The write ceiling admits a burst of about
+// 200 artwork submissions, including the multi-item classroom-group
+// transaction, while still providing a meaningful cost guardrail.
+const DYNAMODB_MAX_ON_DEMAND_READ_REQUEST_UNITS = 200;
+const DYNAMODB_MAX_ON_DEMAND_WRITE_REQUEST_UNITS = 1_000;
+const DYNAMODB_GSI_MAX_ON_DEMAND_READ_REQUEST_UNITS = 200;
+const DYNAMODB_GSI_MAX_ON_DEMAND_WRITE_REQUEST_UNITS = 1_000;
 
 interface InfraStackProps extends StackProps {
   deployment: DeploymentConfig;

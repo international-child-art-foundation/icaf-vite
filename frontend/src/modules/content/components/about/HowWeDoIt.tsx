@@ -22,7 +22,7 @@ const items: AccordionStatsItem[] = [
     number: '01',
     title: 'Innovative Methodologies Up',
     description:
-      'Over the past 27 years, we have developed innovative methodologies for students’ identity development. The Arts Olympiad, our school art program, introduces students to the “Artist-Athlete Ideal” of the creative mind and healthy body (mente sana in corpo sano)',
+      'Over the past 30 years, we have developed innovative methodologies for students’ identity development. The Arts Olympiad, our school art program, introduces students to the “Artist-Athlete Ideal” of the creative mind and healthy body (mente sana in corpo sano)',
     color: 'var(--tertiary-red)',
   },
   {

@@ -43,9 +43,9 @@ export const ArtsOlympiad = () => {
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-black/0 to-transparent" />
           </div>
           <p className="font-openSans text-base font-semibold leading-relaxed text-slate-600 md:text-lg">
-            Selected young artists will represent their school districts or
-            countries at the 7th World Children's Festival in July 2026 on the
-            National Mall in Washington, D.C.
+            Young artists represent their U.S. school districts and
+            international countries at the World Children’s Festival held every
+            four years on the National Mall.
           </p>
         </section>
 
@@ -65,14 +65,11 @@ export const ArtsOlympiad = () => {
               <p className="font-openSans text-base leading-relaxed text-slate-800 md:text-lg">
                 A free global art program for students{' '}
                 <span className="font-semibold">aged 8–12</span> that blends
-                creativity with physical activity. Schools, studios, and
-                homeschoolers can participate before{' '}
-                <span className="font-semibold">March 20, 2026</span>. Winning
-                artists will be invited to the 7th World Children's Festival in{' '}
-                <span className="font-semibold">
-                  July 25-27, 2026 on the National Mall
-                </span>{' '}
-                across from the U.S. Capitol.
+                creativity with physical activity.
+              </p>
+              <p className="font-openSans text-base leading-relaxed text-slate-800 md:text-lg">
+                <span className="font-semibold">News:</span> The 8th Arts
+                Olympiad will be launched in mid-2027.
               </p>
               <p className="font-openSans text-base font-semibold text-slate-700 md:text-lg">
                 🛡 Officially recognized by the U.S. Olympic & Paralympic
@@ -102,15 +99,6 @@ export const ArtsOlympiad = () => {
                 <li>Mail physical artwork to ICAF.</li>
                 <li>Email digital artwork to childart@ICAF.org.</li>
               </ul>
-            </div>
-            <div>
-              <a
-                href="/documents/7th Arts Olympiad Art Entry Form.pdf"
-                download
-                className="bg-primary inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold tracking-[0.14em] text-[#FFD743]"
-              >
-                Download Entry Form
-              </a>
             </div>
           </div>
           <div className="flex items-center justify-center">
@@ -190,15 +178,6 @@ export const ArtsOlympiad = () => {
                   the lesson plan weaves creativity and physical activity into a
                   framework for understanding and peace.
                 </p>
-              </div>
-              <div>
-                <a
-                  href="/documents/7th Arts Olympiad Lesson Plan.pdf"
-                  download
-                  className="bg-primary inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold tracking-[0.14em] text-[#FFD743]"
-                >
-                  Download Lesson Plans
-                </a>
               </div>
             </div>
           </div>

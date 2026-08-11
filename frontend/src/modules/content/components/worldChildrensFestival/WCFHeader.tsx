@@ -72,7 +72,8 @@ export default function WCFHeader() {
             world.{' '}
           </p>
           <p className="mb-4 text-base font-normal md:mb-6 md:text-xl xl:mb-6">
-            The 7th WCF is coming in July 2026. Will you be there?
+            The 7th WCF was held on July 25-27, 2026. The 8th WCF will take
+            place in the summer of 2030.
           </p>
           <a
             href={WCF_SITE_URL}

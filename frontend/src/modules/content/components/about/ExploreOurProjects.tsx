@@ -53,7 +53,7 @@ export default function ExploreOurProjects() {
                 className="h-full max-h-52 w-full object-contain xl:max-h-44 2xl:max-h-48"
               />
             </CardContent>
-            <CardFooter className="text-primary flex-col gap-1 text-center text-lg">
+            <CardFooter className="flex-col gap-1 text-center text-lg">
               <h3 className="font-montserrat font-semibold">
                 World Children’s Festival
               </h3>

@@ -135,7 +135,26 @@ export const icafTimelineData: IicafTimelineData = [
     year: 2023,
     title: 'Media Spotlight',
     description:
-      'Featured in Los Angeles Times; published ChildArt AI edition.',
+      'Featured in Los Angeles Times; hosted a youth panel at the Metaverse conference.',
+  },
+  {
+    year: 2024,
+    title: 'Technology & Art',
+    description:
+      'Published ChildArt magazine on AI & Art and Robotics Education.',
+  },
+  {
+    year: 2025,
+    title: 'Global Program',
+    description:
+      'Organized the 7th Arts Olympiad in the U.S. and worldwide.',
+  },
+  {
+    year: 2026,
+    title: 'Children’s Imagination Olympics',
+    description: 'Produced the 7th World Children’s Festival.',
+    willBreakDesktop: true,
+    willBreakMobile: true,
   },
 ];
 

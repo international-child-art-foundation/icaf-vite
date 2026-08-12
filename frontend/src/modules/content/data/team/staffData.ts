@@ -3,8 +3,6 @@ import AshfaqIshaqImg from '@/modules/content/assets/team/AshfaqIshaq.webp';
 import KattyGueramiImg from '@/modules/content/assets/team/KattyGuerami.webp';
 import AnaAlberdiImg from '@/modules/content/assets/team/AnaAlberdi.webp';
 import NicoleBrownImg from '@/modules/content/assets/team/NicoleBrown.webp';
-import MiaSmithImg from '@/modules/content/assets/team/MiaSmith.webp';
-import AnjayStoneImg from '@/modules/content/assets/team/AnjayStone.webp';
 import NoahZarankaImg from '@/modules/content/assets/team/NoahZaranka.webp';
 
 export const staffData: TStaffData = [
@@ -31,18 +29,6 @@ export const staffData: TStaffData = [
     name: 'Nicole Brown, Esq.',
     title: 'Counsel',
     link: 'https://www.linkedin.com/in/nicolebrown07/',
-  },
-  {
-    src: MiaSmithImg,
-    name: 'Mia Smith',
-    title: 'Manager and Assistant Editor',
-    link: 'https://www.linkedin.com/in/mia-smith-276474209/',
-  },
-  {
-    src: AnjayStoneImg,
-    name: 'Anjay Stone',
-    title: 'Manager and Assistant Editor',
-    link: 'https://www.linkedin.com/in/anjay-stone-6b1b271b4/',
   },
   {
     src: NoahZarankaImg,

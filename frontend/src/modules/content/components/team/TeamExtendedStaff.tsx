@@ -7,7 +7,7 @@ export const TeamExtendedStaff = () => {
       <h2 className="font-montserrat text-center text-[40px] font-extrabold leading-[48px]">
         ICAF Team
       </h2>
-      <div className="grid grid-cols-1 grid-rows-3 gap-[34px] xl:grid-cols-3 xl:grid-rows-1">
+      <div className="mx-auto grid w-full max-w-[600px] grid-cols-1 gap-[34px]">
         {TeamCardData.map((card) => (
           <TeamCard
             key={card.title}

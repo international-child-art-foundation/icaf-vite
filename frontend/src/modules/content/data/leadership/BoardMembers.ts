@@ -66,4 +66,9 @@ export const boardMembers: IBoardMember[] = [
     title: 'Sculptor for The Dwight D. Eisenhower Memorial',
     link: 'https://eylanbekov.com/',
   },
+  {
+    name: 'Bakhtiar Mikhak',
+    title: 'Harvard Extension School',
+    link: '',
+  },
 ];

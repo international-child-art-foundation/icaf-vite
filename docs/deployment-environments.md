@@ -111,6 +111,17 @@ domain targets that alias. A hostname-specific rule in `frontend/public/_headers
 adds `X-Robots-Tag: noindex, nofollow` to the custom staging domain; Cloudflare
 already adds `noindex` to the generated Pages preview URLs.
 
+The route-scoped Pages Function in `functions/assets/[[path]].js` is deployed by
+Wrangler alongside the static frontend. Cloudflare serves a matching static
+asset before this multipath fallback Function; when no `/assets/*` file exists,
+the Function returns an uncached HTTP 404 directly. Requests served by a Pages
+Function do not use `_redirects`, so the SPA rewrite cannot turn the missing
+asset into `index.html`. Keep the Pages deployment command at the repository
+root so Wrangler discovers the `functions` directory. Dashboard drag-and-drop
+uploads do not compile a Pages Functions directory and must not be used for
+releases. The deployment verification probes this behavior and fails unless a
+missing JavaScript asset returns a non-HTML 404.
+
 Protect the `main` GitHub Environment with required reviewers. The
 backend workflow runs `cdk diff` before each deployment. Production never
 includes localhost in API Gateway, Lambda, or S3 CORS configuration.

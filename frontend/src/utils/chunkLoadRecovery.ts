@@ -80,6 +80,13 @@ function reloadOnceForChunkFailure(): void {
 }
 
 export function installChunkLoadRecovery(): void {
+  // Vite emits this event when a dynamic import cannot be loaded, most often
+  // because a deployment replaced the chunk referenced by an older page.
+  window.addEventListener('vite:preloadError', (event) => {
+    event.preventDefault();
+    reloadOnceForChunkFailure();
+  });
+
   window.addEventListener(
     'error',
     (event) => {

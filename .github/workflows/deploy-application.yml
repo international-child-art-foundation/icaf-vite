@@ -8,6 +8,7 @@ on:
       - "infra/**"
       - "shared/**"
       - "cloudflare/api-proxy/**"
+      - "functions/**"
       - "frontend/**"
       - "!frontend/php-api/**"
       - "pnpm-lock.yaml"
@@ -301,6 +302,25 @@ jobs:
           if ! grep -Fqx "commit=$EXPECTED_COMMIT" <<< "$version"; then
             echo "The deployed version does not match commit $EXPECTED_COMMIT." >&2
             printf '%s\n' "$version" >&2
+            exit 1
+          fi
+
+          asset_probe="$(
+            curl \
+              --silent \
+              --show-error \
+              --output /dev/null \
+              --write-out $'%{http_code}\n%{content_type}' \
+              "${DEPLOYMENT_URL%/}/assets/__missing-vite-chunk-probe__.js"
+          )"
+          asset_probe_status="$(sed -n '1p' <<< "$asset_probe")"
+          asset_probe_type="$(sed -n '2p' <<< "$asset_probe")"
+
+          if [ "$asset_probe_status" != "404" ] || [[ "$asset_probe_type" == text/html* ]]; then
+            echo "Missing frontend assets must return a non-HTML 404." >&2
+            printf 'Status: %s\nContent-Type: %s\n' \
+              "$asset_probe_status" \
+              "$asset_probe_type" >&2
             exit 1
           fi
 

@@ -19,7 +19,3 @@
 /ChildArt/:slug/* https://magazines.icaf.org/:slug/:splat 302
 /childart/:slug https://magazines.icaf.org/:slug/ 302
 /childart/:slug/* https://magazines.icaf.org/:slug/:splat 302
-
-# React Router fallback. The route-scoped Pages Function preserves real assets
-# and converts an HTML fallback for a missing /assets/* request into a 404.
-/* /index.html 200

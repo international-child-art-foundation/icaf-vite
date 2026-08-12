@@ -20,6 +20,6 @@
 /childart/:slug https://magazines.icaf.org/:slug/ 302
 /childart/:slug/* https://magazines.icaf.org/:slug/:splat 302
 
-# React Router fallback. Missing /assets/* requests are handled first by the
-# route-scoped Pages Function and return a real 404 without using this rule.
+# React Router fallback. The route-scoped Pages Function preserves real assets
+# and converts an HTML fallback for a missing /assets/* request into a 404.
 /* /index.html 200

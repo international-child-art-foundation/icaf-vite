@@ -112,15 +112,14 @@ adds `X-Robots-Tag: noindex, nofollow` to the custom staging domain; Cloudflare
 already adds `noindex` to the generated Pages preview URLs.
 
 The route-scoped Pages Function in `functions/assets/[[path]].js` is deployed by
-Wrangler alongside the static frontend. Cloudflare serves a matching static
-asset before this multipath fallback Function; when no `/assets/*` file exists,
-the Function returns an uncached HTTP 404 directly. Requests served by a Pages
-Function do not use `_redirects`, so the SPA rewrite cannot turn the missing
-asset into `index.html`. Keep the Pages deployment command at the repository
-root so Wrangler discovers the `functions` directory. Dashboard drag-and-drop
-uploads do not compile a Pages Functions directory and must not be used for
-releases. The deployment verification probes this behavior and fails unless a
-missing JavaScript asset returns a non-HTML 404.
+Wrangler alongside the static frontend. It passes real static assets through
+unchanged, but replaces an HTML SPA fallback for a missing `/assets/*` file with
+an uncached HTTP 404 before a response is sent to the client. Keep the Pages
+deployment command at the repository root so Wrangler discovers the `functions`
+directory. Dashboard drag-and-drop uploads do not compile a Pages Functions
+directory and must not be used for releases. Deployment verification requires
+both the generated Vite entry module to return a non-HTML 200 and a missing
+JavaScript asset to return a non-HTML 404.
 
 Protect the `main` GitHub Environment with required reviewers. The
 backend workflow runs `cdk diff` before each deployment. Production never

@@ -193,6 +193,7 @@ export default function App() {
   return (
     <GlobalContextProvider>
       <GoogleAnalytics
+        DEPLOYMENT_COMMIT={import.meta.env.VITE_DEPLOYMENT_COMMIT}
         GA_MEASUREMENT_ID={import.meta.env.VITE_GA_MEASUREMENT_ID}
       />
       <div className="relative mx-auto box-border flex min-h-screen w-full flex-col overflow-x-hidden px-0">

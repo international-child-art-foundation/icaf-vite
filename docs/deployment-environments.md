@@ -66,7 +66,9 @@ magazine files from the main site deployment.
 Production frontend and backend analytics use the same GA4 web stream. The
 workflow injects `VITE_GA_MEASUREMENT_ID` and passes it to the backend as
 `GA4_MEASUREMENT_ID` only for `main`; staging does not load Google Analytics or
-send events into the production stream. `GA4_API_SECRET` stays backend-only.
+send events into the production stream. Production pageviews include the full
+deployment commit SHA as the `deployment_commit` event parameter.
+`GA4_API_SECRET` stays backend-only.
 
 ## Deployment order
 

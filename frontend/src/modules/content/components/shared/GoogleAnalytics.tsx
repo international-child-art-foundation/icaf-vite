@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useGlobalContext } from '@/modules/content/components/shared/GlobalContext';
 
 type GoogleAnalyticsProps = {
+  DEPLOYMENT_COMMIT: string | undefined;
   GA_MEASUREMENT_ID: string | undefined;
 };
 
@@ -19,6 +20,7 @@ function analyticsPath(pathname: string, search: string): string {
 }
 
 export default function GoogleAnalytics({
+  DEPLOYMENT_COMMIT,
   GA_MEASUREMENT_ID,
 }: GoogleAnalyticsProps) {
   const { isCookieConsentAcquired } = useGlobalContext();
@@ -41,9 +43,11 @@ export default function GoogleAnalytics({
     if (!isCookieConsentAcquired) return;
 
     window.gtag('config', GA_MEASUREMENT_ID, {
+      deployment_commit: DEPLOYMENT_COMMIT,
       page_path: analyticsPath(location.pathname, location.search),
     });
   }, [
+    DEPLOYMENT_COMMIT,
     GA_MEASUREMENT_ID,
     isCookieConsentAcquired,
     location.pathname,

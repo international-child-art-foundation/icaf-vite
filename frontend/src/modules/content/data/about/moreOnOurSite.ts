@@ -50,7 +50,7 @@ export const moreOnOurSiteData: MoreOnOurSite[] = [
     image: EthicsImage,
     buttonText: 'Code of Ethics (PDF)',
     external: true,
-    link: '/documents/code-of-ethics-icaf.pdf',
+    link: 'https://docs.icaf.org/code-of-ethics-icaf.pdf',
   },
   {
     id: 5,

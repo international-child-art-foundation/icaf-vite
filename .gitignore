@@ -19,17 +19,13 @@ dist-ssr
 
 # Large/external asset folders (symlinked for local dev)
 frontend/public/ChildArt
-frontend/public/flags
 frontend/public/audio
 frontend/public/data
-frontend/public/documents
 frontend/public/gallery-arts
 frontend/public/large-media
 frontend/public/ChildArt/*
-frontend/public/flags/*
 frontend/public/audio/*
 frontend/public/data/*
-frontend/public/documents/*
 frontend/public/gallery-arts/*
 frontend/public/large-media/*
 .magazine-zips/

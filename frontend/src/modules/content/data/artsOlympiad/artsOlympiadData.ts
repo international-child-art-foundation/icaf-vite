@@ -18,7 +18,7 @@ export const artsOlympiadHelpfulLinks: ArtsOlympiadHelpfulLink[] = [
   {
     id: 'stories-texas',
     imageSrc: HlImg2,
-    href: '/documents/Arts-Olympiad-Stories-Texas.pdf',
+    href: 'https://docs.icaf.org/Arts-Olympiad-Stories-Texas.pdf',
     description:
       'Arts Olympiad in Texas, China, Croatia, Israel, and New Zealand.',
     label: 'Arts Olympiad stories',
@@ -45,7 +45,7 @@ export const artsOlympiadHelpfulLinks: ArtsOlympiadHelpfulLink[] = [
   {
     id: 'schoolarts-article',
     imageSrc: HlImg5,
-    href: '/documents/Focus_In_ICAF_SchoolArts_5_21.pdf',
+    href: 'https://docs.icaf.org/Focus_In_ICAF_SchoolArts_5_21.pdf',
     description:
       'The International Child Art Foundation. SchoolArts Magazine, May 2021.',
     label: 'SchoolArts magazine article',

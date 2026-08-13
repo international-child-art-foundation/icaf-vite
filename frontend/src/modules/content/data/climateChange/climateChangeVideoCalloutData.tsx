@@ -25,7 +25,7 @@ export const ClimateChangeVideoCalloutData: IClimateChangeVideoCallout[] = [
     thumb: katrinaHealingArtsThumb,
     color: 'red',
     link: {
-      href: "/documents/Katrina Healing Arts Program - A Schoolteacher's Perspective.pdf",
+      href: "https://docs.icaf.org/Katrina Healing Arts Program - A Schoolteacher's Perspective.pdf",
       text: 'Learn More',
     },
   },

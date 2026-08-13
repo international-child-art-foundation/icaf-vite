@@ -33,7 +33,7 @@ _Note: Subject to change._
 
 Small assets are stored directly in the frontend of this repository. For larger files (magazines, PDFs, long videos), keep an `icaf-vite-files` folder outside the repo and symlink its asset subfolders into `frontend/public`.
 Do not set `VITE_PUBLIC_DIR`; Vite must use `frontend/public` so it copies root files like `favicon.svg`, `robots.txt`, `sitemap.xml`, `_headers`, and `_redirects` along with the symlinked asset folders.
-Current server-root asset directories include /ChildArt, /assets, /data, /documents, /gallery-arts, and /large-media.
+Current server-root asset directories include /ChildArt, /assets, /data, /gallery-arts, and /large-media. Documents are hosted separately at https://docs.icaf.org.
 Larger media files and videos exist in our webspace under the domain media.icaf.org. They were moved so that icaf.org can be cached and managed by Cloudflare as per their TOS.
 
 ## API routing

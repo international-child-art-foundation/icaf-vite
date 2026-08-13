@@ -69,21 +69,21 @@ export const PTALearnMoreData: IPTALabeledLink[] = [
   {
     source: 'The Lancet',
     title: 'Developing Children’s Creativity to Foster Peace',
-    link: "/documents/Ishaq - Children's Creativity to Foster Peace.pdf",
+    link: "https://docs.icaf.org/Ishaq - Children's Creativity to Foster Peace.pdf",
   },
   {
     source: 'UNESCO Journal',
     title: 'Prosperity and Peace Through Art',
-    link: '/documents/Prosperity and Peace through Art.pdf',
+    link: 'https://docs.icaf.org/Prosperity and Peace through Art.pdf',
   },
   {
     source: 'SchoolArts',
     title: 'An Invitation to Repair the World',
-    link: '/documents/SchoolArts Magazine_Jan 2017_ICAF.pdf',
+    link: 'https://docs.icaf.org/SchoolArts Magazine_Jan 2017_ICAF.pdf',
   },
   {
     source: 'ChildArt',
     title: 'Special Messages',
-    link: '/documents/Special Messages_ChildArt magazine.pdf',
+    link: 'https://docs.icaf.org/Special Messages_ChildArt magazine.pdf',
   },
 ];

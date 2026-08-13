@@ -1,7 +1,8 @@
-/2026WCF /documents/2026WCF.pdf 302
-/2026WCF/ /documents/2026WCF.pdf 302
-/culturalexposition /documents/Cultural_Exposition.pdf 302
-/culturalexposition/ /documents/Cultural_Exposition.pdf 302
+/2026WCF https://docs.icaf.org/2026WCF.pdf 302
+/2026WCF/ https://docs.icaf.org/2026WCF.pdf 302
+/culturalexposition https://docs.icaf.org/Cultural_Exposition.pdf 302
+/culturalexposition/ https://docs.icaf.org/Cultural_Exposition.pdf 302
+/documents/* https://docs.icaf.org/:splat 301
 
 # Temporary static replacement for the former PHP magazine rotator.
 /daily-magazine https://magazines.icaf.org/Happiness/ 302

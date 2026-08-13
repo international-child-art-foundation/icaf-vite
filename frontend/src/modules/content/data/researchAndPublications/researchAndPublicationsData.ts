@@ -42,7 +42,7 @@ export const researchAndPublicationsData: IResearchAndPublicationsItem[] = [
       'A study on the International Child Art Foundation’s (ICAF) mission to foster the "creative empath" in children, bridging the gap between imagination and social responsibility to develop future leaders.',
     author: 'Ashfaq Ishaq',
     date: '2020',
-    link: '/documents/CreativeEmpaths.pdf',
+    link: 'https://docs.icaf.org/CreativeEmpaths.pdf',
   },
 
   {
@@ -61,6 +61,6 @@ export const researchAndPublicationsData: IResearchAndPublicationsItem[] = [
       'A feature in the prestigious medical journal highlighting the critical link between children’s artistic expression and their mental health, well-being, and developmental growth.',
     author: 'Ashfaq Ishaq',
     date: 'December 2006',
-    link: '/documents/The Lancet.pdf',
+    link: 'https://docs.icaf.org/The Lancet.pdf',
   },
 ];

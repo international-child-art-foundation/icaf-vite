@@ -184,7 +184,7 @@ function Footer() {
           <ol className="grid grid-cols-2 gap-x-8 gap-y-5 lg:grid-cols-1 lg:gap-y-4 lg:pl-0 lg:pr-14">
             <li className="break-words">
               <a
-                href="/documents/ICAF_Website_Terms_of_Use.pdf"
+                href="https://docs.icaf.org/ICAF_Website_Terms_of_Use.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -193,7 +193,7 @@ function Footer() {
             </li>
             <li className="break-words">
               <a
-                href="/documents/ICAF_Website_Privacy_Policy.pdf"
+                href="https://docs.icaf.org/ICAF_Website_Privacy_Policy.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
               >

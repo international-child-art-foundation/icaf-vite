@@ -69,6 +69,11 @@ export const boardMembers: IBoardMember[] = [
   {
     name: 'Bakhtiar Mikhak',
     title: 'Harvard Extension School',
-    link: '',
+    link: 'https://www.linkedin.com/in/mikhak/',
+  },
+  {
+    name: 'Dr. Maria Claudia Albini',
+    title: 'National University of the Arts',
+    link: 'https://una.edu.ar/agenda/presentacion-del-libro-el-conservatorio-nacional-de-musica-buenos-aires-argentina_48289',
   },
 ];

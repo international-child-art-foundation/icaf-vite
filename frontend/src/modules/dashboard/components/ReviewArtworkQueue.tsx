@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   ArtworkListItem,
   ArtworkStatus,
+  ReviewArtworkQueueResponse,
   SubmitterRelationship,
 } from '@icaf/shared';
 import { adminUpdateArtwork } from '@/api/admin';
@@ -39,6 +40,45 @@ const RELATIONSHIPS: SubmitterRelationship[] = [
   'legal_guardian',
   'adult_facilitator',
 ];
+
+const LOAD_ALL_PAGE_DELAY_MS = 1_500;
+
+function wait(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+}
+
+function normalizeSearchText(value: string): string {
+  return value
+    .toLocaleLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim();
+}
+
+function artworkMatchesSearch(
+  artwork: ArtworkListItem,
+  normalizedSearch: string,
+): boolean {
+  if (!normalizedSearch) return true;
+
+  const searchableText = [
+    artwork.f_name && artwork.age != null
+      ? `${artwork.f_name}, ${artwork.age}`
+      : undefined,
+    artwork.f_name,
+    artwork.l_name,
+    artwork.age,
+    artwork.title,
+    artwork.description,
+    artwork.country,
+    artwork.region,
+    artwork.theme,
+    artwork.art_id,
+  ]
+    .filter((value) => value !== undefined && value !== null)
+    .join(' ');
+
+  return normalizeSearchText(searchableText).includes(normalizedSearch);
+}
 
 function modeToStatus(mode: QueueMode): ArtworkStatus {
   return mode === 'pending' ? 'pending_review' : mode;
@@ -107,33 +147,42 @@ export function ReviewArtworkQueue({
   const [hasMore, setHasMore] = useState(false);
   const [lastKey, setLastKey] = useState<string | undefined>();
   const [loadingMore, setLoadingMore] = useState(false);
+  const [loadingAll, setLoadingAll] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [activeArtworkId, setActiveArtworkId] = useState('');
   const [exhibitionArtworkId, setExhibitionArtworkId] = useState('');
+  const requestRunRef = useRef(0);
   const isHorizontal = useMediaQuery('(orientation: landscape)', true);
 
   const selectedIds = useMemo(() => [...selected], [selected]);
+  const normalizedSearch = useMemo(
+    () => normalizeSearchText(searchQuery),
+    [searchQuery],
+  );
+  const visibleArtworks = useMemo(
+    () =>
+      artworks.filter((artwork) =>
+        artworkMatchesSearch(artwork, normalizedSearch),
+      ),
+    [artworks, normalizedSearch],
+  );
   const resolvedArtworks = useMemo(
-    () => artworks.map((artwork) => resolveApiArtwork(artwork)),
-    [artworks],
+    () => visibleArtworks.map((artwork) => resolveApiArtwork(artwork)),
+    [visibleArtworks],
   );
   const editingArtwork = useMemo(
     () => artworks.find((artwork) => artwork.art_id === editingId) ?? null,
     [artworks, editingId],
   );
 
-  const loadQueue = useCallback((cursor?: string) => {
-    const append = Boolean(cursor);
-    if (append) setLoadingMore(true);
-    else setLoading(true);
-    setError(null);
+  const requestPage = useCallback(
+    (cursor?: string): Promise<ReviewArtworkQueueResponse> => {
+      const query = {
+        limit: 48,
+        ...(cursor ? { last_key: cursor } : {}),
+      };
 
-    const query = {
-      limit: 48,
-      ...(cursor ? { last_key: cursor } : {}),
-    };
-
-    const request =
-      mode === 'approved'
+      return mode === 'approved'
         ? listGalleryArtworks(
             { ...query, sort: 'newest' },
             { bypassCache: true },
@@ -143,41 +192,110 @@ export function ReviewArtworkQueue({
           : mode === 'hidden'
             ? fetchHiddenArtworks(query)
             : fetchRejectedArtworks(query);
+    },
+    [mode],
+  );
 
-    request
-      .then((response) => {
-        setArtworks((current) =>
-          append ? [...current, ...response.artworks] : response.artworks,
-        );
-        setHasMore(Boolean(response.has_more && response.last_key));
-        setLastKey(response.last_key);
-        if (!append) {
-          setSelected(new Set());
-          setEditingId((current) =>
-            current && response.artworks.some((art) => art.art_id === current)
-              ? current
-              : null,
+  const loadQueue = useCallback(
+    (cursor?: string) => {
+      const runId = ++requestRunRef.current;
+      const append = Boolean(cursor);
+      if (append) setLoadingMore(true);
+      else setLoading(true);
+      setLoadingAll(false);
+      setError(null);
+
+      requestPage(cursor)
+        .then((response) => {
+          if (requestRunRef.current !== runId) return;
+          setArtworks((current) =>
+            append ? [...current, ...response.artworks] : response.artworks,
           );
+          setHasMore(Boolean(response.has_more && response.last_key));
+          setLastKey(response.last_key);
+          if (!append) {
+            setSelected(new Set());
+            setEditingId((current) =>
+              current && response.artworks.some((art) => art.art_id === current)
+                ? current
+                : null,
+            );
+          }
+        })
+        .catch((err: unknown) => {
+          if (requestRunRef.current !== runId) return;
+          if (!append) {
+            setArtworks([]);
+            setHasMore(false);
+            setLastKey(undefined);
+          }
+          setError(
+            err instanceof Error ? err.message : 'Failed to load artworks',
+          );
+        })
+        .finally(() => {
+          if (requestRunRef.current !== runId) return;
+          setLoading(false);
+          setLoadingMore(false);
+        });
+    },
+    [requestPage],
+  );
+
+  const loadAllArtworks = async () => {
+    if (!lastKey || !hasMore || loadingAll) return;
+
+    const runId = ++requestRunRef.current;
+    let cursor: string | undefined = lastKey;
+    let loadedCount = artworks.length;
+
+    setLoadingAll(true);
+    setLoadingMore(false);
+    setError(null);
+    setMessage(null);
+
+    try {
+      while (cursor) {
+        const response = await requestPage(cursor);
+        if (requestRunRef.current !== runId) return;
+
+        loadedCount += response.artworks.length;
+        setArtworks((current) => [...current, ...response.artworks]);
+
+        cursor =
+          response.has_more && response.last_key
+            ? response.last_key
+            : undefined;
+        setHasMore(Boolean(cursor));
+        setLastKey(cursor);
+
+        if (cursor) {
+          await wait(LOAD_ALL_PAGE_DELAY_MS);
+          if (requestRunRef.current !== runId) return;
         }
-      })
-      .catch((err: unknown) => {
-        if (!append) {
-          setArtworks([]);
-          setHasMore(false);
-          setLastKey(undefined);
-        }
-        setError(
-          err instanceof Error ? err.message : 'Failed to load artworks',
-        );
-      })
-      .finally(() => {
-        setLoading(false);
-        setLoadingMore(false);
-      });
-  }, [mode]);
+      }
+
+      const loadedStatus = modeToStatus(mode).replace(/_/g, ' ');
+      setMessage(
+        `All ${loadedCount} ${loadedStatus} artwork${loadedCount === 1 ? '' : 's'} loaded.`,
+      );
+    } catch (err) {
+      if (requestRunRef.current !== runId) return;
+      setError(
+        err instanceof Error
+          ? `Stopped after loading ${loadedCount} artworks: ${err.message}`
+          : `Stopped after loading ${loadedCount} artworks.`,
+      );
+    } finally {
+      if (requestRunRef.current === runId) setLoadingAll(false);
+    }
+  };
 
   useEffect(() => {
     loadQueue();
+    return () => {
+      requestRunRef.current += 1;
+    };
   }, [loadQueue]);
 
   useEffect(() => {
@@ -193,7 +311,8 @@ export function ReviewArtworkQueue({
       await mapWithConcurrency(ids, 3, (id) =>
         changeArtworkStatus(id, {
           status,
-          rev_num: artworks.find((artwork) => artwork.art_id === id)?.rev_num ?? 1,
+          rev_num:
+            artworks.find((artwork) => artwork.art_id === id)?.rev_num ?? 1,
         }),
       );
       setMessage(
@@ -282,32 +401,61 @@ export function ReviewArtworkQueue({
       title={title}
       description={
         admin
-          ? 'Switch between status views. Approved artwork is the default and uses the public gallery index; hidden, pending, and rejected use review indexes.'
+          ? 'A tool for finding and updating artworks.'
           : 'Approval is the normal path. Rejection and hiding are moderation decisions.'
       }
       aside={
-        <div className="flex flex-wrap items-center gap-2">
-          <select
-            value={mode}
-            onChange={(event) => {
-              setMode(event.target.value as QueueMode);
-              setEditingId(null);
-            }}
-            className="h-10 rounded-md border border-neutral-300 bg-white px-3 text-sm"
-          >
-            {admin && <option value="approved">Approved</option>}
-            <option value="pending">Pending review</option>
-            <option value="hidden">Hidden</option>
-            {admin && <option value="rejected">Rejected</option>}
-          </select>
-          <button
-            type="button"
-            disabled={loading || busy}
-            onClick={() => loadQueue()}
-            className="h-10 rounded-md border border-neutral-300 bg-white px-3 text-sm font-semibold disabled:opacity-40"
-          >
-            Update
-          </button>
+        <div className="flex flex-col gap-2 md:items-end">
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={mode}
+              onChange={(event) => {
+                setMode(event.target.value as QueueMode);
+                setEditingId(null);
+                setSearchQuery('');
+                setMessage(null);
+              }}
+              className="h-10 rounded-md border border-neutral-300 bg-white px-3 text-sm"
+            >
+              {admin && <option value="approved">Approved</option>}
+              <option value="pending">Pending review</option>
+              <option value="hidden">Hidden</option>
+              {admin && <option value="rejected">Rejected</option>}
+            </select>
+            <button
+              type="button"
+              disabled={loading || loadingAll || busy}
+              onClick={() => loadQueue()}
+              className="h-10 rounded-md border border-neutral-300 bg-white px-3 text-sm font-semibold disabled:opacity-40"
+            >
+              Update
+            </button>
+          </div>
+          {admin && (
+            <div className="w-full">
+              <button
+                type="button"
+                disabled={loading || loadingAll || busy || !hasMore}
+                onClick={() => void loadAllArtworks()}
+                className="h-10 w-full rounded-md border border-neutral-300 bg-white px-3 text-sm font-semibold disabled:opacity-40"
+              >
+                {loading
+                  ? 'Loading artworks…'
+                  : loadingAll
+                    ? `Loading all… ${artworks.length} loaded`
+                    : hasMore
+                      ? 'Load all artworks'
+                      : artworks.length > 0
+                        ? 'All artworks loaded'
+                        : 'No artworks to load'}
+              </button>
+              {(hasMore || loadingAll) && (
+                <p className="mt-1 text-center text-xs text-neutral-500 md:text-right">
+                  48 artworks per page, with a 1.5-second pause between pages.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       }
     >
@@ -335,10 +483,33 @@ export function ReviewArtworkQueue({
           setActiveArtworkId('');
         }}
       />
+      {admin && (
+        <div className="mb-4">
+          <label
+            htmlFor="artwork-admin-search"
+            className="text-sm font-semibold text-neutral-800"
+          >
+            Search loaded artwork
+          </label>
+          <input
+            id="artwork-admin-search"
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Artist name, title, description, age, or location"
+            className="mt-1 h-10 w-full rounded-md border border-neutral-300 bg-white px-3 text-sm"
+          />
+          <p className="mt-1 text-xs text-neutral-500" aria-live="polite">
+            Showing {visibleArtworks.length} of {artworks.length} loaded{' '}
+            {statusLabel} artwork{artworks.length === 1 ? '' : 's'}.
+            {hasMore && ' Load all artworks to search the complete status.'}
+          </p>
+        </div>
+      )}
       <div className="mb-4 flex flex-wrap gap-2">
         <button
           type="button"
-          disabled={busy || selectedIds.length === 0}
+          disabled={busy || loadingAll || selectedIds.length === 0}
           onClick={() => void mutateStatus(selectedIds, 'approved')}
           className="rounded-md bg-green-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
         >
@@ -346,7 +517,7 @@ export function ReviewArtworkQueue({
         </button>
         <button
           type="button"
-          disabled={busy || selectedIds.length === 0}
+          disabled={busy || loadingAll || selectedIds.length === 0}
           onClick={() => void mutateStatus(selectedIds, 'hidden')}
           className="rounded-md border border-neutral-300 px-3 py-2 text-sm font-semibold disabled:opacity-40"
         >
@@ -354,7 +525,7 @@ export function ReviewArtworkQueue({
         </button>
         <button
           type="button"
-          disabled={busy || selectedIds.length === 0}
+          disabled={busy || loadingAll || selectedIds.length === 0}
           onClick={() => void mutateStatus(selectedIds, 'rejected')}
           className="rounded-md border border-red-300 px-3 py-2 text-sm font-semibold text-red-700 disabled:opacity-40"
         >
@@ -368,14 +539,15 @@ export function ReviewArtworkQueue({
         <ModuleState>Loading artwork...</ModuleState>
       ) : artworks.length === 0 ? (
         <ModuleState>No {statusLabel} artwork found.</ModuleState>
+      ) : visibleArtworks.length === 0 ? (
+        <ModuleState>
+          No loaded artwork matches “{searchQuery.trim()}”.
+        </ModuleState>
       ) : (
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
-            {artworks.map((artwork) => {
-              const resolvedArtwork =
-                resolvedArtworks.find(
-                  (resolved) => resolved.art_id === artwork.art_id,
-                ) ?? resolveApiArtwork(artwork);
+            {visibleArtworks.map((artwork, index) => {
+              const resolvedArtwork = resolvedArtworks[index];
               const isEditing = editingId === artwork.art_id;
 
               return (
@@ -426,7 +598,7 @@ export function ReviewArtworkQueue({
                         <div className="grid grid-cols-3 gap-2">
                           <button
                             type="button"
-                            disabled={busy}
+                            disabled={busy || loadingAll}
                             onClick={() =>
                               void mutateStatus([artwork.art_id], 'approved')
                             }
@@ -436,7 +608,7 @@ export function ReviewArtworkQueue({
                           </button>
                           <button
                             type="button"
-                            disabled={busy}
+                            disabled={busy || loadingAll}
                             onClick={() =>
                               void mutateStatus([artwork.art_id], 'hidden')
                             }
@@ -446,7 +618,7 @@ export function ReviewArtworkQueue({
                           </button>
                           <button
                             type="button"
-                            disabled={busy}
+                            disabled={busy || loadingAll}
                             onClick={() =>
                               void mutateStatus([artwork.art_id], 'rejected')
                             }
@@ -568,7 +740,7 @@ export function ReviewArtworkQueue({
 
                   <button
                     type="button"
-                    disabled={busy}
+                    disabled={busy || loadingAll}
                     onClick={() => void saveArtworkEdits()}
                     className="bg-primary mt-4 w-full rounded-md px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
                   >
@@ -580,7 +752,7 @@ export function ReviewArtworkQueue({
           )}
         </div>
       )}
-      {hasMore && !loading && (
+      {hasMore && !loading && !loadingAll && (
         <div className="mt-6 flex justify-center">
           <button
             type="button"
@@ -588,7 +760,9 @@ export function ReviewArtworkQueue({
             onClick={() => loadQueue(lastKey)}
             className="rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-40"
           >
-            {loadingMore ? 'Loading more...' : `Load more ${statusLabel} artwork`}
+            {loadingMore
+              ? 'Loading more...'
+              : `Load more ${statusLabel} artwork`}
           </button>
         </div>
       )}

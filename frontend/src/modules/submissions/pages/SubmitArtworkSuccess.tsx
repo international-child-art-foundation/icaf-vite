@@ -77,7 +77,7 @@ export function SubmitArtworkSuccess() {
 
         <section className="mx-auto grid w-full max-w-4xl gap-5 rounded-lg border border-slate-200 bg-white p-4 shadow-xl lg:grid-cols-[minmax(0,1fr)_minmax(300px,360px)] lg:p-6">
           <div className="min-w-0">
-            <p className="text-secondary-blue text-xs font-bold uppercase tracking-widest">
+            <p className="text-secondary-blue text-xs font-bold uppercase">
               Submission received
             </p>
             <h1 className="font-montserrat mt-2 text-2xl font-semibold text-slate-950 sm:text-3xl">

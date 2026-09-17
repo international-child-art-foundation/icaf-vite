@@ -369,7 +369,7 @@ function ArtworkDetailsPane({
           <ChevronLeft aria-hidden="true" className="h-4 w-4" />
         </button>
         <div className="min-w-0 text-center">
-          <p className="select-none text-xs font-bold uppercase tracking-widest text-slate-500">
+          <p className="select-none text-xs font-bold uppercase text-slate-500">
             Artwork details
           </p>
           {hasSelectedArtwork && activeArtwork?.fileName && (

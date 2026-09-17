@@ -151,7 +151,7 @@ export const RegisterForm = () => {
     >
       <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-xl sm:p-8">
         <div className="mb-8">
-          <p className="text-secondary-blue mb-2 text-sm font-bold uppercase tracking-widest">
+          <p className="text-secondary-blue mb-2 text-sm font-bold uppercase">
             ICAF account
           </p>
           <h1 className="font-montserrat text-3xl font-semibold text-slate-950 sm:text-4xl">

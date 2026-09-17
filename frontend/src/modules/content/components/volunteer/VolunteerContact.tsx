@@ -227,7 +227,7 @@ export const VolunteerContact = () => {
             <button
               type="submit"
               disabled={status === 'sending'}
-              className="mt-auto w-full rounded-full bg-yellow-400 px-6 py-3 text-center text-sm font-bold tracking-widest text-slate-900 transition hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:opacity-60"
+              className="mt-auto w-full rounded-full bg-yellow-400 px-6 py-3 text-center text-sm font-bold text-slate-900 transition hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:opacity-60"
             >
               {status === 'sending' ? 'Sending…' : 'Send Message'}
             </button>

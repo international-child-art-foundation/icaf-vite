@@ -888,7 +888,7 @@ export function SubmitArtworkGroup({
         >
           <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-xl sm:p-6">
             <div className="mb-5">
-              <p className="text-secondary-blue mb-2 text-xs font-bold uppercase tracking-widest">
+              <p className="text-secondary-blue mb-2 text-xs font-bold uppercase">
                 {copy.kicker}
               </p>
               <h1 className="font-montserrat text-2xl font-semibold text-slate-950 sm:text-3xl">

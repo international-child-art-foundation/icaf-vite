@@ -24,7 +24,7 @@ export const Login = () => {
       <div className="content-w m-pad my-auto grid gap-8 lg:grid-cols-2 lg:items-stretch">
         <section className="border-1 border-secondary-yellow order-2 mx-auto w-full max-w-xl rounded-lg border bg-white p-6 text-slate-950 shadow-xl sm:p-8 lg:order-1 lg:mx-0 lg:flex lg:max-w-none lg:flex-col lg:justify-between">
           <div>
-            <p className="mb-3 text-sm font-bold uppercase tracking-widest text-slate-700">
+            <p className="mb-3 text-sm font-bold uppercase text-slate-700">
               New to ICAF?
             </p>
             <h2 className="font-montserrat text-3xl font-semibold sm:text-4xl">

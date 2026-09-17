@@ -323,7 +323,7 @@ export const ContactForm = ({
       <button
         type="submit"
         disabled={status === 'sending'}
-        className="mt-auto w-full rounded-full bg-yellow-400 px-6 py-3 text-center text-sm font-bold tracking-widest text-slate-900 transition hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:opacity-60"
+        className="mt-auto w-full rounded-full bg-yellow-400 px-6 py-3 text-center text-sm font-bold text-slate-900 transition hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:opacity-60"
       >
         {status === 'sending'
           ? config.submitLabelSending
@@ -358,8 +358,8 @@ export const ContactForm = ({
           </HeadingTag>
           <p className="text-2xl">{config.subtitle}</p>
           <p className="mt-4 text-xl text-slate-700">
-            If you are under the age of 13, please ask a parent to fill out
-            this form.
+            If you are under the age of 13, please ask a parent to fill out this
+            form.
           </p>
         </div>
 

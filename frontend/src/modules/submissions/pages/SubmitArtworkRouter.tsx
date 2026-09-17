@@ -206,7 +206,7 @@ export function SubmitArtworkRouter() {
             <div>
               <section className="p-4 sm:p-5">
                 <div className="mb-3">
-                  <p className="text-sm font-bold uppercase tracking-widest text-slate-500">
+                  <p className="text-sm font-bold uppercase text-slate-500">
                     First question
                   </p>
                   <h2 className="font-montserrat mt-1 text-xl font-bold text-slate-950 sm:text-2xl">
@@ -235,7 +235,7 @@ export function SubmitArtworkRouter() {
                 )}
               >
                 <div className="mb-3">
-                  <p className="text-sm font-bold uppercase tracking-widest text-slate-500">
+                  <p className="text-sm font-bold uppercase text-slate-500">
                     Second question
                   </p>
                   <h2 className="font-montserrat mt-1 text-xl font-bold text-slate-950 sm:text-2xl">

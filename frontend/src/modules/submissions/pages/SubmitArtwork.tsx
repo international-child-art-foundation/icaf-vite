@@ -653,7 +653,7 @@ export function SubmitArtwork() {
         >
           <div className="flex flex-col gap-6 rounded-lg border border-slate-200 bg-white p-4 shadow-xl sm:p-6">
             <div className="flex flex-col gap-2">
-              <p className="text-secondary-blue text-xs font-bold uppercase tracking-widest">
+              <p className="text-secondary-blue text-xs font-bold uppercase">
                 {copy.kicker}
               </p>
               <div>
@@ -860,7 +860,10 @@ export function SubmitArtwork() {
                 }
               />
               <span className="flex gap-2">
-                <Bell aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-slate-500" />
+                <Bell
+                  aria-hidden="true"
+                  className="mt-1 h-4 w-4 shrink-0 text-slate-500"
+                />
                 Send submission notifications for this artwork.
               </span>
             </label>

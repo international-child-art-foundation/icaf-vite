@@ -7,6 +7,7 @@ import { useRef } from 'react';
 import { TeamExtendedStaff } from '../components/team/TeamExtendedStaff';
 import { Seo } from '@/modules/content/components/shared/Seo';
 import { scrollToSection } from '@/utils/utils';
+import { YouthAdvisoryBoard } from '@/modules/content/components/team/YouthAdvisoryBoard';
 
 const teamMetadata = {
   title: 'Meet the ICAF Team — The People Behind Our Global Arts Mission',
@@ -28,6 +29,7 @@ export const Team = () => {
       <div ref={topRef} className="content-gap">
         <TeamHeader scrollFunction={handleScrollToStaff} />
         <TeamStaff staffData={staffData} />
+        <YouthAdvisoryBoard />
         <TeamExtendedStaff />
         <Creativity />
         <ScrollToTop targetRef={topRef} flairColor={'primaryBlue'} offset={0} />

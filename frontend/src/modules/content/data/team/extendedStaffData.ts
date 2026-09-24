@@ -10,13 +10,24 @@ export const creativeOfficerData: IGroupsAndMembers[] = [
     members: [{ name: 'Sarita Lewis', link: 'https://sarita-lewis.com/' }],
   },
   {
-    name: 'Creative Director',
+    name: 'Creative Directors',
     members: [
+      {
+        name: 'Jia Yu',
+      },
       {
         name: 'Mark Forton',
         link: 'https://mafmovement.com/',
       },
     ],
+  },
+  {
+    name: 'Graphic Designer',
+    members: [{ name: 'Zhiyao Ji' }],
+  },
+  {
+    name: 'Social Media',
+    members: [{ name: 'Alysa Harbilas' }],
   },
   {
     name: 'Videographer',

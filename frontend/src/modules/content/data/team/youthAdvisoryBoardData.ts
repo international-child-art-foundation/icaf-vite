@@ -67,7 +67,7 @@ export const youthAdvisoryBoardData: YouthAdvisoryBoardMember[] = [
     image: MandaDImg,
     name: 'Manda D.',
     location: 'Nebraska',
-    imagePosition: 'center 55%',
+    imagePosition: 'center 80%',
   },
   {
     image: MohammadManiRabieiImg,

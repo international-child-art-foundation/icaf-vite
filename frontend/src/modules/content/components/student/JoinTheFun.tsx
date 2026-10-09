@@ -21,7 +21,11 @@ export const JoinTheFun = () => {
                 <div
                   className={`mx-auto flex h-[100px] w-[100px] justify-center overflow-hidden rounded-full border-2 ${FlairColorMap[item.color].border}`}
                 >
-                  <img src={item.imgSrc} className="h-13 m-auto w-auto" />
+                  <img
+                    src={item.imgSrc}
+                    className="m-auto max-h-full max-w-full object-contain p-2"
+                    alt=""
+                  />
                 </div>
                 <h3 className="font-montserrat text-center text-[24px] font-semibold leading-[39px] md:text-[31px] lg:text-left">
                   {item.title}

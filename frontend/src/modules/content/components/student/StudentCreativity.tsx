@@ -5,7 +5,7 @@ export const StudentCreativity = () => {
   return (
     <div className="">
       <div className="flex flex-col gap-6 md:gap-10">
-        <div className="content-w m-pad">
+        <div className="content-w m-pad flex flex-col gap-6">
           <h2 className="font-montserrat text-[40px] font-extrabold leading-[48px]">
             Why Is Creativity Important?
           </h2>

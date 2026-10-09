@@ -1,7 +1,7 @@
 import { IProfessionalsHowToItem } from '@/modules/content/types/Professionals';
 import { WCF_SITE_URL } from '@/modules/content/utils/outboundLinks';
-import wcfLogo from '@/shared/assets/images/world-childrens-festival.webp';
-import aoLogo from '@/shared/assets/images/arts-olympiad-7-transparent.svg';
+import wcfLogo from '@/shared/assets/images/world-childrens-festival-8.webp';
+import aoLogo from '@/shared/assets/images/arts-olympiad-8.webp';
 import globe from '@/shared/assets/images/New-York-_Michael-Wong_---11.webp';
 import { linkClasses } from '../../../../shared/data/linkClasses';
 import yellowFirework from '@/shared/assets/images/yellowFirework.webp';
@@ -15,9 +15,9 @@ export const professionalsData: IProfessionalsHowToItem[] = [
         You can encourage your school to participate in the
         <Link to="/programs/arts-olympiad" className={linkClasses}>
           {' '}
-          7th Arts Olympiad{' '}
+          8th Arts Olympiad
         </Link>
-        in 2025.
+        .
       </p>
     ),
     imgSrc: aoLogo,
@@ -34,9 +34,9 @@ export const professionalsData: IProfessionalsHowToItem[] = [
           rel="noopener noreferrer"
           className={linkClasses}
         >
-          7th World Children's Festival
+          8th World Children's Festival
         </a>{' '}
-        in the summer of 2026 at the National Mall across the U.S. Capitol.
+        in the summer of 2030 at the National Mall across from the U.S. Capitol.
       </p>
     ),
     imgSrc: wcfLogo,

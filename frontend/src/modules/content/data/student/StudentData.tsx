@@ -4,9 +4,9 @@ import {
 } from '@/modules/content/types/StudentTypes';
 import { WCF_SITE_URL } from '@/modules/content/utils/outboundLinks';
 
-import artsOlympiadLogo from '@/modules/content/assets/student/7th Arts Olympiad logo.webp';
+import artsOlympiadLogo from '@/shared/assets/images/arts-olympiad-8.webp';
 import childArtLogo from '@/modules/content/assets/student/ChildArtLogo.webp';
-import ICAFLogo from '@/modules/content/assets/student/ICAFLogo.webp';
+import wcfLogo from '@/shared/assets/images/world-childrens-festival-8.webp';
 import fistBump from '@/modules/content/assets/student/fistBump.svg';
 import magnifyingGlass from '@/modules/content/assets/student/magnifyingGlass.svg';
 import puzzlePiece from '@/modules/content/assets/student/puzzlePiece.svg';
@@ -38,7 +38,7 @@ export const studentParticipationItems: IStudentParticipationItem[] = [
     title: (
       <>
         Participate in the{' '}
-        <span className="text-secondary-pink font-semibold">7th</span> Arts
+        <span className="text-secondary-pink font-semibold">8th</span> Arts
         Olympiad
       </>
     ),
@@ -70,12 +70,12 @@ export const studentParticipationItems: IStudentParticipationItem[] = [
     title: <>Experience the World Children’s Festival</>,
     forAges: 'For all ages',
     bodyText1:
-      'Meet creative kids from everywhere and share your art in Washington, D.C., this summer.',
+      'Meet creative kids from everywhere and share your art in Washington, D.C.',
     bodyText2: 'Want to go? Visit the website to sign up!',
     buttonText: 'Register for free',
     color: 'yellow',
     link: WCF_SITE_URL,
     isExternal: true,
-    imgSrc: ICAFLogo,
+    imgSrc: wcfLogo,
   },
 ];

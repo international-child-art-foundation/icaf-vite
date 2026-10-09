@@ -8,9 +8,9 @@ export interface DonationUsageCard {
   redirectTo: string;
 }
 
-import artsOlympiadLogo from '@/modules/content/assets/donate/DonationUsageOrg-7thArtsOlympiadLogo.png';
+import artsOlympiadLogo from '@/shared/assets/images/arts-olympiad-8.webp';
 import childArtMagazine from '@/modules/content/assets/donate/DonationUsageOrg-ChildArtMagazine.png';
-import worldChildrensFestival from '@/modules/content/assets/donate/DonationUsageOrg-WCF.png';
+import worldChildrensFestival from '@/shared/assets/images/world-childrens-festival-8.webp';
 
 export const donationUsageData: DonationUsageCard[] = [
   {
@@ -33,7 +33,7 @@ export const donationUsageData: DonationUsageCard[] = [
   },
   {
     id: 'world-childrens-festival',
-    title: 'World Childrens Festival',
+    title: 'World Children’s Festival',
     description:
       'A global celebration of young talent, hosted every four years at the U.S. National Mall. Free and open to all.',
     icon: worldChildrensFestival,

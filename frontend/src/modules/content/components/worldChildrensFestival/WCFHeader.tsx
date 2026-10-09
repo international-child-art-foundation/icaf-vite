@@ -4,11 +4,6 @@ import { CurvedImage } from '@/shared/components/CurvedImage';
 import { useWindowSize } from 'usehooks-ts';
 import { Button } from '../../../../shared/components/ui/button';
 
-//notes:  Used the same gradient as on homepage.  Check the p text size
-/**
- * This component is the header/hero for the programs/world children's festival page.
- * Includes a gradient across the image, text, and a button that opens the World Children's Festival website.
- */
 export default function WCFHeader() {
   const size = useWindowSize();
   const gradientXL =
@@ -61,7 +56,7 @@ export default function WCFHeader() {
           </h3>
           <p className="mb-2 text-base font-normal md:mb-4 md:text-xl xl:mb-6">
             Every four years, the World Children's Festival (WCF) turns the
-            National Mall across from the U.S Capitol into a global stage for a
+            National Mall across from the U.S. Capitol into a global stage for a
             three-day celebration of creativity, empathy, and unity. More than a
             festival, it's a movement—empowering children through art,
             education, and collaboration.
@@ -75,11 +70,7 @@ export default function WCFHeader() {
             The 7th WCF was held on July 25-27, 2026. The 8th WCF will take
             place in the summer of 2030.
           </p>
-          <a
-            href={WCF_SITE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href={WCF_SITE_URL} target="_blank" rel="noopener noreferrer">
             <Button
               variant="secondary"
               className="h-14 w-[225px] rounded-full text-base font-semibold 2xl:w-[270px]"

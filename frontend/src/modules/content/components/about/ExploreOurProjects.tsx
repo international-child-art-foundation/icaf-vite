@@ -5,7 +5,7 @@ import {
 } from '../../../../shared/components/ui/card';
 import Poster from '@/modules/content/assets/about/map-video-cover.webp';
 import { FavoriteSportLogo } from '@/modules/content/assets/about/FavoriteSportLogo';
-import WorldChildrensFestivalLogo from '@/modules/content/assets/about/7th WCF.png';
+import WorldChildrensFestivalLogo from '@/shared/assets/images/world-childrens-festival-8.webp';
 import { WCF_SITE_URL } from '@/modules/content/utils/outboundLinks';
 import { ChevronRight } from 'lucide-react';
 import { VideoWrapper } from '../shared/VideoWrapper';

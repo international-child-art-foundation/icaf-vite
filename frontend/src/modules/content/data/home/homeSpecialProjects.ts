@@ -8,9 +8,9 @@ export const specialProjectData: TSpecialProjectGroup = [
   {
     id: 1,
     image: Wcf,
-    title: '7th World Children’s Festival ',
+    title: '8th World Children’s Festival',
     description:
-      "A three-day celebration of children's creativity and America's 250th anniversary on the National Mall",
+      "A three-day celebration of children's creativity in the summer of 2030 on the National Mall",
     href: WCF_SITE_URL,
     color: 'red',
   },

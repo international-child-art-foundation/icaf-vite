@@ -1,5 +1,5 @@
 import ArtsOlympiadHero from '@/modules/content/assets/artsOlympiad/arts-olympiad-hero.webp';
-import ArtsOlympiadTorch from '@/shared/assets/images/arts-olympiad-7-transparent.svg';
+import ArtsOlympiadTorch from '@/shared/assets/images/arts-olympiad-8.webp';
 import ArtsOlympiadColoring from '@/modules/content/assets/artsOlympiad/arts-olympiad-coloring.webp';
 import ArtsOlympiadPainting from '@/modules/content/assets/artsOlympiad/arts-olympiad-painting.webp';
 import { ArtsOlympiadHelpfulLinks } from '@/modules/content/components/artsOlympiad/ArtsOlympiadHelpfulLinks';
@@ -7,8 +7,7 @@ import { PageBottomSpacer } from '@/modules/content/components/shared/PageBottom
 import { Seo } from '@/modules/content/components/shared/Seo';
 
 const artsOlympiadMetadata = {
-  title:
-    "The Arts Olympiad — ICAF's Global Children's Art Competition",
+  title: "The Arts Olympiad — ICAF's Global Children's Art Competition",
   description:
     "The Arts Olympiad is ICAF's flagship school art program, inviting children worldwide to express creativity and cultural understanding through artistic competition.",
   path: '/programs/arts-olympiad',
@@ -54,7 +53,7 @@ export const ArtsOlympiad = () => {
             <div className="flex items-start justify-center md:justify-start">
               <img
                 src={ArtsOlympiadTorch}
-                alt="7th Arts Olympiad emblem"
+                alt="8th Arts Olympiad emblem"
                 className="h-40 w-40 object-contain sm:h-48 sm:w-48"
               />
             </div>
@@ -153,7 +152,7 @@ export const ArtsOlympiad = () => {
             <div className="flex items-start justify-center md:justify-start">
               <img
                 src={ArtsOlympiadTorch}
-                alt="7th Arts Olympiad emblem"
+                alt="8th Arts Olympiad emblem"
                 className="h-40 w-40 object-contain sm:h-48 sm:w-48"
               />
             </div>

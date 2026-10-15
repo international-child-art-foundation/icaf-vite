@@ -1,6 +1,7 @@
+import AashniSridharImg from '@/modules/content/assets/team/youth-advisory-board/aashni-sridhar.webp';
+import AdaezeFavourOnwubikoImg from '@/modules/content/assets/team/youth-advisory-board/adaeze-favour-onwubiko.webp';
 import AnwitaBImg from '@/modules/content/assets/team/youth-advisory-board/anwita-b.webp';
 import DairaMinhyeChoiImg from '@/modules/content/assets/team/youth-advisory-board/daira-minhye-choi.webp';
-import FeverAdaezeEhubechukwuOnwubikoImg from '@/modules/content/assets/team/youth-advisory-board/fever-adaeze-ehubechukwu-onwubiko.webp';
 import GraceRuiyangGImg from '@/modules/content/assets/team/youth-advisory-board/grace-ruiyang-g.webp';
 import IvanZaklyazminskiyImg from '@/modules/content/assets/team/youth-advisory-board/ivan-zaklyazminskiy.webp';
 import IvankaLexiImg from '@/modules/content/assets/team/youth-advisory-board/ivanka-lexi.webp';
@@ -8,6 +9,7 @@ import JessicaYImg from '@/modules/content/assets/team/youth-advisory-board/jess
 import KellyKImg from '@/modules/content/assets/team/youth-advisory-board/kelly-k.webp';
 import MandaDImg from '@/modules/content/assets/team/youth-advisory-board/manda-d.webp';
 import MohammadManiRabieiImg from '@/modules/content/assets/team/youth-advisory-board/mohammad-mani-rabiei.webp';
+import MuhammadZayyanSaeedImg from '@/modules/content/assets/team/youth-advisory-board/muhammad-zayyan-saeed.webp';
 
 export interface YouthAdvisoryBoardMember {
   image: string;
@@ -20,6 +22,16 @@ export interface YouthAdvisoryBoardMember {
 
 export const youthAdvisoryBoardData: YouthAdvisoryBoardMember[] = [
   {
+    image: AashniSridharImg,
+    name: 'Aashni Sridhar',
+    location: 'Georgia',
+  },
+  {
+    image: AdaezeFavourOnwubikoImg,
+    name: 'Adaeze Favour Onwubiko',
+    location: 'Nigeria',
+  },
+  {
     image: AnwitaBImg,
     name: 'Anwita B.',
     location: 'California',
@@ -29,11 +41,6 @@ export const youthAdvisoryBoardData: YouthAdvisoryBoardMember[] = [
     image: DairaMinhyeChoiImg,
     name: 'Daira Minhye Choi',
     location: 'Argentina',
-  },
-  {
-    image: FeverAdaezeEhubechukwuOnwubikoImg,
-    name: 'Fever Adaeze Ehubechukwu Onwubiko',
-    location: 'Nigeria',
   },
   {
     image: GraceRuiyangGImg,
@@ -67,12 +74,17 @@ export const youthAdvisoryBoardData: YouthAdvisoryBoardMember[] = [
     image: MandaDImg,
     name: 'Manda D.',
     location: 'Nebraska',
-    imagePosition: 'center 80%',
+    imagePosition: 'center 20%',
   },
   {
     image: MohammadManiRabieiImg,
     name: 'Mohammad Mani Rabiei',
     location: 'Iran',
     link: 'https://mohammadmanirabiei.ir/',
+  },
+  {
+    image: MuhammadZayyanSaeedImg,
+    name: 'Muhammad Zayyan Saeed',
+    location: 'Pakistan',
   },
 ];

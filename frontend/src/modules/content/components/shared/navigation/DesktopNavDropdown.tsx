@@ -90,16 +90,24 @@ const DesktopNavDropdown: FC<DesktopNavDropdownProps> = ({
                     } group-hover:opacity-60`}
                   />
 
-                  <div className="col-start-1 row-start-1 flex flex-col justify-end overflow-hidden p-8">
+                  <div
+                    className={`col-start-1 row-start-1 flex flex-col justify-end overflow-hidden ${
+                      item.key === 'get-involved' ? 'p-4 2xl:p-6' : 'p-8'
+                    }`}
+                  >
                     <div
                       className={`flex flex-col transition-transform duration-300 ease-out group-hover:translate-y-0 ${
-                        item.key === 'programs'
+                        item.key === 'programs' || item.key === 'get-involved'
                           ? 'translate-y-[calc(100%-5rem)]'
                           : 'translate-y-[calc(100%-3rem)]'
                       }`}
                     >
                       <p
-                        className={`text-text-inverse flex items-center text-2xl font-bold leading-[1.4] tracking-wide ${
+                        className={`text-text-inverse flex items-center font-bold leading-[1.4] tracking-wide ${
+                          item.key === 'get-involved'
+                            ? 'text-xl 2xl:text-2xl'
+                            : 'text-2xl'
+                        } ${
                           item.children?.length != undefined &&
                           item.children?.length > 3
                             ? 'xl:max-w-48'

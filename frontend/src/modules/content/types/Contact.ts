@@ -1,4 +1,10 @@
-export type ContactFormId = 'contact-us' | 'volunteer' | 'professionals';
+export type TributeFormId = 'art-lovers' | 'in-loving-memory';
+
+export type ContactFormId =
+  | 'contact-us'
+  | 'volunteer'
+  | 'professionals'
+  | TributeFormId;
 
 export type ContactFieldKind = 'input' | 'textarea';
 

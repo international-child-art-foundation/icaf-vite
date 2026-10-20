@@ -28,6 +28,7 @@ const About = lazy(() => import('./modules/content/pages/About'));
 const ChildArtPage = lazy(() => import('./modules/content/pages/ChildArtPage'));
 const Impact = lazy(() => import('./modules/content/pages/Impact'));
 const Donate = lazy(() => import('./modules/content/pages/Donate'));
+const TributeGiving = lazy(() => import('./modules/content/pages/TributeGiving'));
 const WorldChildrensFestival = lazy(
   () => import('./modules/content/pages/WorldChildrensFestivalPage'),
 );
@@ -230,6 +231,14 @@ export default function App() {
               <Route path="/about/history" element={<History />} />
 
               <Route path="/donate" element={<Donate />} />
+              <Route
+                path="/get-involved/art-lovers"
+                element={<TributeGiving kind="art-lovers" />}
+              />
+              <Route
+                path="/get-involved/in-loving-memory"
+                element={<TributeGiving kind="in-loving-memory" />}
+              />
               <Route path="/sponsorship" element={<Sponsorship />} />
               <Route path="/access" element={<MagazineAccess />} />
               <Route path="/contact" element={<Contact />} />

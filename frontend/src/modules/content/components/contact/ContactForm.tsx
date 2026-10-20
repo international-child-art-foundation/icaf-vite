@@ -107,6 +107,10 @@ async function postContact(
     expertise: messageParts.expertise,
     contribution: messageParts.contribution,
     motivation: messageParts.motivation,
+    honoreeName: messageParts.honoreeName,
+    recipientEmail: messageParts.recipientEmail,
+    occasion: messageParts.occasion,
+    relationship: messageParts.relationship,
     website,
   });
 }

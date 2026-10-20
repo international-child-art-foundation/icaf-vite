@@ -26,7 +26,7 @@ export const specialProjectData: TSpecialProjectGroup = [
   {
     id: 3,
     image: Phoenix,
-    title: 'VR Heaven 2026',
+    title: 'VR Heaven 2030',
     description: 'Virtual Reality that brings Heaven to Earth',
     color: 'yellow',
   },

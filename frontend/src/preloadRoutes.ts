@@ -55,6 +55,12 @@ const routePreloaders: Partial<Record<string, Preloader>> = {
   '/donate': () => {
     void import('./modules/content/pages/Donate');
   },
+  '/get-involved/art-lovers': () => {
+    void import('./modules/content/pages/TributeGiving');
+  },
+  '/get-involved/in-loving-memory': () => {
+    void import('./modules/content/pages/TributeGiving');
+  },
   '/sponsorship': () => {
     void import('./modules/content/pages/Sponsorship');
   },

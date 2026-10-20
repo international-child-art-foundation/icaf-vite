@@ -73,6 +73,14 @@ export const routes: RouteAliasGroup[] = [
     aliases: ['/donations', '/donation'],
   },
   {
+    main: '/get-involved/art-lovers',
+    aliases: ['/art-lovers', '/art-lovers.html'],
+  },
+  {
+    main: '/get-involved/in-loving-memory',
+    aliases: ['/in-loving-memory', '/in-loving-memory.html'],
+  },
+  {
     main: '/sponsorship',
     aliases: ['/sponsor', '/sponsorships'],
   },

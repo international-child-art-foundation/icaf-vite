@@ -19,6 +19,10 @@ type ContactRequest = {
   expertise?: unknown;
   contribution?: unknown;
   motivation?: unknown;
+  honoreeName?: unknown;
+  recipientEmail?: unknown;
+  occasion?: unknown;
+  relationship?: unknown;
   age_13_or_older?: unknown;
   website?: unknown;
 };
@@ -28,6 +32,8 @@ const CONTACT_TYPES = new Set<ContactNotificationKind>([
   "volunteer",
   "professionals",
   "subscribe",
+  "art-lovers",
+  "in-loving-memory",
 ]);
 
 const MAX_LENGTHS = {
@@ -39,6 +45,10 @@ const MAX_LENGTHS = {
   expertise: 1000,
   contribution: 1000,
   motivation: 1500,
+  honoreeName: 100,
+  recipientEmail: 254,
+  occasion: 200,
+  relationship: 200,
 } as const;
 
 function readString(value: unknown, maxLength: number): string {
@@ -72,13 +82,18 @@ export const handler = async (event: ApiGatewayEvent) => {
 
     const name = readString(parsedBody.value.name, MAX_LENGTHS.name);
     const email = readString(parsedBody.value.email, MAX_LENGTHS.email);
-    const subject = readString(parsedBody.value.subject, MAX_LENGTHS.subject);
+    let subject = readString(parsedBody.value.subject, MAX_LENGTHS.subject);
     const message = readString(parsedBody.value.message, MAX_LENGTHS.message);
     const organization = readString(parsedBody.value.organization, MAX_LENGTHS.organization);
     const expertise = readString(parsedBody.value.expertise, MAX_LENGTHS.expertise);
     const contribution = readString(parsedBody.value.contribution, MAX_LENGTHS.contribution);
     const motivation = readString(parsedBody.value.motivation, MAX_LENGTHS.motivation);
     const age13OrOlder = parsedBody.value.age_13_or_older === true;
+    const isTribute = type === "art-lovers" || type === "in-loving-memory";
+    const honoreeName = readString(parsedBody.value.honoreeName, MAX_LENGTHS.honoreeName);
+    const recipientEmail = readString(parsedBody.value.recipientEmail, MAX_LENGTHS.recipientEmail);
+    const occasion = readString(parsedBody.value.occasion, MAX_LENGTHS.occasion);
+    const relationship = readString(parsedBody.value.relationship, MAX_LENGTHS.relationship);
 
     if (!email || !isValidEmail(email)) {
       return CommonErrors.badRequest("A valid email address is required");
@@ -88,6 +103,20 @@ export const handler = async (event: ApiGatewayEvent) => {
       if (!age13OrOlder) {
         return CommonErrors.badRequest("Newsletter signup requires age confirmation");
       }
+    } else if (isTribute) {
+      if (!honoreeName || !message) {
+        return CommonErrors.badRequest("Honoree name and message are required");
+      }
+      if (!recipientEmail || !isValidEmail(recipientEmail)) {
+        return CommonErrors.badRequest("A valid recipient email address is required");
+      }
+      if (type === "art-lovers" && (!name || !occasion)) {
+        return CommonErrors.badRequest("Your name and the occasion are required");
+      }
+      if (type === "in-loving-memory" && !relationship) {
+        return CommonErrors.badRequest("The family member’s relationship to the deceased is required");
+      }
+      subject = honoreeName;
     } else if (!name || !message) {
       return CommonErrors.badRequest("Name and message are required");
     }
@@ -103,6 +132,15 @@ export const handler = async (event: ApiGatewayEvent) => {
       { label: "Motivation", value: motivation },
       { label: "Age 13 or older", value: type === "subscribe" ? String(age13OrOlder) : "" },
     ];
+
+    if (isTribute) {
+      fields.push(
+        { label: type === "art-lovers" ? "Art Lover" : "In loving memory of", value: honoreeName },
+        { label: type === "art-lovers" ? "Art Lover’s email" : "Family member’s email", value: recipientEmail },
+        { label: "On the occasion of", value: type === "art-lovers" ? occasion : "" },
+        { label: "Relationship of family member to the deceased", value: type === "in-loving-memory" ? relationship : "" },
+      );
+    }
 
     const messageId = await sendContactNotificationEmail({
       kind: type,

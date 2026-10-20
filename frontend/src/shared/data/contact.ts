@@ -1,5 +1,6 @@
 import ContactImg from '@/modules/content/assets/contact/contact-us.webp';
 import redBlueFirework from '@/shared/assets/images/RedBlueFirework.svg';
+import { tributeFormConfigs } from '@/modules/content/data/tributeGiving';
 import type {
   ContactFormConfig,
   ContactField,
@@ -136,6 +137,7 @@ const professionalsFields: readonly ContactField[] = [
 ] as const;
 
 export const contactFormConfigs: Record<ContactFormId, ContactFormConfig> = {
+  ...tributeFormConfigs,
   'contact-us': {
     id: 'contact-us',
     layout: 'contact-us',

@@ -17,7 +17,9 @@ export type ContactNotificationKind =
   | "contact-us"
   | "volunteer"
   | "professionals"
-  | "subscribe";
+  | "subscribe"
+  | "art-lovers"
+  | "in-loving-memory";
 
 export type ContactNotificationField = {
   label: string;
@@ -29,6 +31,8 @@ const kindLabels: Record<ContactNotificationKind, string> = {
   volunteer: "Volunteer",
   professionals: "Professionals & Partners",
   subscribe: "Newsletter Signup",
+  "art-lovers": "Art Lovers",
+  "in-loving-memory": "In Loving Memory",
 };
 
 export async function sendContactNotificationEmail(args: {

@@ -1,4 +1,5 @@
 import { ArrowUp, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { childArtExhibition } from '@/modules/content/data/donate/childArtExhibitionData';
 import DonationUsageOrgCards from '@/modules/content/components/donate/DonationUsageOrgCards';
 import QuoteBanner from '@/modules/content/components/donate/QuoteBanner';
@@ -53,6 +54,23 @@ export default function Donate() {
       <Seo {...donateMetadata} />
       <div className="content-gap overflow-hidden">
         <DonationHeader />
+        <div className="breakout-w m-pad text-center text-xl leading-relaxed md:text-2xl">
+          You can honor an{' '}
+          <Link
+            to="/get-involved/art-lovers"
+            className="font-semibold text-primary underline underline-offset-4"
+          >
+            Art Lover
+          </Link>{' '}
+          or contribute in{' '}
+          <Link
+            to="/get-involved/in-loving-memory"
+            className="font-semibold text-primary underline underline-offset-4"
+          >
+            Loving Memory
+          </Link>{' '}
+          of someone special.
+        </div>
         {/* About ICAF */}
         <div className="breakout-w m-pad flex flex-col gap-10">
           <h2 className="mx-auto mb-3 text-center text-3xl font-bold text-black md:text-4xl">

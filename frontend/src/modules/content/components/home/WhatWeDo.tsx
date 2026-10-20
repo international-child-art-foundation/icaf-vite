@@ -1,7 +1,6 @@
 import soccer from '@/modules/content/assets/home/circle-images/soccer.webp';
 import globeKids from '@/modules/content/assets/home/circle-images/globe-kids.webp';
 import redBlueFirework from '@/shared/assets/images/RedBlueFirework.svg';
-import DonateButton from '../../../../shared/components/ui/donateButton';
 
 const WhatWeDo = () => {
   return (
@@ -63,7 +62,6 @@ const WhatWeDo = () => {
             </div>
           </div>
         </div>
-        <DonateButton text="Donate to our Campaign" />
       </div>
     </div>
   );

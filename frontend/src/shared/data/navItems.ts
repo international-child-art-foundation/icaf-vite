@@ -17,6 +17,8 @@ import board from '@/shared/assets/images/icafGroupPhoto.webp';
 import wca from '@/shared/assets/images/navigation/programs/worldChildrensAward.webp';
 import researchAndPublications from '@/shared/assets/images/UnitedStatesSLKorth.webp';
 import submitArtwork from '@/shared/assets/images/navigation/getInvolved/submitArtwork.webp';
+import artLovers from '@/modules/content/assets/tributeGiving/art-love1.png';
+import inLovingMemory from '@/modules/content/assets/tributeGiving/in-loving-memory.png';
 
 export interface NavChild {
   label: string;
@@ -165,6 +167,18 @@ export const navItems: NavItem[] = [
         href: '/submit-artwork',
         imageSrc: submitArtwork,
         hoverDescription: "Feature your child's artwork in the ICAF gallery.",
+      },
+      {
+        label: 'Art Lovers',
+        href: '/get-involved/art-lovers',
+        imageSrc: artLovers,
+        hoverDescription: 'Honor someone special with a donation to ICAF.',
+      },
+      {
+        label: 'In Loving Memory',
+        href: '/get-involved/in-loving-memory',
+        imageSrc: inLovingMemory,
+        hoverDescription: 'Remember a loved one while bringing hope to children.',
       },
       // {
       //   label: 'Upcoming Events',

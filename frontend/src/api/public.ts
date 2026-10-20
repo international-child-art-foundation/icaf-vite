@@ -256,7 +256,13 @@ export function initiateTakedown(
 }
 
 export type ContactMessageRequest = {
-  type: 'contact-us' | 'volunteer' | 'professionals' | 'subscribe';
+  type:
+    | 'contact-us'
+    | 'volunteer'
+    | 'professionals'
+    | 'subscribe'
+    | 'art-lovers'
+    | 'in-loving-memory';
   name?: string;
   email: string;
   subject?: string;
@@ -265,6 +271,10 @@ export type ContactMessageRequest = {
   expertise?: string;
   contribution?: string;
   motivation?: string;
+  honoreeName?: string;
+  recipientEmail?: string;
+  occasion?: string;
+  relationship?: string;
   age_13_or_older?: boolean;
   website?: string;
 };

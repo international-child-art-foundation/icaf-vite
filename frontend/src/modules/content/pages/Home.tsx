@@ -1,8 +1,8 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import HomeHeader from '@/modules/content/components/home/HomeHeader';
 import { Activities } from '@/modules/content/components/home/Activities';
-import { HomeImpact } from '@/modules/content/components/home/HomeImpact';
-import MissionVision from '@/modules/content/components/home/MissionVision';
+// import { HomeImpact } from '@/modules/content/components/home/HomeImpact';
+import HomePurpose from '@/modules/content/components/home/HomePurpose';
 import WhatWeDo from '@/modules/content/components/home/WhatWeDo';
 import { bannerItems } from '@/modules/content/data/home/homeBannerImages';
 import { BannerImageCarousel } from '@/modules/content/components/home/BannerImageCarousel';
@@ -10,6 +10,7 @@ import { HomeActivities } from '@/modules/content/data/home/homeActivitySection'
 import { Seo } from '@/modules/content/components/shared/Seo';
 import { NewsletterSignup } from '@/modules/content/components/home/NewsletterSignup';
 import { SpecialProjects } from '@/modules/content/components/home/SpecialProjects';
+import { JoinTheMovement } from '@/modules/content/components/home/JoinTheMovement';
 
 const HomeCarousel = lazy(() =>
   import('@/modules/content/components/home/HomeCarousel').then((m) => ({
@@ -76,11 +77,12 @@ export default function Home() {
       <Seo {...homeMetadata} />
       <div className="content-gap relative">
         <HomeHeader />
-        <MissionVision />
+        <HomePurpose />
         <BannerImageCarousel items={bannerItems} displayMs={3000} />
         <WhatWeDo />
         <Activities activityPairs={HomeActivities} />
-        <HomeImpact />
+        {/* <HomeImpact /> */}
+        <JoinTheMovement />
         <SpecialProjects />
         <NewsletterSignup />
         <HomeCarouselWhenVisible />

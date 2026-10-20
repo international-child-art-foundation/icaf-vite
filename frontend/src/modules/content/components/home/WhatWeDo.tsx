@@ -41,8 +41,7 @@ const WhatWeDo = () => {
                 01
               </p>
               <p className="font-sans text-xl text-black lg:text-center">
-                Through free school art programs, we motivate students to
-                embrace the role of "artist-athletes," nurturing creative minds
+                Inspire children to become "artist-athletes" with creative minds
                 and healthy bodies.
               </p>
             </div>
@@ -55,9 +54,9 @@ const WhatWeDo = () => {
                 02
               </p>
               <p className="font-sans text-xl text-black lg:text-center">
-                Through festivals, interactive exhibitions, and ChildArt
-                magazine, we inspire students to become "creative-empaths,"
-                promoting self-improvement and social contribution.
+                Motivate them to blend their creativity with empathy to become
+                "creative- empaths" work who work together to transform our
+                wounded world into a wondrous one.
               </p>
             </div>
           </div>

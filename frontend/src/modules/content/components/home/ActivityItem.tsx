@@ -1,5 +1,6 @@
 import { IActivityItem } from '@/modules/content/types/HomeActivities';
 import { CircleArrowUp, CircleArrowDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface ActivityItemProps {
   item: IActivityItem;
@@ -10,7 +11,7 @@ interface ActivityItemProps {
 export const ActivityItem = ({ item, expanded, toggle }: ActivityItemProps) => {
   const commonProps = {
     className:
-      'grid cursor-pointer grid-cols-1 grid-rows-1 overflow-hidden rounded-[40px]',
+      'grid grid-cols-1 grid-rows-1 overflow-hidden rounded-[40px]',
     onMouseEnter: () => toggle(item.id),
   };
 
@@ -51,6 +52,19 @@ export const ActivityItem = ({ item, expanded, toggle }: ActivityItemProps) => {
       ></div>
     </>
   );
+
+  if (item.href) {
+    return (
+      <Link
+        {...commonProps}
+        to={item.href}
+        onFocus={() => toggle(item.id)}
+        className={`${commonProps.className} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-white`}
+      >
+        {content}
+      </Link>
+    );
+  }
 
   return <div {...commonProps}>{content}</div>;
 };

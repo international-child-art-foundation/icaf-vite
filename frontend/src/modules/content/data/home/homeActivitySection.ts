@@ -13,12 +13,14 @@ export const HomeActivities: IActivitySection = [
     {
       id: 1,
       title: 'The Arts Olympiad*',
+      href: '/programs/arts-olympiad',
       description: 'The world’s most extensive school art program.',
       img: olympiadImage,
     },
     {
       id: 2,
       title: 'Peace through Art',
+      href: '/programs/peace-through-art',
       description: 'Restore trust in humanity of children in conflict zones.',
       img: craftsImage,
     },
@@ -27,6 +29,7 @@ export const HomeActivities: IActivitySection = [
     {
       id: 3,
       title: 'World Children’s Festival',
+      href: '/programs/world-childrens-festival',
       description: 'At the National Mall across the U.S. Capitol.',
       img: capitolImage,
     },
@@ -41,6 +44,7 @@ export const HomeActivities: IActivitySection = [
     {
       id: 5,
       title: 'ChildArt Magazine',
+      href: '/programs/childart-magazine',
       description:
         'An arts learning, new skill development, and global competency publication.',
       img: magazineImage,
@@ -48,6 +52,7 @@ export const HomeActivities: IActivitySection = [
     {
       id: 6,
       title: 'World Children’s Award',
+      href: '/programs/world-childrens-award',
       description: 'Children choose to honor supporters and champions.',
       img: presentationImage,
     },
@@ -56,6 +61,7 @@ export const HomeActivities: IActivitySection = [
     {
       id: 7,
       title: 'Healing Arts',
+      href: '/programs/healing-arts',
       description:
         'Revive faith in nature of child victims of natural disasters.',
       img: heartImage,
@@ -63,6 +69,7 @@ export const HomeActivities: IActivitySection = [
     {
       id: 8,
       title: 'Research & Publications',
+      href: '/about/research-and-publications',
       description:
         'Share with professionals what we have learned from and about children.',
       img: environmentImage,

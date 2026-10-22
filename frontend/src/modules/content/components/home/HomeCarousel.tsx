@@ -98,10 +98,12 @@ export const HomeCarousel = () => {
                   key={cover.id}
                   className="basis-full pl-4 sm:basis-1/2 lg:basis-1/3 xl:basis-[25%]"
                 >
-                  <div className="w-full overflow-hidden rounded-md shadow-md">
+                  {/* Match the original 720×405 photos regardless of source dimensions. */}
+                  <div className="aspect-video w-full overflow-hidden rounded-md shadow-md">
                     <img
                       src={cover.image}
-                      className="w-full object-cover"
+                      className="h-full w-full object-cover"
+                      style={{ objectPosition: cover.objectPosition ?? 'center' }}
                       alt=""
                       loading="lazy"
                       decoding="async"

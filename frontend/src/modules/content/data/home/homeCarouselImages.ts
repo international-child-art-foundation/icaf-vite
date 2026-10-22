@@ -1,41 +1,29 @@
-import { TCarouselImages } from '@/modules/content/types/HomeCarousel';
+import type { TCarouselImages } from '@/modules/content/types/HomeCarousel';
 
-import carouselImg1 from '@/modules/content/assets/home/carousel/CarouselImage1.webp';
-import carouselImg2 from '@/modules/content/assets/home/carousel/CarouselImage2.webp';
-import carouselImg3 from '@/modules/content/assets/home/carousel/CarouselImage3.webp';
-import carouselImg4 from '@/modules/content/assets/home/carousel/CarouselImage4.webp';
-import carouselImg5 from '@/modules/content/assets/home/carousel/CarouselImage5.webp';
-import carouselImg6 from '@/modules/content/assets/home/carousel/CarouselImage6.webp';
-import carouselImg7 from '@/modules/content/assets/home/carousel/CarouselImage7.webp';
-import carouselImg8 from '@/modules/content/assets/home/carousel/CarouselImage8.webp';
-import carouselImg9 from '@/modules/content/assets/home/carousel/CarouselImage9.webp';
-import carouselImg10 from '@/modules/content/assets/home/carousel/CarouselImage10.webp';
-import carouselImg11 from '@/modules/content/assets/home/carousel/CarouselImage11.webp';
-import carouselImg12 from '@/modules/content/assets/home/carousel/CarouselImage12.webp';
-import carouselImg13 from '@/modules/content/assets/home/carousel/CarouselImage13.webp';
-import carouselImg14 from '@/modules/content/assets/home/carousel/CarouselImage14.webp';
-import carouselImg15 from '@/modules/content/assets/home/carousel/CarouselImage15.webp';
-import carouselImg16 from '@/modules/content/assets/home/carousel/CarouselImage16.webp';
-import carouselImg17 from '@/modules/content/assets/home/carousel/CarouselImage17.webp';
-import carouselImg18 from '@/modules/content/assets/home/carousel/CarouselImage18.webp';
+import landingPhotoA from '@/modules/content/assets/home/carousel/LandingPhotoA.webp';
+import landingPhotoB from '@/modules/content/assets/home/carousel/LandingPhotoB.webp';
+import landingPhotoC from '@/modules/content/assets/home/carousel/LandingPhotoC.webp';
+import landingPhotoD from '@/modules/content/assets/home/carousel/LandingPhotoD.webp';
+import landingPhotoE from '@/modules/content/assets/home/carousel/LandingPhotoE.webp';
+import landingPhotoF from '@/modules/content/assets/home/carousel/LandingPhotoF.webp';
+import landingPhotoG from '@/modules/content/assets/home/carousel/LandingPhotoG.webp';
+import landingPhotoH from '@/modules/content/assets/home/carousel/LandingPhotoH.webp';
+import landingPhotoI from '@/modules/content/assets/home/carousel/LandingPhotoI.webp';
+import landingPhotoJ from '@/modules/content/assets/home/carousel/LandingPhotoJ.webp';
+import landingPhotoK from '@/modules/content/assets/home/carousel/LandingPhotoK.webp';
+import landingPhotoL from '@/modules/content/assets/home/carousel/LandingPhotoL.webp';
 
 export const carouselImages: TCarouselImages = [
-  { id: 1, image: carouselImg1 },
-  { id: 2, image: carouselImg2 },
-  { id: 3, image: carouselImg3 },
-  { id: 4, image: carouselImg4 },
-  { id: 5, image: carouselImg5 },
-  { id: 6, image: carouselImg6 },
-  { id: 7, image: carouselImg7 },
-  { id: 8, image: carouselImg8 },
-  { id: 9, image: carouselImg9 },
-  { id: 10, image: carouselImg10 },
-  { id: 11, image: carouselImg11 },
-  { id: 12, image: carouselImg12 },
-  { id: 13, image: carouselImg13 },
-  { id: 14, image: carouselImg14 },
-  { id: 15, image: carouselImg15 },
-  { id: 16, image: carouselImg16 },
-  { id: 17, image: carouselImg17 },
-  { id: 18, image: carouselImg18 },
+  { id: 1, image: landingPhotoA },
+  { id: 2, image: landingPhotoB },
+  { id: 3, image: landingPhotoC, objectPosition: '50% 35%' },
+  { id: 4, image: landingPhotoD },
+  { id: 5, image: landingPhotoE, objectPosition: '50% 30%' },
+  { id: 6, image: landingPhotoF, objectPosition: '50% 25%' },
+  { id: 7, image: landingPhotoG, objectPosition: '50% 25%' },
+  { id: 8, image: landingPhotoH },
+  { id: 9, image: landingPhotoI },
+  { id: 10, image: landingPhotoJ, objectPosition: '50% 35%' },
+  { id: 11, image: landingPhotoK },
+  { id: 12, image: landingPhotoL, objectPosition: '50% 35%' },
 ];

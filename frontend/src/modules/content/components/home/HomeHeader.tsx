@@ -26,18 +26,16 @@ const HomeHeader = () => {
 
   return (
     <div className="site-w grid grid-cols-1 grid-rows-1">
-      <div className="hero-w font-montserrat z-10 col-start-1 row-start-1 mt-8 flex flex-col gap-4 pt-10 text-3xl font-extrabold text-white md:mt-20 md:text-4xl lg:mt-28 lg:text-6xl">
-        <h1 className="block">
-          <span className="block">Welcome to ICAF</span>
+      <div className="hero-w font-montserrat z-10 col-start-1 row-start-1 mt-8 flex flex-col gap-4 pt-10 font-extrabold text-white md:mt-20 lg:mt-28">
+        <h1 className="block text-4xl md:text-5xl lg:text-7xl">
+          <span className="block">Find Your</span>
           <span className="text-tertiary-yellow block [text-shadow:1px_1px_5px_rgba(0,0,0,0.5)]">
-            Inspiring Creativity,
-          </span>
-          <span className="text-tertiary-yellow block [text-shadow:1px_1px_5px_rgba(0,0,0,0.5)]">
-            Transforming Lives
+            Purpose
           </span>
         </h1>
         <p className="font-openSans text-lg font-normal text-white md:max-w-[50%]">
-          Empowering the next generation through the arts since 1997.
+          In these unsettling times of war and uncertainty, you can empower young
+          people to take charge and shape the future.
         </p>
       </div>
       <div className="col-start-1 row-start-1">

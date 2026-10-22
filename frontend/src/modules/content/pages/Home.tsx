@@ -8,7 +8,7 @@ import { bannerItems } from '@/modules/content/data/home/homeBannerImages';
 import { BannerImageCarousel } from '@/modules/content/components/home/BannerImageCarousel';
 import { HomeActivities } from '@/modules/content/data/home/homeActivitySection';
 import { Seo } from '@/modules/content/components/shared/Seo';
-import { NewsletterSignup } from '@/modules/content/components/home/NewsletterSignup';
+// import { NewsletterSignup } from '@/modules/content/components/home/NewsletterSignup';
 import { SpecialProjects } from '@/modules/content/components/home/SpecialProjects';
 import { JoinTheMovement } from '@/modules/content/components/home/JoinTheMovement';
 
@@ -84,7 +84,7 @@ export default function Home() {
         {/* <HomeImpact /> */}
         <JoinTheMovement />
         <SpecialProjects />
-        <NewsletterSignup />
+        {/* <NewsletterSignup /> */}
         <HomeCarouselWhenVisible />
       </div>
     </>

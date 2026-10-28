@@ -35,7 +35,7 @@ const HomeHeader = () => {
         </h1>
         <p className="font-openSans text-lg font-normal text-white md:max-w-[50%]">
           In these unsettling times, you can empower young people to take charge
-          and shape the future they deserve.
+          and shape a peaceful future.
         </p>
       </div>
       <div className="col-start-1 row-start-1">

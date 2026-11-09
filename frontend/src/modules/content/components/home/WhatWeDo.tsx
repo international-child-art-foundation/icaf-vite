@@ -11,24 +11,17 @@ const WhatWeDo = () => {
         alt=""
       />
       <div className="content-w z-10 flex flex-col items-center gap-6 py-6 pt-0 lg:px-10">
-        <h2 className="font-montserrat text-[32px] font-extrabold text-black lg:text-[40px]">
-          What We Do
-        </h2>
         <div className="flex flex-col gap-6">
-          <p className="font-sans text-2xl font-semibold md:text-center">
-            ICAF empowers children to be creators and peacemakers.
-          </p>
-          {/* <p className="font-sans text-xl font-normal text-black md:text-center lg:text-center xl:text-2xl">
-            We focus on what’s critically important in formative years:{' '}
-            <span className="font-semibold">how students view themselves.</span>
-          </p> */}
+          <h2 className="font-sans text-2xl font-semibold md:text-center">
+            ICAF turns children into creators and peacemakers.
+          </h2>
           <p className="max-w-[1300px] text-xl text-black lg:text-center">
-            Through the transformative power of the arts, we ignite children's
-            imaginations and foster their holistic identity development through
-            a two-stage approach.
+            Through the transformative power of the arts, ICAF fosters children's
+            imagination and their holistic identity development through a
+            two-stage journey:
           </p>
         </div>
-        <div className="flex max-w-[602px] flex-col items-center gap-8 lg:max-w-[1000px] lg:flex-row lg:gap-[60px]">
+        <div className="flex max-w-[602px] flex-col items-center gap-8 lg:max-w-[1000px] lg:flex-row lg:items-start lg:gap-[60px]">
           <div className="flex flex-1 flex-col items-center gap-4 lg:gap-6">
             <img
               src={soccer}
@@ -40,10 +33,16 @@ const WhatWeDo = () => {
               <p className="font-montserrat text-2xl font-semibold text-black">
                 01
               </p>
-              <p className="font-sans text-xl text-black lg:text-center">
-                Inspire children to become "artist-athletes" with creative minds
-                and healthy bodies.
-              </p>
+              <div className="flex flex-col gap-2 lg:text-center">
+                <h3 className="font-sans text-xl font-bold text-black">
+                  From children to artist-athletes
+                </h3>
+                <p className="font-sans text-xl text-black">
+                  Children develop creative minds and healthy bodies, discovering
+                  their potential through artistic expression, physical activity,
+                  and the joy of creation.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -53,11 +52,17 @@ const WhatWeDo = () => {
               <p className="font-montserrat text-2xl font-semibold text-black">
                 02
               </p>
-              <p className="font-sans text-xl text-black lg:text-center">
-                Motivate them to blend their creativity with empathy to become
-                "creative- empaths" work who work together to transform our
-                wounded world into a wondrous one.
-              </p>
+              <div className="flex flex-col gap-2 lg:text-center">
+                <h3 className="font-sans text-xl font-bold text-black">
+                  From artist-athletes to creative-empaths
+                </h3>
+                <p className="font-sans text-xl text-black">
+                  Children learn to blend creativity with empathy, working
+                  collaboratively across cultures and societal differences.
+                  Together, they become a generation capable of transforming our
+                  wounded world into a wondrous one.
+                </p>
+              </div>
             </div>
           </div>
         </div>

@@ -23,26 +23,30 @@ const HomePurpose = () => {
           <div className="flex flex-col gap-8 lg:grid lg:grid-cols-2 lg:grid-rows-1 lg:gap-10">
             <div className="grid grid-cols-1 grid-rows-[36px_1fr] items-center gap-y-2 rounded-lg bg-gradient-to-br from-white/75 via-white/65 to-white/75 py-6 transition-colors hover:bg-white/80">
               <h2 className="font-montserrat text-tertiary-blue col-start-1 row-start-1 text-3xl font-semibold leading-6 md:text-4xl">
-                What?
+                What
               </h2>
               <p className="font-openSans col-start-1 row-start-2 self-start text-base text-black lg:text-2xl">
-                Let’s cultivate <span className="font-semibold">creativity</span>{' '}
-                and nurture mutual <span className="font-semibold">empathy</span>.
-                In the age of AI, creativity is an essential life skill; in the
-                nuclear age, empathy is humanity’s ultimate survival skill.
+                <strong className="font-semibold">Creativity</strong> is an
+                essential life skill in the AI age.{' '}
+                <strong className="font-semibold">Empathy</strong> is a vital
+                survival skill in the nuclear age. Together, they empower young
+                people to shape a prosperous and peaceful future.
               </p>
             </div>
 
             <div className="grid grid-cols-1 grid-rows-[36px_1fr] items-center gap-y-2 rounded-lg bg-gradient-to-br from-white/75 via-white/65 to-white/75 py-6 transition-colors hover:bg-white/80">
               <h2 className="font-montserrat text-error text-3xl font-semibold leading-6 md:text-4xl">
-                How?
+                How
               </h2>
               <p className="font-openSans col-start-1 row-start-2 text-base text-black lg:text-2xl">
-                Join the ICAF, which has served American children since 1997 as
-                their national arts organization, to nurture their creativity
-                and build empathy among them for "
-                <span className="italic">a more perfect union</span>" and with
-                their peers worldwide for a peaceful future.
+                Join the{' '}
+                <strong className="font-semibold">
+                  International Child Art Foundation (ICAF)
+                </strong>
+                , America's national arts organization serving children since
+                1997. ICAF cultivates creativity and grows empathy among young
+                Americans as they pursue “<em>a more perfect union</em>,” while
+                connecting them with peers worldwide to shape a brighter future.
               </p>
             </div>
           </div>

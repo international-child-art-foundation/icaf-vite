@@ -27,15 +27,14 @@ const HomeHeader = () => {
   return (
     <div className="site-w grid grid-cols-1 grid-rows-1">
       <div className="hero-w font-montserrat z-10 col-start-1 row-start-1 mt-8 flex flex-col gap-4 pt-10 font-extrabold text-white md:mt-20 lg:mt-28">
-        <h1 className="block text-4xl md:text-5xl lg:text-7xl">
+        <h1 className="text-tertiary-yellow block text-4xl [text-shadow:1px_1px_5px_rgba(0,0,0,0.5)] md:text-5xl lg:text-7xl">
           <span className="block">Find Your</span>
-          <span className="text-tertiary-yellow block [text-shadow:1px_1px_5px_rgba(0,0,0,0.5)]">
+          <span className="block">
             Purpose
           </span>
         </h1>
         <p className="font-openSans text-lg font-normal text-white md:max-w-[50%]">
-          In these unsettling times, you can empower young people to take charge
-          and shape a peaceful future.
+          Cultivate Creativity. Build Empathy. Shape a Brighter Future.
         </p>
       </div>
       <div className="col-start-1 row-start-1">

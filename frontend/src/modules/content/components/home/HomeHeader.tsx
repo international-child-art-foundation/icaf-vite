@@ -31,7 +31,7 @@ const HomeHeader = () => {
           <span className="block">Find Your</span>
           <span className="text-tertiary-yellow block">Purpose</span>
         </h1>
-        <p className="font-openSans text-lg font-normal text-white md:max-w-[50%]">
+        <p className="font-openSans text-lg font-bold text-white md:max-w-[50%]">
           Cultivate Creativity. Build Empathy. Shape a Brighter Future.
         </p>
       </div>

@@ -7,7 +7,7 @@ const WhatWeDo = () => {
     <div className="breakout-w m-pad relative">
       <img
         src={redBlueFirework}
-        className="absolute -top-32 hidden w-32 sm:left-8 sm:block md:left-12 md:w-48 lg:left-48 xl:-top-36 xl:left-64"
+        className="absolute -top-32 hidden w-32 sm:left-8 sm:block md:left-2 md:w-32 lg:left-20 lg:w-40 xl:-top-36 xl:left-44 xl:w-48"
         alt=""
       />
       <div className="content-w z-10 flex flex-col items-center gap-6 py-6 pt-0 lg:px-10">
@@ -16,9 +16,9 @@ const WhatWeDo = () => {
             ICAF turns children into creators and peacemakers.
           </h2>
           <p className="max-w-[1300px] text-xl text-black lg:text-center">
-            Through the transformative power of the arts, ICAF fosters children's
-            imagination and their holistic identity development through a
-            two-stage journey:
+            Through the transformative power of the arts, ICAF fosters
+            children's imagination and their holistic identity development
+            through a two-stage journey:
           </p>
         </div>
         <div className="flex max-w-[602px] flex-col items-center gap-8 lg:max-w-[1000px] lg:flex-row lg:items-start lg:gap-[60px]">
@@ -38,9 +38,9 @@ const WhatWeDo = () => {
                   From children to artist-athletes
                 </h3>
                 <p className="font-sans text-xl text-black">
-                  Children develop creative minds and healthy bodies, discovering
-                  their potential through artistic expression, physical activity,
-                  and the joy of creation.
+                  Children develop creative minds and healthy bodies,
+                  discovering their potential through artistic expression,
+                  physical activity, and the joy of creation.
                 </p>
               </div>
             </div>
